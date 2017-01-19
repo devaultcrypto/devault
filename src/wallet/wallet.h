@@ -292,8 +292,6 @@ public:
     mutable Amount nAvailableWatchCreditCached;
     mutable Amount nChangeCached;
 
-    CWalletTx() { Init(nullptr); }
-
     CWalletTx(const CWallet *pwalletIn, CTransactionRef arg)
         : CMerkleTx(std::move(arg)) {
         Init(pwalletIn);
