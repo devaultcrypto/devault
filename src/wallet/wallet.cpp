@@ -2774,13 +2774,10 @@ bool CWallet::SignTransaction(CMutableTransaction &tx) {
 }
 
 bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
-                              bool overrideEstimatedFeeRate,
-                              const CFeeRate &specificFeeRate,
                               int &nChangePosInOut, std::string &strFailReason,
-                              bool includeWatching, bool lockUnspents,
+                              bool lockUnspents,
                               const std::set<int> &setSubtractFeeFromOutputs,
-                              bool keepReserveKey,
-                              const CTxDestination &destChange) {
+                              CCoinControl coinControl, bool keepReserveKey) {
     std::vector<CRecipient> vecSend;
 
     // Turn the txout set into a CRecipient vector.
@@ -2791,12 +2788,7 @@ bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
         vecSend.push_back(recipient);
     }
 
-    CCoinControl coinControl;
-    coinControl.destChange = destChange;
     coinControl.fAllowOtherInputs = true;
-    coinControl.fAllowWatchOnly = includeWatching;
-    coinControl.fOverrideFeeRate = overrideEstimatedFeeRate;
-    coinControl.nFeeRate = specificFeeRate;
 
     for (const CTxIn &txin : tx.vin) {
         coinControl.Select(txin.prevout);
