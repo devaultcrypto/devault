@@ -2889,7 +2889,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Added more explicit instructions for release tagging
       Bump version to 0.20.4
       Add phpcs exclusion for strict_types declararion
-      Add static_assert to prevent VARINT(<signed value>)
+xx    Add static_assert to prevent VARINT(<signed value>)
       [CMAKE] Enable Large File Support on platforms that don't enable it by default
       Add support for Glibc version 2.28
       util: Replace boost::signals2 with std::function
@@ -2925,10 +2925,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       [CMAKE] Migrate the python header generation scripts to python 3
       [CMAKE] Only change obj/build.h if the content has changed
       Run miner_tests with fixed options
-      Abstract out BlockAssembler options
-
-xxxx
-
+xx    Abstract out BlockAssembler options
       Fix compiler warnings emitted when compiling under stock OpenBSD 6.3
       Merge #13201: [qa] Handle disconnect_node race
       Merge #13402: Document validationinterace callback blocking deadlock potential.
