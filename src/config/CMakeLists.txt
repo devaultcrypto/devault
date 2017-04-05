@@ -8,13 +8,13 @@ include(CheckSymbolExists)
 include(CheckCXXSourceCompiles)
 
 # Package informations
-set(PACKAGE_NAME "DeVault Core")
+set(PACKAGE_NAME "DeVault Core" CACHE STRING "Package name")
 
 # Version
-set(CLIENT_VERSION_MAJOR 1)
-set(CLIENT_VERSION_MINOR 0)
-set(CLIENT_VERSION_REVISION 7)
-set(CLIENT_VERSION_BUILD 0)
+set(CLIENT_VERSION_MAJOR 1 CACHE STRING "Major version number")
+set(CLIENT_VERSION_MINOR 0 CACHE STRING "Minor version number")
+set(CLIENT_VERSION_REVISION 8 CACHE STRING "Revision version number")
+set(CLIENT_VERSION_BUILD 0 CACHE STRING "Build version number")
 
 set(VERSION_MAJOR ${CLIENT_VERSION_MAJOR} PARENT_SCOPE)
 set(VERSION_MINOR ${CLIENT_VERSION_MINOR} PARENT_SCOPE)
