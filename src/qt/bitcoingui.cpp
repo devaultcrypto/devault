@@ -671,7 +671,7 @@ void BitcoinGUI::optionsClicked() {
 void BitcoinGUI::aboutClicked() {
     if (!clientModel) return;
 
-    HelpMessageDialog dlg(this, true);
+    HelpMessageDialog dlg(m_node, this, true);
     dlg.exec();
 }
 
