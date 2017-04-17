@@ -78,12 +78,17 @@ const QStringList historyFilter = QStringList() << "importprivkey"
  */
 class RPCExecutor : public QObject {
     Q_OBJECT
+public:
+    RPCExecutor(interfaces::Node &node) : m_node(node) {}
 
 public Q_SLOTS:
     void request(const QString &command, const QString &walletID);
 
 Q_SIGNALS:
     void reply(int category, const QString &command);
+
+private:
+    interfaces::Node &m_node;
 };
 
 /** Class for handling RPC timers
@@ -137,6 +142,7 @@ public:
  *   - Within single quotes, no escaping is possible and no special
  * interpretation takes place
  *
+ * @param[in]    node    optional node to execute command on
  * @param[out]   result      stringified Result from the executed command(chain)
  * @param[in]    strCommand  Command line to split
  * @param[in]    fExecute    set true if you want the command to be executed
@@ -144,7 +150,8 @@ public:
  * data
  */
 
-bool RPCConsole::RPCParseCommandLine(std::string &strResult,
+bool RPCConsole::RPCParseCommandLine(interfaces::Node *node,
+                                     std::string &strResult,
                                      const std::string &strCommand,
                                      const bool fExecute,
                                      std::string *const pstrFilteredOut,
@@ -321,28 +328,29 @@ bool RPCConsole::RPCParseCommandLine(std::string &strResult,
                                 // Convert argument list to JSON objects in
                                 // method-dependent way, and pass it along with
                                 // the method name to the dispatcher.
-                                JSONRPCRequest req;
-                                req.params = RPCConvertValues(
+                                UniValue params = RPCConvertValues(
                                     stack.back()[0],
                                     std::vector<std::string>(
                                         stack.back().begin() + 1,
                                         stack.back().end()));
-                                req.strMethod = stack.back()[0];
+                                std::string method = stack.back()[0];
+                                std::string uri;
 
                                 if (g_wallet_init_interface.HasWalletSupport()) {
                                   if (walletID && !walletID->empty()) {
                                     QByteArray encodedName =
-                                      QUrl::toPercentEncoding(
-                                                              QString::fromStdString(*walletID));
-                                    req.URI =
-                                      "/wallet/" +
-                                      std::string(encodedName.constData(),
-                                                  encodedName.length());
+                                        QUrl::toPercentEncoding(
+                                            QString::fromStdString(*walletID));
+                                    uri = "/wallet/" +
+                                          std::string(encodedName.constData(),
+                                                      encodedName.length());
                                   }
                                 }
 
                                 GlobalConfig config;
-                                lastResult = tableRPC.execute(config, req);
+                                assert(node);
+                                lastResult = node->executeRpc(config, method,
+                                                              params, uri);
                             }
 
                             state = STATE_COMMAND_EXECUTED;
@@ -475,8 +483,8 @@ void RPCExecutor::request(const QString &command, const QString &walletID) {
             return;
         }
         std::string wallet_id = walletID.toStdString();
-        if (!RPCConsole::RPCExecuteCommandLine(result, executableCommand,
-                                               nullptr, &wallet_id)) {
+        if (!RPCConsole::RPCExecuteCommandLine(
+                m_node, result, executableCommand, nullptr, &wallet_id)) {
             Q_EMIT reply(RPCConsole::CMD_ERROR,
                          QString("Parse error: unbalanced ' or \""));
             return;
@@ -503,9 +511,10 @@ void RPCExecutor::request(const QString &command, const QString &walletID) {
     }
 }
 
-RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
-    : QWidget(parent), ui(new Ui::RPCConsole), clientModel(nullptr), historyPtr(0),
-      platformStyle(_platformStyle), peersTableContextMenu(nullptr),
+RPCConsole::RPCConsole(interfaces::Node &node,
+                       const PlatformStyle *_platformStyle, QWidget *parent)
+    : QWidget(parent), m_node(node), ui(new Ui::RPCConsole), clientModel(nullptr),
+      historyPtr(0), platformStyle(_platformStyle), peersTableContextMenu(nullptr),
       banTableContextMenu(nullptr), consoleFontSize(0) {
     ui->setupUi(this);
     QSettings settings;
@@ -555,7 +564,7 @@ RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
     rpcTimerInterface = new QtRPCTimerInterface();
     // avoid accidentally overwriting an existing, non QTThread
     // based timer interface
-    RPCSetTimerInterfaceIfUnset(rpcTimerInterface);
+    m_node.rpcSetTimerInterfaceIfUnset(rpcTimerInterface);
 
     setTrafficGraphRange(INITIAL_TRAFFIC_GRAPH_MINS);
 
@@ -571,7 +580,7 @@ RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
 RPCConsole::~RPCConsole() {
     QSettings settings;
     settings.setValue("RPCConsoleWindowGeometry", saveGeometry());
-    RPCUnsetTimerInterface(rpcTimerInterface);
+    m_node.rpcUnsetTimerInterface(rpcTimerInterface);
     delete rpcTimerInterface;
     delete ui;
 }
@@ -778,7 +787,7 @@ void RPCConsole::setClientModel(ClientModel *model) {
 
         // Setup autocomplete and attach it
         QStringList wordList;
-        std::vector<std::string> commandList = tableRPC.listCommands();
+        std::vector<std::string> commandList = m_node.listRpcCommands();
         for (const auto& c : commandList) {
             wordList << c.c_str();
             wordList << ("help " + c).c_str();
@@ -1009,7 +1018,7 @@ void RPCConsole::on_lineEdit_returnPressed() {
         std::string strFilteredCmd;
         try {
             std::string dummy;
-            if (!RPCParseCommandLine(dummy, cmd.toStdString(), false,
+            if (!RPCParseCommandLine(nullptr, dummy, cmd.toStdString(), false,
                                      &strFilteredCmd)) {
                 // Failed to parse command, so we cannot even filter it for the
                 // history
@@ -1090,7 +1099,7 @@ void RPCConsole::browseHistory(int offset) {
 }
 
 void RPCConsole::startExecutor() {
-    RPCExecutor *executor = new RPCExecutor();
+    RPCExecutor *executor = new RPCExecutor(m_node);
     executor->moveToThread(&thread);
 
     // Replies from executor object must go to this object
@@ -1349,10 +1358,6 @@ void RPCConsole::showBanTableContextMenu(const QPoint &point) {
 }
 
 void RPCConsole::disconnectSelectedNode() {
-    if (!g_connman) {
-        return;
-    }
-
     // Get selected peer addresses
     QList<QModelIndex> nodes =
         GUIUtil::getEntryData(ui->peerWidget, PeerTableModel::NetNodeId);
@@ -1360,12 +1365,14 @@ void RPCConsole::disconnectSelectedNode() {
         // Get currently selected peer address
         NodeId id = nodes.at(i).data().toLongLong();
         // Find the node, disconnect it and clear the selected node
-        if (g_connman->DisconnectNode(id)) clearSelectedNode();
+        if (m_node.disconnect(id)) {
+            clearSelectedNode();
+        }
     }
 }
 
 void RPCConsole::banSelectedNode(int bantime) {
-    if (!clientModel || !g_connman) {
+    if (!clientModel) {
         return;
     }
 
@@ -1387,8 +1394,7 @@ void RPCConsole::banSelectedNode(int bantime) {
         const CNodeCombinedStats *stats =
             clientModel->getPeerTableModel()->getNodeStats(detailNodeRow);
         if (stats) {
-            g_connman->Ban(stats->nodeStats.addr, BanReasonManuallyAdded,
-                           bantime);
+            m_node.ban(stats->nodeStats.addr, BanReasonManuallyAdded, bantime);
         }
     }
     clearSelectedNode();
@@ -1409,8 +1415,7 @@ void RPCConsole::unbanSelectedNode() {
         CSubNet possibleSubnet;
 
         LookupSubNet(strNode.toStdString().c_str(), possibleSubnet);
-        if (possibleSubnet.IsValid() && g_connman) {
-            g_connman->Unban(possibleSubnet);
+        if (possibleSubnet.IsValid() && m_node.unban(possibleSubnet)) {
             clientModel->getBanTableModel()->refresh();
         }
     }
