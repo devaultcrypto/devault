@@ -34,6 +34,8 @@
 
 #include "chainparams.h"
 #include "init.h"
+#include "interface/handler.h"
+#include "interface/node.h"
 #include "ui_interface.h"
 #include "util.h"
 
@@ -77,10 +79,10 @@ const std::string BitcoinGUI::DEFAULT_UIPLATFORM =
 #error "ENABLE_WALLET define required for this file"
 #endif
 
-BitcoinGUI::BitcoinGUI(const Config *configIn,
+BitcoinGUI::BitcoinGUI(interface::Node &node, const Config *configIn,
                        const PlatformStyle *_platformStyle,
                        const NetworkStyle *networkStyle, QWidget *parent)
-    : QMainWindow(parent), enableWallet(false), dvtLogoAction(nullptr), platformStyle(_platformStyle),
+    : QMainWindow(parent), enableWallet(false), m_node(node), dvtLogoAction(nullptr), platformStyle(_platformStyle),
       config(configIn) {
     QSettings settings;
     if (!restoreGeometry(settings.value("MainWindowGeometry").toByteArray())) {
@@ -1149,7 +1151,7 @@ void BitcoinGUI::toggleHidden() {
 }
 
 void BitcoinGUI::detectShutdown() {
-    if (ShutdownRequested()) {
+    if (m_node.shutdownRequested()) {
         if (rpcConsole) {
             rpcConsole->hide();
         }
@@ -1209,18 +1211,16 @@ static bool ThreadSafeMessageBox(BitcoinGUI *gui, const std::string &message,
 
 void BitcoinGUI::subscribeToCoreSignals() {
     // Connect signals to client
-    uiInterface.ThreadSafeMessageBox.connect(
+    m_handler_message_box = m_node.handleMessageBox(
         boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
-    uiInterface.ThreadSafeQuestion.connect(
+    m_handler_question = m_node.handleQuestion(
         boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
 }
 
 void BitcoinGUI::unsubscribeFromCoreSignals() {
     // Disconnect signals from client
-    uiInterface.ThreadSafeMessageBox.disconnect(
-        boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
-    uiInterface.ThreadSafeQuestion.disconnect(
-        boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
+    m_handler_message_box->disconnect();
+    m_handler_question->disconnect();
 }
 
 void BitcoinGUI::toggleNetworkActive() {

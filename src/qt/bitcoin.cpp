@@ -385,7 +385,7 @@ bool BitcoinApplication::createWindow(const Config *config,
         if (pss.empty()) return false;
     }
   }
-  window = new BitcoinGUI(config, platformStyle, networkStyle, nullptr);
+  window = new BitcoinGUI(m_node, config, platformStyle, networkStyle, nullptr);
 
   pollShutdownTimer = new QTimer(window);
   connect(pollShutdownTimer, SIGNAL(timeout()), window,
