@@ -12,7 +12,7 @@
 #include "guiutil.h"
 
 #include "amount.h"
-#include "init.h"
+#include "interface/node.h"
 #include "intro.h"
 #include "net.h"
 #include "netbase.h"
@@ -27,8 +27,9 @@
 
 const char *DEFAULT_GUI_PROXY_HOST = "127.0.0.1";
 
-OptionsModel::OptionsModel(QObject *parent, bool resetSettings)
-    : QAbstractListModel(parent) {
+OptionsModel::OptionsModel(interface::Node &node, QObject *parent,
+                           bool resetSettings)
+    : QAbstractListModel(parent), m_node(node) {
     Init(resetSettings);
 }
 
@@ -101,7 +102,7 @@ void OptionsModel::Init(bool resetSettings) {
     if (!settings.contains("nDatabaseCache")) {
         settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);
     }
-    if (!gArgs.SoftSetArg(
+    if (!m_node.softSetArg(
             "-dbcache",
             settings.value("nDatabaseCache").toString().toStdString())) {
         addOverriddenOption("-dbcache");
@@ -110,7 +111,7 @@ void OptionsModel::Init(bool resetSettings) {
     if (!settings.contains("nThreadsScriptVerif")) {
         settings.setValue("nThreadsScriptVerif", DEFAULT_SCRIPTCHECK_THREADS);
     }
-    if (!gArgs.SoftSetArg(
+    if (!m_node.softSetArg(
             "-par",
             settings.value("nThreadsScriptVerif").toString().toStdString())) {
         addOverriddenOption("-par");
@@ -124,10 +125,10 @@ void OptionsModel::Init(bool resetSettings) {
     if (g_wallet_init_interface.HasWalletSupport()) {
       if (!settings.contains("bSpendZeroConfChange")) {
         settings.setValue("bSpendZeroConfChange", true);
-      }
-      if (!gArgs.SoftSetBoolArg(
-                                "-spendzeroconfchange",
-                                settings.value("bSpendZeroConfChange").toBool())) {
+    }
+    if (!m_node.softSetBoolArg(
+            "-spendzeroconfchange",
+            settings.value("bSpendZeroConfChange").toBool())) {
         addOverriddenOption("-spendzeroconfchange");
       }
     }
@@ -136,14 +137,14 @@ void OptionsModel::Init(bool resetSettings) {
     if (!settings.contains("fUseUPnP")) {
         settings.setValue("fUseUPnP", DEFAULT_UPNP);
     }
-    if (!gArgs.SoftSetBoolArg("-upnp", settings.value("fUseUPnP").toBool())) {
+    if (!m_node.softSetBoolArg("-upnp", settings.value("fUseUPnP").toBool())) {
         addOverriddenOption("-upnp");
     }
 
     if (!settings.contains("fListen")) {
         settings.setValue("fListen", DEFAULT_LISTEN);
     }
-    if (!gArgs.SoftSetBoolArg("-listen", settings.value("fListen").toBool())) {
+    if (!m_node.softSetBoolArg("-listen", settings.value("fListen").toBool())) {
         addOverriddenOption("-listen");
     }
 
@@ -157,7 +158,7 @@ void OptionsModel::Init(bool resetSettings) {
     }
     // Only try to set -proxy, if user has enabled fUseProxy
     if (settings.value("fUseProxy").toBool() &&
-        !gArgs.SoftSetArg(
+        !m_node.softSetArg(
             "-proxy", settings.value("addrProxy").toString().toStdString())) {
         addOverriddenOption("-proxy");
     } else if (!settings.value("fUseProxy").toBool() &&
@@ -175,7 +176,7 @@ void OptionsModel::Init(bool resetSettings) {
     }
     // Only try to set -onion, if user has enabled fUseSeparateProxyTor
     if (settings.value("fUseSeparateProxyTor").toBool() &&
-        !gArgs.SoftSetArg(
+        !m_node.softSetArg(
             "-onion",
             settings.value("addrSeparateProxyTor").toString().toStdString())) {
         addOverriddenOption("-onion");
@@ -188,7 +189,7 @@ void OptionsModel::Init(bool resetSettings) {
     if (!settings.contains("language")) {
         settings.setValue("language", "");
     }
-    if (!gArgs.SoftSetArg(
+    if (!m_node.softSetArg(
             "-lang", settings.value("language").toString().toStdString())) {
         addOverriddenOption("-lang");
     }
@@ -341,12 +342,7 @@ bool OptionsModel::setData(const QModelIndex &index, const QVariant &value,
                 break;
             case MapPortUPnP: // core option - can be changed on-the-fly
                 settings.setValue("fUseUPnP", value.toBool());
-                if (value.toBool()) {
-                    StartMapPort();
-                } else {
-                    InterruptMapPort();
-                    StopMapPort();
-                }
+                m_node.mapPort(value.toBool());
                 break;
             case MinimizeOnClose:
                 fMinimizeOnClose = value.toBool();
@@ -482,7 +478,7 @@ bool OptionsModel::getProxySettings(QNetworkProxy &proxy) const {
     // Directly query current base proxy, because
     // GUI settings can be overridden with -proxy.
     proxyType curProxy;
-    if (GetProxy(NET_IPV4, curProxy)) {
+    if (m_node.getProxy(NET_IPV4, curProxy)) {
         proxy.setType(QNetworkProxy::Socks5Proxy);
         proxy.setHostName(QString::fromStdString(curProxy.proxy.ToStringIP()));
         proxy.setPort(curProxy.proxy.GetPort());

@@ -357,7 +357,7 @@ void BitcoinApplication::initPlatformStyle()
 } 
 
 void BitcoinApplication::createOptionsModel(bool resetSettings) {
-    optionsModel = new OptionsModel(nullptr, resetSettings);
+    optionsModel = new OptionsModel(m_node, nullptr, resetSettings);
 }
 
 
