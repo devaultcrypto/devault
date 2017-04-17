@@ -260,6 +260,8 @@ add_library(util
 	compat/glibc_sanity.cpp
 	compat/glibcxx_sanity.cpp
 	fs.cpp
+	interface/handler.cpp
+	interface/node.cpp
 	logging.cpp
 	random.cpp # needs libsodium
 	rcu.cpp

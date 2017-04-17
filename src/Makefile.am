@@ -148,6 +148,8 @@ BITCOIN_CORE_H = \
   httpserver.h \
   indirectmap.h \
   init.h \
+  interface/handler.h \
+  interface/node.h \
   key.h \
   keystore.h \
   dbwrapper.h \
@@ -458,6 +460,8 @@ libbitcoin_util_a_SOURCES = \
   compat/glibcxx_sanity.cpp \
   fs.cpp \
   fs_util.cpp \
+  interface/handler.cpp \
+  interface/node.cpp \
   logging.cpp \
   random.cpp \
   rcu.cpp \

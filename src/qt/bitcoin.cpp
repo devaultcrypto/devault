@@ -26,6 +26,8 @@
 #include "walletmodel.h"
 
 #include "init.h"
+#include "interface/handler.h"
+#include "interface/node.h"
 #include "rpc/server.h"
 #include "ui_interface.h"
 #include "uint256.h"
@@ -167,7 +169,7 @@ void DebugMessageHandler(QtMsgType type, const QMessageLogContext &context,
 class DeVault : public QObject {
     Q_OBJECT
 public:
-    explicit DeVault(SecureString& strWalletPassphrase,
+    explicit DeVault(interface::Node& node, SecureString& strWalletPassphrase,
                      std::vector<std::string>& wordlist);
 
     /**
@@ -192,13 +194,14 @@ private:
     SecureString walletPassphrase;
     // TODO: Set this for it for be used
     std::vector<std::string> words;
+    interface::Node& m_node;
 };
 
 /** Main Bitcoin application object */
 class BitcoinApplication : public QApplication {
     Q_OBJECT
 public:
-    explicit BitcoinApplication(int &argc, char **argv);
+    explicit BitcoinApplication(interface::Node& node, int &argc, char **argv);
     ~BitcoinApplication();
 
     void initPlatformStyle();
@@ -241,6 +244,7 @@ Q_SIGNALS:
 
 private:
     QThread *coreThread;
+    interface::Node& m_node;
     OptionsModel *optionsModel;
     ClientModel *clientModel;
     BitcoinGUI *window;
@@ -259,12 +263,12 @@ private:
 
 #include "bitcoin.moc"
 
-DeVault::DeVault(SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
-  : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist) {}
+DeVault::DeVault(interface::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
+    : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist), m_node(node) {}
 
 void DeVault::handleRunawayException(const std::exception *e) {
     PrintExceptionContinue(e, "Runaway exception");
-    Q_EMIT runawayException(QString::fromStdString(GetWarnings("gui")));
+          Q_EMIT runawayException(QString::fromStdString(m_node.getWarnings("gui")));
 }
 
 bool DeVault::baseInitialize(Config &config, RPCServer &rpcServer) {
@@ -288,7 +292,7 @@ void DeVault::initialize(Config *cfg,
     Config &config(*cfg);
     try {
         qDebug() << __func__ << ": Running initialization in thread";
-        bool rv = AppInitMain(config, *httpRPCRequestProcessor, walletPassphrase, words);
+        bool rv = m_node.appInitMain(config, *httpRPCRequestProcessor, walletPassphrase, words);
         walletPassphrase.clear();
         Q_EMIT initializeResult(rv);
     } catch (const std::exception &e) {
@@ -301,8 +305,7 @@ void DeVault::initialize(Config *cfg,
 void DeVault::shutdown() {
     try {
         qDebug() << __func__ << ": Running Shutdown in thread";
-        Interrupt();
-        Shutdown();
+        m_node.appShutdown();
         qDebug() << __func__ << ": Shutdown finished";
         Q_EMIT shutdownResult();
     } catch (const std::exception &e) {
@@ -312,9 +315,9 @@ void DeVault::shutdown() {
     }
 }
 
-BitcoinApplication::BitcoinApplication(int &argc, char **argv)
-    : QApplication(argc, argv), coreThread(nullptr), optionsModel(nullptr), clientModel(nullptr),
-      window(nullptr), pollShutdownTimer(nullptr),
+BitcoinApplication::BitcoinApplication(interface::Node& node, int &argc, char **argv)
+    : QApplication(argc, argv), coreThread(nullptr), m_node(node),optionsModel(nullptr), clientModel(nullptr),
+      window(nullptr), pollShutdownTimer(nullptr), 
 #ifdef ENABLE_WALLET
       m_wallet_models(),
 #endif
@@ -406,7 +409,7 @@ void BitcoinApplication::startThread() {
         return;
     }
     coreThread = new QThread(this);
-    DeVault *executor = new DeVault(pss, wordlist);
+    DeVault *executor = new DeVault(m_node, pss, wordlist);
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
@@ -442,8 +445,8 @@ void BitcoinApplication::startThread() {
 }
 
 void BitcoinApplication::parameterSetup() {
-    InitLogging();
-    InitParameterInteraction();
+  m_node.initLogging();
+  m_node.initParameterInteraction();
 }
 
 void BitcoinApplication::requestInitialize(
@@ -478,7 +481,7 @@ void BitcoinApplication::requestShutdown(Config &config) {
     delete clientModel;
     clientModel = nullptr;
 
-    StartShutdown();
+    m_node.startShutdown();
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
@@ -603,9 +606,11 @@ static void MigrateSettings() {
 int main(int argc, char *argv[]) {
     SetupEnvironment();
 
+    std::unique_ptr<interface::Node> node = interface::MakeNode();
+
     /// 1. Parse command-line options. These take precedence over anything else.
     // Command-line options take precedence:
-    gArgs.ParseParameters(argc, argv);
+    node->parseParameters(argc, argv);
 
     // Do not refer to data directory yet, this can be overridden by
     // Intro::pickDataDirectory
@@ -615,7 +620,7 @@ int main(int argc, char *argv[]) {
     Q_INIT_RESOURCE(bitcoin);
     Q_INIT_RESOURCE(bitcoin_locale);
 
-    BitcoinApplication app(argc, argv);
+    BitcoinApplication app(*node, argc, argv);
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -690,7 +695,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     try {
-        gArgs.ReadConfigFile(gArgs.GetArg("-conf", BITCOIN_CONF_FILENAME));
+        node->readConfigFile(gArgs.GetArg("-conf", BITCOIN_CONF_FILENAME));
     } catch (const std::exception &e) {
         QMessageBox::critical(
             nullptr, QObject::tr(PACKAGE_NAME),
@@ -711,7 +716,7 @@ int main(int argc, char *argv[]) {
     // Check for -testnet or -regtest parameter (Params() calls are only valid
     // after this clause)
     try {
-        SelectParams(gArgs.GetChainName());
+        node->selectParams(gArgs.GetChainName());
     } catch (std::exception &e) {
         QMessageBox::critical(nullptr, QObject::tr(PACKAGE_NAME),
                               QObject::tr("Error: %1").arg(e.what()));
@@ -745,7 +750,7 @@ int main(int argc, char *argv[]) {
     app.createOptionsModel(gArgs.GetBoolArg("-resetguisettings", false));
 
     // Subscribe to global signals from core
-    uiInterface.InitMessage.connect(InitMessage);
+    std::unique_ptr<interface::Handler> handler = node->handleInitMessage(InitMessage);
 
     // Get global config
     Config &config = const_cast<Config &>(GetConfig());
@@ -766,7 +771,7 @@ int main(int argc, char *argv[]) {
         // initialization/shutdown thread. This is acceptable because this
         // function only contains steps that are quick to execute, so the GUI
         // thread won't be held up.
-        if (!DeVault::baseInitialize(config, rpcServer)) {
+        if (!node->baseInitialize(config, rpcServer)) {
             // A dialog with detailed error will have been shown by InitError()
             return EXIT_FAILURE;
         }
@@ -783,10 +788,10 @@ int main(int argc, char *argv[]) {
         return app.getReturnValue();
     } catch (const std::exception &e) {
         PrintExceptionContinue(&e, "Runaway exception");
-        app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
+        app.handleRunawayException(QString::fromStdString(node->getWarnings("gui")));
     } catch (...) {
         PrintExceptionContinue(nullptr, "Runaway exception");
-        app.handleRunawayException(QString::fromStdString(GetWarnings("gui")));
+        app.handleRunawayException(QString::fromStdString(node->getWarnings("gui")));
     }
     return EXIT_FAILURE;
 }
