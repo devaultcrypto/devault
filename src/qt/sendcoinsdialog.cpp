@@ -216,7 +216,7 @@ void SendCoinsDialog::setModel(WalletModel *_model) {
    //     connect(ui->checkBoxMinimumFee, SIGNAL(stateChanged(int)), this,
    //             SLOT(coinControlUpdateLabels()));
 
-        ui->customFee->setSingleStep(GetMinimumFee(1000, g_mempool));
+        ui->customFee->setSingleStep(model->node().getMinimumFee(1000));
         updateFeeSectionControls();
         updateMinFeeLabel();
         updateSmartFeeLabel();
@@ -602,7 +602,8 @@ void SendCoinsDialog::processSendCoinsReturn(
             msgParams.first =
                 tr("A fee higher than %1 is considered an absurdly high fee.")
                     .arg(BitcoinUnits::formatWithUnit(
-                        model->getOptionsModel()->getDisplayUnit(), maxTxFee));
+                        model->getOptionsModel()->getDisplayUnit(),
+                        model->node().getMaxTxFee()));
             break;
         // included to prevent a compiler warning.
         case WalletModel::OK:
@@ -659,7 +660,7 @@ void SendCoinsDialog::useAvailableBalance(SendCoinsEntry *entry) {
 
 void SendCoinsDialog::setMinimumFee() {
     ui->radioCustomPerKilobyte->setChecked(true);
-    ui->customFee->setValue(GetMinimumFee(1000, g_mempool));
+    ui->customFee->setValue(model->node().getMinimumFee(1000));
 }
 
 void SendCoinsDialog::updateFeeSectionControls() {
@@ -694,8 +695,9 @@ void SendCoinsDialog::updateMinFeeLabel() {
             tr("Pay only the required fee of %1")
                 .arg(BitcoinUnits::formatWithUnit(
                          model->getOptionsModel()->getDisplayUnit(),
-                         GetMinimumFee(1000, g_mempool)) +
-                     "/kB")); 
+                         model->node().getMinimumFee(1000)) +
+                     "/kB"));
+
     } */
 }
 
@@ -712,12 +714,12 @@ void SendCoinsDialog::updateSmartFeeLabel() {
         return;
     }
 
-    CFeeRate feeRate = g_mempool.estimateFee();
+    CFeeRate feeRate = model->node().estimateSmartFee();
 
     ui->labelSmartFee->setText(
         BitcoinUnits::formatWithUnit(
             model->getOptionsModel()->getDisplayUnit(),
-            std::max(feeRate.GetFeePerK(), GetMinimumFee(1000, g_mempool))) +
+            std::max(feeRate.GetFeePerK(), model->node().getMinimumFee(1000))) +
         "/kB");
     // not enough data => minfee
     if (feeRate <= CFeeRate(Amount::zero())) {
