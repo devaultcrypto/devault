@@ -44,6 +44,7 @@ Amount CFeeRate::GetFee(size_t nBytes) const {
 }
 
 std::string CFeeRate::ToString() const {
-    return strprintf("%d.%08d %s/kB", nSatoshisPerK / COIN,
-                     (nSatoshisPerK % COIN).toInt(), CURRENCY_UNIT);
+  // It's assumed MIN_COIN is a power of 10 below. Also we have 3 decimal places
+    return strprintf("%d.%03d %s/kB", (nSatoshisPerK / COIN),
+                     (nSatoshisPerK % COIN).toInt()/MIN_COIN, CURRENCY_UNIT);
 }
