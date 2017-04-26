@@ -12,7 +12,7 @@
 BOOST_FIXTURE_TEST_SUITE(feerate_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(GetFeeTest) {
-    CFeeRate feeRate;
+    CFeeRate feeRate, altFeeRate;
 
     feeRate = CFeeRate(Amount::zero());
     // Must always return 0
@@ -49,7 +49,11 @@ BOOST_AUTO_TEST_CASE(GetFeeTest) {
     BOOST_CHECK_EQUAL(feeRate.GetFee(200), 4 * MINCOIN);
     BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 18 * MINCOIN);
 
-  
+    // Check alternate constructor
+    feeRate = CFeeRate(1000*MINCOIN);
+    altFeeRate = CFeeRate(feeRate);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(100), altFeeRate.GetFee(100));
+
     // Check full constructor
     // default value
     BOOST_CHECK(CFeeRate(Amount::zero(), 1000) == CFeeRate(Amount::zero()));
