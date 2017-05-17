@@ -74,7 +74,7 @@
       [LINTER] Prevent including a source file
       [consensus] Pin P2SH activation to block 173805 on mainnet
       Merge #8498: Near-Bugfix: Optimization: Minimize the number of times it is checked that no money...
-      Merge #10196: Bugfix: PrioritiseTransaction updates the mempool tx counter
+##### Merge #10196: Bugfix: PrioritiseTransaction updates the mempool tx counter
 ##### Merge #10228: build: regenerate bitcoin-config.h as necessary
       Remove unecessary include of boost/version
       Merge #10162: [trivial] Log calls to getblocktemplate
