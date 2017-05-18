@@ -13,5 +13,15 @@
 
 #define BOOST_ERROR(A) std::cout << (A) << "\n";
 
+#define BOOST_FIXTURE_TEST_SUITE(a,b)
+#define BOOST_AUTO_TEST_SUITE_END()
+
+#define STR_VALUE(arg)      #arg
+// this extra level may not be needed
+#define XXX_CASE TEST_CASE
+#define BOOST_AUTO_TEST_CASE(name) XXX_CASE(STR_VALUE(name))
+
+#define BOOST_TEST_MESSAGE(a) std::cout << a
+
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>

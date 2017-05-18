@@ -130,6 +130,7 @@ add_test_to_suite(devault test_devault
 	test_bitcoin.cpp
 	test_bitcoin_main.cpp
 	timedata_tests.cpp
+  torcontrol_tests.cpp
 	transaction_tests.cpp
 	txindex_tests.cpp
 	txvalidationcache_tests.cpp
