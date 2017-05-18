@@ -137,6 +137,7 @@ set(UNIT_CTESTS
   streams
   sync
   timedata
+  torcontrol
   transaction
   txindex
   txvalidationcache
