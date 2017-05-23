@@ -867,9 +867,6 @@ public:
                             Amount &nValueRet) const;
 
     bool IsSpent(const COutPoint &outpoint) const;
-    std::vector<OutputGroup> GroupOutputs(const std::vector<COutput> &outputs,
-                                          bool single_coin) const;
-
     bool IsLockedCoin(const COutPoint &outpoint) const;
     void LockCoin(const COutPoint &output);
     void UnlockCoin(const COutPoint &output);
