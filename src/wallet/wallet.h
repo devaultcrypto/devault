@@ -32,6 +32,10 @@
 #include <utility>
 #include <vector>
 
+namespace interfaces {
+class Chain;
+} // namespace interfaces
+
 bool AddWallet(const std::shared_ptr<CWallet> &wallet);
 bool RemoveWallet(const std::shared_ptr<CWallet> &wallet);
 bool HasWallets();
@@ -739,6 +743,9 @@ private:
     bool AddWatchOnly(const CScript &dest) override
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
+    /** Interface for accessing chain state. */
+    interfaces::Chain &m_chain;
+
     /**
      * The following is used to keep track of how far behind the wallet is
      * from the chain sync, and to allow clients to block on us being caught up.
@@ -793,16 +800,20 @@ public:
     std::map<BKeyID, CHDPubKey> mapBLSPubKeys; //<! memory map of BLS HD extended pubkeys
 
 
-    // Create wallet with dummy database handle
-    explicit CWallet(const CChainParams &chainParamsIn)
-        : database(new WalletDatabase()), chainParams(chainParamsIn) {
-    }
+    // Create wallet with dummy database handle -- sTILL NEEDED? HACK??
+    //explicit CWallet(const CChainParams &chainParamsIn)
+    //: database(new WalletDatabase()), chainParams(chainParamsIn) {
+    //}
 
-    // Create wallet with passed-in database handle
-    CWallet(const CChainParams &chainParamsIn, const WalletLocation &location,
-            std::unique_ptr<WalletDatabase> database_in)
-      : database(std::move(database_in)), chainParams(chainParamsIn), m_location(location) {
-    }
+    /** Construct wallet with specified name and database implementation. */
+    CWallet(const CChainParams &chainParamsIn, interfaces::Chain &chain,
+            const WalletLocation &location,
+            std::unique_ptr<WalletDatabase> databaseIn)
+        : 
+        database(std::move(databaseIn)),
+        m_chain(chain),
+        chainParams(chainParamsIn),
+        m_location(location) {}
 
     ~CWallet() override {}
 
@@ -819,6 +830,9 @@ public:
     std::map<CTxDestination, CAddressBookData> mapAddressBook;
 
     std::set<COutPoint> setLockedCoins;
+
+    /** Interface for accessing chain state. */
+    interfaces::Chain &chain() const { return m_chain; }
 
     const CWalletTx *GetWalletTx(const TxId &txid) const;
 
@@ -1234,8 +1248,9 @@ public:
 
     //! Verify wallet naming and perform salvage on the wallet if required
     static bool Verify(const CChainParams &chainParams,
-                       const WalletLocation &location, bool salvage_wallet,
-                       std::string &error_string, std::string &warning_string);
+                       interfaces::Chain &chain, const WalletLocation &location,
+                       bool salvage_wallet, std::string &error_string,
+                       std::string &warning_string);
 
     /**
      * Load the wallet from a file assuming it exists, returns a new CWallet instance or a null pointer
@@ -1243,13 +1258,15 @@ public:
      */
     static std::shared_ptr<CWallet>
     LoadWalletFromFile(const CChainParams &chainParams,
-                                const WalletLocation &location);
+                       interfaces::Chain &chain, 
+                       const WalletLocation &location);
     /**
      * Initializes the wallet, returns a new CWallet instance or a null pointer
      * in case of an error.
      */
     static std::shared_ptr<CWallet>
     CreateWalletFromFile(const CChainParams &chainParams,
+                         interfaces::Chain &chain,
                          const WalletLocation &location,
                          const SecureString& walletPassphrase,
                          const std::vector<std::string>& words, bool use_bls

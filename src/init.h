@@ -19,14 +19,27 @@ class HTTPRPCRequestProcessor;
 class RPCServer;
 
 class WalletInitInterface;
-extern const WalletInitInterface &g_wallet_init_interface;
+extern const WalletInitInterface &g_wallet_init_interface; // still needed? HACK
 
 
 /** Interrupt threads */
-void Interrupt();
 /** Interrupt all script checking threads once they're out of work */
 void InterruptThreadScriptCheck();
-void Shutdown();
+
+namespace interfaces {
+class Chain;
+class ChainClient;
+} // namespace interfaces
+
+//! Pointers to interfaces used during init and destroyed on shutdown.
+struct InitInterfaces {
+    std::unique_ptr<interfaces::Chain> chain;
+    std::vector<std::unique_ptr<interfaces::ChainClient>> chain_clients;
+};
+
+/** Interrupt threads */
+void Interrupt();
+void Shutdown(InitInterfaces &interfaces);
 //! Initialize the logging infrastructure
 void InitLogging();
 //! Parameter interaction: change current parameters depending on various rules
@@ -72,9 +85,9 @@ bool AppInitLockDataDirectory();
 bool AppInitMain(Config &config,
                  RPCServer &rpcServer,
                  HTTPRPCRequestProcessor &httpRPCRequestProcessor,
+                 InitInterfaces &interfaces,
                  const SecureString& walletPassphrase,
                  const std::vector<std::string>& words, bool use_bls);
-
 /**
  * Setup the arguments for gArgs.
  */

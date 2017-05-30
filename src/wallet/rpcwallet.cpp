@@ -10,6 +10,10 @@
 #include <consensus/validation.h>
 #include <core_io.h>
 #include <dstencode.h>
+
+#include <init.h>
+//#include <key_io.h>
+
 #include <net.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
@@ -124,7 +128,7 @@ void EnsureWalletIsUnlocked(CWallet *const pwallet) {
     }
 }
 
-void WalletTxToJSON(const CWalletTx &wtx, UniValue &entry) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+void WalletTxToJSON(interfaces::Chain &chain, const CWalletTx &wtx, UniValue &entry) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     int confirms = wtx.GetDepthInMainChain();
     entry.pushKV("confirmations", confirms);
     if (wtx.IsCoinBase()) {
@@ -1991,7 +1995,7 @@ void ListTransactions(CWallet *const pwallet, const CWalletTx &wtx,
             entry.pushKV("vout", s.vout);
             entry.pushKV("fee", ValueFromAmount(-1 * nFee));
             if (fLong) {
-                WalletTxToJSON(wtx, entry);
+                WalletTxToJSON(pwallet->chain(), wtx, entry);
             }
             entry.pushKV("abandoned", wtx.isAbandoned());
             ret.push_back(entry);
@@ -2030,7 +2034,7 @@ void ListTransactions(CWallet *const pwallet, const CWalletTx &wtx,
                 }
                 entry.pushKV("vout", r.vout);
                 if (fLong) {
-                    WalletTxToJSON(wtx, entry);
+                    WalletTxToJSON(pwallet->chain(), wtx, entry);
                 }
                 ret.push_back(entry);
             }
@@ -2685,7 +2689,7 @@ static UniValue gettransaction(const Config &config,
         entry.pushKV("fee", ValueFromAmount(nFee));
     }
 
-    WalletTxToJSON(wtx, entry);
+    WalletTxToJSON(pwallet->chain(), wtx, entry);
 
     UniValue details(UniValue::VARR);
     ListTransactions(pwallet, wtx, "*", 0, false, details, filter);
@@ -3445,12 +3449,13 @@ static UniValue loadwallet(const Config &config,
     }
 
     std::string warning;
-    if (!CWallet::Verify(chainParams, location, false, error, warning)) {
+    if (!CWallet::Verify(chainParams, *g_rpc_interfaces->chain, location, false,
+                         error, warning)) {
         throw JSONRPCError(RPC_WALLET_ERROR,
                            "Wallet file verification failed: " + error);
     }
 
-    std::shared_ptr<CWallet> const wallet = CWallet::LoadWalletFromFile(chainParams, location);
+    std::shared_ptr<CWallet> const wallet = CWallet::LoadWalletFromFile(chainParams, *g_rpc_interfaces->chain, location);
     if (!wallet) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Wallet loading failed.");
     }
@@ -3504,7 +3509,8 @@ static UniValue createwallet(const Config &config,
 
     // Wallet::Verify will check if we're trying to create a wallet with a
     // duplicate name.
-    if (!CWallet::Verify(chainParams, location, false, error, warning)) {
+    if (!CWallet::Verify(chainParams, *g_rpc_interfaces->chain, location, false,
+                         error, warning)) {
         throw JSONRPCError(RPC_WALLET_ERROR,
                            "Wallet file verification failed: " + error);
     }
@@ -3513,7 +3519,9 @@ static UniValue createwallet(const Config &config,
     bool use_bls = false;
     SecureString passphrase(password);
     std::shared_ptr<CWallet> const wallet = CWallet::CreateWalletFromFile(
-                                                                          chainParams, location, passphrase, words, use_bls);
+                                                                          chainParams,
+                                                                          *g_rpc_interfaces->chain, 
+                                                                          location, passphrase, words, use_bls);
     if (!wallet) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Wallet creation failed.");
     }
@@ -4156,8 +4164,8 @@ UniValue signrawtransactionwithwallet(const Config &config,
 
     // Sign the transaction
     LOCK2(cs_main, pwallet->cs_wallet);
-    return SignTransaction(mtx, request.params[1], pwallet, false,
-                           request.params[2]);
+    return SignTransaction(pwallet->chain(), mtx, request.params[1], pwallet,
+                           false, request.params[2]);
 }
 
 UniValue generate(const Config &config, const JSONRPCRequest &request) {

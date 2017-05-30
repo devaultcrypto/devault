@@ -4759,7 +4759,7 @@ CWallet::GetDestValues(const std::string &prefix) const {
     }
     return values;
 }
-bool CWallet::Verify(const CChainParams &chainParams,
+bool CWallet::Verify(const CChainParams &chainParams, interfaces::Chain &chain,
                      const WalletLocation &location, bool salvage_wallet,
                      std::string &error_string, std::string &warning_string) {
     // Do some checking on wallet path. It should be either a:
@@ -4818,7 +4818,7 @@ bool CWallet::Verify(const CChainParams &chainParams,
 
     if (salvage_wallet) {
         // Recover readable keypairs:
-        CWallet dummyWallet(chainParams, WalletLocation(),
+        CWallet dummyWallet(chainParams, chain, WalletLocation(),
                             WalletDatabase::CreateDummy());
         std::string backup_filename;
         if (!WalletBatch::Recover(
@@ -4856,16 +4856,17 @@ void CWallet::MarkPreSplitKeys() {
 
 std::shared_ptr<CWallet>
 CWallet::LoadWalletFromFile(const CChainParams &chainParams,
+                            interfaces::Chain &chain,
                             const WalletLocation &location) {
 
-     auto ret = CreateWalletFromFile(chainParams, location, SecureString(""),
+     auto ret = CreateWalletFromFile(chainParams, chain, location, SecureString(""),
                                      std::vector<std::string>(), false);
      return ret;
  }
 
-     
 std::shared_ptr<CWallet>
 CWallet::CreateWalletFromFile(const CChainParams &chainParams,
+                              interfaces::Chain &chain,
                               const WalletLocation &location,
                               const SecureString& walletPassphrase,
                               const mnemonic::WordList& words, bool use_bls
@@ -4878,9 +4879,9 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     if (gArgs.GetBoolArg("-zapwallettxes", false)) {
         uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
 
-        std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
-        std::unique_ptr<CWallet> tempWallet =
-          std::make_unique<CWallet>(chainParams, location, std::move(database));
+        std::unique_ptr<CWallet> tempWallet = std::make_unique<CWallet>(
+            chainParams, chain, location,
+            WalletDatabase::Create(location.GetPath()));
         DBErrors nZapWalletRet = tempWallet->ZapWalletTx(vWtx);
         if (nZapWalletRet != DBErrors::LOAD_OK) {
             InitError(
@@ -4893,15 +4894,14 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
+    
+    // TODO: Can't use std::make_shared because we need a custom deleter but
+    // should be possible to use std::allocate_shared.
+    std::shared_ptr<CWallet> walletInstance(
+        new CWallet(chainParams, chain, location,
+                    WalletDatabase::Create(location.GetPath())),
+        ReleaseWallet);
 
-    // was std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
-    // was CWallet *walletInstance = new CWallet(chainParams, location, std::move(database));
-    
-    // TODO: Can't use std::make_shared because we need a custom deleter but should be possible to use std::allocate_shared.
-    std::shared_ptr<CWallet> walletInstance(new CWallet(chainParams, location, WalletDatabase::Create(location.GetPath())),
-                                                        ReleaseWallet);
-                                                                        
-    
     // Used for switching at various places
     walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false) | use_bls;
     

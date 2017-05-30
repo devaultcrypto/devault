@@ -14,9 +14,8 @@
 std::unique_ptr<CWallet> pwalletMain;
 
 WalletTestingSetup::WalletTestingSetup(const std::string &chainName)
-    : TestingSetup(chainName) {
-    bitdb.MakeMock();
-
+    : TestingSetup(chainName), m_wallet(Params(), *m_chain, WalletLocation(),
+                                        WalletDatabase::CreateMock()) {
     bool fFirstRun;
     std::unique_ptr<WalletDatabase> dbw(
         new WalletDatabase(&bitdb, "wallet_test.dat"));

@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <interfaces/wallet.h>
+#include <interfaces/chain.h>
 
 #include <amount.h>
 #include <chain.h>
@@ -427,10 +428,26 @@ namespace {
         CWallet &m_wallet;
     };
 
+    class WalletClientImpl : public ChainClient {
+    public:
+        WalletClientImpl(Chain &chain,
+                         std::vector<std::string> wallet_filenames)
+            : m_chain(chain), m_wallet_filenames(std::move(wallet_filenames)) {}
+
+        Chain &m_chain;
+        std::vector<std::string> m_wallet_filenames;
+    };
+
 } // namespace
 
 std::unique_ptr<Wallet> MakeWallet(const std::shared_ptr<CWallet> &wallet) {
     return std::make_unique<WalletImpl>(wallet);
+}
+
+std::unique_ptr<ChainClient>
+MakeWalletClient(Chain &chain, std::vector<std::string> wallet_filenames) {
+    return std::make_unique<WalletClientImpl>(chain,
+                                              std::move(wallet_filenames));
 }
 
 } // namespace interfaces

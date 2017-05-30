@@ -12,6 +12,7 @@
 #include <httprpc.h>
 #include <httpserver.h>
 #include <init.h>
+#include <interfaces/chain.h>
 #include <noui.h>
 #include <rpc/server.h>
 #include <util/fs_util.h>
@@ -102,6 +103,9 @@ bool AppInit(int argc, char *argv[]) {
     auto &config = const_cast<Config &>(GetConfig());
     RPCServer rpcServer;
     HTTPRPCRequestProcessor httpRPCRequestProcessor(config, rpcServer);
+
+    InitInterfaces interfaces;
+    interfaces.chain = interfaces::MakeChain();
 
     bool fRet = false;
     SecureString walletPassphrase;
@@ -240,7 +244,7 @@ bool AppInit(int argc, char *argv[]) {
         }
         std::vector<std::string> words;
         bool use_bls = true;
-        fRet = AppInitMain(config, rpcServer, httpRPCRequestProcessor, walletPassphrase, words, use_bls);
+        fRet = AppInitMain(config, rpcServer, httpRPCRequestProcessor, interfaces, walletPassphrase, words, use_bls);
     } catch (const std::exception &e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {
@@ -252,7 +256,7 @@ bool AppInit(int argc, char *argv[]) {
     } else {
         WaitForShutdown();
     }
-    Shutdown();
+    Shutdown(interfaces);
 
     return fRet;
 }

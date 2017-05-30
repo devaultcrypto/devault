@@ -30,6 +30,7 @@
 #include <rpc/register.h>
 #include <rpc/server.h>
 #include <rpc/blockchain.h>
+#include <rpc/util.h>
 #include <scheduler.h>
 #include <script/scriptcache.h>
 #include <script/sigcache.h>
@@ -195,7 +196,7 @@ void Interrupt() {
     }
 }
 
-void Shutdown() {
+void Shutdown(InitInterfaces &interfaces) {
     LogPrintf("%s: In progress...\n", __func__);
     static CCriticalSection cs_Shutdown;
     TRY_LOCK(cs_Shutdown, lockShutdown);
@@ -1860,7 +1861,9 @@ bool AppInitLockDataDirectory() {
 }
 
 bool AppInitMain(Config &config, RPCServer& rpcServer,
-                 HTTPRPCRequestProcessor &httpRPCRequestProcessor, const SecureString& walletPassphrase,
+                 HTTPRPCRequestProcessor &httpRPCRequestProcessor,
+                 InitInterfaces &interfaces,
+                 const SecureString& walletPassphrase,
                  const std::vector<std::string>& words, bool use_bls) {
     // Step 4a: application initialization
     const CChainParams &chainparams = config.GetChainParams();
@@ -1945,6 +1948,10 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
      */
     RegisterAllRPCCommands(config, rpcServer, tableRPC);
     g_wallet_init_interface.RegisterRPC(tableRPC);
+    g_rpc_interfaces = &interfaces;
+#if ENABLE_ZMQ
+    RegisterZMQRPCCommands(tableRPC);
+#endif
 
     /**
      * Start the RPC server.  It will be started in "warmup" mode and not
@@ -1961,7 +1968,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
     }
 
     // Step 5: verify wallet database integrity
-    if (!g_wallet_init_interface.Verify(chainparams)) {
+    if (!g_wallet_init_interface.Verify(chainparams, *interfaces.chain)) {
         return false;
     }
 
@@ -2388,7 +2395,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
     }
 
     // Step 9: load wallet
-    if (!g_wallet_init_interface.Open(chainparams, walletPassphrase, words, use_bls)) {
+    if (!g_wallet_init_interface.Open(chainparams, *interfaces.chain, walletPassphrase, words, use_bls)) {
         return false;
     }
 
