@@ -7,10 +7,12 @@
 #include <config.h>
 #include <dstencode.h>
 #include <fs.h>
+#include <init.h>
 #include <util/time.h>
 #include <util/splitstring.h>
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
+#include <interfaces/chain.h>
 
 namespace WalletTool {
 
@@ -23,8 +25,12 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
   std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(wallet_path));
   auto &config = const_cast<Config &>(GetConfig());
   auto &chainParams = config.GetChainParams();
+  InitInterfaces interfaces;
+  interfaces.chain = interfaces::MakeChain();
+  //interfaces::Chain chain; // HOw to set? HACK
   // dummy chain interface
   std::shared_ptr<CWallet> wallet_instance = std::make_unique<CWallet>(chainParams,
+                                                                       *interfaces.chain,
                                                                        WalletLocation("wallet.dat"),
                                                                        std::move(database));
   DBErrors load_wallet_ret;

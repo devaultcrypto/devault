@@ -11,6 +11,7 @@
 #include <chainparams.h>
 #include <config.h>
 #include <init.h>
+#include <interfaces/chain.h>
 #include <interfaces/handler.h>
 #include <interfaces/wallet.h>
 #include <net.h>
@@ -50,6 +51,8 @@ namespace interfaces {
 namespace {
 
     class NodeImpl : public Node {
+    public:
+        NodeImpl() { m_interfaces.chain = MakeChain(); }
         bool parseParameters(int argc, const char *const argv[],
                              std::string &error) override {
             return gArgs.ParseParameters(argc, argv, error);
@@ -85,11 +88,11 @@ namespace {
                     const SecureString& walletPassphrase,
                     const std::vector<std::string>& words,
                     bool use_bls) override {
-            return AppInitMain(config, rpcServer, httpRPCRequestProcessor, walletPassphrase, words, use_bls);
+            return AppInitMain(config, rpcServer, httpRPCRequestProcessor, m_interfaces, walletPassphrase, words, use_bls);
         }
         void appShutdown() override {
             Interrupt();
-            Shutdown();
+            Shutdown(m_interfaces);
         }
         void startShutdown() override { StartShutdown(); }
         bool shutdownRequested() override { return ShutdownRequested(); }
@@ -317,6 +320,7 @@ namespace {
                        GuessVerificationProgress(Params().TxData(), block));
                 }));
         }
+        InitInterfaces m_interfaces;
     };
 } // namespace
 

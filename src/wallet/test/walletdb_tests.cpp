@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chainparams.h>
+#include <interfaces/chain.h>
 #include <wallet/wallet.h>
 
 #include <catch_tests/test_bitcoin.h>
@@ -12,22 +13,12 @@
 #include <catch2/catch.hpp>
 
 namespace {
-static std::unique_ptr<WalletDatabase> TmpDB(const fs::path &pathTemp,
-                                               const std::string &testname) {
-    fs::path dir = pathTemp / testname;
-    // fs::create_directory(dir);
-    // FIXTHIS    REQUIRE(fs::create_directory(dir),  "Unable to create a
-    // directory for test " + testname);
-    fs::path path =
-        dir / strprintf("testwallet%i", static_cast<int>(GetRand(1000000)));
-    return std::unique_ptr<WalletDatabase>(
-        new WalletDatabase(&bitdb, path.string()));
-}
-
-static std::unique_ptr<CWallet> LoadWallet(WalletBatch *db) {
-    std::unique_ptr<CWallet> wallet(new CWallet(Params()));
-    DBErrors res = db->LoadWallet(wallet.get());
-    REQUIRE(res == DBErrors::LOAD_OK);
+static std::unique_ptr<CWallet> LoadWallet(WalletBatch &batch) {
+    auto chain = interfaces::MakeChain();
+    std::unique_ptr<CWallet> wallet = std::make_unique<CWallet>(
+        Params(), *chain, WalletLocation(), WalletDatabase::CreateDummy());
+    DBErrors res = batch.LoadWallet(wallet.get());
+    BOOST_CHECK(res == DBErrors::LOAD_OK);
     return wallet;
 }
 } // namespace

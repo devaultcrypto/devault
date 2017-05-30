@@ -465,6 +465,7 @@ static void AddKey(CWallet &wallet, const CKey &key) {
 #ifdef DEBUG_THIS
 TEST_CASE("rescan, TestChain100Setup") {
     WalletTestingSetup setup;
+    auto chain = interfaces::MakeChain();
 
     // Cap last block file size, and mine new block in a new block file.
     CBlockIndex *const nullBlock = nullptr;
@@ -478,7 +479,8 @@ TEST_CASE("rescan, TestChain100Setup") {
     // Verify ScanForWalletTransactions picks up transactions in both the old
     // and new block files.
     {
-        CWallet wallet(Params());
+        CWallet wallet(Params(), *chain, WalletLocation(),
+                       WalletDatabase::CreateDummy());
         AddKey(wallet, coinbaseKey);
         WalletRescanReserver reserver(&wallet);
         reserver.reserve();
@@ -494,7 +496,8 @@ TEST_CASE("rescan, TestChain100Setup") {
     // Verify ScanForWalletTransactions only picks transactions in the new block
     // file.
     {
-        CWallet wallet(Params());
+        CWallet wallet(Params(), *chain, WalletLocation(),
+                       WalletDatabase::CreateDummy());
         AddKey(wallet, coinbaseKey);
         WalletRescanReserver reserver(&wallet);
         reserver.reserve();
@@ -508,7 +511,7 @@ TEST_CASE("rescan, TestChain100Setup") {
     // after.
     {
         std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(
-            Params(), "dummy", WalletDatabase::CreateDummy());
+            Params(), *chain, WalletLocation(), WalletDatabase::CreateDummy());
         AddWallet(wallet);
         UniValue keys;
         keys.setArray();
@@ -552,6 +555,83 @@ TEST_CASE("rescan, TestChain100Setup") {
     }
 }
 
+// Verify importwallet RPC starts rescan at earliest block with timestamp
+// greater or equal than key birthday. Previously there was a bug where
+// importwallet RPC would start the scan at the latest block with timestamp less
+// than or equal to key birthday.
+BOOST_FIXTURE_TEST_CASE(importwallet_rescan, TestChain100Setup) {
+    auto chain = interfaces::MakeChain();
+
+    // Create two blocks with same timestamp to verify that importwallet rescan
+    // will pick up both blocks, not just the first.
+    const int64_t BLOCK_TIME = chainActive.Tip()->GetBlockTimeMax() + 5;
+    SetMockTime(BLOCK_TIME);
+    m_coinbase_txns.emplace_back(
+        CreateAndProcessBlock({},
+                              GetScriptForRawPubKey(coinbaseKey.GetPubKey()))
+            .vtx[0]);
+    m_coinbase_txns.emplace_back(
+        CreateAndProcessBlock({},
+                              GetScriptForRawPubKey(coinbaseKey.GetPubKey()))
+            .vtx[0]);
+
+    // Set key birthday to block time increased by the timestamp window, so
+    // rescan will start at the block time.
+    const int64_t KEY_TIME = BLOCK_TIME + TIMESTAMP_WINDOW;
+    SetMockTime(KEY_TIME);
+    m_coinbase_txns.emplace_back(
+        CreateAndProcessBlock({},
+                              GetScriptForRawPubKey(coinbaseKey.GetPubKey()))
+            .vtx[0]);
+
+    LOCK(cs_main);
+
+    std::string backup_file =
+        (SetDataDir("importwallet_rescan") / "wallet.backup").string();
+
+    // Import key into wallet and call dumpwallet to create backup file.
+    {
+        std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(
+            Params(), *chain, WalletLocation(), WalletDatabase::CreateDummy());
+        LOCK(wallet->cs_wallet);
+        wallet->mapKeyMetadata[coinbaseKey.GetPubKey().GetID()].nCreateTime =
+            KEY_TIME;
+        wallet->AddKeyPubKey(coinbaseKey, coinbaseKey.GetPubKey());
+
+        JSONRPCRequest request;
+        request.params.setArray();
+        request.params.push_back(backup_file);
+        AddWallet(wallet);
+        ::dumpwallet(GetConfig(), request);
+        RemoveWallet(wallet);
+    }
+
+    // Call importwallet RPC and verify all blocks with timestamps >= BLOCK_TIME
+    // were scanned, and no prior blocks were scanned.
+    {
+        std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(
+            Params(), *chain, WalletLocation(), WalletDatabase::CreateDummy());
+
+        JSONRPCRequest request;
+        request.params.setArray();
+        request.params.push_back(backup_file);
+        AddWallet(wallet);
+        ::importwallet(GetConfig(), request);
+        RemoveWallet(wallet);
+
+        LOCK(wallet->cs_wallet);
+        BOOST_CHECK_EQUAL(wallet->mapWallet.size(), 3U);
+        BOOST_CHECK_EQUAL(m_coinbase_txns.size(), 103U);
+        for (size_t i = 0; i < m_coinbase_txns.size(); ++i) {
+            bool found = wallet->GetWalletTx(m_coinbase_txns[i]->GetId());
+            bool expected = i >= 100;
+            BOOST_CHECK_EQUAL(found, expected);
+        }
+    }
+
+    SetMockTime(0);
+}
+
 // Check that GetImmatureCredit() returns a newly calculated value instead of
 // the cached value after a MarkDirty() call.
 //
@@ -560,11 +640,14 @@ TEST_CASE("rescan, TestChain100Setup") {
 // debit functions.
 TEST_CASE("coin_mark_dirty_immature_credit") {
     TestChain100Setup setup;
-    CWallet wallet(Params());
     CKeyingMaterial km;
+    auto chain = interfaces::MakeChain();
+    CWallet wallet(Params(), *chain, WalletLocation(),
+                   WalletDatabase::CreateDummy());
     wallet.CreateMasteyKey("bypass", km);
     wallet.SetMasterKey(km);
     CWalletTx wtx(&wallet, MakeTransactionRef(setup.coinbaseTxns.back()));
+    CWalletTx wtx(&wallet, m_coinbase_txns.back());
     LOCK2(cs_main, wallet.cs_wallet);
     wtx.hashBlock = chainActive.Tip()->GetBlockHash();
     wtx.nIndex = 0;
@@ -660,10 +743,8 @@ public:
     ListCoinsTestingSetup() {
         CreateAndProcessBlock({},
                               GetScriptForRawPubKey(coinbaseKey.GetPubKey()));
-        ::bitdb.MakeMock();
-        wallet.reset(new CWallet(
-            Params(), std::unique_ptr<WalletDatabase>(
-                          new WalletDatabase(&bitdb, "wallet_test.dat"))));
+        wallet = std::make_unique<CWallet>(Params(), *m_chain, WalletLocation(),
+                                           WalletDatabase::CreateMock());
         bool firstRun;
         wallet->LoadWallet(firstRun);
         CKeyingMaterial km;
@@ -709,6 +790,7 @@ public:
         return it->second;
     }
 
+    std::unique_ptr<interfaces::Chain> m_chain = interfaces::MakeChain();
     std::unique_ptr<CWallet> wallet;
 };
 
@@ -777,3 +859,16 @@ TEST_CASE("ListCoins") {
     REQUIRE(list.begin()->second.size() == 2);
 #endif
 }
+
+BOOST_FIXTURE_TEST_CASE(wallet_disableprivkeys, TestChain100Setup) {
+    auto chain = interfaces::MakeChain();
+    std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(
+        Params(), *chain, WalletLocation(), WalletDatabase::CreateDummy());
+    wallet->SetMinVersion(FEATURE_LATEST);
+    wallet->SetWalletFlag(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
+    BOOST_CHECK(!wallet->TopUpKeyPool(1000));
+    CPubKey pubkey;
+    BOOST_CHECK(!wallet->GetKeyFromPool(pubkey, false));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
