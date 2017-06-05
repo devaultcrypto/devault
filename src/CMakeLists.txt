@@ -128,6 +128,7 @@ if(EXTRA_WARNINGS)
 	add_cxx_compiler_flag(-Wsuggest-override)
 else()
 	add_compiler_flag(-Wno-unused-parameter)
+	add_compiler_flag(-Wno-implicit-fallthrough)
 endif()
 
 add_feature_info(WITH_WARNINGS EXTRA_WARNINGS "Enable extra warnings")
