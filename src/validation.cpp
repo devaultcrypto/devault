@@ -2892,7 +2892,7 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
                  connectTrace.GetBlocksConnected()) {
                 assert(trace.pblock && trace.pindex);
                 GetMainSignals().BlockConnected(trace.pblock, trace.pindex,
-                                                *trace.conflictedTxs);
+                                                trace.conflictedTxs);
             }
         }
 
