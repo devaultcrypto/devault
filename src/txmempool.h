@@ -29,7 +29,6 @@
 #include <utility>
 #include <vector>
 
-class CAutoFile;
 class CBlockIndex;
 class Config;
 
