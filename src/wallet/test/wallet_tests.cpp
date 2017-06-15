@@ -723,7 +723,11 @@ TEST_CASE("ListCoins") {
 
     // Confirm ListCoins initially returns 1 coin grouped under coinbaseKey
     // address.
-    auto list = setup.wallet->ListCoins();
+    std::map<CTxDestination, std::vector<COutput>> list;
+    {
+      LOCK2(cs_main, setup.wallet->cs_wallet);
+      list = setup.wallet->ListCoins();
+    }
     REQUIRE(list.size() == 1);
     REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==
             coinbaseAddress);
@@ -741,6 +745,7 @@ TEST_CASE("ListCoins") {
 
     AddTx(CRecipient{GetScriptForRawPubKey({}), 1 * COIN,
                      false /* subtract fee */});
+    LOCK2(cs_main, wallet->cs_wallet);
     list = wallet->ListCoins();
     REQUIRE(list.size() == 1);
     REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==
@@ -768,6 +773,7 @@ TEST_CASE("ListCoins") {
     }
     // Confirm ListCoins still returns same result as before, despite coins
     // being locked.
+    LOCK2(cs_main, wallet->cs_wallet);
     list = wallet->ListCoins();
     REQUIRE(list.size() == 1);
     REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==

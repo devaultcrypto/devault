@@ -2400,20 +2400,12 @@ void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe,
 }
 
 std::map<CTxDestination, std::vector<COutput>> CWallet::ListCoins() const {
-    // TODO: Add AssertLockHeld(cs_wallet) here.
-    //
-    // Because the return value from this function contains pointers to
-    // CWalletTx objects, callers to this function really should acquire the
-    // cs_wallet lock before calling it. However, the current caller doesn't
-    // acquire this lock yet. There was an attempt to add the missing lock in
-    // https://github.com/bitcoin/bitcoin/pull/10340, but that change has been
-    // postponed until after https://github.com/bitcoin/bitcoin/pull/10244 to
-    // avoid adding some extra complexity to the Qt code.
+    AssertLockHeld(cs_main);
+    AssertLockHeld(cs_wallet);
 
     std::map<CTxDestination, std::vector<COutput>> result;
     std::vector<COutput> availableCoins;
 
-    LOCK2(cs_main, cs_wallet);
     AvailableCoins(availableCoins);
 
     for (auto &coin : availableCoins) {
@@ -3348,8 +3340,12 @@ CValidationState CWallet::CommitSweep(CTransactionRef tx, CConnman *connman) {
 bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPercent, Amount minAmount, std::string &message) {
 
     CTransactionRef tx;
-    LOCK2(cs_main, cs_wallet);
-    std::vector<CInputCoin> coins_to_use = analyzecoins(ListCoins(), minPercent);
+    std::vector<CInputCoin> coins_to_use;
+    {
+      LOCK2(cs_main, cs_wallet);
+      std::map<CTxDestination, std::vector<COutput>> listCoins = ListCoins();
+      coins_to_use = analyzecoins(listCoins, minPercent);
+    }
     Amount nAmount(0);
     for (const auto &coin : coins_to_use) { nAmount += coin.txout.nValue; }
     // Bail out if amount is too small
@@ -3370,8 +3366,13 @@ bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPerc
 bool CWallet::ConsolidateCoins(const CTxDestination &recipient, double minPercent,
                                CTransactionRef &tx, std::string &strFailReason) {
 
-    std::vector<CInputCoin> coins_to_use = analyzecoins(ListCoins(), minPercent);
-    return ConsolidateCoins(recipient, coins_to_use, tx, strFailReason);
+  std::vector<CInputCoin> coins_to_use;
+  {
+    LOCK2(cs_main, cs_wallet);
+    std::map<CTxDestination, std::vector<COutput>> listCoins = ListCoins();
+    coins_to_use = analyzecoins(listCoins, minPercent);
+  }
+  return ConsolidateCoins(recipient, coins_to_use, tx, strFailReason);
 }
  
 
