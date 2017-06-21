@@ -247,12 +247,12 @@
       (finally) remove getinfo in favor of more module-specific infos
       [mining] Add a test for TestCBlockTemplateEntry
       Bump version number to 0.19.8
-      Fix wallet RPC race by waiting for callbacks in sendrawtransaction
-      Also call other wallet notify callbacks in scheduler thread
+#      Fix wallet RPC race by waiting for callbacks in sendrawtransaction
+#      Also call other wallet notify callbacks in scheduler thread
       Merge #14374: qt: Add "Blocksdir" to Debug window
-      Add tests to SingleThreadedSchedulerClient() and document the memory model
-      Various improvements to the scheduler
-      scheduler: Add Clang thread safety annotations for variables guarded by m_cs_callbacks_pending
+#      Add tests to SingleThreadedSchedulerClient() and document the memory model
+#      Various improvements to the scheduler
+#      scheduler: Add Clang thread safety annotations for variables guarded by m_cs_callbacks_pending
 #      unsigned char => uint8_t
 #      [nit] do not capture unused `this` in wallet interface
 
