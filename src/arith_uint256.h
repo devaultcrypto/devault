@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
@@ -27,11 +28,19 @@ protected:
 
 public:
     base_uint() {
+        static_assert(
+            BITS / 32 > 0 && BITS % 32 == 0,
+            "Template parameter BITS must be a positive multiple of 32.");
+
         for (int i = 0; i < WIDTH; i++)
             pn[i] = 0;
     }
 
     base_uint(const base_uint &b) {
+        static_assert(
+            BITS / 32 > 0 && BITS % 32 == 0,
+            "Template parameter BITS must be a positive multiple of 32.");
+
         for (int i = 0; i < WIDTH; i++)
             pn[i] = b.pn[i];
     }
@@ -43,6 +52,10 @@ public:
     }
 
     base_uint(uint64_t b) {
+        static_assert(
+            BITS / 32 > 0 && BITS % 32 == 0,
+            "Template parameter BITS must be a positive multiple of 32.");
+
         pn[0] = (unsigned int)b;
         pn[1] = (unsigned int)(b >> 32);
         for (int i = 2; i < WIDTH; i++)
@@ -145,7 +158,7 @@ public:
     base_uint &operator++() {
         // prefix operator
         int i = 0;
-        while (++pn[i] == 0 && i < WIDTH - 1)
+        while (i < WIDTH && ++pn[i] == 0)
             i++;
         return *this;
     }
@@ -160,7 +173,7 @@ public:
     base_uint &operator--() {
         // prefix operator
         int i = 0;
-        while (--pn[i] == (uint32_t)-1 && i < WIDTH - 1)
+        while (i < WIDTH && --pn[i] == std::numeric_limits<uint32_t>::max())
             i++;
         return *this;
     }
