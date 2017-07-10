@@ -34,6 +34,7 @@
 #include "wallet/fees.h"
 #include "wallet/finaltx.h"
 #include "wallet/mnemonic.h"
+#include <rpc/server.h> // for IsDeprecatedRPCEnabled
 
 #include <cassert>
 #include <future>
@@ -2813,6 +2814,12 @@ bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
     if (nChangePosInOut != -1) {
         tx.vout.insert(tx.vout.begin() + nChangePosInOut,
                        tx_new->vout[nChangePosInOut]);
+        // we dont have the normal Create/Commit cycle, and dont want to
+        // risk reusing change, so just remove the key from the keypool
+        // here.
+        if (!IsDeprecatedRPCEnabled(gArgs, "fundrawtransaction")) {
+            reservekey.KeepKey();
+        }
     }
 
     // Copy output sizes from new transaction; they may have had the fee
@@ -2833,9 +2840,13 @@ bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
         }
     }
 
+    // DEPRECATED, remove in 0.20 with -reserveChangeKey
     // Optionally keep the change output key.
-    if (keepReserveKey) {
-        reservekey.KeepKey();
+    if (IsDeprecatedRPCEnabled(gArgs, "fundrawtransaction")) {
+
+        if (keepReserveKey) {
+            reservekey.KeepKey();
+        }
     }
 
     return true;

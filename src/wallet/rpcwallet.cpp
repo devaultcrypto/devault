@@ -3438,8 +3438,8 @@ static UniValue fundrawtransaction(const Config &config,
             "false) Also select inputs which are watch only\n"
             "     \"lockUnspents\"           (boolean, optional, default "
             "false) Lock selected unspent outputs\n"
-            "     \"reserveChangeKey\"       (boolean, optional, default true) "
-            "Reserves the change output key from the keypool\n"
+            "     \"reserveChangeKey\"       (boolean, optional) "
+            "DEPRECATED.  Reserves the change output key from the keypool\n"
             "     \"feeRate\"                (numeric, optional, default not "
             "set: makes wallet determine the fee) Set a specific feerate (" +
             CURRENCY_UNIT +
@@ -3491,7 +3491,8 @@ static UniValue fundrawtransaction(const Config &config,
     CCoinControl coinControl;
     int changePosition = -1;
     bool lockUnspents = false;
-    bool reserveChangeKey = true;
+    // DEPRECATED, should be removed in 0.20
+    bool reserveChangeKey = false;
     UniValue subtractFeeFromOutputs;
     std::set<int> setSubtractFeeFromOutputs;
 
@@ -3511,6 +3512,7 @@ static UniValue fundrawtransaction(const Config &config,
                     {"changePosition", UniValueType(UniValue::VNUM)},
                     {"includeWatching", UniValueType(UniValue::VBOOL)},
                     {"lockUnspents", UniValueType(UniValue::VBOOL)},
+                    // DEPRECATED, should be removed in 0.20
                     {"reserveChangeKey", UniValueType(UniValue::VBOOL)},
                     // will be checked below
                     {"feeRate", UniValueType()},
@@ -3545,8 +3547,20 @@ static UniValue fundrawtransaction(const Config &config,
                 lockUnspents = options["lockUnspents"].get_bool();
             }
 
+            // DEPRECATED, should be removed in v0.20
             if (options.exists("reserveChangeKey")) {
-                reserveChangeKey = options["reserveChangeKey"].get_bool();
+                if (!IsDeprecatedRPCEnabled(gArgs, "fundrawtransaction")) {
+                    throw JSONRPCError(
+                        RPC_METHOD_DEPRECATED,
+                        "fundrawtransaction -reserveChangeKey is deprecated "
+                        "and will be fully removed in v0.20.  To use the "
+                        "-reserveChangeKey option in v0.19, restart bitcoind "
+                        "with -deprecatedrpc=fundrawtransaction.\nProjects "
+                        "should transition to expecting change addresses "
+                        "removed from the keypool before upgrading to v0.20");
+                } else {
+                    reserveChangeKey = options["reserveChangeKey"].get_bool();
+                }
             }
 
             if (options.exists("feeRate")) {
