@@ -46,3 +46,4 @@ Bitcoin-ABC 19.x backports:
  - Added to `getblockchaininfo` `size_on_disk` and, when the prune option is enabled, `prune_height`, `automatic_pruning`, and `prune_target_size`.
     - The help message also reflects this.
  - Remove `depends` from transaction objects provided by `getblocktemplate`.
+ - Deprecated the `-reserveChangeKey` option for `fundrawtransaction` wallet rpc command.
