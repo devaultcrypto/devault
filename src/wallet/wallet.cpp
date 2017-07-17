@@ -2797,7 +2797,7 @@ bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
     CReserveKey reservekey(this);
     CWalletTx wtx;
     if (!CreateTransaction(vecSend, wtx, reservekey, nFeeRet, nChangePosInOut,
-                           strFailReason, &coinControl, false)) {
+                           strFailReason, coinControl, false)) {
         return false;
     }
 
@@ -2836,9 +2836,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
                                 CWalletTx &wtxNew, CReserveKey &reservekey,
                                 Amount &nFeeRet, int &nChangePosInOut,
                                 std::string &strFailReason,
-                                const CCoinControl *coinControl, bool sign) {
+                                const CCoinControl &coinControl, bool sign) {
     Amount nValue = Amount::zero();
-
     int nChangePosRequest = nChangePosInOut;
     unsigned int nSubtractFeeFromAmount = 0;
     for (const auto &recipient : vecSend) {
@@ -2901,7 +2900,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
         LOCK2(cs_main, cs_wallet);
 
         std::vector<COutput> vAvailableCoins;
-        AvailableCoins(vAvailableCoins, true, coinControl);
+        AvailableCoins(vAvailableCoins, true, &coinControl);
 
         // Create change script that will be used if we need change
         // TODO: pass in scriptChange instead of reservekey so
@@ -2920,7 +2919,6 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
           if (coinControl &&
               !boost::get<CNoDestination>(&coinControl->destChange)) {
             scriptChange = GetScriptForDestination(coinControl->destChange);
-            // no coin control: send change to newly generated address
 #endif
         } else {
             // no coin control: send change to newly generated address
@@ -3008,7 +3006,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
                 nValueIn = Amount::zero();
                 setCoins.clear();
                 if (!SelectCoins(vAvailableCoins, nValueToSelect, setCoins,
-                                 nValueIn, coinControl)) {
+                                 nValueIn, &coinControl)) {
                     strFailReason = _("Insufficient funds");
                     return false;
                 }
@@ -3112,9 +3110,6 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
             }
 
             Amount nFeeNeeded = GetMinimumFee(nBytes, g_mempool);
-            if (coinControl && coinControl->fOverrideFeeRate) {
-                nFeeNeeded = coinControl->nFeeRate.GetFeeCeiling(nBytes);
-            }
 
             // If we made it here and we aren't even able to meet the relay fee
             // on the next pass, give up because we must be at the maximum

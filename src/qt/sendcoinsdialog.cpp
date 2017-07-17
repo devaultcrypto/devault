@@ -193,15 +193,9 @@ void SendCoinsDialog::setModel(WalletModel *_model) {
         connect(ui->groupFee, SIGNAL(buttonClicked(int)), this,
                 SLOT(updateFeeSectionControls()));
         connect(ui->groupFee, SIGNAL(buttonClicked(int)), this,
-                SLOT(updateGlobalFeeVariables()));
-        connect(ui->groupFee, SIGNAL(buttonClicked(int)), this,
                 SLOT(coinControlUpdateLabels()));
         connect(ui->groupCustomFee, SIGNAL(buttonClicked(int)), this,
-                SLOT(updateGlobalFeeVariables()));
-        connect(ui->groupCustomFee, SIGNAL(buttonClicked(int)), this,
                 SLOT(coinControlUpdateLabels()));
-        connect(ui->customFee, SIGNAL(valueChanged()), this,
-                SLOT(updateGlobalFeeVariables()));
         connect(ui->customFee, SIGNAL(valueChanged()), this,
                 SLOT(coinControlUpdateLabels()));
    //     connect(ui->checkBoxMinimumFee, SIGNAL(stateChanged(int)), this,
@@ -217,7 +211,6 @@ void SendCoinsDialog::setModel(WalletModel *_model) {
         updateFeeSectionControls();
         updateMinFeeLabel();
         updateSmartFeeLabel();
-        updateGlobalFeeVariables();
 
         // Cleanup old confirmation target related settings
         // TODO: Remove these in 0.20
@@ -286,7 +279,9 @@ void SendCoinsDialog::on_sendButton_clicked() {
         ctrl = *CoinControlDialog::coinControl;
     }
 
-    prepareStatus = model->prepareTransaction(currentTransaction, &ctrl);
+    updateCoinControlState(ctrl);
+
+    prepareStatus = model->prepareTransaction(currentTransaction, ctrl);
 
     // process prepareStatus and on error generate message shown to user
     processSendCoinsReturn(
@@ -668,14 +663,6 @@ void SendCoinsDialog::updateFeeSectionControls() {
     ui->customFee               ->setEnabled(ui->radioCustomFee->isChecked() /*&& !ui->checkBoxMinimumFee->isChecked()*/);
 }
 
-void SendCoinsDialog::updateGlobalFeeVariables() {
-    if (ui->radioSmartFee->isChecked()) {
-        payTxFee = CFeeRate(Amount::zero());
-    } else {
-        payTxFee = CFeeRate(Amount(ui->customFee->value()));
-    }
-}
-
 void SendCoinsDialog::updateFeeMinimizedLabel() {
     if (!model || !model->getOptionsModel()) {
         return;
@@ -703,33 +690,35 @@ void SendCoinsDialog::updateMinFeeLabel() {
     } */
 }
 
+void SendCoinsDialog::updateCoinControlState(CCoinControl &ctrl) {
+    if (ui->radioCustomFee->isChecked()) {
+        ctrl.m_feerate = CFeeRate(ui->customFee->value());
+    } else {
+        ctrl.m_feerate.reset();
+    }
+}
+
 void SendCoinsDialog::updateSmartFeeLabel() {
     if (!model || !model->getOptionsModel()) {
         return;
     }
 
     CFeeRate feeRate = g_mempool.estimateFee();
+
+    ui->labelSmartFee->setText(
+        BitcoinUnits::formatWithUnit(
+            model->getOptionsModel()->getDisplayUnit(),
+            std::max(feeRate.GetFeePerK(), GetMinimumFee(1000, g_mempool))) +
+        "/kB");
     // not enough data => minfee
     if (feeRate <= CFeeRate(Amount::zero())) {
-        ui->labelSmartFee->setText(
-            BitcoinUnits::formatWithUnit(
-                model->getOptionsModel()->getDisplayUnit(),
-                std::max(CWallet::fallbackFee.GetFeePerK(),
-                         GetMinimumFee(1000, g_mempool))) +
-            "/kB");
         // (Smart fee not initialized yet. This usually takes a few blocks...)
      //   ui->labelSmartFee2->show();
      //   ui->labelFeeEstimation->setText("");
     } else {
-        ui->labelSmartFee->setText(
-            BitcoinUnits::formatWithUnit(
-                model->getOptionsModel()->getDisplayUnit(),
-                std::max(feeRate.GetFeePerK(),
-                         GetMinimumFee(1000, g_mempool))) +
-            "/kB");
-     //   ui->labelSmartFee2->hide();
-     //   ui->labelFeeEstimation->setText(
-     //       tr("Estimated to begin confirmation by next block."));
+        ui->labelSmartFee2->hide();
+        ui->labelFeeEstimation->setText(
+            tr("Estimated to begin confirmation by next block."));
     }
 
     updateFeeMinimizedLabel();
@@ -790,8 +779,6 @@ void SendCoinsDialog::coinControlFeatureChanged(bool checked) {
         CoinControlDialog::coinControl->SetNull();
     }
 
-    // make sure we set back the confirmation target
-    updateGlobalFeeVariables();
     coinControlUpdateLabels();
 }
 
@@ -881,6 +868,8 @@ void SendCoinsDialog::coinControlUpdateLabels() {
     if (!model || !model->getOptionsModel()) {
         return;
     }
+
+    updateCoinControlState(*CoinControlDialog::coinControl);
 
     // set pay amounts
     CoinControlDialog::payAmounts.clear();
