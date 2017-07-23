@@ -4961,8 +4961,6 @@ bool LoadGenesisBlock(const CChainParams &chainparams) {
         return true;
     }
 
-    // Only add the genesis block if not reindexing (in which case we reuse the
-    // one already on disk)
     try {
         CBlock &block = const_cast<CBlock &>(chainparams.GenesisBlock());
         CDiskBlockPos blockPos =

@@ -112,7 +112,7 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
   prewardsdb = std::make_unique<CRewardsViewDB>("rewards", 1 << 23, true);
   prewards = std::make_unique<CColdRewards>(chainparams.GetConsensus(), prewardsdb.get());
   pbudget = std::make_unique<CBudget>(config);
-  if (!LoadGenesisBlock(chainparams)) { throw std::runtime_error("InitBlockIndex failed."); }
+  if (!LoadGenesisBlock(chainparams)) { throw std::runtime_error("LoadGenesisBlock failed."); }
   {
     CValidationState state;
     if (!ActivateBestChain(config, state)) { throw std::runtime_error("ActivateBestChain failed."); }
