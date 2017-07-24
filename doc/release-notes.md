@@ -17,10 +17,12 @@ This release includes the following features and fixes since forking from Bitcoi
    Use -keeplogfiles=<days> to specify how long to keep in days (default is 7)
  - Change coin display precision and current network precision to 3 decimal points instead of 8
 
-Bitcoin-ABC 19.1 backports:
+Bitcoin-ABC 19.x backports:
  
  - Add `signrawtransactionwithkey` and `signrawtransactionwithwallet` RPCs.
    These are specialized subsets of the `signrawtransaction` RPC.
- - Deprecate `nblocks` parameter in `estimatefee`.  See `bitcoin-cli help estimatefee` for more info. Use `-deprecatedrpc=estimatefee` to temporarily re-enable the old behavior while you migrate.
+ - Deprecate `nblocks` parameter in `estimatefee`.  See `bitcoin-cli help estimatefee` for more info. Use `-deprecatedrpc=estimatefee`
+      to temporarily re-enable the old behavior while you migrate.
  - Minor bug fixes and wallet UI cleanup
  - Removed `txconfirmtarget` option from bitcoind
+ - Added parameter `include_removed` to `listsinceblock` for better tracking of transactions during a reorg. See `bitcoin-cli help listsinceblock` for more details.
