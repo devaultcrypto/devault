@@ -12,8 +12,7 @@
 #include <dstencode.h>
 
 #include <init.h>
-//#include <key_io.h>
-
+#include <interfaces/chain.h>
 #include <net.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
@@ -317,7 +316,8 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
             HelpExampleCli("getlabeladdress", "\"mylabel\"") +
             HelpExampleRpc("getlabeladdress", "\"mylabel\""));
     }
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Parse the label first so we don't generate a key if there's an error
     std::string label = LabelFromValue(request.params[0]);
@@ -439,7 +439,8 @@ static UniValue getaddressesbylabels(const Config &config,
             HelpExampleRpc("getaddressesbylabels",""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Go through AddressBook and list labels with their addresses
     std::map<std::string, std::string> setLabels;
@@ -583,7 +584,8 @@ static UniValue sendtoaddress(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     CTxDestination dest =
         DecodeDestination(request.params[0].get_str(), config.GetChainParams());
@@ -816,7 +818,8 @@ static UniValue listaddressgroupings(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     UniValue jsonGroupings(UniValue::VARR);
     std::map<CTxDestination, Amount> balances = pwallet->GetAddressBalances();
@@ -881,7 +884,8 @@ static UniValue signmessage(const Config &config,
                 R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u", "my message")"));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     EnsureWalletIsUnlocked(pwallet);
 
@@ -970,7 +974,8 @@ static UniValue getreceivedbyaddress(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Bitcoin address
     CTxDestination dest =
@@ -1054,7 +1059,8 @@ UniValue getreceivedbylabel(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Minimum confirmations
     int nMinDepth = 1;
@@ -1153,7 +1159,8 @@ static UniValue getbalance(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (request.params.size() == 0) {
         return ValueFromAmount(pwallet->GetBalance());
@@ -1196,7 +1203,8 @@ static UniValue getunconfirmedbalance(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     return ValueFromAmount(pwallet->GetUnconfirmedBalance());
 }
@@ -1246,7 +1254,8 @@ static UniValue movecmd(const Config &config, const JSONRPCRequest &request) {
                 R"("timotei", "akiko", 0.01, 6, "happy birthday!")"));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::string strFrom = LabelFromValue(request.params[0]);
     std::string strTo = LabelFromValue(request.params[1]);
@@ -1340,7 +1349,8 @@ static UniValue sendfrom(const Config &config, const JSONRPCRequest &request) {
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::string label = LabelFromValue(request.params[0]);
     CTxDestination dest =
@@ -1470,7 +1480,8 @@ static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (pwallet->GetBroadcastTransactions() && !g_connman) {
         throw JSONRPCError(
@@ -1629,7 +1640,8 @@ UniValue addmultisigaddress(const Config &config,
         throw std::runtime_error(msg);
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::string label;
     if (!request.params[2].isNull()) {
@@ -1888,7 +1900,9 @@ static UniValue listreceivedbyaddress(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
+
     return ListReceived(config, pwallet, request.params, false);
 }
 
@@ -1939,7 +1953,8 @@ UniValue listreceivedbylabel(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     return ListReceived(config, pwallet, request.params, true);
 }
@@ -2170,7 +2185,8 @@ UniValue listtransactions(const Config &config, const JSONRPCRequest &request) {
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::string strAccount = "*";
     if (!request.params[0].isNull()) {
@@ -2292,7 +2308,8 @@ static UniValue listaccounts(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     int nMinDepth = 1;
     if (request.params.size() > 0) {
@@ -2472,7 +2489,8 @@ static UniValue listsinceblock(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Block index of the specified block or the common ancestor, if the block
     // provided was in a deactivated chain.
@@ -2660,7 +2678,8 @@ static UniValue gettransaction(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     TxId txid;
     txid.SetHex(request.params[0].get_str());
@@ -2737,7 +2756,8 @@ static UniValue abandontransaction(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     TxId txid;
     txid.SetHex(request.params[0].get_str());
@@ -2780,7 +2800,8 @@ static UniValue backupwallet(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::string strDest = request.params[0].get_str();
     if (!pwallet->BackupWallet(strDest)) {
@@ -2813,7 +2834,14 @@ static UniValue keypoolrefill(const Config &config,
             HelpExampleRpc("keypoolrefill", ""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    /*
+      if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+      throw JSONRPCError(RPC_WALLET_ERROR,
+      "Error: Private keys are disabled for this wallet");
+      }
+    */
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // 0 is interpreted by TopUpKeyPool() as the default keypool size given by
     // -keypool
@@ -2874,7 +2902,8 @@ static UniValue walletpassphrase(const Config &config,
             HelpExampleRpc("walletpassphrase", "\"my pass phrase\", 60"));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (request.fHelp) {
         return true;
@@ -2950,7 +2979,8 @@ static UniValue walletpassphrasechange(const Config &config,
                            R"("old one", "new one")"));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (request.fHelp) {
         return true;
@@ -3014,7 +3044,8 @@ static UniValue walletlock(const Config &config,
             HelpExampleRpc("walletlock", ""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (request.fHelp) {
         return true;
@@ -3097,7 +3128,8 @@ static UniValue lockunspent(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (request.params.size() == 1) {
         RPCTypeCheck(request.params, {UniValue::VBOOL});
@@ -3233,7 +3265,8 @@ static UniValue listlockunspent(const Config &config,
             "\nAs a json rpc call\n" + HelpExampleRpc("listlockunspent", ""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     std::vector<COutPoint> vOutpts;
     pwallet->ListLockedCoins(vOutpts);
@@ -3277,7 +3310,8 @@ static UniValue settxfee(const Config &config, const JSONRPCRequest &request) {
             HelpExampleRpc("settxfee", "0.00001"));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     // Amount
     Amount nAmount = AmountFromValue(request.params[0]);
@@ -3346,7 +3380,8 @@ static UniValue getwalletinfo(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     UniValue obj(UniValue::VOBJ);
     CHDChain hdChain;
@@ -3615,7 +3650,8 @@ static UniValue resendwallettransactions(const Config &config,
             "Error: Peer-to-peer functionality missing or disabled");
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (!pwallet->GetBroadcastTransactions()) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet transaction "
@@ -3803,11 +3839,14 @@ static UniValue listunspent(const Config &config,
 
     UniValue results(UniValue::VARR);
     std::vector<COutput> vecOutputs;
-    LOCK2(cs_main, pwallet->cs_wallet);
-
-    pwallet->AvailableCoins(vecOutputs, !include_unsafe, nullptr,
-                            nMinimumAmount, nMaximumAmount, nMinimumSumAmount,
-                            nMaximumCount, nMinDepth, nMaxDepth);
+    {
+        auto locked_chain = pwallet->chain().lock();
+        LOCK(pwallet->cs_wallet);
+        pwallet->AvailableCoins(vecOutputs, !include_unsafe, nullptr,
+                                nMinimumAmount, nMaximumAmount, nMinimumSumAmount,
+                                nMaximumCount, nMinDepth, nMaxDepth);
+    }
+    
     for (const COutput &out : vecOutputs) {
         CTxDestination address;
         const CScript &scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
@@ -4163,7 +4202,8 @@ UniValue signrawtransactionwithwallet(const Config &config,
     }
 
     // Sign the transaction
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
     return SignTransaction(pwallet->chain(), mtx, request.params[1], pwallet,
                            false, request.params[2]);
 }
@@ -4311,7 +4351,7 @@ UniValue rescanblockchain(const Config &config, const JSONRPCRequest &request) {
     CBlockIndex *pindexStop = nullptr;
     CBlockIndex *pChainTip = nullptr;
     {
-        LOCK(cs_main);
+        auto locked_chain = pwallet->chain().lock();
         pindexStart = chainActive.Genesis();
         pChainTip = chainActive.Tip();
 
@@ -4338,7 +4378,7 @@ UniValue rescanblockchain(const Config &config, const JSONRPCRequest &request) {
 
     // We can't rescan beyond non-pruned blocks, stop and throw an error
     if (fPruneMode) {
-        LOCK(cs_main);
+        auto locked_chain = pwallet->chain().lock();
         CBlockIndex *block = pindexStop ? pindexStop : pChainTip;
         while (block && block->nHeight >= pindexStart->nHeight) {
             if (!block->nStatus.hasData()) {

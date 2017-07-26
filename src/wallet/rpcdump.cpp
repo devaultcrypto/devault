@@ -9,6 +9,7 @@
 #include <core_io.h>
 #include <dstencode.h>
 #include <outputtype.h>
+#include <interfaces/chain.h>
 #include <merkleblock.h>
 #include <rpc/server.h>
 #include <wallet/rpcwallet.h>
@@ -246,7 +247,8 @@ UniValue importaddress(const Config &config, const JSONRPCRequest &request) {
     }
 
     {
-        LOCK2(cs_main, pwallet->cs_wallet);
+        auto locked_chain = pwallet->chain().lock();
+        LOCK(pwallet->cs_wallet);
 
         CTxDestination dest = DecodeDestination(request.params[0].get_str(),
                                                 config.GetChainParams());
@@ -317,8 +319,8 @@ UniValue importprunedfunds(const Config &config,
     size_t txnIndex = 0;
     if (merkleBlock.txn.ExtractMatches(vMatch, vIndex) ==
         merkleBlock.header.hashMerkleRoot) {
-
-        LOCK(cs_main);
+        //LOCK(cs_main);
+        auto locked_chain = pwallet->chain().lock();
 
         if (!mapBlockIndex.count(merkleBlock.header.GetHash()) ||
             !chainActive.Contains(
@@ -343,7 +345,8 @@ UniValue importprunedfunds(const Config &config,
     wtx.nIndex = txnIndex;
     wtx.hashBlock = merkleBlock.header.GetHash();
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     if (pwallet->IsMine(*wtx.tx)) {
         pwallet->AddToWallet(wtx, false);
@@ -382,7 +385,8 @@ UniValue removeprunedfunds(const Config &config,
                            "eae7628734ea0a5\""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     TxId txid;
     txid.SetHex(request.params[0].get_str());
@@ -474,7 +478,8 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
     }
 
     {
-        LOCK2(cs_main, pwallet->cs_wallet);
+        auto locked_chain = pwallet->chain().lock();
+        LOCK(pwallet->cs_wallet);
 
         ImportAddress(pwallet, pubKey.GetKeyID(), strLabel);
         ImportScript(pwallet, GetScriptForRawPubKey(pubKey), strLabel, false);
@@ -510,7 +515,8 @@ UniValue dumpprivkey(const Config &config, const JSONRPCRequest &request) {
             HelpExampleRpc("dumpprivkey", "\"myaddress\""));
     }
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     EnsureWalletIsUnlocked(pwallet);
 
@@ -595,7 +601,8 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
             HelpExampleCli("dumpwallet", "\"test\"") +
             HelpExampleRpc("dumpwallet", "\"test\""));
 
-    LOCK2(cs_main, pwallet->cs_wallet);
+    auto locked_chain = pwallet->chain().lock();
+    LOCK(pwallet->cs_wallet);
 
     EnsureWalletIsUnlocked(pwallet);
 
