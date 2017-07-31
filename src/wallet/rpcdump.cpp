@@ -632,8 +632,8 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     std::map<CTxDestination, int64_t> mapKeyBirth;
     std::map<CTxDestination, int64_t> mapBLSKeyBirth;
     const std::map<CKeyID, int64_t> &mapKeyPool = pwallet->GetAllReserveKeys();
-    pwallet->GetKeyBirthTimes(mapKeyBirth);
-    
+    pwallet->GetKeyBirthTimes(*locked_chain, mapKeyBirth);
+
     std::set<CScriptID> scripts = pwallet->GetCScripts();
     // TODO: include scripts in GetKeyBirthTimes() output instead of separate
 
@@ -648,7 +648,7 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     mapKeyBirth.clear();
     std::sort(vKeyBirth.begin(), vKeyBirth.end());
 
-    pwallet->GetBLSKeyBirthTimes(mapBLSKeyBirth);
+    pwallet->GetBLSKeyBirthTimes(*locked_chain, mapBLSKeyBirth);
     const std::map<BKeyID, int64_t> &mapBLSKeyPool = pwallet->GetAllBLSReserveKeys();
     std::vector<std::pair<int64_t, BKeyID>> vBLSKeyBirth;
 

@@ -9,6 +9,7 @@
 #define BITCOIN_WALLET_WALLET_H
 
 #include <amount.h>
+#include <interfaces/chain.h>
 #include <outputtype.h>
 #include <script/ismine.h>
 #include <script/sign.h>
@@ -31,10 +32,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-namespace interfaces {
-class Chain;
-} // namespace interfaces
 
 bool AddWallet(const std::shared_ptr<CWallet> &wallet);
 bool RemoveWallet(const std::shared_ptr<CWallet> &wallet);
@@ -214,9 +211,9 @@ public:
      *  0  : in memory pool, waiting to be included in a block
      * >=1 : this many blocks deep in the main chain
      */
-    int GetDepthInMainChain() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    bool IsInMainChain() const EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-        return GetDepthInMainChain() > 0;
+    int GetDepthInMainChain(interfaces::Chain::Lock &locked_chain) const;
+    bool IsInMainChain(interfaces::Chain::Lock &locked_chain) const {
+        return GetDepthInMainChain(locked_chain) > 0;
     }
 
     /**
@@ -224,7 +221,7 @@ public:
      *  0 : is not a coinbase transaction, or is a mature coinbase transaction
      * >0 : is a coinbase transaction which matures in this many blocks
      */
-    int GetBlocksToMaturity() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    int GetBlocksToMaturity(interfaces::Chain::Lock &locked_chain) const;
     bool hashUnset() const {
         return (hashBlock.IsNull() || hashBlock == ABANDON_HASH);
     }
@@ -233,7 +230,7 @@ public:
 
     TxId GetId() const { return tx->GetId(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
-    bool IsImmatureCoinBase() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool IsImmatureCoinBase(interfaces::Chain::Lock &locked_chain) const;
 };
 
 // Get the marginal bytes of spending the specified output
@@ -414,18 +411,17 @@ public:
 
     //! filter decides which addresses will count towards the debit
     Amount GetDebit(const isminefilter &filter) const;
-    Amount GetCredit(const isminefilter &filter) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    Amount GetImmatureCredit(bool fUseCache = true) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    Amount GetAvailableCredit(bool fUseCache = true) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    Amount GetUnvestingCredit(bool fUseCache = true) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    Amount GetImmatureWatchOnlyCredit(const bool fUseCache = true) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-    Amount GetAvailableWatchOnlyCredit(const bool fUseCache = true) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetCredit(interfaces::Chain::Lock &locked_chain, const isminefilter &filter) const;
+    Amount GetImmatureCredit(interfaces::Chain::Lock &locked_chain, bool fUseCache = true) const;
+    Amount GetAvailableCredit(interfaces::Chain::Lock &locked_chain, bool fUseCache = true) const NO_THREAD_SAFETY_ANALYSIS;
+    Amount GetUnvestingCredit(interfaces::Chain::Lock &locked_chain, const bool fUseCache = true) const NO_THREAD_SAFETY_ANALYSIS;
+    Amount GetImmatureWatchOnlyCredit(interfaces::Chain::Lock &locked_chain, const bool fUseCache = true) const;
+    Amount GetAvailableWatchOnlyCredit(interfaces::Chain::Lock &locked_chain, const bool fUseCache = true) const NO_THREAD_SAFETY_ANALYSIS;
+    // TODO: Remove "NO_THREAD_SAFETY_ANALYSIS" and replace it with the correct
+    // annotation "EXCLUSIVE_LOCKS_REQUIRED(cs_main, pwallet->cs_wallet)". The
+    // annotation "NO_THREAD_SAFETY_ANALYSIS" was temporarily added to avoid
+    // having to resolve the issue of member access into incomplete type
+    // CWallet.
     Amount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this
@@ -447,20 +443,20 @@ public:
     bool IsEquivalentTo(const CWalletTx &tx) const;
 
     bool InMempool() const;
-    bool IsTrusted() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool IsTrusted(interfaces::Chain::Lock &locked_chain) const;
 
     int64_t GetTxTime() const;
 
     // RelayWalletTransaction may only be called if fBroadcastTransactions!
-    bool RelayWalletTransaction(CConnman *connman)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool RelayWalletTransaction(interfaces::Chain::Lock &locked_chain,
+                                CConnman *connman);
 
     /**
      * Pass this transaction to the mempool. Fails if absolute fee exceeds
      * absurd fee.
      */
-    bool AcceptToMemoryPool(const Amount nAbsurdFee, CValidationState &state)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool AcceptToMemoryPool(interfaces::Chain::Lock &locked_chain,
+                            const Amount nAbsurdFee, CValidationState &state);
 
     std::set<TxId> GetConflicts() const;
 };
@@ -847,7 +843,8 @@ public:
     /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe = true,
+    void AvailableCoins(interfaces::Chain::Lock &locked_chain,
+                        std::vector<COutput> &vCoins, bool fOnlySafe = true,
                         const CCoinControl *coinControl = nullptr,
                         const Amount nMinimumAmount = Amount::min_amount(),
                         const Amount nMaximumAmount = MAX_MONEY,
@@ -855,14 +852,15 @@ public:
                         const uint64_t nMaximumCount = 0,
                         const int nMinDepth = 0,
                         const int nMaxDepth = 9999999) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main, cs_wallet);
+        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
     /**
      * Return list of available coins and locked coins grouped by non-change
      * output address.
      */
-    std::map<CTxDestination, std::vector<COutput>> ListCoins() const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main, cs_wallet);
+    std::map<CTxDestination, std::vector<COutput>>
+    ListCoins(interfaces::Chain::Lock &locked_chain) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
     /**
      * Find non-change parent output.
@@ -882,7 +880,8 @@ public:
                             std::set<CInputCoin> &setCoinsRet,
                             Amount &nValueRet) const;
 
-    bool IsSpent(const COutPoint &outpoint) const  EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool IsSpent(interfaces::Chain::Lock &locked_chain,
+                 const COutPoint &outpoint) const  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     bool IsLockedCoin(const COutPoint &outpoint) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void LockCoin(const COutPoint &output);
     void UnlockCoin(const COutPoint &output)  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
@@ -966,8 +965,11 @@ public:
 
   
 
-    void GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    void GetBLSKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void GetKeyBirthTimes(interfaces::Chain::Lock &locked_chain,
+                          std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void GetBLSKeyBirthTimes(interfaces::Chain::Lock &locked_chain,
+                             std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+
     unsigned int ComputeTimeSmart(const CWalletTx &wtx) const;
 
     /**
@@ -1008,9 +1010,10 @@ public:
         EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     // ResendWalletTransactionsBefore may only be called if
     // fBroadcastTransactions!
-    std::vector<uint256> ResendWalletTransactionsBefore(int64_t nTime,
-                                                        CConnman *connman)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    std::vector<uint256>
+    ResendWalletTransactionsBefore(interfaces::Chain::Lock &locked_chain,
+                                   int64_t nTime,
+                                   CConnman *connman);
     Amount GetBalance() const;
     Amount GetUnconfirmedBalance() const;
     Amount GetUnvestingBalance() const;
@@ -1040,7 +1043,8 @@ public:
      * @note passing nChangePosInOut as -1 will result in setting a random
      * position
      */
-    bool CreateTransaction(const std::vector<CRecipient> &vecSend,
+    bool CreateTransaction(interfaces::Chain::Lock &locked_chain,
+                           const std::vector<CRecipient> &vecSend,
                            CTransactionRef &tx, CReserveKey &reservekey,
                            Amount &nFeeRet, int &nChangePosInOut,
                            std::string &strFailReason,
@@ -1127,7 +1131,7 @@ public:
     bool HasUnusedKeys(size_t min_keys) const;
 
     std::set<std::set<CTxDestination>> GetAddressGroupings() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    std::map<CTxDestination, Amount> GetAddressBalances() EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    std::map<CTxDestination, Amount>   GetAddressBalances(interfaces::Chain::Lock &locked_chain);
     std::set<CTxDestination> GetLabelAddresses(const std::string &label) const;
 
     isminetype IsMine(const CTxIn &txin) const;
@@ -1244,7 +1248,8 @@ public:
      * Mark a transaction (and it in-wallet descendants) as abandoned so its
      * inputs may be respent.
      */
-    bool AbandonTransaction(const TxId &txid);
+    bool AbandonTransaction(interfaces::Chain::Lock &locked_chain,
+                            const TxId &txid);
 
     //! Verify wallet naming and perform salvage on the wallet if required
     static bool Verify(const CChainParams &chainParams,
