@@ -656,13 +656,13 @@ TEST_CASE("coin_mark_dirty_immature_credit") {
 
     // Call GetImmatureCredit() once before adding the key to the wallet to
     // cache the current immature credit amount, which is 0.
-    REQUIRE(wtx.GetImmatureCredit() == Amount::zero());
+    BOOST_CHECK_EQUAL(wtx.GetImmatureCredit(*locked_chain), Amount::zero());
 
     // Invalidate the cached value, add the key, and make sure a new immature
     // credit amount is calculated.
     wtx.MarkDirty();
     wallet.AddKeyPubKey(setup.coinbaseKey, setup.coinbaseKey.GetPubKey());
-    REQUIRE(wtx.GetImmatureCredit() == 500 * COIN);
+    BOOST_CHECK_EQUAL(wtx.GetImmatureCredit(*locked_chain), 50 * COIN);
 }
 
 static int64_t AddTx(CWallet &wallet, uint32_t lockTime, int64_t mockTime,
@@ -772,7 +772,7 @@ public:
         int changePos = -1;
         std::string error;
         CCoinControl dummy;
-        REQUIRE(wallet->CreateTransaction({recipient}, tx, reservekey, fee,
+        REQUIRE(wallet->CreateTransaction({*m_locked_chain, recipient}, tx, reservekey, fee,
                                           changePos, error, dummy));
         CValidationState state;
         REQUIRE(wallet->CommitTransaction(tx, {}, {}, {}, reservekey, nullptr,
@@ -808,8 +808,8 @@ TEST_CASE("ListCoins") {
     // address.
     std::map<CTxDestination, std::vector<COutput>> list;
     {
-      LOCK2(cs_main, setup.wallet->cs_wallet);
-      list = setup.wallet->ListCoins();
+        LOCK2(cs_main, wallet->cs_wallet);
+        list = wallet->ListCoins(*m_locked_chain);
     }
     REQUIRE(list.size() == 1);
     REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==
@@ -823,24 +823,25 @@ TEST_CASE("ListCoins") {
     // returns the coin associated with the change address underneath the
     // coinbaseKey pubkey, even though the change address has a different
     // pubkey.
-#ifdef DEBUG_THIS
     // Currently has issue due to not having a valid HD chaing
 
     AddTx(CRecipient{GetScriptForRawPubKey({}), 1 * COIN,
                      false /* subtract fee */});
-    LOCK2(cs_main, wallet->cs_wallet);
-    list = wallet->ListCoins();
-    REQUIRE(list.size() == 1);
-    REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==
-            coinbaseAddress);
-    REQUIRE(list.begin()->second.size() == 2);
+    {
+        LOCK2(cs_main, wallet->cs_wallet);
+        list = wallet->ListCoins(*m_locked_chain);
+    }
+    BOOST_CHECK_EQUAL(list.size(), 1U);
+    BOOST_CHECK_EQUAL(boost::get<CKeyID>(list.begin()->first).ToString(),
+                      coinbaseAddress);
+    BOOST_CHECK_EQUAL(list.begin()->second.size(), 2U);
 
     // Lock both coins. Confirm number of available coins drops to 0.
     {
         LOCK2(cs_main, wallet->cs_wallet);
         std::vector<COutput> available;
-        wallet->AvailableCoins(available);
-        REQUIRE(available.size() == 2);
+        wallet->AvailableCoins(*m_locked_chain, available);
+        BOOST_CHECK_EQUAL(available.size(), 2U);
     }
     for (const auto &group : list) {
         for (const auto &coin : group.second) {
@@ -851,18 +852,19 @@ TEST_CASE("ListCoins") {
     {
         LOCK2(cs_main, wallet->cs_wallet);
         std::vector<COutput> available;
-        wallet->AvailableCoins(available);
-        REQUIRE(available.size() == 0);
+        wallet->AvailableCoins(*m_locked_chain, available);
+        BOOST_CHECK_EQUAL(available.size(), 0U);
     }
     // Confirm ListCoins still returns same result as before, despite coins
     // being locked.
-    LOCK2(cs_main, wallet->cs_wallet);
-    list = wallet->ListCoins();
-    REQUIRE(list.size() == 1);
-    REQUIRE(std::get<CKeyID>(list.begin()->first).ToString() ==
-            coinbaseAddress);
-    REQUIRE(list.begin()->second.size() == 2);
-#endif
+    {
+        LOCK2(cs_main, wallet->cs_wallet);
+        list = wallet->ListCoins(*m_locked_chain);
+    }
+    BOOST_CHECK_EQUAL(list.size(), 1U);
+    BOOST_CHECK_EQUAL(boost::get<CKeyID>(list.begin()->first).ToString(),
+                      coinbaseAddress);
+    BOOST_CHECK_EQUAL(list.begin()->second.size(), 2U);
 }
 
 BOOST_FIXTURE_TEST_CASE(wallet_disableprivkeys, TestChain100Setup) {
