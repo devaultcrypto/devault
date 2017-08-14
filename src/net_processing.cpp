@@ -2910,6 +2910,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                             &fNewBlock);
             if (fNewBlock) {
                 pfrom->nLastBlockTime = GetTime();
+            } else {
+                LOCK(cs_main);
+                mapBlockSource.erase(pblock->GetHash());
             }
 
             // hold cs_main for CBlockIndex::IsValid()
@@ -3008,6 +3011,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                             &fNewBlock);
             if (fNewBlock) {
                 pfrom->nLastBlockTime = GetTime();
+            } else {
+                LOCK(cs_main);
+                mapBlockSource.erase(pblock->GetHash());
             }
         }
     }
@@ -3068,6 +3074,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         ProcessNewBlock(config, pblock, forceProcessing, &fNewBlock);
         if (fNewBlock) {
             pfrom->nLastBlockTime = GetTime();
+        } else {
+            LOCK(cs_main);
+            mapBlockSource.erase(pblock->GetHash());
         }
     }
 
