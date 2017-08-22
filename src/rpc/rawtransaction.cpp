@@ -1422,7 +1422,7 @@ static UniValue sendrawtransaction(const Config &config,
     const TxId &txid = tx->GetId();
 
     Amount nMaxRawTxFee = maxTxFee;
-    if (request.params.size() > 1 && request.params[1].get_bool()) {
+    if (!request.params[1].isNull() && request.params[1].get_bool()) {
         nMaxRawTxFee = Amount::zero();
     }
 
