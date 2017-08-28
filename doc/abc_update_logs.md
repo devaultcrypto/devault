@@ -498,8 +498,8 @@
       Merge #12305: [docs] [refactor] Add help messages for datadir path mangling
       Merge #12770: Use explicit casting in cuckoocache's compute_hashes(...) to clarify integer conversion
       Merge #12561: Check for block corruption in ConnectBlock()
-      Merge #11131: rpc: Write authcookie atomically
-      Merge #12721: Qt: remove "new" button during receive-mode in addressbook
+#     Merge #11131: rpc: Write authcookie atomically
+#     Merge #12721: Qt: remove "new" button during receive-mode in addressbook
       Add python3 script shebang lint
       Remove the ZMQ example for Python 2
       Various textual improvements in build docs
