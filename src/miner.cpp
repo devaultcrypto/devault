@@ -147,6 +147,7 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
 
     LOCK2(cs_main, mempool->cs);
     CBlockIndex *pindexPrev = chainActive.Tip();
+    assert(pindexPrev != nullptr);
     nHeight = pindexPrev->nHeight + 1;
 
     const CChainParams &chainparams = config->GetChainParams();
