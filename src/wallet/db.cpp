@@ -644,7 +644,6 @@ bool BerkeleyBatch::Rewrite(WalletDatabase &database, const char *pszSkip) {
         }
         MilliSleep(100);
     }
-    return false;
 }
 
 void BerkeleyEnvironment::Flush(bool fShutdown) {
