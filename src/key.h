@@ -52,9 +52,6 @@ public:
         keydata.resize(32);
     }
 
-    //! Destructor (again necessary because of memlocking).
-    ~CKey() = default;
-
     friend bool operator==(const CKey &a, const CKey &b) {
         return a.size() == b.size() &&
                memcmp(a.keydata.data(), b.keydata.data(), a.size()) == 0;
