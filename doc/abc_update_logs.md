@@ -568,8 +568,8 @@
       Merge #11842: [build] Add missing stuff to clean-local
       Merge #12489: Bugfix: respect user defined configuration file (-conf) in QT settings
       Merge #12996: tests: Remove redundant bytes(…) calls
-      Merge #11395: Qt: Enable searching by transaction id
-      Merge #11015: [Qt] Add delay before filtering transactions
+#     Merge #11395: Qt: Enable searching by transaction id
+#     Merge #11015: [Qt] Add delay before filtering transactions
       [teamcity/gitian] Do not remove src tarball from results
 #     Merge #10642: Remove obsolete _MSC_VER check
       Merge #12447: test: Add missing signal.h header
