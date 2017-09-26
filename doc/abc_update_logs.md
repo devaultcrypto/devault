@@ -543,7 +543,7 @@
       Merge #12837: rpc: fix type mistmatch in `listreceivedbyaddress`
       Merge #12650: gui: Fix issue: "default port not shown correctly in settings dialog"
       Merge #11353: Small refactor of CCoinsViewCache::BatchWrite()
-      Merge #12621: Avoid querying unnecessary model data when filtering transactions
+#     Merge #12621: Avoid querying unnecessary model data when filtering transactions
 20.0
       Update manpages for 0.20.0 release
       Update chainparams
@@ -556,7 +556,7 @@
       [4 of 5] scripted-diff: Rename CBlockDiskPos to FlatFilePos.
       Bump automatic replay protection to May 2020 upgrade
       Merge #11417: Correct typo in comments
-      make CheckMinimalPush available to codebase
+#     make CheckMinimalPush available to codebase
       Add upgrade features to release notes
       Merge #13188: qa: Remove unused option --srcdir
       qa: Read reject reasons from debug log, not p2p messages
