@@ -196,8 +196,8 @@ TEST_CASE("DoS_banning") {
   const Config &config = GetConfig();
   std::atomic<bool> interruptDummy(false);
 
-  auto banman = std::make_unique<BanMan>(config.GetChainParams(), nullptr);
-  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman.get(), setup.scheduler);
+  auto banman = g_banman.get();
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman, setup.scheduler);
 
   banman->ClearBanned();
 
@@ -250,8 +250,8 @@ TEST_CASE("DoS_banscore") {
   TestingSetup setup;
   const Config &config = GetConfig();
   std::atomic<bool> interruptDummy(false);
-  auto banman = std::make_unique<BanMan>(config.GetChainParams(), nullptr);
-  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman.get(), setup.scheduler);
+  auto banman = g_banman.get();
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman, setup.scheduler);
   
   banman->ClearBanned();
   // because 11 is my favorite number.
@@ -291,8 +291,8 @@ TEST_CASE("DoS_bantime") {
   TestingSetup setup;
   const Config &config = GetConfig();
   std::atomic<bool> interruptDummy(false);
-  auto banman = std::make_unique<BanMan>(config.GetChainParams(), nullptr);
-  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman.get(), setup.scheduler);
+  auto banman = g_banman.get();
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, banman, setup.scheduler);
   
   banman->ClearBanned();
   int64_t nStartTime = GetTime();
