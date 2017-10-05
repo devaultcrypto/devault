@@ -67,9 +67,13 @@ class PeerLogicValidation final : public CValidationInterface,
                                   public NetEventsInterface {
 private:
     CConnman *const connman;
+    BanMan *const m_banman;
+
+    bool SendRejectsAndCheckIfBanned(CNode *pnode)  EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 public:
-    explicit PeerLogicValidation(CConnman *connman, CScheduler &scheduler);
+    PeerLogicValidation(CConnman *connman, BanMan *banman,
+                        CScheduler &scheduler);
 
     /**
      * Overridden from CValidationInterface.

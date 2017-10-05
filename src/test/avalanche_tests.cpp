@@ -195,7 +195,13 @@ static AvalancheResponse next(AvalancheResponse &r) {
 }
 
 BOOST_AUTO_TEST_CASE(block_register) {
-    AvalancheProcessor p(g_connman.get());
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
     std::vector<AvalancheBlockUpdate> updates;
 
     CBlock block = CreateAndProcessBlock({}, CScript());
@@ -354,7 +360,13 @@ BOOST_AUTO_TEST_CASE(block_register) {
 }
 
 BOOST_AUTO_TEST_CASE(multi_block_register) {
-    AvalancheProcessor p(g_connman.get());
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
     CBlockIndex indexA, indexB;
 
     std::vector<AvalancheBlockUpdate> updates;
@@ -461,7 +473,13 @@ BOOST_AUTO_TEST_CASE(multi_block_register) {
 }
 
 BOOST_AUTO_TEST_CASE(poll_and_response) {
-    AvalancheProcessor p(g_connman.get());
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
 
     std::vector<AvalancheBlockUpdate> updates;
 
@@ -597,7 +615,18 @@ BOOST_AUTO_TEST_CASE(poll_and_response) {
 }
 
 BOOST_AUTO_TEST_CASE(poll_inflight_timeout, *boost::unit_test::timeout(60)) {
-    AvalancheProcessor p(g_connman.get());
+#else
+// TODO: Cleanup this branch when boost 1.58 is no longer supported.
+BOOST_AUTO_TEST_CASE(poll_inflight_timeout) {
+    int64_t timeStart = GetTimeMillis();
+#endif
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
 
     std::vector<AvalancheBlockUpdate> updates;
 
@@ -654,6 +683,12 @@ BOOST_AUTO_TEST_CASE(poll_inflight_count) {
     AvalancheProcessor p(g_connman.get());
     const Config &config = GetConfig();
 
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
+
     // Create enough nodes so that we run into the inflight request limit.
     std::array<std::unique_ptr<CNode>, AVALANCHE_MAX_INFLIGHT_POLL + 1> nodes;
     for (auto &n : nodes) {
@@ -705,7 +740,13 @@ BOOST_AUTO_TEST_CASE(poll_inflight_count) {
 }
 
 BOOST_AUTO_TEST_CASE(quorum_diversity) {
-    AvalancheProcessor p(g_connman.get());
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
     std::vector<AvalancheBlockUpdate> updates;
 
     CBlock block = CreateAndProcessBlock({}, CScript());
@@ -772,7 +813,13 @@ BOOST_AUTO_TEST_CASE(quorum_diversity) {
 }
 
 BOOST_AUTO_TEST_CASE(event_loop) {
-    AvalancheProcessor p(g_connman.get());
+    const Config &config = GetConfig();
+
+    auto connman = std::make_unique<CConnmanTest>(config, 0x1337, 0x1337);
+    auto peerLogic = std::make_unique<PeerLogicValidation>(
+        connman.get(), nullptr, scheduler, false);
+
+    AvalancheProcessor p(connman.get());
     CScheduler s;
 
     CBlock block = CreateAndProcessBlock({}, CScript());

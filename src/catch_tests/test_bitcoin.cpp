@@ -123,9 +123,10 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
   }
 
   // Deterministic randomness for tests.
+  g_banman = std::make_unique<BanMan>(chainparams, nullptr);
   g_connman = std::make_unique<CConnman>(config, 0x1337, 0x1337);
   connman = g_connman.get();
-  peerLogic = std::make_unique<PeerLogicValidation>(connman, scheduler);
+  //peerLogic = std::make_unique<PeerLogicValidation>(connman, g_banman.get(), scheduler);
 }
 
 TestingSetup::~TestingSetup() {
@@ -139,7 +140,8 @@ TestingSetup::~TestingSetup() {
   GetMainSignals().FlushBackgroundCallbacks();
   GetMainSignals().UnregisterBackgroundSignalScheduler();
   g_connman.reset();
-  peerLogic.reset();
+  g_banman.reset();
+  //  peerLogic.reset();
   UnloadBlockIndex();
   pcoinsTip.reset();
   pcoinsdbview.reset();

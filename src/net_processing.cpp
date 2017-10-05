@@ -957,9 +957,9 @@ static bool BlockRequestAllowed(const CBlockIndex *pindex,
             STALE_RELAY_AGE_LIMIT);
 }
 
-PeerLogicValidation::PeerLogicValidation(CConnman *connmanIn,
+PeerLogicValidation::PeerLogicValidation(CConnman *connmanIn, BanMan *banman,
                                          CScheduler &scheduler)
-    : connman(connmanIn), m_stale_tip_check_time(0) {
+   : connman(connmanIn), m_banman(banman), m_stale_tip_check_time(0) {
     // Initialize global variables that cannot be constructed at startup.
     recentRejects = std::make_unique<CRollingBloomFilter>(120000, 0.000001);
 
@@ -3335,7 +3335,8 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     return true;
 }
 
-static bool SendRejectsAndCheckIfBanned(CNode *pnode, CConnman *connman) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+bool PeerLogicValidation::SendRejectsAndCheckIfBanned(CNode *pnode)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
     CNodeState &state = *State(pnode->GetId());
 
@@ -3366,7 +3367,9 @@ static bool SendRejectsAndCheckIfBanned(CNode *pnode, CConnman *connman) EXCLUSI
             pnode->fDisconnect = true;
         } else {
             // Disconnect and ban all nodes sharing the address
-            connman->Ban(pnode->addr, BanReasonNodeMisbehaving);
+            if (m_banman) {
+                m_banman->Ban(pnode->addr, BanReasonNodeMisbehaving);
+            }
             connman->DisconnectNode(pnode->addr);
         }
         return true;
@@ -3433,7 +3436,9 @@ bool PeerLogicValidation::ProcessMessages(const Config &config, CNode *pfrom,
                  SanitizeString(msg.hdr.GetCommand()), pfrom->GetId());
 
         // Make sure we ban where that come from for some time.
-        connman->Ban(pfrom->addr, BanReasonNodeMisbehaving);
+        if (m_banman) {
+            m_banman->Ban(pfrom->addr, BanReasonNodeMisbehaving);
+        }
         connman->DisconnectNode(pfrom->addr);
 
         pfrom->fDisconnect = true;
@@ -3466,7 +3471,9 @@ bool PeerLogicValidation::ProcessMessages(const Config &config, CNode *pfrom,
             HexStr(hdr.pchChecksum,
                    hdr.pchChecksum + CMessageHeader::CHECKSUM_SIZE),
             pfrom->GetId());
-        connman->Ban(pfrom->addr, BanReasonNodeMisbehaving);
+        if (m_banman) {
+            m_banman->Ban(pfrom->addr, BanReasonNodeMisbehaving);
+        }
         connman->DisconnectNode(pfrom->addr);
         return fMoreWork;
     }
@@ -3522,7 +3529,7 @@ bool PeerLogicValidation::ProcessMessages(const Config &config, CNode *pfrom,
     }
 
     LOCK(cs_main);
-    SendRejectsAndCheckIfBanned(pfrom, connman);
+    SendRejectsAndCheckIfBanned(pfrom);
 
     return fMoreWork;
 }
@@ -3787,7 +3794,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
         return true;
     }
 
-    if (SendRejectsAndCheckIfBanned(pto, connman)) {
+    if (SendRejectsAndCheckIfBanned(pto)) {
         return true;
     }
     CNodeState &state = *State(pto->GetId());

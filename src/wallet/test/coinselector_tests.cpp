@@ -10,7 +10,7 @@
 #include <wallet/coinselection.h>
 #include <wallet/wallet.h>
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <wallet/test/wallet_test_fixture.h>
 
 #include <boost/test/unit_test.hpp>

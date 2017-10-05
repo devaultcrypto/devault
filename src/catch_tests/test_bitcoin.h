@@ -82,7 +82,7 @@ struct TestingSetup : public BasicTestingSetup {
     std::vector<std::thread> threadGroup;
     CConnman *connman;
     CScheduler scheduler;
-    std::unique_ptr<PeerLogicValidation> peerLogic;
+  //    std::unique_ptr<PeerLogicValidation> peerLogic;
 
     explicit TestingSetup(
         const std::string &chainName = CBaseChainParams::MAIN);

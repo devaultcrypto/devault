@@ -72,8 +72,12 @@ static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
 static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 
+// Dump addresses to banlist.dat every 15 minutes (900s)
+static constexpr int DUMP_BANS_INTERVAL = 60 * 15;
+
 std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
+std::unique_ptr<BanMan> g_banman;
 
 #if ENABLE_ZMQ
 static CZMQNotificationInterface *pzmqNotificationInterface = nullptr;
@@ -241,6 +245,7 @@ void Shutdown() {
     // stopped, destruct and reset all to nullptr.
     peerLogic.reset();
     g_connman.reset();
+    g_banman.reset();
     g_txindex.reset();
 
     if (g_is_mempool_loaded &&
@@ -1954,13 +1959,14 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
     // is not yet setup and may end up being set up twice if we
     // need to reindex later.
 
+    assert(!g_banman);
+    g_banman = std::make_unique<BanMan>(config.GetChainParams(), &uiInterface);
     assert(!g_connman);
     g_connman = std::make_unique<CConnman>(
         config, GetRand(std::numeric_limits<uint64_t>::max()),
-                     GetRand(std::numeric_limits<uint64_t>::max()));
-    CConnman &connman = *g_connman;
+        GetRand(std::numeric_limits<uint64_t>::max()));
 
-    peerLogic = std::make_unique<PeerLogicValidation>(&connman, scheduler);
+    peerLogic.reset(new PeerLogicValidation(g_connman.get(), g_banman.get(), scheduler));
     RegisterValidationInterface(peerLogic.get());
 
     // sanitize comments per BIP-0014, format user agent and check total size
@@ -2469,6 +2475,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
     connOptions.nMaxFeeler = 1;
     connOptions.nBestHeight = chain_active_height;
     connOptions.uiInterface = &uiInterface;
+    connOptions.m_banman = g_banman.get();
     connOptions.m_msgproc = peerLogic.get();
     connOptions.nSendBufferMaxSize =
         1000 * gArgs.GetArg("-maxsendbuffer", DEFAULT_MAXSENDBUFFER);
@@ -2519,7 +2526,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
             connOptions.m_specified_outgoing = connect;
         }
     }
-    if (!connman.Start(scheduler, connOptions)) {
+    if (!g_connman->Start(scheduler, connOptions)) {
         return false;
     }
 
@@ -2528,6 +2535,13 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
     uiInterface.InitMessage(_("Done loading"));
 
     g_wallet_init_interface.Start(scheduler);
+
+    scheduler.scheduleEvery(
+        [] {
+            g_banman->DumpBanlist();
+            return true;
+        },
+        DUMP_BANS_INTERVAL * 1000);
 
     return true;
 }
