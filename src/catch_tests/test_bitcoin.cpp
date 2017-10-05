@@ -123,7 +123,7 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
   }
 
   // Deterministic randomness for tests.
-  g_banman = std::make_unique<BanMan>(GetDataDir() / "banlist.dat", chainparams, nullptr);
+  g_banman = std::make_unique<BanMan>(GetDataDir() / "banlist.dat", chainparams, nullptr, DEFAULT_MISBEHAVING_BANTIME);
   g_connman = std::make_unique<CConnman>(config, 0x1337, 0x1337);
   connman = g_connman.get();
   //peerLogic = std::make_unique<PeerLogicValidation>(connman, g_banman.get(), scheduler);
