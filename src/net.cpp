@@ -37,8 +37,11 @@
 
 #include <cmath>
 
-// Dump addresses to peers.dat and banlist.dat every 15 minutes (900s)
-#define DUMP_ADDRESSES_INTERVAL 900
+// Dump addresses to peers.dat every 15 minutes (900s)
+static constexpr int DUMP_PEERS_INTERVAL = 15 * 60;
+
+// Dump addresses to banlist.dat every 15 minutes (900s)
+static constexpr int DUMP_BANS_INTERVAL = 60 * 15;
 
 // We add a random period time (0 to 1 seconds) to feeler connections to prevent
 // synchronization.
@@ -1766,11 +1769,6 @@ void CConnman::DumpAddresses() {
              addrman.size(), GetTimeMillis() - nStart);
 }
 
-void CConnman::DumpData() {
-    DumpAddresses();
-    DumpBanlist();
-}
-
 void CConnman::ProcessOneShot() {
     std::string strDest;
     {
@@ -2546,10 +2544,17 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
     // Dump network addresses
     scheduler.scheduleEvery(
         [this]() {
-            this->DumpData();
+            this->DumpAddresses();
             return true;
         },
-        DUMP_ADDRESSES_INTERVAL * 1000);
+        DUMP_PEERS_INTERVAL * 1000);
+
+    scheduler.scheduleEvery(
+        [this]() {
+            this->DumpBanlist();
+            return true;
+        },
+        DUMP_BANS_INTERVAL * 1000);
 
     return true;
 }
@@ -2607,7 +2612,8 @@ void CConnman::Stop() {
     }
 
     if (fAddressesInitialized) {
-        DumpData();
+        DumpAddresses();
+        DumpBanlist();
         fAddressesInitialized = false;
     }
 
