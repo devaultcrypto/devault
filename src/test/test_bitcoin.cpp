@@ -72,77 +72,70 @@ BasicTestingSetup::BasicTestingSetup(const std::string &chainName) {
   noui_connect();
 }
 
-BasicTestingSetup::~BasicTestingSetup() { ECC_Stop(); }
+TestingSetup::TestingSetup(const std::string &chainName)
+    : BasicTestingSetup(chainName) {
+    SetDataDir("tempdir");
+    const Config &config = GetConfig();
+    const CChainParams &chainparams = config.GetChainParams();
 
-TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(chainName) {
-  const Config &config = GetConfig();
-  const CChainParams &chainparams = config.GetChainParams();
+    // Ideally we'd move all the RPC tests to the functional testing framework
+    // instead of unit tests, but for now we need these here.
+    RPCServer rpcServer;
+    RegisterAllRPCCommands(config, rpcServer, tableRPC);
 
-  // Ideally we'd move all the RPC tests to the functional testing framework
-  // instead of unit tests, but for now we need these here.
-  RPCServer rpcServer;
-  RegisterAllRPCCommands(config, rpcServer, tableRPC);
+    /**
+     * RPC does not come out of the warmup state on its own. Normally, this is
+     * handled in bitcoind's init path, but unit tests do not trigger this
+     * codepath, so we call it explicitly as part of setup.
+     */
+    std::string rpcWarmupStatus;
+    if (RPCIsInWarmup(&rpcWarmupStatus)) {
+        SetRPCWarmupFinished();
+    }
 
-  /**
-   * RPC does not come out of the warmup state on its own. Normally, this is
-   * handled in bitcoind's init path, but unit tests do not trigger this
-   * codepath, so we call it explicitly as part of setup.
-   */
-  std::string rpcWarmupStatus;
-  if (RPCIsInWarmup(&rpcWarmupStatus)) { SetRPCWarmupFinished(); }
+    ClearDatadirCache();
 
-  ClearDatadirCache();
-  pathTemp = fs::temp_directory_path() /
-             strprintf("test_bitcoin_%lu_%i", (unsigned long)GetTime(), (int)(InsecureRandRange(100000)));
-  fs::create_directories(pathTemp);
-  gArgs.ForceSetArg("-datadir", pathTemp.string());
+    // We have to run a scheduler thread to prevent ActivateBestChain
+    // from blocking due to queue overrun.
+    threadGroup.create_thread(
+        boost::bind(&CScheduler::serviceQueue, &scheduler));
+    GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
-  // We have to run a scheduler thread to prevent ActivateBestChain
-  // from blocking due to queue overrun.
-  threadGroup.emplace_back(std::thread(std::bind(&CScheduler::serviceQueue, &scheduler)));
-  GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
+    g_mempool.setSanityCheck(1.0);
+    pblocktree.reset(new CBlockTreeDB(1 << 20, true));
+    pcoinsdbview.reset(new CCoinsViewDB(1 << 23, true));
+    pcoinsTip.reset(new CCoinsViewCache(pcoinsdbview.get()));
+    if (!LoadGenesisBlock(chainparams)) {
+        throw std::runtime_error("LoadGenesisBlock failed.");
+    }
+    {
+        CValidationState state;
+        if (!ActivateBestChain(config, state)) {
+            throw std::runtime_error(strprintf("ActivateBestChain failed. (%s)",
+                                               FormatStateMessage(state)));
+        }
+    }
+    nScriptCheckThreads = 3;
+    for (int i = 0; i < nScriptCheckThreads - 1; i++) {
+        threadGroup.create_thread(&ThreadScriptCheck);
+    }
 
-  g_mempool.setSanityCheck(1.0);
-  pblocktree = std::make_unique<CBlockTreeDB>(1 << 20, true);
-  pcoinsdbview = std::make_unique<CCoinsViewDB>(1 << 23, true);
-  pcoinsTip = std::make_unique<CCoinsViewCache>(pcoinsdbview.get());
-  prewardsdb = std::make_unique<CRewardsViewDB>("rewards", 1 << 23, true);
-  prewards = std::make_unique<CColdRewards>(chainparams.GetConsensus(), prewardsdb.get());
-  pbudget = std::make_unique<CBudget>(config);
-  if (!LoadGenesisBlock(chainparams)) { throw std::runtime_error("LoadGenesisBlock failed."); }
-  {
-    CValidationState state;
-    if (!ActivateBestChain(config, state)) { throw std::runtime_error("ActivateBestChain failed."); }
-  }
-  nScriptCheckThreads = 3;
-  for (int i = 0; i < nScriptCheckThreads - 1; i++) {
-    threadGroup.emplace_back(std::thread(&ThreadScriptCheck));
-  }
-
-  // Deterministic randomness for tests.
-  g_connman = std::make_unique<CConnman>(config, 0x1337, 0x1337);
-  connman = g_connman.get();
-  peerLogic = std::make_unique<PeerLogicValidation>(connman, scheduler);
+    g_banman = std::make_unique<BanMan>(chainparams, nullptr);
+    // Deterministic randomness for tests.
+    g_connman = std::make_unique<CConnman>(config, 0x1337, 0x1337);
 }
 
 TestingSetup::~TestingSetup() {
-  scheduler.interrupt(true);
-  scheduler.stop();
-  InterruptThreadScriptCheck();
-  for (auto &&thread : threadGroup) if (thread.joinable()) thread.join();
-  threadGroup.clear();
-  
-  GetMainSignals().FlushBackgroundCallbacks();
-  GetMainSignals().UnregisterBackgroundSignalScheduler();
-  g_connman.reset();
-  peerLogic.reset();
-  UnloadBlockIndex();
-  pcoinsTip.reset();
-  pcoinsdbview.reset();
-  pblocktree.reset();
-  prewards.reset();
-  prewardsdb.reset();
-  fs::remove_all(pathTemp);
+    threadGroup.interrupt_all();
+    threadGroup.join_all();
+    GetMainSignals().FlushBackgroundCallbacks();
+    GetMainSignals().UnregisterBackgroundSignalScheduler();
+    g_connman.reset();
+    g_banman.reset();
+    UnloadBlockIndex();
+    pcoinsTip.reset();
+    pcoinsdbview.reset();
+    pblocktree.reset();
 }
 
 TestChain100Setup::TestChain100Setup() : TestingSetup(CBaseChainParams::REGTEST) {

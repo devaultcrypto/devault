@@ -6,7 +6,7 @@
 #define BITCOIN_WALLET_TEST_FIXTURE_H
 
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <wallet/wallet.h>
 /**
  * Testing setup and teardown for wallet.

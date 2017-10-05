@@ -5,7 +5,7 @@
 #include <chainparams.h>
 #include <wallet/wallet.h>
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <wallet/test/wallet_test_fixture.h>
 
 #define CATCH_CONFIG_MAIN

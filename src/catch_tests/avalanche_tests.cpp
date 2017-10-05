@@ -188,7 +188,10 @@ static AvalancheResponse next(AvalancheResponse &r) {
 
 TEST_CASE("block_register") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
+  
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+
+  AvalancheProcessor p(setup.connman);
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
@@ -198,7 +201,7 @@ TEST_CASE("block_register") {
   const Config &config = GetConfig();
 
   // Create nodes that supports avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
 
   // Querying for random block returns false.
   BOOST_CHECK(!p.isAccepted(pindex));
@@ -345,15 +348,17 @@ TEST_CASE("block_register") {
 
 TEST_CASE("multi_block_register") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
   CBlockIndex indexA, indexB;
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+
+  AvalancheProcessor p(setup.connman);
 
   std::vector<AvalancheBlockUpdate> updates;
 
   const Config &config = GetConfig();
 
   // Create several nodes that support avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
 
   // Make sure the block has a hash.
   CBlock blockA = setup.CreateAndProcessBlock({}, CScript());
@@ -446,7 +451,11 @@ TEST_CASE("multi_block_register") {
 
 TEST_CASE("poll_and_response") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
+  const Config &config = GetConfig();
+  
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+  
+  AvalancheProcessor p(setup.connman);
 
   std::vector<AvalancheBlockUpdate> updates;
 
@@ -454,14 +463,12 @@ TEST_CASE("poll_and_response") {
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
-  const Config &config = GetConfig();
-
   // There is no node to query.
   BOOST_CHECK_EQUAL(AvalancheTest::getSuitableNodeToQuery(p), NO_NODE);
 
   // Create a node that supports avalanche and one that doesn't.
-  auto oldnode = ConnectNode(config, NODE_NONE, *setup.peerLogic);
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
+  auto oldnode = ConnectNode(config, NODE_NONE, *peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
   NodeId avanodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(avanodeid, 0));
 
@@ -578,8 +585,9 @@ TEST_CASE("poll_and_response") {
 
 TEST_CASE("poll_inflight_timeout") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
-
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+  
+  AvalancheProcessor p(setup.connman);
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
@@ -591,7 +599,7 @@ TEST_CASE("poll_inflight_timeout") {
 
   // Create a node that supports avalanche.
   const Config &config = GetConfig();
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
   NodeId avanodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(avanodeid, 0));
 
@@ -620,13 +628,15 @@ TEST_CASE("poll_inflight_timeout") {
 
 TEST_CASE("poll_inflight_count") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+  
+  AvalancheProcessor p(setup.connman);
   const Config &config = GetConfig();
 
   // Create enough nodes so that we run into the inflight request limit.
   std::array<std::unique_ptr<CNode>, AVALANCHE_MAX_INFLIGHT_POLL + 1> nodes;
   for (auto &n : nodes) {
-    n = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
+    n = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
     BOOST_CHECK(p.addPeer(n->GetId(), 0));
   }
 
@@ -675,17 +685,19 @@ TEST_CASE("poll_inflight_count") {
 
 TEST_CASE("quorum_diversity") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
+  const Config &config = GetConfig();
+  
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+  
+  AvalancheProcessor p(setup.connman);
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
-  const Config &config = GetConfig();
-
   // Create nodes that supports avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
 
   // Querying for random block returns false.
   BOOST_CHECK(!p.isAccepted(pindex));
@@ -741,7 +753,11 @@ TEST_CASE("quorum_diversity") {
 
 TEST_CASE("event_loop") {
   TestChain100Setup setup;
-  AvalancheProcessor p(g_connman.get());
+  const Config &config = GetConfig();
+  
+  auto peerLogic = std::make_unique<PeerLogicValidation>(setup.connman, nullptr, setup.scheduler);
+  
+  AvalancheProcessor p(setup.connman);
   CScheduler s;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
@@ -762,10 +778,8 @@ TEST_CASE("event_loop") {
   std::thread schedulerThread(std::bind(&CScheduler::serviceQueue, &s));
 
   // Create a node and a block to query.
-  const Config &config = GetConfig();
-
   // Create a node that supports avalanche.
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
   NodeId nodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(nodeid, 0));
 
