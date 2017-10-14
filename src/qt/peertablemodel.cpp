@@ -33,6 +33,10 @@ bool NodeLessThan::operator()(const CNodeCombinedStats &left,
             return pLeft->cleanSubVer.compare(pRight->cleanSubVer) < 0;
         case PeerTableModel::Ping:
             return pLeft->dMinPing < pRight->dMinPing;
+        case PeerTableModel::Sent:
+            return pLeft->nSendBytes < pRight->nSendBytes;
+        case PeerTableModel::Received:
+            return pLeft->nRecvBytes < pRight->nRecvBytes;
     }
 
     return false;
@@ -148,10 +152,20 @@ QVariant PeerTableModel::data(const QModelIndex &index, int role) const {
                 return QString::fromStdString(rec->nodeStats.cleanSubVer);
             case Ping:
                 return GUIUtil::formatPingTime(rec->nodeStats.dMinPing);
+            case Sent:
+                return GUIUtil::formatBytes(rec->nodeStats.nSendBytes);
+            case Received:
+                return GUIUtil::formatBytes(rec->nodeStats.nRecvBytes);
         }
     } else if (role == Qt::TextAlignmentRole) {
-        if (index.column() == Ping)
-            return (QVariant)(Qt::AlignRight | Qt::AlignVCenter);
+        switch (index.column()) {
+            case Ping:
+            case Sent:
+            case Received:
+                return QVariant(Qt::AlignRight | Qt::AlignVCenter);
+            default:
+                return QVariant();
+        }
     }
 
     return QVariant();
