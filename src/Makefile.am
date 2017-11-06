@@ -128,6 +128,7 @@ BITCOIN_CORE_H = \
   compat/byteswap.h \
   compat/endian.h \
   compat/sanity.h \
+  compat/setenv.h \
   compressor.h \
   config.h \
 	devault/budget.h \
