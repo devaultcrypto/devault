@@ -720,6 +720,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "control",            "getinfo",                getinfo,                {} }, /* uses wallet if enabled */
 #endif
     { "control",            "getmemoryinfo",          getmemoryinfo,          {"mode"} },
+    { "control",             "logging",                logging,                {"include", "exclude"} },
     { "util",               "verifymessage",          verifymessage,          {"address","signature","message"} },
     { "util",               "signmessagewithlegacyprivkey", signmessagewithlegacyprivkey, {"privkey","message"} },
     { "util",               "signmessagewithblsprivkey", signmessagewithblsprivkey, {"privkey","message"} },
@@ -731,7 +732,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "hidden",             "setmocktime",            setmocktime,            {"timestamp"}},
     { "hidden",             "echo",                   echo,                   {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
     { "hidden",             "echojson",               echo,                   {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
-    { "hidden",             "logging",                logging,                {"include", "exclude"}},
 };
 // clang-format on
 
