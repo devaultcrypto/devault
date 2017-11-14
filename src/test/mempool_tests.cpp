@@ -336,15 +336,20 @@ BOOST_AUTO_TEST_CASE(MempoolClearTest) {
 }
 
 template <typename name>
-void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder, std::string &&testcase) {
-  BOOST_CHECK_EQUAL(pool.size(), sortedOrder.size());
-  typename CTxMemPool::indexed_transaction_set::index<name>::type::iterator it = pool.mapTx.get<name>().begin();
-  int count = 0;
-  for (; it != pool.mapTx.get<name>().end(); ++it, ++count) {
-    BOOST_CHECK_MESSAGE(it->GetTx().GetId().ToString() == sortedOrder[count],
-                        it->GetTx().GetId().ToString()
-                            << " != " << sortedOrder[count] << " in test " << testcase << ":" << count);
-  }
+static void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder,
+                      const std::string &testcase)
+    EXCLUSIVE_LOCKS_REQUIRED(pool.cs) {
+    BOOST_CHECK_EQUAL(pool.size(), sortedOrder.size());
+    typename CTxMemPool::indexed_transaction_set::index<name>::type::iterator
+        it = pool.mapTx.get<name>().begin();
+    int count = 0;
+    for (; it != pool.mapTx.get<name>().end(); ++it, ++count) {
+        BOOST_CHECK_MESSAGE(it->GetTx().GetId().ToString() ==
+                                sortedOrder[count],
+                            it->GetTx().GetId().ToString()
+                                << " != " << sortedOrder[count] << " in test "
+                                << testcase << ":" << count);
+    }
 }
 #ifdef DEBUG_THIS
 BOOST_AUTO_TEST_CASE(MempoolIndexingTest) {
