@@ -240,7 +240,8 @@ TEST_CASE("MempoolClearTest") {
 }
 
 template <typename name>
-void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder, std::string &&testcase) {
+static void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder, const std::string &testcase)
+    EXCLUSIVE_LOCKS_REQUIRED(pool.cs) {
   BOOST_CHECK_EQUAL(pool.size(), sortedOrder.size());
   typename CTxMemPool::indexed_transaction_set::index<name>::type::iterator it = pool.mapTx.get<name>().begin();
   int count = 0;
