@@ -3527,6 +3527,7 @@ void PeerLogicValidation::ConsiderEviction(CNode *pto,
                         : "<none>");
                 pto->fDisconnect = true;
             } else {
+                assert(state.m_chain_sync.m_work_header);
                 LogPrint(
                     BCLog::NET,
                     "sending getheaders to outbound peer=%d to verify chain "
