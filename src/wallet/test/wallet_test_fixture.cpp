@@ -29,7 +29,6 @@ WalletTestingSetup::WalletTestingSetup(const std::string &chainName)
 
 WalletTestingSetup::~WalletTestingSetup() {
     UnregisterValidationInterface(pwalletMain.get());
-    pwalletMain.reset();
 
     bitdb.Flush(true);
     bitdb.Reset();
