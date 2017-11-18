@@ -9,8 +9,7 @@
 #include <cstdint>
 
 #include <boost/test/unit_test.hpp>
-
-extern CWallet *pwalletMain;
+extern std::unique_ptr<CWallet> pwalletMain;
 
 BOOST_FIXTURE_TEST_SUITE(accounting_tests, WalletTestingSetup)
 
