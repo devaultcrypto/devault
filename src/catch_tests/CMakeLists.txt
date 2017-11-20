@@ -140,6 +140,7 @@ set(UNIT_CTESTS
   torcontrol
   transaction
   txindex
+  txvalidation
   txvalidationcache
   uint256
   undo
