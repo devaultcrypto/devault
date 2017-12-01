@@ -145,3 +145,20 @@ bool CBasicKeyStore::HaveWatchOnly() const {
     return (!setWatchOnly.empty());
 }
 
+CKeyID GetKeyForDestination(const CKeyStore &store,
+                            const CTxDestination &dest) {
+    // Only supports destinations which map to single public keys, i.e. P2PKH.
+#ifdef HAVE_VARIANT
+    try {
+      auto id = std::get<CKeyID>(dest);
+      return id;
+    } catch (std::bad_variant_access&) {
+      return CKeyID();
+    }
+#else
+    if (auto id = boost::get<CNoDestination>(&dest)) {
+        return *id;
+    }
+#endif
+    return CKeyID();
+}
