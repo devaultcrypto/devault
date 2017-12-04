@@ -254,7 +254,7 @@ struct BlockHasher {
 };
 
 typedef std::unordered_map<BlockHash, CBlockIndex *, BlockHasher> BlockMap;
-extern BlockMap mapBlockIndex;
+extern BlockMap &mapBlockIndex;
 extern CCriticalSection cs_main;
 
 inline CBlockIndex *LookupBlockIndex(const BlockHash &hash) {

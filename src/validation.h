@@ -448,8 +448,6 @@ void PruneOneBlockFile(const int fileNumber);
  */
 void UnlinkPrunedFiles(const std::set<int> &setFilesToPrune);
 
-/** Create a new block index entry for a given block hash */
-CBlockIndex *InsertBlockIndex(const BlockHash& hash);
 /** Flush all state, indexes and buffers to disk. */
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */
@@ -670,7 +668,7 @@ bool ParkBlock(const Config &config, CValidationState &state,
                CBlockIndex *pindex);
 
 /** Remove invalidity status from a block and its descendants. */
-void ResetBlockFailureFlags(CBlockIndex *pindex);
+bool ResetBlockFailureFlags(CBlockIndex *pindex);
 
 /** Remove parked status from a block and its descendants. */
 bool UnparkBlockAndChildren(CBlockIndex *pindex);
@@ -689,7 +687,7 @@ const CBlockIndex *GetFinalizedBlock();
 bool IsBlockFinalized(const CBlockIndex *pindex);
 
 /** The currently-connected chain of blocks (protected by cs_main). */
-extern CChain chainActive;
+extern CChain &chainActive;
 
 /**
  * Global variable that points to the coins database (protected by cs_main)
