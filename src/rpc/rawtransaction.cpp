@@ -180,15 +180,13 @@ static UniValue getrawtransaction(const Config &config,
 
     if (!request.params[2].isNull()) {
         uint256 blockhash = ParseHashV(request.params[2], "parameter 3");
-        if (!blockhash.IsNull()) {
-            auto it = mapBlockIndex.find(blockhash);
-            if (it == mapBlockIndex.end()) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                                   "Block hash not found");
-            }
-            blockindex = it->second;
-            in_active_chain = chainActive.Contains(blockindex);
+        auto it = mapBlockIndex.find(blockhash);
+        if (it == mapBlockIndex.end()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                               "Block hash not found");
         }
+        blockindex = it->second;
+        in_active_chain = chainActive.Contains(blockindex);
     }
 
     CTransactionRef tx;
