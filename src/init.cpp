@@ -2427,5 +2427,5 @@ bool AppInitMain(Config &config,
 
     g_wallet_init_interface->Start(scheduler);
 
-    return !fRequestShutdown;
+    return true;
 }
