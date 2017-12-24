@@ -1,10 +1,10 @@
 # 19.9
-      Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
-      Merge #10408, #13291, and partial #13163
+####  Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
+####  Merge #10408, #13291, and partial #13163
       Update manpages for 0.19.9 release
       Update chainparams for 0.19.9 release
       Update seeds for 0.19.9 release
-      [RPC] Adding ::minRelayTxFee amount to getmempoolinfo and updating help
+####  [RPC] Adding ::minRelayTxFee amount to getmempoolinfo and updating help
       Fix currency/fee-rate unit string in the help text
       getmempool mempoolminfee is a BCH/kB feerate
       Revert "add flags to VerifySignature and sigcache"
