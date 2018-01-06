@@ -36,6 +36,7 @@
 #include <event2/http.h>
 
 #include <thread>
+#include <functional>
 
 static std::thread generate_thread;
 static std::atomic<bool> stop_generate = false;
@@ -2737,7 +2738,7 @@ static UniValue walletpassphrase(const Config &config,
             "\nArguments:\n"
             "1. \"passphrase\"     (string, required) The wallet passphrase\n"
             "2. timeout            (numeric, required) The time to keep the "
-            "decryption key in seconds.\n"
+            "decryption key in seconds; capped at 100000000 (~3 years).\n"
             "\nNote:\n"
             "Issuing the walletpassphrase command while the wallet is already "
             "unlocked will set a new unlock\n"
@@ -2772,6 +2773,20 @@ static UniValue walletpassphrase(const Config &config,
     // with.
     strWalletPass = request.params[0].get_str().c_str();
 
+    // Get the timeout
+    int64_t nSleepTime = request.params[1].get_int64();
+    // Timeout cannot be negative, otherwise it will relock immediately
+    if (nSleepTime < 0) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                           "Timeout cannot be negative.");
+    }
+    // Clamp timeout
+    // larger values trigger a macos/libevent bug?
+    constexpr int64_t MAX_SLEEP_TIME = 100000000;
+    if (nSleepTime > MAX_SLEEP_TIME) {
+        nSleepTime = MAX_SLEEP_TIME;
+    }
+
     if (strWalletPass.length() > 0) {
         if (!pwallet->Unlock(strWalletPass)) {
             throw JSONRPCError(
@@ -2787,10 +2802,9 @@ static UniValue walletpassphrase(const Config &config,
 
     pwallet->TopUpKeyPool();
 
-    int64_t nSleepTime = request.params[1].get_int64();
     pwallet->nRelockTime = GetTime() + nSleepTime;
     RPCRunLater(strprintf("lockwallet(%s)", pwallet->GetName()),
-                boost::bind(LockWallet, pwallet), nSleepTime);
+                std::bind(LockWallet, pwallet), nSleepTime);
 
     return NullUniValue;
 }
