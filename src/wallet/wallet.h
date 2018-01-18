@@ -349,9 +349,7 @@ public:
 
         strFromAccount = std::move(mapValue["fromaccount"]);
         ReadOrderPos(nOrderPos, mapValue);
-        nTimeSmart = mapValue.count("timesmart")
-                         ? (unsigned int)atoi64(mapValue["timesmart"])
-                         : 0;
+        nTimeSmart = mapValue.count("timesmart") ? (unsigned int)std::atoll(mapValue["timesmart"].c_str()) : 0;
 
         mapValue.erase("fromaccount");
         mapValue.erase("version");

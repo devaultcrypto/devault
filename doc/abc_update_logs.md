@@ -197,28 +197,28 @@
       Merge #12681: Fix ComputeTimeSmart test failure with -DDEBUG_LOCKORDER
 ##### Merge #11744: net: Add missing locks in net.{cpp,h}
       Revert removal of code block
-      Merge #12206: qa: Sync with validationinterface queue in sync_mempools
+##### Merge #12206: qa: Sync with validationinterface queue in sync_mempools
       test: refactor: Use absolute include paths for test data files
       qt: refactor: Changes to make include paths absolute
       qt: refactor: Use absolute include paths in .ui files
-      Merge #12283: Fix typos
-      Sanitize some wallet serialization
-      No need to use OpenSSL malloc/free
+##### Merge #12283: Fix typos
+##### Sanitize some wallet serialization
+~~    No need to use OpenSSL malloc/free~~
 ##### Merge #9539: [net] Avoid initialization to a value that is never read
       [trivial] Fix recently introduced typos in comments
 ##### Merge #12326: net: initialize socket to avoid closing random fd's
 ##### Merge #11252: [P2P] When clearing addrman clear mapInfo and mapAddr.
 ##### Merge #12448: Interrupt block generation on shutdown request
-      Merge #11585: addrman: Add missing lock in Clear() (CAddrMan)
+##### Merge #11585: addrman: Add missing lock in Clear() (CAddrMan)
 ##### Merge #10914: Add missing lock in CScheduler::AreThreadsServicingQueue()
 ##### Merge #11831: Always return true if AppInitMain got to the end
 ##### Merge #10057: [init] Deduplicated sigaction() boilerplate
-      Init: Remove redundant exit(EXIT_FAILURE) instances and replace with return false
+##### Init: Remove redundant exit(EXIT_FAILURE) instances and replace with return false
 ##### Ignore macOS daemon() depracation warning
       [LINTER] Revive the locale dependent functions linter in arcanist
 ##### Merge #9693: Prevent integer overflow in ReadVarInt.
-      Backport dev notes on RPC
-      blockfilter: Use unordered_set instead of set in blockfilter.
+##### Backport dev notes on RPC
+##### blockfilter: Use unordered_set instead of set in blockfilter.
       Disallow using addresses in createmultisig
 ##### Merge #10027: Set to nullptr after delete
 ##### Merge #10029: Fix parameter naming inconsistencies between .h and .cpp files
