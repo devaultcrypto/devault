@@ -55,6 +55,7 @@ add_test_to_suite(devault test_devault
   bip32_tests.cpp
 	blockcheck_tests.cpp
 	blockencodings_tests.cpp
+	blockfilter_tests.cpp
 	blockindex_tests.cpp
 	blockstatus_tests.cpp
 	bloom_tests.cpp
