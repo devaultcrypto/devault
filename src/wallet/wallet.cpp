@@ -1074,7 +1074,7 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransactionRef &ptx,
 bool CWallet::TransactionCanBeAbandoned(const TxId &txid) const {
     LOCK2(cs_main, cs_wallet);
     const CWalletTx *wtx = GetWalletTx(txid);
-    return wtx && !wtx->isAbandoned() && wtx->GetDepthInMainChain() <= 0 &&
+    return wtx && !wtx->isAbandoned() && wtx->GetDepthInMainChain() == 0 &&
            !wtx->InMempool();
 }
 
@@ -1090,7 +1090,7 @@ bool CWallet::AbandonTransaction(const TxId &txid) {
     auto it = mapWallet.find(txid);
     assert(it != mapWallet.end());
     CWalletTx &origtx = it->second;
-    if (origtx.GetDepthInMainChain() > 0 || origtx.InMempool()) {
+    if (origtx.GetDepthInMainChain() != 0 || origtx.InMempool()) {
         return false;
     }
 
