@@ -333,7 +333,7 @@ static void MutateTxAddOutPubKey(CMutableTransaction &tx,
     bool bScriptHash = false;
     if (vStrInputParts.size() == 3) {
         std::string flags = vStrInputParts[2];
-        bScriptHash = (flags.find("S") != std::string::npos);
+        bScriptHash = (flags.find('S') != std::string::npos);
     }
 
     if (bScriptHash) {
@@ -394,7 +394,7 @@ static void MutateTxAddOutMultiSig(CMutableTransaction &tx,
     bool bScriptHash = false;
     if (vStrInputParts.size() == numkeys + 4) {
         std::string flags = vStrInputParts.back();
-        bScriptHash = (flags.find("S") != std::string::npos);
+        bScriptHash = (flags.find('S') != std::string::npos);
     } else if (vStrInputParts.size() > numkeys + 4) {
         // Validate that there were no more parameters passed
         throw std::runtime_error("Too many parameters");
@@ -461,7 +461,7 @@ static void MutateTxAddOutScript(CMutableTransaction &tx,
     bool bScriptHash = false;
     if (vStrInputParts.size() == 3) {
         std::string flags = vStrInputParts.back();
-        bScriptHash = (flags.find("S") != std::string::npos);
+        bScriptHash = (flags.find('S') != std::string::npos);
     }
 
     if (bScriptHash) {
