@@ -51,9 +51,11 @@ class TestNode():
     To make things easier for the test writer, any unrecognised messages will
     be dispatched to the RPC connection."""
 
-    def __init__(self, i, datadir, host, rpc_port, p2p_port, timewait, bitcoind, bitcoin_cli, stderr, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False):
+    def __init__(self, i, datadir, host, rpc_port, p2p_port, timewait, bitcoind, bitcoin_cli, mocktime, coverage_dir, extra_conf=None, extra_args=None, use_cli=False):
         self.index = i
         self.datadir = datadir
+        self.stdout_dir = os.path.join(self.datadir, "stdout")
+        self.stderr_dir = os.path.join(self.datadir, "stderr")
         self.host = host
         self.rpc_port = rpc_port
         self.p2p_port = p2p_port
@@ -67,7 +69,6 @@ class TestNode():
         if not os.path.isfile(self.binary):
             raise FileNotFoundError(
                 "Binary '{}' could not be found.\nTry setting it manually:\n\tBITCOIND=<path/to/bitcoind> {}".format(self.binary, sys.argv[0]))
-        self.stderr = stderr
         self.coverage_dir = coverage_dir
         if extra_conf != None:
             append_config(datadir, extra_conf)
@@ -115,18 +116,52 @@ class TestNode():
             assert self.rpc_connected, "Error: No RPC connection"
             return getattr(self.rpc, name)
 
-    def start(self, extra_args=None, stderr=None, *args, **kwargs):
+    def clear_default_args(self):
+        self.default_args.clear()
+
+    def extend_default_args(self, args):
+        self.default_args.extend(args)
+
+    def remove_default_args(self, args):
+        for rm_arg in args:
+            # Remove all occurrences of rm_arg in self.default_args:
+            #  - if the arg is a flag (-flag), then the names must match
+            #  - if the arg is a value (-key=value) then the name must starts
+            #    with "-key=" (the '"' char is to avoid removing "-key_suffix"
+            #    arg is "-key" is the argument to remove).
+            self.default_args = [def_arg for def_arg in self.default_args
+                                 if rm_arg != def_arg and not def_arg.startswith(rm_arg + '=')]
+
+    def start(self, extra_args=None, stdout=None, stderr=None, *args, **kwargs):
         """Start the node."""
         if extra_args is None:
             extra_args = self.extra_args
+
+        # Add a new stdout and stderr file each time bitcoind is started
         if stderr is None:
-            stderr = self.stderr
+            stderr = tempfile.NamedTemporaryFile(
+                dir=self.stderr_dir, delete=False)
+        if stdout is None:
+            stdout = tempfile.NamedTemporaryFile(
+                dir=self.stdout_dir, delete=False)
+        self.stderr = stderr
+        self.stdout = stdout
+
         # Delete any existing cookie file -- if such a file exists (eg due to
         # unclean shutdown), it will get overwritten anyway by bitcoind, and
         # potentially interfere with our attempt to authenticate
         delete_cookie_file(self.datadir)
+
+        # add environment variable LIBC_FATAL_STDERR_=1 so that libc errors are written to stderr and not the terminal
+        subp_env = dict(os.environ, LIBC_FATAL_STDERR_="1")
+
         self.process = subprocess.Popen(
+<<<<<<< HEAD
             self.args + extra_args, stderr=stderr, *args, **kwargs)
+=======
+            [self.binary] + self.default_args + extra_args, env=subp_env, stdout=stdout, stderr=stderr, *args, **kwargs)
+
+>>>>>>> 3263031e7... [tests] Better stderr testing
         self.running = True
         self.log.debug("bitcoind started, waiting for RPC to come up")
 
@@ -168,7 +203,7 @@ class TestNode():
             wallet_path = "wallet/{}".format(wallet_name)
             return self.rpc / wallet_path
 
-    def stop_node(self):
+    def stop_node(self, expected_stderr=''):
         """Stop the node."""
         if not self.running:
             return
@@ -177,6 +212,14 @@ class TestNode():
             self.stop()
         except http.client.CannotSendRequest:
             self.log.exception("Unable to stop node.")
+
+        # Check that stderr is as expected
+        self.stderr.seek(0)
+        stderr = self.stderr.read().decode('utf-8').strip()
+        if stderr != expected_stderr:
+            raise AssertionError(
+                "Unexpected stderr {} != {}".format(stderr, expected_stderr))
+
         del self.p2ps[:]
 
     def is_node_stopped(self):
@@ -210,9 +253,11 @@ class TestNode():
 
         Will throw if bitcoind starts without an error.
         Will throw if an expected_msg is provided and it does not match bitcoind's stdout."""
-        with tempfile.SpooledTemporaryFile(max_size=2**16) as log_stderr:
+        with tempfile.NamedTemporaryFile(dir=self.stderr_dir, delete=False) as log_stderr, \
+                tempfile.NamedTemporaryFile(dir=self.stdout_dir, delete=False) as log_stdout:
             try:
-                self.start(extra_args, stderr=log_stderr, *args, **kwargs)
+                self.start(extra_args, stdout=log_stdout,
+                           stderr=log_stderr, *args, **kwargs)
                 self.wait_for_rpc_connection()
                 self.stop_node()
                 self.wait_until_stopped()
