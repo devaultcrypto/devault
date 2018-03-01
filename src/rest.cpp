@@ -96,7 +96,7 @@ static enum RetFormat ParseDataFormat(std::string &param,
 }
 
 static std::string AvailableDataFormatsString() {
-    std::string formats = "";
+    std::string formats;
     for (const auto& i : rf_names) {
         if (strlen(i.name) > 0) {
             formats.append(".");

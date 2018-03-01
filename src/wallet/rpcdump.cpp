@@ -267,7 +267,7 @@ UniValue importaddress(const Config &config, const JSONRPCRequest &request) {
                            R"("myscript", "testing", false)"));
     }
 
-    std::string strLabel = "";
+    std::string strLabel;
     if (!request.params[1].isNull()) {
         strLabel = request.params[1].get_str();
     }
@@ -487,7 +487,7 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
             HelpExampleRpc("importpubkey", R"("mypubkey", "testing", false)"));
     }
 
-    std::string strLabel = "";
+    std::string strLabel;
     if (!request.params[1].isNull()) {
         strLabel = request.params[1].get_str();
     }

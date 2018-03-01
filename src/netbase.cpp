@@ -139,7 +139,7 @@ bool Lookup(const char *pszName, std::vector<CService> &vAddr, int portDefault,
             bool fAllowLookup, unsigned int nMaxSolutions) {
     if (pszName[0] == 0) return false;
     int port = portDefault;
-    std::string hostname = "";
+    std::string hostname;
     SplitHostPort(std::string(pszName), port, hostname);
 
     std::vector<CNetAddr> vIP;
