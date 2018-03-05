@@ -1688,10 +1688,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                          CCoinsViewCache &view, bool fJustCheck = false, bool ignoreAddressIndex = false) {
     AssertLockHeld(cs_main);
     assert(pindex);
-    // pindex->phashBlock can be null if called by
-    // CreateNewBlock/TestBlockValidity
-    assert((pindex->phashBlock == nullptr) ||
-           (*pindex->phashBlock == block.GetHash()));
+    assert(*pindex->phashBlock == block.GetHash());
     int64_t nTimeStart = GetTimeMicros();
 
     // Check it again in case a previous version let a bad block in
@@ -1775,7 +1772,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     // applied to all blocks except the two in the chain that violate it. This
     // prevents exploiting the issue against nodes during their initial block
     // download.
- 
+
     // Once BIP34 activated it was not possible to create new duplicate
     // coinbases and thus other than starting with the 2 existing duplicate
     // coinbase pairs, not possible to create overwriting txs. But by the time
@@ -4101,9 +4098,11 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
     AssertLockHeld(cs_main);
     assert(pindexPrev && pindexPrev == chainActive.Tip());
     CCoinsViewCache viewNew(pcoinsTip.get());
+    uint256 block_hash(block.GetHash());
     CBlockIndex indexDummy(block);
     indexDummy.pprev = pindexPrev;
     indexDummy.nHeight = pindexPrev->nHeight + 1;
+    indexDummy.phashBlock = &block_hash;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
     if (!ContextualCheckBlockHeader(config, block, state, pindexPrev,
