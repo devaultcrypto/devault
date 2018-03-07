@@ -132,8 +132,8 @@ bool CKey::SignECDSA(const uint256 &hash, std::vector<uint8_t> &vchSig,
                                    begin(), secp256k1_nonce_function_rfc6979,
                                    test_case ? extra_entropy : nullptr);
     assert(ret);
-    secp256k1_ecdsa_signature_serialize_der(
-        secp256k1_context_sign, (uint8_t *)vchSig.data(), &nSigLen, &sig);
+    secp256k1_ecdsa_signature_serialize_der(secp256k1_context_sign,
+                                            vchSig.data(), &nSigLen, &sig);
     vchSig.resize(nSigLen);
     return true;
 }
@@ -181,7 +181,7 @@ bool CKey::SignCompact(const uint256 &hash,
         secp256k1_nonce_function_rfc6979, nullptr);
     assert(ret);
     secp256k1_ecdsa_recoverable_signature_serialize_compact(
-        secp256k1_context_sign, (uint8_t *)&vchSig[1], &rec, &sig);
+        secp256k1_context_sign, &vchSig[1], &rec, &sig);
     assert(ret);
     assert(rec != -1);
     vchSig[0] = 27 + rec + 4;
