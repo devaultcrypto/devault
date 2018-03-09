@@ -38,5 +38,6 @@ fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
 /* Only used in Windows */
 fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 fs::path GetPidFile();
+const fs::path &GetBlocksDir(bool fNetSpecific = true);
 void CreatePidFile(const fs::path &path, pid_t pid);
 

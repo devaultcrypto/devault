@@ -116,6 +116,8 @@ fs::path GetDefaultDataDir() {
 static fs::path pathCached;
 static fs::path pathCachedNetSpecific;
 static CCriticalSection csPathCached;
+static fs::path g_blocks_path_cached;
+static fs::path g_blocks_path_cache_net_specific;
 
 bool CheckIfWalletDatExists(bool fNetSpecific) {
   fs::path path;
@@ -480,4 +482,36 @@ bool LockDataDirectory(bool probeOnly) {
                                    strDataDir, _(PACKAGE_NAME), e.what()));
     }
     return true;
+}
+
+
+const fs::path &GetBlocksDir(bool fNetSpecific) {
+
+    LOCK(csPathCached);
+
+    fs::path &path =
+        fNetSpecific ? g_blocks_path_cache_net_specific : g_blocks_path_cached;
+
+    // This can be called during exceptions by LogPrintf(), so we cache the
+    // value so we don't have to do memory allocations after that.
+    if (!path.empty()) {
+        return path;
+    }
+
+    if (gArgs.IsArgSet("-blocksdir")) {
+        path = fs::system_complete(gArgs.GetArg("-blocksdir", ""));
+        if (!fs::is_directory(path)) {
+            path = "";
+            return path;
+        }
+    } else {
+        path = GetDataDir(false);
+    }
+    if (fNetSpecific) {
+        path /= BaseParams().DataDir();
+    }
+
+    path /= "blocks";
+    fs::create_directories(path);
+    return path;
 }
