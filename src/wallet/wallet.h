@@ -1214,6 +1214,10 @@ public:
     bool StoreCryptedHDChain();
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
   
+    /** Whether a given output is spendable by this wallet */
+    bool OutputEligibleForSpending(const COutput &output, const int nConfMine,
+                                   const int nConfTheirs,
+                                   const uint64_t nMaxAncestors) const;
 };
 
 /** A key allocated from the key pool. */
