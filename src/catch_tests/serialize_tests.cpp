@@ -31,7 +31,7 @@ class CSerializeMethodsTestSingle {
   CSerializeMethodsTestSingle(int intvalin, bool boolvalin, std::string stringvalin, const char *charstrvalin,
                               CTransaction txvalin)
     : intval(intvalin), boolval(boolvalin), stringval(std::move(stringvalin)),
-      txval(MakeTransactionRef(txvalin)) {
+      txval(txvalin) {
     memcpy(charstrval, charstrvalin, sizeof(charstrval));
   }
   ADD_SERIALIZE_METHODS;
