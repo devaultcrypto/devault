@@ -950,7 +950,7 @@ static bool WriteBlockToDisk(const CBlock &block, CDiskBlockPos &pos,
 
     // Write index header
     unsigned int nSize = GetSerializeSize(block, fileout.GetVersion());
-    fileout << FLATDATA(messageStart) << nSize;
+    fileout << messageStart << nSize;
 
     // Write block
     long fileOutPos = ftell(fileout.Get());
@@ -1378,7 +1378,7 @@ bool UndoWriteToDisk(const CBlockUndo &blockundo, CDiskBlockPos &pos,
 
     // Write index header
     unsigned int nSize = GetSerializeSize(blockundo, fileout.GetVersion());
-    fileout << FLATDATA(messageStart) << nSize;
+    fileout << messageStart << nSize;
 
     // Write undo data
     long fileOutPos = ftell(fileout.Get());
@@ -5350,8 +5350,8 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                 uint8_t buf[CMessageHeader::MESSAGE_START_SIZE];
                 blkdat.FindByte(chainparams.DiskMagic()[0]);
                 nRewind = blkdat.GetPos() + 1;
-                blkdat >> FLATDATA(buf);
-                if (memcmp(buf, std::begin(chainparams.DiskMagic()),
+                blkdat >> buf;
+                if (memcmp(buf, chainparams.DiskMagic().data(),
                            CMessageHeader::MESSAGE_START_SIZE)) {
                     continue;
                 }

@@ -2874,7 +2874,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Inline Sign1 and SignN
       Separate HaveKey function that checks whether a key is in a keystore
 #     Merge #13176: Improve CRollingBloomFilter performance: replace modulus with FastMod
-      Add native support for serializing char arrays without FLATDATA
+XX    Add native support for serializing char arrays without FLATDATA
       refactor: Avoid locking tx pool cs thrice
 #     Return void instead of bool for functions that cannot fail
       Relayout comment in sign.h
