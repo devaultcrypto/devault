@@ -1,4 +1,5 @@
 #include <wallettests.h>
+#include <util.h>
 
 #include <chainparams.h>
 #include <config.h>
