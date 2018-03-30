@@ -23,15 +23,15 @@
 #define NUM_MULTIPLES_50BCH 420000
 
 static bool TestEncode(Amount in) {
-  return in.toInt() == CTxOutCompressor::DecompressAmount(CTxOutCompressor::CompressAmount(in.toInt()));
+    return in.toInt() == DecompressAmount(CompressAmount(in.toInt()));
 }
 
 static bool TestDecode(uint64_t in) {
-  return in == CTxOutCompressor::CompressAmount(CTxOutCompressor::DecompressAmount(in));
+    return in == CompressAmount(DecompressAmount(in));
 }
 
 static bool TestPair(Amount dec, uint64_t enc) {
-  return CTxOutCompressor::CompressAmount(dec.toInt()) == enc && CTxOutCompressor::DecompressAmount(enc) == dec.toInt();
+    return CompressAmount(dec.toInt()) == enc && DecompressAmount(enc) == dec.toInt();
 }
 
 TEST_CASE("compress_amounts") {
