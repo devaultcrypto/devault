@@ -297,6 +297,7 @@ namespace {
         WalletBalances getBalances() override {
             WalletBalances result;
             result.balance = m_wallet.GetBalance();
+            result.currentBalanceOptional = result.balance; // copy balance
             result.unconfirmed_balance = m_wallet.GetUnconfirmedBalance();
             result.immature_balance = m_wallet.GetImmatureBalance();
             result.have_watch_only = m_wallet.HaveWatchOnly();

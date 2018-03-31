@@ -9,12 +9,7 @@
 #include "transactionview.h"
 
 
-#ifdef HAVE_VARIANT
-#include <optional>
-#else
-#include <boost/optional.hpp>
-#endif
-
+#include <interfaces/wallet.h>
 
 #include <QWidget>
 #include <memory>
@@ -49,10 +44,7 @@ public:
     TransactionView *transactionView;
 
 public Q_SLOTS:
-    void setBalance(const Amount balance, const Amount unconfirmedBalance,
-                    const Amount immatureBalance, const Amount watchOnlyBalance,
-                    const Amount watchUnconfBalance,
-                    const Amount watchImmatureBalance);
+    void setBalance(const interfaces::WalletBalances &balances);
 
 Q_SIGNALS:
  //   void transactionClicked(const QModelIndex &index);
@@ -62,17 +54,7 @@ private:
     Ui::OverviewPage *ui;
     ClientModel *clientModel;
     WalletModel *walletModel;
-#ifdef HAVE_VARIANT  
-    std::optional<Amount> currentBalanceOptional;
-#else
-    boost::optional<Amount> currentBalanceOptional;
-#endif
-    Amount currentBalance;
-    Amount currentUnconfirmedBalance;
-    Amount currentImmatureBalance;
-    Amount currentWatchOnlyBalance;
-    Amount currentWatchUnconfBalance;
-    Amount currentWatchImmatureBalance;
+    interfaces::WalletBalances m_balances;
 
     TxViewDelegate *txdelegate;
     std::unique_ptr<TransactionFilterProxy> filter;
