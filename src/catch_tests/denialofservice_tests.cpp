@@ -67,10 +67,11 @@ TEST_CASE("outbound_slow_chain_eviction") {
   dummyNode1.fSuccessfullyConnected = true;
 
   // This test requires that we have a chain with non-zero work.
-  LOCK(cs_main);
-  BOOST_CHECK(chainActive.Tip() != nullptr);
-  BOOST_CHECK(chainActive.Tip()->nChainWork > 0);
-
+  {
+      LOCK(cs_main);
+      BOOST_CHECK(chainActive.Tip() != nullptr);
+      BOOST_CHECK(chainActive.Tip()->nChainWork > 0);
+  }
   // Test starts here
   LOCK(dummyNode1.cs_sendProcessing);
   // should result in getheaders
