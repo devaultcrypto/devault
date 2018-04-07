@@ -1151,7 +1151,7 @@ void CleanupBlockRevFiles() {
 
 void ThreadImport(const Config &config, std::vector<fs::path> vImportFiles) {
     RenameThread("devault-loadblk");
-
+    ScheduleBatchPriority();
     {
         CImportingNow imp;
 
