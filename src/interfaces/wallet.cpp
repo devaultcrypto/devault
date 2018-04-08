@@ -507,7 +507,7 @@ namespace {
             StartWallets(scheduler);
         }
 
-        bool open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+        bool load(const CChainParams &chainParams, const SecureString& walletPassphrase,
                   const std::vector<std::string>& words, bool use_bls) override {
           return LoadWallets(chainParams, m_chain, m_wallet_filenames,
                              walletPassphrase,words,use_bls);

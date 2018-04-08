@@ -15,6 +15,8 @@ class CScheduler;
 
 namespace interfaces {
 
+class Wallet;
+
 //! Interface for giving wallet processes access to blockchain state.
 class Chain {
 public:
@@ -38,6 +40,9 @@ public:
     //! method is temporary and is only used in a few places to avoid changing
     //! behavior while code is transitioned to use the Chain::Lock interface.
     virtual std::unique_ptr<Lock> assumeLocked() = 0;
+
+    //! Send wallet load notification to the GUI.
+    virtual void loadWallet(std::unique_ptr<Wallet> wallet) = 0;
 };
 
 //! Interface to let node manage chain clients (wallets, or maybe tools for
@@ -53,7 +58,7 @@ public:
     virtual bool verify(const CChainParams &chainParams) = 0;
 
     /** Open wallets*/    
-    virtual bool open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+    virtual bool load(const CChainParams &chainParams, const SecureString& walletPassphrase,
                       const std::vector<std::string>& words, bool use_bls) = 0;
   
     //! Start client execution and provide a scheduler.

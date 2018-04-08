@@ -13,8 +13,11 @@
 #include <memory>
 #include <string>
 
-class CWallet;
 class CBlockIndex;
+
+namespace interfaces {
+class Wallet;
+} // namespace interfaces
 
 /** General change type (added, updated, removed). */
 enum ChangeType { CT_NEW, CT_UPDATED, CT_DELETED };
@@ -73,6 +76,13 @@ public:
         MSG_ERROR = (ICON_ERROR | BTN_OK | MODAL)
     };
 
+#define ADD_SIGNALS_DECL_WRAPPER(signal_name, rtype, args...)                  \
+    rtype signal_name(args);                                                   \
+    using signal_name##Sig = rtype(args);                                      \
+    boost::signals2::connection signal_name##_connect(                         \
+        std::function<signal_name##Sig> fn);                                   \
+    void signal_name##_disconnect(std::function<signal_name##Sig> fn);
+
     /** Show message box. */
     boost::signals2::signal<bool(const std::string &message,
                                  const std::string &caption,
@@ -109,7 +119,8 @@ public:
     boost::signals2::signal<void()> NotifyAlertChanged;
 
     /** A wallet has been loaded. */
-    boost::signals2::signal<void(std::shared_ptr<CWallet> wallet)> LoadWallet;
+    ADD_SIGNALS_DECL_WRAPPER(LoadWallet, void,
+                             std::unique_ptr<interfaces::Wallet> &wallet);
 
     /**
      * Show progress e.g. for verifychain.
