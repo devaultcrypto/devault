@@ -18,6 +18,7 @@
 #include <init.h>
 #include <fs.h>
 #include <interfaces/chain.h>
+#include <interfaces/wallet.h>
 #include <key.h>
 #include <keystore.h>
 #include <net.h>
@@ -5405,8 +5406,9 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
         }
     }
 
-    uiInterface.LoadWallet(walletInstance);
-    
+          // was uiInterface.LoadWallet(walletInstance);
+    chain.loadWallet(interfaces::MakeWallet(walletInstance));
+
     // Register with the validation interface. It's ok to do this after rescan
     // since we're still holding cs_main.
     RegisterValidationInterface(walletInstance.get());

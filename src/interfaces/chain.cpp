@@ -4,6 +4,15 @@
 
 #include <interfaces/chain.h>
 
+#include <chain.h>
+#include <chainparams.h>
+#include <interfaces/wallet.h>
+#include <net.h>
+//#include <policy/mempool.h>
+#include <primitives/block.h>
+//#include <primitives/blockhash.h>
+#include <primitives/transaction.h>
+#include <protocol.h>
 #include <sync.h>
 #include <util/system.h>
 #include <validation.h>
@@ -35,6 +44,9 @@ namespace {
         }
         std::unique_ptr<Chain::Lock> assumeLocked() override {
             return std::make_unique<LockImpl>();
+        }
+        void loadWallet(std::unique_ptr<Wallet> wallet) override {
+            ::uiInterface.LoadWallet(wallet);
         }
     };
 

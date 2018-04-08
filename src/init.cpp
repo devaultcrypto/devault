@@ -2401,7 +2401,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
 
     // Step 9: load wallet
     for (const auto &client : interfaces.chain_clients) {
-      if (!client->open(chainparams, walletPassphrase, words, use_bls)) {
+      if (!client->load(chainparams, walletPassphrase, words, use_bls)) {
         return false;
       }
     }
