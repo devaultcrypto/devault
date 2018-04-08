@@ -1677,6 +1677,13 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     BlockValidationOptions validationOptions =
         BlockValidationOptions(!fJustCheck, !fJustCheck);
     if (!CheckBlock(config, block, state, validationOptions)) {
+        if (state.CorruptionPossible()) {
+            // We don't write down blocks to disk if they may have been
+            // corrupted, so this should be impossible unless we're having
+            // hardware problems.
+            return AbortNode(state, "Corrupt block found indicating potential "
+                                    "hardware failure; shutting down");
+        }
         return error("%s: Consensus::CheckBlock: %s", __func__,
                      FormatStateMessage(state));
     }
