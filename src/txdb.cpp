@@ -640,7 +640,7 @@ bool TxIndexDB::MigrateData(CBlockTreeDB &block_tree_db,
 
     int64_t count = 0;
     LogPrintf("Upgrading txindex database... [0%%]\n");
-    uiInterface.ShowProgress(_("Upgrading txindex database"), 0, true);
+    uiInterface.ShowProgress.fire(_("Upgrading txindex database"), 0, true);
     int report_done = 0;
     const size_t batch_size = 1 << 24; // 16 MiB
 
@@ -651,14 +651,9 @@ bool TxIndexDB::MigrateData(CBlockTreeDB &block_tree_db,
     std::pair<unsigned char, uint256> begin_key{DB_TXINDEX, uint256()};
     std::pair<unsigned char, uint256> prev_key = begin_key;
 
-    bool interrupted = false;
     std::unique_ptr<CDBIterator> cursor(block_tree_db.NewIterator());
     for (cursor->Seek(begin_key); cursor->Valid(); cursor->Next()) {
-        boost::this_thread::interruption_point();
-        if (ShutdownRequested()) {
-            interrupted = true;
-            break;
-        }
+        interruption_point(ShutdownRequested());
 
         if (!cursor->GetKey(key)) {
             return error("%s: cannot get key from valid cursor", __func__);
@@ -678,7 +673,7 @@ bool TxIndexDB::MigrateData(CBlockTreeDB &block_tree_db,
                 (static_cast<uint32_t>(*(txid.begin() + 1)) << 0);
             int percentage_done = (int)(high_nibble * 100.0 / 65536.0 + 0.5);
 
-            uiInterface.ShowProgress(_("Upgrading txindex database"),
+            uiInterface.ShowProgress.fire(_("Upgrading txindex database"),
                                      percentage_done, true);
             if (report_done < percentage_done / 10) {
                 LogPrintf("Upgrading txindex database... [%d%%]\n",
@@ -710,7 +705,7 @@ bool TxIndexDB::MigrateData(CBlockTreeDB &block_tree_db,
     // hash marker to the new database and delete from the old one. This signals
     // that the former is fully caught up to that point in the blockchain and
     // that all txindex entries have been removed from the latter.
-    if (!interrupted) {
+    if (!ShutdownRequested()) {
         batch_olddb.Erase(DB_TXINDEX_BLOCK);
         batch_newdb.Write(DB_BEST_BLOCK, locator);
     }
@@ -718,12 +713,12 @@ bool TxIndexDB::MigrateData(CBlockTreeDB &block_tree_db,
     WriteTxIndexMigrationBatches(*this, block_tree_db, batch_newdb, batch_olddb,
                                  begin_key, key);
 
-    if (interrupted) {
+    if (ShutdownRequested()) {
         LogPrintf("[CANCELLED].\n");
         return false;
     }
 
-    uiInterface.ShowProgress("", 100, false);
+    uiInterface.ShowProgress.fire("", 100, false);
 
     LogPrintf("[DONE].\n");
     return true;
