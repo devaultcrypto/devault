@@ -111,9 +111,9 @@
       create net-specific data directory early in init process
       [LINTER] Enforce using angle brackets in #include directives
       Make CMutableTransaction constructor explicit
-      bitcoin-tx: Remove unused for loop
-      Remove redundant code in MutateTxSign(CMutableTransaction&, const std::string&)
-      Kill MAX_FREE_TRANSACTION_CREATE_SIZE
+##### bitcoin-tx: Remove unused for loop
+##### Remove redundant code in MutateTxSign(CMutableTransaction&, const std::string&)
+##### Kill MAX_FREE_TRANSACTION_CREATE_SIZE
 ##### [txindex] transaction Hash -> TxId
       Explicitly call out updating makeseeds.py after major releases
       Directly use CMutableTransaction more often in txvaidationcache_tests.cpp
