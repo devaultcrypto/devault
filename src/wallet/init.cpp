@@ -24,6 +24,7 @@ public:
 
     //! Return the wallets help message.
     void AddWalletOptions() const override;
+    //std::string GetHelpString(bool showDebug) const override;
 
     //! Wallets parameter interaction
     bool ParameterInteraction() const override;
@@ -56,7 +57,8 @@ public:
     void Close() const override;
 };
 
-const WalletInitInterface &g_wallet_init_interface = WalletInit();
+static WalletInit g_wallet_init;
+const WalletInitInterface &g_wallet_init_interface = g_wallet_init;
 
 void WalletInit::AddWalletOptions() const {
     gArgs.AddArg("-disablewallet",
