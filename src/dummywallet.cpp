@@ -9,17 +9,17 @@
 class DummyWalletInit : public WalletInitInterface {
 public:
     bool HasWalletSupport() const override { return false; }
-    std::string GetHelpString(bool showDebug) override { return std::string{}; }
-    bool ParameterInteraction() override { return true; }
-    void RegisterRPC(CRPCTable &) override {}
-    bool Verify(const CChainParams &chainParams) override { return true; }
+    std::string GetHelpString(bool showDebug) const override { return std::string{}; }
+    bool ParameterInteraction() const override { return true; }
+    void RegisterRPC(CRPCTable &) const override {}
+    bool Verify(const CChainParams &chainParams) const override { return true; }
     bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase,
-	      const std::vector<std::string>& words) override { return true; }
-    bool CheckIfWalletExists(const CChainParams &chainParams) override { return false; }
-    void Start(CScheduler &scheduler) override {}
-    void Flush() override {}
-    void Stop() override {}
-    void Close() override {}
+              const std::vector<std::string>& words) override { return true; }
+    bool CheckIfWalletExists(const CChainParams &chainParams) const override { return false; }
+    void Start(CScheduler &scheduler) const override {}
+    void Flush() const override {}
+    void Stop() const override {}
+    void Close() const override {}
 };
 
 static DummyWalletInit g_wallet_init;
