@@ -41,4 +41,4 @@ public:
     virtual ~WalletInitInterface() = default;
 };
 
-extern WalletInitInterface& g_wallet_init_interface;
+extern const WalletInitInterface& g_wallet_init_interface;

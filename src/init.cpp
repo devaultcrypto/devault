@@ -72,7 +72,6 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
 
-
 #if ENABLE_ZMQ
 static CZMQNotificationInterface *pzmqNotificationInterface = nullptr;
 #endif
@@ -1810,6 +1809,13 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
 
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
     GetMainSignals().RegisterWithMempoolSignals(g_mempool);
+
+    /**
+     * Register RPC commands regardless of -server setting so they will be
+     * available in the GUI RPC console even if external calls are disabled.
+     */
+    RegisterAllRPCCommands(config, rpcServer, tableRPC);
+    g_wallet_init_interface.RegisterRPC(tableRPC);
 
     /**
      * Start the RPC server.  It will be started in "warmup" mode and not
