@@ -313,6 +313,20 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
         return NullUniValue;
     }
 
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts") &&
+        request.strMethod == "getaccountaddress") {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "getaccountaddress (Deprecated, will be removed in v0.21. To "
+                "use this command, start bitcoind with "
+                "-deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(
+            RPC_METHOD_DEPRECATED,
+            "getaccountaddress is deprecated and will be removed in v0.21. To "
+            "use this command, start bitcoind with -deprecatedrpc=accounts.");
+    }
+
     if (request.fHelp || request.params.size() < 1 ||
         request.params.size() > 2) {
         throw std::runtime_error(
@@ -423,6 +437,19 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = wallet.get();
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
+    }
+
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts") &&
+        request.strMethod == "setaccount") {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "setaccount (Deprecated, will be removed in v0.21. To use this "
+                "command, start bitcoind with -deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(
+            RPC_METHOD_DEPRECATED,
+            "setaccount is deprecated and will be removed in v0.21. To use "
+            "this command, start bitcoind with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() != 2) {
@@ -1090,6 +1117,20 @@ UniValue getreceivedbylabel(const Config &config,
         return NullUniValue;
     }
 
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts") &&
+        request.strMethod == "getreceivedbyaccount") {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "getreceivedbyaccount (Deprecated, will be removed in v0.21. "
+                "To use this command, start bitcoind with "
+                "-deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(RPC_METHOD_DEPRECATED,
+                           "getreceivedbyaccount is deprecated and will be "
+                           "removed in v0.21. To use this command, start "
+                           "bitcoind with -deprecatedrpc=accounts.");
+    }
+
     if (request.fHelp || request.params.size() < 1 ||
         request.params.size() > 2) {
         throw std::runtime_error(
@@ -1281,6 +1322,18 @@ static UniValue movecmd(const Config &config, const JSONRPCRequest &request) {
 
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
+    }
+
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts")) {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "move (Deprecated, will be removed in v0.21. To use this "
+                "command, start bitcoind with -deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(
+            RPC_METHOD_DEPRECATED,
+            "move is deprecated and will be removed in v0.21. To use this "
+            "command, start bitcoind with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() < 3 ||
@@ -1985,6 +2038,20 @@ UniValue listreceivedbylabel(const Config &config,
         return NullUniValue;
     }
 
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts") &&
+        request.strMethod == "listreceivedbyaccount") {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "listreceivedbyaccount (Deprecated, will be removed in v0.21. "
+                "To use this command, start bitcoind with "
+                "-deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(RPC_METHOD_DEPRECATED,
+                           "listreceivedbyaccount is deprecated and will be "
+                           "removed in v0.21. To use this command, start "
+                           "bitcoind with -deprecatedrpc=accounts.");
+    }
+
     if (request.fHelp || request.params.size() > 3) {
         throw std::runtime_error(
             "listreceivedbylabel ( minconf include_empty include_watchonly)\n"
@@ -2347,6 +2414,18 @@ static UniValue listaccounts(const Config &config,
 
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
+    }
+
+    if (!IsDeprecatedRPCEnabled(gArgs, "accounts")) {
+        if (request.fHelp) {
+            throw std::runtime_error(
+                "listaccounts (Deprecated, will be removed in v0.21. To use "
+                "this command, start bitcoind with -deprecatedrpc=accounts)");
+        }
+        throw JSONRPCError(
+            RPC_METHOD_DEPRECATED,
+            "listaccounts is deprecated and will be removed in v0.21. To use "
+            "this command, start bitcoind with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() > 2) {
