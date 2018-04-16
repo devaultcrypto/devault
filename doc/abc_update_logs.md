@@ -2728,9 +2728,9 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       [depends] mac_alias 2.0.6, ds_store 1.1.2
       Add more methods to Span class
       Fix comment layout in client.h
-      Deprecate wallet 'account' API
-      [wallet] Deprecate account RPC methods
-      [wallet] [rpc] Remove duplicate entries in rpcwallet.cpp's CRPCCommand table
+##### Deprecate wallet 'account' API
+##### [wallet] Deprecate account RPC methods
+##### [wallet] [rpc] Remove duplicate entries in rpcwallet.cpp's CRPCCommand table
       [tests] Rename rpc_listtransactions.py to wallet_listtransactions.py
 ####  Merge #12892: [wallet] [rpc] introduce 'label' API for wallet
       Merge #9894: remove 'label' filter for rpc command help
