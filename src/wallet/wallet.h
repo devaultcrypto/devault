@@ -31,8 +31,10 @@
 #include <utility>
 #include <vector>
 
-typedef CWallet *CWalletRef;
-extern std::vector<CWalletRef> vpwallets;
+bool AddWallet(CWallet *wallet);
+bool RemoveWallet(CWallet *wallet);
+std::vector<CWallet *> GetWallets();
+CWallet *GetWallet(const std::string &name);
 
 /**
  * Settings
@@ -541,9 +543,6 @@ public:
     KeyType GetType() const { return ktype; }
     std::string ToString() const;
 
-    inline CInputCoin GetInputCoin() const {
-        return CInputCoin(tx->tx, i, nInputBytes);
-    }
 };
 
 /** Private key that includes an expiration date in case it never gets used. */
@@ -1320,11 +1319,11 @@ std::vector<CTxDestination> GetAllDestinationsForKey(const CPubKey &key);
 /** RAII object to check and reserve a wallet rescan */
 class WalletRescanReserver {
 private:
-    CWalletRef m_wallet;
+    CWallet *m_wallet;
     bool m_could_reserve;
 
 public:
-    explicit WalletRescanReserver(CWalletRef w)
+    explicit WalletRescanReserver(CWallet *w)
         : m_wallet(w), m_could_reserve(false) {}
 
     bool reserve() {
