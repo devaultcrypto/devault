@@ -2929,6 +2929,8 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
                 uiInterface.NotifyBlockTip(fInitialDownload, pindexNewTip);
             }
         }
+        // When we reach this point, we switched to a new tip (stored in
+        // pindexNewTip).
 
         if (nStopAtHeight && pindexNewTip &&
             pindexNewTip->nHeight >= nStopAtHeight) {
