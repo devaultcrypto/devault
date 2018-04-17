@@ -55,11 +55,48 @@ namespace bls {
     class Signature;
 }
 
-std::vector<CWalletRef> vpwallets;
+static std::vector<CWallet *> vpwallets;
 
 /** Transaction fee set by the user */
 CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
+
+bool AddWallet(CWallet *wallet) {
+    assert(wallet);
+    std::vector<CWallet *>::const_iterator i =
+        std::find(vpwallets.begin(), vpwallets.end(), wallet);
+    if (i != vpwallets.end()) {
+        return false;
+    }
+    vpwallets.push_back(wallet);
+    return true;
+}
+
+bool RemoveWallet(CWallet *wallet) {
+    assert(wallet);
+    std::vector<CWallet *>::iterator i =
+        std::find(vpwallets.begin(), vpwallets.end(), wallet);
+    if (i == vpwallets.end()) {
+        return false;
+    }
+    vpwallets.erase(i);
+    return true;
+}
+
+std::vector<CWallet *> GetWallets() {
+    return vpwallets;
+}
+
+CWallet *GetWallet(const std::string &name) {
+    for (CWallet *wallet : vpwallets) {
+        if (wallet->GetName() == name) {
+            return wallet;
+        }
+    }
+    return nullptr;
+}
+
+static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
 
 const char *DEFAULT_WALLET_DAT = "wallet.dat";
 

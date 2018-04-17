@@ -430,7 +430,7 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
       if (!pwallet) {
         return false;
       }
-      vpwallets.push_back(pwallet);
+      AddWallet(pwallet);
       break; // Exit after 1st wallet file
     }
 
@@ -438,26 +438,26 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
 }
 
 void WalletInit::Start(CScheduler &scheduler) const {
-    for (CWalletRef pwallet : vpwallets) {
+    for (CWallet *pwallet : GetWallets()) {
         pwallet->postInitProcess(scheduler);
     }
 }
 
 void WalletInit::Flush() const {
-    for (CWalletRef pwallet : vpwallets) {
+    for (CWallet *pwallet : GetWallets()) {
         pwallet->Flush(false);
     }
 }
 
 void WalletInit::Stop() const {
-    for (CWalletRef pwallet : vpwallets) {
+    for (CWallet *pwallet : GetWallets()) {
         pwallet->Flush(true);
     }
 }
 
 void WalletInit::Close() const {
-    for (CWalletRef pwallet : vpwallets) {
+    for (CWallet *pwallet : GetWallets()) {
+        RemoveWallet(pwallet);
         delete pwallet;
     }
-    vpwallets.clear();
 }

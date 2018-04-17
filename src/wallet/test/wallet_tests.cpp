@@ -507,8 +507,8 @@ TEST_CASE("rescan, TestChain100Setup") {
     // before the missing block, and success for a key whose creation time is
     // after.
     {
-        CWallet wallet(Params());
-        vpwallets.insert(vpwallets.begin(), &wallet);
+        CWallet wallet(Params(), "dummy", CWalletDBWrapper::CreateDummy());
+        AddWallet(&wallet);
         UniValue keys;
         keys.setArray();
         UniValue key;
@@ -547,10 +547,9 @@ TEST_CASE("rescan, TestChain100Setup") {
                       "rescanning the relevant blocks (see -reindex and "
                       "-rescan options).\"}},{\"success\":true}]",
                       0, oldTip->GetBlockTimeMax(), TIMESTAMP_WINDOW));
-        vpwallets.erase(vpwallets.begin());
+        RemoveWallet(&wallet);
     }
 }
-#endif
 
 // Check that GetImmatureCredit() returns a newly calculated value instead of
 // the cached value after a MarkDirty() call.
