@@ -56,7 +56,7 @@ TEST_CASE("manythreads") {
   size_t nTasks = microTasks.getQueueInfo(first, last);
   BOOST_CHECK(nTasks == 0);
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 100; ++i) {
     std::chrono::system_clock::time_point t = now + std::chrono::microseconds(randomMsec(rng));
     std::chrono::system_clock::time_point tReschedule = now + std::chrono::microseconds(500 + randomMsec(rng));
     int whichCounter = zeroToNine(rng);
