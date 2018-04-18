@@ -2168,14 +2168,20 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
 void FlushStateToDisk() {
     CValidationState state;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FlushStateMode::ALWAYS);
+    if (!FlushStateToDisk(chainparams, state, FlushStateMode::ALWAYS)) {
+        LogPrintf("%s: failed to flush state (%s)\n", __func__,
+                  FormatStateMessage(state));
+    }
 }
 
 void PruneAndFlush() {
     CValidationState state;
     fCheckForPruning = true;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FlushStateMode::NONE);
+    if (!FlushStateToDisk(chainparams, state, FlushStateMode::NONE)) {
+        LogPrintf("%s: failed to flush state (%s)\n", __func__,
+                  FormatStateMessage(state));
+    }
 }
 
 /**
@@ -4103,7 +4109,7 @@ bool ProcessNewBlock(const Config &config,
         if (!ret) {
             GetMainSignals().BlockChecked(*pblock, state);
             return error("%s: AcceptBlock FAILED (%s)", __func__,
-                         state.GetDebugMessage());
+                         FormatStateMessage(state));
         }
     }
 
@@ -4112,7 +4118,8 @@ bool ProcessNewBlock(const Config &config,
     // Only used to report errors, not invalidity - ignore it
     CValidationState state;
     if (!ActivateBestChain(config, state, pblock)) {
-        return error("%s: ActivateBestChain failed", __func__);
+        return error("%s: ActivateBestChain failed (%s)", __func__,
+                     FormatStateMessage(state));
     }
 
     return true;
@@ -4251,8 +4258,11 @@ static void FindFilesToPruneManual(std::set<int> &setFilesToPrune,
 void PruneBlockFilesManual(int nManualPruneHeight) {
     CValidationState state;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FlushStateMode::NONE,
-                     nManualPruneHeight);
+    if (!FlushStateToDisk(chainparams, state, FlushStateMode::NONE,
+                          nManualPruneHeight)) {
+        LogPrintf("%s: failed to flush state (%s)\n", __func__,
+                  FormatStateMessage(state));
+    }
 }
 
 /**
@@ -4536,6 +4546,8 @@ bool LoadChainTip(const Config &config) {
         LogPrintf("%s: Connecting genesis block...\n", __func__);
         CValidationState state;
         if (!ActivateBestChain(config, state)) {
+            LogPrintf("%s: failed to activate chain (%s)\n", __func__,
+                      FormatStateMessage(state));
             return false;
         }
     }
@@ -4692,9 +4704,10 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                     pindex->nHeight, pindex->GetBlockHash().ToString());
             }
             if (!ConnectBlock(config, block, state, pindex, coins, false, true)) {
-                return error(
-                    "VerifyDB(): *** found unconnectable block at %d, hash=%s",
-                    pindex->nHeight, pindex->GetBlockHash().ToString());
+                return error("VerifyDB(): *** found unconnectable block at %d, "
+                             "hash=%s (%s)",
+                             pindex->nHeight, pindex->GetBlockHash().ToString(),
+                             FormatStateMessage(state));
             }
         }
     }
@@ -4852,13 +4865,15 @@ bool RewindBlockIndex(const Config &config) {
         }
 
         if (!DisconnectTip(config, state, nullptr)) {
-            return error(
-                "RewindBlockIndex: unable to disconnect block at height %i",
-                pindex->nHeight);
+            return error("RewindBlockIndex: unable to disconnect block at "
+                         "height %i (%s)",
+                         pindex->nHeight, FormatStateMessage(state));
         }
 
         // Occasionally flush state to disk.
         if (!FlushStateToDisk(params, state, FlushStateMode::PERIODIC)) {
+            LogPrintf("RewindBlockIndex: unable to flush state to disk (%s)\n",
+                      FormatStateMessage(state));
             return false;
         }
     }
@@ -4886,7 +4901,9 @@ bool RewindBlockIndex(const Config &config) {
         // and skip it here, we're about to -reindex-chainstate anyway, so
         // it'll get called a bunch real soon.
         if (!FlushStateToDisk(params, state, FlushStateMode::ALWAYS)) {
-            return false;
+          LogPrintf("RewindBlockIndex: unable to flush state to disk (%s)\n",
+                    FormatStateMessage(state));
+          return false;
         }
     }
 
@@ -4970,7 +4987,8 @@ bool LoadGenesisBlock(const CChainParams &chainparams) {
         CBlockIndex *pindex = AddToBlockIndex(block);
         CValidationState state;
         if (!ReceivedBlockTransactions(block, state, pindex, blockPos)) {
-            return error("%s: genesis block not accepted", __func__);
+            return error("%s: genesis block not accepted (%s)", __func__,
+                         FormatStateMessage(state));
         }
     } catch (const std::runtime_error &e) {
         return error("%s: failed to write genesis block: %s", __func__,
