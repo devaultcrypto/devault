@@ -7,9 +7,6 @@ This release includes the following features and fixes since 1.2.1 release:
    configured with `-walletdir` parameter.
 
 This release includes the following features and fixes:
- - The `inactivehdmaster` property in the `dumpwallet` output has been
-   deprecated in favor of `inactivehdseed`. `inactivehdmaster` will be removed
-   in V0.21.
 
 'label' and 'account' APIs for wallet
 -------------------------------------
@@ -47,3 +44,6 @@ Here are the changes to RPC methods:
 | `sendmany`             | The `account` named parameter has been renamed to `dummy`. If provided, the `dummy` parameter must be set to the empty string, unless running with the `-deprecatedrpc=accounts` argument (in which case functionality is unchanged). |
 | `listtransactions`     | The `account` named parameter has been renamed to `dummy`. If provided, the `dummy` parameter must be set to the string `*`, unless running with the `-deprecatedrpc=accounts` argument (in which case functionality is unchanged). |
 | `getbalance`           | `account`, `minconf` and `include_watchonly` parameters are deprecated, and can only be used if running with '-deprecatedrpc=accounts' |
+
+ - `getlabeladdress` has been removed and replaced with `getaccountaddress`
+   until v0.21 at which time `getaccountaddress` will also be removed.  To

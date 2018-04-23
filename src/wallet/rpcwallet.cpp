@@ -306,80 +306,6 @@ std::string GetLabelDestination(CWallet *const pwallet, const std::string &label
     return dest;
 }
 
-UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
-    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    CWallet *const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    if (!IsDeprecatedRPCEnabled(gArgs, "accounts") &&
-        request.strMethod == "getaccountaddress") {
-        if (request.fHelp) {
-            throw std::runtime_error(
-                "getaccountaddress (Deprecated, will be removed. To "
-                "use this command, start devaultd with "
-                "-deprecatedrpc=accounts)");
-        }
-        throw JSONRPCError(
-            RPC_METHOD_DEPRECATED,
-            "getaccountaddress is deprecated and will be removed. To "
-            "use this command, start devaultd with -deprecatedrpc=accounts.");
-    }
-
-    if (request.fHelp || request.params.size() < 1 ||
-        request.params.size() > 2) {
-        throw std::runtime_error(
-            "getlabeladdress \"label\" ( force ) \n"
-            "\nReturns the default receiving address for this label. This will "
-            "reset to a fresh address once there's a transaction that spends "
-            "to it.\n"
-            "\nArguments:\n"
-            "1. \"label\"         (string, required) The label for the "
-            "address. It can also be set to the empty string \"\" to represent "
-            "the default label.\n"
-            "2. \"force\"         (bool, optional) Whether the label should be "
-            "created if it does not yet exist. If False, the RPC will return "
-            "an error if called with a label that doesn't exist.\n"
-            "                                    Defaults to false (unless the "
-            "getaccountaddress method alias is being called, in which case "
-            "defaults to true for backwards compatibility).\n"
-            "\nResult:\n"
-            "\"address\"          (string) The current receiving address for "
-            "the label.\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getlabeladdress", "") +
-            HelpExampleCli("getlabeladdress", "\"\"") +
-            HelpExampleCli("getlabeladdress", "\"mylabel\"") +
-            HelpExampleRpc("getlabeladdress", "\"mylabel\""));
-    }
-    auto locked_chain = pwallet->chain().lock();
-    LOCK(pwallet->cs_wallet);
-
-    // Parse the label first so we don't generate a key if there's an error
-    std::string label = LabelFromValue(request.params[0]);
-    bool force = request.strMethod == "getaccountaddress" ? true : false;
-    if (!request.params[1].isNull()) {
-        force = request.params[1].get_bool();
-    }
-
-    bool label_found = false;
-    for (const auto& item : pwallet->mapAddressBook) {
-        if (item.second.name == label) {
-            label_found = true;
-            break;
-        }
-    }
-    if (!force && !label_found) {
-        throw JSONRPCError(RPC_WALLET_INVALID_LABEL_NAME,
-                           std::string("No addresses with label " + label));
-    }
-
-    UniValue ret(UniValue::VSTR);
-    ret = GetLabelDestination(pwallet, label);
-    return ret;
-}
-
 static UniValue getrawchangeaddress(const Config &config,
                                     const JSONRPCRequest &request) {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
@@ -477,24 +403,28 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
                            "Invalid Devault address");
     }
 
+    std::string old_label = pwallet->mapAddressBook[dest].name;
     std::string label = LabelFromValue(request.params[1]);
 
     if (IsMine(*pwallet, dest)) {
-        // Detect when changing the label of an address that is the receiving
-        // address of another label. If so, delete the account record for it.
-        // Labels, unlike addresses, can be deleted, and if we wouldn't do this,
-        // the record would stick around forever.
-        if (pwallet->mapAddressBook.count(dest)) {
-            std::string old_label = pwallet->mapAddressBook[dest].name;
-            if (old_label != label &&
-                dest_label == GetLabelDestination(pwallet, old_label)) {
-                pwallet->DeleteLabel(old_label);
-            }
-        }
-
-        pwallet->SetAddressBook(dest, label, "receive");
     } else {
         pwallet->SetAddressBook(dest, label, "send");
+    }
+
+    // Detect when there are no addresses using this label.
+    // If so, delete the account record for it. Labels, unlike addresses, can be
+    // deleted, and if we wouldn't do this, the record would stick around
+    // forever.
+    bool found_address = false;
+    for (const auto &item :
+         pwallet->mapAddressBook) {
+        if (item.second.name == label) {
+            found_address = true;
+            break;
+        }
+    }
+    if (!found_address) {
+        pwallet->DeleteLabel(old_label);
     }
 
     return NullUniValue;
@@ -5115,7 +5045,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
     { "wallet",             "getaddressesbylabels",         getaddressesbylabels,         {} },
     { "wallet",             "getreceivedbylabel",           getreceivedbylabel,           {"label","minconf"} },
     { "wallet",             "getreceivedbyaccount",         getreceivedbylabel,           {"account","minconf"} },
@@ -5156,9 +5085,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "walletpassphrase",             walletpassphrase,             {"passphrase","timeout"} },
 
     /** Account functions (deprecated) */
-    { "wallet",             "getaccountaddress",            getlabeladdress,              {"account"} },
-    //    { "wallet",             "getaccount",                   getaccount,                   {"address"} },
-    //    { "wallet",             "getaddressesbyaccount",        getaddressesbyaccount,        {"account"} },
     { "wallet",             "getreceivedbyaccount",         getreceivedbylabel,           {"account","minconf"} },
     { "wallet",             "listaccounts",                 listaccounts,                 {"minconf","include_watchonly"} },
     { "wallet",             "listreceivedbyaccount",        listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
@@ -5166,7 +5092,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "move",                         movecmd,                      {"fromaccount","toaccount","amount","minconf","comment"} },
 
     /** Label functions (to replace non-balance account functions) */
-    { "wallet",             "getlabeladdress",              getlabeladdress,              {"label","force"} },
     { "wallet",             "getaddressesbylabel",          getaddressesbylabel,          {"label"} },
     { "wallet",             "getreceivedbylabel",           getreceivedbylabel,           {"label","minconf"} },
     { "wallet",             "listlabels",                   listlabels,                   {"purpose"} },
