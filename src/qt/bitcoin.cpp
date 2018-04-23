@@ -506,8 +506,12 @@ void BitcoinApplication::startThread() {
 }
 
 void BitcoinApplication::parameterSetup() {
-  m_node.initLogging();
-  m_node.initParameterInteraction();
+    // Default printtoconsole to false for the GUI. GUI programs should not
+    // print to the console unnecessarily.
+    gArgs.SoftSetBoolArg("-printtoconsole", false);
+
+    m_node.initLogging();
+    m_node.initParameterInteraction();
 }
 
 void BitcoinApplication::requestInitialize(
