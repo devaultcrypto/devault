@@ -33,7 +33,7 @@ static uint256 SignatureHashOld(CScript scriptCode, const CTransaction &txTo, un
 
   // In case concatenating two scripts ends up with two codeseparators, or an
   // extra one at the end, this prevents all those possible incompatibilities.
-  scriptCode.FindAndDelete(CScript(OP_CODESEPARATOR));
+  FindAndDelete(scriptCode, CScript(OP_CODESEPARATOR));
 
   // Blank out other inputs' signatures
   for (auto &in : txTmp.vin) {
