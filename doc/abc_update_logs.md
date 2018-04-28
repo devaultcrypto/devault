@@ -891,8 +891,8 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       Merge #11491: [gui] Add proxy icon in statusbar
 XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
       ui: Support wallets unloaded dynamically
-      rpc: Add unloadwallet RPC, release notes, and tests
-      rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
+#     rpc: Add unloadwallet RPC, release notes, and tests
+#     rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
 #     [mempool] Mark mempool import fails that were found in mempool as 'already there'
       [CMAKE] Propagate requirements for cmake >= 3.12
       Merge #11050: Avoid treating null RPC arguments different from missing arguments
@@ -909,9 +909,9 @@ XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in Walle
 #     Decodehextx scripts sanity check
       Update seeder files to use fprintf() instead of printf()
 #     Merge #9598: Improve readability by removing redundant casts to same type (on all platforms)
-      Merge #13275: Qt: use [default wallet] as name for wallet with no name
-      Merge #13506: Qt: load wallet in UI after possible init aborts
-      Merge #13564: [wallet] loadwallet shouldn't create new wallets.
+#     Merge #13275: Qt: use [default wallet] as name for wallet with no name
+#     Merge #13506: Qt: load wallet in UI after possible init aborts
+#     Merge #13564: [wallet] loadwallet shouldn't create new wallets.
       Merge #13097: ui: Support wallets loaded dynamically
       Merge #13273: Qt/Bugfix: fix handling default wallet with no name
       Version Bump to v20.5
@@ -925,11 +925,11 @@ XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in Walle
       mempool, validation: Explain cs_main locking semantics
       [build-configurations] Make BUILD_DIR configurable
       [LINTER] Check for header guard closure comment
-      Merge #13058: [wallet] `createwallet` RPC - create new wallet at runtime
+#     Merge #13058: [wallet] `createwallet` RPC - create new wallet at runtime
       Update Seeder to use fsbridge::fopen() instead of fopen()
 XXXXX Make objects in range declarations immutable by default. Avoid unnecessary copying of objects in range declarations.
 #     cli: Ignore libevent warnings
-      Merge #13252: Wallet: Refactor ReserveKeyFromKeyPool for safety
+#     Merge #13252: Wallet: Refactor ReserveKeyFromKeyPool for safety
       [build-configurations] Resurface the more informative error message when ABC_BUILD_NAME is not set
       Added translations for new send coins dialog box
       Merge #13158: [Qt]: Improve sendcoinsdialog readability
