@@ -59,6 +59,11 @@ static void SetupCliArgs() {
                   DEFAULT_RPCCONNECT),
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg(
+        "-rpccookiefile=<loc>",
+        _("Location of the auth cookie. Relative paths will be prefixed by a "
+          "net-specific datadir location. (default: data dir)"),
+        false, OptionsCategory::OPTIONS);
+    gArgs.AddArg(
         "-rpcport=<port>",
         strprintf(
             _("Connect to JSON-RPC on <port> (default: %u or testnet: %u)"),
@@ -92,6 +97,9 @@ static void SetupCliArgs() {
                    "wallet filename in bitcoind directory, required if "
                    "bitcoind/-Qt runs with multiple wallets)"),
                  false, OptionsCategory::OPTIONS);
+    // Hidden
+    gArgs.AddArg("-h", "", false, OptionsCategory::HIDDEN);
+    gArgs.AddArg("-help", "", false, OptionsCategory::HIDDEN);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -118,7 +126,12 @@ static int AppInitRPC(int argc, char *argv[]) {
     // Parameters
     //
     SetupCliArgs();
-    gArgs.ParseParameters(argc, argv);
+    std::string error;
+    if (!gArgs.ParseParameters(argc, argv, error)) {
+        fprintf(stderr, "Error parsing command line arguments: %s\n",
+                error.c_str());
+        return EXIT_FAILURE;
+    }
     if (argc < 2 || HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
         std::string strUsage =
             PACKAGE_NAME " RPC client version " + FormatFullVersion() + "\n";
@@ -150,10 +163,9 @@ static int AppInitRPC(int argc, char *argv[]) {
                 gArgs.GetArg("-datadir", "").c_str());
         return EXIT_FAILURE;
     }
-    try {
-        gArgs.ReadConfigFile(gArgs.GetArg("-conf", BITCOIN_CONF_FILENAME));
-    } catch (const std::exception &e) {
-        fprintf(stderr, "Error reading configuration file: %s\n", e.what());
+    if (!gArgs.ReadConfigFiles(error, true)) {
+        fprintf(stderr, "Error reading configuration file: %s\n",
+                error.c_str());
         return EXIT_FAILURE;
     }
     // Check for -testnet or -regtest parameter (BaseParams() calls are only
