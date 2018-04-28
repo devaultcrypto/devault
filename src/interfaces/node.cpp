@@ -49,11 +49,12 @@ namespace interfaces {
 namespace {
 
     class NodeImpl : public Node {
-        void parseParameters(int argc, const char *const argv[]) override {
-            gArgs.ParseParameters(argc, argv);
+        bool parseParameters(int argc, const char *const argv[],
+                             std::string &error) override {
+            return gArgs.ParseParameters(argc, argv, error);
         }
-        void readConfigFile(const std::string &conf_path) override {
-            gArgs.ReadConfigFile(conf_path);
+        bool readConfigFiles(std::string &error) override {
+            return gArgs.ReadConfigFiles(error);
         }
         bool softSetArg(const std::string &arg,
                         const std::string &value) override {
