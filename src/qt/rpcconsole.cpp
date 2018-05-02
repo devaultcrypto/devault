@@ -513,9 +513,8 @@ void RPCExecutor::request(const QString &command, const QString &walletID) {
 
 RPCConsole::RPCConsole(interfaces::Node &node,
                        const PlatformStyle *_platformStyle, QWidget *parent)
-    : QWidget(parent), m_node(node), ui(new Ui::RPCConsole), clientModel(nullptr),
-      historyPtr(0), platformStyle(_platformStyle), peersTableContextMenu(nullptr),
-      banTableContextMenu(nullptr), consoleFontSize(0) {
+    : QWidget(parent), m_node(node), ui(new Ui::RPCConsole),
+      platformStyle(_platformStyle) {
     ui->setupUi(this);
     QSettings settings;
     if (!restoreGeometry(
