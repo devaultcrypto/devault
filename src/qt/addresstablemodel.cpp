@@ -154,7 +154,7 @@ public:
 };
 
 AddressTableModel::AddressTableModel(WalletModel *parent)
-    : QAbstractTableModel(parent), walletModel(parent), priv(nullptr) {
+    : QAbstractTableModel(parent), walletModel(parent) {
     columns << tr("Label") << tr("Address");
     priv = new AddressTablePriv(this);
     priv->refreshAddressTable(parent->wallet());
