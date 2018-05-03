@@ -3971,12 +3971,13 @@ static UniValue listunspent(const Config &config,
     std::vector<COutput> vecOutputs;
     {
         auto locked_chain = pwallet->chain().lock();
-        LOCK(pwallet->cs_wallet);
+        LOCK2(cs_main, pwallet->cs_wallet);
         pwallet->AvailableCoins(*locked_chain, vecOutputs, !include_unsafe, nullptr,
                                 nMinimumAmount, nMaximumAmount, nMinimumSumAmount,
                                 nMaximumCount, nMinDepth, nMaxDepth);
     }
-    
+    LOCK(pwallet->cs_wallet);
+
     for (const COutput &out : vecOutputs) {
         CTxDestination address;
         const CScript &scriptPubKey = out.tx->tx->vout[out.i].scriptPubKey;
@@ -3994,9 +3995,12 @@ static UniValue listunspent(const Config &config,
         if (fValidAddress) {
             entry.pushKV("address", EncodeDestination(address));
 
-            if (pwallet->mapAddressBook.count(address)) {
-                entry.pushKV("label", pwallet->mapAddressBook[address].name);
-                entry.pushKV("account", pwallet->mapAddressBook[address].name);
+            auto i = pwallet->mapAddressBook.find(address);
+            if (i != pwallet->mapAddressBook.end()) {
+                entry.pushKV("label", i->second.name);
+                if (IsDeprecatedRPCEnabled(gArgs, "accounts")) {
+                    entry.pushKV("account", i->second.name);
+                }
             }
 
             if (scriptPubKey.IsPayToScriptHash()) {
