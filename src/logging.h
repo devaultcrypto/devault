@@ -86,7 +86,7 @@ public:
     ~Logger();
 
     /** Send a string to the log output */
-    int LogPrintStr(const std::string &str);
+    void LogPrintStr(const std::string &str);
 
     bool OpenDebugLog();
     void ShrinkDebugFile();
