@@ -553,7 +553,8 @@ static std::string EntryDescriptionString() {
            "       ... ]\n";
 }
 
-static void entryToJSON(UniValue &info, const CTxMemPoolEntry &e) {
+static void entryToJSON(UniValue &info, const CTxMemPoolEntry &e)
+    EXCLUSIVE_LOCKS_REQUIRED(g_mempool.cs) {
     AssertLockHeld(g_mempool.cs);
 
     info.pushKV("size", (int)e.GetTxSize());
