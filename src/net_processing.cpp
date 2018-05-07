@@ -1826,6 +1826,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                 LogPrint(BCLog::NET, "Unparseable reject message received\n");
             }
         }
+        return true;
     }
 
     else if (strCommand == NetMsgType::VERSION) {
