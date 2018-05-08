@@ -111,16 +111,14 @@ bool AppInit(int argc, char *argv[]) {
 
     // Process help and version before taking care about datadir
     if (HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
-        std::string strUsage = strprintf(_("%s Daemon"), _(PACKAGE_NAME)) +
-                               " " + _("version") + " " + FormatFullVersion() +
-                               "\n";
+        std::string strUsage =
+            PACKAGE_NAME " Daemon version " + FormatFullVersion() + "\n";
 
         if (gArgs.IsArgSet("-version")) {
             strUsage += FormatParagraph(LicenseInfo());
         } else {
-            strUsage += "\n" + _("Usage:") + "\n" +
-                        "  devaultd [options]                     " +
-                        strprintf(_("Start %s Daemon"), _(PACKAGE_NAME)) + "\n";
+            strUsage += "\nUsage:  devaultd [options]                     "
+                        "Start " PACKAGE_NAME " Daemon\n";
 
             strUsage += "\n" + HelpMessage(HelpMessageMode::BITCOIND);
         }

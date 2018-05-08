@@ -54,12 +54,13 @@ static int AppInitRawTx(int argc, char *argv[]) {
     if (argc < 2 || HelpRequested(gArgs)) {
         // First part of help message is specific to this utility
         std::string strUsage =
-            strprintf(_("%s devault-tx utility version"), _(PACKAGE_NAME)) +
-            " " + FormatFullVersion() + "\n\n" + _("Usage:") + "\n" +
-            "  devault-tx [options] <hex-tx> [commands]  " +
-            _("Update hex-encoded devault transaction") + "\n" +
-            "  devault-tx [options] -create [commands]   " +
-            _("Create hex-encoded devault transaction") + "\n" + "\n";
+            PACKAGE_NAME " devault-tx utility version " + FormatFullVersion() +
+            "\n\n" +
+            "Usage:  devault-tx [options] <hex-tx> [commands]  Update "
+            "hex-encoded devault transaction\n" +
+            "or:     devault-tx [options] -create [commands]   Create "
+            "hex-encoded devault transaction\n" +
+            "\n";
 
         fprintf(stdout, "%s", strUsage.c_str());
 
