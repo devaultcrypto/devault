@@ -114,20 +114,18 @@ static int AppInitRPC(int argc, char *argv[]) {
     gArgs.ParseParameters(argc, argv);
     if (argc < 2 || HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
         std::string strUsage =
-            strprintf(_("%s RPC client version"), _(PACKAGE_NAME)) + " " +
-            FormatFullVersion() + "\n";
+            PACKAGE_NAME " RPC client version " + FormatFullVersion() + "\n";
         if (!gArgs.IsArgSet("-version")) {
-            strUsage +=
-                "\n" + _("Usage:") + "\n" +
-                "  devault-cli [options] <command> [params]  " +
-                strprintf(_("Send command to %s"), _(PACKAGE_NAME)) + "\n" +
-                "  devault-cli [options] -named <command> [name=value] ... " +
-                strprintf(_("Send command to %s (with named arguments)"),
-                          _(PACKAGE_NAME)) +
-                "\n" + "  devault-cli [options] help                " +
-                _("List commands") + "\n" +
-                "  devault-cli [options] help <command>      " +
-                _("Get help for a command") + "\n";
+            strUsage += "\n"
+                        "Usage:  devault-cli [options] <command> [params]  "
+                        "Send command to " PACKAGE_NAME "\n"
+                        "or:     devault-cli [options] -named <command> "
+                        "[name=value]...  Send command to " PACKAGE_NAME
+                        " (with named arguments)\n"
+                        "or:     devault-cli [options] help                "
+                        "List commands\n"
+                        "or:     devault-cli [options] help <command>      Get "
+                        "help for a command\n";
 
             strUsage += "\n" + HelpMessageCli();
         }
