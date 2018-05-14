@@ -90,7 +90,8 @@ UniValue abortrescan(const Config &config, const JSONRPCRequest &request) {
 void ImportAddress(CWallet *, const CTxDestination &dest,
                    const std::string &strLabel);
 void ImportScript(CWallet *const pwallet, const CScript &script,
-                  const std::string &strLabel, bool isRedeemScript) {
+                  const std::string &strLabel, bool isRedeemScript) 
+    EXCLUSIVE_LOCKS_REQUIRED(pwallet->cs_wallet) {
     if (!isRedeemScript && ::IsMine(*pwallet, script) == ISMINE_SPENDABLE) {
         throw JSONRPCError(RPC_WALLET_ERROR, "The wallet already contains the "
                                              "private key for this address or "
@@ -119,7 +120,8 @@ void ImportScript(CWallet *const pwallet, const CScript &script,
 }
 
 void ImportAddress(CWallet *const pwallet, const CTxDestination &dest,
-                   const std::string &strLabel) {
+                   const std::string &strLabel) 
+    EXCLUSIVE_LOCKS_REQUIRED(pwallet->cs_wallet) {
     CScript script = GetScriptForDestination(dest);
     ImportScript(pwallet, script, strLabel, false);
     // add to address book or update label
