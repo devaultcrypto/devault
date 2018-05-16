@@ -22,6 +22,7 @@
 #include <optionsmodel.h>
 #include <platformstyle.h>
 #include <rpcconsole.h>
+#include <shutdown.h>
 #include <utilitydialog.h>
 
 #include <walletframe.h>
@@ -35,6 +36,7 @@
 #include <chain.h>
 #include <chainparams.h>
 #include <config.h>
+#include <init.h>
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 #include <ui_interface.h>

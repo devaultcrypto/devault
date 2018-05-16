@@ -25,6 +25,7 @@
 #include <script/script.h>
 #include <script/sighashtype.h>
 #include <script/sign.h>
+#include <shutdown.h>
 #include <timedata.h>
 #include <txmempool.h>
 #include <ui_interface.h>

@@ -1,5 +1,5 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -20,6 +20,7 @@
 #include <rpc/util.h>
 #include <rpc/rawtransaction.h>
 #include <rpc/server.h>
+#include <shutdown.h>
 #include <timedata.h>
 #include <reverse_iterator.h>
 #include <util/moneystr.h>
@@ -30,10 +31,7 @@
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
 #include <miner.h> // for CBlockTemplate GenerateUntilShutdown
-// Input src/init.h (not wallet/init.h) for StartShutdown
-#include <init.h>
 #include <utxo_functions.h>
-
 #include <univalue.h>
 
 #include <event2/http.h>

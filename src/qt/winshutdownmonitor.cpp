@@ -5,7 +5,7 @@
 #include <winshutdownmonitor.h>
 
 #if defined(Q_OS_WIN)
-#include <init.h>
+#include <shutdown.h>
 #include <util/system.h>
 
 #include <windows.h>
