@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2018 The Bitcoin Core developers
 // Copyright (c) 2018 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -21,15 +21,7 @@ class RPCServer;
 class WalletInitInterface;
 extern const WalletInitInterface &g_wallet_init_interface;
 
-namespace boost {
-class thread_group;
-} // namespace boost
 
-void StartShutdown();
-bool ShutdownRequested();
-void StartDialog();
-void StopDialog();
-bool StopDialogRequested();
 /** Interrupt threads */
 void Interrupt();
 /** Interrupt all script checking threads once they're out of work */

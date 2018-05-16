@@ -495,6 +495,7 @@ add_library(server
 	script/scriptcache.cpp
 	script/sigcache.cpp
 	script/ismine.cpp
+	shutdown.cpp
 	timedata.cpp
 	torcontrol.cpp
 	txdb.cpp
