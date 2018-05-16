@@ -17,6 +17,7 @@
 #include <script/sign.h>
 #include <script/standard.h>
 #include <streams.h>
+#include <shutdown.h>
 #include <sync.h>
 #include <txdb.h>
 #include <txmempool.h>

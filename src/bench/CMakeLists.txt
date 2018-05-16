@@ -56,7 +56,11 @@ add_executable(bitcoin-bench
 	${BENCH_DATA_GENERATED_HEADERS}
 )
 
-target_link_libraries(bitcoin-bench common devaultconsensus server)
+target_link_libraries(bitcoin-bench common devaultconsensus wallet server)
+
+if(BUILD_BITCOIN_WALLET)
+	target_sources(bitcoin-bench PRIVATE coin_selection.cpp)
+endif()
 
 add_custom_target(bench-bitcoin
 	COMMAND

@@ -11,7 +11,7 @@
 #include <consensus/consensus.h>
 #include <devault/rewards.h>
 #include <devault/rewards_calculation.h>
-#include <init.h> // for Shutdown
+#include <shutdown.h> // for Shutdown
 #include <logging.h>
 #include <script/standard.h>
 #include <validation.h>
