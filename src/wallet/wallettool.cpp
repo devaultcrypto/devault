@@ -20,7 +20,7 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
     return nullptr;
   }
 
-  std::unique_ptr<WalletDatabase> database(new WalletDatabase(wallet_path));
+  std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(wallet_path));
   auto &config = const_cast<Config &>(GetConfig());
   auto &chainParams = config.GetChainParams();
   // dummy chain interface
