@@ -4734,6 +4734,11 @@ bool CWallet::Verify(const CChainParams &chainParams,
         return false;
     }
 
+    // Keep same database environment instance across Verify/Recover calls
+    // below.
+    std::unique_ptr<WalletDatabase> database =
+        WalletDatabase::Create(wallet_path);
+
     try {
         if (!WalletBatch::VerifyEnvironment(wallet_path, error_string)) {
             return false;
@@ -4796,7 +4801,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     if (gArgs.GetBoolArg("-zapwallettxes", false)) {
         uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
 
-        std::unique_ptr<WalletDatabase> database(new WalletDatabase(location.GetPath()));
+        std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
         std::unique_ptr<CWallet> tempWallet =
           std::make_unique<CWallet>(chainParams, location, std::move(database));
         DBErrors nZapWalletRet = tempWallet->ZapWalletTx(vWtx);
@@ -4811,7 +4816,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
-    std::unique_ptr<WalletDatabase> database(new WalletDatabase(location.GetPath()));
+    std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
     CWallet *walletInstance = new CWallet(chainParams, location, std::move(database));
     
     // Used for switching at various places
