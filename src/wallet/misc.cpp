@@ -103,8 +103,9 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
             "\nExamples:\n" +
             HelpExampleCli("getinfo", "") + HelpExampleRpc("getinfo", ""));
     }
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
 
-    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : nullptr);
 
     proxyType proxy;
@@ -244,7 +245,8 @@ static UniValue validateaddress(const Config &config,
     }
     
 #ifdef ENABLE_WALLET
-    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
 
     LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : nullptr);
 #endif
@@ -378,7 +380,8 @@ static UniValue createmultisig(const Config &config,
             pubkeys.push_back(HexToPubKey(keys[i].get_str()));
         } else {
 #ifdef ENABLE_WALLET
-            CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+          std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+          CWallet *const pwallet = wallet.get();
             if (IsDeprecatedRPCEnabled(gArgs, "createmultisig") &&
                 EnsureWalletIsAvailable(pwallet, false)) {
                 pubkeys.push_back(AddrToPubKey(config.GetChainParams(), pwallet,

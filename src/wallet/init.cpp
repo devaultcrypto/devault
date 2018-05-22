@@ -297,6 +297,8 @@ bool WalletInit::ParameterInteraction() const {
     bSpendZeroConfChange =
         gArgs.GetBoolArg("-spendzeroconfchange", DEFAULT_SPEND_ZEROCONF_CHANGE);
 
+    g_address_type = OutputType::LEGACY;
+    
     return true;
 }
 
@@ -425,8 +427,9 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
 
     // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
-      CWallet *const pwallet =
-        CWallet::CreateWalletFromFile(chainParams, WalletLocation(walletFile), walletPassphrase, words, use_bls);
+        std::shared_ptr<CWallet> pwallet = CWallet::CreateWalletFromFile(
+                                                                         chainParams, WalletLocation(walletFile),
+                                                                         walletPassphrase, words, use_bls);
       if (!pwallet) {
         return false;
       }
@@ -438,26 +441,25 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
 }
 
 void WalletInit::Start(CScheduler &scheduler) const {
-    for (CWallet *pwallet : GetWallets()) {
+    for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
         pwallet->postInitProcess(scheduler);
     }
 }
 
 void WalletInit::Flush() const {
-    for (CWallet *pwallet : GetWallets()) {
+    for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
         pwallet->Flush(false);
     }
 }
 
 void WalletInit::Stop() const {
-    for (CWallet *pwallet : GetWallets()) {
+    for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
         pwallet->Flush(true);
     }
 }
 
 void WalletInit::Close() const {
-    for (CWallet *pwallet : GetWallets()) {
+    for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
         RemoveWallet(pwallet);
-        delete pwallet;
     }
 }

@@ -55,15 +55,17 @@ namespace bls {
     class Signature;
 }
 
-static std::vector<CWallet *> vpwallets;
-
 /** Transaction fee set by the user */
 CFeeRate payTxFee(DEFAULT_TRANSACTION_FEE);
 bool bSpendZeroConfChange = DEFAULT_SPEND_ZEROCONF_CHANGE;
 
-bool AddWallet(CWallet *wallet) {
+static CCriticalSection cs_wallets;
+static std::vector<std::shared_ptr<CWallet>> vpwallets GUARDED_BY(cs_wallets);
+
+bool AddWallet(const std::shared_ptr<CWallet> &wallet) {
+    LOCK(cs_wallets);
     assert(wallet);
-    std::vector<CWallet *>::const_iterator i =
+    std::vector<std::shared_ptr<CWallet>>::const_iterator i =
         std::find(vpwallets.begin(), vpwallets.end(), wallet);
     if (i != vpwallets.end()) {
         return false;
@@ -72,9 +74,10 @@ bool AddWallet(CWallet *wallet) {
     return true;
 }
 
-bool RemoveWallet(CWallet *wallet) {
+bool RemoveWallet(const std::shared_ptr<CWallet> &wallet) {
+    LOCK(cs_wallets);
     assert(wallet);
-    std::vector<CWallet *>::iterator i =
+    std::vector<std::shared_ptr<CWallet>>::iterator i =
         std::find(vpwallets.begin(), vpwallets.end(), wallet);
     if (i == vpwallets.end()) {
         return false;
@@ -84,15 +87,18 @@ bool RemoveWallet(CWallet *wallet) {
 }
 
 bool HasWallets() {
+    LOCK(cs_wallets);
     return !vpwallets.empty();
 }
 
-std::vector<CWallet *> GetWallets() {
+std::vector<std::shared_ptr<CWallet>> GetWallets() {
+    LOCK(cs_wallets);
     return vpwallets;
 }
 
-CWallet *GetWallet(const std::string &name) {
-    for (CWallet *wallet : vpwallets) {
+std::shared_ptr<CWallet> GetWallet(const std::string &name) {
+    LOCK(cs_wallets);
+    for (const std::shared_ptr<CWallet> &wallet : vpwallets) {
         if (wallet->GetName() == name) {
             return wallet;
         }
@@ -100,7 +106,9 @@ CWallet *GetWallet(const std::string &name) {
     return nullptr;
 }
 
-static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
+//static const size_t OUTPUT_GROUP_MAX_ENTRIES = 10;
+
+OutputType g_address_type = OutputType::LEGACY;
 
 const char *DEFAULT_WALLET_DAT = "wallet.dat";
 
@@ -3779,8 +3787,6 @@ DBErrors CWallet::LoadWallet(bool &fFirstRunRet) {
         return nLoadWalletRet;
     }
 
-    uiInterface.LoadWallet(this);
-
     return DBErrors::LOAD_OK;
 }
 
@@ -4834,7 +4840,8 @@ void CWallet::MarkPreSplitKeys() {
 }
 #endif
 
-CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
+std::shared_ptr<CWallet>
+CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                                        const WalletLocation &location,
                                        const SecureString& walletPassphrase,
                                        const mnemonic::WordList& words, bool use_bls
@@ -4862,8 +4869,14 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
-    std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
-    CWallet *walletInstance = new CWallet(chainParams, location, std::move(database));
+
+    // was std::unique_ptr<WalletDatabase> database(WalletDatabase::Create(location.GetPath()));
+    // was CWallet *walletInstance = new CWallet(chainParams, location, std::move(database));
+    
+    std::shared_ptr<CWallet> walletInstance = std::make_shared<CWallet>(
+                                                                        chainParams, location,
+                                                                        WalletDatabase::Create(location.GetPath()));
+                                                                        
     
     // Used for switching at various places
     walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false) | use_bls;
@@ -4896,6 +4909,8 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             return nullptr;
         }
     }
+
+    uiInterface.LoadWallet(walletInstance);
 
     if (gArgs.GetBoolArg("-upgradewallet", fFirstRun)) {
         int nMaxVersion = gArgs.GetArg("-upgradewallet", 0);
@@ -4997,7 +5012,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     }
 
     walletInstance->m_last_block_processed = chainActive.Tip();
-    RegisterValidationInterface(walletInstance);
+    // NOT YET - CHECK LATER RegisterValidationInterface(walletInstance);
 
     if (chainActive.Tip() && chainActive.Tip() != pindexRescan) {
         // We can't rescan beyond non-pruned blocks, stop and throw an error.
@@ -5034,7 +5049,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
         nStart = GetTimeMillis();
         {
-            WalletRescanReserver reserver(walletInstance);
+            WalletRescanReserver reserver(walletInstance.get());
             if (!reserver.reserve()) {
                 InitError(
                     _("Failed to rescan the wallet during initialization"));
@@ -5070,6 +5085,10 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             }
         }
     }
+
+    // Register with the validation interface. It's ok to do this after rescan
+    // since we're still holding cs_main.
+    RegisterValidationInterface(walletInstance.get());
 
     walletInstance->SetBroadcastTransactions(
         gArgs.GetBoolArg("-walletbroadcast", DEFAULT_WALLETBROADCAST));
