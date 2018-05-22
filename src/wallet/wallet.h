@@ -9,6 +9,7 @@
 #define BITCOIN_WALLET_WALLET_H
 
 #include <amount.h>
+#include <outputtype.h>
 #include <script/ismine.h>
 #include <script/sign.h>
 #include <streams.h>
@@ -31,11 +32,11 @@
 #include <utility>
 #include <vector>
 
-bool AddWallet(CWallet *wallet);
-bool RemoveWallet(CWallet *wallet);
+bool AddWallet(const std::shared_ptr<CWallet> &wallet);
+bool RemoveWallet(const std::shared_ptr<CWallet> &wallet);
 bool HasWallets();
-std::vector<CWallet *> GetWallets();
-CWallet *GetWallet(const std::string &name);
+std::vector<std::shared_ptr<CWallet>> GetWallets();
+std::shared_ptr<CWallet> GetWallet(const std::string &name);
 
 /**
  * Settings
@@ -63,7 +64,7 @@ static const bool DEFAULT_DISABLE_WALLET = false;
 
 extern const char *DEFAULT_WALLET_DAT;
 
-static const int64_t TIMESTAMP_MIN = 0;
+//static const int64_t TIMESTAMP_MIN = 0;
 
 class CBlockIndex;
 class CChainParams;
@@ -82,13 +83,6 @@ enum WalletFeature {
     FEATURE_BASE = 190000,
     FEATURE_START = 1000000,
     FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
-};
-
-enum class OutputType {
-    NONE,
-    LEGACY,
-
-    DEFAULT = LEGACY,
 };
 
 extern OutputType g_address_type;
@@ -1229,11 +1223,12 @@ public:
      * Initializes the wallet, returns a new CWallet instance or a null pointer
      * in case of an error.
      */
-    static CWallet *CreateWalletFromFile(const CChainParams &chainParams,
-                                         const WalletLocation &location,
-                                         const SecureString& walletPassphrase,
-                                         const std::vector<std::string>& words, bool use_bls
-                                         );
+    static std::shared_ptr<CWallet>
+    CreateWalletFromFile(const CChainParams &chainParams,
+                         const WalletLocation &location,
+                         const SecureString& walletPassphrase,
+                         const std::vector<std::string>& words, bool use_bls
+                         );
 
     /**
      * Wallet post-init setup
@@ -1301,21 +1296,6 @@ public:
     void KeepKey();
     void KeepScript() override { KeepKey(); }
 };
-
-OutputType ParseOutputType(const std::string &str,
-                           OutputType default_type = OutputType::DEFAULT);
-const std::string &FormatOutputType(OutputType type);
-
-/**
- * Get a destination of the requested type (if possible) to the specified key.
- * The caller must make sure LearnRelatedScripts has been called beforehand.
- */
-CTxDestination GetDestinationForKey(const CPubKey &key, OutputType);
-
-/**
- * Get all destinations (potentially) supported by the wallet for the given key.
- */
-std::vector<CTxDestination> GetAllDestinationsForKey(const CPubKey &key);
 
 /** RAII object to check and reserve a wallet rescan */
 class WalletRescanReserver {
