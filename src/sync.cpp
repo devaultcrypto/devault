@@ -70,7 +70,7 @@ struct LockData {
     std::mutex dd_mutex;
 } static lockdata;
 
-static thread_local std::unique_ptr<LockStack> lockstack;
+static thread_local LockStack g_lockstack;
 
 static void
 potential_deadlock_detected(const std::pair<void *, void *> &mismatch,
@@ -107,20 +107,20 @@ potential_deadlock_detected(const std::pair<void *, void *> &mismatch,
 }
 
 static void push_lock(void *c, const CLockLocation &locklocation) {
-    if (!lockstack) {
-        lockstack.reset(new LockStack);
-    }
-
     std::lock_guard<std::mutex> lock(lockdata.dd_mutex);
 
-    lockstack->push_back(std::make_pair(c, locklocation));
+    g_lockstack.push_back(std::make_pair(c, locklocation));
 
-    for (const std::pair<void *, CLockLocation> &i : (*lockstack)) {
-        if (i.first == c) break;
+    for (const std::pair<void *, CLockLocation> &i : g_lockstack) {
+        if (i.first == c) {
+            break;
+        }
 
         std::pair<void *, void *> p1 = std::make_pair(i.first, c);
-        if (lockdata.lockorders.count(p1)) continue;
-        lockdata.lockorders[p1] = (*lockstack);
+        if (lockdata.lockorders.count(p1)) {
+            continue;
+        }
+        lockdata.lockorders[p1] = g_lockstack;
 
         std::pair<void *, void *> p2 = std::make_pair(c, i.first);
         lockdata.invlockorders.insert(p2);
@@ -131,7 +131,7 @@ static void push_lock(void *c, const CLockLocation &locklocation) {
 }
 
 static void pop_lock() {
-    (*lockstack).pop_back();
+    g_lockstack.pop_back();
 }
 
 void EnterCritical(const char *pszName, const char *pszFile, int nLine,
@@ -145,7 +145,7 @@ void LeaveCritical() {
 
 std::string LocksHeld() {
     std::string result;
-    for (const std::pair<void *, CLockLocation> &i : *lockstack) {
+    for (const std::pair<void *, CLockLocation> &i : g_lockstack) {
         result += i.second.ToString() + std::string("\n");
     }
     return result;
@@ -153,8 +153,10 @@ std::string LocksHeld() {
 
 void AssertLockHeldInternal(const char *pszName, const char *pszFile, int nLine,
                             void *cs) {
-    for (const std::pair<void *, CLockLocation> &i : *lockstack) {
-        if (i.first == cs) return;
+    for (const std::pair<void *, CLockLocation> &i : g_lockstack) {
+        if (i.first == cs) {
+            return;
+        }
     }
     fprintf(stderr,
             "Assertion failed: lock %s not held in %s:%i; locks held:\n%s",
@@ -164,7 +166,7 @@ void AssertLockHeldInternal(const char *pszName, const char *pszFile, int nLine,
 
 void AssertLockNotHeldInternal(const char *pszName, const char *pszFile,
                                int nLine, void *cs) {
-    for (const std::pair<void *, CLockLocation> &i : *lockstack) {
+    for (const std::pair<void *, CLockLocation> &i : g_lockstack) {
         if (i.first == cs) {
             fprintf(stderr,
                     "Assertion failed: lock %s held in %s:%i; locks held:\n%s",
