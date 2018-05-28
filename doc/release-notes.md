@@ -19,3 +19,8 @@ Dynamic creation of wallets
     or the name of a wallet that is currently loaded.
 
   - This feature is currently only available through the RPC interface.
+
+ - Wallets loaded dynamically through the RPC interface may now be displayed in
+   the Devault-Core GUI.
+ - The default wallet will now be labeled `[default wallet]` in the DeVault-Core
+   GUI if no name is provided by the `-wallet` option on start up.
