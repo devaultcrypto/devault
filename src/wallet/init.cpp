@@ -90,28 +90,33 @@ void WalletInit::AddWalletOptions() const {
     gArgs.AddArg("-upgradewallet",
                  "Upgrade wallet to latest format on startup", false,
                  OptionsCategory::WALLET);
-    gArgs.AddArg("-wallet=<file>",
-                 "Specify wallet file (within data directory) " +
-                     strprintf("(default: %s)", DEFAULT_WALLET_DAT),
+    gArgs.AddArg("-wallet=<path>",
+                 "Specify wallet database path. Can be specified multiple "
+                 "times to load multiple wallets. Path is interpreted relative "
+                 "to <walletdir> if it is not absolute, and will be created if "
+                 "it does not exist (as a directory containing a wallet.dat "
+                 "file and log files). For backwards compatibility this will "
+                 "also accept names of existing data files in <walletdir>.)",
                  false, OptionsCategory::WALLET);
-    gArgs.AddArg("-walletbroadcast",
-                 "Make the wallet broadcast transactions " +
-                     strprintf("(default: %d)", DEFAULT_WALLETBROADCAST),
-                 false, OptionsCategory::WALLET);
+    gArgs.AddArg(
+        "-walletbroadcast",
+        strprintf("Make the wallet broadcast transactions (default: %d)",
+                  DEFAULT_WALLETBROADCAST),
+        false, OptionsCategory::WALLET);
     gArgs.AddArg("-walletdir=<dir>",
                  "Specify directory to hold wallets (default: "
-                   "<datadir>/wallets if it exists, otherwise <datadir>)",
+                 "<datadir>/wallets if it exists, otherwise <datadir>)",
                  false, OptionsCategory::WALLET);
     gArgs.AddArg("-walletnotify=<cmd>",
-                 "Execute command when a wallet transaction changes (%s in "
-                   "cmd is replaced by TxID)",
+                 "Execute command when a wallet transaction changes (%s in cmd "
+                 "is replaced by TxID)",
                  false, OptionsCategory::WALLET);
-    gArgs.AddArg("-zapwallettxes=<mode>",
-                 "Delete all wallet transactions and only recover those "
-                   "parts of the blockchain through -rescan on startup"
-                     "(1 = keep tx meta data e.g. account owner and payment "
-                       "request information, 2 = drop tx meta data)",
-                 false, OptionsCategory::WALLET);
+    gArgs.AddArg(
+        "-zapwallettxes=<mode>",
+        "Delete all wallet transactions and only recover those parts of the "
+        "blockchain through -rescan on startup (1 = keep tx meta data e.g. "
+        "account owner and payment request information, 2 = drop tx meta data)",
+        false, OptionsCategory::WALLET);
 
     gArgs.AddArg("-dblogsize=<n>",
                  strprintf("Flush wallet database activity from memory to disk "
@@ -130,7 +135,7 @@ void WalletInit::AddWalletOptions() const {
                  true, OptionsCategory::WALLET_DEBUG_TEST);
     gArgs.AddArg("-walletrejectlongchains",
                  strprintf("Wallet will not create transactions that violate "
-                             "mempool chain limits (default: %d)",
+                           "mempool chain limits (default: %d)",
                            DEFAULT_WALLET_REJECT_LONG_CHAINS),
                  true, OptionsCategory::WALLET_DEBUG_TEST);
 }
