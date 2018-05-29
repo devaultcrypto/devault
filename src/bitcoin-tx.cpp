@@ -38,8 +38,8 @@ static void SetupBitcoinTxArgs() {
     gArgs.AddArg("-json", "Select JSON output", false,
                  OptionsCategory::OPTIONS);
     gArgs.AddArg("-txid",
-                 "Output only the hex-encoded transaction id of the "
-                   "resultant transaction.",
+                 "Output only the hex-encoded transaction id of the resultant "
+                 "transaction.",
                  false, OptionsCategory::OPTIONS);
     SetupChainParamsBaseOptions();
 
@@ -57,31 +57,29 @@ static void SetupBitcoinTxArgs() {
                  false, OptionsCategory::COMMANDS);
     gArgs.AddArg("outpubkey=VALUE:PUBKEY[:FLAGS]",
                  "Add pay-to-pubkey output to TX. "
-                     "Optionally add the \"S\" flag to wrap the output in a "
-                       "pay-to-script-hash.",
+                 "Optionally add the \"S\" flag to wrap the output in a "
+                 "pay-to-script-hash.",
                  false, OptionsCategory::COMMANDS);
-    gArgs.AddArg("outdata=[VALUE:]DATA", "Add data-based output to TX",
-                 false, OptionsCategory::COMMANDS);
+    gArgs.AddArg("outdata=[VALUE:]DATA", "Add data-based output to TX", false,
+                 OptionsCategory::COMMANDS);
     gArgs.AddArg("outscript=VALUE:SCRIPT[:FLAGS]",
                  "Add raw script output to TX. "
-                     "Optionally add the \"S\" flag to wrap the output in a "
-                       "pay-to-script-hash.",
+                 "Optionally add the \"S\" flag to wrap the output in a "
+                 "pay-to-script-hash.",
                  false, OptionsCategory::COMMANDS);
     gArgs.AddArg(
         "outmultisig=VALUE:REQUIRED:PUBKEYS:PUBKEY1:PUBKEY2:....[:FLAGS]",
-        "Add Pay To n-of-m Multi-sig output to TX. n = REQUIRED, m = "
-          "PUBKEYS"
-            ". "
-            "Optionally add the \"S\" flag to wrap the output in a "
-              "pay-to-script-hash.",
+        "Add Pay To n-of-m Multi-sig output to TX. n = REQUIRED, m = PUBKEYS. "
+        "Optionally add the \"S\" flag to wrap the output in a "
+        "pay-to-script-hash.",
         false, OptionsCategory::COMMANDS);
     gArgs.AddArg("sign=SIGHASH-FLAGS",
                  "Add zero or more signatures to transaction. "
-                     "This command requires JSON registers:"
-                     "prevtxs=JSON object, "
-                     "privatekeys=JSON object. "
-                     "See signrawtransaction docs for format of sighash "
-                       "flags, JSON objects.",
+                 "This command requires JSON registers:"
+                 "prevtxs=JSON object, "
+                 "privatekeys=JSON object. "
+                 "See signrawtransactionwithkey docs for format of sighash "
+                 "flags, JSON objects.",
                  false, OptionsCategory::COMMANDS);
 
     gArgs.AddArg("load=NAME:FILENAME",
@@ -133,7 +131,6 @@ static int AppInitRawTx(int argc, char *argv[]) {
             "or:     devault-tx [options] -create [commands]   Create "
             "hex-encoded devault transaction\n" +
             "\n";
-
         strUsage += gArgs.GetHelpMessage();
         fprintf(stdout, "%s", strUsage.c_str());
 
