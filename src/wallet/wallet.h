@@ -89,6 +89,13 @@ enum WalletFeature {
 extern OutputType g_address_type;
 extern OutputType g_change_type;
 
+//! Default for -addresstype
+constexpr OutputType DEFAULT_ADDRESS_TYPE{OutputType::LEGACY};
+
+//! Default for -changetype
+constexpr OutputType DEFAULT_CHANGE_TYPE{OutputType::CHANGE_AUTO};
+
+
 /** A key pool entry */
 class CKeyPool {
 public:
@@ -1089,6 +1096,8 @@ public:
     bool DummySignInput(CTxIn &tx_in, const CTxOut &txout) const;
 
     static CFeeRate fallbackFee;
+    OutputType m_default_address_type{DEFAULT_ADDRESS_TYPE};
+    OutputType m_default_change_type{DEFAULT_CHANGE_TYPE};
 
     bool NewKeyPool();
     size_t KeypoolCountExternalKeys() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);

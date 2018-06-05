@@ -82,6 +82,7 @@ public:
      * list of transactions, address book and sending functionality.
      */
     bool addWallet(WalletModel *walletModel);
+    bool removeWallet(WalletModel *walletModel);
     void removeAllWallets();
     void cancel();
     bool enableWallet = false;
@@ -140,6 +141,8 @@ private:
     QAction *sweepBLSAction = nullptr;
     QWidgetAction *actProgressBar = nullptr;
     QWidgetAction *actProgressBarLabel = nullptr;
+    QAction *m_wallet_selector_label_action = nullptr;
+    QAction *m_wallet_selector_action = nullptr;
 
     QLabel *m_wallet_selector_label = nullptr;
     QComboBox *m_wallet_selector = nullptr;
@@ -155,8 +158,9 @@ private:
     int prevBlocks = 0;
     int spinnerFrame = 0;
 
-    const PlatformStyle *platformStyle;
     const Config *config;
+    const PlatformStyle *platformStyle;
+    const NetworkStyle *const m_network_style;
 
     /** Create the main UI actions. */
     void createActions();
