@@ -310,6 +310,11 @@ bool WalletModel::changePassphrase(const SecureString &oldPass,
 }
 
 // Handlers for core signals
+static void NotifyUnload(WalletModel *walletModel) {
+    qDebug() << "NotifyUnload";
+    QMetaObject::invokeMethod(walletModel, "unload", Qt::QueuedConnection);
+}
+
 static void NotifyKeyStoreStatusChanged(WalletModel *walletmodel) {
     qDebug() << "NotifyKeyStoreStatusChanged";
     QMetaObject::invokeMethod(walletmodel, "updateStatus",
@@ -360,6 +365,7 @@ static void NotifyWatchonlyChanged(WalletModel *walletmodel,
 
 void WalletModel::subscribeToCoreSignals() {
     // Connect signals to wallet
+    m_handler_unload = m_wallet->handleUnload(std::bind(&NotifyUnload, this));
     m_handler_status_changed = m_wallet->handleStatusChanged(
         std::bind(&NotifyKeyStoreStatusChanged, this));
     m_handler_address_book_changed = m_wallet->handleAddressBookChanged(
@@ -377,6 +383,7 @@ void WalletModel::subscribeToCoreSignals() {
 
 void WalletModel::unsubscribeFromCoreSignals() {
     // Disconnect signals from wallet
+    m_handler_unload->disconnect();
     m_handler_status_changed->disconnect();
     m_handler_address_book_changed->disconnect();
     m_handler_transaction_changed->disconnect();

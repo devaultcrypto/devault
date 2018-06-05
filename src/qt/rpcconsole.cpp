@@ -818,6 +818,14 @@ void RPCConsole::addWallet(WalletModel *const walletModel) {
         ui->WalletSelectorLabel->setVisible(true);
     }
 }
+void RPCConsole::removeWallet(WalletModel *const walletModel) {
+    const QString name = walletModel->getWalletName();
+    ui->WalletSelector->removeItem(ui->WalletSelector->findData(name));
+    if (ui->WalletSelector->count() == 2) {
+        ui->WalletSelector->setVisible(false);
+        ui->WalletSelectorLabel->setVisible(false);
+    }
+}
 
 static QString categoryClass(int category) {
     switch (category) {

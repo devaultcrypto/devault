@@ -254,6 +254,8 @@ public Q_SLOTS:
     /// Handle runaway exceptions. Shows a message box with the problem and
     /// quits the program.
     void handleRunawayException(const QString &message);
+    void addWallet(WalletModel *walletModel);
+    void removeWallet();
 
 Q_SIGNALS:
     void requestedInitialize(Config *config, RPCServer *rpcServer,
@@ -542,6 +544,30 @@ void BitcoinApplication::requestShutdown(Config &config) {
     Q_EMIT requestedShutdown();
 }
 
+void BitcoinApplication::addWallet(WalletModel *walletModel) {
+#ifdef ENABLE_WALLET
+    window->addWallet(walletModel);
+
+    if (m_wallet_models.empty()) {
+        window->setCurrentWallet(walletModel->getWalletName());
+    }
+
+    connect(walletModel, SIGNAL(unload()), this, SLOT(removeWallet()));
+
+    m_wallet_models.push_back(walletModel);
+#endif
+}
+
+void BitcoinApplication::removeWallet() {
+#ifdef ENABLE_WALLET
+    WalletModel *walletModel = static_cast<WalletModel *>(sender());
+    m_wallet_models.erase(
+        std::find(m_wallet_models.begin(), m_wallet_models.end(), walletModel));
+    window->removeWallet(walletModel);
+    walletModel->deleteLater();
+#endif
+}
+
 void BitcoinApplication::initializeResult(bool success) {
     qDebug() << __func__ << ": Initialization result: " << success;
     returnValue = success ? EXIT_SUCCESS : EXIT_FAILURE;
@@ -559,24 +585,20 @@ void BitcoinApplication::initializeResult(bool success) {
     window->setClientModel(clientModel);
 
 #ifdef ENABLE_WALLET
-    bool fFirstWallet = true;
-    auto wallets = m_node.getWallets();
-    for (auto &wallet : wallets) {
-        WalletModel *const walletModel = new WalletModel(
-            std::move(wallet), m_node, platformStyle, optionsModel);
+    m_node.handleLoadWallet(
+                            [this](std::unique_ptr<interfaces::Wallet> wallet) {
+                                WalletModel *wallet_model =
+                                    new WalletModel(std::move(wallet), m_node, platformStyle,
+                                                    optionsModel, nullptr);
+                                // Fix wallet model thread affinity.
+                                wallet_model->moveToThread(thread());
+                                QMetaObject::invokeMethod(this, "addWallet", Qt::QueuedConnection,
+                                                          Q_ARG(WalletModel *, wallet_model));
+                            });
 
-        window->addWallet(walletModel);
-        if (fFirstWallet) {
-            window->setCurrentWallet(walletModel->getWalletName());
-            fFirstWallet = false;
-        }
-
-    //    connect(walletModel,
-   //             SIGNAL(coinsSent(CWallet *, SendCoinsRecipient, QByteArray)));
-     //           SLOT(fetchPaymentACK(CWallet *, const SendCoinsRecipient &,
-     //                                QByteArray)));
-
-        m_wallet_models.push_back(walletModel);
+    for (auto &wallet : m_node.getWallets()) {
+        addWallet(new WalletModel(std::move(wallet), m_node, platformStyle,
+                                  optionsModel));
     }
 #endif
 
