@@ -919,8 +919,7 @@ static UniValue getdifficulties(const Config &config, const JSONRPCRequest &requ
 static CBlock GetBlockChecked(const Config &config,
                               const CBlockIndex *pblockindex) {
     CBlock block;
-    if (fHavePruned && !pblockindex->nStatus.hasData() &&
-        pblockindex->nTx > 0) {
+    if (IsBlockPruned(pblockindex)) {
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
     }
 
