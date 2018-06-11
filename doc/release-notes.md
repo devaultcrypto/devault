@@ -57,3 +57,9 @@ Network
    changed to randomize the fetch order across peers and to prefer sending
    download requests to outbound peers over inbound peers. This fixes an issue
    where inbound peers can prevent a node from getting a transaction.
+
+GUI changes
+-----------
+ - Block storage can be limited under Preferences, in the Main tab. Undoing
+   this setting requires downloading the full blockchain again. This mode is
+   incompatible with -txindex and -rescan.

@@ -102,6 +102,20 @@ void OptionsModel::Init(bool resetSettings) {
     // by command-line and show this in the UI.
 
     // Main
+    if (!settings.contains("bPrune")) {
+        settings.setValue("bPrune", false);
+    }
+    if (!settings.contains("nPruneSize")) {
+        settings.setValue("nPruneSize", 2);
+    }
+    // Convert prune size to MB:
+    const uint64_t nPruneSizeMB = settings.value("nPruneSize").toInt() * 1000;
+    if (!m_node.softSetArg("-prune", settings.value("bPrune").toBool()
+                                         ? std::to_string(nPruneSizeMB)
+                                         : "0")) {
+        addOverriddenOption("-prune");
+    }
+
     if (!settings.contains("nDatabaseCache")) {
         settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);
     }
@@ -338,6 +352,10 @@ QVariant OptionsModel::data(const QModelIndex &index, int role) const {
                 return settings.value("theme");
             case CoinControlFeatures:
                 return fCoinControlFeatures;
+            case Prune:
+                return settings.value("bPrune");
+            case PruneSize:
+                return settings.value("nPruneSize");
             case DatabaseCache:
                 return settings.value("nDatabaseCache");
             case ThreadsScriptVerif:
@@ -464,6 +482,18 @@ bool OptionsModel::setData(const QModelIndex &index, const QVariant &value,
                 fCoinControlFeatures = value.toBool();
                 settings.setValue("fCoinControlFeatures", fCoinControlFeatures);
                 Q_EMIT coinControlFeaturesChanged(fCoinControlFeatures);
+                break;
+            case Prune:
+                if (settings.value("bPrune") != value) {
+                    settings.setValue("bPrune", value);
+                    setRestartRequired(true);
+                }
+                break;
+            case PruneSize:
+                if (settings.value("nPruneSize") != value) {
+                    settings.setValue("nPruneSize", value);
+                    setRestartRequired(true);
+                }
                 break;
             case DatabaseCache:
                 if (settings.value("nDatabaseCache") != value) {
