@@ -2807,7 +2807,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       [CMAKE] Move package name and copyright to the top level
       Added build-werror config to error on build warnings
       Merge #13248: [gui] Make proxy icon from statusbar clickable
-      Merge #13043: [qt] OptionsDialog: add prune setting
+xx    Merge #13043: [qt] OptionsDialog: add prune setting
       Fix -Wrange-loop-analysis warnings
       Fix -Wthread-safety-analysis warnings
       [CMAKE] Use CPack to build source packages
@@ -2821,9 +2821,9 @@ XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in Walle
 #     rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
 #     [mempool] Mark mempool import fails that were found in mempool as 'already there'
       [CMAKE] Propagate requirements for cmake >= 3.12
-      Merge #11050: Avoid treating null RPC arguments different from missing arguments
-      Merge #11191: RPC: Improve help text and behavior of RPC-logging.
-      Merge #11626: rpc: Make `logging` RPC public
+xx    Merge #11050: Avoid treating null RPC arguments different from missing arguments
+xx    Merge #11191: RPC: Improve help text and behavior of RPC-logging.
+xx    Merge #11626: rpc: Make `logging` RPC public
 xx    [rpc] Add logging RPC
       Change CDnsSeedOpts to use std::string instead of c-strings
       Introduce constant default variables to initialize seeder options
