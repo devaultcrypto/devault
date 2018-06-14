@@ -12,7 +12,6 @@
 #include <core_io.h>
 #include <dstencode.h>
 #include <index/txindex.h>
-#include <init.h>
 #include <keystore.h>
 #include <merkleblock.h>
 #include <net.h>

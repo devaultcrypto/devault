@@ -10,7 +10,6 @@
 #include <config.h>
 #include <chain.h>
 #include <dstencode.h>
-#include <init.h>
 #include <net.h>
 #include <netbase.h>
 #include <rpc/blockchain.h>

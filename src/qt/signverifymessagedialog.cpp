@@ -11,7 +11,6 @@
 #include <walletmodel.h>
 
 #include <dstencode.h>
-#include <init.h>
 #include <validation.h> // For strMessageMagic
 #include <wallet/wallet.h>
 
