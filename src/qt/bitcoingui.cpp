@@ -34,7 +34,7 @@
 
 #include <chain.h>
 #include <chainparams.h>
-#include <init.h>
+#include <config.h>
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 #include <ui_interface.h>
