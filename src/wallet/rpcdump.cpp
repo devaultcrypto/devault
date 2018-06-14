@@ -9,7 +9,6 @@
 #include <config.h>
 #include <core_io.h>
 #include <dstencode.h>
-#include <init.h>
 #include <merkleblock.h>
 #include <rpc/server.h>
 #include <wallet/rpcwallet.h>
