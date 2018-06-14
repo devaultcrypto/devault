@@ -69,3 +69,6 @@ Other
  - Fixed a bug with Multiwallets that have their own directories (i.e. cases
    such as `DATADIR/wallets/mywallet/wallet.dat`).  Backups of these wallets
    will now take each wallet's specific directory into account.
+
+ - Added `nTx` return value to `getblock` and `getblockheader` detailing the
+   number of transactions in the returned block.
