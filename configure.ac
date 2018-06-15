@@ -291,6 +291,7 @@ if test "x$CXXFLAGS_overridden" = "xno"; then
   AX_CHECK_COMPILE_FLAG([-Wthread-safety-analysis],[CXXFLAGS="$CXXFLAGS -Wthread-safety-analysis"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wshadow],[CXXFLAGS="$CXXFLAGS -Wshadow"],,[[$CXXFLAG_WERROR]])
   AX_CHECK_COMPILE_FLAG([-Wmissing-braces],[CXXFLAGS="$CXXFLAGS -Wmissing-braces"],,[[$CXXFLAG_WERROR]])
+  AX_CHECK_COMPILE_FLAG([-Wrange-loop-analysis],[CXXFLAGS="$CXXFLAGS -Wrange-loop-analysis"],,[[$CXXFLAG_WERROR]])
 
   ## Some compilers (gcc) ignore unknown -Wno-* options, but warn about all
   ## unknown options if any other warning is produced. Test the -Wfoo case, and
