@@ -737,7 +737,6 @@ static UniValue submitblock(const Config &config,
     }
 
     uint256 hash = block.GetHash();
-    bool fBlockPresent = false;
     {
         LOCK(cs_main);
         auto mi = mapBlockIndex.find(hash);
@@ -749,19 +748,21 @@ static UniValue submitblock(const Config &config,
             if (pindex->nStatus.isInvalid()) {
                 return "duplicate-invalid";
             }
-            // Otherwise, we might only have the header - process the block
-            // before returning
-            fBlockPresent = true;
         }
     }
 
+    bool new_block;
     submitblock_StateCatcher sc(block.GetHash());
     RegisterValidationInterface(&sc);
-    bool fAccepted = ProcessNewBlock(config, blockptr, true, nullptr);
+    bool accepted =
+        ProcessNewBlock(config, blockptr, /* fForceProcessing */ true,
+                        /* fNewBlock */ &new_block);
     UnregisterValidationInterface(&sc);
-    if (fBlockPresent) {
-        if (fAccepted && !sc.found) {
-            return "duplicate-inconclusive";
+    if (!new_block) {
+        if (!accepted) {
+            // TODO Maybe pass down fNewBlock to AcceptBlockHeader, so it is
+            // properly set to true in this case?
+            return "invalid";
         }
         return "duplicate";
     }

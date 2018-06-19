@@ -4023,10 +4023,6 @@ static bool AcceptBlock(const Config &config,
         }
     }
 
-    if (fNewBlock) {
-        *fNewBlock = true;
-    }
-
     if (!CheckBlock(config, block, state, BlockValidationOptions(config)) ||
         !ContextualCheckBlock(config, block, state, pindex->pprev)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
@@ -4061,6 +4057,9 @@ static bool AcceptBlock(const Config &config,
     const CChainParams &chainparams = config.GetChainParams();
 
     // Write block to history file
+    if (fNewBlock) {
+        *fNewBlock = true;
+    }
     try {
         CDiskBlockPos blockPos =
             SaveBlockToDisk(block, pindex->nHeight, chainparams, dbp);
