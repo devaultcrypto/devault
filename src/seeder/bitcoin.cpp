@@ -245,7 +245,7 @@ class CSeederNode {
 
 public:
     CSeederNode(const CService &ip, std::vector<CAddress> *vAddrIn)
-        : sock(INVALID_SOCKET), vSend(SER_NETWORK, 0), vRecv(SER_NETWORK, 0),
+        : sock(INVALID_SOCKET), vSend(0), vRecv(0),
           nHeaderStart(-1), nMessageStart(-1), nVersion(0), vAddr(vAddrIn),
           ban(0), doneAfter(0),
           you(ip, ServiceFlags(NODE_NETWORK)) {

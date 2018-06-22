@@ -2931,7 +2931,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
         }
         CTxOut change_prototype_txout(Amount::zero(), scriptChange);
         size_t change_prototype_size =
-            GetSerializeSize(change_prototype_txout, SER_DISK, 0);
+            GetSerializeSize(change_prototype_txout);
 
         nFeeRet = Amount::zero();
         bool pick_new_inputs = true;

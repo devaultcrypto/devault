@@ -47,9 +47,8 @@ bool ContextualCheckTransaction(const Config &config, const CTransaction &tx,
                          "non-final transaction");
     }
 
-    
     // Size limit
-    if (::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) <
+    if (::GetSerializeSize(tx, PROTOCOL_VERSION) <
         MIN_TX_SIZE) {
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-undersize");
     }
@@ -197,7 +196,7 @@ static bool CheckTransactionCommon(const CTransaction &tx,
     }
 
     // Size limit
-    if (::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) > MAX_TX_SIZE) {
+    if (::GetSerializeSize(tx, PROTOCOL_VERSION) > MAX_TX_SIZE) {
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-oversize");
     }
 
