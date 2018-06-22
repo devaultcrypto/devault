@@ -856,12 +856,10 @@ class CSizeComputer {
 protected:
     size_t nSize;
 
-    const int nType;
     const int nVersion;
 
 public:
-    CSizeComputer(int nTypeIn, int nVersionIn)
-        : nSize(0), nType(nTypeIn), nVersion(nVersionIn) {}
+    explicit CSizeComputer(int nVersionIn) : nSize(0), nVersion(nVersionIn) {}
 
     void write(const char *psz, size_t _nSize) { this->nSize += _nSize; }
 
@@ -876,7 +874,6 @@ public:
     size_t size() const { return nSize; }
 
     int GetVersion() const { return nVersion; }
-    int GetType() const { return nType; }
 };
 
 template <typename Stream> void SerializeMany(Stream &s) {}
@@ -915,14 +912,13 @@ inline void WriteCompactSize(CSizeComputer &s, uint64_t nSize) {
     s.seek(GetSizeOfCompactSize(nSize));
 }
 
-template <typename T>
-size_t GetSerializeSize(const T &t, int nType, int nVersion) {
-    return (CSizeComputer(nType, nVersion) << t).size();
+template <typename T> size_t GetSerializeSize(const T &t, int nVersion = 0) {
+    return (CSizeComputer(nVersion) << t).size();
 }
 
 template <typename S, typename T>
 size_t GetSerializeSize(const S &s, const T &t) {
-    return (CSizeComputer(s.GetType(), s.GetVersion()) << t).size();
+    return (CSizeComputer(s.GetVersion()) << t).size();
 }
 
 #endif // BITCOIN_SERIALIZE_H
