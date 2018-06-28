@@ -1019,7 +1019,7 @@ public:
                          int &nChangePosInOut, std::string &strFailReason,
                          bool lockUnspents,
                          const std::set<int> &setSubtractFeeFromOutputs,
-                         CCoinControl& coinControl, bool keepReserveKey);
+                         CCoinControl& coinControl);
     bool SignTransaction(CMutableTransaction &tx)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
