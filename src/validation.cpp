@@ -4614,13 +4614,13 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
               nCheckLevel);
 
     CCoinsViewCache coins(coinsview);
-    CBlockIndex *pindexState = chainActive.Tip();
+    CBlockIndex *pindex;
     CBlockIndex *pindexFailure = nullptr;
     int nGoodTransactions = 0;
     CValidationState state;
     int reportDone = 0;
     LogPrintf("[0%%]...");
-    for (CBlockIndex *pindex = chainActive.Tip(); pindex && pindex->pprev;
+    for (pindex = chainActive.Tip(); pindex && pindex->pprev;
          pindex = pindex->pprev) {
         if (StopDialogRequested()) break;
         interruption_point(ShutdownRequested());
@@ -4676,7 +4676,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
 
         // check level 3: check for inconsistencies during memory-only
         // disconnect of tip blocks
-        if (nCheckLevel >= 3 && pindex == pindexState &&
+        if (nCheckLevel >= 3 &&
             (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <=
                 nCoinCacheUsage) {
             assert(coins.GetBestBlock() == pindex->GetBlockHash());
@@ -4688,7 +4688,6 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                              pindex->GetBlockHash().ToString());
             }
 
-            pindexState = pindex->pprev;
             if (res == DISCONNECT_UNCLEAN) {
                 nGoodTransactions = 0;
                 pindexFailure = pindex;
@@ -4706,9 +4705,11 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                      nGoodTransactions);
     }
 
+    // store block count as we move pindex at check level >= 4
+    int block_count = chainActive.Height() - pindex->nHeight;
+
     // check level 4: try reconnecting blocks
     if (nCheckLevel >= 4) {
-        CBlockIndex *pindex = pindexState;
         while (pindex != chainActive.Tip()) {
             if (StopDialogRequested()) break;
             interruption_point(ShutdownRequested());
@@ -4734,7 +4735,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
     LogPrintf("[DONE].\n");
     LogPrintf("No coin database inconsistencies in last %i blocks (%i "
               "transactions)\n",
-              chainActive.Height() - pindexState->nHeight, nGoodTransactions);
+              block_count, nGoodTransactions);
 
     return true;
 }
