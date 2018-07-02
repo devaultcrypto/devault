@@ -19,7 +19,7 @@ enum Network {
     NET_UNROUTABLE = 0,
     NET_IPV4,
     NET_IPV6,
-    NET_TOR,
+    NET_ONION,
     NET_INTERNAL,
 
     NET_MAX,
