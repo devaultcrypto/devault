@@ -118,8 +118,12 @@ public:
  */
 class CCryptoKeyStore : public CBasicKeyStore {
 private:
-    CKeyingMaterial vMasterKey;
-    CHDChain cryptedHDChain;
+    CKeyingMaterial vMasterKey GUARDED_BY(cs_KeyStore);
+    CHDChain cryptedHDChain GUARDED_BY(cs_KeyStore);
+
+    //! if fUseCrypto is true, mapKeys must be empty
+    //! if fUseCrypto is false, vMasterKey must be empty
+    std::atomic<bool> fUseCrypto;
 
     //! keeps track of whether Unlock has run a thorough check before
     bool fDecryptionThoroughlyChecked;
@@ -129,7 +133,7 @@ protected:
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
-    
+
 public:
     CCryptoKeyStore() : fDecryptionThoroughlyChecked(false) {}
 
@@ -142,7 +146,10 @@ public:
     std::set<CKeyID> GetKeys() const;
     bool GetCryptedHDChain(CHDChain& hdChainRet) const;
     bool GetDecryptedHDChain(CHDChain& hdChainRet) const;
-    void SetMasterKey(const CKeyingMaterial &MasterKey) {     vMasterKey = MasterKey; }
+    void SetMasterKey(const CKeyingMaterial &MasterKey) {
+      LOCK(cs_KeyStore);
+      vMasterKey = MasterKey;
+    }
     
     /**
      * Wallet status (locked/unlocked) changed.

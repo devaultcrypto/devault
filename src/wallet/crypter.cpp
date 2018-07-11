@@ -208,7 +208,8 @@ bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const 
   std::vector<unsigned char> vchCryptedSeed;
   if (!EncryptSecret(vMasterKeyIn, hdChain.GetSeed(), hdChain.GetID(), vchCryptedSeed))
     return false;
-  
+
+  LOCK(cs_KeyStore);
   cryptedHDChain = hdChain; // Will preserve the ID
   cryptedHDChain.SetCrypted(true);
   
@@ -231,6 +232,7 @@ bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const 
 
 bool CCryptoKeyStore::DecryptHDChain(CHDChain& hdChainRet) const
 {
+  LOCK(cs_KeyStore);
     if (cryptedHDChain.IsNull())
         return false;
 
@@ -268,6 +270,7 @@ bool CCryptoKeyStore::DecryptHDChain(CHDChain& hdChainRet) const
 
 bool CCryptoKeyStore::SetCryptedHDChain(const CHDChain& chain)
 {
+  LOCK(cs_KeyStore);
     if (!chain.IsCrypted())
         return false;
 
@@ -276,12 +279,14 @@ bool CCryptoKeyStore::SetCryptedHDChain(const CHDChain& chain)
 }
 bool CCryptoKeyStore::GetCryptedHDChain(CHDChain& hdChainRet) const
 {
+  LOCK(cs_KeyStore);
   hdChainRet = cryptedHDChain;
   return !cryptedHDChain.IsNull();
 }
 
 bool CCryptoKeyStore::GetDecryptedHDChain(CHDChain& hdChainRet) const
 {
+  LOCK(cs_KeyStore);
   hdChainRet = cryptedHDChain;
   if (!DecryptHDChain(hdChainRet)) {
       return false;

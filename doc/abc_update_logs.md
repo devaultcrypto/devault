@@ -2795,14 +2795,14 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       Separate CSeederNode class declaration from definition
       Move parse_name() to dns.h so it can be tested
       Bump version to 0.20.6
-      Merge #13481: doc: Rewrite some validation docs as lock annotations
+xx    Merge #13481: doc: Rewrite some validation docs as lock annotations
 20.5      
       Updated manpages for 0.20.5 release
       Updated chainparams
       Update seeds
       bench: Benchmark MempoolToJSON
 #     Merge #14444: Add compile time checking for cs_main locks which we assert at run time
-      Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
+xx    Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
       Add test_runner flag to suppress ASAN errors from wallet_multiwallet.py
       [CMAKE] Move package name and copyright to the top level
       Added build-werror config to error on build warnings

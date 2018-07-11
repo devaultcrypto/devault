@@ -60,12 +60,14 @@ typedef std::set<CScript> WatchOnlySet;
 /** Basic key store, that keeps keys in an address->secret map */
 class CBasicKeyStore : public CKeyStore {
 protected:
-    KeyMap mapKeys;
-    BLSKeyMap mapBLSKeysTemp;
-    WatchKeyMap mapWatchKeys;
-    WatchBLSKeyMap mapBLSWatchKeys;
-    ScriptMap mapScripts;
-    WatchOnlySet setWatchOnly;
+    mutable CCriticalSection cs_KeyStore;
+
+    KeyMap mapKeys GUARDED_BY(cs_KeyStore);
+    BLSKeyMap mapBLSKeysTemp GUARDED_BY(cs_KeyStore);
+    WatchKeyMap mapWatchKeys GUARDED_BY(cs_KeyStore);
+    WatchBLSKeyMap mapBLSWatchKeys GUARDED_BY(cs_KeyStore);
+    ScriptMap mapScripts GUARDED_BY(cs_KeyStore);
+    WatchOnlySet setWatchOnly GUARDED_BY(cs_KeyStore);
 
     void ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey)
         EXCLUSIVE_LOCKS_REQUIRED(cs_KeyStore);
