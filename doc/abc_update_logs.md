@@ -2473,10 +2473,10 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [CMAKE] Add an option to promote some warnings to errors
      Remove Unused CTransaction tx in wallet.cpp
      Privatize CWallet::AddToWalletIfInvolvingMe
-     Extract CWallet::MarkInputsDirty
+#    Extract CWallet::MarkInputsDirty
      [CMAKE] Silent the Qt translation files generation
      allow cuckoocache to function as a map
-     Merge #12944: [wallet] ScanforWalletTransactions should mark input txns as dirty
+#    Merge #12944: [wallet] ScanforWalletTransactions should mark input txns as dirty
      Log debug build status and warn when running benchmarks
      bench_bitcoin: Avoid read/write to default datadir
      test_bitcoin: Avoid read/write to default datadir
@@ -2486,10 +2486,10 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      fix incomplete txvalidationcache_tests
      Fix cuckoocache_tests -Wcast-align warnings
      [cuckoocache] Use getKey and KeyType for contains
-     Merge #13627: Free keystore.h from file scope level type aliases
-     Merge #13603: bitcoin-tx: Stricter check for valid integers
+##   Merge #13627: Free keystore.h from file scope level type aliases
+##   Merge #13603: bitcoin-tx: Stricter check for valid integers
      [move only] Move BIP70 code together in preparation to backport PR14451 BIP70 changes
-     Sanity-check script sizes in bitcoin-tx
+##   Sanity-check script sizes in bitcoin-tx
      Fix unused variable warning when building with wallet disabled
      Bump version to 0.20.9
 20.8     

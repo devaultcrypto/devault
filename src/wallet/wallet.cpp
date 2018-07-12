@@ -1225,7 +1225,6 @@ bool CWallet::TransactionCanBeAbandoned(const TxId &txid) const {
            wtx->GetDepthInMainChain(*locked_chain) == 0 && !wtx->InMempool();
 }
 
-/* for later
 void CWallet::MarkInputsDirty(const CTransactionRef &tx) {
     for (const CTxIn &txin : tx->vin) {
         auto it = mapWallet.find(txin.prevout.GetTxId());
@@ -1234,7 +1233,6 @@ void CWallet::MarkInputsDirty(const CTransactionRef &tx) {
         }
     }
 }
-*/
 
 bool CWallet::AbandonTransaction(interfaces::Chain::Lock &locked_chain,
                                  const TxId &txid) {
@@ -1292,12 +1290,7 @@ bool CWallet::AbandonTransaction(interfaces::Chain::Lock &locked_chain,
             // If a transaction changes 'conflicted' state, that changes the
             // balance available of the outputs it spends. So force those to be
             // recomputed.
-            for (const CTxIn &txin : wtx.tx->vin) {
-                auto it2 = mapWallet.find(txin.prevout.GetTxId());
-                if (it2 != mapWallet.end()) {
-                    it2->second.MarkDirty();
-                }
-            }
+            MarkInputsDirty(wtx.tx);
         }
     }
 
@@ -1360,12 +1353,7 @@ void CWallet::MarkConflicted(const BlockHash &hashBlock, const TxId &txid) {
             // If a transaction changes 'conflicted' state, that changes the
             // balance available of the outputs it spends. So force those to be
             // recomputed.
-            for (const CTxIn &txin : wtx.tx->vin) {
-                auto it2 = mapWallet.find(txin.prevout.GetTxId());
-                if (it2 != mapWallet.end()) {
-                    it2->second.MarkDirty();
-                }
-            }
+            MarkInputsDirty(wtx.tx);
         } else {
           LogPrintf("Conflicted Transaction %s in wallet removed since it's replaced with Tx in block\n", now.ToString());
           batch.EraseTx(now);
@@ -1388,12 +1376,7 @@ void CWallet::SyncTransaction(const CTransactionRef &ptx,
     // If a transaction changes 'conflicted' state, that changes the balance
     // available of the outputs it spends. So force those to be
     // recomputed, also:
-    for (const CTxIn &txin : tx.vin) {
-        auto it = mapWallet.find(txin.prevout.GetTxId());
-        if (it != mapWallet.end()) {
-            it->second.MarkDirty();
-        }
-    }
+    MarkInputsDirty(ptx);
 }
 
 void CWallet::TransactionAddedToMempool(const CTransactionRef &ptx) {
