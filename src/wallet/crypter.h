@@ -132,6 +132,8 @@ protected:
     bool EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc);
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
+    using CryptedKeyMap = std::map<CKeyID, std::pair<CPubKey, std::vector<uint8_t>>>;
+
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
 
 public:
