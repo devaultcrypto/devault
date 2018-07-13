@@ -1376,10 +1376,11 @@ void CWallet::MarkConflicted(const BlockHash &hashBlock, const TxId &txid) {
 }
 
 void CWallet::SyncTransaction(const CTransactionRef &ptx,
-                              const CBlockIndex *pindex, int posInBlock) {
+                              const CBlockIndex *pindex, int posInBlock,
+                              bool update_tx) {
     const CTransaction &tx = *ptx;
 
-    if (!AddToWalletIfInvolvingMe(ptx, pindex, posInBlock, true)) {
+    if (!AddToWalletIfInvolvingMe(ptx, pindex, posInBlock, update_tx)) {
         // Not one of ours
         return;
     }
@@ -1995,8 +1996,8 @@ CBlockIndex *CWallet::ScanForWalletTransactions(
                 }
                 for (size_t posInBlock = 0; posInBlock < block.vtx.size();
                      ++posInBlock) {
-                    AddToWalletIfInvolvingMe(block.vtx[posInBlock], pindex,
-                                             posInBlock, fUpdate);
+                    SyncTransaction(block.vtx[posInBlock], pindex, posInBlock,
+                                    fUpdate);
                 }
             } else {
                 ret = pindex;
