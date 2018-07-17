@@ -540,6 +540,10 @@ public:
     void SetType(const KeyType k) { ktype = k; }
     KeyType GetType() const { return ktype; }
     std::string ToString() const;
+
+    inline CInputCoin GetInputCoin() const {
+        return CInputCoin(tx->tx, i, nInputBytes);
+    }
 };
 
 /** Private key that includes an expiration date in case it never gets used. */
