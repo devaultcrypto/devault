@@ -2637,7 +2637,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
 #     Don't use systray icon on inappropriate systems
       add a couple more Schnorr checkmultisig tests
       Make SigningProvider expose key origin information
-      [MOVEONLY] Move ParseHDKeypath to utilstrencodings
+xx    [MOVEONLY] Move ParseHDKeypath to utilstrencodings
       Introduce KeyOriginInfo for fingerprint + path
 #     Merge #9662: Add createwallet "disableprivatekeys" option: a sane mode for watchonly-wallets
       Use local instance of ArgsManager in getarg_tests
@@ -2659,7 +2659,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       gui: Favor macOS show / hide action in dock menu
       Add missing braces on key.cpp
       qa: Premine to deterministic address with -disablewallet
-      RPC: Add new getzmqnotifications method.
+xx    RPC: Add new getzmqnotifications method.
 #     Break circular dependency: init -> * -> init by extracting shutdown.h
 #     Drop unused init.h includes
 #     Add Windows shutdown handler
