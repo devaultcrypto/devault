@@ -55,6 +55,8 @@
 #include <devault/rewards.h>
 #include <devault/budget.h>
 
+#include <diskblockpos.h>
+
 #include <cstdint>
 #include <cstdio>
 #include <memory>
