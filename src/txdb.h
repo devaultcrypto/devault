@@ -12,6 +12,7 @@
 #include <flatfile.h>
 #include <addrindex.h>
 #include <timestampindex.h>
+#include <diskblockpos.h>
 
 #include <string>
 #include <utility>

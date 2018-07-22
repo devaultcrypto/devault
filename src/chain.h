@@ -16,6 +16,7 @@
 #include <tinyformat.h>
 #include <sync.h>
 #include <uint256.h>
+#include "diskblockpos.h"
 
 #include <unordered_map>
 #include <vector>
