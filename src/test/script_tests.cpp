@@ -9,28 +9,19 @@
 #include <key.h>
 #include <keystore.h>
 #include <rpc/server.h>
-<<<<<<< HEAD
 #include <script/script.h>
 #include <script/script_error.h>
 #include <script/sighashtype.h>
 #include <script/sign.h>
-=======
 #include <streams.h>
 #include <util/strencodings.h>
 #include <util/system.h>
 
-#if defined(HAVE_CONSENSUS_LIB)
-#include <script/bitcoinconsensus.h>
-#endif
-
 #include <test/data/script_tests.json.h>
->>>>>>> c3f3e6af6... Move util files to directory
 #include <test/jsonutil.h>
 #include <test/scriptflags.h>
 #include <test/sigutil.h>
 #include <test/test_bitcoin.h>
-#include <util.h>
-#include <utilstrencodings.h>
 
 #if defined(HAVE_CONSENSUS_LIB)
 #include <script/devaultconsensus.h>
@@ -1835,19 +1826,21 @@ BOOST_AUTO_TEST_CASE(script_build) {
         }
     }
 
+#ifdef UPDATE_JSON_TESTS
     std::string strGen;
+#endif
 
     for (TestBuilder &test : tests) {
         test.Test();
         std::string str = JSONPrettyPrint(test.GetJSON());
-        //      std::cout << "test = " << str << "\n";
-#ifndef UPDATE_JSON_TESTS
+#ifdef UPDATE_JSON_TESTS
+        strGen += str + ",\n";
+#else
         if (tests_set.count(str) == 0) {
             BOOST_CHECK_MESSAGE(false, "Missing auto script_valid test: " +
                                            test.GetComment());
         }
 #endif
-        strGen += str + ",\n";
     }
 
 #ifdef UPDATE_JSON_TESTS
