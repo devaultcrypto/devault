@@ -55,6 +55,7 @@
 
 #define MICRO 0.000001
 #define MILLI 0.001
+
 /**
  * Global state
  */
@@ -3172,7 +3173,7 @@ template <typename F> void UpdateFlags(CBlockIndex *pindex, F f) EXCLUSIVE_LOCKS
     UpdateFlags(pindex, f, f);
 }
 
-bool ResetBlockFailureFlags(CBlockIndex *pindex) {
+void ResetBlockFailureFlags(CBlockIndex *pindex) {
     AssertLockHeld(cs_main);
 
     if (pindexBestInvalid &&
@@ -3192,11 +3193,9 @@ bool ResetBlockFailureFlags(CBlockIndex *pindex) {
     UpdateFlags(pindex, [](const BlockStatus status) {
         return status.withClearedFailureFlags();
     });
-
-    return true;
 }
 
-static bool UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
+static void UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
     AssertLockHeld(cs_main);
 
     if (pindexBestParked &&
@@ -3214,16 +3213,14 @@ static bool UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
                     return fClearChildren ? status.withClearedParkedFlags()
                                           : status.withParkedParent(false);
                 });
-
-    return true;
 }
 
-bool UnparkBlockAndChildren(CBlockIndex *pindex) {
-    return UnparkBlockImpl(pindex, true);
+void UnparkBlockAndChildren(CBlockIndex *pindex) {
+    UnparkBlockImpl(pindex, true);
 }
 
-bool UnparkBlock(CBlockIndex *pindex) {
-    return UnparkBlockImpl(pindex, false);
+void UnparkBlock(CBlockIndex *pindex) {
+    UnparkBlockImpl(pindex, false);
 }
 
 const CBlockIndex *GetFinalizedBlock() {
