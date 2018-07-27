@@ -242,21 +242,19 @@ bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
     return WalletBatch(*database).WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
 }
 
-bool CWallet::LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &meta) {
+void CWallet::LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &meta) {
     // mapKeyMetadata
     AssertLockHeld(cs_wallet);
     UpdateTimeFirstKey(meta.nCreateTime);
     mapKeyMetadata[keyID] = meta;
-    return true;
 }
 
-bool CWallet::LoadScriptMetadata(const CScriptID &script_id,
+void CWallet::LoadScriptMetadata(const CScriptID &script_id,
                                  const CKeyMetadata &meta) {
     // m_script_metadata
     AssertLockHeld(cs_wallet);
     UpdateTimeFirstKey(meta.nCreateTime);
     m_script_metadata[script_id] = meta;
-    return true;
 }
 
 bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey,
@@ -452,12 +450,12 @@ void CWallet::ChainStateFlushed(const CBlockLocator &loc) {
     batch.WriteBestBlock(loc);
 }
 
-bool CWallet::SetMinVersion(enum WalletFeature nVersion, WalletBatch *pbatchIn,
+void CWallet::SetMinVersion(enum WalletFeature nVersion, WalletBatch *pbatchIn,
                             bool fExplicit) {
     // nWalletVersion
     LOCK(cs_wallet);
     if (nWalletVersion >= nVersion) {
-        return true;
+        return;
     }
 
     // When doing an explicit upgrade, if we pass the max version permitted,
@@ -478,8 +476,6 @@ bool CWallet::SetMinVersion(enum WalletFeature nVersion, WalletBatch *pbatchIn,
     if (!pbatchIn) {
         delete pbatch;
     }
-
-    return true;
 }
 
 bool CWallet::SetMaxVersion(int nVersion) {
@@ -936,7 +932,7 @@ bool CWallet::AddToWallet(const CWalletTx &wtxIn, bool fFlushOnClose) {
     return true;
 }
 
-bool CWallet::LoadToWallet(const CWalletTx &wtxIn) {
+void CWallet::LoadToWallet(const CWalletTx &wtxIn) {
     const TxId &txid = wtxIn.GetId();
     CWalletTx &wtx = mapWallet.emplace(txid, wtxIn).first->second;
     wtx.BindWallet(this);
@@ -951,8 +947,6 @@ bool CWallet::LoadToWallet(const CWalletTx &wtxIn) {
             }
         }
     }
-
-    return true;
 }
 
 /**
@@ -1433,7 +1427,6 @@ Amount CWallet::GetChange(const CTransaction &tx) const {
 
     return nChange;
 }
-
 
 int64_t CWalletTx::GetTxTime() const {
     int64_t n = nTimeSmart;
@@ -4530,10 +4523,9 @@ bool CWallet::EraseDestData(const CTxDestination &dest,
     return WalletBatch(*database).EraseDestData(dest, key);
 }
 
-bool CWallet::LoadDestData(const CTxDestination &dest, const std::string &key,
+void CWallet::LoadDestData(const CTxDestination &dest, const std::string &key,
                            const std::string &value) {
     mapAddressBook[dest].destdata.insert(std::make_pair(key, value));
-    return true;
 }
 
 bool CWallet::GetDestData(const CTxDestination &dest, const std::string &key,
@@ -4646,7 +4638,6 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     }
 
     if (fFirstRun) {
-
       CKeyingMaterial _vMasterKey; // Just new Random Bytes
       mnemonic::WordList cwords;
       std::vector<uint8_t> hashWords;

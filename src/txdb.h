@@ -97,7 +97,7 @@ public:
     bool ReadBlockFileInfo(int nFile, CBlockFileInfo &info);
     bool ReadLastBlockFile(int &nFile);
     bool WriteReindexing(bool fReindexing);
-    bool ReadReindexing(bool &fReindexing);
+    void ReadReindexing(bool &fReindexing);
 
     bool WriteAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);
     bool EraseAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);

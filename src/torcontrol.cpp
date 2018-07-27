@@ -92,7 +92,7 @@ public:
     /**
      * Disconnect from Tor control port.
      */
-    bool Disconnect();
+    void Disconnect();
 
     /**
      * Send a command, register a handler for the reply.
@@ -238,12 +238,11 @@ bool TorControlConnection::Connect(const std::string &target,
     return true;
 }
 
-bool TorControlConnection::Disconnect() {
+void TorControlConnection::Disconnect() {
     if (b_conn) {
         bufferevent_free(b_conn);
     }
     b_conn = nullptr;
-    return true;
 }
 
 bool TorControlConnection::Command(const std::string &cmd,

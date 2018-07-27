@@ -888,9 +888,9 @@ public:
     }
 
     //! Load metadata (used by LoadWallet)
-    bool LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &metadata)
+    void LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &metadata)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    bool LoadScriptMetadata(const CScriptID &script_id,
+    void LoadScriptMetadata(const CScriptID &script_id,
                             const CKeyMetadata &metadata)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
@@ -919,7 +919,7 @@ public:
     //! Erases a destination data tuple in the store and on disk
     bool EraseDestData(const CTxDestination &dest, const std::string &key);
     //! Adds a destination data tuple to the store, without saving it to disk
-    bool LoadDestData(const CTxDestination &dest, const std::string &key,
+    void LoadDestData(const CTxDestination &dest, const std::string &key,
                       const std::string &value);
     //! Look up a destination data tuple in the store, return true if found
     //! false otherwise
@@ -972,7 +972,7 @@ public:
 
     void MarkDirty();
     bool AddToWallet(const CWalletTx &wtxIn, bool fFlushOnClose = true);
-    bool LoadToWallet(const CWalletTx &wtxIn);
+    void LoadToWallet(const CWalletTx &wtxIn);
     void TransactionAddedToMempool(const CTransactionRef &tx) override;
     void
     BlockConnected(const std::shared_ptr<const CBlock> &pblock,
@@ -1142,7 +1142,7 @@ public:
 
     //! signify that a particular wallet feature is now used. this may change
     //! nWalletVersion and nWalletMaxVersion if those are lower
-    bool SetMinVersion(enum WalletFeature, WalletBatch *pbatchIn = nullptr,
+    void SetMinVersion(enum WalletFeature, WalletBatch *pbatchIn = nullptr,
                        bool fExplicit = false);
 
     //! change which version we're allowed to upgrade to (note that this does

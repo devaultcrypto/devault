@@ -389,12 +389,8 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             ssKey >> strAddress;
             ssKey >> strKey;
             ssValue >> strValue;
-            if (!pwallet->LoadDestData(
-                    DecodeDestination(strAddress, pwallet->chainParams), strKey,
-                    strValue)) {
-                strErr = "Error reading wallet database: LoadDestData failed";
-                return false;
-            }
+            pwallet->LoadDestData(
+                                  DecodeDestination(strAddress, pwallet->chainParams), strKey, strValue);
         } else if (strType == "chdchain") {
             CHDChain chain;
             ssValue >> chain;
