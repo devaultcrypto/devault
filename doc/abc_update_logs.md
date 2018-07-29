@@ -2526,7 +2526,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Make TxIndex::FindTx use BlockHash
      Update GetTransaction's parameters
      Update mempool and compact block logic to use TxHash
-     tx pool: Use class methods to hide raw map iterator impl details
+xx   tx pool: Use class methods to hide raw map iterator impl details
 xx   Update mempool's mapDelta to use TxId
 xx   Update mempool's mapTx to index from TxId.
 xx   Use TxId in setInventoryTxToSend
