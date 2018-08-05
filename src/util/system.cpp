@@ -73,6 +73,7 @@ using std::ifstream;
 #include <codecvt>
 
 #include <io.h> /* for _commit */
+#include <shellapi.h>
 #include <shlobj.h>
 #endif
 
@@ -706,7 +707,7 @@ bool ArgsManager::ReadConfigStream(std::istream &stream, std::string &error,
       }
 
       // Check that the arg is known
-      if (!IsArgKnown(strKey, error) && !ignore_invalid_keys) {
+      if (!IsArgKnown(strKey) && !ignore_invalid_keys) {
           error = strprintf("Invalid configuration value %s", strKey.c_str());
           return false;
       }
@@ -853,3 +854,27 @@ int ScheduleBatchPriority() {
     return 1;
 #endif
 }
+
+namespace util {
+#ifdef WIN32
+WinCmdLineArgs::WinCmdLineArgs() {
+    wchar_t **wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> utf8_cvt;
+    argv = new char *[argc];
+    args.resize(argc);
+    for (int i = 0; i < argc; i++) {
+        args[i] = utf8_cvt.to_bytes(wargv[i]);
+        argv[i] = &*args[i].begin();
+    }
+    LocalFree(wargv);
+}
+
+WinCmdLineArgs::~WinCmdLineArgs() {
+    delete[] argv;
+}
+
+std::pair<int, char **> WinCmdLineArgs::get() {
+    return std::make_pair(argc, argv);
+}
+#endif
+} // namespace util
