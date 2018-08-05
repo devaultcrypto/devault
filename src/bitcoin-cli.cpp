@@ -21,6 +21,9 @@
 
 #include <univalue.h>
 
+#include <cstdio>
+#include <tuple>
+
 static const char DEFAULT_RPCCONNECT[] = "127.0.0.1";
 static const int DEFAULT_HTTP_CLIENT_TIMEOUT = 900;
 static const bool DEFAULT_NAMED = false;
@@ -584,6 +587,10 @@ int CommandLineRPC(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+#ifdef WIN32
+    util::WinCmdLineArgs winArgs;
+    std::tie(argc, argv) = winArgs.get();
+#endif
     SetupEnvironment();
     if (!SetupNetworking()) {
         fprintf(stderr, "Error: Initializing networking failed\n");
