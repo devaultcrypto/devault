@@ -115,18 +115,18 @@
       Merge #11617: Avoid lock: Call FlushStateToDisk(...) regardless of fCheckForPruning
       Merge #12969: Drop dead code CScript::Find
       Merge #11573: [Util] Update tinyformat.h
-19.12      
       Revert "macOS: Prevent Xcode 9.3 build warnings"
       Revert "Bump version to 0.20.0"
       [CMAKE] Avoid duplicating the compiler/linker flags
       [CMAKE] Fix -Wunused-command-line-argument when adding linker flag
       build: avoid getifaddrs when unavailable
-      build: Enable -Wredundant-decls where available
+#     build: Enable -Wredundant-decls where available
       Bump version to 0.20.0
       Merge #12947: Wallet hd functional test speedup and clarification
-      Merge #12942: rpc: Drop redundant testing of signrawtransaction prevtxs args
-      Merge #13162: [net] Don't incorrectly log that REJECT messages are unknown.
-      Merge #13194: Remove template matching and pseudo opcodes
+#     Merge #12942: rpc: Drop redundant testing of signrawtransaction prevtxs args
+#     Merge #13162: [net] Don't incorrectly log that REJECT messages are unknown.
+#     Merge #13194: Remove template matching and pseudo opcodes
+19.12      
       Updated manpages for 0.19.12 release
       Update chainparams
       Update seeds
