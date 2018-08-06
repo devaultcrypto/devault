@@ -451,7 +451,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
         // Get cursor
         Dbc *pcursor = m_batch.GetCursor();
         if (!pcursor) {
-            LogPrintf("Error getting wallet database cursor\n");
+            pwallet->WalletLogPrintf("Error getting wallet database cursor\n");
             return DBErrors::CORRUPT;
         }
 
@@ -465,7 +465,8 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
             }
 
             if (ret != 0) {
-                LogPrintf("Error reading next record from wallet database\n");
+                pwallet->WalletLogPrintf(
+                    "Error reading next record from wallet database\n");
                 return DBErrors::CORRUPT;
             }
 
@@ -492,7 +493,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
                 }
             }
             if (!strErr.empty()) {
-                LogPrintf("%s\n", strErr);
+                pwallet->WalletLogPrintf("%s\n", strErr);
             }
         }
         pcursor->close();
@@ -513,7 +514,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
         return result;
     }
 
-    LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
+    pwallet->WalletLogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
     if (wss.nCKeys) {
         InitWarning(_("You have one or more private keys in your wallet that are potentially not backed"
@@ -522,7 +523,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
     }
 
 
-    LogPrintf("Keys: %u encrypted, %u w/ metadata, unknown wallet records: %u\n", wss.nCKeys, wss.nKeyMeta,
+    pwallet->WalletLogPrintf("Keys: %u encrypted, %u w/ metadata, unknown wallet records: %u\n", wss.nCKeys, wss.nKeyMeta,
               wss.m_unknown_records);
 
     // nTimeFirstKey is only reliable if all keys have metadata

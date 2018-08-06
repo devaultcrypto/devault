@@ -2463,16 +2463,16 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
 #    [CMAKE] Enable SSE4.1, SHA-NI and AVX2 for the crypto library
      reduce code duplication in UpdateFlags
      Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
-     [wallet] Add wallet name to log messages
+##   [wallet] Add wallet name to log messages
      [tests] Fix race in rpc_deprecated.py
      add SCRIPT_VERIFY_MINIMALDATA to mandatory flags
      Add braces to support/lockedpool.cpp
-     Abstract EraseBlockData out of RewindBlockIndex
+#    Abstract EraseBlockData out of RewindBlockIndex
      [CI] Print the sanitizer logs
      [CI] Move the sanitizer log directory to /tmp
      [CMAKE] Add an option to promote some warnings to errors
-     Remove Unused CTransaction tx in wallet.cpp
-     Privatize CWallet::AddToWalletIfInvolvingMe
+#    Remove Unused CTransaction tx in wallet.cpp
+#    Privatize CWallet::AddToWalletIfInvolvingMe
 #    Extract CWallet::MarkInputsDirty
      [CMAKE] Silent the Qt translation files generation
      allow cuckoocache to function as a map

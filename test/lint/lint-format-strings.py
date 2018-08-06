@@ -21,6 +21,8 @@ FALSE_POSITIVES = [
     ("src/seeder/main.cpp", "fprintf(stderr, help, argv[0])"),
     ("src/tinyformat.h", "printf(const char *fmt, const Args &... args)"),
     ("src/tinyformat.h", "printf(const char *fmt, TINYFORMAT_VARARGS(n))"),
+    ("src/wallet/wallet.h",
+     "LogPrintf((\"%s \" + fmt).c_str(), GetDisplayName(), parameters...)"),
 ]
 
 

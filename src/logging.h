@@ -147,4 +147,8 @@ bool GetLogCategory(BCLog::LogFlags &flag, const std::string &str);
         GetLogger().LogPrintStr(tfm::format(__VA_ARGS__));                     \
     } while (0)
 
+
+#define LogPrintfToBeContinued LogPrintf
+#define LogPrintToBeContinued LogPrint
+
 #endif // BITCOIN_LOGGING_H
