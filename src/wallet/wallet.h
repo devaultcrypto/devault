@@ -9,6 +9,7 @@
 #define BITCOIN_WALLET_WALLET_H
 
 #include <amount.h>
+#include <logging.h>
 #include <interfaces/chain.h>
 #include <outputtype.h>
 #include <primitives/blockhash.h>
@@ -1447,6 +1448,32 @@ public:
     bool OutputEligibleForSpending(const COutput &output, const int nConfMine,
                                    const int nConfTheirs,
                                    const uint64_t nMaxAncestors) const;
+    /**
+     * Returns a bracketed wallet name for displaying in logs, will return
+     * [default wallet] if the wallet has no name.
+     */
+    const std::string GetDisplayName() const {
+        std::string wallet_name =
+            GetName().length() == 0 ? "default wallet" : GetName();
+        return strprintf("[%s]", wallet_name);
+    };
+
+    /**
+     * Prepends the wallet name in logging output to ease debugging in
+     * multi-wallet use cases.
+     */
+    template <typename... Params>
+    void WalletLogPrintf(std::string fmt, Params... parameters) const {
+        LogPrintf(("%s " + fmt).c_str(), GetDisplayName(), parameters...);
+    };
+
+    template <typename... Params>
+    void WalletLogPrintfToBeContinued(std::string fmt,
+                                      Params... parameters) const {
+        LogPrintfToBeContinued(("%s " + fmt).c_str(), GetDisplayName(),
+                               parameters...);
+    };
+
 };
 
 /** A key allocated from the key pool. */

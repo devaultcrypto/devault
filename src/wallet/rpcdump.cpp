@@ -492,6 +492,170 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
     return NullUniValue;
 }
 
+/* not used - keep for ABC merging
+UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            "importwallet \"filename\"\n"
+            "\nImports keys from a wallet dump file (see dumpwallet). Requires "
+            "a new wallet backup to include imported keys.\n"
+            "\nArguments:\n"
+            "1. \"filename\"    (string, required) The wallet file\n"
+            "\nExamples:\n"
+            "\nDump the wallet\n" +
+            HelpExampleCli("dumpwallet", "\"test\"") + "\nImport the wallet\n" +
+            HelpExampleCli("importwallet", "\"test\"") +
+            "\nImport using the json rpc call\n" +
+            HelpExampleRpc("importwallet", "\"test\""));
+    }
+
+    if (fPruneMode) {
+        throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Importing wallets is disabled in pruned mode");
+    }
+
+    WalletRescanReserver reserver(pwallet);
+    if (!reserver.reserve()) {
+        throw JSONRPCError(
+            RPC_WALLET_ERROR,
+            "Wallet is currently rescanning. Abort existing rescan or wait.");
+    }
+
+    int64_t nTimeBegin = 0;
+    bool fGood = true;
+    {
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        EnsureWalletIsUnlocked(pwallet);
+
+        std::ifstream file;
+        file.open(request.params[0].get_str().c_str(),
+                  std::ios::in | std::ios::ate);
+        if (!file.is_open()) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                               "Cannot open wallet dump file");
+        }
+        nTimeBegin = chainActive.Tip()->GetBlockTime();
+
+        int64_t nFilesize = std::max((int64_t)1, (int64_t)file.tellg());
+        file.seekg(0, file.beg);
+
+        // Use uiInterface.ShowProgress instead of pwallet.ShowProgress because
+        // pwallet.ShowProgress has a cancel button tied to AbortRescan which we
+        // don't want for this progress bar showing the import progress.
+        // uiInterface.ShowProgress does not have a cancel button.
+
+        // show progress dialog in GUI
+        uiInterface.ShowProgress(
+            strprintf("%s " + _("Importing..."), pwallet->GetDisplayName()), 0,
+            false);
+        while (file.good()) {
+            uiInterface.ShowProgress(
+                "",
+                std::max(1, std::min(99, (int)(((double)file.tellg() /
+                                                (double)nFilesize) *
+                                               100))),
+                false);
+            std::string line;
+            std::getline(file, line);
+            if (line.empty() || line[0] == '#') {
+                continue;
+            }
+
+            std::vector<std::string> vstr;
+            boost::split(vstr, line, boost::is_any_of(" "));
+            if (vstr.size() < 2) {
+                continue;
+            }
+            CKey key = DecodeSecret(vstr[0]);
+            if (key.IsValid()) {
+                CPubKey pubkey = key.GetPubKey();
+                assert(key.VerifyPubKey(pubkey));
+                CKeyID keyid = pubkey.GetID();
+                if (pwallet->HaveKey(keyid)) {
+                    pwallet->WalletLogPrintf(
+                        "Skipping import of %s (key already present)\n",
+                        EncodeDestination(keyid, config));
+                    continue;
+                }
+                int64_t nTime = DecodeDumpTime(vstr[1]);
+                std::string strLabel;
+                bool fLabel = true;
+                for (unsigned int nStr = 2; nStr < vstr.size(); nStr++) {
+                    if (boost::algorithm::starts_with(vstr[nStr], "#")) {
+                        break;
+                    }
+                    if (vstr[nStr] == "change=1") {
+                        fLabel = false;
+                    }
+                    if (vstr[nStr] == "reserve=1") {
+                        fLabel = false;
+                    }
+                    if (boost::algorithm::starts_with(vstr[nStr], "label=")) {
+                        strLabel = DecodeDumpString(vstr[nStr].substr(6));
+                        fLabel = true;
+                    }
+                }
+                pwallet->WalletLogPrintf("Importing %s...\n",
+                                         EncodeDestination(keyid, config));
+                if (!pwallet->AddKeyPubKey(key, pubkey)) {
+                    fGood = false;
+                    continue;
+                }
+                pwallet->mapKeyMetadata[keyid].nCreateTime = nTime;
+                if (fLabel) {
+                    pwallet->SetAddressBook(keyid, strLabel, "receive");
+                }
+                nTimeBegin = std::min(nTimeBegin, nTime);
+            } else if (IsHex(vstr[0])) {
+                std::vector<uint8_t> vData(ParseHex(vstr[0]));
+                CScript script = CScript(vData.begin(), vData.end());
+                if (pwallet->HaveCScript(script)) {
+                    pwallet->WalletLogPrintf(
+                        "Skipping import of %s (script already present)\n",
+                        vstr[0]);
+                    continue;
+                }
+                if (!pwallet->AddCScript(script)) {
+                    pwallet->WalletLogPrintf("Error importing script %s\n",
+                                             vstr[0]);
+                    fGood = false;
+                    continue;
+                }
+                int64_t birth_time = DecodeDumpTime(vstr[1]);
+                if (birth_time > 0) {
+                    pwallet->m_script_metadata[CScriptID(script)].nCreateTime =
+                        birth_time;
+                    nTimeBegin = std::min(nTimeBegin, birth_time);
+                }
+            }
+        }
+        file.close();
+
+        // hide progress dialog in GUI
+        uiInterface.ShowProgress("", 100, false);
+        pwallet->UpdateTimeFirstKey(nTimeBegin);
+    }
+    // hide progress dialog in GUI
+    uiInterface.ShowProgress("", 100, false);
+    RescanWallet(*pwallet, reserver, nTimeBegin, false);  // update
+    pwallet->MarkDirty();
+
+    if (!fGood) {
+        throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Error adding some keys/scripts to wallet");
+    }
+
+    return NullUniValue;
+}
+*/
+
 UniValue dumpprivkey(const Config &config, const JSONRPCRequest &request) {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet *const pwallet = wallet.get();
