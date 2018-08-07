@@ -38,9 +38,6 @@ class MultiWalletTest(BitcoinTestFramework):
                 return wallet_dir(name, "wallet.dat")
             return wallet_dir(name)
 
-        assert_equal(self.nodes[0].listwalletdir(),
-                     {'wallets': [{'name': ''}]})
-
         # check wallet.dat is created
         self.stop_nodes()
         assert_equal(os.path.isfile(wallet_dir('wallet.dat')), True)
@@ -80,11 +77,7 @@ class MultiWalletTest(BitcoinTestFramework):
         # check that all requested wallets were created
         self.stop_node(0)
         for wallet_name in wallet_names:
-            if os.path.isdir(wallet_dir(wallet_name)):
-                assert_equal(os.path.isfile(
-                    wallet_dir(wallet_name, "wallet.dat")), True)
-            else:
-                assert_equal(os.path.isfile(wallet_dir(wallet_name)), True)
+            assert_equal(os.path.isfile(wallet_file(wallet_name)), True)
 
         # should not initialize if wallet path can't be created
         exp_stderr = "boost::filesystem::create_directory: (The system cannot find the path specified|Not a directory):"
@@ -367,9 +360,12 @@ class MultiWalletTest(BitcoinTestFramework):
         assert_equal(self.nodes[0].listwallets(), ['w1'])
         assert_equal(w1.getwalletinfo()['walletname'], 'w1')
 
+<<<<<<< HEAD
         assert_equal(sorted(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), [
                      '', os.path.join('sub', 'w5'), 'w', 'w1', 'w2', 'w3', 'w7', 'w7_symlink', 'w8', 'w8_copy', 'w9'])
 
+=======
+>>>>>>> 903f7859b... Merge #13667: wallet: Fix backupwallet for multiwallets
         # Test backing up and restoring wallets
         self.log.info("Test wallet backup")
         self.restart_node(0, ['-nowallet'])
@@ -389,6 +385,7 @@ class MultiWalletTest(BitcoinTestFramework):
             self.nodes[0].loadwallet(wallet_name)
             assert_equal(rpc.getaddressinfo(addr)['ismine'], True)
 
+<<<<<<< HEAD
         # Test .walletlock file is closed
         self.start_node(1)
         wallet = os.path.join(self.options.tmpdir, 'my_wallet')
@@ -399,6 +396,8 @@ class MultiWalletTest(BitcoinTestFramework):
         self.nodes[1].loadwallet(wallet)
 
 >>>>>>> 50a1fbc83... Merge #14291: wallet: Add ListWalletDir utility function
+=======
+>>>>>>> 903f7859b... Merge #13667: wallet: Fix backupwallet for multiwallets
 
 if __name__ == '__main__':
     MultiWalletTest().main()
