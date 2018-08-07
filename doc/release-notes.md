@@ -63,3 +63,9 @@ GUI changes
  - Block storage can be limited under Preferences, in the Main tab. Undoing
    this setting requires downloading the full blockchain again. This mode is
    incompatible with -txindex and -rescan.
+
+Other
+-----------
+ - Fixed a bug with Multiwallets that have their own directories (i.e. cases
+   such as `DATADIR/wallets/mywallet/wallet.dat`).  Backups of these wallets
+   will now take each wallet's specific directory into account.
