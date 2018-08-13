@@ -45,7 +45,7 @@ CBlockIndex CreateBlockIndex(int nHeight) {
   return index;
 }
 
-bool TestSequenceLocks(const CTransaction &tx, int flags) {
+bool TestSequenceLocks(const CTransaction &tx, int flags) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
   LOCK(g_mempool.cs);
   return CheckSequenceLocks(tx, flags);
 }

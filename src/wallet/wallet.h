@@ -212,14 +212,17 @@ public:
      *  0  : in memory pool, waiting to be included in a block
      * >=1 : this many blocks deep in the main chain
      */
-    int GetDepthInMainChain() const;
-    bool IsInMainChain() const { return GetDepthInMainChain() > 0; }
+    int GetDepthInMainChain() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool IsInMainChain() const EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+        return GetDepthInMainChain() > 0;
+    }
+
     /**
      * @return number of blocks to maturity for this transaction:
      *  0 : is not a coinbase transaction, or is a mature coinbase transaction
      * >0 : is a coinbase transaction which matures in this many blocks
      */
-    int GetBlocksToMaturity() const;
+    int GetBlocksToMaturity() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     bool hashUnset() const {
         return (hashBlock.IsNull() || hashBlock == ABANDON_HASH);
     }
@@ -228,7 +231,7 @@ public:
 
     TxId GetId() const { return tx->GetId(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
-    bool IsImmatureCoinBase() const;
+    bool IsImmatureCoinBase() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 };
 
 // Get the marginal bytes of spending the specified output
@@ -409,12 +412,18 @@ public:
 
     //! filter decides which addresses will count towards the debit
     Amount GetDebit(const isminefilter &filter) const;
-    Amount GetCredit(const isminefilter &filter) const;
-    Amount GetImmatureCredit(bool fUseCache = true) const;
-    Amount GetAvailableCredit(bool fUseCache = true) const;
-    Amount GetUnvestingCredit(bool fUseCache = true) const;
-    Amount GetImmatureWatchOnlyCredit(const bool fUseCache = true) const;
-    Amount GetAvailableWatchOnlyCredit(const bool fUseCache = true) const;
+    Amount GetCredit(const isminefilter &filter) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetImmatureCredit(bool fUseCache = true) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetAvailableCredit(bool fUseCache = true) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetUnvestingCredit(bool fUseCache = true) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetImmatureWatchOnlyCredit(const bool fUseCache = true) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    Amount GetAvailableWatchOnlyCredit(const bool fUseCache = true) const
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     Amount GetChange() const;
 
     // Get the marginal bytes if spending the specified output from this
@@ -436,18 +445,20 @@ public:
     bool IsEquivalentTo(const CWalletTx &tx) const;
 
     bool InMempool() const;
-    bool IsTrusted() const;
+    bool IsTrusted() const EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     int64_t GetTxTime() const;
 
     // RelayWalletTransaction may only be called if fBroadcastTransactions!
-    bool RelayWalletTransaction(CConnman *connman);
+    bool RelayWalletTransaction(CConnman *connman)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     /**
      * Pass this transaction to the mempool. Fails if absolute fee exceeds
      * absurd fee.
      */
-    bool AcceptToMemoryPool(const Amount nAbsurdFee, CValidationState &state);
+    bool AcceptToMemoryPool(const Amount nAbsurdFee, CValidationState &state)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     std::set<TxId> GetConflicts() const;
 };
@@ -823,7 +834,7 @@ public:
                         const uint64_t nMaximumCount = 0,
                         const int nMinDepth = 0,
                         const int nMaxDepth = 9999999) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main, cs_wallet);
 
     /**
      * Return list of available coins and locked coins grouped by non-change
@@ -849,9 +860,9 @@ public:
                             std::set<CInputCoin> &setCoinsRet,
                             Amount &nValueRet) const;
 
-    bool IsSpent(const COutPoint &outpoint) const;
+    bool IsSpent(const COutPoint &outpoint) const  EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     bool IsLockedCoin(const COutPoint &outpoint) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    void LockCoin(const COutPoint &output);
+    void LockCoin(const COutPoint &output) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void UnlockCoin(const COutPoint &output) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void UnlockAllCoins() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void ListLockedCoins(std::vector<COutPoint> &vOutpts) const  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
@@ -981,11 +992,13 @@ public:
     void TransactionRemovedFromMempool(const CTransactionRef &ptx) override;
     void ReacceptWalletTransactions();
     void ResendWalletTransactions(int64_t nBestBlockTime,
-                                  CConnman *connman) override;
+                                  CConnman *connman) override
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     // ResendWalletTransactionsBefore may only be called if
     // fBroadcastTransactions!
     std::vector<uint256> ResendWalletTransactionsBefore(int64_t nTime,
-                                                        CConnman *connman);
+                                                        CConnman *connman)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     Amount GetBalance() const;
     Amount GetUnconfirmedBalance() const;
     Amount GetUnvestingBalance() const;
@@ -1077,7 +1090,8 @@ public:
     }
     std::set<std::set<CTxDestination>> GetAddressGroupings()
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    std::map<CTxDestination, Amount> GetAddressBalances();
+    std::map<CTxDestination, Amount> GetAddressBalances()
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     std::set<CTxDestination> GetLabelAddresses(const std::string &label) const;
 
@@ -1218,7 +1232,7 @@ public:
      * Obviously holding cs_main/cs_wallet when going into this call may cause
      * deadlock
      */
-    void BlockUntilSyncedToCurrentChain() LOCKS_EXCLUDED(cs_wallet);
+    void BlockUntilSyncedToCurrentChain() LOCKS_EXCLUDED(cs_main, cs_wallet);
 
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
