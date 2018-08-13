@@ -3286,6 +3286,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
 
     if (fBroadcastTransactions) {
         // Broadcast
+        LOCK(cs_main);
         if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
             LogPrintf("CommitConsolidate(): Transaction cannot be broadcast "
                       "immediately, %s\n",
@@ -3293,7 +3294,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
             // TODO: if we expect the failure to be long term or permanent,
             // instead delete wtx from the wallet and return failure.
         } else {
-            wtx.RelayWalletTransaction(connman);
+          wtx.RelayWalletTransaction(connman);
         }
     }
     return state;
@@ -3318,6 +3319,7 @@ CValidationState CWallet::CommitSweep(CTransactionRef tx, CConnman *connman) {
 
     if (fBroadcastTransactions) {
         // Broadcast
+        LOCK(cs_main);
         if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
             LogPrintf("CommitSweep(): Transaction cannot be broadcast "
                       "immediately, %s\n",
@@ -4859,7 +4861,8 @@ bool CMerkleTx::IsImmatureCoinBase() const {
 }
 
 bool CWalletTx::AcceptToMemoryPool(const Amount nAbsurdFee,
-                                   CValidationState &state) {
+                                   CValidationState &state)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     // Quick check to avoid re-setting fInMempool to false
     if (g_mempool.exists(tx->GetId())) {
         return false;
