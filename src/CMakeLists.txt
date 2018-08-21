@@ -275,6 +275,7 @@ add_library(util
 	utilstrencodings.cpp
 	utiltime.cpp
   ui_interface.cpp # for InitError in fs_util
+	util/bytevectorhash.cpp
 )
 
 target_compile_definitions(util PUBLIC HAVE_CONFIG_H)
