@@ -1,4 +1,4 @@
-# Copyright (c) 2017 The Bitcoin developers
+# Copyright (c) 2017-2019 The Bitcoin developers
 
 project(crypto)
 
@@ -23,6 +23,7 @@ add_library(crypto
   zeroize.c
   pkcs5_pbkdf2.c
 	hmacsha512.c
+	siphash.cpp
 )
 
 target_include_directories(crypto

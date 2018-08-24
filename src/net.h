@@ -22,6 +22,7 @@
 #include "sync.h"
 #include "threadinterrupt.h"
 #include "uint256.h"
+#include "crypto/siphash.h"
 
 #include <atomic>
 #include <condition_variable>
