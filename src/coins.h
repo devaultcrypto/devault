@@ -12,6 +12,7 @@
 #include "memusage.h"
 #include "serialize.h"
 #include "uint256.h"
+#include "crypto/siphash.h"
 
 #include <cassert>
 #include <cstdint>

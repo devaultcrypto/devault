@@ -13,6 +13,8 @@
 #include "txmempool.h"
 #include "util.h"
 #include "validation.h"
+#include "crypto/sha256.h"
+#include "crypto/siphash.h"
 
 #include <unordered_map>
 
