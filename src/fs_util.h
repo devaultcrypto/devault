@@ -11,6 +11,7 @@ extern const char *const BITCOIN_PID_FILENAME;
 
 struct CDiskBlockPos;
 
+bool CheckDiskSpace(const fs::path &dir, uint64_t nAdditionalBytes = 0);
 fs::path GetDefaultDataDir();
 fs::path GetDebugLogPath();
 /** Get name of RPC authentication cookie file */

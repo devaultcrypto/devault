@@ -2052,8 +2052,9 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
             // Write blocks and block index to disk.
             if (fDoFullFlush || fPeriodicWrite) {
                 // Depend on nMinDiskSpace to ensure we can write block index
-                if (!CheckDiskSpace(0, true)) {
-                    return state.Error("out of disk space");
+                if (!CheckDiskSpace(GetBlocksDir())) {
+                    return AbortNode(state, "Disk space is low!",
+                                     _("Error: Disk space is low!"));
                 }
 
                 // First make sure all block and undo data is flushed to disk.
@@ -2099,8 +2100,10 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
                 // already an overestimation, as most will delete an existing
                 // entry or overwrite one. Still, use a conservative safety
                 // factor of 2.
-                if (!CheckDiskSpace(48 * 2 * 2 * pcoinsTip->GetCacheSize())) {
-                    return state.Error("out of disk space");
+                if (!CheckDiskSpace(GetDataDir(),
+                                    48 * 2 * 2 * pcoinsTip->GetCacheSize())) {
+                    return AbortNode(state, "Disk space is low!",
+                                     _("Error: Disk space is low!"));
                 }
 
                 // Flush the chainstate (which may refer to block index
@@ -3343,8 +3346,8 @@ static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                 fCheckForPruning = true;
             }
 
-            if (CheckDiskSpace(nNewChunks * BLOCKFILE_CHUNK_SIZE - pos.nPos,
-                               true)) {
+            if (CheckDiskSpace(GetBlocksDir(),
+                               nNewChunks * BLOCKFILE_CHUNK_SIZE - pos.nPos)) {
                 FILE *file = OpenBlockFile(pos);
                 if (file) {
                     LogPrintf(
@@ -3356,7 +3359,8 @@ static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                     fclose(file);
                 }
             } else {
-                return error("out of disk space");
+                return AbortNode("Disk space is low!",
+                                 _("Error: Disk space is low!"));
             }
         }
     }
@@ -3385,7 +3389,8 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
             fCheckForPruning = true;
         }
 
-        if (CheckDiskSpace(nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos, true)) {
+        if (CheckDiskSpace(GetBlocksDir(),
+                           nNewChunks * UNDOFILE_CHUNK_SIZE - pos.nPos)) {
             FILE *file = OpenUndoFile(pos);
             if (file) {
                 LogPrintf("Pre-allocating up to position 0x%x in rev%05u.dat\n",
@@ -3395,7 +3400,8 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
                 fclose(file);
             }
         } else {
-            return state.Error("out of disk space");
+            return AbortNode(state, "Disk space is low!",
+                             _("Error: Disk space is low!"));
         }
     }
 
@@ -4271,21 +4277,6 @@ static void FindFilesToPrune(std::set<int> &setFilesToPrune,
              nPruneTarget / 1024 / 1024, nCurrentUsage / 1024 / 1024,
              ((int64_t)nPruneTarget - (int64_t)nCurrentUsage) / 1024 / 1024,
              nLastBlockWeCanPrune, count);
-}
-
-bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir) {
-
-    // Below version was causing crashes in unit_tests, so skip using blocks_dir
-    // uint64_t nFreeBytesAvailable = fs::space(blocks_dir ? GetBlocksDir() : GetDataDir()).available;
-
-    uint64_t nFreeBytesAvailable = fs::space(GetDataDir()).available;
-
-    // Check for nMinDiskSpace bytes (currently 50MB)
-    if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes) {
-        return AbortNode("Disk space is low!", _("Error: Disk space is low!"));
-    }
-
-    return true;
 }
 
 static FILE *OpenDiskFile(const CDiskBlockPos &pos, const char *prefix,
