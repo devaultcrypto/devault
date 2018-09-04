@@ -3859,7 +3859,31 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
                          __func__, hash.ToString(), FormatStateMessage(state));
         }
 
+        /* Determine if this block descends from any block which has been found
+         * invalid (m_failed_blocks), then mark pindexPrev and any blocks
+         * between them as failed. For example:
+         *
+         *                D3
+         *              /
+         *      B2 - C2
+         *    /         \
+         *  A             D2 - E2 - F2
+         *    \
+         *      B1 - C1 - D1 - E1
+         *
+         * In the case that we attempted to reorg from E1 to F2, only to find
+         * C2 to be invalid, we would mark D2, E2, and F2 as BLOCK_FAILED_CHILD
+         * but NOT D3 (it was not in any of our candidate sets at the time).
+         *
+         * In any case D3 will also be marked as BLOCK_FAILED_CHILD at restart
+         * in LoadBlockIndex.
+         */
         if (!pindexPrev->IsValid(BlockValidity::SCRIPTS)) {
+            // The above does not mean "invalid": it checks if the previous
+            // block hasn't been validated up to BLOCK_VALID_SCRIPTS. This is a
+            // performance optimization, in the common case of adding a new
+            // block to the tip, we don't need to iterate over the failed blocks
+            // list.
             for (const CBlockIndex *failedit : g_failed_blocks) {
                 if (pindexPrev->GetAncestor(failedit->nHeight) == failedit) {
                     assert(failedit->nStatus.hasFailed());
