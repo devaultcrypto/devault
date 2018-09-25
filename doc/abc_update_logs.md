@@ -1,4 +1,382 @@
 XXXXX - Partial upgrade of wallet stuff
+     
+   [CMAKE] Move the upgrade activated tests out of the TestSuite module
+   [CMAKE] Make the list of tests a property of the test suite
+      [CMAKE] Factorize the test suite target name construction
+      lcov: filter depends from coverage report
+      Failing functional tests stop lcov
+      [SECP256K1] Fix ability to compile tests without -DVERIFY.
+      [Automated] Update chainparams
+      Clear the IFP bip in the version by default to avoid accidental activation
+      Fix a race condition in abc-finalize-block
+      Merge #12035: [qt] change µBTC to bits
+      Merge #14307: Consolidate redundant implementations of ParseHashStr
+      Merge #13424: Consistently validate txid / blockhash length and encoding in rpc calls
+      Move github-release to appropriate contrib sub-directory
+      Move build_* wrapper scripts to devtools
+      lcov: filter /usr/lib/ from coverage reports
+      Update manpages for 0.21.0 release
+      Add missing items to release-notes + formatting fixups
+      Bump automatic replay protection to Nov 2020 upgrade
+      Change version to 0.21.0
+      [sigcheck] Add per tx limit
+      Implement miner funding features
+      [sigcheck] Remove redundant sigcheck in CheckInputs
+      [ConnectBlock] Use an index to refers into blockundo.vtxundo rather than pusing as we go
+      [LINTER] Fix the doxygen linter when inline comments are multilined
+      fix ASAN error relating to nSigChecksBlockLimiter
+      [consensus rule] limit sigchecks in a block after phonon upgrade
+      deactivate sigops limits in phonon upgrade
+      Merge #12079: Improve prioritisetransaction test coverage
+      Enable new ancestor/descendants chains limit at fork
+      Merge #14460: tests: Improve 'CAmount' tests
+      Merge #14679: importmulti: Don't add internal addresses to address book
+      Add --commit to automated-commits to make local testing easier
+      Update seeds
+      [Automated] Update chainparams
+      Fix exit behavior in test-seeds
+      Merge #14720: rpc: Correctly name arguments
+      [CMAKE] Use the new FindPython module
+      Merge #14410: rpcwallet: 'ischange' field for 'getaddressinfo' RPC
+      Fix a race condition with rpc ports in check-seeds
+      [standardness] activate SCRIPT_VERIFY_INPUT_SIGCHECKS in next upgrade
+      [CI] Run the functional tests when wallet is disable
+      Add new post-fork ancestor and descendants limit.
+      OP_REVERSEBYTES activation logic
+      Revert "OP_REVERSEBYTES activation logic"
+      Merge #13152: [rpc] Add getnodeaddresses RPC command
+      OP_REVERSEBYTES activation logic
+      Merge #15321: doc: Add cs_main lock annotations for mapBlockIndex
+      Merge #14310: [wallet] Ensure wallet is unlocked before signing
+      Merge #14236: qa: generate --> generatetoaddress change to allow tests run without wallet
+      Use a temporary datadir and non-default RPC port when testing seeds
+      Remove updating chainparams from release process
+      Merge #13030: [bugfix] [wallet] Fix zapwallettxes/multiwallet interaction.
+      Merge #10816: Properly forbid -salvagewallet and -zapwallettxes for multi wallet.
+      rm cruft: contrib/rpm
+      Prevent arc land from failing if there is nothing to lint
+      Merge #10451: contrib/init/bitcoind.openrcconf: Don't disable wallet by default
+      RPCHelpMan fixups
+      Merge #14530: Use RPCHelpMan to generate RPC doc strings
+      rm cruft: travis-ci doc
+      Merge #14398: tests: Don't access out of bounds array index: array[sizeof(array)]
+      Merge #14822: bench: Destroy wallet txs instead of leaking their memory
+      Merge #17455: tests: Update valgrind suppressions
+      Fix nits in RPC help messages
+      Fix LockDirectory test failure when the Junit logger is enabled
+      [cmake] Add the suite name to the test runner.
+      Move mempool policy constants to policy/mempool.h
+      [Automated] Update chainparams
+      Add a script for building and pushing automated commits
+      remove SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE (aka WITNESS_PUBKEYTYPE)
+      [avalanche_tests] fix block index accesses
+      test: Build fuzz targets into seperate executables
+      docs: Spelling error fix on fuzzing.md
+      build: Allow to configure --with-sanitizers=fuzzer
+      tests: Use MakeUnique to construct objects owned by unique_ptrs
+      [tests] Add libFuzzer support.
+      Cache the result of chainparams.GetConsensus() in miner code
+      Update weird way to check for MTP in functional tests
+      [DOC] Update fuzzing.md to use cmake/ninja build and fix some nits
+      Merge #15203: Fix issue #9683 "gui, wallet: random abort (segmentation fault)"
+      remove print-debugging statement that ended up in master
+      Merge #13679: Initialize m_next_send_inv_to_incoming
+      [python linting] tweak options
+      Update copyright year in COPYING file
+      add missing swap to CScriptCheck
+      Update blockchain RPC to report all BIP9 based on versionbitsinfo
+      Make standard flags based off consensus flags
+      [python linting] apply aggressive mode in autopep8 (line wrapping)
+      apply nontrivial changes suggested by autopep8 aggressive
+      [python linting] nit
+      Update copyright for various files
+      [CI] Deduplicate test_bitcoin run for the TSAN build
+      Make the CI record and track the unit tests
+      [python linting] enforce E722: do not use bare except
+      Merge #13823: qa: quote path in authproxy for external multiwallets
+      Merge #14179: qa: Fixups to "Run all tests even if wallet is not compiled"
+      Merge #14180: qa: Run all tests even if wallet is not compiled
+      Update copyright_header.py to not duplicate parts of the header
+      Run the linters as part of arc land
+      qa: Prevent concurrency issues reading .cookie file
+      Merge #9739: Fix BIP68 activation test
+      [python linting] Enforce all flake8 F codes
+      [LINTER] Prevent using inline doxygen comments on their own line
+      [python linting] enforce E731: Do not assign a lambda expression, use a def
+      [LINTER] Silent a shellcheck false positive
+      mempool_accept nits: use FromHex/ToHex
+      [python linting] enforce E713: Test for membership should be 'not in'
+      [python linting] enforce E712: Comparison to true should be 'if cond is true:' or 'if cond:'
+      [python linting] enforce E265: Block comment should start with '# '
+      [python linting] enforce all flake8 E & W codes besides some exceptions
+      [lint] trailing whitespaces in python tests
+      add E711 to python linter (reject `== None` / `!= None`)
+      Merge #14964: test: Fix race in mempool_accept
+      Merge #14926: test: consensus: Check that final transactions are valid
+      Merge #14940: test: Add test for truncated pushdata script
+      fix whitespace lint error
+      Add build support for 'gprof' profiling.
+      [CMAKE] Get rid of ECM for running the sanitizers
+      fix comments //!<  to  //!
+      Consolidate check-seeds builds
+      Merge #14094: refactoring: Remove unreferenced local variables
+      Added OP_REVERSEBYTES+implementation, added (always disabled) activation flag
+      Bump timeouts in slow running tests
+      Merge #14993: rpc: Fix data race (UB) in InterruptRPC()
+      Merge #12153: Avoid permanent cs_main lock in getblockheader
+      Merge #15350: qa: Drop RPC connection if --usecli
+      Merge #14958: qa: Remove race between connecting and shutdown on separate connections
+      Merge #14982: rpc: Add getrpcinfo command
+      Merge #14777: tests: Add regtest for JSON-RPC batch calls
+      Merge #14670: http: Fix HTTP server shutdown
+      fix p2p_compactblocks flakiness
+      fix AreInputsStandard sigops counting
+      Merge #16538: test: Add missing sync_blocks to feature_pruning
+      Merge #12917: qa: Windows fixups for functional tests
+      Disable clang-tidy by default
+      Remove redundant std::move
+      scratch space: use single allocation
+      add sigchecks limiter to CheckInputs
+      http: add missing header bootlegged by boost < 1.72
+      Remove unecessary include of iostream
+      Merge #13962: Remove unused dummy_tx variable from FillPSBT
+      Avoid redundant calls to GetChainParams and GetConsensus in CChainState::AcceptBlock
+      Fix the build with GCC < 8
+      sigcheckcount_tests: better macro
+      Increase timeout in avalanche test
+      [CMAKE] Make ccache to work with clang-tidy
+      Automatically add missing braces
+      [CMAKE] Fix incompatibility between clang-tidy and -fstack-reuse
+      [CMAKE] Enable clang-tidy
+      rearrange ATMP in preparation for SigChecks accounting in mempool
+      Bump version to 0.20.13
+      synchronize validation queue during submitblock
+      Ensure the thresold for BIP9 can be configured on a per activation basis.
+      Restore BIP9 RPC support in getblockchaininfo
+      Ressurect BIP9 style activation mechanism
+      Merge #14209/#17218: logging: Replace LogPrintf macro with regular function
+      Merge #13938: refactoring: Cleanup StartRest()
+      Fix ubsan failure in excessiveblock_tests
+      doxygen: Remove misleading checkpoints comment in CMainParams
+      Chainparams: Use name constants in chainparams initialization
+      fix a deserialization overflow edge case
+      Prevent wrapping in setexcessiveblock RPC
+      arc lint --everything
+      [tests] fix formatting in feature_dbcrash
+      ConnectBlock: fix slow usage of AddCoins
+      nit: functional test chmod +x
+      track nSigChecks in CheckInputs
+      Fix missing lock in txvalidationcache_tests
+      add sigChecks value to script cache
+      [CMAKE] Make Qt protobuf an object library
+      Add braces to unit tests files
+      Update manpages for 0.20.12 release
+      Update chainparams
+      Added some release notes
+      Update seeds
+      Merge #13967: [walletdb] don't report minversion wallet entry as unknown
+      Add braces to various files
+      Add braces to bench files
+      Add braces to wallet files
+      Add braces to GUI files
+      Add braces to crypto files
+      Add braces to seeder files
+      Add braces to bitcoin-tx and bitcoin-cli
+      [SECP256K1] CMake: set default build configuration and optimization
+      Merge #13913: qa: Remove redundant checkmempool/checkblockindex extra_args
+      Merge #13948: trivial: Removes unsed `CBloomFilter` constructor.
+      Use virtualsize for mining/mempool priority
+      rpc: Make unloadwallet wait for complete wallet unload
+      [SECP256K1] CMake: add an install target
+      [CMAKE] Allow for component based installation
+      [CMAKE] Minor improvements to the install_shared_library function
+      [SECP256K1] CMake: Fix in-tree build
+      [SECP256K1] Travis: pass extra flags to the CMake build
+      [SECP256K1] CMake: make the GMP bignum support optional
+      [SECP256K1] CMake: allow to select field and scalar implementation
+      Fix autotools build failure
+      gui: Defer removeAndDeleteWallet when no modal widget is active
+      wallet: Releases dangling files on BerkeleyEnvironment::Close
+      Remove direct node->wallet calls in init.cpp
+      [SECP256K1] CMake: add an option to enable endomorphism
+      [SECP256K1] Travis : run a 64 bits ninja for building 32 bits targets
+      always unpark even when -parkdeepreorg=0
+      LastCommonAncestor: use skiplist when available
+      AreOnTheSameFork: don't actually need to find common ancestor
+      FinalizeBlockAndInvalidate: just use chainActive
+      ConnectBlock : count sigops in one place
+      make per-tx sigops limit contextual
+      rework AcceptToMemoryPoolWorker sigops counting
+      add test that coinbase sigops are limited
+      Pass chain locked variables where needed
+      Remove uses of cs_main in wallet code
+      Pass chain and client variables where needed
+      Add skeleton chain and client classes
+      Remove ENABLE_WALLET from libbitcoin_server.a
+      Prevent shared conf files from failing with different available options in different binaries
+      [Tests] Suppress output in test_bitcoin for expected errors
+      Add an option to set the functional test suite name
+      move sigops counting from CheckBlock to ContextualCheckBlock
+      split feature_block test into sigops and non-sigops parts
+      split abc-p2p-fullblocktest into sigops and non-sigops parts
+      add input sigchecks limit to STANDARD_SCRIPT_VERIFY_FLAGS (but not mempool flags)
+      add a flag that (if unset) zeroes sigchecks reported by VerifyScript
+      wallet: Add missing cs_wallet/cs_KeyStore locks to wallet
+      gui: Also log and print messages or questions like bitcoind
+      ui: Compile boost:signals2 only once
+      tests: Reduce noise level in test_bitcoin output
+      Merge #13982: refactor: use fs:: over boost::filesystem::
+      Fix parent<->child mixup in UnwindBlock
+      Add last missing part from PR12954
+      Increase RPC timeout for the feature_assumevalid test
+      build with -fstack-reuse=none
+      Enable context creation in preallocated memory
+      Make WINDOW_G configurable
+      [DOC] Add CMake and Ninja to the dependency list
+      Make last disconnected block BLOCK_FAILED_VALID, even when aborted
+      Use trivial algorithm in ecmult_multi if scratch space is small
+      Merge #9963: util: Properly handle errors during log message formatting
+      Add instructions for verifying download integrity against release signer keys
+      Bump version to 0.20.12
+      [CMAKE] Attach the linker flags to target properties
+      [CMAKE] Bump minimum version to 3.13
+      [CMAKE] Fix the native build when the target is in the current build dir
+      [SECP256K1] Use the cmake version from Kitware PPA on Travis
+      CreateNewBlock: small tweaks
+      CreateNewBlock: insert entries into block slightly earlier so that correct size is logged
+      [CMAKE] Get rid of `add_compiler_flags_to_var`
+      [CMAKE] Add a check_linker_flag function
+      [cmake] Refactor native build cmake generation
+      [cmake] Do not generate git_ignored_files.txt
+      fix a test in anticipation of SCRIPT_VERIFY_INPUT_SIGCHECKS activation
+      [abc-wallet-standardness] do test the signing error code
+      Merge #14494: Error if # is used in rpcpassword in conf
+      Merge #14413: tests: Allow closed rpc handler in assert_start_raises_init_error
+      Merge #14105: util: Report parse errors in configuration file
+      Merge #14146: wallet: Remove trailing separators from -walletdir arg
+      [CMAKE] Fix static linkage when building for Windows
+      Fix type mismatch for GetVirtualSizeWith<Descendants|Ancerstors>
+      simplify ATMP standard flag computation [2/2] - move computation to another function
+      simplify ATMP standard flag computation [1/2] - remove CHECKDATASIG_SIGOPS
+      [cmake] Only set the native build marker once
+      Add virtualsize computation to mempool
+      track descendant sigops count in mempool
+      tweak auto-unparking message
+      [validation.cpp] parking-related comment tweaks
+      [CMAKE] Run wallet tests as part of the check-bitcoin target
+      Merge #13862: utils: drop boost::interprocess::file_lock
+      [CMAKE] Fix getentropy detection on OSX
+      [CMAKE] Fix daemon() detection on OSX
+      Merge #14108: tests: Add missing locking annotations and locks (g_cs_orphans)
+      Temporary fix for recent build flakiness
+      Merge #13126: util: Add Clang thread safety annotations for variables guarded by cs_args
+      Update manpages for 0.20.11 release
+      Merge #12804: [tests] Fix intermittent rpc_net.py failure.
+      Update seeds
+      Update chainparams
+      [cmake] Always run native build standalone
+      Note intention of timing sidechannel freeness.
+      configure: Use CFLAGS_FOR_BUILD when checking native compiler
+      Respect LDFLAGS and #undef STATIC_PRECOMPUTATION if using basic config
+      Make sure we're not using an uninitialized variable in secp256k1_wnaf_const(...)
+      Pass scalar by reference in secp256k1_wnaf_const()
+      Avoid implementation-defined and undefined behavior when dealing with sizes
+      Guard memcmp in tests against mixed size inputs.
+      Use __GNUC_PREREQ for detecting __builtin_expect
+      Add $(COMMON_LIB) to exhaustive tests to fix ARM asm build
+      Switch x86_64 asm to use "i" instead of "n" for immediate values.
+      Allow field_10x26_arm.s to compile for ARMv7 architecture
+      Clear a copied secret key after negation
+      Use size_t shifts when computing a size_t
+      Fix integer overflow in ecmult_multi_var when n is large
+      Add trivial ecmult_multi algorithm which does not require a scratch space
+      Make bench_internal obey secp256k1_fe_sqrt's contract wrt aliasing.
+      travis: Remove unused sudo:false
+      Summarize build options in configure script
+      Portability fix for the configure scripts generated
+      Correct order of libs returned on pkg-config --libs --static libsecp256k1 call.
+      Eliminate scratch memory used when generating contexts
+      Optimize secp256k1_fe_normalize_weak calls.
+      Assorted minor corrections
+      Make constants static: static const secp256k1_ge secp256k1_ge_const_g; static const int CURVE_B;
+      secp256k1_fe_sqrt: Verify that the arguments don't alias.
+      Make randomization of a non-signing context a noop
+      add static context object which has no capabilities
+      Fix algorithm selection in bench_ecmult
+      Make use of TAG_PUBKEY constants in secp256k1_eckey_pubkey_parse
+      improvements to random seed in src/tests.c
+      Merge #15507: test: Bump timeout on tests
+      Merge #13861: test: Add testing of value_ret for SelectCoinsBnB
+      [secp256k1] [ECDH API change] Support custom hash function
+      Merge #14056: Docs: Fix help message typo optiona -> optional
+      [CMAKE] Use the same debug flags for C and C++
+      [CMAKE] Remove useless remove_compile_flag in leveldb
+      Revert "Prevent callback overruns in InvalidateBlock and RewindBlockIndex"
+      [CMAKE] Add compiler flags to some build configuration only
+      [secp256k1] fix tests.c in the count == 0 case
+      Merge #13429: Return the script type from Solver
+      [CI] Increase the coverage for the build-diff and build-master configs
+      Optimization: don't add txn back to mempool after 10 invalidates
+      [CI] Use ninja targets instead of calling binaries
+      Move the functional test temporary directory under the build directory
+      Move the JUnit file to the temporary directory
+      Prevent callback overruns in InvalidateBlock and RewindBlockIndex
+      [CMAKE] Add compiler flags to properties rather than CFLAGS/CXXFLAGS
+      [CMAKE] Remove extra -fPIE flag
+      [secp256k1] scratch: add stack frame support
+      Revert "Call FinalizeBlockAndInvalidate without cs_main held"
+      Call FinalizeBlockAndInvalidate without cs_main held
+      Add a script to generate sha256sums from Gitian output
+      Release cs_main during InvalidateBlock iterations
+      Call InvalidateBlock without cs_main held
+      Call RewindBlockIndex without cs_main held
+      [wallet] Support creating a blank wallet
+      add a flag that restricts sigChecks per-input
+      save ScriptExecutionMetrics during CScriptCheck
+      parameterize ecmult_const over input size
+      Merge #12559: Avoid locking cs_main in some wallet RPC
+      Add some braces to policy/policy.cpp
+      [CI] Add a configuration to build and run the benchmarks
+      [CI] Split build-default into build-diff and build-master
+      [CMAKE] Add a check-upgrade-activated-extended target
+      Merge #13988: Add checks for settxfee reasonableness
+      Merge #13142: Separate IsMine from solvability
+      move ScriptExecutionMetrics to its own file
+      move MANDATORY_SCRIPT_VERIFY_FLAGS to policy.h
+      [tests] remove test_bitcoin.h dependency on txmempool.h
+      Fix -Wshadow warnings
+      test: add "diamond" unit test to MempoolAncestryTests
+      scripted-diff: Remove unused first argument to addUnchecked
+      Free BerkeleyEnvironment instances when not in use
+      Fix the abc-p2p-compactblocks when running whith UBSAN
+      Fix extra parenthesis in python .format()
+      Mark CTxMemPoolEntry members that should not be modified const
+      fix misc places that refer to virtual transaction size
+      Reintroduce IsSolvable
+      Merge #13002: Do not treat bare multisig outputs as IsMine unless watched
+      document MANDATORY_SCRIPT_VERIFY_FLAGS accurately
+      simplify checkdatasig_tests
+      fix scriptSig analysis in sign.cpp
+      [mempool_tests] add sigop counting check in TestPackageAccounting
+      redefine virtual transaction size to something useful
+      remove segwit 'sigops cost' leftovers
+      Add keys to source package
+      VerifyScript: accumulate ScriptExecutionMetrics and return them
+      fix inappropriate uses of virtual size
+      Wrap paths in codeblocks in release-process.md
+      Increase sparsity of pippenger fixed window naf representation
+      Remove unnecessary major.minor version from gitian-descriptors
+      Add Clang thread safety annotations for variables guarded by cs_db
+      [CMAKE] Actually run the seeder tests
+      [SECP256K1] Update Travis deprecated keywords
+      [SECP256k1] Add the CMake/Ninja build to Travis
+      [CMAKE] Add a check-extended target
+      Log env path in BerkeleyEnvironment::Flush
+      wallet: detecting duplicate wallet by comparing the db filename.
+##### [bugfix] wallet: Fix duplicate fileid detection
+##### [wallet] Reopen CDBEnv after encryption instead of shutting down
+      Make ECM error message more helpful
+##### wallet: Reset BerkeleyDB handle after connection fails
 
 20.11
       Use best-fit strategy in Arena, now O(log(n)) instead O(n)
