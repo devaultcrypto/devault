@@ -843,7 +843,7 @@ int64_t GetStartupTime() {
 
 int ScheduleBatchPriority() {
 #ifdef SCHED_BATCH
-    const static sched_param param{0};
+    const static sched_param param{};
     if (int ret = pthread_setschedparam(pthread_self(), SCHED_BATCH, &param)) {
         LogPrintf("Failed to pthread_setschedparam: %s\n", strerror(errno));
         return ret;
