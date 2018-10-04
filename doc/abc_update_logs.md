@@ -2544,8 +2544,8 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Introduce BlockHash to represent a block hash
      Add braces in block.h
      Use size_t where apropriate in skiplist_tests.cpp
-     Add Benchmark to test input de-duplication worst case
-     Add const modifier to HTTPRequest methods
+##   Add Benchmark to test input de-duplication worst case
+##   Add const modifier to HTTPRequest methods
      Add braces in txdb.cpp
      Move pindexFinalized in CChainState
 #    Explain GetAncestor check for m_failed_blocks in AcceptBlockHeader
