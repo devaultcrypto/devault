@@ -3479,6 +3479,37 @@ static UniValue getwalletinfo(const Config &config,
     return obj;
 }
 
+static UniValue listwalletdir(const Config &config,
+                              const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 0) {
+        throw std::runtime_error(
+            "listwalletdir\n"
+            "Returns a list of wallets in the wallet directory.\n"
+            "{\n"
+            "  \"wallets\" : [                (json array of objects)\n"
+            "    {\n"
+            "      \"name\" : \"name\"          (string) The wallet name\n"
+            "    }\n"
+            "    ,...\n"
+            "  ]\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("listwalletdir", "") +
+            HelpExampleRpc("listwalletdir", ""));
+    }
+
+    UniValue wallets(UniValue::VARR);
+    for (const auto &path : ListWalletDir()) {
+        UniValue wallet(UniValue::VOBJ);
+        wallet.pushKV("name", path.string());
+        wallets.push_back(wallet);
+    }
+
+    UniValue result(UniValue::VOBJ);
+    result.pushKV("wallets", wallets);
+    return result;
+}
+
 static UniValue listwallets(const Config &config,
                             const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 0) {
@@ -4513,6 +4544,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "listsinceblock",               listsinceblock,               {"blockhash","target_confirmations","include_watchonly","include_removed"} },
     { "wallet",             "listtransactions",             listtransactions,             {"account","count","skip","include_watchonly"} },
     { "wallet",             "listunspent",                  listunspent,                  {"minconf","maxconf","addresses","include_unsafe","query_options"} },
+    { "wallet",             "listwalletdir",                listwalletdir,                {} },
     { "wallet",             "listwallets",                  listwallets,                  {} },
     { "wallet",             "loadwallet",                   loadwallet,                   {"filename", "password"} },
     { "wallet",             "lockunspent",                  lockunspent,                  {"unlock","transactions"} },

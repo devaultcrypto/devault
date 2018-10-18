@@ -5,11 +5,15 @@
 #pragma once
 
 #include <util/fs_util.h>
+#include <vector>
 
 //! Get the path of the wallet directory.
 fs::path GetWalletDir();
 fs::path GetWalletDirNoCreate(fs::path& added_dir);
 fs::path GetWalletPathNoCreate(fs::path& added, const std::string& file);
+
+//! Get wallets in wallet directory.
+std::vector<fs::path> ListWalletDir();
 
 //! The WalletLocation class provides wallet information.
 class WalletLocation final {
