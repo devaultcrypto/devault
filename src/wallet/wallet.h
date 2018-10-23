@@ -778,6 +778,7 @@ public:
 
     void LoadKeyPool(int64_t nIndex, const CKeyPool &keypool)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    //void MarkPreSplitKeys() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
     // Map from Key ID to key metadata.
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata;

@@ -4698,6 +4698,90 @@ CWallet::GetDestValues(const std::string &prefix) const {
     }
     return values;
 }
+#ifdef ADD_VERIFY
+bool CWallet::Verify(const CChainParams &chainParams,
+                     const WalletLocation &location, bool salvage_wallet,
+                     std::string &error_string, std::string &warning_string) {
+    // Do some checking on wallet path. It should be either a:
+    //
+    // 1. Path where a directory can be created.
+    // 2. Path to an existing directory.
+    // 3. Path to a symlink to a directory.
+    // 4. For backwards compatibility, the name of a data file in -walletdir.
+    LOCK(cs_wallets);
+    const fs::path &wallet_path = location.GetPath();
+    fs::file_type path_type = fs::symlink_status(wallet_path).type();
+    if (!(path_type == fs::file_not_found || path_type == fs::directory_file ||
+          (path_type == fs::symlink_file && fs::is_directory(wallet_path)) ||
+          (path_type == fs::regular_file &&
+           fs::path(location.GetName()).filename() == location.GetName()))) {
+        error_string =
+            strprintf("Invalid -wallet path '%s'. -wallet path should point to "
+                      "a directory where wallet.dat and "
+                      "database/log.?????????? files can be stored, a location "
+                      "where such a directory could be created, "
+                      "or (for backwards compatibility) the name of an "
+                      "existing data file in -walletdir (%s)",
+                      location.GetName(), GetWalletDir());
+        return false;
+    }
+
+    // Make sure that the wallet path doesn't clash with an existing wallet path
+    if (IsWalletLoaded(wallet_path)) {
+        error_string = strprintf(
+            "Error loading wallet %s. Duplicate -wallet filename specified.",
+            location.GetName());
+        return false;
+    }
+
+    try {
+        if (!WalletBatch::VerifyEnvironment(wallet_path, error_string)) {
+            return false;
+        }
+    } catch (const fs::filesystem_error &e) {
+        error_string = strprintf("Error loading wallet %s. %s",
+                                 location.GetName(), e.what());
+        return false;
+    }
+
+    if (salvage_wallet) {
+        // Recover readable keypairs:
+        CWallet dummyWallet(chainParams, WalletLocation(),
+                            WalletDatabase::CreateDummy());
+        std::string backup_filename;
+        if (!WalletBatch::Recover(
+                wallet_path, static_cast<void *>(&dummyWallet),
+                WalletBatch::RecoverKeysOnlyFilter, backup_filename)) {
+            return false;
+        }
+    }
+
+    return WalletBatch::VerifyDatabaseFile(wallet_path, warning_string,
+                                           error_string);
+}
+
+#endif
+#ifdef USE_PRESPLIT
+void CWallet::MarkPreSplitKeys() {
+    WalletBatch batch(*database);
+    for (auto it = setExternalKeyPool.begin();
+         it != setExternalKeyPool.end();) {
+        int64_t index = *it;
+        CKeyPool keypool;
+        if (!batch.ReadPool(index, keypool)) {
+            throw std::runtime_error(std::string(__func__) +
+                                     ": read keypool entry failed");
+        }
+        keypool.m_pre_split = true;
+        if (!batch.WritePool(index, keypool)) {
+            throw std::runtime_error(std::string(__func__) +
+                                     ": writing modified keypool entry failed");
+        }
+        set_pre_split_keypool.insert(index);
+        it = setExternalKeyPool.erase(it);
+    }
+}
+#endif
 
 CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                                        const WalletLocation &location,

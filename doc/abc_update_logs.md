@@ -372,7 +372,7 @@ XXXXX - Partial upgrade of wallet stuff
       [SECP256k1] Add the CMake/Ninja build to Travis
       [CMAKE] Add a check-extended target
       Log env path in BerkeleyEnvironment::Flush
-      wallet: detecting duplicate wallet by comparing the db filename.
+XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 ##### [bugfix] wallet: Fix duplicate fileid detection
 ##### [wallet] Reopen CDBEnv after encryption instead of shutting down
       Make ECM error message more helpful
