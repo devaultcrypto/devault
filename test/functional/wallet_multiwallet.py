@@ -72,13 +72,12 @@ class MultiWalletTest(BitcoinTestFramework):
                         os.path.join(self.options.tmpdir, 'extern/w6'), 'w7_symlink', 'w8', '']
         extra_args = ['-wallet={}'.format(n) for n in wallet_names]
         self.start_node(0, extra_args)
-        assert_equal(set(map(lambda w: w['name'], self.nodes[0].listwalletdir()[
-                     'wallets'])), set(['', 'w3', 'w2', 'sub/w5', 'w7', 'w7', 'w1', 'w8', 'w']))
+        assert_equal(sorted(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), [
+                     '', os.path.join('sub', 'w5'), 'w', 'w1', 'w2', 'w3', 'w7', 'w7_symlink', 'w8'])
 
         assert_equal(set(node.listwallets()), set(wallet_names))
 
         # check that all requested wallets were created
->>>>>>> 50a1fbc83... Merge #14291: wallet: Add ListWalletDir utility function
         self.stop_node(0)
         for wallet_name in wallet_names:
             if os.path.isdir(wallet_dir(wallet_name)):
@@ -197,8 +196,8 @@ class MultiWalletTest(BitcoinTestFramework):
 
         self.start_node(0, self.extra_args[0])
 
-        assert_equal(set(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), set(
-            ['', 'w3', 'w2', 'sub/w5', 'w7', 'w7', 'w8_copy', 'w1', 'w8', 'w']))
+        assert_equal(sorted(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), [
+                     '', os.path.join('sub', 'w5'), 'w', 'w1', 'w2', 'w3', 'w7', 'w7_symlink', 'w8', 'w8_copy'])
 
         wallets = [wallet(w) for w in wallet_names]
         wallet_bad = wallet("bad")
@@ -368,8 +367,8 @@ class MultiWalletTest(BitcoinTestFramework):
         assert_equal(self.nodes[0].listwallets(), ['w1'])
         assert_equal(w1.getwalletinfo()['walletname'], 'w1')
 
-        assert_equal(set(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), set(
-            ['', 'w3', 'w2', 'sub/w5', 'w7', 'w9', 'w7', 'w8_copy', 'w1', 'w8', 'w']))
+        assert_equal(sorted(map(lambda w: w['name'], self.nodes[0].listwalletdir()['wallets'])), [
+                     '', os.path.join('sub', 'w5'), 'w', 'w1', 'w2', 'w3', 'w7', 'w7_symlink', 'w8', 'w8_copy', 'w9'])
 
         # Test backing up and restoring wallets
         self.log.info("Test wallet backup")
