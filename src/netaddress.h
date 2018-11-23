@@ -31,7 +31,7 @@ protected:
     // in network byte order
     uint8_t ip[16];
     // for scoped/link-local ipv6 addresses
-    uint32_t scopeId;
+    uint32_t scopeId{0};
 
 public:
     CNetAddr();
