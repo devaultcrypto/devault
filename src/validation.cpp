@@ -19,6 +19,7 @@
 #include <consensus/merkle.h>
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
+#include <diskblockpos.h>
 #include <hash.h>
 #include <index/txindex.h>
 #include <policy/fees.h>
@@ -1566,6 +1567,28 @@ static bool WriteUndoDataForBlock(const CBlockUndo &blockundo,
     return true;
 }
 
+static bool WriteTxIndexDataForBlock(const CBlock &block,
+                                     CValidationState &state,
+                                     std::vector<std::pair<CAddrIndexKey, Amount>>& addrIndex,
+                                     CBlockIndex *pindex) {
+    CDiskTxPos pos(pindex->GetBlockPos(),
+                   GetSizeOfCompactSize(block.vtx.size()));
+    std::vector<std::pair<uint256, CDiskTxPos>> vPos;
+    vPos.reserve(block.vtx.size());
+    for (const CTransactionRef &tx : block.vtx) {
+        vPos.push_back(std::make_pair(tx->GetHash(), pos));
+        pos.nTxOffset += ::GetSerializeSize(*tx, CLIENT_VERSION);
+    }
+    
+    if (addrIndex.size() > 0) {
+      if (!pblocktree->WriteAddrIndex(addrIndex)) {
+        return AbortNode(state, "Failed to write address index");
+      }
+    }
+
+    return true;
+}
+
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
@@ -1994,10 +2017,8 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         setDirtyBlockIndex.insert(pindex);
     }
 
-    if (addrIndex.size() > 0) {
-        if (!pblocktree->WriteAddrIndex(addrIndex)) {
-            return AbortNode(state, "Failed to write address index");
-        }
+    if (!WriteTxIndexDataForBlock(block, state, addrIndex, pindex)) {
+        return false;
     }
 
     // DeVault:: Reward, update DB entry
