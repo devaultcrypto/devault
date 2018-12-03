@@ -2521,11 +2521,11 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      fix undefined behaviour in seeder (select() aliasing)
      Update the github issue template to include disclosure policy
      remove NULLDUMMY
-     refactor: Add and use HaveTxsDownloaded() where appropriate
+xx   refactor: Add and use HaveTxsDownloaded() where appropriate
      Added autopatch script for patching and rebasing phabricator diffs
-     Make TxIndex::FindTx use BlockHash
+xx   Make TxIndex::FindTx use BlockHash
      Update GetTransaction's parameters
-     Update mempool and compact block logic to use TxHash
+xx   Update mempool and compact block logic to use TxHash
 xx   tx pool: Use class methods to hide raw map iterator impl details
 xx   Update mempool's mapDelta to use TxId
 xx   Update mempool's mapTx to index from TxId.
