@@ -34,6 +34,38 @@
 #include <utility>
 #include <vector>
 
+//! Responsible for reading and validating the -wallet arguments and verifying
+//! the wallet database.
+//  This function will perform salvage on the wallet if requested, as long as
+//  only one wallet is being loaded (WalletParameterInteraction forbids
+//  -salvagewallet, -zapwallettxes or -upgradewallet with multiwallet).
+/*
+bool VerifyWallets(const CChainParams &chainParams, interfaces::Chain &chain,
+                   const std::vector<std::string> &wallet_files);
+
+//! Load wallet databases.
+bool LoadWallets(const CChainParams &chainParams, interfaces::Chain &chain,
+                 const std::vector<std::string> &wallet_files);
+*/
+//! Complete startup of wallets.
+void StartWallets(CScheduler &scheduler);
+
+//! Flush all wallets in preparation for shutdown.
+void FlushWallets();
+
+//! Stop all wallets. Wallets will be flushed first.
+void StopWallets();
+
+//! Close all wallets.
+void UnloadWallets();
+
+//! Explicitly unload and delete the wallet.
+//  Blocks the current thread after signaling the unload intent so that all
+//  wallet clients release the wallet.
+//  Note that, when blocking is not required, the wallet is implicitly unloaded
+//  by the shared pointer deleter.
+void UnloadWallet(std::shared_ptr<CWallet> &&wallet);
+
 bool AddWallet(const std::shared_ptr<CWallet> &wallet);
 bool RemoveWallet(const std::shared_ptr<CWallet> &wallet);
 bool HasWallets();
@@ -820,7 +852,10 @@ public:
         chainParams(chainParamsIn),
         m_location(location) {}
 
-    ~CWallet() override {}
+    ~CWallet() {
+        // Should not have slots connected at this point.
+        assert(NotifyUnload.empty());
+    }
 
     std::map<TxId, CWalletTx> mapWallet;
     std::list<CAccountingEntry> laccentries;

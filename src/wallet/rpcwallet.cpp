@@ -3456,7 +3456,7 @@ static UniValue getwalletinfo(const Config &config,
     obj.push_back(Pair("hdaccountcount", (int64_t)hdChain.CountAccounts()));
     UniValue accounts(UniValue::VARR);
     int i = 0;
-    int found=0;
+    size_t found=0;
     do {
         CHDAccount acc;
         if(hdChain.GetAccount(i, acc)) {
@@ -3685,16 +3685,8 @@ static UniValue unloadwallet(const Config &config,
     if (!RemoveWallet(wallet)) {
         throw JSONRPCError(RPC_MISC_ERROR, "Requested wallet already unloaded");
     }
-    UnregisterValidationInterface(wallet.get());
 
-    // The wallet can be in use so it's not possible to explicitly unload here.
-    // Just notify the unload intent so that all shared pointers are released.
-    // The wallet will be destroyed once the last shared pointer is released.
-    wallet->NotifyUnload();
-
-    // There's no point in waiting for the wallet to unload.
-    // At this point this method should never fail. The unloading could only
-    // fail due to an unexpected error which would cause a process termination.
+    UnloadWallet(std::move(wallet));
 
     return NullUniValue;
 }

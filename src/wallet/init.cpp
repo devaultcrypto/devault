@@ -53,8 +53,6 @@ public:
     //! Stop all wallets. Wallets will be flushed first.
     void Stop() const override;
 
-    //! Close all wallets.
-    void Close() const override;
 };
 
 static WalletInit g_wallet_init;
@@ -459,8 +457,12 @@ void WalletInit::Stop() const {
     }
 }
 
-void WalletInit::Close() const {
-    for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
-        RemoveWallet(pwallet);
+void UnloadWallets() {
+    auto wallets = GetWallets();
+    while (!wallets.empty()) {
+        auto wallet = wallets.back();
+        wallets.pop_back();
+        RemoveWallet(wallet);
+        UnloadWallet(std::move(wallet));
     }
 }
