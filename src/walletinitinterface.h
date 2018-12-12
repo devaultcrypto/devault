@@ -41,8 +41,6 @@ public:
     virtual void Flush() const = 0;
     /** Stop Wallets*/
     virtual void Stop() const = 0;
-    /** Close wallets */
-    virtual void Close() const = 0;
 
     virtual ~WalletInitInterface() = default;
 };

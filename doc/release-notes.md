@@ -27,8 +27,9 @@ Dynamic creation of wallets
    GUI if no name is provided by the `-wallet` option on start up.
  - It is now possible to unload wallets dynamically at runtime. This feature is
    currently only available through the RPC interface.
- - Wallets dynamically unloaded will now be reflected in the gui.
-
+ - Wallets dynamically unloaded will now be reflected in the gui. Also the
+   unloadwallet RPC is synchronous, meaning that it blocks until the
+   wallet is fully unloaded.
  - The RPC `createwallet` now has an optional `blank` argument that can be used
    to create a blank wallet. Blank wallets do not have any keys or HD seed.
    They cannot be opened in software that is version 1.1.4 or older 

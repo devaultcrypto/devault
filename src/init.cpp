@@ -21,6 +21,7 @@
 #include <httprpc.h>
 #include <httpserver.h>
 #include <index/txindex.h>
+#include <interfaces/chain.h>
 #include <key.h>
 #include <miner.h>
 #include <net.h>
@@ -98,7 +99,6 @@ public:
     void Start(CScheduler &scheduler) const override {}
     void Flush() const override {}
     void Stop() const override {}
-    void Close() const override {}
 };
 
 static DummyWalletInit g_dummy_wallet_init;
@@ -304,10 +304,10 @@ void Shutdown(InitInterfaces &interfaces) {
         LogPrintf("%s: Unable to remove pidfile: %s\n", __func__, e.what());
     }
 #endif
+    ///    interfaces.chain_clients.clear();
     UnregisterAllValidationInterfaces();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     GetMainSignals().UnregisterWithMempoolSignals(g_mempool);
-    g_wallet_init_interface.Close();
     globalVerifyHandle.reset();
     ECC_Stop();
     LogPrintf("%s: done\n", __func__);
