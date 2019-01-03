@@ -282,6 +282,7 @@ add_library(util
 	random.cpp # needs libsodium
 	rcu.cpp
 	rpc/protocol.cpp
+	rpc/rpcutil.cpp
 	support/cleanse.cpp
 	support/lockedpool.cpp
 	sync.cpp

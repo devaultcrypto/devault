@@ -6,4 +6,4 @@ Upstream Bitcoin-ABC updates
 - Remove Safe Mode
 - [schnorr] Refactor the signature process in reusable component
 - Merge #12630: Provide useful error message if datadir is not writable
- 
+ - Using addresses in createmultisig is now deprectated. Use -deprecatedrpc=createmultisig to get the old behavior.
