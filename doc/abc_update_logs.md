@@ -222,7 +222,7 @@
 ##### Merge #9693: Prevent integer overflow in ReadVarInt.
 ##### Backport dev notes on RPC
 ##### blockfilter: Use unordered_set instead of set in blockfilter.
-      Disallow using addresses in createmultisig
+##### Disallow using addresses in createmultisig
 ##### Merge #10027: Set to nullptr after delete
 ##### Merge #10029: Fix parameter naming inconsistencies between .h and .cpp files
 ##### Merge #12349: shutdown: fix crash on shutdown with reindex-chainstate

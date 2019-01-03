@@ -1442,10 +1442,6 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterDumpRPCCommands(CRPCTable &t) {
-    if (gArgs.GetBoolArg("-disablewallet", false)) {
-        return;
-    }
-
     for (auto& command : commands) {
         t.appendCommand(command.name, &command);
     }
