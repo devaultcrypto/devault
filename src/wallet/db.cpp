@@ -231,7 +231,7 @@ bool CDB::Recover(const std::string &filename, void *callbackDataIn,
     }
     LogPrintf("Salvage(aggressive) found %u records\n", salvagedData.size());
 
-    std::unique_ptr<Db> pdbCopy = MakeUnique<Db>(bitdb.dbenv.get(), 0);
+    std::unique_ptr<Db> pdbCopy = std::make_unique<Db>(bitdb.dbenv.get(), 0);
     int ret = pdbCopy->open(nullptr,          // Txn pointer
                             filename.c_str(), // Filename
                             "main",           // Logical db name
@@ -440,7 +440,8 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
 
         pdb = env->mapDb[strFilename];
         if (pdb == nullptr) {
-            std::unique_ptr<Db> pdb_temp = MakeUnique<Db>(env->dbenv.get(), 0);
+            std::unique_ptr<Db> pdb_temp =
+                std::make_unique<Db>(env->dbenv.get(), 0);
 
             bool fMockDb = env->IsMock();
             if (fMockDb) {
@@ -556,7 +557,7 @@ bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
                     // surround usage of db with extra {}
                     CDB db(dbw, "r");
                     std::unique_ptr<Db> pdbCopy =
-                        MakeUnique<Db>(env->dbenv.get(), 0);
+                        std::make_unique<Db>(env->dbenv.get(), 0);
 
                     int ret = pdbCopy->open(nullptr,            // Txn pointer
                                             strFileRes.c_str(), // Filename
