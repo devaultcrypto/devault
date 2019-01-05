@@ -39,8 +39,8 @@ class BanTablePriv {
 public:
     /** Local cache of peer information */
     QList<CCombinedBan> cachedBanlist;
-    /** Column to sort nodes by */
-    int sortColumn;
+    /** Column to sort nodes by (default to unsorted) */
+    int sortColumn{-1};
     /** Order (ascending or descending) to sort nodes by */
     Qt::SortOrder sortOrder;
 

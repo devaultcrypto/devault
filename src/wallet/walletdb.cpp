@@ -231,20 +231,15 @@ void WalletBatch::ListAccountCreditDebit(const std::string &strAccount,
 
 class CWalletScanState {
 public:
-    unsigned int nCKeys;
-    unsigned int nWatchKeys;
-    unsigned int nKeyMeta;
-    bool fIsEncrypted;
-    bool fAnyUnordered;
-    int nFileVersion;
+    unsigned int nCKeys{0};
+    unsigned int nWatchKeys{0};
+    unsigned int nKeyMeta{0};
+    bool fIsEncrypted{false};
+    bool fAnyUnordered{false};
+    int nFileVersion{0};
     std::vector<TxId> vWalletUpgrade;
 
-    CWalletScanState() {
-        nCKeys = nWatchKeys = nKeyMeta = 0;
-        fIsEncrypted = false;
-        fAnyUnordered = false;
-        nFileVersion = 0;
-    }
+    CWalletScanState() {}
 };
 
 bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,

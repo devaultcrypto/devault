@@ -12,12 +12,9 @@
 #include "catch_unit.h"
 
 class CAddrManTest : public CAddrMan {
-  uint64_t state;
 
   public:
   CAddrManTest(bool makeDeterministic = true) {
-      state = 1;
-      
       if (makeDeterministic) {
           // Set addrman addr placement to be deterministic.
           MakeDeterministic();
