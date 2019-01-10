@@ -176,7 +176,7 @@ static int GetnScore(const CService &addr) {
 bool IsPeerAddrLocalGood(CNode *pnode) {
     CService addrLocal = pnode->GetAddrLocal();
     return fDiscover && pnode->addr.IsRoutable() && addrLocal.IsRoutable() &&
-           !IsLimited(addrLocal.GetNetwork());
+           IsReachable(addrLocal.GetNetwork());
 }
 
 // Pushes our own address to a peer.
@@ -218,7 +218,7 @@ bool AddLocal(const CService &addr, int nScore) {
         return false;
     }
 
-    if (IsLimited(addr)) {
+    if (!IsReachable(addr)) {
         return false;
     }
 
@@ -247,24 +247,21 @@ void RemoveLocal(const CService &addr) {
     mapLocalHost.erase(addr);
 }
 
-/**
- * Make a particular network entirely off-limits (no automatic connects to it).
- */
-void SetLimited(enum Network net, bool fLimited) {
+void SetReachable(enum Network net, bool reachable) {
     if (net == NET_UNROUTABLE || net == NET_INTERNAL) {
         return;
     }
     LOCK(cs_mapLocalHost);
-    vfLimited[net] = fLimited;
+    vfLimited[net] = !reachable;
 }
 
-bool IsLimited(enum Network net) {
+bool IsReachable(enum Network net) {
     LOCK(cs_mapLocalHost);
-    return vfLimited[net];
+    return !vfLimited[net];
 }
 
-bool IsLimited(const CNetAddr &addr) {
-    return IsLimited(addr.GetNetwork());
+bool IsReachable(const CNetAddr &addr) {
+    return IsReachable(addr.GetNetwork());
 }
 
 /** vote for a local address */
@@ -281,16 +278,6 @@ bool SeenLocal(const CService &addr) {
 bool IsLocal(const CService &addr) {
     LOCK(cs_mapLocalHost);
     return mapLocalHost.count(addr) > 0;
-}
-
-/** check whether a given network is one we can probably connect to */
-bool IsReachable(enum Network net) {
-    return !IsLimited(net);
-}
-
-/** check whether a given address is in a network we can probably connect to */
-bool IsReachable(const CNetAddr &addr) {
-    return IsReachable(addr.GetNetwork());
 }
 
 CNode *CConnman::FindNode(const CNetAddr &ip) {
@@ -1791,7 +1778,7 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect) {
                 break;
             }
 
-            if (IsLimited(addr)) {
+            if (!IsReachable(addr)) {
                 continue;
             }
 
@@ -2197,7 +2184,7 @@ NodeId CConnman::GetNewNodeId() {
 }
 
 bool CConnman::Bind(const CService &addr, unsigned int flags) {
-    if (!(flags & BF_EXPLICIT) && IsLimited(addr)) {
+    if (!(flags & BF_EXPLICIT) && !IsReachable(addr)) {
         return false;
     }
     std::string strError;

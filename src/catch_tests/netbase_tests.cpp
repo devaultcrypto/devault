@@ -34,7 +34,7 @@ TEST_CASE("netbase_networks") {
   BOOST_CHECK(ResolveIP("::1").GetNetwork() == NET_UNROUTABLE);
   BOOST_CHECK(ResolveIP("8.8.8.8").GetNetwork() == NET_IPV4);
   BOOST_CHECK(ResolveIP("2001::8888").GetNetwork() == NET_IPV6);
-  BOOST_CHECK(ResolveIP("FD87:D87E:EB43:edb1:8e4:3588:e546:35ca").GetNetwork() == NET_TOR);
+  BOOST_CHECK(ResolveIP("FD87:D87E:EB43:edb1:8e4:3588:e546:35ca").GetNetwork() == NET_ONION);
   BOOST_CHECK(CreateInternal("foo.com").GetNetwork() == NET_INTERNAL);
 }
 
@@ -287,7 +287,7 @@ TEST_CASE("netbase_getgroup") {
   // RFC4380
   BOOST_CHECK(ResolveIP("2001:0:9999:9999:9999:9999:FEFD:FCFB").GetGroup() == Vec8({NET_IPV4, 1, 2}));
   // Tor
-  BOOST_CHECK(ResolveIP("FD87:D87E:EB43:edb1:8e4:3588:e546:35ca").GetGroup() == Vec8({NET_TOR, 239}));
+  BOOST_CHECK(ResolveIP("FD87:D87E:EB43:edb1:8e4:3588:e546:35ca").GetGroup() == Vec8({NET_ONION, 239}));
   // he.net
   BOOST_CHECK(ResolveIP("2001:470:abcd:9999:9999:9999:9999:9999").GetGroup() == Vec8({NET_IPV6, 32, 1, 4, 112, 175}));
   // IPv6
