@@ -161,6 +161,33 @@ OutputType g_address_type = OutputType::LEGACY;
 
 const char *DEFAULT_WALLET_DAT = "wallet.dat";
 
+std::shared_ptr<CWallet> LoadWallet(const CChainParams &chainParams,
+                                    interfaces::Chain &chain,
+                                    const WalletLocation &location,
+                                    std::string &error, std::string &warning) {
+    if (!CWallet::Verify(chainParams, chain, location, false, error, warning)) {
+        error = "Wallet file verification failed: " + error;
+        return nullptr;
+    }
+    WalletFlag flag;
+    std::shared_ptr<CWallet> wallet =
+      CWallet::CreateWalletFromFile(chainParams, chain, location, SecureString(""), std::vector<std::string>(), flag);
+    if (!wallet) {
+        error = "Wallet loading failed.";
+        return nullptr;
+    }
+    AddWallet(wallet);
+    wallet->postInitProcess();
+    return wallet;
+}
+
+std::shared_ptr<CWallet> LoadWallet(const CChainParams &chainParams,
+                                    interfaces::Chain &chain,
+                                    const std::string &name, std::string &error,
+                                    std::string &warning) {
+    return LoadWallet(chainParams, chain, WalletLocation(name), error, warning);
+}
+
 /**
  * If fee estimation does not have enough data to provide estimates, use this
  * fee instead. Has no effect if not using fee estimation.
