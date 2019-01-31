@@ -196,7 +196,7 @@ XXXXX - Partial upgrade of wallet stuff
       [SECP256K1] CMake: allow to select field and scalar implementation
       Fix autotools build failure
       gui: Defer removeAndDeleteWallet when no modal widget is active
-      wallet: Releases dangling files on BerkeleyEnvironment::Close
+##### wallet: Releases dangling files on BerkeleyEnvironment::Close
       Remove direct node->wallet calls in init.cpp
       [SECP256K1] CMake: add an option to enable endomorphism
       [SECP256K1] Travis : run a 64 bits ninja for building 32 bits targets
@@ -347,7 +347,7 @@ XXXXX - Partial upgrade of wallet stuff
       Fix -Wshadow warnings
       test: add "diamond" unit test to MempoolAncestryTests
       scripted-diff: Remove unused first argument to addUnchecked
-      Free BerkeleyEnvironment instances when not in use
+##### Free BerkeleyEnvironment instances when not in use
       Fix the abc-p2p-compactblocks when running whith UBSAN
       Fix extra parenthesis in python .format()
       Mark CTxMemPoolEntry members that should not be modified const
@@ -366,7 +366,7 @@ XXXXX - Partial upgrade of wallet stuff
       Wrap paths in codeblocks in release-process.md
       Increase sparsity of pippenger fixed window naf representation
       Remove unnecessary major.minor version from gitian-descriptors
-      Add Clang thread safety annotations for variables guarded by cs_db
+####  Add Clang thread safety annotations for variables guarded by cs_db
       [CMAKE] Actually run the seeder tests
       [SECP256K1] Update Travis deprecated keywords
       [SECP256k1] Add the CMake/Ninja build to Travis
