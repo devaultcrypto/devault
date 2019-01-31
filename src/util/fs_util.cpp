@@ -544,6 +544,13 @@ const fs::path &GetBlocksDir(bool fNetSpecific) {
     return path;
 }
 
+
+void UnlockDirectory(const fs::path &directory,
+                     const std::string &lockfile_name) {
+    std::lock_guard<std::mutex> lock(cs_dir_locks);
+    dir_locks.erase((directory / lockfile_name).string());
+}
+
 bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir) {
 
     constexpr uint64_t nMinDiskSpace = 52428800;

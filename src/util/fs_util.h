@@ -30,6 +30,8 @@ void SetupEnvironment();
 bool LockDirectory(const fs::path &directory, const std::string lockfile_name, bool probe_only);
 void ReleaseDirectoryLocks();
 bool LockDataDirectory(bool probeOnly);
+void UnlockDirectory(const fs::path &directory,
+                     const std::string &lockfile_name);
 bool DirIsWritable(const fs::path &directory);
 // Check whether enough disk space is available for an incoming block.
 bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
