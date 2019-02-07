@@ -866,4 +866,3 @@ TEST_CASE("ListCoins") {
                       coinbaseAddress);
     BOOST_CHECK_EQUAL(list.begin()->second.size(), 2U);
 }
-

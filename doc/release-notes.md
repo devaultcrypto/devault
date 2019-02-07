@@ -1,6 +1,7 @@
 This release includes the following features and fixes since 1.1.4 release:
 
 This release includes the following features and fixes:
+
  - Minor bug fixes and improvements.
  - New `fees` field introduced in `getrawmempool`, `getmempoolancestors`,
    `getmempooldescendants` and  `getmempoolentry` when verbosity is set to
@@ -27,3 +28,7 @@ Dynamic creation of wallets
  - It is now possible to unload wallets dynamically at runtime. This feature is
    currently only available through the RPC interface.
  - Wallets dynamically unloaded will now be reflected in the gui.
+
+ - The RPC `createwallet` now has an optional `blank` argument that can be used
+   to create a blank wallet. Blank wallets do not have any keys or HD seed.
+   They cannot be opened in software that is version 1.1.4 or older 

@@ -75,6 +75,7 @@ TEST_PARAMS = {
     #    testname --param3
     "wallet_txn_doublespend.py": [["--mineblock"]],
     "wallet_txn_clone.py": [["--mineblock"]],
+    "wallet_createwallet.py": [["--usecli"]],
     "wallet_multiwallet.py": [["--usecli"]],
     "wallet_disableprivatekeys.py": [["--usecli"]],
 }
@@ -248,9 +249,14 @@ def main():
 
     # Remove the test cases that the user has explicitly asked to exclude.
     if args.exclude:
-        for exclude_test in args.exclude.split(','):
-            if exclude_test + ".py" in test_list:
-                test_list.remove(exclude_test + ".py")
+        tests_excl = [re.sub(r"\.py$", "", t)
+                      + ".py" for t in args.exclude.split(',')]
+        for exclude_test in tests_excl:
+            if exclude_test in test_list:
+                test_list.remove(exclude_test)
+            else:
+                print("{}WARNING!{} Test '{}' not found in current test list.".format(
+                    BOLD[1], BOLD[0], exclude_test))
 
     # Use and update timings from build_dir only if separate
     # build directory is used. We do not want to pollute source directory.
@@ -423,7 +429,8 @@ def execute_test_processes(num_jobs, test_list, tests_dir, tmpdir, flags):
                 update_queue.task_done()
             except Empty as e:
                 if not on_ci():
-                    print("Running jobs: {}".format(", ".join(running_jobs)), end="\r")
+                    print("Running jobs: {}".format(
+                        ", ".join([j[1] for j in running_jobs])), end="\r")
                     sys.stdout.flush()
                     printed_status = True
 

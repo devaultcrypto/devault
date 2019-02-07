@@ -7,9 +7,9 @@ project(catch-tests)
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/data")
 
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  find_program(PYTHON3 python) 
+  find_program(PYTHON python3) 
 ELSE()
-  find_program(PYTHON2 python) # Python 3 had issues on Linux
+  find_program(PYTHON python2) # Python 3 had issues on Linux
 ENDIF()
 
 function(gen_json_header NAME)
@@ -21,7 +21,7 @@ function(gen_json_header NAME)
 get_filename_component(TEST_NAME ${f} NAME_WE)
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_custom_command(OUTPUT ${h}
-		COMMAND ${PYTHON3}
+		COMMAND ${PYTHON}
 		ARGS
 		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header3.py"
 		"${TEST_NAME}"
@@ -33,7 +33,7 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		)
 ELSE()
 	add_custom_command(OUTPUT ${h}
-		COMMAND ${PYTHON2}
+		COMMAND ${PYTHON}
 		ARGS
 		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header.py"
 		"${TEST_NAME}"

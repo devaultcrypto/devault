@@ -38,7 +38,9 @@ public:
     void setClientModel(ClientModel *clientModel);
 
     bool addWallet(WalletModel *walletModel);
+    bool setCurrentWallet(WalletModel *wallet_model);
     bool setCurrentWallet(const QString &name);
+    bool removeWallet(WalletModel *wallet_model);
     bool removeWallet(const QString &name);
     void removeAllWallets();
 
@@ -55,7 +57,7 @@ private:
     QStackedWidget *walletStack;
     BitcoinGUI *gui;
     ClientModel *clientModel;
-    QMap<QString, WalletView *> mapWalletViews;
+    QMap<WalletModel *, WalletView *> mapWalletViews;
 
     bool bOutOfSync;
 
@@ -63,7 +65,8 @@ private:
     const Config *config;
 
 public:
-    WalletView *currentWalletView();
+    WalletView *currentWalletView() const;
+    WalletModel *currentWalletModel() const;
 
 public Q_SLOTS:
     /** Switch to overview (home) page */
