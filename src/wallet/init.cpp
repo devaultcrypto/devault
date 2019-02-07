@@ -425,11 +425,11 @@ bool WalletInit::Open(const CChainParams &chainParams, interfaces::Chain &chain,
                                  "-wallet"));
     }
 
-
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+        uint64_t flags;
         std::shared_ptr<CWallet> pwallet = CWallet::CreateWalletFromFile(
                                                                          chainParams, chain, WalletLocation(walletFile),
-                                                                         walletPassphrase, words, use_bls);
+                                                                         walletPassphrase, words, use_bls, flags);
       if (!pwallet) {
         return false;
       }

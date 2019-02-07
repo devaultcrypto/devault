@@ -449,8 +449,17 @@ bool WalletModel::privateKeysDisabled() const {
     return m_wallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
 }
 
+bool WalletModel::canGetAddresses() const {
+    return m_wallet->canGetAddresses();
+}
+
 QString WalletModel::getWalletName() const {
     return QString::fromStdString(m_wallet->getWalletName());
+}
+
+QString WalletModel::getDisplayName() const {
+    const QString name = getWalletName();
+    return name.isEmpty() ? "[" + tr("default wallet") + "]" : name;
 }
 
 bool WalletModel::isMultiwallet() {

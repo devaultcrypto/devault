@@ -50,6 +50,9 @@
 #include <cstdint>
 
 //#include <boost/filesystem/operations.hpp>
+#ifdef ENABLE_WALLET
+#include <qt/walletcontroller.h>
+#endif
 
 #include <QApplication>
 #include <QDebug>
@@ -254,8 +257,6 @@ public Q_SLOTS:
     /// Handle runaway exceptions. Shows a message box with the problem and
     /// quits the program.
     void handleRunawayException(const QString &message);
-    void addWallet(WalletModel *walletModel);
-    void removeWallet();
 
 Q_SIGNALS:
     void requestedInitialize(Config *config, RPCServer *rpcServer,
@@ -263,6 +264,7 @@ Q_SIGNALS:
     void requestedShutdown();
     void stopThread();
     void splashFinished(QWidget *window);
+    void windowShown(BitcoinGUI *window);
 
 private:
     QThread *coreThread;
@@ -271,9 +273,9 @@ private:
     ClientModel *clientModel;
     BitcoinGUI *window;
     QTimer *pollShutdownTimer;
-#ifdef ENABLE_WALLET
-    std::vector<WalletModel *> m_wallet_models;
-#endif
+    #ifdef ENABLE_WALLET
+        WalletController *m_wallet_controller{nullptr};
+    #endif
     SecureString pss;
     std::vector<std::string> wordlist;
     bool use_bls;
@@ -283,6 +285,8 @@ private:
 
     void startThread();
 };
+
+int GuiMain(int argc, char *argv[]);
 
 #include <bitcoin.moc>
 
@@ -340,9 +344,6 @@ void DeVault::shutdown() {
 BitcoinApplication::BitcoinApplication(interfaces::Node& node, int &argc, char **argv)
     : QApplication(argc, argv), coreThread(nullptr), m_node(node),optionsModel(nullptr), clientModel(nullptr),
       window(nullptr), pollShutdownTimer(nullptr), 
-#ifdef ENABLE_WALLET
-      m_wallet_models(),
-#endif
       returnValue(0), platformStyle(0) {
     setQuitOnLastWindowClosed(false);
 }
@@ -529,11 +530,8 @@ void BitcoinApplication::requestShutdown(Config &config) {
     pollShutdownTimer->stop();
 
 #ifdef ENABLE_WALLET
-    window->removeAllWallets();
-    for (WalletModel *walletModel : m_wallet_models) {
-        delete walletModel;
-    }
-    m_wallet_models.clear();
+    delete m_wallet_controller;
+    m_wallet_controller = nullptr;
 #endif
     delete clientModel;
     clientModel = nullptr;
@@ -542,30 +540,6 @@ void BitcoinApplication::requestShutdown(Config &config) {
 
     // Request shutdown from core thread
     Q_EMIT requestedShutdown();
-}
-
-void BitcoinApplication::addWallet(WalletModel *walletModel) {
-#ifdef ENABLE_WALLET
-    window->addWallet(walletModel);
-
-    if (m_wallet_models.empty()) {
-        window->setCurrentWallet(walletModel->getWalletName());
-    }
-
-    connect(walletModel, SIGNAL(unload()), this, SLOT(removeWallet()));
-
-    m_wallet_models.push_back(walletModel);
-#endif
-}
-
-void BitcoinApplication::removeWallet() {
-#ifdef ENABLE_WALLET
-    WalletModel *walletModel = static_cast<WalletModel *>(sender());
-    m_wallet_models.erase(
-        std::find(m_wallet_models.begin(), m_wallet_models.end(), walletModel));
-    window->removeWallet(walletModel);
-    walletModel->deleteLater();
-#endif
 }
 
 void BitcoinApplication::initializeResult(bool success) {
@@ -581,25 +555,16 @@ void BitcoinApplication::initializeResult(bool success) {
     // Log this only after AppInitMain finishes, as then logging setup is
     // guaranteed complete.
     qWarning() << "Platform customization:" << platformStyle->getName();
-    clientModel = new ClientModel(m_node, optionsModel);
-    window->setClientModel(clientModel);
 
 #ifdef ENABLE_WALLET
-    m_node.handleLoadWallet(
-                            [this](std::unique_ptr<interfaces::Wallet> wallet) {
-                                WalletModel *wallet_model =
-                                    new WalletModel(std::move(wallet), m_node, platformStyle,
-                                                    optionsModel, nullptr);
-                                // Fix wallet model thread affinity.
-                                wallet_model->moveToThread(thread());
-                                QMetaObject::invokeMethod(this, "addWallet", Qt::QueuedConnection,
-                                                          Q_ARG(WalletModel *, wallet_model));
-                            });
+    m_wallet_controller =
+        new WalletController(m_node, platformStyle, optionsModel, this);
+#endif
 
-    for (auto &wallet : m_node.getWallets()) {
-        addWallet(new WalletModel(std::move(wallet), m_node, platformStyle,
-                                  optionsModel));
-    }
+    clientModel = new ClientModel(m_node, optionsModel);
+    window->setClientModel(clientModel);
+#ifdef ENABLE_WALLET
+    window->setWalletController(m_wallet_controller);
 #endif
 
     // If -min option passed, start window minimized.

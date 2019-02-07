@@ -83,6 +83,7 @@ enum WalletFeature {
     // the earliest version new wallets supports (only useful for getinfo's clientversion output)
     FEATURE_BASE = 190000,
     FEATURE_START = 1000000,
+    FEATURE_BLANK = 1500000,
     FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
 };
 
@@ -103,10 +104,22 @@ enum WalletFlags : uint64_t {
     // Will enforce the rule that the wallet can't contain any private keys
     // (only watch-only/pubkeys).
     WALLET_FLAG_DISABLE_PRIVATE_KEYS = (1ULL << 32),
+
+    //! Flag set when a wallet contains no HD seed and no private keys, scripts,
+    //! addresses, and other watch only things, and is therefore "blank."
+    //!
+    //! The only function this flag serves is to distinguish a blank wallet from
+    //! a newly created wallet when the wallet database is loaded, to avoid
+    //! initialization that should only happen on first run.
+    //!
+    //! This flag is also a mandatory flag to prevent previous versions of
+    //! bitcoin from opening the wallet, thinking it was newly created, and
+    //! then improperly reinitializing it.
+    WALLET_FLAG_BLANK_WALLET = (1ULL << 33),
 };
 
 static constexpr uint64_t g_known_wallet_flags =
-    WALLET_FLAG_DISABLE_PRIVATE_KEYS;
+    WALLET_FLAG_DISABLE_PRIVATE_KEYS | WALLET_FLAG_BLANK_WALLET;
 
 /** A key pool entry */
 class CKeyPool {
@@ -1297,7 +1310,8 @@ public:
                          const WalletLocation &location,
                          const SecureString& walletPassphrase,
                          const std::vector<std::string>& words, bool use_bls,
-                         uint64_t wallet_creation_flags = 0);
+                         uint64_t flags
+                         );
 
     /**
      * Wallet post-init setup
@@ -1308,6 +1322,15 @@ public:
 
     bool BackupWallet(const std::string &strDest);
 
+    /* Returns true if the wallet can generate new keys */
+    bool CanGenerateKeys();
+
+    /**
+     * Returns true if the wallet can give out new addresses. This means it has
+     * keys in the keypool or can generate new keys.
+     */
+    bool CanGetAddresses(bool internal = false);
+
     /**
      * Blocks until the wallet state is up-to-date to /at least/ the current
      * chain at the time this function is entered.
@@ -1315,6 +1338,41 @@ public:
      * deadlock
      */
     void BlockUntilSyncedToCurrentChain() LOCKS_EXCLUDED(cs_main, cs_wallet);
+
+    /**
+     * Explicitly make the wallet learn the related scripts for outputs to the
+     * given key. This is purely to make the wallet file compatible with older
+     * software, as CBasicKeyStore automatically does this implicitly for all
+     * keys now.
+     */
+    void LearnRelatedScripts(const CPubKey &key, OutputType);
+
+    /**
+     * Same as LearnRelatedScripts, but when the OutputType is not known (and
+     * could be anything).
+     */
+    void LearnAllRelatedScripts(const CPubKey &key);
+
+    /**
+     * Set a single wallet flag.
+     */
+    void SetWalletFlag(uint64_t flags);
+
+    /**
+     * Unsets a single wallet flag.
+     */
+    void UnsetWalletFlag(uint64_t flag);
+
+    /**
+     * Check if a certain wallet flag is set.
+     */
+    bool IsWalletFlagSet(uint64_t flag);
+
+    /**
+     * Overwrite all flags by the given uint64_t.
+     * Returns false if unknown, non-tolerable flags are present.
+     */
+    bool SetWalletFlags(uint64_t overwriteFlags, bool memOnly);
 
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
@@ -1341,27 +1399,6 @@ public:
     bool OutputEligibleForSpending(const COutput &output, const int nConfMine,
                                    const int nConfTheirs,
                                    const uint64_t nMaxAncestors) const;
-    /**
-     * Same as LearnRelatedScripts, but when the OutputType is not known (and
-     * could be anything).
-     */
-    void LearnAllRelatedScripts(const CPubKey &key);
-
-    /**
-     * Set a single wallet flag.
-     */
-    void SetWalletFlag(uint64_t flags);
-
-    /**
-     * Check if a certain wallet flag is set.
-     */
-    bool IsWalletFlagSet(uint64_t flag);
-
-    /**
-     * Overwrite all flags by the given uint64_t.
-     * Returns false if unknown, non-tolerable flags are present.
-     */
-    bool SetWalletFlags(uint64_t overwriteFlags, bool memOnly);
 };
 
 /** A key allocated from the key pool. */

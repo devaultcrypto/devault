@@ -190,7 +190,10 @@ public:
 
     const CChainParams &getChainParams() const;
 
+    bool canGetAddresses() const;
+
     QString getWalletName() const;
+    QString getDisplayName() const;
 
     bool isMultiwallet();
 

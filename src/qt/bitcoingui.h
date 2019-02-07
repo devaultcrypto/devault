@@ -32,6 +32,7 @@ class PlatformStyle;
 class RPCConsole;
 class SendCoinsRecipient;
 class UnitDisplayStatusBarControl;
+class WalletController;
 class WalletFrame;
 class WalletModel;
 class HelpMessageDialog;
@@ -75,14 +76,17 @@ public:
      * the P2P network, and is wallet-agnostic.
      */
     void setClientModel(ClientModel *clientModel);
+#ifdef ENABLE_WALLET
+    void setWalletController(WalletController *wallet_controller);
+#endif
 
     /**
      * Set the wallet model.
      * The wallet model represents a bitcoin wallet, and offers access to the
      * list of transactions, address book and sending functionality.
      */
-    bool addWallet(WalletModel *walletModel);
-    bool removeWallet(WalletModel *walletModel);
+    void addWallet(WalletModel *walletModel);
+    void removeWallet(WalletModel *walletModel);
     void removeAllWallets();
     void cancel();
     bool enableWallet = false;
@@ -97,6 +101,7 @@ protected:
 
 private:
     interfaces::Node &m_node;
+    WalletController *m_wallet_controller{nullptr};
     std::unique_ptr<interfaces::Handler> m_handler_message_box;
     std::unique_ptr<interfaces::Handler> m_handler_question;
     ClientModel *clientModel = nullptr;
@@ -169,7 +174,7 @@ private:
     /** Create the toolbars */
     void createToolBars();
     /** Create system tray icon and notification */
-    void createTrayIcon(const NetworkStyle *networkStyle);
+    void createTrayIcon();
     /** Create system tray menu (or setup the dock menu) */
     void createTrayIconMenu();
 
@@ -212,8 +217,9 @@ public Q_SLOTS:
     void message(const QString &title, const QString &message,
                  unsigned int style, bool *ret = nullptr);
 
-    bool setCurrentWallet(const QString &name);
-    bool setCurrentWalletBySelectorIndex(int index);
+#ifdef ENABLE_WALLET
+    void setCurrentWallet(WalletModel *wallet_model);
+    void setCurrentWalletBySelectorIndex(int index);
     /** Set the UI status indicators based on the currently selected wallet.
      */
     void updateWalletStatus();
@@ -232,6 +238,12 @@ public Q_SLOTS:
     void incomingTransaction(const QString &date, int unit, const Amount amount,
                              const QString &type, const QString &address,
                              const QString &label, const QString &walletName);
+#endif // ENABLE_WALLET
+
+private:
+    /** Set the proxy-enabled icon as shown in the UI. */
+    void updateProxyIcon();
+    void updateWindowTitle();
 
     /** Open DeVault website */
     void openDVT_global();
@@ -271,6 +283,7 @@ public Q_SLOTS:
 
     /** Show window if hidden, unminimize when minimized, rise when obscured or
      * show if hidden and fToggleHidden is true */
+public:    
     void showNormalIfMinimized(bool fToggleHidden = false);
     /** Simply calls showNormalIfMinimized(true) for use in SLOT() macro */
     void toggleHidden();
@@ -284,6 +297,7 @@ public Q_SLOTS:
     /** When hideTrayIcon setting is changed in OptionsModel hide or show the
      * icon accordingly. */
     void setTrayIconVisible(bool);
+private:    
 
     /** Toggle networking */
     void toggleNetworkActive();

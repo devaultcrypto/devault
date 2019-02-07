@@ -229,7 +229,8 @@ const CWalletTx *CWallet::GetWalletTx(const TxId &txid) const {
 }
 
 std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, bool internal) {
-    assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+    //assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+    //assert(!IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET));
     // mapKeyMetadata
     AssertLockHeld(cs_wallet);
 
@@ -241,7 +242,6 @@ std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, boo
     CKeyMetadata metadata(nCreationTime);
 
     // use HD key derivation since HD was enabled during wallet creation
-
     // for now we use a fixed keypath scheme of m/0'/0'/k
     // master key seed (256bit)
     CKey key;
@@ -360,7 +360,6 @@ bool CWallet::AddCScript(const CScript &redeemScript) {
     if (!CCryptoKeyStore::AddCScript(redeemScript)) {
         return false;
     }
-
     return WalletBatch(*database).WriteCScript(Hash160(redeemScript), redeemScript);
 }
 
@@ -391,7 +390,11 @@ bool CWallet::AddWatchOnly(const CScript &dest) {
     const CKeyMetadata &meta = m_script_metadata[CScriptID(dest)];
     UpdateTimeFirstKey(meta.nCreateTime);
     NotifyWatchonlyChanged(true);
-    return WalletBatch(*database).WriteWatchOnly(dest, meta);
+    if (WalletBatch(*database).WriteWatchOnly(dest, meta)) {
+        UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
+        return true;
+    }
+    return false;
 }
 
 bool CWallet::AddWatchOnly(const CScript &dest, int64_t nCreateTime) {
@@ -1558,52 +1561,6 @@ Amount CWallet::GetChange(const CTransaction &tx) const {
 }
 
 #ifdef NEEDED
-CPubKey CWallet::GenerateNewSeed() {
-    assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
-    CKey key;
-    key.MakeNewKey(true);
-    return DeriveNewSeed(key);
-}
-
-CPubKey CWallet::DeriveNewSeed(const CKey &key) {
-    int64_t nCreationTime = GetTime();
-    CKeyMetadata metadata(nCreationTime);
-
-    // Calculate the seed
-    CPubKey seed = key.GetPubKey();
-    assert(key.VerifyPubKey(seed));
-
-    // Set the hd keypath to "s" -> Seed, refers the seed to itself
-    metadata.hdKeypath = "s";
-    metadata.hd_seed_id = seed.GetID();
-
-    LOCK(cs_wallet);
-
-    // mem store the metadata
-    mapKeyMetadata[seed.GetID()] = metadata;
-
-    // Write the key&metadata to the database
-    if (!AddKeyPubKey(key, seed)) {
-        throw std::runtime_error(std::string(__func__) +
-                                 ": AddKeyPubKey failed");
-    }
-
-    return seed;
-}
-
-void CWallet::SetHDSeed(const CPubKey &seed) {
-    LOCK(cs_wallet);
-
-    // Store the keyid (hash160) together with the child index counter in the
-    // database as a hdchain object.
-    CHDChain newHdChain;
-    newHdChain.nVersion = CanSupportFeature(FEATURE_HD_SPLIT)
-                              ? CHDChain::VERSION_HD_CHAIN_SPLIT
-                              : CHDChain::VERSION_HD_BASE;
-    newHdChain.seed_id = seed.GetID();
-    SetHDChain(newHdChain, false);
-}
-
 void CWallet::SetHDChain(const CHDChain &chain, bool memonly) {
     LOCK(cs_wallet);
     if (!memonly && !WalletBatch(*database).WriteHDChain(chain)) {
@@ -1619,9 +1576,39 @@ bool CWallet::IsHDEnabled() const {
 }
 #endif
 
+bool CWallet::CanGenerateKeys() {
+    LOCK(cs_wallet);
+    return true;
+}
+
+bool CWallet::CanGetAddresses(bool internal) {
+    LOCK(cs_wallet);
+    // Check if the keypool has keys
+    bool keypool_has_keys;
+    if (internal && CanSupportFeature(FEATURE_BLANK)) {
+        keypool_has_keys = setInternalKeyPool.size() > 0;
+    } else {
+        keypool_has_keys = KeypoolCountExternalKeys() > 0;
+    }
+    // If the keypool doesn't have keys, check if we can generate them
+    if (!keypool_has_keys) {
+        return CanGenerateKeys();
+    }
+    return keypool_has_keys;
+}
+
 void CWallet::SetWalletFlag(uint64_t flags) {
     LOCK(cs_wallet);
     m_wallet_flags |= flags;
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +
+                                 ": writing wallet flags failed");
+    }
+}
+
+void CWallet::UnsetWalletFlag(uint64_t flag) {
+    LOCK(cs_wallet);
+    m_wallet_flags &= ~flag;
     if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
         throw std::runtime_error(std::string(__func__) +
                                  ": writing wallet flags failed");
@@ -3968,7 +3955,12 @@ DBErrors CWallet::LoadWallet(bool &fFirstRunRet) {
             mapWatchKeys.empty() && setWatchOnly.empty() &&
             mapHdPubKeys.empty() && mapBLSPubKeys.empty() &&
             mapKeyMetadata.empty() && !IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
+
+        //HACK
+        //!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS) &&
+        //!IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET);
     }
+        
     if (nLoadWalletRet != DBErrors::LOAD_OK) {
         return nLoadWalletRet;
     }
@@ -4238,7 +4230,7 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
     }
     LOCK(cs_wallet);
 
-    if (IsLocked()) {
+    if (IsLocked() || !CanGenerateKeys()) {
         return false;
     }
 
@@ -4427,7 +4419,7 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal, const CPubKey &pubkey) {
 }
 
 bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
-    if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!CanGetAddresses(internal)) {
         return false;
     }
 
@@ -4676,6 +4668,10 @@ CWallet::GetLabelAddresses(const std::string &label) const {
 }
 
 bool CReserveKey::GetReservedKey(CPubKey &pubkey, bool internal) {
+    if (!pwallet->CanGetAddresses(internal)) {
+        return false;
+    }
+
     if (nIndex == -1) {
         CKeyPool keypool;
         if (!pwallet->ReserveKeyFromKeyPool(nIndex, keypool, internal)) {
@@ -5060,7 +5056,8 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                               const WalletLocation &location,
                               const SecureString& walletPassphrase,
                               const mnemonic::WordList& words, bool use_bls,
-                              uint64_t wallet_creation_flags) {
+                              uint64_t wallet_creation_flags
+                              ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
