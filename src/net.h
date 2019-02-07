@@ -77,10 +77,6 @@ static const bool DEFAULT_UPNP = USE_UPNP;
 #else
 static const bool DEFAULT_UPNP = false;
 #endif
-/** The maximum number of entries in mapAskFor */
-static const size_t MAPASKFOR_MAX_SZ = MAX_INV_SZ;
-/** The maximum number of entries in setAskFor (larger due to getdata latency)*/
-static const size_t SETASKFOR_MAX_SZ = 2 * MAX_INV_SZ;
 /** The maximum number of peer connections to maintain. */
 static const unsigned int DEFAULT_MAX_PEER_CONNECTIONS = 125;
 /** The default for -maxuploadtarget. 0 = Unlimited */
@@ -506,8 +502,6 @@ extern bool fDiscover;
 extern bool fListen;
 extern bool fRelayTxes;
 
-extern limitedmap<uint256, int64_t> mapAlreadyAskedFor;
-
 struct LocalServiceInfo {
     int nScore;
     int nPort;
@@ -711,8 +705,6 @@ public:
     // requested.
     std::vector<uint256> vInventoryBlockToSend GUARDED_BY(cs_inventory);
     CCriticalSection cs_inventory;
-    std::set<uint256> setAskFor;
-    std::multimap<int64_t, CInv> mapAskFor;
     int64_t nNextInvSend{0};
     // Used for headers announcements - unfiltered blocks to relay.
     std::vector<uint256> vBlockHashesToAnnounce GUARDED_BY(cs_inventory);
@@ -837,8 +829,6 @@ public:
         LOCK(cs_inventory);
         vBlockHashesToAnnounce.push_back(hash);
     }
-
-    void AskFor(const CInv &inv);
 
     void CloseSocketDisconnect();
 
