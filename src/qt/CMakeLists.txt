@@ -12,7 +12,7 @@ endif()
 include(BrewHelper)
 find_brew_prefix(QT5_PREFIX qt5)
 
-set(QT_REQUIRED_COMPONENTS Core Widgets Network Test)
+set(QT_REQUIRED_COMPONENTS Core Widgets Network Test DBus)
 find_package(Qt5 COMPONENTS ${QT_REQUIRED_COMPONENTS} REQUIRED HINTS "${QT5_PREFIX}")
 
 # Find out more about Qt. This is similar to
@@ -25,7 +25,6 @@ endif()
 
 find_package(Qt5DBus)
 if (Qt5DBus_FOUND)
-  include_directories(${include_directories} "/usr/local/opt/qt5/include/QtDBus/" "/usr/include/x86_64-linux-gnu/qt5/QtDBus" ...)
   add_compile_options("-DUSE_DBUS")
 endif()
 
@@ -117,9 +116,13 @@ set(CMAKE_AUTOMOC ON)
 # Handle qrc resources
 qt5_add_resources(QRC_BITCOIN_CPP bitcoin.qrc)
 
-# Do protobuf codegen
-find_package(Protobuf REQUIRED)
-protobuf_generate_cpp(PROTOBUF_SOURCES PROTOBUF_HEADERS paymentrequest.proto)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+set(mac_stuff
+	macdockiconhandler.mm
+	macnotificationhandler.mm
+	)
+endif()
+
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -157,10 +160,6 @@ add_library(bitcoin-qt-base
 	# Handle ui files
 	${UI_GENERATED_HEADERS}
 
-	# Protobuf codegen
-	${PROTOBUF_HEADERS}
-	${PROTOBUF_SOURCES}
-
 	# Translations
 	${BITCOIN_QM_FILES}
 
@@ -182,7 +181,6 @@ target_include_directories(bitcoin-qt-base
 		.
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}/forms
-		${Protobuf_INCLUDE_DIRS}
 )
 
 target_link_libraries(bitcoin-qt-base
@@ -190,8 +188,7 @@ target_link_libraries(bitcoin-qt-base
 	rpcclient
 	Qt5::Widgets
 	Qt5::Network
-	OpenSSL::SSL
-	${Protobuf_LIBRARIES}
+#	OpenSSL::SSL
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -214,8 +211,6 @@ if(BUILD_BITCOIN_WALLET)
 			editaddressdialog.cpp
 			openuridialog.cpp
 			overviewpage.cpp
-			paymentrequestplus.cpp
-			paymentserver.cpp
 			receivecoinsdialog.cpp
 			receiverequestdialog.cpp
 			recentrequeststablemodel.cpp
