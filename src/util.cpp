@@ -85,8 +85,8 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char *const BITCOIN_CONF_FILENAME = "devault.conf";
-const char *const BITCOIN_PID_FILENAME = "devaultd.pid";
+const char *const BITCOIN_CONF_FILENAME = "bitcoin.conf";
+const char *const BITCOIN_PID_FILENAME = "bitcoind.pid";
 
 ArgsManager gArgs;
 
@@ -598,7 +598,7 @@ fs::path GetDefaultDataDir() {
 // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "DeVault";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Bitcoin";
 #else
     fs::path pathRet;
     char *pszHome = getenv("HOME");
@@ -609,10 +609,10 @@ fs::path GetDefaultDataDir() {
     }
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/DeVault";
+    return pathRet / "Library/Application Support/Bitcoin";
 #else
     // Unix
-    return pathRet / ".devault";
+    return pathRet / ".bitcoin";
 #endif
 #endif
 }
