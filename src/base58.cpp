@@ -208,34 +208,6 @@ int CBase58Data::CompareTo(const CBase58Data &b58) const {
     return 0;
 }
 
-namespace {
-class DestinationEncoder : public boost::static_visitor<std::string> {
-private:
-    const CChainParams &m_params;
-
-public:
-    explicit DestinationEncoder(const CChainParams &params)
-        : m_params(params) {}
-
-    std::string operator()(const CKeyID &id) const {
-        std::vector<uint8_t> data =
-            m_params.Base58Prefix(CChainParams::PUBKEY_ADDRESS);
-        data.insert(data.end(), id.begin(), id.end());
-        return EncodeBase58Check(data);
-    }
-
-    std::string operator()(const CScriptID &id) const {
-        std::vector<uint8_t> data =
-            m_params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
-        data.insert(data.end(), id.begin(), id.end());
-        return EncodeBase58Check(data);
-    }
-
-    std::string operator()(const CNoDestination &no) const { return ""; }
-};
-
-
-} // namespace
 
 void CBitcoinSecret::SetKey(const CKey &vchSecret) {
     assert(vchSecret.IsValid());
