@@ -55,7 +55,7 @@ bool CWalletDB::WritePurpose(const CTxDestination &address,
         return false;
     }
     return WriteIC(std::make_pair(std::string("purpose"),
-                                  EncodeLegacyAddr(address, Params())),
+                                  EncodeCashAddr(address, Params())),
                    strPurpose);
 }
 
@@ -64,7 +64,7 @@ bool CWalletDB::ErasePurpose(const CTxDestination &address) {
         return false;
     }
     return EraseIC(std::make_pair(std::string("purpose"),
-                                  EncodeLegacyAddr(address, Params())));
+                                  EncodeCashAddr(address, Params())));
 }
 
 bool CWalletDB::WriteTx(const CWalletTx &wtx) {
@@ -857,7 +857,7 @@ bool CWalletDB::WriteDestData(const CTxDestination &address,
     return WriteIC(
         std::make_pair(
             std::string("destdata"),
-            std::make_pair(EncodeLegacyAddr(address, Params()), key)),
+            std::make_pair(EncodeCashAddr(address, Params()), key)),
         value);
 }
 
@@ -868,7 +868,7 @@ bool CWalletDB::EraseDestData(const CTxDestination &address,
     }
     return EraseIC(std::make_pair(
         std::string("destdata"),
-        std::make_pair(EncodeLegacyAddr(address, Params()), key)));
+        std::make_pair(EncodeCashAddr(address, Params()), key)));
 }
 
 bool CWalletDB::WriteHDChain(const CHDChain &chain) {

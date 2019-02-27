@@ -17,10 +17,7 @@ std::string EncodeDestination(const CTxDestination &dest,
 CTxDestination DecodeDestination(const std::string &addr,
                                  const CChainParams &params) {
     CTxDestination dst = DecodeCashAddr(addr, params);
-    if (IsValidDestination(dst)) {
-        return dst;
-    }
-    return DecodeLegacyAddr(addr, params);
+    return dst;
 }
 
 bool IsValidDestinationString(const std::string &addr,
