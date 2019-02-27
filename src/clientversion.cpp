@@ -13,7 +13,7 @@
  * for both bitcoind and bitcoin-abc, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("Bitcoin ABC");
+const std::string CLIENT_NAME("DeVault Core");
 
 /**
  * Client version number
@@ -43,10 +43,11 @@ const std::string CLIENT_NAME("Bitcoin ABC");
 #endif
 
 //! git will put "#define GIT_ARCHIVE 1" on the next line inside archives.
-//! $Format:%n#define GIT_ARCHIVE 1$
+//! 
+#define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
-#define GIT_COMMIT_ID "$Format:%h$"
-#define GIT_COMMIT_DATE "$Format:%cD$"
+#define GIT_COMMIT_ID "217791f8a"
+#define GIT_COMMIT_DATE "Wed, 27 Feb 2019 11:19:40 -0500"
 #endif
 
 #define BUILD_DESC_WITH_SUFFIX(maj, min, rev, build, suffix)                   \
