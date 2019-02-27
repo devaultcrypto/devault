@@ -7,6 +7,7 @@
 #include "wallet/walletdb.h"
 
 #include "base58.h"
+#include "cashaddrenc.h"
 #include "consensus/tx_verify.h"
 #include "consensus/validation.h"
 #include "dstencode.h"
@@ -33,7 +34,7 @@ bool CWalletDB::WriteName(const CTxDestination &address,
         return false;
     }
     return WriteIC(std::make_pair(std::string("name"),
-                                  EncodeLegacyAddr(address, Params())),
+                                  EncodeCashAddr(address, Params())),
                    strName);
 }
 
@@ -45,7 +46,7 @@ bool CWalletDB::EraseName(const CTxDestination &address) {
         return false;
     }
     return EraseIC(std::make_pair(std::string("name"),
-                                  EncodeLegacyAddr(address, Params())));
+                                  EncodeCashAddr(address, Params())));
 }
 
 bool CWalletDB::WritePurpose(const CTxDestination &address,

@@ -11,8 +11,7 @@
 std::string EncodeDestination(const CTxDestination &dest,
                               const Config &config) {
     const CChainParams &params = config.GetChainParams();
-    return config.UseCashAddrEncoding() ? EncodeCashAddr(dest, params)
-                                        : EncodeLegacyAddr(dest, params);
+    return EncodeCashAddr(dest, params);
 }
 
 CTxDestination DecodeDestination(const std::string &addr,
