@@ -535,18 +535,6 @@ WId BitcoinApplication::getMainWinId() const {
 
 #ifndef BITCOIN_QT_TEST
 
-static void MigrateSettings() {
-    assert(!QApplication::applicationName().isEmpty());
-
-    static const QString legacyAppName("BitcoinABC-Qt"),
-#ifdef Q_OS_DARWIN
-        // Macs and/or iOS et al use a domain-style name for Settings
-        // files. All other platforms use a simple orgname. This
-        // difference is documented in the QSettings class documentation.
-        legacyOrg("bitcoinabc.org");
-#else
-        legacyOrg("BitcoinABC");
-#endif
     QSettings
         // below picks up settings file location based on orgname,appname
         legacy(legacyOrg, legacyAppName),
