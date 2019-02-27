@@ -6,7 +6,8 @@
 
 #include "wallet/walletdb.h"
 
-#include "base58.h"
+
+#include "chainparams.h"
 #include "cashaddrenc.h"
 #include "consensus/tx_verify.h"
 #include "consensus/validation.h"
