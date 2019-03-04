@@ -1621,13 +1621,6 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // Start enforcing the DERSIG (BIP66) rule.
     flags |= SCRIPT_VERIFY_DERSIG;
 
-    // Start enforcing CHECKLOCKTIMEVERIFY (BIP65) rule.
-    flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
-    
-
-    // Start enforcing CSV (BIP68, BIP112 and BIP113) rule.
-    flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
-    
 
     // If the UAHF is enabled, we start accepting replay protected txns
     //if (IsUAHFenabled(config, pChainTip)) {
