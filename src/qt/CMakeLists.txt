@@ -301,7 +301,7 @@ endif()
 if (DO_PACKAGING)
   add_executable(${APP_NAME} MACOSX_BUNDLE bitcoin.cpp)
 else()
-  add_executable(${APP_NAME} bitcoin.cpp)
+  add_executable(${APP_NAME} WIN32 bitcoin.cpp)
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(${APP_NAME} bitcoin-qt-base "-framework Foundation" "-framework CoreServices" "-framework AppKit")
@@ -369,7 +369,6 @@ if (BUILD_BUNDLE)
   INCLUDE(CPack)
   INSTALL(TARGETS ${APP_NAME} DESTINATION .)
 endif()
-
 
 # Test tests
 add_subdirectory(test)
