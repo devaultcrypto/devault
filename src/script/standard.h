@@ -11,8 +11,7 @@
 #include "script/script_flags.h"
 #include "uint256.h"
 
-#include <boost/variant.hpp>
-
+#include <variant>
 #include <cstdint>
 
 static const bool DEFAULT_ACCEPT_DATACARRIER = true;
@@ -72,7 +71,7 @@ public:
  *  * CScriptID: TX_SCRIPTHASH destination
  *  A CTxDestination is the internal data type encoded in a bitcoin address
  */
-typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
+typedef std::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
 
 const char *GetTxnOutputType(txnouttype t);
 bool IsValidDestination(const CTxDestination &dest);

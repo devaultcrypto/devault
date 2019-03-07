@@ -9,10 +9,8 @@
 #include "script/script.h"
 #include "utilstrencodings.h"
 
-#include <boost/variant/static_visitor.hpp>
-
 #include <algorithm>
-#include <iostream>
+#include <variant>
 
 namespace {
 
@@ -66,7 +64,7 @@ std::vector<uint8_t> PackAddrData(const T &id, uint8_t type) {
 }
 
 // Implements encoding of CTxDestination using cashaddr.
-class CashAddrEncoder : public boost::static_visitor<std::string> {
+class CashAddrEncoder : public std::variant<std::string> {
 public:
     CashAddrEncoder(const CChainParams &p) : params(p) {}
 
@@ -87,7 +85,7 @@ private:
 };
 
 // Implements encoding of CTxDestination using cashaddr.
-class CashSecretAddrEncoder : public boost::static_visitor<std::string> {
+  class CashSecretAddrEncoder : public std::variant<std::string> {
 public:
     CashSecretAddrEncoder(const CChainParams &p) : params(p) {}
 
@@ -111,7 +109,7 @@ private:
 
 std::string EncodeCashAddr(const CTxDestination &dst,
                            const CChainParams &params) {
-    return boost::apply_visitor(CashAddrEncoder(params), dst);
+  return std::visit(CashAddrEncoder(params), dst);
 }
 
 std::string EncodeCashAddr(const std::string &prefix,

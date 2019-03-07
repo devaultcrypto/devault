@@ -119,7 +119,7 @@ void SignVerifyMessageDialog::on_signMessageButton_SM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-    const CKeyID *keyID = boost::get<CKeyID>(&destination);
+    const CKeyID *keyID = &std::get<CKeyID>(destination);
     if (!keyID) {
         ui->addressIn_SM->setValid(false);
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
@@ -199,13 +199,14 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-    if (!boost::get<CKeyID>(&destination)) {
-        ui->addressIn_VM->setValid(false);
-        ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
-        ui->statusLabel_VM->setText(
-            tr("The entered address does not refer to a key.") + QString(" ") +
-            tr("Please check the address and try again."));
-        return;
+    CKeyID *keyID = &std::get<CKeyID>(destination);
+    if (!keyID) {
+      ui->addressIn_VM->setValid(false);
+      ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
+      ui->statusLabel_VM->setText(
+                                  tr("The entered address does not refer to a key.") + QString(" ") +
+                                  tr("Please check the address and try again."));
+      return;
     }
 
     bool fInvalid = false;

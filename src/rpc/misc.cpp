@@ -136,7 +136,7 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
 }
 
 #ifdef ENABLE_WALLET
-class DescribeAddressVisitor : public boost::static_visitor<UniValue> {
+class DescribeAddressVisitor : public std::variant<UniValue> {
 public:
     CWallet *const pwallet;
 
@@ -252,15 +252,14 @@ static UniValue validateaddress(const Config &config,
         isminetype mine = pwallet ? IsMine(*pwallet, dest) : ISMINE_NO;
         ret.pushKV("ismine", (mine & ISMINE_SPENDABLE) ? true : false);
         ret.pushKV("iswatchonly", (mine & ISMINE_WATCH_ONLY) ? true : false);
-        UniValue detail =
-            boost::apply_visitor(DescribeAddressVisitor(pwallet), dest);
+        UniValue detail = std::visit(DescribeAddressVisitor(pwallet), dest);
         ret.pushKVs(detail);
         if (pwallet && pwallet->mapAddressBook.count(dest)) {
             ret.pushKV("account", pwallet->mapAddressBook[dest].name);
         }
         if (pwallet) {
             const CKeyMetadata *meta = nullptr;
-            if (const CKeyID *key_id = boost::get<CKeyID>(&dest)) {
+            if (const CKeyID *key_id = &std::get<CKeyID>(dest)) {
                 auto it = pwallet->mapKeyMetadata.find(*key_id);
                 if (it != pwallet->mapKeyMetadata.end()) {
                     meta = &it->second;
@@ -323,7 +322,7 @@ CScript createmultisig_redeemScript(CWallet *const pwallet,
         if (pwallet) {
             CTxDestination dest = DecodeDestination(ks, pwallet->chainParams);
             if (IsValidDestination(dest)) {
-                const CKeyID *keyID = boost::get<CKeyID>(&dest);
+                const CKeyID *keyID = &std::get<CKeyID>(dest);
                 if (!keyID) {
                     throw std::runtime_error(
                         strprintf("%s does not refer to a key", ks));
@@ -467,7 +466,7 @@ static UniValue verifymessage(const Config &config,
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
 
-    const CKeyID *keyID = boost::get<CKeyID>(&destination);
+    const CKeyID *keyID = &std::get<CKeyID>(destination);
     if (!keyID) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }

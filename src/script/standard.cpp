@@ -234,7 +234,7 @@ bool ExtractDestinations(const CScript &scriptPubKey, txnouttype &typeRet,
 }
 
 namespace {
-class CScriptVisitor : public boost::static_visitor<bool> {
+class CScriptVisitor : public std::variant<bool> {
 private:
     CScript *script;
 
@@ -264,7 +264,7 @@ public:
 CScript GetScriptForDestination(const CTxDestination &dest) {
     CScript script;
 
-    boost::apply_visitor(CScriptVisitor(&script), dest);
+    std::visit(CScriptVisitor(&script), dest);
     return script;
 }
 
@@ -285,5 +285,5 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey> &keys) {
 }
 
 bool IsValidDestination(const CTxDestination &dest) {
-    return dest.which() != 0;
+  return !std::holds_alternative<CNoDestination>(dest);
 }

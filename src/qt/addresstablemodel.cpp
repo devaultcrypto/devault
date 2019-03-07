@@ -245,12 +245,14 @@ bool AddressTableModel::setData(const QModelIndex &index, const QVariant &value,
             CTxDestination newAddress = DecodeDestination(
                 value.toString().toStdString(), wallet->chainParams);
             // Refuse to set invalid address, set error status and return false
-            if (boost::get<CNoDestination>(&newAddress)) {
-                editStatus = INVALID_ADDRESS;
-                return false;
+            try {
+              std::get<CNoDestination>(newAddress);
+            } catch (std::bad_variant_access&) {
+              editStatus = INVALID_ADDRESS;
+              return false;
             }
             // Do nothing, if old address == new address
-            else if (newAddress == curAddress) {
+            if (newAddress == curAddress) {
                 editStatus = NO_CHANGES;
                 return false;
             }
