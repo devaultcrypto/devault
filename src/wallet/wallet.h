@@ -976,6 +976,7 @@ public:
                          const std::set<int> &setSubtractFeeFromOutputs,
                          bool keepReserveKey = true,
                          const CTxDestination &destChange = CNoDestination());
+    bool SignTransaction(CMutableTransaction &tx);
 
     /**
      * Create a new transaction paying the recipients with a set of coins
@@ -997,7 +998,8 @@ public:
     bool AddAccountingEntry(const CAccountingEntry &);
     bool AddAccountingEntry(const CAccountingEntry &, CWalletDB *pwalletdb);
     template <typename ContainerType>
-    bool DummySignTx(CMutableTransaction &txNew, const ContainerType &coins);
+    bool DummySignTx(CMutableTransaction &txNew,
+                     const ContainerType &coins) const;
 
     static CFeeRate fallbackFee;
 
@@ -1244,7 +1246,7 @@ public:
 // that each entry corresponds to each vIn, in order.
 template <typename ContainerType>
 bool CWallet::DummySignTx(CMutableTransaction &txNew,
-                          const ContainerType &coins) {
+                          const ContainerType &coins) const {
     // Fill in dummy signatures for fee calculation.
     int nIn = 0;
     for (const auto &coin : coins) {
