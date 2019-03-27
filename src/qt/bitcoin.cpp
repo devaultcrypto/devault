@@ -21,6 +21,7 @@
 #include "splashscreen.h"
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
+#include "setpassphrasedialog.h"
 
 #ifdef ENABLE_WALLET
 #include "walletmodel.h"
@@ -211,6 +212,8 @@ public:
     void createWindow(const Config *, const NetworkStyle *networkStyle);
     /// Create splash screen
     void createSplashScreen(const NetworkStyle *networkStyle);
+    /// Get wallet password from user for Wallet Encryption
+    void setupPassword(SecureString& password);
 
     /// Request core initialization
     void requestInitialize(Config &config,
@@ -249,6 +252,7 @@ private:
 #ifdef ENABLE_WALLET
     std::vector<WalletModel *> m_wallet_models;
 #endif
+    SecureString pss;
     int returnValue;
     const PlatformStyle *platformStyle;
     std::unique_ptr<QWidget> shutdownWindow;
@@ -286,7 +290,7 @@ void BitcoinABC::initialize(Config *cfg,
     Config &config(*cfg);
     try {
         qDebug() << __func__ << ": Running initialization in thread";
-        bool rv = AppInitMain(config, *httpRPCRequestProcessor);
+        bool rv = AppInitMain(config, *httpRPCRequestProcessor, "xyz");
         Q_EMIT initializeResult(rv);
     } catch (const std::exception &e) {
         handleRunawayException(&e);
@@ -354,8 +358,30 @@ void BitcoinApplication::createOptionsModel(bool resetSettings) {
     optionsModel = new OptionsModel(nullptr, resetSettings);
 }
 
+
+void BitcoinApplication::setupPassword(SecureString& password) {
+  bool has_wallet = false;
+  if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
+    LogPrintf("Wallet disabled!\n");
+  } else {
+    for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+      if (fs::exists(walletFile)) has_wallet = true;
+    }
+  }
+  if (CheckIfWalletDirExists()) has_wallet = true;
+  
+  if (!has_wallet) {
+    SetPassphraseDialog dlg(0);
+    dlg.exec();
+    password = dlg.getPassword();
+    std::cout << "Got " << password << "\n";
+  }
+}
+
 void BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
+
+    setupPassword(pss);
     window = new BitcoinGUI(config, platformStyle, networkStyle, 0);
 
     pollShutdownTimer = new QTimer(window);
@@ -481,6 +507,7 @@ void BitcoinApplication::initializeResult(bool success) {
         WalletModel *const walletModel =
             new WalletModel(platformStyle, pwallet, optionsModel);
 
+        walletModel->setWalletEncrypted(true, pss);
         window->addWallet(walletModel);
         if (fFirstWallet) {
             window->setCurrentWallet(walletModel->getWalletName());

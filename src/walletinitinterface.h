@@ -6,7 +6,7 @@
 #define WALLETINITINTERFACE_H
 
 #include "chainparams.h"
-
+#include "support/allocators/secure.h"
 #include <string>
 
 class CScheduler;
@@ -23,7 +23,7 @@ public:
     /** Verify wallets */
     virtual bool Verify(const CChainParams &chainParams) = 0;
     /** Open wallets*/
-    virtual bool Open(const CChainParams &chainParams) = 0;
+    virtual bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase) = 0;
     /** Start wallets*/
     virtual void Start(CScheduler &scheduler) = 0;
     /** Flush Wallets*/

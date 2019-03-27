@@ -10,6 +10,7 @@
 #endif
 
 #include "amount.h"
+#include "support/allocators/secure.h"
 #include "dvtui.h"
 
 #include <QLabel>

@@ -20,7 +20,8 @@
 #include "util.h"
 #include "utilstrencodings.h"
 #include "walletinitinterface.h"
-
+#include "support/allocators/secure.h"
+#include <cstdint>
 #include <boost/thread.hpp>
 
 #include <cstdio>
@@ -66,6 +67,7 @@ bool AppInit(int argc, char *argv[]) {
     HTTPRPCRequestProcessor httpRPCRequestProcessor(config, rpcServer);
 
     bool fRet = false;
+    SecureString walletPassphrase;
 
     //
     // Parameters
@@ -95,6 +97,30 @@ bool AppInit(int argc, char *argv[]) {
     }
 
     try {
+        if (!CheckIfWalletDirExists(false)) {
+          std::cout << "Enter a New Encryption password\n";
+          SecureString pass1;
+          SecureString pass2;
+          char c='0';
+          do {
+            while (c != '\n') {
+              std::cin.get(c);
+              std::cout << "*" << std::flush;
+              pass1.push_back(c);
+            }
+            c = '0';
+            std::cout << "Confirm password\n";
+            while (c != '\n') {
+              std::cin.get(c);
+              std::cout << "*" << std::flush;
+              pass2.push_back(c);
+            }
+          } while (pass1 != pass2);
+          walletPassphrase   = "123";
+          exit(0);
+        }
+
+      
         if (!fs::is_directory(GetDataDir(false))) {
             fprintf(stderr,
                     "Error: Specified data directory \"%s\" does not exist.\n",
@@ -173,7 +199,7 @@ bool AppInit(int argc, char *argv[]) {
             // If locking the data directory failed, exit immediately
             exit(EXIT_FAILURE);
         }
-        fRet = AppInitMain(config, httpRPCRequestProcessor);
+        fRet = AppInitMain(config, httpRPCRequestProcessor, walletPassphrase);
     } catch (const std::exception &e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {

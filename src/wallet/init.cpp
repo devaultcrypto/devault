@@ -34,7 +34,7 @@ public:
     bool Verify(const CChainParams &chainParams) override;
 
     //! Load wallet databases.
-    bool Open(const CChainParams &chainParams) override;
+    bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase) override;
 
     //! Complete startup of wallets.
     void Start(CScheduler &scheduler) override;
@@ -82,11 +82,6 @@ std::string WalletInit::GetHelpString(bool showDebug) {
                        strprintf(_("Spend unconfirmed change when sending "
                                    "transactions (default: %d)"),
                                  DEFAULT_SPEND_ZEROCONF_CHANGE));
-    strUsage += HelpMessageOpt(
-        "-usehd",
-        _("Use hierarchical deterministic key generation (HD) after BIP32. "
-          "Only has effect during wallet creation/first start") +
-            " " + strprintf(_("(default: %d)"), DEFAULT_USE_HD_WALLET));
     strUsage += HelpMessageOpt("-upgradewallet",
                                _("Upgrade wallet to latest format on startup"));
     strUsage +=
@@ -383,7 +378,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) {
     return true;
 }
 
-bool WalletInit::Open(const CChainParams &chainParams) {
+bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walletPassphrase) {
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         LogPrintf("Wallet disabled!\n");
         return true;
@@ -391,7 +386,7 @@ bool WalletInit::Open(const CChainParams &chainParams) {
 
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
         CWallet *const pwallet =
-            CWallet::CreateWalletFromFile(chainParams, walletFile);
+            CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase);
         if (!pwallet) {
             return false;
         }

@@ -153,6 +153,7 @@ add_library(bitcoin-qt-base
 	splashscreen.cpp
 	trafficgraphwidget.cpp
 	utilitydialog.cpp
+  dvtui.cpp
 
 	# Handle ui files
 	${UI_GENERATED_HEADERS}
