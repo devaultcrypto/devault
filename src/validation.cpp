@@ -3385,6 +3385,7 @@ bool ReceivedBlockTransactions(const CBlock &block, CValidationState &state,
 }
 
 static bool FindBlockPos(FlatFilePos &pos, unsigned int nAddSize,
+                         //static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                          unsigned int nHeight, uint64_t nTime,
                          bool fKnown = false) {
     LOCK(cs_LastBlockFile);
@@ -3446,7 +3447,6 @@ static bool FindBlockPos(FlatFilePos &pos, unsigned int nAddSize,
                     fclose(file);
                 }
             } else {
-                AbortNode("Disk space is low!", _("Error: Disk space is low!"));
                 return error("out of disk space");
             }
         }
