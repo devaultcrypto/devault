@@ -212,8 +212,8 @@ public:
     bool createWindow(const Config *, const NetworkStyle *networkStyle);
     /// Create splash screen
     void createSplashScreen(const NetworkStyle *networkStyle);
-    /// Get wallet password from user for Wallet Encryption
-    void setupPassword(SecureString& password);
+    /// Get wallet password from user for Wallet Encryption or return true if wallet pre-exists
+    bool setupPassword(SecureString& password);
 
     /// Request core initialization
     void requestInitialize(Config &config,
@@ -359,29 +359,28 @@ void BitcoinApplication::createOptionsModel(bool resetSettings) {
 }
 
 
-void BitcoinApplication::setupPassword(SecureString& password) {
-  bool has_wallet = false;
+bool BitcoinApplication::setupPassword(SecureString& password) {
   if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
     LogPrintf("Wallet disabled!\n");
   } else {
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
-      if (fs::exists(walletFile)) has_wallet = true;
+        if (fs::exists(walletFile)) return true;
     }
   }
-  if (CheckIfWalletDirExists()) has_wallet = true;
+  if (CheckIfWalletDirExists()) return true;
   
-  if (!has_wallet) {
-    SetPassphraseDialog dlg(0);
-    dlg.exec();
-    password = dlg.getPassword();
-  }
+  SetPassphraseDialog dlg(0);
+  dlg.exec();
+  password = dlg.getPassword();
+  return false;
 }
 
 bool BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
 
-    setupPassword(pss);
-    if (pss.empty()) return false;
+    if (!setupPassword(pss)) {
+        if (pss.empty()) return false;
+    }
     window = new BitcoinGUI(config, platformStyle, networkStyle, 0);
 
     pollShutdownTimer = new QTimer(window);
