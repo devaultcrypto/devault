@@ -116,8 +116,7 @@ bool AppInit(int argc, char *argv[]) {
               pass2.push_back(c);
             }
           } while (pass1 != pass2);
-          walletPassphrase   = "123";
-          exit(0);
+          walletPassphrase   = pass1;
         }
 
       
