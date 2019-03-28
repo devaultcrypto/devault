@@ -374,7 +374,6 @@ void BitcoinApplication::setupPassword(SecureString& password) {
     SetPassphraseDialog dlg(0);
     dlg.exec();
     password = dlg.getPassword();
-    std::cout << "Got " << password << "\n";
   }
 }
 
