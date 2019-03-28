@@ -209,7 +209,7 @@ public:
     /// Create options model
     void createOptionsModel(bool resetSettings);
     /// Create main window
-    void createWindow(const Config *, const NetworkStyle *networkStyle);
+    bool createWindow(const Config *, const NetworkStyle *networkStyle);
     /// Create splash screen
     void createSplashScreen(const NetworkStyle *networkStyle);
     /// Get wallet password from user for Wallet Encryption
@@ -377,15 +377,17 @@ void BitcoinApplication::setupPassword(SecureString& password) {
   }
 }
 
-void BitcoinApplication::createWindow(const Config *config,
+bool BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
 
     setupPassword(pss);
+    if (pss.empty()) return false;
     window = new BitcoinGUI(config, platformStyle, networkStyle, 0);
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window,
             SLOT(detectShutdown()));
+    return true;
 }
 
 void BitcoinApplication::createSplashScreen(const NetworkStyle *networkStyle) {
@@ -764,7 +766,9 @@ int main(int argc, char *argv[]) {
     HTTPRPCRequestProcessor httpRPCRequestProcessor(config, rpcServer);
 
     try {
-        app.createWindow(&config, networkStyle.data());
+        if (!app.createWindow(&config, networkStyle.data())) {
+            return EXIT_FAILURE;
+        }
         // Perform base initialization before spinning up
         // initialization/shutdown thread. This is acceptable because this
         // function only contains steps that are quick to execute, so the GUI
