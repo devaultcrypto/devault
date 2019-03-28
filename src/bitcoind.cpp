@@ -54,6 +54,28 @@ void WaitForShutdown() {
     Interrupt();
 }
 
+void getPassphrase(SecureString& walletPassphrase) {
+  std::cout << "Enter a New Encryption password\n";
+  SecureString pass1;
+  SecureString pass2;
+  char c='0';
+  do {
+    while (c != '\n') {
+      std::cin.get(c);
+      std::cout << "*" << std::flush;
+      pass1.push_back(c);
+    }
+    c = '0';
+    std::cout << "Confirm password\n";
+    while (c != '\n') {
+      std::cin.get(c);
+      std::cout << "*" << std::flush;
+      pass2.push_back(c);
+    }
+  } while (pass1 != pass2);
+  walletPassphrase   = pass1;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Start
@@ -68,7 +90,6 @@ bool AppInit(int argc, char *argv[]) {
 
     bool fRet = false;
     SecureString walletPassphrase;
-
     //
     // Parameters
     //
@@ -97,28 +118,6 @@ bool AppInit(int argc, char *argv[]) {
     }
 
     try {
-        if (!CheckIfWalletDirExists(false)) {
-          std::cout << "Enter a New Encryption password\n";
-          SecureString pass1;
-          SecureString pass2;
-          char c='0';
-          do {
-            while (c != '\n') {
-              std::cin.get(c);
-              std::cout << "*" << std::flush;
-              pass1.push_back(c);
-            }
-            c = '0';
-            std::cout << "Confirm password\n";
-            while (c != '\n') {
-              std::cin.get(c);
-              std::cout << "*" << std::flush;
-              pass2.push_back(c);
-            }
-          } while (pass1 != pass2);
-          walletPassphrase   = pass1;
-        }
-
       
         if (!fs::is_directory(GetDataDir(false))) {
             fprintf(stderr,
@@ -140,6 +139,11 @@ bool AppInit(int argc, char *argv[]) {
             fprintf(stderr, "Error: %s\n", e.what());
             return false;
         }
+      
+        if (!CheckIfWalletDirExists(true)) {
+          getPassphrase(walletPassphrase);
+        }
+
 
         // Error out when loose non-argument tokens are encountered on command
         // line

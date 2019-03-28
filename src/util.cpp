@@ -635,7 +635,8 @@ bool CheckIfWalletDirExists(bool fNetSpecific) {
     path /= BaseParams().DataDir();
   }
   
-  return fs::exists(path / "wallets");
+  path /= "wallets";
+  return fs::exists(path);
 }
 
 const fs::path &GetDataDir(bool fNetSpecific) {
