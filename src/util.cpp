@@ -672,6 +672,35 @@ const fs::path &GetDataDir(bool fNetSpecific) {
     return path;
 }
 
+const fs::path GetDataDirNoCreate(bool fNetSpecific) {
+  // copy instead of reference
+  fs::path path = fNetSpecific ? pathCachedNetSpecific : pathCached;
+  
+  // This can be called during exceptions by LogPrintf(), so we cache the
+  // value so we don't have to do memory allocations after that.
+  if (!path.empty()) {
+    return path;
+  }
+  
+  if (gArgs.IsArgSet("-datadir")) {
+    path = fs::system_complete(gArgs.GetArg("-datadir", ""));
+    if (!fs::is_directory(path)) {
+      path = "";
+      return path;
+    }
+  } else {
+    path = GetDefaultDataDir();
+  }
+  
+  if (fNetSpecific) {
+    path /= BaseParams().DataDir();
+  }
+  
+  path /= "wallets";
+  
+  return path;
+}
+
 void ClearDatadirCache() {
     LOCK(csPathCached);
 

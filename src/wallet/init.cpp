@@ -32,6 +32,8 @@ public:
     //  as only one wallet is being loaded (WalletParameterInteraction forbids
     //  -salvagewallet, -zapwallettxes or -upgradewallet with multiwallet).
     bool Verify(const CChainParams &chainParams) override;
+    //!
+    bool CheckIfWalletExists(const CChainParams &chainParams) override;
 
     //! Load wallet databases.
     bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase) override;
@@ -376,6 +378,44 @@ bool WalletInit::Verify(const CChainParams &chainParams) {
     }
 
     return true;
+}
+
+bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) {
+    if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
+        return true; //???
+    }
+
+    if (gArgs.IsArgSet("-walletdir")) {
+        fs::path wallet_dir = gArgs.GetArg("-walletdir", "");
+        if (!fs::exists(wallet_dir)) {
+          return false;
+        } else if (!fs::is_directory(wallet_dir)) {
+          return false;
+        } else if (!wallet_dir.is_absolute()) {
+          return false;
+        }
+    }
+
+    // Keep track of each wallet absolute path to detect duplicates.
+    std::set<fs::path> wallet_paths;
+
+    for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+        if (fs::path(walletFile).filename() != walletFile) {
+          return false;
+        }
+
+        if (SanitizeString(walletFile, SAFE_CHARS_FILENAME) != walletFile) {
+          return false;
+        }
+
+        fs::path wallet_path = fs::absolute(walletFile, GetWalletDirNoCreate());
+
+        if (fs::exists(wallet_path)) {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walletPassphrase) {

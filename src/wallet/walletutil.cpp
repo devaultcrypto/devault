@@ -25,3 +25,24 @@ fs::path GetWalletDir() {
 
     return path;
 }
+fs::path GetWalletDirNoCreate() {
+  fs::path path;
+  
+  if (gArgs.IsArgSet("-walletdir")) {
+    path = gArgs.GetArg("-walletdir", "");
+    if (!fs::is_directory(path)) {
+      // If the path specified doesn't exist, we return the deliberately
+      // invalid empty string.
+      path = "";
+    }
+  } else {
+    path = GetDataDirNoCreate();
+    // If a wallets directory exists, use that, otherwise default to
+    // GetDataDir
+    if (fs::is_directory(path / "wallets")) {
+      path /= "wallets";
+    }
+  }
+  
+  return path;
+}

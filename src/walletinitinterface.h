@@ -22,6 +22,8 @@ public:
     virtual void RegisterRPC(CRPCTable &) = 0;
     /** Verify wallets */
     virtual bool Verify(const CChainParams &chainParams) = 0;
+    /** Check if wallet exists already */
+    virtual bool CheckIfWalletExists(const CChainParams &chainParams) = 0;
     /** Open wallets*/
     virtual bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase) = 0;
     /** Start wallets*/

@@ -140,11 +140,6 @@ bool AppInit(int argc, char *argv[]) {
             return false;
         }
       
-        if (!CheckIfWalletDirExists(true)) {
-          getPassphrase(walletPassphrase);
-        }
-
-
         // Error out when loose non-argument tokens are encountered on command
         // line
         for (int i = 1; i < argc; i++) {
@@ -173,6 +168,12 @@ bool AppInit(int argc, char *argv[]) {
             // up on console
             exit(1);
         }
+      
+      if (!g_wallet_init_interface->CheckIfWalletExists(config.GetChainParams())) {
+        //std::cout << "Stop here no wallet found\n!";
+        getPassphrase(walletPassphrase);
+      }
+
         if (!AppInitSanityChecks()) {
             // InitError will have been called with detailed error, which ends
             // up on console
