@@ -119,7 +119,6 @@ private:
     QAction *receiveCoinsMenuAction = nullptr;
     QAction *optionsAction = nullptr;
     QAction *toggleHideAction = nullptr;
-    QAction *encryptWalletAction = nullptr;
     QAction *backupWalletAction = nullptr;
     QAction *changePassphraseAction = nullptr;
     QAction *aboutQtAction = nullptr;

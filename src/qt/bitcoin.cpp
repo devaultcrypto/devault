@@ -507,7 +507,6 @@ void BitcoinApplication::initializeResult(bool success) {
         WalletModel *const walletModel =
             new WalletModel(platformStyle, pwallet, optionsModel);
 
-        walletModel->setWalletEncrypted(true, pss);
         window->addWallet(walletModel);
         if (fFirstWallet) {
             window->setCurrentWallet(walletModel->getWalletName());
