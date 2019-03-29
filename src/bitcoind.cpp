@@ -55,7 +55,7 @@ void WaitForShutdown() {
 }
 
 void getPassphrase(SecureString& walletPassphrase) {
-  std::cout << "Enter a New Encryption password\n";
+  std::cout << "Enter a Wallet Encryption password\n";
   SecureString pass1;
   SecureString pass2;
   char c='0';

@@ -76,7 +76,7 @@ bool TryCreateDirectories(const fs::path &p);
 fs::path GetDefaultDataDir();
 const fs::path &GetDataDir(bool fNetSpecific = true);
 const fs::path GetDataDirNoCreate();
-bool CheckIfWalletDirExists(bool fNetSpecific = true);
+bool CheckIfWalletDatExists(bool fNetSpecific = true);
 void ClearDatadirCache();
 fs::path GetConfigFile(const std::string &confPath);
 #ifndef WIN32

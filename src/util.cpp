@@ -620,7 +620,7 @@ static fs::path pathCached;
 static fs::path pathCachedNetSpecific;
 static CCriticalSection csPathCached;
 
-bool CheckIfWalletDirExists(bool fNetSpecific) {
+bool CheckIfWalletDatExists(bool fNetSpecific) {
   fs::path path;
   if (gArgs.IsArgSet("-datadir")) {
     path = fs::system_complete(gArgs.GetArg("-datadir", ""));
@@ -636,6 +636,7 @@ bool CheckIfWalletDirExists(bool fNetSpecific) {
   }
   
   path /= "wallets";
+  path /= "wallet.dat";
   return fs::exists(path);
 }
 
@@ -664,10 +665,9 @@ const fs::path &GetDataDir(bool fNetSpecific) {
         path /= BaseParams().DataDir();
     }
 
-    if (fs::create_directories(path)) {
-        // This is the first run, create wallets subdirectory too
-        fs::create_directories(path / "wallets");
-    }
+    fs::create_directories(path);
+    // Make sure this wallets subdirectory exists too
+    fs::create_directories(path / "wallets");
 
     return path;
 }

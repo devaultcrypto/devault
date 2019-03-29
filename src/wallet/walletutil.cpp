@@ -16,11 +16,8 @@ fs::path GetWalletDir() {
         }
     } else {
         path = GetDataDir();
-        // If a wallets directory exists, use that, otherwise default to
-        // GetDataDir
-        if (fs::is_directory(path / "wallets")) {
-            path /= "wallets";
-        }
+        // Always use a wallets directory
+        path /= "wallets";
     }
 
     return path;
@@ -38,15 +35,13 @@ fs::path GetWalletDirNoCreate(fs::path& added_dir) {
   } else {
     path = GetDataDirNoCreate();
     
+    // This will be Net specific addition
     if (added_dir != "") {
       path /= added_dir;
     }
-    
-    // If a wallets directory exists, use that, otherwise default to
-    // GetDataDir
-    if (fs::is_directory(path / "wallets")) {
-      path /= "wallets";
-    }
+  
+    // Always assume a wallets directory
+    path /= "wallets";
   }
   
   return path;

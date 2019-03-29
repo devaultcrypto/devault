@@ -367,7 +367,7 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
         if (fs::exists(walletFile)) return true;
     }
   }
-  if (CheckIfWalletDirExists()) return true;
+  if (CheckIfWalletDatExists()) return true;
   
   SetPassphraseDialog dlg(0);
   dlg.exec();
