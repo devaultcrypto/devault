@@ -25,7 +25,7 @@ fs::path GetWalletDir() {
 
     return path;
 }
-fs::path GetWalletDirNoCreate() {
+fs::path GetWalletDirNoCreate(fs::path& added_dir) {
   fs::path path;
   
   if (gArgs.IsArgSet("-walletdir")) {
@@ -37,6 +37,11 @@ fs::path GetWalletDirNoCreate() {
     }
   } else {
     path = GetDataDirNoCreate();
+    
+    if (added_dir != "") {
+      path /= added_dir;
+    }
+    
     // If a wallets directory exists, use that, otherwise default to
     // GetDataDir
     if (fs::is_directory(path / "wallets")) {

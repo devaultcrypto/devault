@@ -672,9 +672,9 @@ const fs::path &GetDataDir(bool fNetSpecific) {
     return path;
 }
 
-const fs::path GetDataDirNoCreate(bool fNetSpecific) {
+const fs::path GetDataDirNoCreate() {
   // copy instead of reference
-  fs::path path = fNetSpecific ? pathCachedNetSpecific : pathCached;
+  fs::path path = pathCachedNetSpecific;
   
   // This can be called during exceptions by LogPrintf(), so we cache the
   // value so we don't have to do memory allocations after that.
@@ -691,13 +691,6 @@ const fs::path GetDataDirNoCreate(bool fNetSpecific) {
   } else {
     path = GetDefaultDataDir();
   }
-  
-  if (fNetSpecific) {
-    path /= BaseParams().DataDir();
-  }
-  
-  path /= "wallets";
-  
   return path;
 }
 

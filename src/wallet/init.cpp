@@ -407,8 +407,8 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) {
         if (SanitizeString(walletFile, SAFE_CHARS_FILENAME) != walletFile) {
           return false;
         }
-
-        fs::path wallet_path = fs::absolute(walletFile, GetWalletDirNoCreate());
+        fs::path added_dir = BaseParams().DataDir();
+        fs::path wallet_path = fs::absolute(walletFile, GetWalletDirNoCreate(added_dir));
 
         if (fs::exists(wallet_path)) {
           return true;
