@@ -397,14 +397,6 @@ bool CWallet::Unlock(const SecureString &strWalletPassphrase) {
   
     LOCK(cs_wallet);
     for (const MasterKeyMap::value_type &pMasterKey : mapMasterKeys) {
-      
-      std::cout << "\n\nUNLOCK Using Master Key";
-      std::cout << " vchCryptedKey = " << HexStr(pMasterKey.second.vchCryptedKey) << " ";
-      std::cout << " vchSalt = " << HexStr(pMasterKey.second.vchSalt);
-      std::cout << " iterations = " << pMasterKey.second.nDeriveIterations << "\n";
-      std::cout << " method = " << pMasterKey.second.nDerivationMethod << " and ";
-      std::cout << " with password = " << strWalletPassphrase << "\n";
-
         if (!crypter.SetKeyFromPassphrase(
                 strWalletPassphrase, pMasterKey.second.vchSalt,
                 pMasterKey.second.nDeriveIterations,
@@ -412,8 +404,7 @@ bool CWallet::Unlock(const SecureString &strWalletPassphrase) {
             return false;
         }
 
-      // Should get back original _vMasterKey....
-      
+        // Should get back original _vMasterKey....
         if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, _vMasterKey)) {
             // try another master key
             continue;
