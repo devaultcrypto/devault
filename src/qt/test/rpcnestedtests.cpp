@@ -118,9 +118,6 @@ void RPCNestedTests::rpcNestedTests() {
         result, "walletpassphrasechange(help(walletpassphrasechange(abc)))",
         false, &filtered);
     QVERIFY(filtered == "walletpassphrasechange(…)");
-    RPCConsole::RPCParseCommandLine(result, "help(encryptwallet(abc, def))",
-                                    false, &filtered);
-    QVERIFY(filtered == "help(encryptwallet(…))");
     RPCConsole::RPCParseCommandLine(result, "help(importprivkey())", false,
                                     &filtered);
     QVERIFY(filtered == "help(importprivkey(…))");

@@ -21,6 +21,7 @@
 #include "validation.h"
 #include "wallet.h"
 #include "mnemonic.h"
+#include "utilsplitstring.h"
 #include <string.h> // for memcpy
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -842,28 +843,50 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
         }
     }
 
-    for (std::vector<std::pair<int64_t, CKeyID>>::const_iterator it =
-             vKeyBirth.begin();
-         it != vKeyBirth.end(); it++) {
-        const CKeyID &keyid = it->second;
-        std::string strTime = FormatISO8601DateTime(it->first);
+    // Rather than just print out the keypaths in a somewhat random order
+    // Put into a map so they can be ordered by hdkeypath
+    // after map is created, print out
+    std::map<uint64_t,std::string> keypaths;
+    
+    for (const auto& it : vKeyBirth) {
+        const CKeyID &keyid = it.second;
+        std::string strTime = FormatISO8601DateTime(it.first);
         std::string strAddr = EncodeDestination(keyid);
         CKey key;
+        std::string fullstr="";
         if (pwallet->GetKey(keyid, key)) {
-            file << strprintf("%s %s ", EncodeSecret(key),
-                              strTime);
-            if (pwallet->mapAddressBook.count(keyid)) {
-                file << strprintf(
-                    "label=%s",
-                    EncodeDumpString(pwallet->mapAddressBook[keyid].name));
-            } else if (mapKeyPool.count(keyid)) {
-                file << "reserve=1";
-            } else {
-                file << "change=1";
-            }
-            file << strprintf(" # addr=%s%s\n", strAddr, (pwallet->mapHdPubKeys.count(keyid) ? " hdkeypath="+pwallet->mapHdPubKeys[keyid].GetKeyPath() : ""));
+          fullstr += strprintf("%s %s ", EncodeSecret(key),strTime);
+          if (pwallet->mapAddressBook.count(keyid)) {
+            fullstr += strprintf("label=%s",EncodeDumpString(pwallet->mapAddressBook[keyid].name));
+          } else if (mapKeyPool.count(keyid)) {
+            fullstr += "reserve=1";
+          } else {
+            fullstr += "change=1";
+          }
+          {
+            std::string hdkeypath="";
+            if (pwallet->mapHdPubKeys.count(keyid)) hdkeypath += pwallet->mapHdPubKeys[keyid].GetKeyPath();
+            fullstr += strprintf(" # addr=%s,hdkeypath=%s\n", strAddr, hdkeypath);
+
+            // This is to make the output keys sorted by path
+            // Put into a std::map based on numeric path that will be stored in sorted order
+            std::vector<std::string> vParts;
+            Split(vParts, hdkeypath, "/");
+            uint64_t keynum = std::stoi(vParts.back());
+            vParts.pop_back();
+            uint64_t ext = std::stoi(vParts.back());
+            uint64_t order = ext*100000+keynum;
+            keypaths.insert(make_pair(order,fullstr));
+          }
         }
     }
+    
+    // Print sorted map
+    for (const auto& s : keypaths) {
+      file << s.second;
+    }
+    
+    
     file << "\n";
     for (const CScriptID &scriptid : scripts) {
         CScript script;

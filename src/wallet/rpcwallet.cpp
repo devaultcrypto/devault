@@ -2706,84 +2706,6 @@ static UniValue walletlock(const Config &config,
     return NullUniValue;
 }
 
-static UniValue encryptwallet(const Config &config,
-                              const JSONRPCRequest &request) {
-    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    if (!pwallet->IsCrypted() &&
-        (request.fHelp || request.params.size() != 1)) {
-        throw std::runtime_error(
-            "encryptwallet \"passphrase\"\n"
-            "\nEncrypts the wallet with 'passphrase'. This is for first time "
-            "encryption.\n"
-            "After this, any calls that interact with private keys such as "
-            "sending or signing \n"
-            "will require the passphrase to be set prior the making these "
-            "calls.\n"
-            "Use the walletpassphrase call for this, and then walletlock "
-            "call.\n"
-            "If the wallet is already encrypted, use the "
-            "walletpassphrasechange call.\n"
-            "Note that this will shutdown the server.\n"
-            "\nArguments:\n"
-            "1. \"passphrase\"    (string) The pass phrase to encrypt the "
-            "wallet with. It must be at least 1 character, but should be "
-            "long.\n"
-            "\nExamples:\n"
-            "\nEncrypt you wallet\n" +
-            HelpExampleCli("encryptwallet", "\"my pass phrase\"") +
-            "\nNow set the passphrase to use the wallet, such as for signing "
-            "or sending devault\n" +
-            HelpExampleCli("walletpassphrase", "\"my pass phrase\"") +
-            "\nNow we can so something like sign\n" +
-            HelpExampleCli("signmessage", "\"address\" \"test message\"") +
-            "\nNow lock the wallet again by removing the passphrase\n" +
-            HelpExampleCli("walletlock", "") + "\nAs a json rpc call\n" +
-            HelpExampleRpc("encryptwallet", "\"my pass phrase\""));
-    }
-
-    LOCK2(cs_main, pwallet->cs_wallet);
-
-    if (request.fHelp) {
-        return true;
-    }
-    if (pwallet->IsCrypted()) {
-        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE,
-                           "Error: running with an encrypted wallet, but "
-                           "encryptwallet was called.");
-    }
-
-    // TODO: get rid of this .c_str() by implementing
-    // SecureString::operator=(std::string)
-    // Alternately, find a way to make request.params[0] mlock()'d to begin
-    // with.
-    SecureString strWalletPass;
-    strWalletPass.reserve(100);
-    strWalletPass = request.params[0].get_str().c_str();
-
-    if (strWalletPass.length() < 1) {
-        throw std::runtime_error("encryptwallet <passphrase>\n"
-                                 "Encrypts the wallet with <passphrase>.");
-    }
-
-    if (!pwallet->EncryptWallet(strWalletPass)) {
-        throw JSONRPCError(RPC_WALLET_ENCRYPTION_FAILED,
-                           "Error: Failed to encrypt the wallet.");
-    }
-
-    // BDB seems to have a bad habit of writing old data into
-    // slack space in .dat files; that is bad if the old data is
-    // unencrypted private keys. So:
-    StartShutdown();
-    return "wallet encrypted; Devault server stopping, restart to run with "
-           "encrypted wallet. The keypool has been flushed and a new HD seed "
-           "was generated (if you are using HD). You need to make a new "
-           "backup.";
-}
-
 static UniValue lockunspent(const Config &config,
                             const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
@@ -3864,7 +3786,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "encryptwallet",                encryptwallet,                {"passphrase"} },
     { "wallet",             "getaccountaddress",            getlabeladdress,              {"account"} },
     { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
     { "wallet",             "getaccount",                   getaccount,                   {"address"} },

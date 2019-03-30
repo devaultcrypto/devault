@@ -71,8 +71,7 @@ const QStringList historyFilter = QStringList() << "importprivkey"
                                                 << "signrawtransaction"
                                                 << "signrawtransactionwithkey"
                                                 << "walletpassphrase"
-                                                << "walletpassphrasechange"
-                                                << "encryptwallet";
+                                                   << "walletpassphrasechange";
 } // namespace
 
 /* Object for executing console RPC commands in a separate thread.
