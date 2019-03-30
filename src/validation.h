@@ -364,13 +364,18 @@ bool ProcessNewBlockHeaders(const Config &config,
 /**
  * Open a block file (blk?????.dat).
  */
-FILE *OpenBlockFile(const FlatFilePos &pos, bool fReadOnly = false);
+FILE *OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly = false);
+
+/**
+ * Translation to a filesystem path.
+ */
+fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
 
 /**
  * Import blocks from an external file.
  */
 bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
-                           FlatFilePos *dbp = nullptr);
+                           CDiskBlockPos *dbp = nullptr);
 
 /**
  * Ensures we have a genesis block in the block tree, possibly writing one to
@@ -575,7 +580,7 @@ bool GetAddrIndex(const std::string& addr,
 std::string GetAddr(const CTxOut& out);
 
 /** Functions for disk access for blocks */
-bool ReadBlockFromDisk(CBlock &block, const FlatFilePos &pos,
+bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,
                        const Config &config);
 bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex,
                        const Config &config);
@@ -668,10 +673,10 @@ bool ParkBlock(const Config &config, CValidationState &state,
 void ResetBlockFailureFlags(CBlockIndex *pindex);
 
 /** Remove parked status from a block and its descendants. */
-void UnparkBlockAndChildren(CBlockIndex *pindex);
+bool UnparkBlockAndChildren(CBlockIndex *pindex);
 
 /** Remove parked status from a block. */
-void UnparkBlock(CBlockIndex *pindex);
+bool UnparkBlock(CBlockIndex *pindex);
 
 /**
  * Retrieve the topmost finalized block.

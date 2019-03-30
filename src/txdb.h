@@ -60,7 +60,7 @@ struct CDiskTxPos : public FlatFilePos {
         READWRITE(VARINT(nTxOffset));
     }
 
-    CDiskTxPos(const FlatFilePos &blockIn, unsigned int nTxOffsetIn)
+    CDiskTxPos(const CDiskBlockPos &blockIn, unsigned int nTxOffsetIn)
         : FlatFilePos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn) {}
 
     CDiskTxPos() { SetNull(); }

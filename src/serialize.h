@@ -504,9 +504,46 @@ I ReadVarInt(Stream &is) {
     }
 }
 
+#define FLATDATA(obj)                                                          \
+    REF(CFlatData((char *)&(obj), (char *)&(obj) + sizeof(obj)))
 #define VARINT(obj, ...) WrapVarInt<__VA_ARGS__>(REF(obj))
 #define COMPACTSIZE(obj) CCompactSize(REF(obj))
 #define LIMITED_STRING(obj, n) LimitedString<n>(REF(obj))
+
+
+/**
+ * Wrapper for serializing arrays and POD.
+ */
+class CFlatData {
+protected:
+    char *pbegin;
+    char *pend;
+
+public:
+    CFlatData(void *pbeginIn, void *pendIn)
+        : pbegin((char *)pbeginIn), pend((char *)pendIn) {}
+    template <class T, class TAl> explicit CFlatData(std::vector<T, TAl> &v) {
+        pbegin = (char *)v.data();
+        pend = (char *)(v.data() + v.size());
+    }
+    template <unsigned int N, typename T, typename S, typename D>
+    explicit CFlatData(prevector<N, T, S, D> &v) {
+        pbegin = (char *)v.data();
+        pend = (char *)(v.data() + v.size());
+    }
+    char *begin() { return pbegin; }
+    const char *begin() const { return pbegin; }
+    char *end() { return pend; }
+    const char *end() const { return pend; }
+
+    template <typename Stream> void Serialize(Stream &s) const {
+        s.write(pbegin, pend - pbegin);
+    }
+
+    template <typename Stream> void Unserialize(Stream &s) {
+        s.read(pbegin, pend - pbegin);
+    }
+};
 
 template <VarIntMode Mode, typename I> class CVarInt {
 protected:
