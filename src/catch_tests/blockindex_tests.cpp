@@ -64,20 +64,20 @@ TEST_CASE("get_disk_positions") {
       }
 
       // Data and undo positions should be unmodified
-      FlatFilePos dataPosition = index.GetBlockPos();
+      CDiskBlockPos dataPosition = index.GetBlockPos();
       if (flags & 0x01) {
         BOOST_CHECK(dataPosition.nFile == expectedFile);
         BOOST_CHECK(dataPosition.nPos == expectedDataPosition);
       } else {
-        BOOST_CHECK(dataPosition == FlatFilePos());
+        BOOST_CHECK(dataPosition == CDiskBlockPos());
       }
 
-      FlatFilePos undoPosition = index.GetUndoPos();
+      CDiskBlockPos undoPosition = index.GetUndoPos();
       if (flags & 0x02) {
         BOOST_CHECK(undoPosition.nFile == expectedFile);
         BOOST_CHECK(undoPosition.nPos == expectedUndoPosition);
       } else {
-        BOOST_CHECK(undoPosition == FlatFilePos());
+        BOOST_CHECK(undoPosition == CDiskBlockPos());
       }
     }
   }

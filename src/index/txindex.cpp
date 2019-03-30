@@ -248,7 +248,9 @@ bool TxIndex::FindTx(const TxId &txid, uint256 &block_hash,
         return false;
     }
 
-    CAutoFile file(OpenBlockFile(postx, true), SER_DISK, CLIENT_VERSION);
+    CDiskBlockPos blockpos(postx.nFile, postx.nPos);
+
+    CAutoFile file(OpenBlockFile(blockpos, true), SER_DISK, CLIENT_VERSION);
     if (file.IsNull()) {
         return error("%s: OpenBlockFile failed", __func__);
     }

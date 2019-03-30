@@ -145,8 +145,8 @@ public:
         nNonce = block.nNonce;
     }
 
-    FlatFilePos GetBlockPos() const {
-        FlatFilePos ret;
+    CDiskBlockPos GetBlockPos() const {
+        CDiskBlockPos ret;
         if (nStatus.hasData()) {
             ret.nFile = nFile;
             ret.nPos = nDataPos;
@@ -154,8 +154,8 @@ public:
         return ret;
     }
 
-    FlatFilePos GetUndoPos() const {
-        FlatFilePos ret;
+    CDiskBlockPos GetUndoPos() const {
+        CDiskBlockPos ret;
         if (nStatus.hasUndo()) {
             ret.nFile = nFile;
             ret.nPos = nUndoPos;

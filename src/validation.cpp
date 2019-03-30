@@ -241,7 +241,7 @@ static void FindFilesToPruneManual(std::set<int> &setFilesToPrune,
                                    int nManualPruneHeight);
 static void FindFilesToPrune(std::set<int> &setFilesToPrune,
                              uint64_t nPruneAfterHeight);
-static FILE *OpenUndoFile(const FlatFilePos &pos, bool fReadOnly = false);
+static FILE *OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
 static uint32_t GetBlockScriptFlags(const Config &config,
                                     const CBlockIndex *pChainTip);
 
@@ -829,7 +829,7 @@ bool GetTransaction(const Config &config, const TxId &txid,
 // CBlock and CBlockIndex
 //
 
-static bool WriteBlockToDisk(const CBlock &block, FlatFilePos &pos,
+static bool WriteBlockToDisk(const CBlock &block, CDiskBlockPos &pos,
                              const CMessageHeader::MessageMagic &messageStart) {
     // Open history file to append
     CAutoFile fileout(OpenBlockFile(pos), SER_DISK, CLIENT_VERSION);
@@ -839,7 +839,7 @@ static bool WriteBlockToDisk(const CBlock &block, FlatFilePos &pos,
 
     // Write index header
     unsigned int nSize = GetSerializeSize(block, fileout.GetVersion());
-    fileout << messageStart << nSize;
+    fileout << FLATDATA(messageStart) << nSize;
 
     // Write block
     long fileOutPos = ftell(fileout.Get());
@@ -853,7 +853,7 @@ static bool WriteBlockToDisk(const CBlock &block, FlatFilePos &pos,
     return true;
 }
 
-bool ReadBlockFromDisk(CBlock &block, const FlatFilePos &pos,
+bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,
                        const Config &config) {
     block.SetNull();
 
@@ -883,13 +883,7 @@ bool ReadBlockFromDisk(CBlock &block, const FlatFilePos &pos,
 
 bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex,
                        const Config &config) {
-    FlatFilePos blockPos;
-    {
-        LOCK(cs_main);
-        blockPos = pindex->GetBlockPos();
-    }
-
-    if (!ReadBlockFromDisk(block, blockPos, config)) {
+    if (!ReadBlockFromDisk(block, pindex->GetBlockPos(), config)) {
         return false;
     }
 
@@ -1262,7 +1256,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
 
 namespace {
 
-bool UndoWriteToDisk(const CBlockUndo &blockundo, FlatFilePos &pos,
+bool UndoWriteToDisk(const CBlockUndo &blockundo, CDiskBlockPos &pos,
                      const uint256 &hashBlock,
                      const CMessageHeader::MessageMagic &messageStart) {
     // Open history file to append
@@ -1273,7 +1267,7 @@ bool UndoWriteToDisk(const CBlockUndo &blockundo, FlatFilePos &pos,
 
     // Write index header
     unsigned int nSize = GetSerializeSize(blockundo, fileout.GetVersion());
-    fileout << messageStart << nSize;
+    fileout << FLATDATA(messageStart) << nSize;
 
     // Write undo data
     long fileOutPos = ftell(fileout.Get());
@@ -1293,7 +1287,7 @@ bool UndoWriteToDisk(const CBlockUndo &blockundo, FlatFilePos &pos,
 }
 
 static bool UndoReadFromDisk(CBlockUndo &blockundo, const CBlockIndex *pindex) {
-    FlatFilePos pos = pindex->GetUndoPos();
+    CDiskBlockPos pos = pindex->GetUndoPos();
     if (pos.IsNull()) {
         return error("%s: no undo data available", __func__);
     }
@@ -1512,7 +1506,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
 static void FlushBlockFile(bool fFinalize = false) {
     LOCK(cs_LastBlockFile);
 
-    FlatFilePos posOld(nLastBlockFile, 0);
+    CDiskBlockPos posOld(nLastBlockFile, 0);
 
     FILE *fileOld = OpenBlockFile(posOld);
     bool status = true;
@@ -1540,7 +1534,7 @@ static void FlushBlockFile(bool fFinalize = false) {
     }
 }
 
-static bool FindUndoPos(CValidationState &state, int nFile, FlatFilePos &pos,
+static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
                         unsigned int nAddSize);
 
 static bool WriteUndoDataForBlock(const CBlockUndo &blockundo,
@@ -1548,7 +1542,7 @@ static bool WriteUndoDataForBlock(const CBlockUndo &blockundo,
                                   const CChainParams &chainparams) {
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull()) {
-        FlatFilePos _pos;
+        CDiskBlockPos _pos;
         if (!FindUndoPos(state, pindex->nFile, _pos,
                          ::GetSerializeSize(blockundo, CLIENT_VERSION) + 40)) {
             return error("ConnectBlock(): FindUndoPos failed");
@@ -1571,6 +1565,7 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
                                      CValidationState &state,
                                      std::vector<std::pair<CAddrIndexKey, Amount>>& addrIndex,
                                      CBlockIndex *pindex) {
+  /*
     CDiskTxPos pos(pindex->GetBlockPos(),
                    GetSizeOfCompactSize(block.vtx.size()));
     std::vector<std::pair<uint256, CDiskTxPos>> vPos;
@@ -1585,7 +1580,7 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
         return AbortNode(state, "Failed to write address index");
       }
     }
-
+  */
     return true;
 }
 
@@ -3240,7 +3235,7 @@ void ResetBlockFailureFlags(CBlockIndex *pindex) {
     });
 }
 
-static void UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
+static bool UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
     AssertLockHeld(cs_main);
 
     if (pindexBestParked &&
@@ -3259,14 +3254,15 @@ static void UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren) {
             return fClearChildren ? status.withClearedParkedFlags()
                                   : status.withParkedParent(false);
         });
+    return true;
 }
 
-void UnparkBlockAndChildren(CBlockIndex *pindex) {
-    UnparkBlockImpl(pindex, true);
+bool UnparkBlockAndChildren(CBlockIndex *pindex) {
+    return UnparkBlockImpl(pindex, true);
 }
 
-void UnparkBlock(CBlockIndex *pindex) {
-    UnparkBlockImpl(pindex, false);
+bool UnparkBlock(CBlockIndex *pindex) {
+    return UnparkBlockImpl(pindex, false);
 }
 
 const CBlockIndex *GetFinalizedBlock() {
@@ -3326,7 +3322,7 @@ static CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
  * BLOCK_VALID_TRANSACTIONS).
  */
 bool ReceivedBlockTransactions(const CBlock &block, CValidationState &state,
-                               CBlockIndex *pindexNew, const FlatFilePos &pos)
+                               CBlockIndex *pindexNew, const CDiskBlockPos &pos)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     pindexNew->nTx = block.vtx.size();
     pindexNew->nChainTx = 0;
@@ -3384,7 +3380,7 @@ bool ReceivedBlockTransactions(const CBlock &block, CValidationState &state,
     return true;
 }
 
-static bool FindBlockPos(FlatFilePos &pos, unsigned int nAddSize,
+static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                          //static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                          unsigned int nHeight, uint64_t nTime,
                          bool fKnown = false) {
@@ -3456,7 +3452,7 @@ static bool FindBlockPos(FlatFilePos &pos, unsigned int nAddSize,
     return true;
 }
 
-static bool FindUndoPos(CValidationState &state, int nFile, FlatFilePos &pos,
+static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
                         unsigned int nAddSize) {
     pos.nFile = nFile;
 
@@ -3958,23 +3954,23 @@ bool ProcessNewBlockHeaders(const Config &config,
  * Store block on disk. If dbp is non-nullptr, the file is known to already
  * reside on disk.
  */
-static FlatFilePos SaveBlockToDisk(const CBlock &block, int nHeight,
+static CDiskBlockPos SaveBlockToDisk(const CBlock &block, int nHeight,
                                    const CChainParams &chainparams,
-                                   const FlatFilePos *dbp) {
+                                   const CDiskBlockPos *dbp) {
     unsigned int nBlockSize = ::GetSerializeSize(block, CLIENT_VERSION);
-    FlatFilePos blockPos;
+    CDiskBlockPos blockPos;
     if (dbp != nullptr) {
         blockPos = *dbp;
     }
     if (!FindBlockPos(blockPos, nBlockSize + 8, nHeight, block.GetBlockTime(),
                       dbp != nullptr)) {
         error("%s: FindBlockPos failed", __func__);
-        return FlatFilePos();
+        return CDiskBlockPos();
     }
     if (dbp == nullptr) {
         if (!WriteBlockToDisk(block, blockPos, chainparams.DiskMagic())) {
             AbortNode("Failed to write block");
-            return FlatFilePos();
+            return CDiskBlockPos();
         }
     }
     return blockPos;
@@ -3994,7 +3990,7 @@ static FlatFilePos SaveBlockToDisk(const CBlock &block, int nHeight,
 static bool AcceptBlock(const Config &config,
                         const std::shared_ptr<const CBlock> &pblock,
                         CValidationState &state, bool fRequested,
-                        const FlatFilePos *dbp, bool *fNewBlock) {
+                        const CDiskBlockPos *dbp, bool *fNewBlock) {
     AssertLockHeld(cs_main);
 
     const CBlock &block = *pblock;
@@ -4124,7 +4120,7 @@ static bool AcceptBlock(const Config &config,
         *fNewBlock = true;
     }
     try {
-        FlatFilePos blockPos =
+        CDiskBlockPos blockPos =
             SaveBlockToDisk(block, pindex->nHeight, chainparams, dbp);
         if (blockPos.IsNull()) {
             state.Error(strprintf(
@@ -4283,7 +4279,7 @@ void PruneOneBlockFile(const int fileNumber) {
 
 void UnlinkPrunedFiles(const std::set<int> &setFilesToPrune) {
     for (const int i : setFilesToPrune) {
-        FlatFilePos pos(i, 0);
+        CDiskBlockPos pos(i, 0);
         fs::remove(GetBlockPosFilename(pos, "blk"));
         fs::remove(GetBlockPosFilename(pos, "rev"));
         LogPrintf("Prune: %s deleted blk/rev (%05u)\n", __func__, i);
@@ -4420,7 +4416,7 @@ static void FindFilesToPrune(std::set<int> &setFilesToPrune,
              nLastBlockWeCanPrune, count);
 }
 
-static FILE *OpenDiskFile(const FlatFilePos &pos, const char *prefix,
+static FILE *OpenDiskFile(const CDiskBlockPos &pos, const char *prefix,
                           bool fReadOnly) {
     if (pos.IsNull()) {
         return nullptr;
@@ -4450,16 +4446,16 @@ static FILE *OpenDiskFile(const FlatFilePos &pos, const char *prefix,
     return file;
 }
 
-FILE *OpenBlockFile(const FlatFilePos &pos, bool fReadOnly) {
+FILE *OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly) {
     return OpenDiskFile(pos, "blk", fReadOnly);
 }
 
 /** Open an undo file (rev?????.dat) */
-static FILE *OpenUndoFile(const FlatFilePos &pos, bool fReadOnly) {
+static FILE *OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly) {
     return OpenDiskFile(pos, "rev", fReadOnly);
 }
 
-fs::path GetBlockPosFilename(const FlatFilePos &pos, const char *prefix) {
+fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix) {
     return GetBlocksDir() / strprintf("%s%05u.dat", prefix, pos.nFile);
 }
 
@@ -4588,7 +4584,7 @@ static bool LoadBlockIndexDB(const Config &config) {
     }
 
     for (const int i : setBlkDataFiles) {
-        FlatFilePos pos(i, 0);
+        CDiskBlockPos pos(i, 0);
         if (CAutoFile(OpenBlockFile(pos, true), SER_DISK, CLIENT_VERSION)
                 .IsNull()) {
             return false;
@@ -5066,7 +5062,7 @@ bool LoadGenesisBlock(const CChainParams &chainparams) {
 
     try {
         const CBlock &block = chainparams.GenesisBlock();
-        FlatFilePos blockPos = SaveBlockToDisk(block, 0, chainparams, nullptr);
+        CDiskBlockPos blockPos = SaveBlockToDisk(block, 0, chainparams, nullptr);
         if (blockPos.IsNull()) {
             return error("%s: writing genesis block to disk failed", __func__);
         }
@@ -5085,10 +5081,10 @@ bool LoadGenesisBlock(const CChainParams &chainparams) {
 }
 
 bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
-                           FlatFilePos *dbp) {
+                           CDiskBlockPos *dbp) {
     // Map of disk positions for blocks with unknown parent (only used for
     // reindex)
-    static std::multimap<uint256, FlatFilePos> mapBlocksUnknownParent;
+    static std::multimap<uint256, CDiskBlockPos> mapBlocksUnknownParent;
     int64_t nStart = GetTimeMillis();
 
     const CChainParams &chainparams = config.GetChainParams();
@@ -5115,7 +5111,7 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                 uint8_t buf[CMessageHeader::MESSAGE_START_SIZE];
                 blkdat.FindByte(chainparams.DiskMagic()[0]);
                 nRewind = blkdat.GetPos() + 1;
-                blkdat >> buf;
+                blkdat >> FLATDATA(buf);
                 if (memcmp(buf, std::begin(chainparams.DiskMagic()),
                            CMessageHeader::MESSAGE_START_SIZE)) {
                     continue;
@@ -5200,8 +5196,8 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                 while (!queue.empty()) {
                     uint256 head = queue.front();
                     queue.pop_front();
-                    std::pair<std::multimap<uint256, FlatFilePos>::iterator,
-                              std::multimap<uint256, FlatFilePos>::iterator>
+                    std::pair<std::multimap<uint256, CDiskBlockPos>::iterator,
+                              std::multimap<uint256, CDiskBlockPos>::iterator>
                         range = mapBlocksUnknownParent.equal_range(head);
                     while (range.first != range.second) {
                         auto it = range.first;
