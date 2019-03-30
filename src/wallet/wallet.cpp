@@ -395,6 +395,14 @@ bool CWallet::Unlock(const SecureString &strWalletPassphrase) {
 
     LOCK(cs_wallet);
     for (const MasterKeyMap::value_type &pMasterKey : mapMasterKeys) {
+      
+      std::cout << "\n\nUNLOCK Using Master Key";
+      std::cout << " vchCryptedKey = " << HexStr(pMasterKey.second.vchCryptedKey) << " ";
+      std::cout << " vchSalt = " << HexStr(pMasterKey.second.vchSalt);
+      std::cout << " iterations = " << pMasterKey.second.nDeriveIterations << "\n";
+      std::cout << " method = " << pMasterKey.second.nDerivationMethod << " and ";
+      std::cout << " with password = " << strWalletPassphrase << "\n";
+
         if (!crypter.SetKeyFromPassphrase(
                 strWalletPassphrase, pMasterKey.second.vchSalt,
                 pMasterKey.second.nDeriveIterations,
@@ -402,6 +410,8 @@ bool CWallet::Unlock(const SecureString &strWalletPassphrase) {
             return false;
         }
 
+      // Should get back original _vMasterKey....
+      
         if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, _vMasterKey)) {
             // try another master key
             continue;
@@ -669,13 +679,13 @@ bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
     if (IsCrypted()) {
         return false;
     }
-
-    CKeyingMaterial _vMasterKey;
+  
+    CKeyingMaterial _vMasterKey; // Just new Random Bytes
 
     _vMasterKey.resize(WALLET_CRYPTO_KEY_SIZE);
     GetStrongRandBytes(&_vMasterKey[0], WALLET_CRYPTO_KEY_SIZE);
 
-    CMasterKey kMasterKey;
+    CMasterKey kMasterKey; // Based on Password and random iterations
 
     kMasterKey.vchSalt.resize(WALLET_CRYPTO_SALT_SIZE);
     GetStrongRandBytes(&kMasterKey.vchSalt[0], WALLET_CRYPTO_SALT_SIZE);
@@ -710,9 +720,11 @@ bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
         return false;
     }
 
+    // Go from Random Bytes to Create Crypted value for kMasterKey
     if (!crypter.Encrypt(_vMasterKey, kMasterKey.vchCryptedKey)) {
         return false;
     }
+    // Now kMasterKey is complete
 
     {
         LOCK(cs_wallet);
@@ -730,7 +742,7 @@ bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
         CHDChain hdChainCurrent;
         GetHDChain(hdChainCurrent);
       
-      // mostly sets fCrypto since no MapKeys now
+      // mostly sets fCrypto since no MapKeys now - vMasterKey shouldn't be needed here
       if (!EncryptKeys(_vMasterKey)) {
         pwalletdbEncryption->TxnAbort();
         delete pwalletdbEncryption;
@@ -774,7 +786,7 @@ bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
         // Need to completely rewrite the wallet file; if we don't, bdb might
         // keep bits of the unencrypted private key in slack space in the
         // database file.
-        dbw->Rewrite();
+        //dbw->Rewrite();
     }
 
     NotifyStatusChanged(this);
@@ -4273,6 +4285,8 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             return nullptr;
       }
 
+      walletInstance->EncryptWallet(walletPassphrase);
+      
       walletInstance->SetBestChain(chainActive.GetLocator());
     }
 
