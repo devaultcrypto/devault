@@ -393,6 +393,8 @@ bool CWallet::Unlock(const SecureString &strWalletPassphrase) {
     CCrypter crypter;
     CKeyingMaterial _vMasterKey;
 
+    if (!IsLocked()) return true;
+  
     LOCK(cs_wallet);
     for (const MasterKeyMap::value_type &pMasterKey : mapMasterKeys) {
       

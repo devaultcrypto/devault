@@ -63,14 +63,14 @@ void getPassphrase(SecureString& walletPassphrase) {
     while (c != '\n') {
       std::cin.get(c);
       std::cout << "*" << std::flush;
-      pass1.push_back(c);
+      if (c != '\n') pass1.push_back(c);
     }
     c = '0';
     std::cout << "Confirm password\n";
     while (c != '\n') {
       std::cin.get(c);
       std::cout << "*" << std::flush;
-      pass2.push_back(c);
+      if (c != '\n') pass2.push_back(c);
     }
   } while (pass1 != pass2);
   walletPassphrase   = pass1;
