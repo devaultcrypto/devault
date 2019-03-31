@@ -19,7 +19,7 @@ class CTransaction;
  * Default for -blockmaxsize, which controls the maximum size of block the
  * mining code will create.
  */
-static const uint64_t DEFAULT_MAX_GENERATED_BLOCK_SIZE = 2 * ONE_MEGABYTE;
+static const uint64_t DEFAULT_MAX_GENERATED_BLOCK_SIZE = 32 * ONE_MEGABYTE;
 /**
  * Default for -blockprioritypercentage, define the amount of block space
  * reserved to high priority transactions.
@@ -56,7 +56,7 @@ static const unsigned int MAX_STANDARD_TX_SIGOPS = MAX_TX_SIGOPS_COUNT / 5;
 /**
  * Default for -maxmempool, maximum megabytes of mempool memory usage.
  */
-static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 300;
+static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 360;
 /**
  * Default for -incrementalrelayfee, which sets the minimum feerate increase for
  * mempool limiting or BIP 125 replacement.
