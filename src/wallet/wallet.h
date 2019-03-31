@@ -1163,7 +1163,7 @@ public:
     bool BackupWallet(const std::string &strDest);
 
     /* Set the HD chain model (chain child index counters) */
-    bool SetHDChain(const CHDChain &chain, bool memonly);
+    bool SetHDChain(const CHDChain &chain);
 
     /* Returns true if HD is enabled */
     bool IsHDEnabled();

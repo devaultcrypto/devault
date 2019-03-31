@@ -219,7 +219,7 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata &metadata,
       throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
   }
   else {
-    if (!SetHDChain(hdChainCurrent, false))
+    if (!SetHDChain(hdChainCurrent))
       throw std::runtime_error(std::string(__func__) + ": SetHDChain failed");
   }
  
@@ -691,6 +691,7 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey) {
         }
       
   }
+  return true;
 }
 
 bool CWallet::FinishEncryptWallet(const SecureString &strWalletPassphrase) {
@@ -1564,7 +1565,7 @@ void CWallet::GenerateHDMasterKey() {
   
   hdChain.Setup(words, hashWords);
   // Store to dB
-  SetHDChain(hdChain, false);
+  SetHDChain(hdChain);
 }
 
 // Need to Review
@@ -1573,16 +1574,11 @@ CPubKey CWallet::GenerateNewHDMasterKey() {
   return pubkey;
 }
 
-bool CWallet::SetHDChain(const CHDChain &chain, bool memonly) {
+bool CWallet::SetHDChain(const CHDChain &chain) {
     LOCK(cs_wallet);
   
     if (!CCryptoKeyStore::SetHDChain(chain))
       return false;
-
-    if (!memonly && !CWalletDB(*dbw).WriteHDChain(chain)) {
-        throw std::runtime_error(std::string(__func__) +
-                                 ": writing chain failed");
-    }
 
     hdChain = chain;
     return true;
