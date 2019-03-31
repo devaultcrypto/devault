@@ -1165,9 +1165,6 @@ public:
     /* Set the HD chain model (chain child index counters) */
     bool SetHDChain(const CHDChain &chain);
 
-    /* Returns true if HD is enabled */
-    bool IsHDEnabled();
-
    /* Generates a new HD master key (will not be activated) */
     void GenerateHDMasterKey();
     CPubKey GenerateNewHDMasterKey();
