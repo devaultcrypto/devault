@@ -275,8 +275,8 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {0, uint256S("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526"
-                               "f8d77f4943")},
+                {0, uint256S("00000000484cc373e7ec23902e51286bb0552d0ddae873e4be947f"
+                               "3761889c0e")},
             }};
 
         // Data as of block
