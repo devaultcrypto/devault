@@ -508,13 +508,6 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 strErr = "Error reading wallet database: LoadDestData failed";
                 return false;
             }
-        } else if (strType == "hdchain") {
-            CHDChain chain;
-            ssValue >> chain;
-            if (!pwallet->SetHDChain(chain, true)) {
-                strErr = "Error reading wallet database: SetHDChain failed";
-                return false;
-            }
         } else if (strType == "chdchain") {
             CHDChain chain;
             ssValue >> chain;
@@ -548,8 +541,7 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
 
 bool CWalletDB::IsKeyType(const std::string &strType) {
     return (strType == "key" || strType == "wkey" || strType == "mkey" ||
-            strType == "hdchain" || 
-            strType == "chdchain" || 
+            strType == "chdchain" ||
             strType == "ckey");
 }
 
@@ -854,7 +846,7 @@ bool CWalletDB::RecoverKeysOnlyFilter(void *callbackData, CDataStream ssKey,
         fReadOK = ReadKeyValue(dummyWallet, ssKey, ssValue, dummyWss, strType,
                                strErr);
     }
-    if (!IsKeyType(strType) && strType != "hdchain") {
+    if (!IsKeyType(strType) && strType != "hdpubkey") {
         return false;
     }
     if (!fReadOK) {
@@ -903,10 +895,6 @@ bool CWalletDB::EraseDestData(const CTxDestination &address,
         std::make_pair(EncodeCashAddr(address, Params()), key)));
 }
 
-bool CWalletDB::WriteHDChain(const CHDChain &chain) {
-    return WriteIC(std::string("hdchain"), chain);
-}
-
 bool CWalletDB::TxnBegin() {
     return batch.TxnBegin();
 }
@@ -939,8 +927,6 @@ bool CWalletDB::WriteCryptedHDChain(const CHDChain& chain)
 {
     if (!WriteIC(std::string("chdchain"), chain))
         return false;
-
-    EraseIC(std::string("hdchain"));
 
     return true;
 }
