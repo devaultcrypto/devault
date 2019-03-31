@@ -13,6 +13,7 @@ option(BUILD_BITCOIN_SEEDER "Build devault-seeder" ON)
 option(BUILD_BITCOIN_CLI "Build bitcoin-cli" ON)
 option(BUILD_BITCOIN_TX "Build bitcoin-tx" ON)
 option(BUILD_BITCOIN_QT "Build bitcoin-qt" ON)
+option(ENABLE_HARDENING "Harden the executables" ON)
 
 # Cmake uses the CMAKE_BUILD_TYPE variable to select the build configuration.
 # By default it supports more configurations that needed for Bitcoin ABC, and
@@ -22,19 +23,59 @@ option(BUILD_BITCOIN_QT "Build bitcoin-qt" ON)
 include(AddCompilerFlags)
 remove_compiler_flags(-DNDEBUG)
 
+# Overrides the flags for the Debug build type
+# This mimics the autotools behavior by setting the CFLAGS to '-g -O2`, which
+# are not well suited for debugging.
+# FIXME: update CFLAGS with better debug oriented optimization flags
+set(CMAKE_C_FLAGS_DEBUG "-g -O2")
+
+# Prefer -g3, defaults to -g if unavailable
+add_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -g3 -g)
+
+# Prefer -Og, defaults to -O0 if unavailable
+add_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -Og -O0)
+
+# Define the debugging symbols DEBUG and DEBUG_LOCKORDER when the Debug build
+# type is selected.
+string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DDEBUG -DDEBUG_LOCKORDER")
+
 # Ensure that WINDRES_PREPROC is enabled when using windres.
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	# Ensure that WINDRES_PREPROC is enabled when using windres.
 	list(APPEND CMAKE_RC_FLAGS "-DWINDRES_PREPROC")
+
+	# Build all static so there is no dll file to distribute.
+	add_compiler_flag(-static)
 endif()
 
-# CMake provides the POSITION_INDEPENDENT_CODE property to set PIC/PIE.
-# Unfortunately setting the -pie linker flag this way required CMake >= 3.14,
-# which is not widely distributed at the time of writing.
-# FIXME: use the POSITION_INDEPENDENT_CODE property instead
+# All windows code is PIC, forcing it on just adds useless compile warnings
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for all targets
-	#add_compiler_flag(-fPIC -fPIE)
-	#add_linker_flag(-pie)
+	add_compiler_flag(-fPIC)
+endif()
+	
+if(ENABLE_HARDENING)
+	# Enable stack protection
+	add_cxx_compiler_flag(-fstack-protector-all -Wstack-protector)
+	
+	# Enable some buffer overflow checking
+	add_compiler_flag(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
+	
+	# Enable ASLR (these flags are primarily targeting MinGw)
+	add_linker_flag(-Wl,--dynamicbase -Wl,--nxcompat -Wl,--high-entropy-va)
+	
+	# Make the relocated sections read-only
+	add_linker_flag(-Wl,-z,relro -Wl,-z,now)
+
+	# CMake provides the POSITION_INDEPENDENT_CODE property to set PIC/PIE.
+	# Unfortunately setting the -pie linker flag this way require CMake >= 3.14,
+	# which is not widely distributed at the time of writing.
+	# FIXME: use the POSITION_INDEPENDENT_CODE property instead
+	if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for all targets
+	else()
+		# MinGw provides its own libssp for stack smashing protection
+		link_libraries(ssp)
+	endif()
 endif()
 
 # Enable warning
