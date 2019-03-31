@@ -21,9 +21,9 @@
 #include "splashscreen.h"
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
-#include "setpassphrasedialog.h"
 
 #ifdef ENABLE_WALLET
+#include "setpassphrasedialog.h"
 #include "walletmodel.h"
 #endif
 
@@ -362,6 +362,7 @@ void BitcoinApplication::createOptionsModel(bool resetSettings) {
 
 
 bool BitcoinApplication::setupPassword(SecureString& password) {
+#ifdef ENABLE_WALLET    
   if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
     LogPrintf("Wallet disabled!\n");
   } else {
@@ -374,15 +375,18 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
   SetPassphraseDialog dlg(0);
   dlg.exec();
   password = dlg.getPassword();
+#endif
   return false;
 }
 
 bool BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
 
+#ifdef ENABLE_WALLET    
     if (!setupPassword(pss)) {
         if (pss.empty()) return false;
     }
+#endif
     window = new BitcoinGUI(config, platformStyle, networkStyle, 0);
 
     pollShutdownTimer = new QTimer(window);

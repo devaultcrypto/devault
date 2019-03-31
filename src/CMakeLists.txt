@@ -7,16 +7,28 @@ project(DeVault)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-option(BUILD_BITCOIN_WALLET "Activate the wallet functionality" ON)
-option(BUILD_BITCOIN_ZMQ "Activate the ZeroMQ functionalities" ON)
-option(BUILD_BITCOIN_SEEDER "Build devault-seeder" ON)
-option(BUILD_BITCOIN_CLI "Build bitcoin-cli" ON)
-option(BUILD_BITCOIN_TX "Build bitcoin-tx" ON)
-option(BUILD_BITCOIN_QT "Build bitcoin-qt" ON)
+include(FeatureSummary)
+
+option(BUILD_WALLET "Activate the wallet functionality" ON)
+option(BUILD_ZMQ "Activate the ZeroMQ functionalities" ON)
+option(BUILD_SEEDER "Build devault-seeder" ON)
+option(BUILD_CLI "Build devault-cli" ON)
+option(BUILD_TX "Build devault-tx" ON)
+option(BUILD_QT "Build devault-qt" ON)
 option(ENABLE_HARDENING "Harden the executables" ON)
 
+add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
+add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
+add_feature_info(WITH_SEEDER BUILD_SEEDER "Build devault-seeder")
+add_feature_info(WITH_CLI BUILD_CLI "Build devault-cli")
+add_feature_info(WITH_TX BUILD_TX "Build devault-tx")
+add_feature_info(WITH_QT BUILD_QT "Build devault-qt")
+add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
+
+set(CMAKE_REQUIRED_QUIET true)
+
 # Cmake uses the CMAKE_BUILD_TYPE variable to select the build configuration.
-# By default it supports more configurations that needed for Bitcoin ABC, and
+# By default it supports more configurations that needed for DeVault, and
 # all the releases types set NDEBUG which is unwanted as it disables the assert
 # completely.
 # Remove the -DNDEBUG flag from the CFLAGS/CXXFLAGS in all the configurations
@@ -100,6 +112,9 @@ if(EXTRA_WARNINGS)
 else()
 	add_compiler_flag(-Wno-unused-parameter)
 endif()
+
+add_feature_info(WITH_WARNINGS EXTRA_WARNINGS "Enable extra warnings")
+
 
 check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if (HAVE_FLAG_STD_CXX17)
@@ -381,13 +396,13 @@ add_subdirectory(test)
 add_subdirectory(bench)
 
 # Wallet
-if(BUILD_BITCOIN_WALLET)
+if(BUILD_WALLET)
 	add_subdirectory(wallet)
 	target_link_libraries(server wallet)
 endif()
 
 # ZeroMQ
-if(BUILD_BITCOIN_ZMQ)
+if(BUILD_ZMQ)
 	add_subdirectory(zmq)
 	target_link_libraries(server zmq)
 endif()
@@ -397,12 +412,12 @@ add_library(rpcclient rpc/client.cpp)
 target_link_libraries(rpcclient univalue util)
 
 # devault-seeder
-if(BUILD_BITCOIN_SEEDER)
+if(BUILD_SEEDER)
 	add_subdirectory(seeder)
 endif()
 
 # bitcoin-cli
-if(BUILD_BITCOIN_CLI)
+if(BUILD_CLI)
 	add_executable(devault-cli bitcoin-cli.cpp)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		target_sources(devault-cli PRIVATE bitcoin-cli-res.rc)
@@ -412,7 +427,7 @@ if(BUILD_BITCOIN_CLI)
 endif()
 
 # bitcoin-tx
-if(BUILD_BITCOIN_TX)
+if(BUILD_TX)
 	add_executable(devault-tx bitcoin-tx.cpp)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		target_sources(devault-tx PRIVATE bitcoin-tx-res.rc)
@@ -429,6 +444,26 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 # Bitcoin-qt
-if(BUILD_BITCOIN_QT)
+if(BUILD_QT)
 	add_subdirectory(qt)
 endif()
+
+
+
+message(STATUS "-----------------------------------------")
+if (CMAKE_BUILD_TYPE)
+  message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
+  message(STATUS "-----------------------------------------")
+endif()
+
+#########################################################################
+# print features summary
+#########################################################################
+message(STATUS "######################################################")
+message(STATUS "Enabled features")
+feature_summary(WHAT ENABLED_FEATURES)
+message(STATUS "######################################################")
+message(STATUS "Disabled features")
+feature_summary(WHAT DISABLED_FEATURES)
+message(STATUS "######################################################")
+

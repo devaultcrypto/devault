@@ -168,11 +168,12 @@ bool AppInit(int argc, char *argv[]) {
             // up on console
             exit(1);
         }
-      
+
+#ifdef ENABLE_WALLET        
       if (!g_wallet_init_interface->CheckIfWalletExists(config.GetChainParams())) {
-        //std::cout << "Stop here no wallet found\n!";
         getPassphrase(walletPassphrase);
       }
+#endif
 
         if (!AppInitSanityChecks()) {
             // InitError will have been called with detailed error, which ends
