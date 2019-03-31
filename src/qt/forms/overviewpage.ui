@@ -138,7 +138,7 @@
                                                         </item>
                                                         <!-- available label-->
                                                         <item row="2" column="1">
-                                                            <widget class="QLabel" name="labelBalanceText1">
+                                                            <widget class="QLabel" name="labelBalanceText">
                                                                 <property name="text">
                                                                     <string>Available</string>
                                                                 </property>
@@ -193,7 +193,7 @@
                                                 </item>
                                                 <!-- TOTAL -->
                                                 <item>
-                                                    <layout class="QGridLayout" name="gridTotal1">
+                                                    <layout class="QGridLayout" name="gridTotal">
                                                         <property name="spacing">
                                                             <number>2</number>
                                                         </property>
@@ -207,7 +207,7 @@
                                                         </item>
                                                         <!-- icon -->
                                                         <item row="1" column="0" rowspan="2">
-                                                            <widget class="QPushButton" name="totalIcon1">
+                                                            <widget class="QPushButton" name="totalIcon">
                                                                 <property name="enabled">
                                                                     <bool>false</bool>
                                                                 </property>
@@ -265,7 +265,7 @@
                                                         </item>
                                                         <!-- total label-->
                                                         <item row="2" column="1">
-                                                            <widget class="QLabel" name="labelTotalText1">
+                                                            <widget class="QLabel" name="labelTotalText">
                                                                 <property name="text">
                                                                     <string>Total</string>
                                                                 </property>
