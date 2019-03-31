@@ -351,6 +351,10 @@ std::set<CKeyID> CCryptoKeyStore::GetKeys() const {
     return set_address;
 }
 
+// Since this only happens during wallet encryption then there
+// will be no MapKeys to encrypt since all keys will be HD keys
+// MapKeys are for imported private keys
+// Now just use SetCrypted instead - keep this for a bit
 bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial &vMasterKeyIn) {
     {
         LOCK(cs_KeyStore);
@@ -379,9 +383,7 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial &vMasterKeyIn) {
 
 bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn)
 {
-    // should call EncryptKeys first
-    if (!IsCrypted())
-        return false;
+    SetCrypted();
 
     if (!cryptedHDChain.IsNull())
         return true;

@@ -668,13 +668,68 @@ void CWallet::AddToSpends(const TxId &wtxid) {
     }
 }
 
-bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
+bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey) {
+
+  {
+        LOCK(cs_wallet);
+        CHDChain hdChainCurrent;
+        GetHDChain(hdChainCurrent);
+      
+        // Should not be Null since firstRun has set it up
+        if (!hdChainCurrent.IsNull()) {
+          assert(EncryptHDChain(_vMasterKey));
+        
+          CHDChain hdChainCrypted;
+          GetHDChain(hdChainCrypted);
+          assert(!hdChainCrypted.IsNull());
+        
+          // ids should match, seed hashes should not
+          assert(hdChainCurrent.GetID() == hdChainCrypted.GetID());
+          assert(hdChainCurrent.GetSeedHash() != hdChainCrypted.GetSeedHash());
+        
+          assert(SetCryptedHDChain(hdChainCrypted, false));
+        }
+      
+  }
+}
+
+bool CWallet::FinishEncryptWallet(const SecureString &strWalletPassphrase) {
+
+  {
+        LOCK(cs_wallet);
+        if (!pwalletdbEncryption->TxnCommit()) {
+            delete pwalletdbEncryption;
+            // We now have keys encrypted in memory, but not on disk... die to
+            // avoid confusion and let the user reload the unencrypted wallet.
+            assert(false);
+        }
+
+        delete pwalletdbEncryption;
+        pwalletdbEncryption = nullptr;
+
+        Lock();
+        Unlock(strWalletPassphrase);
+
+        TopUpKeyPool();
+        Lock();
+
+        // Need to completely rewrite the wallet file; if we don't, bdb might
+        // keep bits of the unencrypted private key in slack space in the
+        // database file.
+        //dbw->Rewrite();
+    }
+
+    NotifyStatusChanged(this);
+    return true;
+}
+
+
+bool CWallet::CreateMasteyKey(const SecureString &strWalletPassphrase,
+                              CKeyingMaterial& _vMasterKey) {
     if (IsCrypted()) {
         return false;
     }
   
-    CKeyingMaterial _vMasterKey; // Just new Random Bytes
-
     _vMasterKey.resize(WALLET_CRYPTO_KEY_SIZE);
     GetStrongRandBytes(&_vMasterKey[0], WALLET_CRYPTO_KEY_SIZE);
 
@@ -731,58 +786,7 @@ bool CWallet::EncryptWallet(const SecureString &strWalletPassphrase) {
         }
         pwalletdbEncryption->WriteMasterKey(nMasterKeyMaxID, kMasterKey);
 
-        // must get current HD chain before EncryptKeys
-        CHDChain hdChainCurrent;
-        GetHDChain(hdChainCurrent);
-      
-      // mostly sets fCrypto since no MapKeys now - vMasterKey shouldn't be needed here
-      if (!EncryptKeys(_vMasterKey)) {
-        pwalletdbEncryption->TxnAbort();
-        delete pwalletdbEncryption;
-        // We now probably have half of our keys encrypted in memory, and
-        // half not... die and let the user reload the unencrypted wallet.
-        assert(false);
-      }
-
-      
-        if (!hdChainCurrent.IsNull()) {
-          assert(EncryptHDChain(_vMasterKey));
-        
-          CHDChain hdChainCrypted;
-          GetHDChain(hdChainCrypted);
-          assert(!hdChainCrypted.IsNull());
-        
-          // ids should match, seed hashes should not
-          assert(hdChainCurrent.GetID() == hdChainCrypted.GetID());
-          assert(hdChainCurrent.GetSeedHash() != hdChainCrypted.GetSeedHash());
-        
-          assert(SetCryptedHDChain(hdChainCrypted, false));
-        }
-      
-
-        if (!pwalletdbEncryption->TxnCommit()) {
-            delete pwalletdbEncryption;
-            // We now have keys encrypted in memory, but not on disk... die to
-            // avoid confusion and let the user reload the unencrypted wallet.
-            assert(false);
-        }
-
-        delete pwalletdbEncryption;
-        pwalletdbEncryption = nullptr;
-
-        Lock();
-        Unlock(strWalletPassphrase);
-
-        TopUpKeyPool();
-        Lock();
-
-        // Need to completely rewrite the wallet file; if we don't, bdb might
-        // keep bits of the unencrypted private key in slack space in the
-        // database file.
-        //dbw->Rewrite();
     }
-
-    NotifyStatusChanged(this);
     return true;
 }
 
@@ -4264,9 +4268,10 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     }
 
     if (fFirstRun) {
-        //
-        // Add Encrypt Wallet Here!
-        //
+
+      CKeyingMaterial _vMasterKey; // Just new Random Bytes
+
+      //
       walletInstance->GenerateHDMasterKey();
       //  throw std::runtime_error(std::string(__func__) + ": Unable to set HD MasterKey");
 
@@ -4276,7 +4281,10 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             return nullptr;
       }
 
-      walletInstance->EncryptWallet(walletPassphrase);
+      // Create MasterKey and store to mapMasterKeys
+      walletInstance->CreateMasteyKey(walletPassphrase, _vMasterKey);
+      walletInstance->EncryptHDWallet(_vMasterKey);
+      walletInstance->FinishEncryptWallet(walletPassphrase);
       
       walletInstance->SetBestChain(chainActive.GetLocator());
     }
