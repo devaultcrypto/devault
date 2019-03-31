@@ -914,7 +914,10 @@ public:
     bool Unlock(const SecureString &strWalletPassphrase);
     bool ChangeWalletPassphrase(const SecureString &strOldWalletPassphrase,
                                 const SecureString &strNewWalletPassphrase);
-    bool EncryptWallet(const SecureString &strWalletPassphrase);
+    bool EncryptHDWallet(const CKeyingMaterial& _vMasterKey);
+    bool FinishEncryptWallet(const SecureString &strWalletPassphrase);
+    bool CreateMasteyKey(const SecureString &strWalletPassphrase,
+                         CKeyingMaterial& _vMasterKey);
 
     void GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const;
     unsigned int ComputeTimeSmart(const CWalletTx &wtx) const;
