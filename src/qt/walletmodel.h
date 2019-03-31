@@ -209,8 +209,6 @@ public:
 
     static bool isWalletEnabled();
 
-    bool hdEnabled() const;
-
     const CChainParams &getChainParams() const;
 
     QString getWalletName() const;

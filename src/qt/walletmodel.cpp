@@ -592,10 +592,6 @@ bool WalletModel::isWalletEnabled() {
     return !gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET);
 }
 
-bool WalletModel::hdEnabled() const {
-    return wallet->IsHDEnabled();
-}
-
 QString WalletModel::getWalletName() const {
     LOCK(wallet->cs_wallet);
     return QString::fromStdString(wallet->GetName());

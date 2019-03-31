@@ -209,10 +209,9 @@ private:
     void setEncryptionStatus(int status);
 
     /** Set the hd-enabled status as shown in the UI.
-     @param[in] status            current hd enabled status
      @see WalletModel::EncryptionStatus
      */
-    void setHDStatus(int hdEnabled);
+    void setHDStatus();
 
 public Q_SLOTS:
     bool handlePaymentRequest(const SendCoinsRecipient &recipient);
