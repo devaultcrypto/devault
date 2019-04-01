@@ -18,7 +18,7 @@ define $(package)_build_cmds
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) DESTDIR=$($(package)_staging_dir) INSTALL_PATH=$(host_prefix) LD_LIBRARY_PATH=$(host_prefix) install-static
+  $(MAKE) DESTDIR=$($(package)_staging_dir) INSTALL_PATH=$($(package)_staging_prefix_dir) LD_LIBRARY_PATH=$(host_prefix) install-static
 endef
 
 define $(package)_postprocess_cmds
