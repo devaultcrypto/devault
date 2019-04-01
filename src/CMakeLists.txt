@@ -15,7 +15,7 @@ option(BUILD_SEEDER "Build devault-seeder" ON)
 option(BUILD_CLI "Build devault-cli" ON)
 option(BUILD_TX "Build devault-tx" ON)
 option(BUILD_QT "Build devault-qt" ON)
-option(ENABLE_HARDENING "Harden the executables" ON)
+option(ENABLE_HARDENING "Harden the executables" OFF)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -39,17 +39,17 @@ remove_compiler_flags(-DNDEBUG)
 # This mimics the autotools behavior by setting the CFLAGS to '-g -O2`, which
 # are not well suited for debugging.
 # FIXME: update CFLAGS with better debug oriented optimization flags
-set(CMAKE_C_FLAGS_DEBUG "-g -O2")
+#set(CMAKE_C_FLAGS_DEBUG "-g -O2")
 
 # Prefer -g3, defaults to -g if unavailable
-add_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -g3 -g)
+#dd_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -g3 -g)
 
 # Prefer -Og, defaults to -O0 if unavailable
-add_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -Og -O0)
+#add_cxx_compiler_flag_with_fallback(CMAKE_CXX_FLAGS_DEBUG -Og -O0)
 
 # Define the debugging symbols DEBUG and DEBUG_LOCKORDER when the Debug build
 # type is selected.
-string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DDEBUG -DDEBUG_LOCKORDER")
+#string(APPEND CMAKE_CXX_FLAGS_DEBUG " -DDEBUG -DDEBUG_LOCKORDER")
 
 # Ensure that WINDRES_PREPROC is enabled when using windres.
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -62,7 +62,8 @@ endif()
 
 # All windows code is PIC, forcing it on just adds useless compile warnings
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	add_compiler_flag(-fPIC)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for all targets
+	#add_compiler_flag(-fPIC)
 endif()
 	
 if(ENABLE_HARDENING)
@@ -148,14 +149,16 @@ add_subdirectory(config)
 # libraries
 add_subdirectory(crypto)
 
+#find_package(bzip2)
+#find_package(lz4)
 
 # Can change to LevelDB if needed
-find_package(RocksDB) # REQUIRED)
+#find_package(RocksDB) # REQUIRED)
 if (RocksDB_FOUND)
   message(STATUS "Found RocksDB")
   message(STATUS "Libs : ${ROCKSDB_LIBRARIES}")
   add_definitions("-DUSE_ROCKSDB")
-  set(DB_LIBRARIES ${ROCKSDB_LIBRARIES})
+  set(DB_LIBRARIES ${ROCKSDB_LIBRARIES} ${BZIP2_LIBRARIES})
 else()
   message(STATUS "FAILED to FIND RocksDB")
   add_subdirectory(leveldb)
@@ -387,6 +390,7 @@ target_link_libraries(server
 	devaultconsensus
   ${DB_LIBRARIES}
   ${MINIUPNP_LIBRARY}
+#  /usr/local/lib/liblz4.a
 )
 
 # Test suite.
