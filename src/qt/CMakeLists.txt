@@ -124,8 +124,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	  macnotificationhandler.mm
 	  )
 
+if(BUILD_WALLET)
   file(GLOB QT_BASE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
   source_group("BaseHeaders" FILES ${QT_BASE_HEADERS})
+endif()
 endif()
 
 
