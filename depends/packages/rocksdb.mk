@@ -14,11 +14,11 @@ define $(package)_config_cmds
 endef
 
 define $(package)_build_cmds
-  $(MAKE) shared_lib
+  PORTABLE=1 $(MAKE) static_lib
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) DESTDIR=$($(package)_staging_dir) INSTALL_PATH=$(host_prefix) install
+  $(MAKE) DESTDIR=$($(package)_staging_dir) INSTALL_PATH=$(host_prefix) LD_LIBRARY_PATH=$(host_prefix) install-static
 endef
 
 define $(package)_postprocess_cmds
