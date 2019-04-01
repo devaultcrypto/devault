@@ -7,14 +7,14 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 	set(EXEEXT ".exe")
 endif()
 
-if(NOT BUILD_BITCOIN_WALLET)
+if(NOT BUILD_WALLET)
 	set(ENABLE_WALLET_TRUE "#")
 endif()
 
-if(NOT BUILD_BITCOIN_TX OR NOT BUILD_BITCOIN_TX)
-	set(BUILD_BITCOIN_UTILS_TRUE "#")
+if(NOT BUILD_TX OR NOT BUILD_TX)
+	set(BUILD_UTILS_TRUE "#")
 endif()
-if(NOT BUILD_BITCOIN_ZMQ)
+if(NOT BUILD_ZMQ)
 	set(ENABLE_ZMQ_TRUE "#")
 endif()
 
@@ -62,7 +62,7 @@ add_custom_target(check-functional
 
 add_dependencies(check-all check-functional)
 
-if(BUILD_BITCOIN_TX)
+if(BUILD_TX)
 	add_custom_target(check-bitcoin-util
 		COMMAND
 			${CMAKE_COMMAND} -E echo "Running test/util/bitcoin-util-test.py..."

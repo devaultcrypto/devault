@@ -149,10 +149,10 @@ set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
 check_symbol_exists(EVP_MD_CTX_new "openssl/evp.h" HAVE_DECL_EVP_MD_CTX_NEW)
 
 # Activate wallet
-set(ENABLE_WALLET ${BUILD_BITCOIN_WALLET})
+set(ENABLE_WALLET ${BUILD_WALLET})
 
 # Activate ZeroMQ
-set(ENABLE_ZMQ ${BUILD_BITCOIN_ZMQ})
+set(ENABLE_ZMQ ${BUILD_ZMQ})
 
 # Generate the config
 configure_file(bitcoin-config.h.cmake.in bitcoin-config.h ESCAPE_QUOTES)
