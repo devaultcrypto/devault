@@ -136,7 +136,7 @@ TorControlConnection::~TorControlConnection() {
 }
 
 void TorControlConnection::readcb(struct bufferevent *bev, void *ctx) {
-    TorControlConnection *self = (TorControlConnection *)ctx;
+    TorControlConnection *self = static_cast<TorControlConnection *>(ctx);
     struct evbuffer *input = bufferevent_get_input(bev);
     size_t n_read_out = 0;
     char *line;
@@ -187,7 +187,7 @@ void TorControlConnection::readcb(struct bufferevent *bev, void *ctx) {
 
 void TorControlConnection::eventcb(struct bufferevent *bev, short what,
                                    void *ctx) {
-    TorControlConnection *self = (TorControlConnection *)ctx;
+    TorControlConnection *self = static_cast<TorControlConnection *>(ctx);
     if (what & BEV_EVENT_CONNECTED) {
         LogPrint(BCLog::TOR, "tor: Successfully connected!\n");
         self->connected(*self);
@@ -763,7 +763,7 @@ fs::path TorController::GetPrivateKeyFile() {
 }
 
 void TorController::reconnect_cb(evutil_socket_t fd, short what, void *arg) {
-    TorController *self = (TorController *)arg;
+    TorController *self = static_cast<TorController *>(arg);
     self->Reconnect();
 }
 
