@@ -7,9 +7,9 @@
 #include "logging.h"
 #include "util.h"
 #include "utiltime.h"
+#include <chrono>
 
 bool fLogIPs = DEFAULT_LOGIPS;
-const char *const DEFAULT_DEBUGLOGFILE = "debug.log";
 
 /**
  * NOTE: the logger instance is leaked on exit. This is ugly, but will be
@@ -32,6 +32,7 @@ BCLog::Logger &GetLogger() {
 static int FileWriteStr(const std::string &str, FILE *fp) {
     return fwrite(str.data(), 1, str.size(), fp);
 }
+
 
 fs::path BCLog::Logger::GetDebugLogPath() {
     fs::path logfile(gArgs.GetArg("-debuglogfile", DEFAULT_DEBUGLOGFILE));
@@ -224,6 +225,44 @@ void BCLog::Logger::ShrinkDebugFile() {
         }
     } else if (file != nullptr) {
         fclose(file);
+    }
+}
+
+std::string BCLog::Logger::RenameLastDebugFile(){
+  fs::path pathLog = GetDataDir();
+  pathLog /= DEFAULT_DEBUGLOGFILE;
+  fs::path oldLog = GetDataDir();
+  if (fs::exists(pathLog)) {
+    auto last_write_time = fs::last_write_time(pathLog);
+    std::string s = "debug-"+FormatISO8601DateTime(last_write_time)+".log";
+    oldLog /= s;
+    fs::rename(pathLog, oldLog);
+    return oldLog.c_str();
+  }
+  return "";
+}
+
+//! Remove debug.log files older than 1 day unless "keeplogfiles" is specified
+//  then keep up to days specified by argument
+void BCLog::Logger::RemoveOlderDebugFiles() {
+    int days_to_keep = gArgs.GetArg("-keeplogfiles", 1);
+    days_to_keep = std::max(1, days_to_keep);
+    fs::path pathLog = GetDataDir();
+    fs::directory_iterator dir_it(pathLog);
+    for(const auto& it : dir_it) {
+        if (!fs::is_regular_file(it.status())) continue;
+        std::string filename = it.path().filename().c_str();
+        std::size_t found_log = filename.find(".log");
+        std::size_t found_debug = filename.find("debug");
+        if (found_log !=std::string::npos && found_debug != std::string::npos) {
+            //LogPrintf("Found older debug file %s\n",it.path().filename().c_str());
+            auto last_write_time = fs::last_write_time(it.path());
+            std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+            if ((cftime - last_write_time) > (60*60*24*days_to_keep)) {
+                LogPrintf("Removing %s since older than %d day",it.path().filename().c_str(),days_to_keep);
+                fs::remove(it.path().filename());
+            }
+        }
     }
 }
 

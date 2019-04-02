@@ -20,8 +20,9 @@ static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS = false;
 static const bool DEFAULT_LOGTIMESTAMPS = true;
 
+static const std::string DEFAULT_DEBUGLOGFILE = "debug.log";
+
 extern bool fLogIPs;
-extern const char *const DEFAULT_DEBUGLOGFILE;
 
 namespace BCLog {
 
@@ -89,6 +90,9 @@ public:
     fs::path GetDebugLogPath();
     bool OpenDebugLog();
     void ShrinkDebugFile();
+    std::string RenameLastDebugFile();
+    void RemoveOlderDebugFiles();
+
 
     void EnableCategory(LogFlags category);
     bool EnableCategory(const std::string &str);
