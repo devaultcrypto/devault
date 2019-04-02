@@ -402,8 +402,12 @@ std::string HelpMessage(HelpMessageMode mode) {
         "-debuglogfile=<file>",
         strprintf(
             _("Specify location of debug log file: this can be an absolute "
-              "path or a path relative to the data directory (default: %s)"),
-            DEFAULT_DEBUGLOGFILE));
+              "path or a path relative to the data directory, if not supplied debug log file will called debug.log")));
+    strUsage += HelpMessageOpt(
+                             "-keeplogfiles=<days>",
+                             strprintf(
+                                       _("If specified, debug log file older than <days> days will be deleted where days must be 1 or more, otherwise log files older than 1 day will be deleted")));
+
     strUsage += HelpMessageOpt(
         "-maxorphantx=<n>", strprintf(_("Keep at most <n> unconnectable "
                                         "transactions in memory (default: %u)"),
@@ -1788,7 +1792,8 @@ bool AppInitMain(Config &config,
 #endif
 
     BCLog::Logger &logger = GetLogger();
-
+    std::string RenamedLogfile = logger.RenameLastDebugFile();
+  
     bool default_shrinkdebugfile = logger.DefaultShrinkDebugFile();
     if (gArgs.GetBoolArg("-shrinkdebugfile", default_shrinkdebugfile)) {
         // Do this first since it both loads a bunch of debug.log into memory,
@@ -1802,6 +1807,10 @@ bool AppInitMain(Config &config,
                                        logger.GetDebugLogPath().string()));
         }
     }
+    // Can only remove older after creating new one since there are LogPrintf in there!
+    if (RenamedLogfile != "") LogPrintf("Renamed old log file %s to %s\n",DEFAULT_DEBUGLOGFILE, RenamedLogfile);
+    logger.RemoveOlderDebugFiles();
+
 
     if (!logger.m_log_timestamps) {
         LogPrintf("Startup time: %s\n", FormatISO8601DateTime(GetTime()));
