@@ -76,14 +76,10 @@ class CWalletTx;
 
 /** (client) version numbers for particular wallet features */
 enum WalletFeature {
-    // the earliest version new wallets supports (only useful for getinfo's
-    // clientversion output)
-    FEATURE_BASE = 130000,
-    // Hierarchical key derivation after BIP32 (HD Wallet)
-    // Wallet with HD chain split (change outputs will use m/0'/1'/k)
-
-    // HD is optional, use FEATURE_COMPRPUBKEY as latest version
-    FEATURE_LATEST = FEATURE_BASE,
+    // the earliest version new wallets supports (only useful for getinfo's clientversion output)
+    FEATURE_BASE = 190000,
+    FEATURE_START = 1000000,
+    FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
 };
 
 /** A key pool entry */
