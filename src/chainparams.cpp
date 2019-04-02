@@ -157,7 +157,7 @@ public:
         cashaddrSecretPrefix = "dvtpriv";
 
         // Rewards
-        consensus.nPerCentPerYear = {15,13,11,9,7};
+        consensus.nPerCentPerYear = {15,12,9,7,5};
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward = 50 * COIN;
