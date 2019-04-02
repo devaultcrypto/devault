@@ -31,3 +31,6 @@ Bitcoin-ABC 19.x backports:
  - Various minor fixes to RPC parameter validation
  - Minor wallet performance improvements
  - `errors` in getmininginfo rpc commmand has been deprecated.  Use `warnings` now instead.
+ - Added optional `blockhash` parameter to `getrawtransaction` to narrowly
+   search for a transaction within a given block. New returned field
+   `in_active_chain` will indicate if that block is part of the active chain.
