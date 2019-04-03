@@ -3,6 +3,57 @@
 project(devault-qt)
 cmake_minimum_required(VERSION 3.5)
 
+
+# Project Info
+SET(APP_NAME DeVault-Qt)
+SET(PROJECT_NAME_SHORT   "DeVault-Qt")
+SET(PROJECT_NAME_LONG    "CMake DeVault Qt project")
+SET(PROJECT_DESCRIPTION  "CMake build system template for Qt based projects")
+SET(PROJECT_COPYRIGHT    "Copyright (C) 2019 DeVault Developers")
+SET(PROJECT_CONTACT      "jonspock@protonmail.com")
+SET(PROJECT_VENDOR       "Jon Spock")
+SET(ORG_WEBSITE          "http://devault.cc")
+
+# For projects using Git, use git version patch
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    SET(PATCH_OUT "0")
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    # Find Git Version Patch
+    FIND_PROGRAM(GIT git)
+    IF(GIT)
+        EXECUTE_PROCESS(
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMAND ${GIT} rev-parse --short HEAD 
+            OUTPUT_VARIABLE GIT_OUT OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        SET(PATCH_OUT "0-${GIT_OUT}")
+    ELSE(GIT)
+        SET(PATCH_OUT "0")
+    ENDIF(GIT)
+ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+SET(PROJECT_VERSION_PATCH ${PATCH_OUT})
+
+# Project Version
+SET(CPACK_PACKAGE_VERSION_MAJOR "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+SET(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+SET(PROJECT_VERSION_MAJOR ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR})
+SET(PROJECT_VERSION ${CPACK_PACKAGE_VERSION})
+
+MESSAGE(STATUS "Version: ${PROJECT_VERSION}")
+
+STRING(TOLOWER ${PROJECT_NAME_SHORT} PROJECT_NAME_SHORT_LOWER)
+PROJECT(${PROJECT_NAME_SHORT_LOWER}-${PROJECT_VERSION})
+
+# System on which project is built
+SITE_NAME(HOSTNAME)
+SET(SYSNAME ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_PROCESSOR})
+
+# CMake Settings
+SET(CMAKE_COLOR_MAKEFILE ON)
+
 # This ensure that AUTOMOC doesn't run on generated files.
 if (CMAKE_VERSION VERSION_LESS 3.10)
   message("Not setting CMP0071")
@@ -235,23 +286,76 @@ if(BUILD_WALLET)
 endif()
 
 # The executable
-add_executable(devault-qt bitcoin.cpp)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(devault-qt bitcoin-qt-base "-framework Foundation" "-framework CoreServices" "-framework AppKit")
+if (DO_PACKAGING)
+  add_executable(${APP_NAME} MACOSX_BUNDLE bitcoin.cpp)
 else()
-  target_link_libraries(devault-qt bitcoin-qt-base)
+  add_executable(${APP_NAME} bitcoin.cpp)
+endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  target_link_libraries(${APP_NAME} bitcoin-qt-base "-framework Foundation" "-framework CoreServices" "-framework AppKit")
+else()
+  target_link_libraries(${APP_NAME} bitcoin-qt-base)
 endif()
 
-QT5_USE_Modules(devault-qt Gui)
-QT5_USE_Modules(devault-qt Core)
-QT5_USE_Modules(devault-qt Widgets)
-QT5_USE_Modules(devault-qt Test)
-QT5_USE_Modules(devault-qt PrintSupport)
-QT5_USE_Modules(devault-qt Network)
+QT5_USE_Modules(${APP_NAME} Gui)
+QT5_USE_Modules(${APP_NAME} Core)
+QT5_USE_Modules(${APP_NAME} Widgets)
+QT5_USE_Modules(${APP_NAME} Test)
+QT5_USE_Modules(${APP_NAME} PrintSupport)
+QT5_USE_Modules(${APP_NAME} Network)
 if (Qt5DBus_FOUND)
-  QT5_USE_Modules(devault-qt DBus)
+  QT5_USE_Modules(${APP_NAME} DBus)
 endif()
 
+set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
+
+
+if (DO_PACKAGING)
+  #############################################################
+  # Enable packaging
+  INCLUDE(InstallRequiredSystemLibraries)
+  
+
+  if (APPLE)
+    SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in")
+    SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE TRUE)
+  endif()
+  
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/${APP_NAME}.app")
+  set(DIRS ${CMAKE_BINARY_DIR})
+
+
+  SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
+  SET(CPACK_PACKAGE_NAME ${PROJECT_NAME_SHORT})
+  SET(CPACK_PACKAGE_DESCRIPTION "${PROJECT_NAME_LONG}")
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME_SHORT} - ${PROJECT_DESCRIPTION}")
+  SET(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
+  SET(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT})
+  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+  SET(CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/README.md)
+  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  
+  SET(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CPACK_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
+
+
+  if (APPLE)
+    SET(CPACK_GENERATOR "DragNDrop")
+    # Libraries are bundled directly
+    SET(CPACK_COMPONENT_LIBRARIES_HIDDEN TRUE)
+    SET(MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
+    SET(MACOSX_BUNDLE_INFO_STRING "DeVault-Qt")
+    SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.DeVault-Qt")
+    SET(MACOSX_BUNDLE_COPYRIGHT "(c) DeVault 2018")
+    SET(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
+    SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION})
+    SET(MACOSX_BUNDLE_LONG_VERSION_STRING "Version ${PROJECT_VERSION}")
+  endif()
+  # Bundle Properties
+
+  SET(CPACK_PACKAGE_EXECUTABLES "DeVault-Qt" "devault-qt")
+  INCLUDE(CPack)
+  INSTALL(TARGETS ${APP_NAME} DESTINATION .)
+endif()
 
 
 # Test tests

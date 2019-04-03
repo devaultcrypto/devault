@@ -9,6 +9,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 include(FeatureSummary)
 
+option(LINK_STATIC_LIBS "Use static linking" ON)
 option(BUILD_WALLET "Activate the wallet functionality" ON)
 option(BUILD_ZMQ "Activate the ZeroMQ functionalities" ON)
 option(BUILD_SEEDER "Build devault-seeder" ON)
@@ -26,8 +27,13 @@ add_feature_info(WITH_TX BUILD_TX "Build devault-tx")
 add_feature_info(WITH_QT BUILD_QT "Build devault-qt")
 add_feature_info(WITH_ROCKSDB BUILD_ROCKSDB "Build with RocksDB (blockchain restart needed if switched" )
 add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
+add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
 
 set(CMAKE_REQUIRED_QUIET true)
+
+if (LINK_STATIC_LIBS)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib")
+endif()
 
 # Cmake uses the CMAKE_BUILD_TYPE variable to select the build configuration.
 # By default it supports more configurations that needed for DeVault, and
@@ -397,7 +403,6 @@ target_link_libraries(server
 	devaultconsensus
   ${DB_LIBRARIES}
   ${MINIUPNP_LIBRARY}
-#  /usr/local/lib/liblz4.a
 )
 
 # Test suite.
