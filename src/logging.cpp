@@ -237,7 +237,7 @@ std::string BCLog::Logger::RenameLastDebugFile(){
     std::string s = "debug-"+FormatISO8601DateTime(last_write_time)+".log";
     oldLog /= s;
     fs::rename(pathLog, oldLog);
-    return oldLog.c_str();
+    return oldLog.string();
   }
   return "";
 }
@@ -251,7 +251,7 @@ void BCLog::Logger::RemoveOlderDebugFiles() {
     fs::directory_iterator dir_it(pathLog);
     for(const auto& it : dir_it) {
         if (!fs::is_regular_file(it.status())) continue;
-        std::string filename = it.path().filename().c_str();
+        std::string filename = it.path().filename().string();
         std::size_t found_log = filename.find(".log");
         std::size_t found_debug = filename.find("debug");
         if (found_log !=std::string::npos && found_debug != std::string::npos) {
@@ -259,7 +259,7 @@ void BCLog::Logger::RemoveOlderDebugFiles() {
             auto last_write_time = fs::last_write_time(it.path());
             std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
             if ((cftime - last_write_time) > (60*60*24*days_to_keep)) {
-                LogPrintf("Removing %s since older than %d day",it.path().filename().c_str(),days_to_keep);
+                LogPrintf("Removing %s since older than %d day",it.path().filename().string(),days_to_keep);
                 fs::remove(it.path().filename());
             }
         }
