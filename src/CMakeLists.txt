@@ -144,6 +144,9 @@ else()
 endif()
 
 
+if (EXISTS	"${CMAKE_CURRENT_SOURCE_DIR}/config/bitcoin-config.h")
+  message(FATAL_ERROR ": Please delete ${CMAKE_CURRENT_SOURCE_DIR}/config/bitcoin-config.h before continuing")
+endif()
 
 
 # Create a target for OpenSSL
