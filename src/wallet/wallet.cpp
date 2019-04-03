@@ -2908,16 +2908,15 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
 
         // coin control: send change to custom address
 #ifdef HAVE_VARIANT
-        if (coinControl) {
+        {
           try {
-            std::get<CNoDestination>(coinControl->destChange);
-            scriptChange = GetScriptForDestination(coinControl->destChange);
+            std::get<CNoDestination>(coinControl.destChange);
+            scriptChange = GetScriptForDestination(coinControl.destChange);
           }
           catch (std::bad_variant_access&) { LogPrintf("bad variant access"); }
 #else
-          if (coinControl &&
-              !boost::get<CNoDestination>(&coinControl->destChange)) {
-            scriptChange = GetScriptForDestination(coinControl->destChange);
+          if (!boost::get<CNoDestination>(&coinControl.destChange)) {
+            scriptChange = GetScriptForDestination(coinControl.destChange);
 #endif
         } else {
             // no coin control: send change to newly generated address

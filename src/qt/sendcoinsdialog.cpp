@@ -716,7 +716,7 @@ void SendCoinsDialog::updateSmartFeeLabel() {
      //   ui->labelSmartFee2->show();
      //   ui->labelFeeEstimation->setText("");
     } else {
-        ui->labelSmartFee2->hide();
+        ui->labelSmartFee->hide();
         ui->labelFeeEstimation->setText(
             tr("Estimated to begin confirmation by next block."));
     }

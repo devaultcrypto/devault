@@ -277,18 +277,7 @@ WalletModel::sendCoins(WalletModelTransaction &transaction) {
 
         std::vector<std::pair<std::string, std::string>> vOrderForm;
         for (const SendCoinsRecipient &rcp : transaction.getRecipients()) {
-            if (rcp.paymentRequest.IsInitialized()) {
-                // Make sure any payment requests involved are still valid.
-                if (PaymentServer::verifyExpired(
-                        rcp.paymentRequest.getDetails())) {
-                    return PaymentRequestExpired;
-                }
-
-                // Store PaymentRequests in wtx.vOrderForm in wallet.
-                std::string value;
-                rcp.paymentRequest.SerializeToString(&value);
-                vOrderForm.emplace_back("PaymentRequest", std::move(value));
-            } else if (!rcp.message.isEmpty()) {
+          if (!rcp.message.isEmpty()) {
                 // Message from normal bitcoincash:URI
                 // (bitcoincash:123...?message=example)
                 vOrderForm.emplace_back("Message", rcp.message.toStdString());
