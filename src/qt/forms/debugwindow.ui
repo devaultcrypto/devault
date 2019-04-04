@@ -597,7 +597,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="debuglineEdit">
            <property name="placeholderText">
             <string/>
            </property>
