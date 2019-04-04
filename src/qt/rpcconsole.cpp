@@ -536,7 +536,7 @@ RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
         platformStyle->SingleColorIcon(":/icons/fontsmaller"));
 
     // Install event filter for up and down arrow
-    ui->lineEdit->installEventFilter(this);
+    ui->debuglineEdit->installEventFilter(this);
     ui->messagesWidget->installEventFilter(this);
 
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clear()));
@@ -590,20 +590,20 @@ bool RPCConsole::eventFilter(QObject *obj, QEvent *event) {
         Qt::KeyboardModifiers mod = keyevt->modifiers();
         switch (key) {
             case Qt::Key_Up:
-                if (obj == ui->lineEdit) {
+                if (obj == ui->debuglineEdit) {
                     browseHistory(-1);
                     return true;
                 }
                 break;
             case Qt::Key_Down:
-                if (obj == ui->lineEdit) {
+                if (obj == ui->debuglineEdit) {
                     browseHistory(1);
                     return true;
                 }
                 break;
             case Qt::Key_PageUp: /* pass paging keys to messages widget */
             case Qt::Key_PageDown:
-                if (obj == ui->lineEdit) {
+                if (obj == ui->debuglineEdit) {
                     QApplication::postEvent(ui->messagesWidget,
                                             new QKeyEvent(*keyevt));
                     return true;
@@ -611,9 +611,9 @@ bool RPCConsole::eventFilter(QObject *obj, QEvent *event) {
                 break;
             case Qt::Key_Return:
             case Qt::Key_Enter:
-                // forward these events to lineEdit
+                // forward these events to debuglineEdit
                 if (obj == autoCompleter->popup()) {
-                    QApplication::postEvent(ui->lineEdit,
+                    QApplication::postEvent(ui->debuglineEdit,
                                             new QKeyEvent(*keyevt));
                     return true;
                 }
@@ -627,8 +627,8 @@ bool RPCConsole::eventFilter(QObject *obj, QEvent *event) {
                       key != Qt::Key_Tab) ||
                      ((mod & Qt::ControlModifier) && key == Qt::Key_V) ||
                      ((mod & Qt::ShiftModifier) && key == Qt::Key_Insert))) {
-                    ui->lineEdit->setFocus();
-                    QApplication::postEvent(ui->lineEdit,
+                    ui->debuglineEdit->setFocus();
+                    QApplication::postEvent(ui->debuglineEdit,
                                             new QKeyEvent(*keyevt));
                     return true;
                 }
@@ -793,7 +793,7 @@ void RPCConsole::setClientModel(ClientModel *model) {
         wordList.sort();
         autoCompleter = new QCompleter(wordList, this);
         autoCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-        ui->lineEdit->setCompleter(autoCompleter);
+        ui->debuglineEdit->setCompleter(autoCompleter);
         autoCompleter->popup()->installEventFilter(this);
         // Start thread to execute RPC commands.
         startExecutor();
@@ -882,8 +882,8 @@ void RPCConsole::clear(bool clearHistory) {
         history.clear();
         historyPtr = 0;
     }
-    ui->lineEdit->clear();
-    ui->lineEdit->setFocus();
+    ui->debuglineEdit->clear();
+    ui->debuglineEdit->setFocus();
 
     // Add smoothly scaled icon images.
     // (when using width/height on an img, Qt uses nearest instead of linear
@@ -1010,7 +1010,7 @@ void RPCConsole::setMempoolSize(long numberOfTxs, size_t dynUsage) {
 }
 
 void RPCConsole::on_lineEdit_returnPressed() {
-    QString cmd = ui->lineEdit->text();
+    QString cmd = ui->debuglineEdit->text();
 
     if (!cmd.isEmpty()) {
         std::string strFilteredCmd;
@@ -1029,7 +1029,7 @@ void RPCConsole::on_lineEdit_returnPressed() {
             return;
         }
 
-        ui->lineEdit->clear();
+        ui->debuglineEdit->clear();
 
         cmdBeforeBrowsing = QString();
 
@@ -1077,7 +1077,7 @@ void RPCConsole::on_lineEdit_returnPressed() {
 void RPCConsole::browseHistory(int offset) {
     // store current text when start browsing through the history
     if (historyPtr == history.size()) {
-        cmdBeforeBrowsing = ui->lineEdit->text();
+        cmdBeforeBrowsing = ui->debuglineEdit->text();
     }
 
     historyPtr += offset;
@@ -1093,7 +1093,7 @@ void RPCConsole::browseHistory(int offset) {
     } else if (!cmdBeforeBrowsing.isNull()) {
         cmd = cmdBeforeBrowsing;
     }
-    ui->lineEdit->setText(cmd);
+    ui->debuglineEdit->setText(cmd);
 }
 
 void RPCConsole::startExecutor() {
@@ -1121,7 +1121,7 @@ void RPCConsole::startExecutor() {
 
 void RPCConsole::on_tabWidget_currentChanged(int index) {
     if (ui->tabWidget->widget(index) == ui->tab_console) {
-        ui->lineEdit->setFocus();
+        ui->debuglineEdit->setFocus();
     } else if (ui->tabWidget->widget(index) != ui->tab_peers) {
         clearSelectedNode();
     }
