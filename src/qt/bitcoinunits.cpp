@@ -15,7 +15,6 @@ QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits() {
     QList<BitcoinUnits::Unit> unitlist;
     unitlist.append(DVT);
     unitlist.append(mDVT);
-    unitlist.append(uDVT);
     return unitlist;
 }
 
@@ -23,7 +22,6 @@ bool BitcoinUnits::valid(int unit) {
     switch (unit) {
         case DVT:
         case mDVT:
-        case uDVT:
             return true;
         default:
             return false;
@@ -36,8 +34,6 @@ QString BitcoinUnits::name(int unit) {
             return QString("DVT");
         case mDVT:
             return QString("mDVT");
-        case uDVT:
-            return QString::fromUtf8("μDVT");
         default:
             return QString("???");
     }
@@ -49,9 +45,6 @@ QString BitcoinUnits::description(int unit) {
             return QString("DVTs");
         case mDVT:
             return QString("Milli-DVTs (1 / 1" THIN_SP_UTF8 "000)");
-        case uDVT:
-            return QString("Micro-DVTs (1 / 1" THIN_SP_UTF8
-                           "000" THIN_SP_UTF8 "000)");
         default:
             return QString("???");
     }
@@ -63,8 +56,6 @@ qint64 BitcoinUnits::factor(int unit) {
             return 100000000;
         case mDVT:
             return 100000;
-        case uDVT:
-            return 100;
         default:
             return 100000000;
     }
@@ -76,12 +67,28 @@ int BitcoinUnits::decimals(int unit) {
             return 8;
         case mDVT:
             return 5;
-        case uDVT:
-            return 2;
         default:
             return 0;
     }
 }
+
+int BitcoinUnits::display_decimals(int unit) {
+  switch (unit) {
+    case DVT:
+      return 3;
+    default:
+      return 0;
+  }
+}
+int BitcoinUnits::scale_decimals(int unit) {
+  switch (unit) {
+    case DVT:
+      return MIN_COIN;
+    default:
+      return COIN_PRECISION/(1000*MIN_COIN); // 1000 since mDVT
+  }
+}
+
 
 QString BitcoinUnits::format(int unit, const Amount nIn, bool fPlus,
                              SeparatorStyle separators) {
@@ -93,13 +100,18 @@ QString BitcoinUnits::format(int unit, const Amount nIn, bool fPlus,
     }
     qint64 n = qint64(nIn / SATOSHI);
     qint64 coin = factor(unit);
-    int num_decimals = decimals(unit);
     qint64 n_abs = (n > 0 ? n : -n);
     qint64 quotient = n_abs / coin;
     qint64 remainder = n_abs % coin;
+    // Now since we are using less decimal places
+    // divide the remainder to appropriate precision
+    remainder /= scale_decimals(unit);
+    // and use number of decimals specified here
+    int num_decimals = display_decimals(unit);
+    //
     QString quotient_str = QString::number(quotient);
     QString remainder_str =
-        QString::number(remainder).rightJustified(num_decimals, '0');
+        QString::number(remainder).rightJustified(num_decimals, '0', true);
 
     // Use SI-style thin space separators as these are locale independent and
     // can't be confused with the decimal marker.
@@ -149,6 +161,7 @@ bool BitcoinUnits::parse(int unit, const QString &value, Amount *val_out) {
         return false;
     }
     int num_decimals = decimals(unit);
+    int num_display_decimals = display_decimals(unit);
 
     // Ignore spaces and thin spaces when parsing
     QStringList parts = removeSpaces(value).split(".");
@@ -163,7 +176,7 @@ bool BitcoinUnits::parse(int unit, const QString &value, Amount *val_out) {
     if (parts.size() > 1) {
         decimals = parts[1];
     }
-    if (decimals.size() > num_decimals) {
+    if (decimals.size() > num_display_decimals) {
         // Exceeds max precision
         return false;
     }

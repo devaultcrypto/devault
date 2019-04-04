@@ -76,6 +76,9 @@ public:
     static qint64 factor(int unit);
     //! Number of decimals left
     static int decimals(int unit);
+    //! Decimals for GUI display
+    static int display_decimals(int unit);
+    static int scale_decimals(int unit);
     //! Format as string
     static QString format(int unit, const Amount amount, bool plussign = false,
                           SeparatorStyle separators = separatorStandard);

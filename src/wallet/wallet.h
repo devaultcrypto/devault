@@ -46,7 +46,7 @@ static const Amount DEFAULT_TRANSACTION_FEE = Amount::zero();
 //! -fallbackfee default
 static const Amount DEFAULT_FALLBACK_FEE(20000 * SATOSHI);
 //! minimum recommended increment for BIP 125 replacement txs
-static const Amount WALLET_INCREMENTAL_RELAY_FEE(5000 * SATOSHI);
+static const Amount WALLET_INCREMENTAL_RELAY_FEE(MINCOIN);
 //! target minimum change amount
 static const Amount MIN_CHANGE = CENT;
 //! final minimum change amount after paying for fees
