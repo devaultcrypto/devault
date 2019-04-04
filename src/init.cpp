@@ -406,7 +406,7 @@ std::string HelpMessage(HelpMessageMode mode) {
     strUsage += HelpMessageOpt(
                              "-keeplogfiles=<days>",
                              strprintf(
-                                       _("If specified, debug log file older than <days> days will be deleted where days must be 1 or more, otherwise log files older than 1 day will be deleted")));
+                                       _("If specified, debug log file older than <days> days will be deleted where days must be 1 or more, otherwise log files older than %d days will be deleted"), DEFAULT_DEBUGLOGFILE_KEEPDAYS));
 
     strUsage += HelpMessageOpt(
         "-maxorphantx=<n>", strprintf(_("Keep at most <n> unconnectable "

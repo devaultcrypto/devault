@@ -20,7 +20,9 @@ static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS = false;
 static const bool DEFAULT_LOGTIMESTAMPS = true;
 
+// For debug.log log files, used in init and logging.cpp
 static const std::string DEFAULT_DEBUGLOGFILE = "debug.log";
+static const uint32_t DEFAULT_DEBUGLOGFILE_KEEPDAYS = 7;
 
 extern bool fLogIPs;
 
