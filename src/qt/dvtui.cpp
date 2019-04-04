@@ -79,8 +79,10 @@ bool DVTUI::customThemeIsSet() {
             "{ background: " + s_hightlight_dark + "; border: 1px solid " + s_LBlue + "; border-left: none; border-right: none; border-top: none}"
 
 	    //Debug window
-            "#debuglineEdit "
-            "{ border: none; background: " + s_Dark + " }"
+            "#lineEdit "
+            "{ background: " + s_Dark + "; border: 1px solid " + s_LBlue + "}"
+            "#promptIcon "
+            "{ border: 1px solid " + s_LBlue + "}"
             
             //Table view
             "QHeaderView "
@@ -93,7 +95,7 @@ bool DVTUI::customThemeIsSet() {
             "{ border-right: none; border-bottom: none; }"                    
             
             "#payAmount > QAbstractSpinBox, #payAmount > QComboBox"
-            "{ min-height: 30px; font-size: 20px; color: " +  s_LBlue +"; font-weight: light;}"
+            "{ min-height: 27px; font-size: 18px; color: " +  s_LBlue +"; font-weight: light;}"
             
             //Progress Bar
             "QProgressBar "

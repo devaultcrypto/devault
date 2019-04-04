@@ -684,7 +684,6 @@ void CoinControlDialog::updateView() {
     // performance, otherwise updateLabels would be called for every checked
     // checkbox
     ui->treeWidget->setEnabled(false);
-    ui->treeWidget->setAlternatingRowColors(!treeMode);
     QFlags<Qt::ItemFlag> flgCheckbox =
         Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     QFlags<Qt::ItemFlag> flgTristate =

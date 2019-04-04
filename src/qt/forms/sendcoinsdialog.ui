@@ -1179,7 +1179,7 @@
     </layout>
    </item>
   <item>
-      <widget class="Line" name="lineb">
+      <widget class="Line" name="lineb1">
         <property name="orientation">
           <enum>Qt::Horizontal</enum>
         </property>
