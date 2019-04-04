@@ -14,6 +14,7 @@
 #include <type_traits>
 
 const int64_t MIN_COIN = 100000;
+const int64_t COIN_PRECISION = 100000000;
 
 constexpr int64_t QuantizeAmount(int64_t am) {
   if (am <= 0) return am; // Don't mess with -SATOSHI
