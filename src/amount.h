@@ -4,8 +4,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_AMOUNT_H
-#define BITCOIN_AMOUNT_H
+#pragma once
 
 #include "serialize.h"
 
@@ -14,18 +13,30 @@
 #include <string>
 #include <type_traits>
 
+const int64_t MIN_COIN = 100000;
+
+constexpr int64_t QuantizeAmount(int64_t am) {
+  if (am <= 0) return am; // Don't mess with -SATOSHI
+  if (am == 1) return am; // Also special case
+  int64_t residual = (am % MIN_COIN);
+  int64_t amount = (am - residual);
+  if (residual > 0) amount += MIN_COIN;
+  return amount;
+}
+
 struct Amount {
 private:
     int64_t amount;
-
-    explicit constexpr Amount(int64_t _amount) : amount(_amount) {}
+    explicit constexpr Amount(int64_t _amount) : amount(QuantizeAmount(_amount)) {}
+  
 
 public:
     constexpr Amount() : amount(0) {}
-    constexpr Amount(const Amount &_camount) : amount(_camount.amount) {}
+    constexpr Amount(const Amount &_camount) : amount(QuantizeAmount(_camount.amount)) {}
 
     static constexpr Amount zero() { return Amount(0); }
     static constexpr Amount satoshi() { return Amount(1); }
+    static constexpr Amount min_coin() { return Amount(MIN_COIN+1); }
 
     /**
      * Implement standard operators
@@ -141,7 +152,7 @@ public:
 };
 
 static constexpr Amount SATOSHI = Amount::satoshi();
-static constexpr Amount CASH = 100 * SATOSHI;
+static constexpr Amount MINCOIN = Amount::min_coin();
 static constexpr Amount COIN = 100000000 * SATOSHI;
 static constexpr Amount CENT = COIN / 100;
 
@@ -163,4 +174,3 @@ inline bool MoneyRange(const Amount nValue) {
     return nValue >= Amount::zero() && nValue <= MAX_MONEY;
 }
 
-#endif //  BITCOIN_AMOUNT_H
