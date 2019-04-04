@@ -13,7 +13,9 @@ This release includes the following features and fixes since forking from Bitcoi
  - Remove Base58 address support
  - Transition to BIP 32/39/44 HD Wallet support only
  - Boost cleanup
- -
+ - Each run of devaultd/devault-qt will create a new debug.log file and rename older files based on last accessed time
+   Use -keeplogfiles=<days> to specify how long to keep in days (default is 7)
+ - Change coin display precision and current network precision to 3 decimal points instead of 8
 
 Bitcoin-ABC 19.1 backports:
  
