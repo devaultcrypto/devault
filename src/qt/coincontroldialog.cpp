@@ -556,7 +556,7 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
         }
 
         // Fee
-        nPayFee = GetMinimumFee(nBytes, g_mempool);
+        nPayFee = GetMinimumFee(nBytes, g_mempool, *coinControl);
 
         if (nPayAmount > Amount::zero()) {
             nChange = nAmount - nPayAmount;

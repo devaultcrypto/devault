@@ -292,8 +292,6 @@ public:
     mutable Amount nAvailableWatchCreditCached;
     mutable Amount nChangeCached;
 
-    CWalletTx() { Init(nullptr); }
-
     CWalletTx(const CWallet *pwalletIn, CTransactionRef arg)
         : CMerkleTx(std::move(arg)) {
         Init(pwalletIn);
@@ -969,13 +967,11 @@ public:
      * CreateTransaction();
      */
     bool FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
-                         bool overrideEstimatedFeeRate,
-                         const CFeeRate &specificFeeRate, int &nChangePosInOut,
-                         std::string &strFailReason, bool includeWatching,
+                         int &nChangePosInOut, std::string &strFailReason,
                          bool lockUnspents,
                          const std::set<int> &setSubtractFeeFromOutputs,
-                         bool keepReserveKey = true,
-                         const CTxDestination &destChange = CNoDestination());
+                         CCoinControl coinControl, bool keepReserveKey = true);
+    bool SignTransaction(CMutableTransaction &tx);
 
     /**
      * Create a new transaction paying the recipients with a set of coins
@@ -984,20 +980,23 @@ public:
      * position
      */
     bool CreateTransaction(const std::vector<CRecipient> &vecSend,
-                           CWalletTx &wtxNew, CReserveKey &reservekey,
+                           CTransactionRef &tx, CReserveKey &reservekey,
                            Amount &nFeeRet, int &nChangePosInOut,
                            std::string &strFailReason,
-                           const CCoinControl *coinControl = nullptr,
-                           bool sign = true);
-    bool CommitTransaction(CWalletTx &wtxNew, CReserveKey &reservekey,
-                           CConnman *connman, CValidationState &state);
+                           const CCoinControl &coinControl, bool sign = true);
+    bool CommitTransaction(
+        CTransactionRef tx, mapValue_t mapValue,
+        std::vector<std::pair<std::string, std::string>> orderForm,
+        std::string fromAccount, CReserveKey &reservekey, CConnman *connman,
+        CValidationState &state);
 
     void ListAccountCreditDebit(const std::string &strAccount,
                                 std::list<CAccountingEntry> &entries);
     bool AddAccountingEntry(const CAccountingEntry &);
     bool AddAccountingEntry(const CAccountingEntry &, CWalletDB *pwalletdb);
     template <typename ContainerType>
-    bool DummySignTx(CMutableTransaction &txNew, const ContainerType &coins);
+    bool DummySignTx(CMutableTransaction &txNew,
+                     const ContainerType &coins) const;
 
     static CFeeRate fallbackFee;
 
@@ -1244,7 +1243,7 @@ public:
 // that each entry corresponds to each vIn, in order.
 template <typename ContainerType>
 bool CWallet::DummySignTx(CMutableTransaction &txNew,
-                          const ContainerType &coins) {
+                          const ContainerType &coins) const {
     // Fill in dummy signatures for fee calculation.
     int nIn = 0;
     for (const auto &coin : coins) {

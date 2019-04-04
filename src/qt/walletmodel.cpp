@@ -19,6 +19,7 @@
 #include "ui_interface.h"
 #include "util.h" // for GetBoolArg
 #include "validation.h"
+#include "wallet/coincontrol.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h" // for BackupWallet
 
@@ -177,7 +178,7 @@ bool WalletModel::validateAddress(const QString &address) {
 
 WalletModel::SendCoinsReturn
 WalletModel::prepareTransaction(WalletModelTransaction &transaction,
-                                const CCoinControl *coinControl) {
+                                const CCoinControl &coinControl) {
     Amount total = Amount::zero();
     bool fSubtractFeeFromAmount = false;
     QList<SendCoinsRecipient> recipients = transaction.getRecipients();
@@ -220,7 +221,7 @@ WalletModel::prepareTransaction(WalletModelTransaction &transaction,
         return DuplicateAddress;
     }
 
-    Amount nBalance = getBalance(coinControl);
+    Amount nBalance = getBalance(&coinControl);
 
     if (total > nBalance) {
         return AmountExceedsBalance;
@@ -235,9 +236,9 @@ WalletModel::prepareTransaction(WalletModelTransaction &transaction,
         int nChangePosRet = -1;
         std::string strFailReason;
 
-        CWalletTx *newTx = transaction.getTransaction();
+        CTransactionRef &newTx = transaction.getTransaction();
         CReserveKey *keyChange = transaction.getPossibleKeyChange();
-        bool fCreated = wallet->CreateTransaction(vecSend, *newTx, *keyChange,
+        bool fCreated = wallet->CreateTransaction(vecSend, newTx, *keyChange,
                                                   nFeeRequired, nChangePosRet,
                                                   strFailReason, coinControl);
         transaction.setTransactionFee(nFeeRequired);
@@ -273,28 +274,29 @@ WalletModel::sendCoins(WalletModelTransaction &transaction) {
 
     {
         LOCK2(cs_main, wallet->cs_wallet);
-        CWalletTx *newTx = transaction.getTransaction();
 
+        std::vector<std::pair<std::string, std::string>> vOrderForm;
         for (const SendCoinsRecipient &rcp : transaction.getRecipients()) {
           if (!rcp.message.isEmpty()) {
                 // Message from normal bitcoincash:URI
                 // (bitcoincash:123...?message=example)
-                newTx->vOrderForm.push_back(
-                    make_pair("Message", rcp.message.toStdString()));
-          }
+                vOrderForm.emplace_back("Message", rcp.message.toStdString());
+            }
         }
 
+        CTransactionRef &newTx = transaction.getTransaction();
         CReserveKey *keyChange = transaction.getPossibleKeyChange();
         CValidationState state;
-        if (!wallet->CommitTransaction(*newTx, *keyChange, g_connman.get(),
-                                       state)) {
+        if (!wallet->CommitTransaction(
+                newTx, {} /* mapValue */, std::move(vOrderForm),
+                {} /* fromAccount */, *keyChange, g_connman.get(), state)) {
             return SendCoinsReturn(
                 TransactionCommitFailed,
                 QString::fromStdString(state.GetRejectReason()));
         }
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
-        ssTx << *newTx->tx;
+        ssTx << newTx;
         transaction_array.append(&(ssTx[0]), ssTx.size());
     }
 
@@ -509,11 +511,11 @@ void WalletModel::getOutputs(const std::vector<COutPoint> &vOutpoints,
             continue;
         }
         int nDepth =
-            wallet->mapWallet[outpoint.GetTxId()].GetDepthInMainChain();
+            wallet->mapWallet.at(outpoint.GetTxId()).GetDepthInMainChain();
         if (nDepth < 0) {
             continue;
         }
-        COutput out(&wallet->mapWallet[outpoint.GetTxId()], outpoint.GetN(),
+        COutput out(&wallet->mapWallet.at(outpoint.GetTxId()), outpoint.GetN(),
                     nDepth, true /* spendable */, true /* solvable */,
                     true /* safe */);
         vOutputs.push_back(out);

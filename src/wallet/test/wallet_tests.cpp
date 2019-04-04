@@ -11,6 +11,7 @@
 #include "rpc/server.h"
 #include "test/test_bitcoin.h"
 #include "validation.h"
+#include "wallet/coincontrol.h"
 #include "wallet/rpcdump.h"
 #include "wallet/test/wallet_test_fixture.h"
 
@@ -724,25 +725,27 @@ public:
     }
 
     CWalletTx &AddTx(CRecipient recipient) {
-        CWalletTx wtx;
+        CTransactionRef tx;
         CReserveKey reservekey(wallet.get());
         Amount fee;
         int changePos = -1;
         std::string error;
-        BOOST_CHECK(wallet->CreateTransaction({recipient}, wtx, reservekey, fee,
-                                              changePos, error));
+        CCoinControl dummy;
+        BOOST_CHECK(wallet->CreateTransaction({recipient}, tx, reservekey, fee,
+                                              changePos, error, dummy));
         CValidationState state;
-        BOOST_CHECK(wallet->CommitTransaction(wtx, reservekey, nullptr, state));
+        BOOST_CHECK(wallet->CommitTransaction(tx, {}, {}, {}, reservekey,
+                                              nullptr, state));
         CMutableTransaction blocktx;
         {
             LOCK(wallet->cs_wallet);
             blocktx =
-                CMutableTransaction(*wallet->mapWallet.at(wtx.GetId()).tx);
+                CMutableTransaction(*wallet->mapWallet.at(tx->GetId()).tx);
         }
         CreateAndProcessBlock({CMutableTransaction(blocktx)},
                               GetScriptForRawPubKey(coinbaseKey.GetPubKey()));
         LOCK(wallet->cs_wallet);
-        auto it = wallet->mapWallet.find(wtx.GetId());
+        auto it = wallet->mapWallet.find(tx->GetId());
         BOOST_CHECK(it != wallet->mapWallet.end());
         it->second.SetMerkleBranch(chainActive.Tip(), 1);
         return it->second;

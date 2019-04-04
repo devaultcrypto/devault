@@ -424,9 +424,10 @@ static UniValue getaddressesbyaccount(const Config &config,
     return ret;
 }
 
-static void SendMoney(CWallet *const pwallet, const CTxDestination &address,
-                      Amount nValue, bool fSubtractFeeFromAmount,
-                      CWalletTx &wtxNew) {
+static CTransactionRef SendMoney(CWallet *const pwallet,
+                                 const CTxDestination &address, Amount nValue,
+                                 bool fSubtractFeeFromAmount,
+                                 mapValue_t mapValue, std::string fromAccount) {
     Amount curBalance = pwallet->GetBalance();
 
     // Check amount
@@ -456,8 +457,10 @@ static void SendMoney(CWallet *const pwallet, const CTxDestination &address,
     CRecipient recipient = {scriptPubKey, nValue, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
 
-    if (!pwallet->CreateTransaction(vecSend, wtxNew, reservekey, nFeeRequired,
-                                    nChangePosRet, strError)) {
+    CCoinControl coinControl;
+    CTransactionRef tx;
+    if (!pwallet->CreateTransaction(vecSend, tx, reservekey, nFeeRequired,
+                                    nChangePosRet, strError, coinControl)) {
         if (!fSubtractFeeFromAmount && nValue + nFeeRequired > curBalance) {
             strError = strprintf("Error: This transaction requires a "
                                  "transaction fee of at least %s",
@@ -466,13 +469,15 @@ static void SendMoney(CWallet *const pwallet, const CTxDestination &address,
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
     CValidationState state;
-    if (!pwallet->CommitTransaction(wtxNew, reservekey, g_connman.get(),
-                                    state)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */,
+                                    std::move(fromAccount), reservekey,
+                                    g_connman.get(), state)) {
         strError =
             strprintf("Error: The transaction was rejected! Reason given: %s",
                       state.GetRejectReason());
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
+    return tx;
 }
 
 static UniValue sendtoaddress(const Config &config,
@@ -547,14 +552,14 @@ static UniValue sendtoaddress(const Config &config,
     }
 
     // Wallet comments
-    CWalletTx wtx;
+    mapValue_t mapValue;
     if (request.params.size() > 2 && !request.params[2].isNull() &&
         !request.params[2].get_str().empty()) {
-        wtx.mapValue["comment"] = request.params[2].get_str();
+        mapValue["comment"] = request.params[2].get_str();
     }
     if (request.params.size() > 3 && !request.params[3].isNull() &&
         !request.params[3].get_str().empty()) {
-        wtx.mapValue["to"] = request.params[3].get_str();
+        mapValue["to"] = request.params[3].get_str();
     }
 
     bool fSubtractFeeFromAmount = false;
@@ -564,9 +569,10 @@ static UniValue sendtoaddress(const Config &config,
 
     EnsureWalletIsUnlocked(pwallet);
 
-    SendMoney(pwallet, dest, nAmount, fSubtractFeeFromAmount, wtx);
-
-    return wtx.GetId().GetHex();
+    CTransactionRef tx =
+        SendMoney(pwallet, dest, nAmount, fSubtractFeeFromAmount,
+                  std::move(mapValue), {} /* fromAccount */);
+    return tx->GetId().GetHex();
 }
 
 static UniValue listaddressgroupings(const Config &config,
@@ -1140,16 +1146,15 @@ static UniValue sendfrom(const Config &config, const JSONRPCRequest &request) {
         nMinDepth = request.params[3].get_int();
     }
 
-    CWalletTx wtx;
-    wtx.strFromAccount = label;
+    mapValue_t mapValue;
     if (request.params.size() > 4 && !request.params[4].isNull() &&
         !request.params[4].get_str().empty()) {
-        wtx.mapValue["comment"] = request.params[4].get_str();
+        mapValue["comment"] = request.params[4].get_str();
     }
 
     if (request.params.size() > 5 && !request.params[5].isNull() &&
         !request.params[5].get_str().empty()) {
-        wtx.mapValue["to"] = request.params[5].get_str();
+        mapValue["to"] = request.params[5].get_str();
     }
 
     EnsureWalletIsUnlocked(pwallet);
@@ -1162,9 +1167,9 @@ static UniValue sendfrom(const Config &config, const JSONRPCRequest &request) {
                            "Account has insufficient funds");
     }
 
-    SendMoney(pwallet, dest, nAmount, false, wtx);
-
-    return wtx.GetId().GetHex();
+    CTransactionRef tx = SendMoney(pwallet, dest, nAmount, false,
+                                   std::move(mapValue), std::move(label));
+    return tx->GetId().GetHex();
 }
 
 static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
@@ -1267,11 +1272,10 @@ static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
         nMinDepth = request.params[2].get_int();
     }
 
-    CWalletTx wtx;
-    wtx.strFromAccount = strAccount;
+    mapValue_t mapValue;
     if (request.params.size() > 3 && !request.params[3].isNull() &&
         !request.params[3].get_str().empty()) {
-        wtx.mapValue["comment"] = request.params[3].get_str();
+        mapValue["comment"] = request.params[3].get_str();
     }
 
     UniValue subtractFeeFromAmount(UniValue::VARR);
@@ -1333,19 +1337,24 @@ static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
     Amount nFeeRequired = Amount::zero();
     int nChangePosRet = -1;
     std::string strFailReason;
-    bool fCreated = pwallet->CreateTransaction(
-        vecSend, wtx, keyChange, nFeeRequired, nChangePosRet, strFailReason);
+    CTransactionRef tx;
+    CCoinControl coinControl;
+    bool fCreated =
+        pwallet->CreateTransaction(vecSend, tx, keyChange, nFeeRequired,
+                                   nChangePosRet, strFailReason, coinControl);
     if (!fCreated) {
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, strFailReason);
     }
     CValidationState state;
-    if (!pwallet->CommitTransaction(wtx, keyChange, g_connman.get(), state)) {
+    if (!pwallet->CommitTransaction(tx, std::move(mapValue), {} /* orderForm */,
+                                    std::move(strAccount), keyChange,
+                                    g_connman.get(), state)) {
         strFailReason = strprintf("Transaction commit failed:: %s",
                                   state.GetRejectReason());
         throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
     }
 
-    return wtx.GetId().GetHex();
+    return tx->GetId().GetHex();
 }
 
 static UniValue addmultisigaddress(const Config &config,
@@ -2361,7 +2370,7 @@ static UniValue gettransaction(const Config &config,
                            "Invalid or non-wallet transaction id");
     }
 
-    const CWalletTx &wtx = pwallet->mapWallet[txid];
+    const CWalletTx &wtx = pwallet->mapWallet.at(txid);
 
     Amount nCredit = wtx.GetCredit(filter);
     Amount nDebit = wtx.GetDebit(filter);
@@ -3420,20 +3429,17 @@ static UniValue fundrawtransaction(const Config &config,
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    CTxDestination changeAddress = CNoDestination();
+    CCoinControl coinControl;
     int changePosition = -1;
-    bool includeWatching = false;
     bool lockUnspents = false;
     bool reserveChangeKey = true;
-    CFeeRate feeRate = CFeeRate(Amount::zero());
-    bool overrideEstimatedFeerate = false;
     UniValue subtractFeeFromOutputs;
     std::set<int> setSubtractFeeFromOutputs;
 
     if (request.params.size() > 1) {
         if (request.params[1].type() == UniValue::VBOOL) {
             // backward compatibility bool only fallback
-            includeWatching = request.params[1].get_bool();
+            coinControl.fAllowWatchOnly = request.params[1].get_bool();
         } else {
             RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VOBJ});
 
@@ -3464,7 +3470,7 @@ static UniValue fundrawtransaction(const Config &config,
                         "changeAddress must be a valid devault address");
                 }
 
-                changeAddress = dest;
+                coinControl.destChange = dest;
             }
 
             if (options.exists("changePosition")) {
@@ -3472,7 +3478,8 @@ static UniValue fundrawtransaction(const Config &config,
             }
 
             if (options.exists("includeWatching")) {
-                includeWatching = options["includeWatching"].get_bool();
+                coinControl.fAllowWatchOnly =
+                    options["includeWatching"].get_bool();
             }
 
             if (options.exists("lockUnspents")) {
@@ -3484,8 +3491,9 @@ static UniValue fundrawtransaction(const Config &config,
             }
 
             if (options.exists("feeRate")) {
-                feeRate = CFeeRate(AmountFromValue(options["feeRate"]));
-                overrideEstimatedFeerate = true;
+                coinControl.m_feerate =
+                    CFeeRate(AmountFromValue(options["feeRate"]));
+                coinControl.fOverrideFeeRate = true;
             }
 
             if (options.exists("subtractFeeFromOutputs")) {
@@ -3535,10 +3543,9 @@ static UniValue fundrawtransaction(const Config &config,
     Amount nFeeOut;
     std::string strFailReason;
 
-    if (!pwallet->FundTransaction(
-            tx, nFeeOut, overrideEstimatedFeerate, feeRate, changePosition,
-            strFailReason, includeWatching, lockUnspents,
-            setSubtractFeeFromOutputs, reserveChangeKey, changeAddress)) {
+    if (!pwallet->FundTransaction(tx, nFeeOut, changePosition, strFailReason,
+                                  lockUnspents, setSubtractFeeFromOutputs,
+                                  coinControl, reserveChangeKey)) {
         throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
     }
 
