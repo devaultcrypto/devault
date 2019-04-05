@@ -1,10 +1,8 @@
 <!--- Remove sections that do not apply -->
 
-This issue tracker is only for technical issues related to bitcoin-abc.
+This issue tracker is only for technical issues related to DeVault.
 
-General bitcoin questions and/or support requests and are best directed to the [Bitcoin StackExchange](https://bitcoin.stackexchange.com).
-
-For reporting security issues, please contact people privately.
+For reporting security issues, please see [Disclosure Policy](https://github.com/devaultcrypto/devault/blob/master/DISCLOSURE_POLICY.md).
 
 ### Describe the issue
 
