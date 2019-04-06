@@ -3530,12 +3530,10 @@ static bool ContextualCheckBlockHeader(const Config &config,
                                        const CBlockIndex *pindexPrev,
                                        int64_t nAdjustedTime) {
     //const Consensus::Params &consensusParams = config.GetChainParams().GetConsensus();
-    //const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
     assert(pindexPrev != nullptr);
+    const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, config)) {
         LogPrintf("bad bits after height: %d\n", pindexPrev->nHeight);
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false,
