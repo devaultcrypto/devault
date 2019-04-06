@@ -139,6 +139,6 @@ DisconnectResult UndoCoinSpend(const Coin &undo, CCoinsViewCache &view,
  */
 DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                                 const CBlock &block, const CBlockIndex *pindex,
-                                CCoinsViewCache &coins);
+                                CCoinsViewCache &coins, bool ignoreAddressIndex = false);
 
 #endif // BITCOIN_UNDO_H

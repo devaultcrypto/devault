@@ -52,6 +52,17 @@ static const CRPCConvertParam vRPCConvertParams[] = {
     {"getbalance", 1, "minconf"},
     {"getbalance", 2, "include_watchonly"},
     {"getblockhash", 0, "height"},
+    {"getaddressbalance", 1, "address"},
+#ifdef EXTRA_INDEXES    
+    {"getblockhashes", 0 , "high"},
+    {"getblockhashes", 1, "low"},
+    {"getblockhashes", 2, "options" },
+    {"getspentinfo", 0, "txid_index"},
+    {"getaddresstxids", 0, "addresses"},
+    {"getaddressdeltas", 0, "addresses"},
+    {"getaddressutxos", 0, "addresses"},
+    {"getaddressmempool", 0, "addresses"},
+#endif    
     {"waitforblockheight", 0, "height"},
     {"waitforblockheight", 1, "timeout"},
     {"waitforblock", 1, "timeout"},

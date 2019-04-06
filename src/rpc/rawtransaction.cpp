@@ -36,14 +36,59 @@
 
 #include <univalue.h>
 
-void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
-              UniValue &entry) {
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, bool expanded = false) {
     // Call into TxToUniv() in bitcoin-common to decode the transaction hex.
     //
     // Blockchain contextual information (confirmations and blocktime) is not
     // available to code in bitcoin-common, so we query them here and push the
     // data into the returned UniValue.
     TxToUniv(tx, uint256(), entry);
+    if (expanded) {
+        uint256 txid = tx.GetHash();
+        if (!(tx.IsCoinBase())) {
+            const UniValue& oldVin = entry["vin"];
+            UniValue newVin(UniValue::VARR);
+            for (unsigned int i = 0; i < tx.vin.size(); i++) {
+                const CTxIn& txin = tx.vin[i];
+                UniValue in = oldVin[i];
+
+                 // Add address and value info if spentindex enabled
+                CSpentIndexValue spentInfo;
+                CSpentIndexKey spentKey(txin.prevout.GetTxId(), txin.prevout.GetN());
+                if (GetSpentIndex(spentKey, spentInfo)) {
+                    in.pushKV("value", ValueFromAmount(spentInfo.satoshis));
+                    //in.pushKV("valueSat", ValueFromAmount(spentInfo.satoshis));
+                    if (spentInfo.addressType == 1) {
+                        in.pushKV("address", EncodeCashAddr(CKeyID(spentInfo.addressHash),Params()));
+                    } else if (spentInfo.addressType == 2) {
+                        in.pushKV("address", EncodeCashAddr(CScriptID(spentInfo.addressHash), Params()));
+                    }
+                }
+                newVin.push_back(in);
+            }
+            entry.pushKV("vin", newVin);
+        }
+
+         const UniValue& oldVout = entry["vout"];
+        UniValue newVout(UniValue::VARR);
+        for (unsigned int i = 0; i < tx.vout.size(); i++) {
+            const CTxOut& txout = tx.vout[i];
+            UniValue out = oldVout[i];
+
+             // Add spent information if spentindex is enabled
+            CSpentIndexValue spentInfo;
+            CSpentIndexKey spentKey(txid, i);
+            if (GetSpentIndex(spentKey, spentInfo)) {
+                out.pushKV("spentTxId", spentInfo.txid.GetHex());
+                out.pushKV("spentIndex", (int)spentInfo.inputIndex);
+                out.pushKV("spentHeight", spentInfo.blockHeight);
+            }
+
+            out.pushKV("valueSat", ValueFromAmount(txout.nValue));
+            newVout.push_back(out);
+        }
+        entry.pushKV("vout", newVout);
+    }
 
     if (!hashBlock.IsNull()) {
         entry.pushKV("blockhash", hashBlock.GetHex());
@@ -51,11 +96,13 @@ void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
         if (mi != mapBlockIndex.end() && (*mi).second) {
             CBlockIndex *pindex = (*mi).second;
             if (chainActive.Contains(pindex)) {
+                entry.pushKV("height", pindex->nHeight);
                 entry.pushKV("confirmations",
                              1 + chainActive.Height() - pindex->nHeight);
                 entry.pushKV("time", pindex->GetBlockTime());
                 entry.pushKV("blocktime", pindex->GetBlockTime());
             } else {
+                entry.pushKV("height", -1);
                 entry.pushKV("confirmations", 0);
             }
         }
@@ -189,7 +236,7 @@ static UniValue getrawtransaction(const Config &config,
 
     UniValue result(UniValue::VOBJ);
     result.pushKV("hex", strHex);
-    TxToJSON(*tx, hashBlock, result);
+    TxToJSON(*tx, hashBlock, result, true);
     return result;
 }
 

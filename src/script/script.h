@@ -631,6 +631,7 @@ public:
      */
     uint32_t GetSigOpCount(uint32_t flags, const CScript &scriptSig) const;
 
+    bool IsPayToPublicKeyHash() const;
     bool IsPayToScriptHash() const;
     bool IsCommitment(const std::vector<uint8_t> &data) const;
     bool IsWitnessProgram(int &version, std::vector<uint8_t> &program) const;
