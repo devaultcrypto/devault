@@ -55,21 +55,25 @@ void WaitForShutdown() {
 }
 
 void getPassphrase(SecureString& walletPassphrase) {
-  std::cout << "Enter a Wallet Encryption password\n";
+  std::cout << "Enter a Wallet Encryption password (upto 80 characters long)\n";
   SecureString pass1;
   SecureString pass2;
+  int char_count=0; // This is used to handle Ctrl-C which would create
+  // an infinite loop and crash below otherwise
   char c='0';
   do {
     while (c != '\n') {
       std::cin.get(c);
-      std::cout << "*" << std::flush;
+      char_count++;
+      if (char_count++ > 80) exit(0);
       if (c != '\n') pass1.push_back(c);
     }
     c = '0';
+    char_count = 0;
     std::cout << "Confirm password\n";
     while (c != '\n') {
       std::cin.get(c);
-      std::cout << "*" << std::flush;
+      if (char_count++ > 80) exit(0);
       if (c != '\n') pass2.push_back(c);
     }
   } while (pass1 != pass2);
