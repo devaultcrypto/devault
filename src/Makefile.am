@@ -487,7 +487,6 @@ libdevault_seeder_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libdevault_seeder_a_SOURCES = \
   seeder/bitcoin.cpp \
   seeder/bitcoin.h \
-  seeder/compat.h \
   seeder/db.cpp \
   seeder/db.h \
   seeder/dns.cpp \
