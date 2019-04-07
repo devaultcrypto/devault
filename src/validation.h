@@ -13,6 +13,7 @@
 
 #include "amount.h"
 #include "blockfileinfo.h"
+#include "chain.h"
 #include "coins.h"
 #include "consensus/consensus.h"
 #include "diskblockpos.h"
@@ -20,7 +21,6 @@
 #include "protocol.h" // For CMessageHeader::MessageMagic
 #include "script/script_error.h"
 #include "sync.h"
-#include "versionbits.h"
 
 #include <algorithm>
 #include <atomic>
@@ -698,8 +698,6 @@ extern std::unique_ptr<CBudget> pbudget;
  * This is also true for mempool checks.
  */
 int GetSpendHeight(const CCoinsViewCache &inputs);
-
-extern VersionBitsCache versionbitscache;
 
 /**
  * Determine what nVersion a new block should use.

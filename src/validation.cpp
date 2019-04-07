@@ -86,6 +86,15 @@ size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 
+/** What block version to use for new blocks (pre versionbits) */
+static const int32_t VERSIONBITS_LAST_OLD_BLOCK_VERSION = 4;
+/** What bits to set in version for versionbits blocks */
+static const int32_t VERSIONBITS_TOP_BITS = 0x20000000UL;
+/** What bitmask determines whether versionbits is in use */
+// static const int32_t VERSIONBITS_TOP_MASK = 0xE0000000UL;
+/** Total bits available for versionbits */
+//static const int32_t VERSIONBITS_NUM_BITS = 29;
+
 uint256 hashAssumeValid;
 arith_uint256 nMinimumChainWork;
 
@@ -1542,9 +1551,6 @@ void ThreadScriptCheck() {
     RenameThread("bitcoin-scriptch");
     scriptcheckqueue.Thread();
 }
-
-// Protected by cs_main
-VersionBitsCache versionbitscache;
 
 int32_t ComputeBlockVersion(const CBlockIndex *pindexPrev,
                             const Consensus::Params &params) {
@@ -4831,7 +4837,6 @@ void UnloadBlockIndex() {
     nBlockSequenceId = 1;
     setDirtyBlockIndex.clear();
     setDirtyFileInfo.clear();
-    versionbitscache.Clear();
 
     for (BlockMap::value_type &entry : mapBlockIndex) {
         delete entry.second;
