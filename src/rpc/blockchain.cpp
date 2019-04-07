@@ -1240,18 +1240,6 @@ UniValue getblockchaininfo(const Config &config,
             "to pruning\n"
             "  \"pruneheight\": xxxxxx,    (numeric) lowest-height complete "
             "block stored\n"
-            "  \"softforks\": [            (array) status of softforks in "
-            "progress\n"
-            "     {\n"
-            "        \"id\": \"xxxx\",        (string) name of softfork\n"
-            "        \"version\": xx,         (numeric) block version\n"
-            "        \"reject\": {            (object) progress toward "
-            "rejecting pre-softfork blocks\n"
-            "           \"status\": xx,       (boolean) true if threshold "
-            "reached\n"
-            "        },\n"
-            "     }, ...\n"
-            "  ]\n"
             "}\n"
             "\nExamples:\n" +
             HelpExampleCli("getblockchaininfo", "") +
@@ -1272,13 +1260,6 @@ UniValue getblockchaininfo(const Config &config,
                                          chainActive.Tip()));
     obj.pushKV("chainwork", chainActive.Tip()->nChainWork.GetHex());
     obj.pushKV("pruned", fPruneMode);
-
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
-    CBlockIndex *tip = chainActive.Tip();
-    UniValue softforks(UniValue::VARR);
-    softforks.push_back(SoftForkDesc("csv", 5, tip, consensusParams));
-    obj.pushKV("softforks", softforks);
 
     if (fPruneMode) {
         CBlockIndex *block = chainActive.Tip();
