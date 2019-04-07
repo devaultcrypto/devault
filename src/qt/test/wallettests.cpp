@@ -58,7 +58,7 @@ uint256 SendCoins(CWallet &wallet, SendCoinsDialog &sendCoinsDialog,
         QString::fromStdString(EncodeDestination(address)));
     entry->findChild<BitcoinAmountField *>("payAmount")->setValue(amount);
     uint256 txid;
-    boost::signals2::scoped_connection c =
+    sigs::scoped_connection c =
         wallet.NotifyTransactionChanged.connect(
             [&txid](CWallet *, const uint256 &hash, ChangeType status) {
                 if (status == CT_NEW) {

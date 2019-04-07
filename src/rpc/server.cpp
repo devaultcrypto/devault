@@ -14,16 +14,16 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "signals-cpp/signals.h"
 
 #include <univalue.h>
 
 #include <boost/algorithm/string/case_conv.hpp> // for to_upper()
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/bind.hpp>
-#include <boost/signals2/signal.hpp>
 
 #include <memory> // for unique_ptr
+#include <functional> // for bind
 #include <set>
 #include <unordered_map>
 
@@ -74,9 +74,9 @@ void RPCServer::RegisterCommand(std::unique_ptr<RPCCommand> command) {
 }
 
 static struct CRPCSignals {
-    boost::signals2::signal<void()> Started;
-    boost::signals2::signal<void()> Stopped;
-    boost::signals2::signal<void(const ContextFreeRPCCommand &)> PreCommand;
+    sigs::signal<void()> Started;
+    sigs::signal<void()> Stopped;
+    sigs::signal<void(const ContextFreeRPCCommand &)> PreCommand;
 } g_rpcSignals;
 
 void RPCServerSignals::OnStarted(std::function<void()> slot) {
@@ -390,7 +390,7 @@ bool CRPCTable::appendCommand(const std::string &name,
 bool StartRPC() {
     LogPrint(BCLog::RPC, "Starting RPC\n");
     fRPCRunning = true;
-    g_rpcSignals.Started();
+    g_rpcSignals.Started.fire();
     return true;
 }
 
@@ -404,7 +404,7 @@ void StopRPC() {
     LogPrint(BCLog::RPC, "Stopping RPC\n");
     deadlineTimers.clear();
     DeleteAuthCookie();
-    g_rpcSignals.Stopped();
+    g_rpcSignals.Stopped.fire();
 }
 
 bool IsRPCRunning() {
@@ -537,7 +537,7 @@ UniValue CRPCTable::execute(Config &config,
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found");
     }
 
-    g_rpcSignals.PreCommand(*pcmd);
+    g_rpcSignals.PreCommand.fire(*pcmd);
 
     try {
         // Execute, convert arguments to array if necessary
@@ -558,7 +558,7 @@ std::vector<std::string> CRPCTable::listCommands() const {
 
     std::transform(mapCommands.begin(), mapCommands.end(),
                    std::back_inserter(commandList),
-                   boost::bind(&commandMap::value_type::first, _1));
+                   std::bind(&commandMap::value_type::first, std::placeholders::_1));
     return commandList;
 }
 

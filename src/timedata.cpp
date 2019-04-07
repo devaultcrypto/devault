@@ -100,8 +100,9 @@ void AddTimeData(const CNetAddr &ip, int64_t nOffsetSample) {
                                     "wrong, %s will not work properly."),
                                   _(PACKAGE_NAME));
                     SetMiscWarning(strMessage);
-                    uiInterface.ThreadSafeMessageBox(
-                        strMessage, "", CClientUIInterface::MSG_WARNING);
+                    bool fRet;
+                    uiInterface.ThreadSafeMessageBox.fire(
+                                                          strMessage, "", CClientUIInterface::MSG_WARNING, &fRet);
                 }
             }
         }

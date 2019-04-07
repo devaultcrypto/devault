@@ -18,6 +18,7 @@
 #include "wallet/crypter.h"
 #include "wallet/rpcwallet.h"
 #include "wallet/walletdb.h"
+#include "signals-cpp/signals.h"
 
 #include <boost/thread.hpp>
 
@@ -1105,7 +1106,7 @@ public:
      * Address book entry changed.
      * @note called with lock cs_wallet held.
      */
-    boost::signals2::signal<void(CWallet *wallet, const CTxDestination &address,
+    sigs::signal<void(CWallet *wallet, const CTxDestination &address,
                                  const std::string &label, bool isMine,
                                  const std::string &purpose, ChangeType status)>
         NotifyAddressBookChanged;
@@ -1114,16 +1115,16 @@ public:
      * Wallet transaction added, removed or updated.
      * @note called with lock cs_wallet held.
      */
-    boost::signals2::signal<void(CWallet *wallet, const TxId &txid,
+    sigs::signal<void(CWallet *wallet, const TxId &txid,
                                  ChangeType status)>
         NotifyTransactionChanged;
 
     /** Show progress e.g. for rescan */
-    boost::signals2::signal<void(const std::string &title, int nProgress)>
+    sigs::signal<void(const std::string &title, int nProgress)>
         ShowProgress;
 
     /** Watch-only address added */
-    boost::signals2::signal<void(bool fHaveWatchOnly)> NotifyWatchonlyChanged;
+    sigs::signal<void(bool fHaveWatchOnly)> NotifyWatchonlyChanged;
 
     /** Inquire whether this wallet broadcasts transactions. */
     bool GetBroadcastTransactions() const { return fBroadcastTransactions; }

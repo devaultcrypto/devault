@@ -168,13 +168,14 @@ static bool InitHTTPAllowList() {
         CSubNet subnet;
         LookupSubNet(strAllow.c_str(), subnet);
         if (!subnet.IsValid()) {
-            uiInterface.ThreadSafeMessageBox(
+            bool fRet;
+            uiInterface.ThreadSafeMessageBox.fire(
                 strprintf("Invalid -rpcallowip subnet specification: %s. "
                           "Valid are a single IP (e.g. 1.2.3.4), a "
                           "network/netmask (e.g. 1.2.3.4/255.255.255.0) or a "
                           "network/CIDR (e.g. 1.2.3.4/24).",
                           strAllow),
-                "", CClientUIInterface::MSG_ERROR);
+                "", CClientUIInterface::MSG_ERROR, &fRet);
             return false;
         }
         rpc_allow_subnets.push_back(subnet);
@@ -365,9 +366,10 @@ bool InitHTTPServer(Config &config) {
     if (!InitHTTPAllowList()) return false;
 
     if (gArgs.GetBoolArg("-rpcssl", false)) {
-        uiInterface.ThreadSafeMessageBox(
+        bool fRet;
+        uiInterface.ThreadSafeMessageBox.fire(
             "SSL mode for RPC (-rpcssl) is no longer supported.", "",
-            CClientUIInterface::MSG_ERROR);
+            CClientUIInterface::MSG_ERROR, &fRet);
         return false;
     }
 

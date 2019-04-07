@@ -30,7 +30,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/signals2/signal.hpp>
+#include "signals-cpp/signals.h"
+//#include <boost/optional.hpp>
 #include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
 
 // Application startup time (used for uptime calculation)
@@ -40,7 +41,7 @@ int64_t GetStartupTime();
 class CTranslationInterface {
 public:
     /** Translate a message to the native language of the user. */
-    boost::signals2::signal<std::string(const char *psz)> Translate;
+  sigs::signal<void(const char *psz, std::string& s)> Translate;
 };
 
 extern CTranslationInterface translationInterface;
@@ -54,8 +55,9 @@ extern const char *const BITCOIN_PID_FILENAME;
  * returned, and simply return the input.
  */
 inline std::string _(const char *psz) {
-    boost::optional<std::string> rv = translationInterface.Translate(psz);
-    return rv ? (*rv) : psz;
+  std::string rv = "";
+  translationInterface.Translate.fire(psz, rv);
+  return (rv != "") ? rv : psz;
 }
 
 void SetupEnvironment();

@@ -156,9 +156,10 @@ public:
         try {
             return CCoinsViewBacked::GetCoin(outpoint, coin);
         } catch (const std::runtime_error &e) {
-            uiInterface.ThreadSafeMessageBox(
+            bool fRet;
+            uiInterface.ThreadSafeMessageBox.fire(
                 _("Error reading from database, shutting down."), "",
-                CClientUIInterface::MSG_ERROR);
+                CClientUIInterface::MSG_ERROR, &fRet);
             LogPrintf("Error reading from database: %s\n", e.what());
             // Starting the shutdown sequence and returning false to the caller
             // would be interpreted as 'entry not found' (as opposed to unable
@@ -309,7 +310,7 @@ void OnRPCStarted() {
 }
 
 void OnRPCStopped() {
-    uiInterface.NotifyBlockTip.disconnect(&RPCNotifyBlockChange);
+    uiInterface.NotifyBlockTip.disconnect_all(true);
     RPCNotifyBlockChange(false, nullptr);
     g_best_block_cv.notify_all();
     LogPrint(BCLog::RPC, "RPC stopped.\n");
@@ -2064,7 +2065,7 @@ bool AppInitMain(Config &config,
         std::string strLoadError;
 
         
-        uiInterface.InitMessage(_("Loading block index..."));
+        uiInterface.InitMessage.fire(_("Loading block index..."));
 
         nStart = GetTimeMillis();
         do {
@@ -2192,7 +2193,7 @@ bool AppInitMain(Config &config,
                     // to -reindex-chainstate. It both disconnects blocks based
                     // on chainActive, and drops block data in mapBlockIndex
                     // based on lack of available witness data.
-                    uiInterface.InitMessage(_("Rewinding blocks..."));
+                    uiInterface.InitMessage.fire(_("Rewinding blocks..."));
                     if (!RewindBlockIndex(config)) {
                         strLoadError = _("Unable to rewind the database to a "
                                          "pre-fork state. You will need to "
@@ -2202,7 +2203,7 @@ bool AppInitMain(Config &config,
                 }
 
                 if (!fReindex && !fReindexChainState) {
-                    uiInterface.InitMessage(_("Verifying blocks..."));
+                    uiInterface.InitMessage.fire(_("Verifying blocks..."));
                     if (fHavePruned &&
                         gArgs.GetArg("-checkblocks", DEFAULT_CHECKBLOCKS) >
                             MIN_BLOCKS_TO_KEEP) {
@@ -2250,14 +2251,15 @@ bool AppInitMain(Config &config,
         if (!fLoaded && !fRequestShutdown) {
             // first suggest a reindex
             if (!fReset) {
-                bool fRet = uiInterface.ThreadSafeQuestion(
-                    strLoadError + ".\n\n" +
-                        _("Do you want to rebuild the block database now?"),
-                    strLoadError + ".\nPlease restart with -reindex or "
-                                   "-reindex-chainstate to recover.",
-                    "",
-                    CClientUIInterface::MSG_ERROR |
-                        CClientUIInterface::BTN_ABORT);
+                bool fRet;
+                uiInterface.ThreadSafeQuestion.fire(
+                                                    strLoadError + ".\n\n" +
+                                                    _("Do you want to rebuild the block database now?"),
+                                                    strLoadError + ".\nPlease restart with -reindex or "
+                                                    "-reindex-chainstate to recover.",
+                                                    "",
+                                                    CClientUIInterface::MSG_ERROR |
+                                                    CClientUIInterface::BTN_ABORT, &fRet);
                 if (fRet) {
                     fReindex = true;
                     fRequestShutdown = false;
@@ -2295,7 +2297,7 @@ bool AppInitMain(Config &config,
         LogPrintf("Unsetting NODE_NETWORK on prune mode\n");
         nLocalServices = ServiceFlags(nLocalServices & ~NODE_NETWORK);
         if (!fReindex) {
-            uiInterface.InitMessage(_("Pruning blockstore..."));
+            uiInterface.InitMessage.fire(_("Pruning blockstore..."));
             PruneAndFlush();
         }
     }
@@ -2335,7 +2337,7 @@ bool AppInitMain(Config &config,
         while (!fHaveGenesis && !ShutdownRequested()) {
             condvar_GenesisWait.wait_for(lock, std::chrono::milliseconds(500));
         }
-        uiInterface.NotifyBlockTip.disconnect(BlockNotifyGenesisWait);
+        uiInterface.NotifyBlockTip.disconnect_all(true);
     }
 
     // Step 11: start node
@@ -2432,7 +2434,7 @@ bool AppInitMain(Config &config,
     // Step 12: finished
 
     SetRPCWarmupFinished();
-    uiInterface.InitMessage(_("Done loading"));
+    uiInterface.InitMessage.fire(_("Done loading"));
 
     g_wallet_init_interface->Start(scheduler);
 

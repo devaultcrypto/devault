@@ -18,7 +18,7 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index_container.hpp>
 
-#include <boost/signals2/signal.hpp>
+#include "signals-cpp/signal.h"
 
 #include <map>
 #include <memory>
@@ -747,8 +747,8 @@ public:
 
     size_t DynamicMemoryUsage() const;
 
-    boost::signals2::signal<void(CTransactionRef)> NotifyEntryAdded;
-    boost::signals2::signal<void(CTransactionRef, MemPoolRemovalReason)>
+    sigs::signal<void(CTransactionRef)> NotifyEntryAdded;
+    sigs::signal<void(CTransactionRef, MemPoolRemovalReason)>
         NotifyEntryRemoved;
 
 private:
