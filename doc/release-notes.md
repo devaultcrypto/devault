@@ -42,3 +42,6 @@ Bitcoin-ABC 19.x backports:
  - `signrawtransaction` RPC is now deprecated. The new RPCs 
    `signrawtransactionwithkey` and `signrawtransactionwithwallet` should 
    be used instead.
+ - Added to `getblockchaininfo` `size_on_disk` and, when the prune option is enabled, `prune_height`, `automatic_pruning`, and `prune_target_size`.
+    - The help message also reflects this.
+ - Remove `depends` from transaction objects provided by `getblocktemplate`.
