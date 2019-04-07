@@ -1271,6 +1271,13 @@ UniValue getblockchaininfo(const Config &config,
                GuessVerificationProgress(config.GetChainParams().TxData(),
                                          chainActive.Tip()));
     obj.pushKV("chainwork", chainActive.Tip()->nChainWork.GetHex());
+  
+    CCoinsStats stats;
+    FlushStateToDisk();
+    if (GetUTXOStats(pcoinsdbview.get(), stats)) {
+      obj.pushKV("coinsupply", ValueFromAmount(stats.nTotalAmount));
+    }
+ 
     obj.pushKV("pruned", fPruneMode);
 
     const Consensus::Params &consensusParams =
