@@ -27,6 +27,7 @@ FIND_LIBRARY(QREncode_LIBRARY
   PATHS
   /sw
   /opt/local
+  /usr/local
   /opt
 )
 

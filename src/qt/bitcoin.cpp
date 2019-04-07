@@ -85,7 +85,7 @@ static void InitMessage(const std::string &message) {
  * Translate string to current locale using Qt.
  */
 static std::string Translate(const char *psz) {
-    return QCoreApplication::translate("bitcoin-abc", psz).toStdString();
+    return QCoreApplication::translate("DeVault", psz).toStdString();
 }
 
 static QString GetLangTerritory() {

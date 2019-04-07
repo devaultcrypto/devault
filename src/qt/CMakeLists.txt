@@ -80,6 +80,15 @@ if (Qt5DBus_FOUND)
   add_compile_options("-DUSE_DBUS")
 endif()
 
+find_package(QREncode)
+if (QREncode_FOUND)
+  add_definitions(-DUSE_QRCODE)
+  message(STATUS "Found QREncode")
+  set(QR_LIB ${QREncode_LIBRARY})
+else()
+  message(STATUS " QREncode NOT FOUND ")
+endif()
+ 
 
 
 set(STATIC_DEPENDENCIES_CMAKE_FILE "${CMAKE_BINARY_DIR}/QtStaticDependencies.cmake")
@@ -240,6 +249,7 @@ target_link_libraries(bitcoin-qt-base
 	rpcclient
 	Qt5::Widgets
 	Qt5::Network
+  ${QR_LIB}
 #	OpenSSL::SSL
 )
 
