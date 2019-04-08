@@ -1199,6 +1199,9 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
                  std::vector<CScriptCheck> *pvChecks) {
     assert(!tx.IsCoinBase());
 
+    // This call does all the inexpensive checks on all the inputs. Only if ALL
+    // inputs pass do we perform expensive ECDSA signature checks. Helps prevent
+    // CPU exhaustion attacks.
     if (!Consensus::CheckTxInputs(tx, state, inputs, GetSpendHeight(inputs))) {
         return false;
     }
@@ -1206,10 +1209,6 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
     if (pvChecks) {
         pvChecks->reserve(tx.vin.size());
     }
-
-    // The first loop above does all the inexpensive checks. Only if ALL inputs
-    // pass do we perform expensive ECDSA signature checks. Helps prevent CPU
-    // exhaustion attacks.
 
     // Skip script verification when connecting blocks under the assumedvalid
     // block. Assuming the assumedvalid block is valid this is safe because
