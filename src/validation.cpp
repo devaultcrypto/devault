@@ -190,12 +190,7 @@ std::unique_ptr<CRewardsViewDB> prewardsdb;
 std::unique_ptr<CBudget> pbudget;
 
 
-enum FlushStateMode {
-    FLUSH_STATE_NONE,
-    FLUSH_STATE_IF_NEEDED,
-    FLUSH_STATE_PERIODIC,
-    FLUSH_STATE_ALWAYS
-};
+enum class FlushStateMode { NONE, IF_NEEDED, PERIODIC, ALWAYS };
 
 // See definition for documentation
 static bool FlushStateToDisk(const CChainParams &chainParams,
@@ -771,7 +766,8 @@ static bool AcceptToMemoryPoolWithTime(
     // After we've (potentially) uncached entries, ensure our coins cache is
     // still within its size limits
     CValidationState stateDummy;
-    FlushStateToDisk(config.GetChainParams(), stateDummy, FLUSH_STATE_PERIODIC);
+    FlushStateToDisk(config.GetChainParams(), stateDummy,
+                     FlushStateMode::PERIODIC);
     return res;
 }
 
@@ -827,6 +823,9 @@ bool GetTransaction(const Config &config, const TxId &txid,
 
             return true;
         }
+
+        // transaction not found in index, nothing more can be done
+        return false;
     }
 
     // use coin database to locate block that contains transaction, and scan it
@@ -1644,7 +1643,11 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                          CValidationState &state, CBlockIndex *pindex,
                          CCoinsViewCache &view, bool fJustCheck = false) {
     AssertLockHeld(cs_main);
-
+    assert(pindex);
+    // pindex->phashBlock can be null if called by
+    // CreateNewBlock/TestBlockValidity
+    assert((pindex->phashBlock == nullptr) ||
+           (*pindex->phashBlock == block.GetHash()));
     int64_t nTimeStart = GetTimeMicros();
 
     // Check it again in case a previous version let a bad block in
@@ -1997,25 +2000,25 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
             // The cache is large and we're within 10% and 10 MiB of the limit,
             // but we have time now (not in the middle of a block processing).
             bool fCacheLarge =
-                mode == FLUSH_STATE_PERIODIC &&
+                mode == FlushStateMode::PERIODIC &&
                 cacheSize > std::max((9 * nTotalSpace) / 10,
                                      nTotalSpace -
                                          MAX_BLOCK_COINSDB_USAGE * 1024 * 1024);
             // The cache is over the limit, we have to write now.
             bool fCacheCritical =
-                mode == FLUSH_STATE_IF_NEEDED && cacheSize > nTotalSpace;
+                mode == FlushStateMode::IF_NEEDED && cacheSize > nTotalSpace;
             // It's been a while since we wrote the block index to disk. Do this
             // frequently, so we don't need to redownload after a crash.
             bool fPeriodicWrite =
-                mode == FLUSH_STATE_PERIODIC &&
+                mode == FlushStateMode::PERIODIC &&
                 nNow > nLastWrite + (int64_t)DATABASE_WRITE_INTERVAL * 1000000;
             // It's been very long since we flushed the cache. Do this
             // infrequently, to optimize cache usage.
             bool fPeriodicFlush =
-                mode == FLUSH_STATE_PERIODIC &&
+                mode == FlushStateMode::PERIODIC &&
                 nNow > nLastFlush + (int64_t)DATABASE_FLUSH_INTERVAL * 1000000;
             // Combine all conditions that result in a full cache flush.
-            fDoFullFlush = (mode == FLUSH_STATE_ALWAYS) || fCacheLarge ||
+            fDoFullFlush = (mode == FlushStateMode::ALWAYS) || fCacheLarge ||
                            fCacheCritical || fPeriodicFlush || fFlushForPrune;
             // Write blocks and block index to disk.
             if (fDoFullFlush || fPeriodicWrite) {
@@ -2081,7 +2084,8 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
         }
 
         if (fDoFullFlush ||
-            ((mode == FLUSH_STATE_ALWAYS || mode == FLUSH_STATE_PERIODIC) &&
+            ((mode == FlushStateMode::ALWAYS ||
+              mode == FlushStateMode::PERIODIC) &&
              nNow >
                  nLastSetChain + (int64_t)DATABASE_WRITE_INTERVAL * 1000000)) {
             // Update best block in wallet (so we can detect restored wallets).
@@ -2098,14 +2102,14 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
 void FlushStateToDisk() {
     CValidationState state;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FLUSH_STATE_ALWAYS);
+    FlushStateToDisk(chainparams, state, FlushStateMode::ALWAYS);
 }
 
 void PruneAndFlush() {
     CValidationState state;
     fCheckForPruning = true;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FLUSH_STATE_NONE);
+    FlushStateToDisk(chainparams, state, FlushStateMode::NONE);
 }
 
 /**
@@ -2222,7 +2226,7 @@ static bool DisconnectTip(const Config &config, CValidationState &state,
 
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(config.GetChainParams(), state,
-                          FLUSH_STATE_IF_NEEDED)) {
+                          FlushStateMode::IF_NEEDED)) {
         return false;
     }
 
@@ -2493,7 +2497,7 @@ static bool ConnectTip(const Config &config, CValidationState &state,
 
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(config.GetChainParams(), state,
-                          FLUSH_STATE_IF_NEEDED)) {
+                          FlushStateMode::IF_NEEDED)) {
         return false;
     }
 
@@ -2926,7 +2930,7 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
     CheckBlockIndex(params.GetConsensus());
 
     // Write changes periodically to disk, after relay.
-    if (!FlushStateToDisk(params, state, FLUSH_STATE_PERIODIC)) {
+    if (!FlushStateToDisk(params, state, FlushStateMode::PERIODIC)) {
         return false;
     }
 
@@ -3515,55 +3519,52 @@ bool CheckBlock(const Config &config, const CBlock &block,
     return true;
 }
 
-static bool CheckIndexAgainstCheckpoint(const CBlockIndex *pindexPrev,
-                                        CValidationState &state,
-                                        const CChainParams &chainparams,
-                                        const uint256 &hash) {
-    if (*pindexPrev->phashBlock ==
-        chainparams.GetConsensus().hashGenesisBlock) {
-        return true;
-    }
-
-    int nHeight = pindexPrev->nHeight + 1;
-    const CCheckpointData &checkpoints = chainparams.Checkpoints();
-
-    // Check that the block chain matches the known block chain up to a
-    // checkpoint.
-    if (!Checkpoints::CheckBlock(checkpoints, nHeight, hash)) {
-        return state.DoS(100,
-                         error("%s: rejected by checkpoint lock-in at %d",
-                               __func__, nHeight),
-                         REJECT_CHECKPOINT, "checkpoint mismatch");
-    }
-
-    // Don't accept any forks from the main chain prior to last checkpoint.
-    // GetLastCheckpoint finds the last checkpoint in MapCheckpoints that's in
-    // our MapBlockIndex.
-    CBlockIndex *pcheckpoint = Checkpoints::GetLastCheckpoint(checkpoints);
-    if (pcheckpoint && nHeight < pcheckpoint->nHeight) {
-        return state.DoS(
-            100,
-            error("%s: forked chain older than last checkpoint (height %d)",
-                  __func__, nHeight),
-            REJECT_CHECKPOINT, "bad-fork-prior-to-checkpoint");
-    }
-
-    return true;
-}
-
+/**
+ * Context-dependent validity checks.
+ * By "context", we mean only the previous block headers, but not the UTXO
+ * set; UTXO-related validity checks are done in ConnectBlock().
+ */
 static bool ContextualCheckBlockHeader(const Config &config,
                                        const CBlockHeader &block,
                                        CValidationState &state,
                                        const CBlockIndex *pindexPrev,
                                        int64_t nAdjustedTime) {
     //const Consensus::Params &consensusParams = config.GetChainParams().GetConsensus();
-    //const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
+    assert(pindexPrev != nullptr);
+    const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, config)) {
         LogPrintf("bad bits after height: %d\n", pindexPrev->nHeight);
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false,
                          "incorrect proof of work");
+    }
+
+    // Check against checkpoints
+    if (fCheckpointsEnabled) {
+        const CCheckpointData &checkpoints =
+            config.GetChainParams().Checkpoints();
+
+        // Check that the block chain matches the known block chain up to a
+        // checkpoint.
+        if (!Checkpoints::CheckBlock(checkpoints, nHeight, block.GetHash())) {
+            return state.DoS(100,
+                             error("%s: rejected by checkpoint lock-in at %d",
+                                   __func__, nHeight),
+                             REJECT_CHECKPOINT, "checkpoint mismatch");
+        }
+
+        // Don't accept any forks from the main chain prior to last checkpoint.
+        // GetLastCheckpoint finds the last checkpoint in MapCheckpoints that's
+        // in our MapBlockIndex.
+        CBlockIndex *pcheckpoint = Checkpoints::GetLastCheckpoint(checkpoints);
+        if (pcheckpoint && nHeight < pcheckpoint->nHeight) {
+            return state.DoS(
+                100,
+                error("%s: forked chain older than last checkpoint (height %d)",
+                      __func__, nHeight),
+                REJECT_CHECKPOINT, "bad-fork-prior-to-checkpoint");
+        }
     }
 
     // Check timestamp against prev
@@ -3735,12 +3736,6 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
         if (pindexPrev->nStatus.isInvalid()) {
             return state.DoS(100, error("%s: prev block invalid", __func__),
                              REJECT_INVALID, "bad-prevblk");
-        }
-
-        if (fCheckpointsEnabled && !CheckIndexAgainstCheckpoint(
-                                       pindexPrev, state, chainparams, hash)) {
-            return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__,
-                         state.GetRejectReason().c_str());
         }
 
         if (!ContextualCheckBlockHeader(config, block, state, pindexPrev,
@@ -3964,7 +3959,7 @@ static bool AcceptBlock(const Config &config,
 
     if (fCheckForPruning) {
         // we just allocated more disk space for block files.
-        FlushStateToDisk(config.GetChainParams(), state, FLUSH_STATE_NONE);
+        FlushStateToDisk(config.GetChainParams(), state, FlushStateMode::NONE);
     }
 
     return true;
@@ -4017,16 +4012,7 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
                        const CBlock &block, CBlockIndex *pindexPrev,
                        BlockValidationOptions validationOptions) {
     AssertLockHeld(cs_main);
-    const CChainParams &chainparams = config.GetChainParams();
-
     assert(pindexPrev && pindexPrev == chainActive.Tip());
-    if (fCheckpointsEnabled &&
-        !CheckIndexAgainstCheckpoint(pindexPrev, state, chainparams,
-                                     block.GetHash())) {
-        return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__,
-                     state.GetRejectReason().c_str());
-    }
-
     CCoinsViewCache viewNew(pcoinsTip.get());
     CBlockIndex indexDummy(block);
     indexDummy.pprev = pindexPrev;
@@ -4153,7 +4139,8 @@ static void FindFilesToPruneManual(std::set<int> &setFilesToPrune,
 void PruneBlockFilesManual(int nManualPruneHeight) {
     CValidationState state;
     const CChainParams &chainparams = Params();
-    FlushStateToDisk(chainparams, state, FLUSH_STATE_NONE, nManualPruneHeight);
+    FlushStateToDisk(chainparams, state, FlushStateMode::NONE,
+                     nManualPruneHeight);
 }
 
 /**
@@ -4484,12 +4471,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
     }
 
     // Verify blocks in the best chain
-    if (nCheckDepth <= 0) {
-        // suffices until the year 19000
-        nCheckDepth = 1000000000;
-    }
-
-    if (nCheckDepth > chainActive.Height()) {
+    if (nCheckDepth <= 0 || nCheckDepth > chainActive.Height()) {
         nCheckDepth = chainActive.Height();
     }
 
@@ -4785,7 +4767,7 @@ bool RewindBlockIndex(const Config &config) {
         }
 
         // Occasionally flush state to disk.
-        if (!FlushStateToDisk(params, state, FLUSH_STATE_PERIODIC)) {
+        if (!FlushStateToDisk(params, state, FlushStateMode::PERIODIC)) {
             return false;
         }
     }
@@ -4812,7 +4794,7 @@ bool RewindBlockIndex(const Config &config) {
         // FlushStateToDisk can possibly read chainActive. Be conservative
         // and skip it here, we're about to -reindex-chainstate anyway, so
         // it'll get called a bunch real soon.
-        if (!FlushStateToDisk(params, state, FLUSH_STATE_ALWAYS)) {
+        if (!FlushStateToDisk(params, state, FlushStateMode::ALWAYS)) {
             return false;
         }
     }

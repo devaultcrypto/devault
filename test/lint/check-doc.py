@@ -13,22 +13,16 @@ Author: @MarcoFalke
 
 from subprocess import check_output
 from pprint import PrettyPrinter
+import glob
 import re
 
-FOLDER_SRC = 'src'
-FOLDER_TEST = 'src/test/'
-PATH_SRC = '`git rev-parse --show-toplevel`/{}'.format(FOLDER_SRC)
-PATH_TEST = '`git rev-parse --show-toplevel`/{}'.format(FOLDER_TEST)
+TOP_LEVEL = 'git rev-parse --show-toplevel'
+FOLDER_SRC = '/src/**/'
+FOLDER_TEST = '/src/**/test/'
 
-GREP_ARGS_REGEX = r"egrep -rIzo '((Is|Get)(Bool)?Arg(s|Set)?\((\s)*)\"\-[^\"]+?\"' {}"
-CMD_GREP_ARGS_SRC = GREP_ARGS_REGEX.format(PATH_SRC)
-CMD_GREP_ARGS_TEST = GREP_ARGS_REGEX.format(PATH_TEST)
-CMD_GREP_DOCS = r"egrep -rIzo 'HelpMessageOpt\((\s)*\"\-[^\"=]+?(=|\")' {}".format(
-    PATH_SRC)
-
-REGEX_ARG = re.compile(
-    r'(?:(?:Is|Get)(?:Bool)?Arg(?:s|Set)?\((?:\s)*)\"(\-[^\"]+?)\"')
-REGEX_DOC = re.compile(r'HelpMessageOpt\((?:\s)*\"(\-[^\"=]+?)(?:=|\")')
+EXTENSIONS = ["*.c", "*.h", "*.cpp", "*.cc", "*.hpp"]
+REGEX_ARG = '(?:ForceSet|SoftSet|Get|Is)(?:Bool)?Args?(?:Set)?\(\s*"(-[^"]+)"'
+REGEX_DOC = 'HelpMessageOpt\(\s*"(-[^"=]+?)(?:=|")'
 
 # list unsupported, deprecated and duplicate args as they need no documentation
 SET_DOC_OPTIONAL = set(['-benchmark',
@@ -38,6 +32,7 @@ SET_DOC_OPTIONAL = set(['-benchmark',
                         '-forcecompactdb',
                         # TODO remove after the may 2019 fork
                         '-greatwallactivationtime',
+                        '-h',
                         '-help',
                         '-parkdeepreorg',
                         '-promiscuousmempoolflags',
@@ -56,14 +51,27 @@ SET_FALSE_POSITIVE_UNKNOWNS = set(['-nodebug',
 
 
 def main():
-    used = check_output(CMD_GREP_ARGS_SRC, shell=True).decode()
-    tested = check_output(CMD_GREP_ARGS_TEST, shell=True).decode()
-    docd = check_output(CMD_GREP_DOCS, shell=True).decode()
+    top_level = check_output(TOP_LEVEL, shell=True).decode().strip()
+    source_files = []
+    test_files = []
 
-    args_used = set(re.findall(REGEX_ARG, used))
-    args_used -= set(re.findall(REGEX_ARG, tested))
+    for extension in EXTENSIONS:
+        source_files += glob.glob(top_level +
+                                  FOLDER_SRC + extension, recursive=True)
+        test_files += glob.glob(top_level + FOLDER_TEST +
+                                extension, recursive=True)
+
+    files = set(source_files) - set(test_files)
+
+    args_used = set()
+    args_docd = set()
+    for file in files:
+        with open(file, 'r') as f:
+            content = f.read()
+            args_used |= set(re.findall(re.compile(REGEX_ARG), content))
+            args_docd |= set(re.findall(re.compile(REGEX_DOC), content))
+
     args_used |= SET_FALSE_POSITIVE_UNKNOWNS
-    args_docd = set(re.findall(REGEX_DOC, docd))
     args_need_doc = args_used - args_docd - SET_DOC_OPTIONAL
     args_unknown = args_docd - args_used
 

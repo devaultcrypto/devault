@@ -172,7 +172,7 @@ static UniValue getnewaddress(const Config &config,
 
     // Parse the label first so we don't generate a key if there's an error
     std::string label;
-    if (request.params.size() > 0) {
+    if (!request.params[0].isNull()) {
         label = LabelFromValue(request.params[0]);
     }
 
@@ -249,7 +249,7 @@ static UniValue getrawchangeaddress(const Config &config,
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() > 1) {
+    if (request.fHelp || request.params.size() > 0) {
         throw std::runtime_error(
             "getrawchangeaddress\n"
             "\nReturns a new Devault address, for receiving change.\n"
@@ -582,7 +582,7 @@ static UniValue listaddressgroupings(const Config &config,
         return NullUniValue;
     }
 
-    if (request.fHelp) {
+    if (request.fHelp || request.params.size() != 0) {
         throw std::runtime_error(
             "listaddressgroupings\n"
             "\nLists groups of addresses which have had their common "
@@ -775,7 +775,7 @@ static UniValue getreceivedbyaddress(const Config &config,
 
     // Minimum confirmations
     int nMinDepth = 1;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         nMinDepth = request.params[1].get_int();
     }
 
@@ -846,7 +846,7 @@ UniValue getreceivedbylabel(const Config &config,
 
     // Minimum confirmations
     int nMinDepth = 1;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         nMinDepth = request.params[1].get_int();
     }
 
@@ -952,12 +952,12 @@ static UniValue getbalance(const Config &config,
                                      : nullptr;
 
     int nMinDepth = 1;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         nMinDepth = request.params[1].get_int();
     }
 
     isminefilter filter = ISMINE_SPENDABLE;
-    if (request.params.size() > 2 && request.params[2].get_bool()) {
+    if (!request.params[2].isNull() && request.params[2].get_bool()) {
         filter = filter | ISMINE_WATCH_ONLY;
     }
 
@@ -1268,7 +1268,7 @@ static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
     std::string strAccount = LabelFromValue(request.params[0]);
     UniValue sendTo = request.params[1].get_obj();
     int nMinDepth = 1;
-    if (request.params.size() > 2) {
+    if (!request.params[2].isNull()) {
         nMinDepth = request.params[2].get_int();
     }
 
@@ -1437,13 +1437,13 @@ UniValue ListReceived(const Config &config, CWallet *const pwallet,
                       const UniValue &params, bool by_label) {
     // Minimum confirmations
     int nMinDepth = 1;
-    if (params.size() > 0) {
+    if (!params[0].isNull()) {
         nMinDepth = params[0].get_int();
     }
 
     // Whether to include empty labels
     bool fIncludeEmpty = false;
-    if (params.size() > 1) {
+    if (!params[1].isNull()) {
         fIncludeEmpty = params[1].get_bool();
     }
 
@@ -1712,6 +1712,17 @@ static void MaybePushAddress(UniValue &entry, const CTxDestination &dest) {
     }
 }
 
+/**
+ * List transactions based on the given criteria.
+ *
+ * @param  pwallet    The wallet.
+ * @param  wtx        The wallet transaction.
+ * @param  strAccount The account, if any, or "*" for all.
+ * @param  nMinDepth  The minimum confirmation depth.
+ * @param  fLong      Whether to include the JSON version of the transaction.
+ * @param  ret        The UniValue into which the result is stored.
+ * @param  filter     The "is mine" filter bool.
+ */
 void ListTransactions(CWallet *const pwallet, const CWalletTx &wtx,
                       const std::string &strAccount, int nMinDepth, bool fLong,
                       UniValue &ret, const isminefilter &filter) {
@@ -1924,22 +1935,22 @@ static UniValue listtransactions(const Config &config,
     LOCK2(cs_main, pwallet->cs_wallet);
 
     std::string strAccount = "*";
-    if (request.params.size() > 0) {
+    if (!request.params[0].isNull()) {
         strAccount = request.params[0].get_str();
     }
 
     int nCount = 10;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         nCount = request.params[1].get_int();
     }
 
     int nFrom = 0;
-    if (request.params.size() > 2) {
+    if (!request.params[2].isNull()) {
         nFrom = request.params[2].get_int();
     }
 
     isminefilter filter = ISMINE_SPENDABLE;
-    if (request.params.size() > 3 && request.params[3].get_bool()) {
+    if (!request.params[3].isNull() && request.params[3].get_bool()) {
         filter = filter | ISMINE_WATCH_ONLY;
     }
 
@@ -2112,19 +2123,30 @@ static UniValue listsinceblock(const Config &config,
         return NullUniValue;
     }
 
-    if (request.fHelp) {
+    if (request.fHelp || request.params.size() > 4) {
         throw std::runtime_error(
             "listsinceblock ( \"blockhash\" target_confirmations "
-            "include_watchonly)\n"
+            "include_watchonly include_removed )\n"
             "\nGet all transactions in blocks since block [blockhash], or all "
-            "transactions if omitted\n"
+            "transactions if omitted.\n"
+            "If \"blockhash\" is no longer a part of the main chain, "
+            "transactions from the fork point onward are included.\n"
+            "Additionally, if include_removed is set, transactions affecting "
+            "the wallet which were removed are returned in the \"removed\" "
+            "array.\n"
             "\nArguments:\n"
             "1. \"blockhash\"            (string, optional) The block hash to "
             "list transactions since\n"
-            "2. target_confirmations:    (numeric, optional) The confirmations "
-            "required, must be 1 or more\n"
+            "2. target_confirmations:    (numeric, optional, default=1) The "
+            "confirmations required, must be 1 or more\n"
             "3. include_watchonly:       (bool, optional, default=false) "
-            "Include transactions to watch-only addresses (see 'importaddress')"
+            "Include transactions to watch-only addresses (see "
+            "'importaddress')\n"
+            "4. include_removed:         (bool, optional, default=true) Show "
+            "transactions that were removed due to a reorg in the \"removed\" "
+            "array\n"
+            "                                                           (not "
+            "guaranteed to work on pruned nodes)\n"
             "\nResult:\n"
             "{\n"
             "  \"transactions\": [\n"
@@ -2180,6 +2202,13 @@ static UniValue listsinceblock(const Config &config,
             "    \"to\": \"...\",            (string) If a comment to is "
             "associated with the transaction.\n"
             "  ],\n"
+            "  \"removed\": [\n"
+            "    <structure is the same as \"transactions\" above, only "
+            "present if include_removed=true>\n"
+            "    Note: transactions that were readded in the active chain will "
+            "appear as-is in this array, and may thus have a positive "
+            "confirmation count.\n"
+            "  ],\n"
             "  \"lastblock\": \"lastblockhash\"     (string) The hash of the "
             "last block\n"
             "}\n"
@@ -2201,27 +2230,32 @@ static UniValue listsinceblock(const Config &config,
 
     LOCK2(cs_main, pwallet->cs_wallet);
 
+    // Block index of the specified block or the common ancestor, if the block
+    // provided was in a deactivated chain.
     const CBlockIndex *pindex = nullptr;
+    // Block index of the specified block, even if it's in a deactivated chain.
+    const CBlockIndex *paltindex = nullptr;
     int target_confirms = 1;
     isminefilter filter = ISMINE_SPENDABLE;
 
-    if (request.params.size() > 0) {
+    if (!request.params[0].isNull() && !request.params[0].get_str().empty()) {
         uint256 blockId;
 
         blockId.SetHex(request.params[0].get_str());
         BlockMap::iterator it = mapBlockIndex.find(blockId);
-        if (it != mapBlockIndex.end()) {
-            pindex = it->second;
-            if (chainActive[pindex->nHeight] != pindex) {
-                // the block being asked for is a part of a deactivated chain;
-                // we don't want to depend on its perceived height in the block
-                // chain, we want to instead use the last common ancestor
-                pindex = chainActive.FindFork(pindex);
-            }
+        if (it == mapBlockIndex.end()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+        }
+        paltindex = pindex = it->second;
+        if (chainActive[pindex->nHeight] != pindex) {
+            // the block being asked for is a part of a deactivated chain;
+            // we don't want to depend on its perceived height in the block
+            // chain, we want to instead use the last common ancestor
+            pindex = chainActive.FindFork(pindex);
         }
     }
 
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         target_confirms = request.params[1].get_int();
 
         if (target_confirms < 1) {
@@ -2229,9 +2263,12 @@ static UniValue listsinceblock(const Config &config,
         }
     }
 
-    if (request.params.size() > 2 && request.params[2].get_bool()) {
+    if (!request.params[2].isNull() && request.params[2].get_bool()) {
         filter = filter | ISMINE_WATCH_ONLY;
     }
+
+    bool include_removed =
+        (request.params[3].isNull() || request.params[3].get_bool());
 
     int depth = pindex ? (1 + chainActive.Height() - pindex->nHeight) : -1;
 
@@ -2245,12 +2282,37 @@ static UniValue listsinceblock(const Config &config,
         }
     }
 
+    // when a reorg'd block is requested, we also list any relevant transactions
+    // in the blocks of the chain that was detached
+    UniValue removed(UniValue::VARR);
+    while (include_removed && paltindex && paltindex != pindex) {
+        CBlock block;
+        if (!ReadBlockFromDisk(block, paltindex, config)) {
+            throw JSONRPCError(RPC_INTERNAL_ERROR,
+                               "Can't read block from disk");
+        }
+        for (const CTransactionRef &tx : block.vtx) {
+            auto it = pwallet->mapWallet.find(tx->GetId());
+            if (it != pwallet->mapWallet.end()) {
+                // We want all transactions regardless of confirmation count to
+                // appear here, even negative confirmation ones, hence the big
+                // negative.
+                ListTransactions(pwallet, it->second, "*", -100000000, true,
+                                 removed, filter);
+            }
+        }
+        paltindex = paltindex->pprev;
+    }
+
     CBlockIndex *pblockLast =
         chainActive[chainActive.Height() + 1 - target_confirms];
     uint256 lastblock = pblockLast ? pblockLast->GetBlockHash() : uint256();
 
     UniValue ret(UniValue::VOBJ);
     ret.pushKV("transactions", transactions);
+    if (include_removed) {
+        ret.pushKV("removed", removed);
+    }
     ret.pushKV("lastblock", lastblock.GetHex());
 
     return ret;
@@ -2360,17 +2422,17 @@ static UniValue gettransaction(const Config &config,
     txid.SetHex(request.params[0].get_str());
 
     isminefilter filter = ISMINE_SPENDABLE;
-    if (request.params.size() > 1 && request.params[1].get_bool()) {
+    if (!request.params[1].isNull() && request.params[1].get_bool()) {
         filter = filter | ISMINE_WATCH_ONLY;
     }
 
     UniValue entry(UniValue::VOBJ);
-    if (!pwallet->mapWallet.count(txid)) {
+    auto it = pwallet->mapWallet.find(txid);
+    if (it == pwallet->mapWallet.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Invalid or non-wallet transaction id");
     }
-
-    const CWalletTx &wtx = pwallet->mapWallet.at(txid);
+    const CWalletTx &wtx = it->second;
 
     Amount nCredit = wtx.GetCredit(filter);
     Amount nDebit = wtx.GetDebit(filter);
@@ -2510,7 +2572,7 @@ static UniValue keypoolrefill(const Config &config,
     // 0 is interpreted by TopUpKeyPool() as the default keypool size given by
     // -keypool
     unsigned int kpSize = 0;
-    if (request.params.size() > 0) {
+    if (!request.params[0].isNull()) {
         if (request.params[0].get_int() < 0) {
             throw JSONRPCError(RPC_INVALID_PARAMETER,
                                "Invalid parameter, expected valid size.");
@@ -3436,7 +3498,7 @@ static UniValue fundrawtransaction(const Config &config,
     UniValue subtractFeeFromOutputs;
     std::set<int> setSubtractFeeFromOutputs;
 
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         if (request.params[1].type() == UniValue::VBOOL) {
             // backward compatibility bool only fallback
             coinControl.fAllowWatchOnly = request.params[1].get_bool();
@@ -3813,7 +3875,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "listreceivedbylabel",          listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
     { "wallet",             "listreceivedbyaccount",        listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
     { "wallet",             "listreceivedbyaddress",        listreceivedbyaddress,        {"minconf","include_empty","include_watchonly","address_filter"} },
-    { "wallet",             "listsinceblock",               listsinceblock,               {"blockhash","target_confirmations","include_watchonly"} },
+    { "wallet",             "listsinceblock",               listsinceblock,               {"blockhash","target_confirmations","include_watchonly","include_removed"} },
     { "wallet",             "listtransactions",             listtransactions,             {"account","count","skip","include_watchonly"} },
     { "wallet",             "listunspent",                  listunspent,                  {"minconf","maxconf","addresses","include_unsafe","query_options"} },
     { "wallet",             "listwallets",                  listwallets,                  {} },

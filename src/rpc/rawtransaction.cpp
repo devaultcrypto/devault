@@ -43,7 +43,7 @@ void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
     // Blockchain contextual information (confirmations and blocktime) is not
     // available to code in bitcoin-common, so we query them here and push the
     // data into the returned UniValue.
-    TxToUniv(tx, uint256(), entry);
+    TxToUniv(tx, uint256(), entry, true, RPCSerializationFlags());
 
     if (!hashBlock.IsNull()) {
         entry.pushKV("blockhash", hashBlock.GetHex());
@@ -154,7 +154,7 @@ static UniValue getrawtransaction(const Config &config,
 
     // Accept either a bool (true) or a num (>=1) to indicate verbose output.
     bool fVerbose = false;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         if (request.params[1].isNum()) {
             if (request.params[1].get_int() != 0) {
                 fVerbose = true;
@@ -181,14 +181,11 @@ static UniValue getrawtransaction(const Config &config,
                 ". Use gettransaction for wallet transactions.");
     }
 
-    std::string strHex = EncodeHexTx(*tx, RPCSerializationFlags());
-
     if (!fVerbose) {
-        return strHex;
+        return EncodeHexTx(*tx, RPCSerializationFlags());
     }
 
     UniValue result(UniValue::VOBJ);
-    result.pushKV("hex", strHex);
     TxToJSON(*tx, hashBlock, result);
     return result;
 }
@@ -249,7 +246,7 @@ static UniValue gettxoutproof(const Config &config,
     CBlockIndex *pblockindex = nullptr;
 
     uint256 hashBlock;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         hashBlock = uint256S(request.params[1].get_str());
         if (!mapBlockIndex.count(hashBlock)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
@@ -586,7 +583,7 @@ static UniValue decoderawtransaction(const Config &config,
     }
 
     UniValue result(UniValue::VOBJ);
-    TxToUniv(CTransaction(std::move(mtx)), uint256(), result);
+    TxToUniv(CTransaction(std::move(mtx)), uint256(), result, false);
 
     return result;
 }
