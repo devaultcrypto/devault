@@ -782,57 +782,58 @@ bool AcceptToMemoryPool(const Config &config, CTxMemPool &pool,
 
 /**
  * Return transaction in txOut, and if it was found inside a block, its hash is
- * placed in hashBlock.
+ * placed in hashBlock. If blockIndex is provided, the transaction is fetched
+ * from the corresponding block.
  */
 bool GetTransaction(const Config &config, const TxId &txid,
-                    CTransactionRef &txOut, uint256 &hashBlock,
-                    bool fAllowSlow) {
-    CBlockIndex *pindexSlow = nullptr;
+                    CTransactionRef &txOut, uint256 &hashBlock, bool fAllowSlow,
+                    CBlockIndex *blockIndex) {
+    CBlockIndex *pindexSlow = blockIndex;
 
     LOCK(cs_main);
 
-    CTransactionRef ptx = g_mempool.get(txid);
-    if (ptx) {
-        txOut = ptx;
-        return true;
-    }
-
-    if (fTxIndex) {
-        CDiskTxPos postx;
-        if (pblocktree->ReadTxIndex(txid, postx)) {
-            CAutoFile file(OpenBlockFile(postx, true), SER_DISK,
-                           CLIENT_VERSION);
-            if (file.IsNull()) {
-                return error("%s: OpenBlockFile failed", __func__);
-            }
-
-            CBlockHeader header;
-            try {
-                file >> header;
-                fseek(file.Get(), postx.nTxOffset, SEEK_CUR);
-                file >> txOut;
-            } catch (const std::exception &e) {
-                return error("%s: Deserialize or I/O error - %s", __func__,
-                             e.what());
-            }
-
-            hashBlock = header.GetHash();
-            if (txOut->GetId() != txid) {
-                return error("%s: txid mismatch", __func__);
-            }
-
+    if (!blockIndex) {
+        CTransactionRef ptx = g_mempool.get(txid);
+        if (ptx) {
+            txOut = ptx;
             return true;
         }
 
-        // transaction not found in index, nothing more can be done
-        return false;
-    }
+        if (fTxIndex) {
+            CDiskTxPos postx;
+            if (pblocktree->ReadTxIndex(txid, postx)) {
+                CAutoFile file(OpenBlockFile(postx, true), SER_DISK,
+                               CLIENT_VERSION);
+                if (file.IsNull()) {
+                    return error("%s: OpenBlockFile failed", __func__);
+                }
+                CBlockHeader header;
+                try {
+                    file >> header;
+                    fseek(file.Get(), postx.nTxOffset, SEEK_CUR);
+                    file >> txOut;
+                } catch (const std::exception &e) {
+                    return error("%s: Deserialize or I/O error - %s", __func__,
+                                 e.what());
+                }
+                hashBlock = header.GetHash();
+                if (txOut->GetId() != txid) {
+                    return error("%s: txid mismatch", __func__);
+                }
+                return true;
+            }
 
-    // use coin database to locate block that contains transaction, and scan it
-    if (fAllowSlow) {
-        const Coin &coin = AccessByTxid(*pcoinsTip, txid);
-        if (!coin.IsSpent()) {
-            pindexSlow = chainActive[coin.GetHeight()];
+            // transaction not found in index, nothing more can be done
+            return false;
+        }
+
+        // use coin database to locate block that contains transaction, and scan
+        // it
+        if (fAllowSlow) {
+            const Coin &coin = AccessByTxid(*pcoinsTip, txid);
+            if (!coin.IsSpent()) {
+                pindexSlow = chainActive[coin.GetHeight()];
+            }
         }
     }
 
@@ -1301,8 +1302,12 @@ bool UndoWriteToDisk(const CBlockUndo &blockundo, CDiskBlockPos &pos,
     return true;
 }
 
-bool UndoReadFromDisk(CBlockUndo &blockundo, const CDiskBlockPos &pos,
-                      const uint256 &hashBlock) {
+static bool UndoReadFromDisk(CBlockUndo &blockundo, const CBlockIndex *pindex) {
+    CDiskBlockPos pos = pindex->GetUndoPos();
+    if (pos.IsNull()) {
+        return error("%s: no undo data available", __func__);
+    }
+
     // Open history file to read
     CAutoFile filein(OpenUndoFile(pos, true), SER_DISK, CLIENT_VERSION);
     if (filein.IsNull()) {
@@ -1314,7 +1319,7 @@ bool UndoReadFromDisk(CBlockUndo &blockundo, const CDiskBlockPos &pos,
     // We need a CHashVerifier as reserializing may lose data
     CHashVerifier<CAutoFile> verifier(&filein);
     try {
-        verifier << hashBlock;
+        verifier << pindex->pprev->GetBlockHash();
         verifier >> blockundo;
         filein >> hashChecksum;
     } catch (const std::exception &e) {
@@ -1396,13 +1401,7 @@ static DisconnectResult DisconnectBlock(const CBlock &block,
                                         const CBlockIndex *pindex,
                                         CCoinsViewCache &view) {
     CBlockUndo blockUndo;
-    CDiskBlockPos pos = pindex->GetUndoPos();
-    if (pos.IsNull()) {
-        error("DisconnectBlock(): no undo data available");
-        return DISCONNECT_FAILED;
-    }
-
-    if (!UndoReadFromDisk(blockUndo, pos, pindex->pprev->GetBlockHash())) {
+    if (!UndoReadFromDisk(blockUndo, pindex)) {
         error("DisconnectBlock(): failure reading undo data");
         return DISCONNECT_FAILED;
     }
@@ -3278,9 +3277,9 @@ bool ReceivedBlockTransactions(const CBlock &block, CValidationState &state,
     return true;
 }
 
-static bool FindBlockPos(CValidationState &state, CDiskBlockPos &pos,
-                         unsigned int nAddSize, unsigned int nHeight,
-                         uint64_t nTime, bool fKnown = false) {
+static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
+                         unsigned int nHeight, uint64_t nTime,
+                         bool fKnown = false) {
     LOCK(cs_LastBlockFile);
 
     unsigned int nFile = fKnown ? pos.nFile : nLastBlockFile;
@@ -3339,7 +3338,7 @@ static bool FindBlockPos(CValidationState &state, CDiskBlockPos &pos,
                     fclose(file);
                 }
             } else {
-                return state.Error("out of disk space");
+                return error("out of disk space");
             }
         }
     }
@@ -3790,6 +3789,33 @@ bool ProcessNewBlockHeaders(const Config &config,
 }
 
 /**
+ * Store block on disk. If dbp is non-nullptr, the file is known to already
+ * reside on disk.
+ */
+static CDiskBlockPos SaveBlockToDisk(const CBlock &block, int nHeight,
+                                     const CChainParams &chainparams,
+                                     const CDiskBlockPos *dbp) {
+    unsigned int nBlockSize =
+        ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
+    CDiskBlockPos blockPos;
+    if (dbp != nullptr) {
+        blockPos = *dbp;
+    }
+    if (!FindBlockPos(blockPos, nBlockSize + 8, nHeight, block.GetBlockTime(),
+                      dbp != nullptr)) {
+        error("%s: FindBlockPos failed", __func__);
+        return CDiskBlockPos();
+    }
+    if (dbp == nullptr) {
+        if (!WriteBlockToDisk(block, blockPos, chainparams.DiskMagic())) {
+            AbortNode("Failed to write block");
+            return CDiskBlockPos();
+        }
+    }
+    return blockPos;
+}
+
+/**
  * Store a block on disk.
  *
  * @param[in]     config     The global config.
@@ -3927,29 +3953,18 @@ static bool AcceptBlock(const Config &config,
         GetMainSignals().NewPoWValidBlock(pindex, pblock);
     }
 
-    int nHeight = pindex->nHeight;
     const CChainParams &chainparams = config.GetChainParams();
 
     // Write block to history file
     try {
-        unsigned int nBlockSize =
-            ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
-        CDiskBlockPos blockPos;
-        if (dbp != nullptr) {
-            blockPos = *dbp;
+        CDiskBlockPos blockPos =
+            SaveBlockToDisk(block, pindex->nHeight, chainparams, dbp);
+        if (blockPos.IsNull()) {
+            state.Error(strprintf(
+                "%s: Failed to find position to write new block to disk",
+                __func__));
+            return false;
         }
-
-        if (!FindBlockPos(state, blockPos, nBlockSize + 8, nHeight,
-                          block.GetBlockTime(), dbp != nullptr)) {
-            return error("AcceptBlock(): FindBlockPos failed");
-        }
-
-        if (dbp == nullptr) {
-            if (!WriteBlockToDisk(block, blockPos, chainparams.DiskMagic())) {
-                AbortNode(state, "Failed to write block");
-            }
-        }
-
         if (!ReceivedBlockTransactions(block, state, pindex, blockPos)) {
             return error("AcceptBlock(): ReceivedBlockTransactions failed");
         }
@@ -4535,10 +4550,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         // check level 2: verify undo validity
         if (nCheckLevel >= 2 && pindex) {
             CBlockUndo undo;
-            CDiskBlockPos pos = pindex->GetUndoPos();
-            if (!pos.IsNull()) {
-                if (!UndoReadFromDisk(undo, pos,
-                                      pindex->pprev->GetBlockHash())) {
+            if (!pindex->GetUndoPos().IsNull()) {
+                if (!UndoReadFromDisk(undo, pindex)) {
                     return error(
                         "VerifyDB(): *** found bad undo data at %d, hash=%s\n",
                         pindex->nHeight, pindex->GetBlockHash().ToString());
@@ -4870,19 +4883,13 @@ bool LoadGenesisBlock(const CChainParams &chainparams) {
     // one already on disk)
     try {
         CBlock &block = const_cast<CBlock &>(chainparams.GenesisBlock());
-        // Start new block file
-        unsigned int nBlockSize =
-            ::GetSerializeSize(block, SER_DISK, CLIENT_VERSION);
-        CDiskBlockPos blockPos;
-        CValidationState state;
-        if (!FindBlockPos(state, blockPos, nBlockSize + 8, 0,
-                          block.GetBlockTime())) {
-            return error("%s: FindBlockPos failed", __func__);
-        }
-        if (!WriteBlockToDisk(block, blockPos, chainparams.DiskMagic())) {
+        CDiskBlockPos blockPos =
+            SaveBlockToDisk(block, 0, chainparams, nullptr);
+        if (blockPos.IsNull()) {
             return error("%s: writing genesis block to disk failed", __func__);
         }
         CBlockIndex *pindex = AddToBlockIndex(block);
+        CValidationState state;
         if (!ReceivedBlockTransactions(block, state, pindex, blockPos)) {
             return error("%s: genesis block not accepted", __func__);
         }

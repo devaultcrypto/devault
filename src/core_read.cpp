@@ -28,16 +28,16 @@ CScript ParseScript(const std::string &s) {
                 continue;
             }
 
-            const char *name = GetOpName((opcodetype)op);
+            const char *name = GetOpName(static_cast<opcodetype>(op));
             if (strcmp(name, "OP_UNKNOWN") == 0) {
                 continue;
             }
 
             std::string strName(name);
-            mapOpNames[strName] = (opcodetype)op;
+            mapOpNames[strName] = static_cast<opcodetype>(op);
             // Convenience: OP_ADD and just ADD are both recognized:
             strName.replace(strName.find("OP_"),3,"");
-            mapOpNames[strName] = (opcodetype)op;
+            mapOpNames[strName] = static_cast<opcodetype>(op);
         }
     }
 

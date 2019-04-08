@@ -346,7 +346,7 @@ public:
             }
         }
 
-        READWRITE(*(CMerkleTx *)this);
+        READWRITE(*static_cast<CMerkleTx *>(this));
         //!< Used to be vtxPrev
         std::vector<CMerkleTx> vUnused;
         READWRITE(vUnused);
@@ -764,6 +764,7 @@ public:
         fBroadcastTransactions = false;
         fAbortRescan = false;
         fScanningWallet = false;
+        nRelockTime = 0;
     }
 
     std::map<TxId, CWalletTx> mapWallet;

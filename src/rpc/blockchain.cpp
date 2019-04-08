@@ -24,6 +24,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 #include "validation.h"
+#include "warnings.h"
 
 #include <boost/thread/thread.hpp> // boost::thread::interrupt
 
@@ -1280,6 +1281,7 @@ UniValue getblockchaininfo(const Config &config,
 
         obj.pushKV("pruneheight", block->nHeight);
     }
+    obj.pushKV("warnings", GetWarnings("statusbar"));
     return obj;
 }
 
@@ -1705,20 +1707,22 @@ UniValue getchaintxstats(const Config &config, const JSONRPCRequest &request) {
             "ends the window.\n"
             "\nResult:\n"
             "{\n"
-            "  \"time\": xxxxx,                (numeric) The timestamp for the "
-            "final block in the window in UNIX format.\n"
-            "  \"txcount\": xxxxx,             (numeric) The total number of "
-            "transactions in the chain up to that point.\n"
-            "  \"window_block_count\": xxxxx,  (numeric) Size of the window in "
-            "number of blocks.\n"
-            "  \"window_tx_count\": xxxxx,     (numeric) The number of "
-            "transactions in the window. Only returned if "
+            "  \"time\": xxxxx,                         (numeric) The "
+            "timestamp for the final block in the window in UNIX format.\n"
+            "  \"txcount\": xxxxx,                      (numeric) The total "
+            "number of transactions in the chain up to that point.\n"
+            "  \"window_final_block_hash\": \"...\",      (string) The hash of "
+            "the final block in the window.\n"
+            "  \"window_block_count\": xxxxx,           (numeric) Size of "
+            "the window in number of blocks.\n"
+            "  \"window_tx_count\": xxxxx,              (numeric) The number "
+            "of transactions in the window. Only returned if "
             "\"window_block_count\" is > 0.\n"
-            "  \"window_interval\": xxxxx,     (numeric) The elapsed time in "
-            "the window in seconds. Only returned if \"window_block_count\" is "
-            "> 0.\n"
-            "  \"txrate\": x.xx,               (numeric) The average rate of "
-            "transactions per second in the window. Only returned if "
+            "  \"window_interval\": xxxxx,              (numeric) The elapsed "
+            "time in the window in seconds. Only returned if "
+            "\"window_block_count\" is > 0.\n"
+            "  \"txrate\": x.xx,                        (numeric) The average "
+            "rate of transactions per second in the window. Only returned if "
             "\"window_interval\" is > 0.\n"
             "}\n"
             "\nExamples:\n" +
@@ -1732,27 +1736,20 @@ UniValue getchaintxstats(const Config &config, const JSONRPCRequest &request) {
     int blockcount = 30 * 24 * 60 * 60 /
                      config.GetChainParams().GetConsensus().nPowTargetSpacing;
 
-    bool havehash = !request.params[1].isNull();
-    uint256 hash;
-    if (havehash) {
-        hash = uint256S(request.params[1].get_str());
-    }
-
-    {
+    if (request.params[1].isNull()) {
         LOCK(cs_main);
-        if (havehash) {
-            auto it = mapBlockIndex.find(hash);
-            if (it == mapBlockIndex.end()) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                                   "Block not found");
-            }
-            pindex = it->second;
-            if (!chainActive.Contains(pindex)) {
-                throw JSONRPCError(RPC_INVALID_PARAMETER,
-                                   "Block is not in main chain");
-            }
-        } else {
-            pindex = chainActive.Tip();
+        pindex = chainActive.Tip();
+    } else {
+        uint256 hash = uint256S(request.params[1].get_str());
+        LOCK(cs_main);
+        auto it = mapBlockIndex.find(hash);
+        if (it == mapBlockIndex.end()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+        }
+        pindex = it->second;
+        if (!chainActive.Contains(pindex)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                               "Block is not in main chain");
         }
     }
 
@@ -1780,6 +1777,7 @@ UniValue getchaintxstats(const Config &config, const JSONRPCRequest &request) {
     UniValue ret(UniValue::VOBJ);
     ret.pushKV("time", int64_t(pindex->nTime));
     ret.pushKV("txcount", int64_t(pindex->nChainTx));
+    ret.pushKV("window_final_block_hash", pindex->GetBlockHash().GetHex());
     ret.pushKV("window_block_count", blockcount);
     if (blockcount > 0) {
         ret.pushKV("window_tx_count", nTxDiff);
