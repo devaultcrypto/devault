@@ -9,6 +9,7 @@
 
 #include "utiltime.h"
 
+#include <cassert>
 #include <atomic>
 #include <chrono>
 #include <boost/thread.hpp>
