@@ -2925,8 +2925,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
 #else
           if (!boost::get<CNoDestination>(&coinControl.destChange)) {
             scriptChange = GetScriptForDestination(coinControl.destChange);
-#endif
         } else {
+#endif
             // no coin control: send change to newly generated address
             // Note: We use a new key here to keep it from being obvious
             // which side is the change.
