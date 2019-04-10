@@ -41,9 +41,6 @@
 
 #include <cstdint>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/thread.hpp>
-
 #include <QApplication>
 #include <QDebug>
 #include <QLibraryInfo>
@@ -84,8 +81,8 @@ static void InitMessage(const std::string &message) {
 /**
  * Translate string to current locale using Qt.
  */
-static std::string Translate(const char *psz) {
-    return QCoreApplication::translate("DeVault", psz).toStdString();
+static void Translate(const char *psz, std::string& ret) {
+    ret = QCoreApplication::translate("DeVault", psz).toStdString();
 }
 
 static QString GetLangTerritory() {

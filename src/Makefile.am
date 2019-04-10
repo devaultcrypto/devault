@@ -181,6 +181,11 @@ BITCOIN_CORE_H = \
   rpc/tojson.h \
   rpc/register.h \
   rwcollection.h \
+  signals-cpp/config.h \
+  signals-cpp/connection.h \
+  signals-cpp/connections.h \
+  signals-cpp/signal.h \
+  signals-cpp/signals.h \
   scheduler.h \
   script/scriptcache.h \
   script/sigcache.h \

@@ -16,7 +16,7 @@
 #include <vector>
 #include <functional>
 
-#include <boost/signals2/signal.hpp>
+#include "signals-cpp/signals.h"
 
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
@@ -103,7 +103,7 @@ public:
     bool Command(const std::string &cmd, const ReplyHandlerCB &reply_handler);
 
     /** Response handlers for async replies */
-    boost::signals2::signal<void(TorControlConnection &,
+    sigs::signal<void(TorControlConnection &,
                                  const TorControlReply &)>
         async_handler;
 
@@ -160,7 +160,7 @@ void TorControlConnection::readcb(struct bufferevent *bev, void *ctx) {
             if (self->message.code >= 600) {
                 // Dispatch async notifications to async handler.
                 // Synchronous and asynchronous messages are never interleaved
-                self->async_handler(*self, self->message);
+                self->async_handler.fire(*self, self->message);
             } else {
                 if (!self->reply_handlers.empty()) {
                     // Invoke reply handler with message

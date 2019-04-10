@@ -563,9 +563,9 @@ UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
     file.seekg(0, file.beg);
 
     // show progress dialog in GUI
-    pwallet->ShowProgress(_("Importing..."), 0);
+    pwallet->ShowProgress.fire(_("Importing..."), 0);
     while (file.good()) {
-        pwallet->ShowProgress(
+        pwallet->ShowProgress.fire(
             "", std::max(1, std::min(99, (int)(((double)file.tellg() /
                                                 (double)nFilesize) *
                                                100))));
@@ -642,7 +642,7 @@ UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
     file.close();
 
     // hide progress dialog in GUI
-    pwallet->ShowProgress("", 100);
+    pwallet->ShowProgress.fire("", 100);
     pwallet->UpdateTimeFirstKey(nTimeBegin);
 
     pwallet->RescanFromTime(nTimeBegin, false /* update */);

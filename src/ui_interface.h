@@ -9,8 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#include <boost/signals2/last_value.hpp>
-#include <boost/signals2/signal.hpp>
+#include "signals-cpp/signals.h"
 
 class CBasicKeyStore;
 class CWallet;
@@ -75,10 +74,9 @@ public:
     };
 
     /** Show message box. */
-    boost::signals2::signal<bool(const std::string &message,
-                                 const std::string &caption,
-                                 unsigned int style),
-                            boost::signals2::last_value<bool>>
+    sigs::signal<void(const std::string &message,
+                      const std::string &caption,
+                      unsigned int style, bool *b)>
         ThreadSafeMessageBox;
 
     /**
@@ -86,49 +84,48 @@ public:
      * ThreadSafeMessageBox(noninteractive_message, caption, style) and returns
      * false.
      */
-    boost::signals2::signal<bool(const std::string &message,
-                                 const std::string &noninteractive_message,
-                                 const std::string &caption,
-                                 unsigned int style),
-                            boost::signals2::last_value<bool>>
+    sigs::signal<void(const std::string &message,
+                      const std::string &noninteractive_message,
+                      const std::string &caption,
+                      unsigned int style, bool* b)>
         ThreadSafeQuestion;
 
     /** Progress message during initialization. */
-    boost::signals2::signal<void(const std::string &message)> InitMessage;
+    sigs::signal<void(const std::string &message)> InitMessage;
 
     /** Number of network connections changed. */
-    boost::signals2::signal<void(int newNumConnections)>
+    sigs::signal<void(int newNumConnections)>
         NotifyNumConnectionsChanged;
 
     /** Network activity state changed. */
-    boost::signals2::signal<void(bool networkActive)>
+    sigs::signal<void(bool networkActive)>
         NotifyNetworkActiveChanged;
 
     /**
      * Status bar alerts changed.
      */
-    boost::signals2::signal<void()> NotifyAlertChanged;
+    sigs::signal<void()> NotifyAlertChanged;
 
     /** A wallet has been loaded. */
-    boost::signals2::signal<void(CWallet *wallet)> LoadWallet;
+    sigs::signal<void(CWallet *wallet)> LoadWallet;
 
     /**
      * Show progress e.g. for verifychain.
      * resume_possible indicates shutting down now will result in the current
      * progress action resuming upon restart.
      */
-    boost::signals2::signal<void(const std::string &title, int nProgress,
+    sigs::signal<void(const std::string &title, int nProgress,
                                  bool resume_possible)>
         ShowProgress;
 
     /** New block has been accepted */
-    boost::signals2::signal<void(bool, const CBlockIndex *)> NotifyBlockTip;
+    sigs::signal<void(bool, const CBlockIndex *)> NotifyBlockTip;
 
     /** Best header has changed */
-    boost::signals2::signal<void(bool, const CBlockIndex *)> NotifyHeaderTip;
+    sigs::signal<void(bool, const CBlockIndex *)> NotifyHeaderTip;
 
     /** Banlist did change. */
-    boost::signals2::signal<void(void)> BannedListChanged;
+    sigs::signal<void(void)> BannedListChanged;
 };
 
 /** Show warning message **/

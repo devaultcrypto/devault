@@ -43,10 +43,6 @@
 #include "shlwapi.h"
 #endif
 
-#include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/scoped_array.hpp>
-
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QClipboard>

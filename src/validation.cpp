@@ -51,6 +51,7 @@
 #include <future>
 #include <sstream>
 #include <thread>
+#include <functional> // for bind
 
 #include <boost/thread.hpp>
 
@@ -973,7 +974,7 @@ CBlockIndex const *pindexBestForkTip = nullptr;
 CBlockIndex const *pindexBestForkBase = nullptr;
 
 static void AlertNotify(const std::string &strMessage) {
-    uiInterface.NotifyAlertChanged();
+    uiInterface.NotifyAlertChanged.fire();
     std::string strCmd = gArgs.GetArg("-alertnotify", "");
     if (strCmd.empty()) {
         return;
@@ -1339,11 +1340,12 @@ bool AbortNode(const std::string &strMessage,
                const std::string &userMessage = "") {
     SetMiscWarning(strMessage);
     LogPrintf("*** %s\n", strMessage);
-    uiInterface.ThreadSafeMessageBox(
-        userMessage.empty() ? _("Error: A fatal internal error occurred, see "
-                                "debug.log for details")
-                            : userMessage,
-        "", CClientUIInterface::MSG_ERROR);
+    bool fRet;
+    uiInterface.ThreadSafeMessageBox.fire(
+                                     userMessage.empty() ? _("Error: A fatal internal error occurred, see "
+                                                             "debug.log for details")
+                                     : userMessage,
+                                     "", CClientUIInterface::MSG_ERROR, &fRet);
     StartShutdown();
     return false;
 }
@@ -2298,12 +2300,11 @@ private:
 public:
     explicit ConnectTrace(CTxMemPool &_pool) : blocksConnected(1), pool(_pool) {
         pool.NotifyEntryRemoved.connect(
-            boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+                                        std::bind(&ConnectTrace::NotifyEntryRemoved, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     ~ConnectTrace() {
-        pool.NotifyEntryRemoved.disconnect(
-            boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
+        pool.NotifyEntryRemoved.disconnect_all(true);
     }
 
     void BlockConnected(CBlockIndex *pindex,
@@ -2834,7 +2835,7 @@ static void NotifyHeaderTip() {
 
     // Send block tip changed notifications without cs_main
     if (fNotify) {
-        uiInterface.NotifyHeaderTip(fInitialBlockDownload, pindexHeader);
+        uiInterface.NotifyHeaderTip.fire(fInitialBlockDownload, pindexHeader);
     }
 }
 
@@ -2921,7 +2922,7 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
 
         // Always notify the UI if a new block tip was connected
         if (pindexFork != pindexNewTip) {
-            uiInterface.NotifyBlockTip(fInitialDownload, pindexNewTip);
+            uiInterface.NotifyBlockTip.fire(fInitialDownload, pindexNewTip);
         }
     } while (pindexNewTip != pindexMostWork);
 
@@ -3025,7 +3026,7 @@ static bool UnwindBlock(const Config &config, CValidationState &state,
     if (invalidate) {
         InvalidChainFound(pindex);
     }
-    uiInterface.NotifyBlockTip(IsInitialBlockDownload(), pindex->pprev);
+    uiInterface.NotifyBlockTip.fire(IsInitialBlockDownload(), pindex->pprev);
     return true;
 }
 
@@ -4471,11 +4472,11 @@ bool LoadChainTip(const Config &config) {
 }
 
 CVerifyDB::CVerifyDB() {
-    uiInterface.ShowProgress(_("Verifying blocks..."), 0, false);
+    uiInterface.ShowProgress.fire(_("Verifying blocks..."), 0, false);
 }
 
 CVerifyDB::~CVerifyDB() {
-    uiInterface.ShowProgress("", 100, false);
+    uiInterface.ShowProgress.fire("", 100, false);
 }
 
 bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
@@ -4516,7 +4517,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
             reportDone = percentageDone / 10;
         }
 
-        uiInterface.ShowProgress(_("Verifying blocks..."), percentageDone,
+        uiInterface.ShowProgress.fire(_("Verifying blocks..."), percentageDone,
                                  false);
         if (pindex->nHeight < chainActive.Height() - nCheckDepth) {
             break;
@@ -4599,7 +4600,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         CBlockIndex *pindex = pindexState;
         while (pindex != chainActive.Tip()) {
             boost::this_thread::interruption_point();
-            uiInterface.ShowProgress(
+            uiInterface.ShowProgress.fire(
                 _("Verifying blocks..."),
                 std::max(
                     1, std::min(99, 100 - (int)(((double)(chainActive.Height() -
@@ -4675,7 +4676,7 @@ bool ReplayBlocks(const Config &config, CCoinsView *view) {
         return error("ReplayBlocks(): unknown inconsistent state");
     }
 
-    uiInterface.ShowProgress(_("Replaying blocks..."), 0, false);
+    uiInterface.ShowProgress.fire(_("Replaying blocks..."), 0, false);
     LogPrintf("Replaying blocks\n");
 
     // Old tip during the interrupted flush.
@@ -4750,7 +4751,7 @@ bool ReplayBlocks(const Config &config, CCoinsView *view) {
 
     cache.SetBestBlock(pindexNew->GetBlockHash());
     cache.Flush();
-    uiInterface.ShowProgress("", 100, false);
+    uiInterface.ShowProgress.fire("", 100, false);
     return true;
 }
 

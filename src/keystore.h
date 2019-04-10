@@ -13,7 +13,7 @@
 #include "script/standard.h"
 #include "sync.h"
 
-#include <boost/signals2/signal.hpp>
+#include "signals-cpp/signal.h"
 
 /** A virtual base class for key stores */
 class CKeyStore {
