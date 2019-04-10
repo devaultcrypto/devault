@@ -1053,7 +1053,7 @@ void PeerLogicValidation::NewPoWValidBlock(
         AssertLockHeld(cs_main);
 
         // TODO: Avoid the repeated-serialization here
-        if (pnode->fDisconnect) {
+        if (pnode->nVersion < INVALID_CB_NO_BAN_VERSION || pnode->fDisconnect) {
             return;
         }
         ProcessBlockAvailability(pnode->GetId());
@@ -1221,6 +1221,7 @@ static void RelayAddress(const CAddress &addr, bool fReachable,
     assert(nRelayNodes <= best.size());
 
     auto sortfunc = [&best, &hasher, nRelayNodes](CNode *pnode) {
+        if (pnode->nVersion >= CADDR_TIME_VERSION) {
             uint64_t hashKey =
                 CSipHasher(hasher).Write(pnode->GetId()).Finalize();
             for (unsigned int i = 0; i < nRelayNodes; i++) {
@@ -1231,6 +1232,7 @@ static void RelayAddress(const CAddress &addr, bool fReachable,
                     break;
                 }
             }
+        }
     };
 
     auto pushfunc = [&addr, &best, nRelayNodes, &insecure_rand] {
@@ -1793,9 +1795,14 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     if (!(pfrom->GetLocalServices() & NODE_BLOOM) &&
         (strCommand == NetMsgType::FILTERLOAD ||
          strCommand == NetMsgType::FILTERADD)) {
+        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
             LOCK(cs_main);
             Misbehaving(pfrom, 100, "no-bloom-version");
             return false;
+        } else {
+            pfrom->fDisconnect = true;
+            return false;
+        }
     }
 
     if (strCommand == NetMsgType::REJECT) {
@@ -1979,10 +1986,13 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             }
 
             // Get recent addresses
-            connman->PushMessage(
+            if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION ||
+                connman->GetAddressCount() < 1000) {
+                connman->PushMessage(
                     pfrom,
                     CNetMsgMaker(nSendVersion).Make(NetMsgType::GETADDR));
                 pfrom->fGetAddr = true;
+            }
             connman->MarkAddressGood(pfrom->addr);
         }
 
@@ -2001,6 +2011,22 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         int64_t nTimeOffset = nTime - GetTime();
         pfrom->nTimeOffset = nTimeOffset;
         AddTimeData(pfrom->addr, nTimeOffset);
+
+        // If the peer is old enough to have the old alert system, send it the
+        // final alert.
+        if (pfrom->nVersion <= 70012) {
+            CDataStream finalAlert(
+                ParseHex("60010000000000000000000000ffffff7f00000000ffffff7ffef"
+                         "fff7f01ffffff7f00000000ffffff7f00ffffff7f002f55524745"
+                         "4e543a20416c657274206b657920636f6d70726f6d697365642c2"
+                         "075706772616465207265717569726564004630440220653febd6"
+                         "410f470f6bae11cad19c48413becb1ac2c17f908fd0fd53bdc3ab"
+                         "d5202206d0e9c96fe88d4a0f01ed9dedae2b6f9e00da94cad0fec"
+                         "aae66ecf689bf71b50"),
+                SER_NETWORK, PROTOCOL_VERSION);
+            connman->PushMessage(
+                pfrom, CNetMsgMaker(nSendVersion).Make("alert", finalAlert));
+        }
 
         // Feeler connections exist only to verify if address is online.
         if (pfrom->fFeeler) {
@@ -2037,21 +2063,24 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                          : ""));
         }
 
-        // Tell our peer we prefer to receive headers rather than inv's
-        // We send this to non-NODE NETWORK peers as well, because even
-        // non-NODE NETWORK peers can announce blocks (such as pruning
-        // nodes)
-        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDHEADERS));
-      
-        // Tell our peer we are willing to provide version 1 or 2
-        // cmpctblocks. However, we do not request new block announcements
-        // using cmpctblock messages. We send this to non-NODE NETWORK peers
-        // as well, because they may wish to request compact blocks from us.
-        bool fAnnounceUsingCMPCTBLOCK = false;
-        uint64_t nCMPCTBLOCKVersion = 1;
-        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDCMPCT,
+        if (pfrom->nVersion >= SENDHEADERS_VERSION) {
+            // Tell our peer we prefer to receive headers rather than inv's
+            // We send this to non-NODE NETWORK peers as well, because even
+            // non-NODE NETWORK peers can announce blocks (such as pruning
+            // nodes)
+            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDHEADERS));
+        }
+        if (pfrom->nVersion >= SHORT_IDS_BLOCKS_VERSION) {
+            // Tell our peer we are willing to provide version 1 or 2
+            // cmpctblocks. However, we do not request new block announcements
+            // using cmpctblock messages. We send this to non-NODE NETWORK peers
+            // as well, because they may wish to request compact blocks from us.
+            bool fAnnounceUsingCMPCTBLOCK = false;
+            uint64_t nCMPCTBLOCKVersion = 1;
+            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDCMPCT,
                                                       fAnnounceUsingCMPCTBLOCK,
                                                       nCMPCTBLOCKVersion));
+        }
         pfrom->fSuccessfullyConnected = true;
     }
 
@@ -2066,6 +2095,11 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         std::vector<CAddress> vAddr;
         vRecv >> vAddr;
 
+        // Don't want addr from older versions unless seeding
+        if (pfrom->nVersion < CADDR_TIME_VERSION &&
+            connman->GetAddressCount() > 1000) {
+            return true;
+        }
         if (vAddr.size() > 1000) {
             LOCK(cs_main);
             Misbehaving(pfrom, 20, "oversized-addr");
@@ -3123,8 +3157,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     }
 
     else if (strCommand == NetMsgType::PING) {
-        uint64_t nonce = 0;
-        vRecv >> nonce;
+        if (pfrom->nVersion > BIP0031_VERSION) {
+            uint64_t nonce = 0;
+            vRecv >> nonce;
             // Echo the message back with the nonce. This allows for two useful
             // features:
             //
@@ -3139,7 +3174,8 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             // pings: without it, if the remote node sends a ping once per
             // second and this node takes 5 seconds to respond to each, the 5th
             // ping the remote sends would appear to return very quickly.
-        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::PONG, nonce));
+            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::PONG, nonce));
+        }
     }
 
     else if (strCommand == NetMsgType::PONG) {
@@ -3702,8 +3738,15 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
         }
         pto->fPingQueued = false;
         pto->nPingUsecStart = GetTimeMicros();
-        pto->nPingNonceSent = nonce;
-        connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING, nonce));
+        if (pto->nVersion > BIP0031_VERSION) {
+            pto->nPingNonceSent = nonce;
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING, nonce));
+        } else {
+            // Peer is too old to support ping command with nonce, pong will
+            // never arrive.
+            pto->nPingNonceSent = 0;
+            connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING));
+        }
     }
 
     // Acquire cs_main for IsInitialBlockDownload() and CNodeState()
@@ -4263,7 +4306,8 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
     //
     // We don't want white listed peers to filter txs to us if we have
     // -whitelistforcerelay
-    if (gArgs.GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
+    if (pto->nVersion >= FEEFILTER_VERSION &&
+        gArgs.GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
         !(pto->fWhitelisted && gArgs.GetBoolArg("-whitelistforcerelay",
                                                 DEFAULT_WHITELISTFORCERELAY))) {
         Amount currentFilter =
