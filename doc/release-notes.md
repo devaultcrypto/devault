@@ -16,6 +16,11 @@ This release includes the following features and fixes since forking from Bitcoi
  - Each run of devaultd/devault-qt will create a new debug.log file and rename older files based on last accessed time
    Use -keeplogfiles=<days> to specify how long to keep in days (default is 7)
  - Change coin display precision and current network precision to 3 decimal points instead of 8
+ - Remove BIP9 code
+ - Remove Old Protocol Version switches
+ - Prompt user for Password on 1st run so that wallet will always be encrypted
+ - GUI makeover
+ - Exclusive use of Bech32 style addresses
 
 Bitcoin-ABC 19.x backports:
  
