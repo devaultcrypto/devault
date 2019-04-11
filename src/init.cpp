@@ -2127,6 +2127,13 @@ bool AppInitMain(Config &config,
                                      "-reindex-chainstate to change -txindex");
                     break;
                 }
+              
+                if (fAddressIndex != gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX)) {
+                  strLoadError = _("You need to rebuild the database using "
+                                   "-reindex-chainstate to change -addressindex");
+                  break;
+                }
+
 
                 // Check for changed -prune state.  What we are concerned about
                 // is a user who has pruned blocks in the past, but is now
