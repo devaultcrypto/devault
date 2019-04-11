@@ -21,6 +21,8 @@
 #include "protocol.h" // For CMessageHeader::MessageMagic
 #include "script/script_error.h"
 #include "sync.h"
+#include "addrindex.h"
+#include "timestampindex.h"
 
 #include <algorithm>
 #include <atomic>
@@ -177,6 +179,7 @@ static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
 static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
 static const bool DEFAULT_TXINDEX = false;
+static const bool DEFAULT_ADDRESSINDEX = false;
 static const unsigned int DEFAULT_BANSCORE_THRESHOLD = 100;
 
 /** Default for -persistmempool */
@@ -555,6 +558,14 @@ public:
 
     ScriptError GetScriptError() const { return error; }
 };
+
+bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &hashes);
+bool HashOnchainActive(const uint256 &hash);
+bool GetAddrIndex(const std::string& addr,
+                  std::vector<std::pair<CAddrIndexKey, Amount> > &addressIndex,
+                  int start = 0, int end = 0);
+
+std::string GetAddr(const CTxOut& out);
 
 /** Functions for disk access for blocks */
 bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,

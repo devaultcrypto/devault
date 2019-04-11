@@ -11,6 +11,8 @@
 #include "coins.h"
 #include "dbwrapper.h"
 #include "diskblockpos.h"
+#include "addrindex.h"
+#include "timestampindex.h"
 
 #include <map>
 #include <string>
@@ -127,6 +129,18 @@ public:
     bool ReadReindexing(bool &fReindexing);
     bool ReadTxIndex(const uint256 &txid, CDiskTxPos &pos);
     bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos>> &vect);
+
+    bool WriteAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);
+    bool EraseAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);
+    bool ReadAddrIndex(const std::string& addr,
+                          std::vector<std::pair<CAddrIndexKey, Amount> > &addressIndex,
+                          int start = 0, int end = 0);
+
+    
+    bool WriteTimestampIndex(const CTimestampIndexKey &timestampIndex);
+    bool ReadTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &vect);
+    bool WriteTimestampBlockIndex(const CTimestampBlockIndexKey &blockhashIndex, const CTimestampBlockIndexValue &logicalts);
+    bool ReadTimestampBlockIndex(const uint256 &hash, unsigned int &logicalTS);
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
     bool LoadBlockIndexGuts(

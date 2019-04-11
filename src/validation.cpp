@@ -9,6 +9,7 @@
 #include "arith_uint256.h"
 #include "blockindexworkcomparator.h"
 #include "blockvalidity.h"
+#include "cashaddrenc.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "checkqueue.h"
@@ -56,7 +57,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-#error "Bitcoin cannot be compiled without assertions."
+#error "DeVault cannot be compiled without assertions."
 #endif
 
 #define MICRO 0.000001
@@ -77,6 +78,8 @@ int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 std::atomic_bool fReindex(false);
 bool fTxIndex = false;
+bool fAddressIndex = false;
+bool fTimestampIndex = false;
 bool fHavePruned = false;
 bool fPruneMode = false;
 bool fIsBareMultisigStd = DEFAULT_PERMIT_BAREMULTISIG;
@@ -102,6 +105,13 @@ arith_uint256 nMinimumChainWork;
 Amount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
 CTxMemPool g_mempool;
+
+std::string GetAddr(const CTxOut& out) {
+  CTxDestination dest;
+  ExtractDestination(out.scriptPubKey, dest);
+  std::string SDest = EncodeCashAddr(dest, Params());
+  return SDest;
+}
 
 static void CheckBlockIndex(const Consensus::Params &consensusParams);
 
@@ -728,6 +738,11 @@ static bool AcceptToMemoryPoolWorker(
 
         // Store transaction in memory.
         pool.addUnchecked(txid, entry, setAncestors, validForFeeEstimation);
+        
+        // Add memory address index
+        if (fAddressIndex) {
+            pool.addAddrIndex(entry, view);
+        }
 
         // Trim mempool and check if tx was trimmed.
         if (!fOverrideMempoolLimit) {
@@ -780,6 +795,30 @@ bool AcceptToMemoryPool(const Config &config, CTxMemPool &pool,
                                       pfMissingInputs, GetTime(),
                                       fOverrideMempoolLimit, nAbsurdFee);
 }
+
+bool HashOnchainActive(const uint256 &hash)
+{
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+
+     if (!chainActive.Contains(pblockindex)) {
+        return false;
+    }
+
+     return true;
+}
+
+bool GetAddrIndex(const std::string& addr,
+                  std::vector<std::pair<CAddrIndexKey, Amount> > &addressIndex, int start, int end)
+{
+    if (!fAddressIndex)
+        return error("address index not enabled");
+
+     if (!pblocktree->ReadAddrIndex(addr, addressIndex, start, end))
+        return error("unable to get txids for address");
+
+     return true;
+}
+
 
 /**
  * Return transaction in txOut, and if it was found inside a block, its hash is
@@ -1401,19 +1440,19 @@ DisconnectResult UndoCoinSpend(const Coin &undo, CCoinsViewCache &view,
  */
 static DisconnectResult DisconnectBlock(const CBlock &block,
                                         const CBlockIndex *pindex,
-                                        CCoinsViewCache &view) {
+                                        CCoinsViewCache &view, bool ignoreAddressIndex = false) {
     CBlockUndo blockUndo;
     if (!UndoReadFromDisk(blockUndo, pindex)) {
         error("DisconnectBlock(): failure reading undo data");
         return DISCONNECT_FAILED;
     }
 
-    return ApplyBlockUndo(blockUndo, block, pindex, view);
+    return ApplyBlockUndo(blockUndo, block, pindex, view, ignoreAddressIndex);
 }
 
 DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                                 const CBlock &block, const CBlockIndex *pindex,
-                                CCoinsViewCache &view) {
+                                CCoinsViewCache &view, bool ignoreAddressIndex) {
     bool fClean = true;
 
     if (blockUndo.vtxundo.size() + 1 != block.vtx.size()) {
@@ -1421,6 +1460,13 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
         return DISCONNECT_FAILED;
     }
 
+    // For fAddressIndex enabled
+    // Go through all outputs and add back to addressIndex 
+    // Go through all inputs and add the negative of the value to addressIndex
+    // At the End Erase all of those entries in the DB by passing to EraseAddressIndex
+
+    std::vector<std::pair<CAddrIndexKey, Amount> > addrIndex;
+    
     // First, restore inputs.
     for (size_t i = 1; i < block.vtx.size(); i++) {
         const CTransaction &tx = *(block.vtx[i]);
@@ -1430,6 +1476,15 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
             return DISCONNECT_FAILED;
         }
 
+        uint256 hash = tx.GetHash();
+
+        if (fAddressIndex) {
+            for (uint32_t k = tx.vout.size(); k-- > 0;) {
+                const CTxOut &out = tx.vout[k];
+                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(out),pindex->nHeight, i, hash, k, false), out.nValue));
+            }
+        }
+        
         for (size_t j = 0; j < tx.vin.size(); j++) {
             const COutPoint &out = tx.vin[j].prevout;
             const Coin &undo = txundo.vprevout[j];
@@ -1438,6 +1493,12 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                 return DISCONNECT_FAILED;
             }
             fClean = fClean && res != DISCONNECT_UNCLEAN;
+
+            const CTxIn input = tx.vin[j];
+            if (fAddressIndex) {
+                const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
+                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(prevout),pindex->nHeight, i, hash, j, true), -prevout.nValue));
+            }
         }
     }
 
@@ -1468,6 +1529,13 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
 
     // Move best block pointer to previous block.
     view.SetBestBlock(block.hashPrevBlock);
+
+    if (addrIndex.size() > 0) { // only happens with fAddressIndex set
+        if (!pblocktree->EraseAddrIndex(addrIndex)) {
+            error("Failed to delete addr index");
+            return DISCONNECT_FAILED;
+        }
+    }
 
     return fClean ? DISCONNECT_OK : DISCONNECT_UNCLEAN;
 }
@@ -1642,7 +1710,7 @@ static int64_t nBlocksTotal = 0;
  */
 static bool ConnectBlock(const Config &config, const CBlock &block,
                          CValidationState &state, CBlockIndex *pindex,
-                         CCoinsViewCache &view, bool fJustCheck = false) {
+                         CCoinsViewCache &view, bool fJustCheck = false, bool ignoreAddressIndex = false) {
     AssertLockHeld(cs_main);
     assert(pindex);
     // pindex->phashBlock can be null if called by
@@ -1773,6 +1841,14 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
     blockundo.vtxundo.reserve(block.vtx.size() - 1);
 
+
+    // For fAddressIndex enabled (ignoring coinbase)
+    // Go through all inputs and add the negative of the value to addressIndex 
+    // Go through all output and add the value to addressIndex
+    // At the End Write all of those entries to the DB by passing to WriteAddressIndex
+
+    std::vector<std::pair<CAddrIndexKey, Amount> > addrIndex;
+    
     for (const auto &ptx : block.vtx) {
         const CTransaction &tx = *ptx;
 
@@ -1789,9 +1865,18 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         // In both cases, we get a more meaningful feedback out of it.
         AddCoins(view, tx, pindex->nHeight, true);
     }
-
+    int i=0;
     for (const auto &ptx : block.vtx) {
         const CTransaction &tx = *ptx;
+        const uint256 txhash = tx.GetHash();
+      
+        if (fAddressIndex) {
+          for (unsigned int k = 0; k < tx.vout.size(); k++) {
+            const CTxOut &out = tx.vout[k];
+            addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(out), pindex->nHeight, i, txhash, k, false), out.nValue));
+          }
+        }
+      
         if (tx.IsCoinBase()) {
             continue;
         }
@@ -1815,6 +1900,17 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                 error("%s: contains a non-BIP68-final transaction", __func__),
                 REJECT_INVALID, "bad-txns-nonfinal");
         }
+
+
+        if (fAddressIndex) {
+            for (size_t j = 0; j < tx.vin.size(); j++) {
+                const CTxIn input = tx.vin[j];
+                const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
+                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(prevout), pindex->nHeight, i, txhash, j, true), -prevout.nValue));
+            }
+            i++;
+        }
+
 
         // GetTransactionSigOpCount counts 2 types of sigops:
         // * legacy (always)
@@ -1921,6 +2017,12 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         return false;
     }
 
+    if (addrIndex.size() > 0) {
+        if (!pblocktree->WriteAddrIndex(addrIndex)) {
+            return AbortNode(state, "Failed to write address index");
+        }
+    }
+  
     // DeVault:: Reward, update DB entry
     if (nColdReward > Amount()) prewards->UpdateRewardsDB(pindex->nHeight);
 
@@ -4433,6 +4535,10 @@ static bool LoadBlockIndexDB(const Config &config) {
     LogPrintf("%s: transaction index %s\n", __func__,
               fTxIndex ? "enabled" : "disabled");
 
+
+    // Check whether we have an address index
+    pblocktree->ReadFlag("addressindex", fAddressIndex);
+    LogPrintf("%s: address index %s\n", __func__, fAddressIndex ? "enabled" : "disabled");
     return true;
 }
 
@@ -4566,7 +4672,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
             (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <=
                 nCoinCacheUsage) {
             assert(coins.GetBestBlock() == pindex->GetBlockHash());
-            DisconnectResult res = DisconnectBlock(block, pindex, coins);
+            DisconnectResult res = DisconnectBlock(block, pindex, coins, true);
             if (res == DISCONNECT_FAILED) {
                 return error("VerifyDB(): *** irrecoverable inconsistency in "
                              "block data at %d, hash=%s",
@@ -4614,7 +4720,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                     "VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s",
                     pindex->nHeight, pindex->GetBlockHash().ToString());
             }
-            if (!ConnectBlock(config, block, state, pindex, coins)) {
+            if (!ConnectBlock(config, block, state, pindex, coins, false, true)) {
                 return error(
                     "VerifyDB(): *** found unconnectable block at %d, hash=%s",
                     pindex->nHeight, pindex->GetBlockHash().ToString());
@@ -4865,6 +4971,12 @@ bool LoadBlockIndex(const Config &config) {
         // Use the provided setting for -txindex in the new database
         fTxIndex = gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX);
         pblocktree->WriteFlag("txindex", fTxIndex);
+      
+        // Use the provided setting for -addressindex in the new database
+        fAddressIndex = gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX);
+        pblocktree->WriteFlag("addressindex", fAddressIndex);
+        LogPrintf("%s: address index %s\n", __func__, fAddressIndex ? "enabled" : "disabled");
+      
     }
     return true;
 }

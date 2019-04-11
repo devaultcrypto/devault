@@ -486,8 +486,66 @@ bool CTxMemPool::addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
     return true;
 }
 
+void CTxMemPool::addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCache &view)
+{
+    LOCK(cs);
+    const CTransaction& tx = entry.GetTx();
+    std::vector<CMempoolAddrDeltaKey> inserted;
+
+    uint256 txhash = tx.GetHash();
+    for (unsigned int j = 0; j < tx.vin.size(); j++) {
+        const CTxIn input = tx.vin[j];
+        const CTxOut &prevout = view.AccessCoin(input.prevout).GetTxOut();
+        std::string addr = GetAddr(prevout);
+        CMempoolAddrDeltaKey key(addr, txhash, j, 1);
+        CMempoolAddrDelta delta(entry.GetTime(), -prevout.nValue, input.prevout.GetTxId(), input.prevout.GetN());
+        mapAddr.insert(std::make_pair(key, delta));
+        inserted.push_back(key);
+    }
+
+     for (unsigned int k = 0; k < tx.vout.size(); k++) {
+        const CTxOut &out = tx.vout[k];
+        std::string addr = GetAddr(out);
+        CMempoolAddrDeltaKey key(addr, txhash, k, 0);
+        mapAddr.insert(std::make_pair(key, CMempoolAddrDelta(entry.GetTime(), out.nValue)));
+        inserted.push_back(key);
+    }
+
+     mapAddrInserted.insert(std::make_pair(txhash, inserted));
+}
+
+bool CTxMemPool::getAddrIndex(std::vector<std::string> &addresses,
+                              std::vector<std::pair<CMempoolAddrDeltaKey, CMempoolAddrDelta> > &results)
+{
+    LOCK(cs);
+    for (const auto& it : addresses) {
+        auto ait = mapAddr.lower_bound(CMempoolAddrDeltaKey(it));
+        while (ait != mapAddr.end() && (*ait).first.addr == it) {
+            results.push_back(*ait);
+            ait++;
+        }
+    }
+    return true;
+}
+
+ bool CTxMemPool::removeAddrIndex(const uint256 txhash)
+{
+    LOCK(cs);
+    auto it = mapAddrInserted.find(txhash);
+     if (it != mapAddrInserted.end()) {
+        std::vector<CMempoolAddrDeltaKey> keys = (*it).second;
+        for (std::vector<CMempoolAddrDeltaKey>::iterator mit = keys.begin(); mit != keys.end(); mit++) {
+            mapAddr.erase(*mit);
+        }
+        mapAddrInserted.erase(it);
+    }
+
+     return true;
+}
+
 void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason) {
     NotifyEntryRemoved.fire(it->GetSharedTx(), reason);
+    const uint256 hash = it->GetTx().GetHash();
     for (const CTxIn &txin : it->GetTx().vin) {
         mapNextTx.erase(txin.prevout);
     }
@@ -510,6 +568,7 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason) {
     mapLinks.erase(it);
     mapTx.erase(it);
     nTransactionsUpdated++;
+    removeAddrIndex(hash);
 }
 
 // Calculates descendants of entry that are not already in setDescendants, and
