@@ -188,6 +188,12 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=$enableval],
   [use_zmq=yes])
 
+AC_ARG_ENABLE([rocksdb],
+  [AS_HELP_STRING([--disable-rocksdb],
+  [disable rocksdb notifications])],
+  [use_rocksdb=$enableval],
+  [use_rocksdb=yes])
+
 AC_ARG_ENABLE(man,
     [AS_HELP_STRING([--disable-man],
                     [do not install man pages (default is to install)])],,
@@ -918,6 +924,21 @@ else
     esac
   fi
 
+  if test "x$use_rocksdb" = "xyes"; then
+     AC_CHECK_HEADER([rocksdb/db.h],
+       [AC_DEFINE([ENABLE_ROCKSDB],[1],[Define to 1 to enable ROCKSDB functions])],
+       [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
+        use_zmq=no
+        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
+     AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-l:librocksdb.a,
+       [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
+        use_rocksdb=no
+        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
+     BITCOIN_QT_CHECK([AC_CHECK_LIB([rocksdb], [main],[ROCSKDB_LIBS=-l:librocksdb.a], [have_rocksdb=no])])
+  else
+    AC_DEFINE_UNQUOTED([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])
+  fi
+
   if test x$use_qr != xno; then
     BITCOIN_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])
     BITCOIN_QT_CHECK([AC_CHECK_HEADER([qrencode.h],, have_qrencode=no)])
@@ -1097,7 +1118,12 @@ if test x$bitcoin_enable_qt != xno; then
   fi
 fi
 
+if test x$use_rocksdb != xno; then
+   CPPFLAGS="$CPPFLAGS -DUSE_ROCKSDB=1"
+fi
+
 AM_CONDITIONAL([ENABLE_ZMQ], [test "x$use_zmq" = "xyes"])
+AM_CONDITIONAL([ENABLE_ROCKSDB], [test "x$use_rocksdb" = "xyes"])
 
 AC_MSG_CHECKING([whether to build test_bitcoin])
 if test x$use_tests = xyes; then
@@ -1191,6 +1217,7 @@ AC_SUBST(SSL_LIBS)
 AC_SUBST(EVENT_LIBS)
 AC_SUBST(EVENT_PTHREADS_LIBS)
 AC_SUBST(ZMQ_LIBS)
+AC_SUBST(ROCKSDB_LIBS)
 AC_SUBST(QR_LIBS)
 AC_CONFIG_FILES([Makefile src/Makefile doc/man/Makefile share/setup.nsi share/qt/Info.plist test/config.ini])
 AC_CONFIG_FILES([contrib/devtools/split-debug.sh],[chmod +x contrib/devtools/split-debug.sh])
@@ -1207,6 +1234,8 @@ CPPFLAGS="$CPPFLAGS_TEMP"
 LDFLAGS_TEMP="$LDFLAGS"
 unset LDFLAGS
 LDFLAGS="$LDFLAGS_TEMP"
+
+
 
 LIBS_TEMP="$LIBS"
 unset LIBS
@@ -1256,6 +1285,7 @@ if test x$bitcoin_enable_qt != xno; then
     echo "    with qr     = $use_qr"
 fi
 echo "  with zmq      = $use_zmq"
+echo "  with rocksdb  = $use_rocksdb"
 echo "  with test     = $use_tests"
 echo "  with bench    = $use_bench"
 echo "  with upnp     = $use_upnp"
