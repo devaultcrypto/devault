@@ -1,14 +1,19 @@
 // Copyright (c) 2018 The Bitcoin developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_RWCOLLECTION_H
-#define BITCOIN_RWCOLLECTION_H
+#pragma once
 
 #include "noncopyable.h"
 #include <boost/range/iterator.hpp>
 #include <boost/thread/locks.hpp>
+
+#ifdef HAVE_STD_SHARED_MUTEX
+#include <shared_mutex>
+#else
 #include <boost/thread/shared_mutex.hpp>
+#endif
 
 #include <iterator>
 #include <type_traits>
@@ -60,25 +65,29 @@ public:
 
 template <typename T> class RWCollection {
 private:
+#ifdef HAVE_STD_SHARED_MUTEX
+    mutable std::shared_mutex rwlock;
+#else
     mutable boost::shared_mutex rwlock;
+#endif
     T collection;
 
 public:
     RWCollection() : collection() {}
 
-    typedef RWCollectionView<const T, boost::shared_lock<boost::shared_mutex>>
-        ReadView;
-    ReadView getReadView() const {
-        return ReadView(boost::shared_lock<boost::shared_mutex>(rwlock),
-                        collection);
-    }
-
-    typedef RWCollectionView<T, boost::unique_lock<boost::shared_mutex>>
-        WriteView;
+#ifdef HAVE_STD_SHARED_MUTEX
+    typedef RWCollectionView<const T, std::shared_lock<std::shared_mutex>> ReadView;
+    ReadView getReadView() const { return ReadView(std::shared_lock<std::shared_mutex>(rwlock), collection);  }
+    typedef RWCollectionView<T, std::unique_lock<std::shared_mutex>> WriteView;
     WriteView getWriteView() {
-        return WriteView(boost::unique_lock<boost::shared_mutex>(rwlock),
-                         collection);
+        return WriteView(std::unique_lock<std::shared_mutex>(rwlock), collection);
     }
+#else
+    typedef RWCollectionView<const T, boost::shared_lock<boost::shared_mutex>>  ReadView;
+    ReadView getReadView() const { return ReadView(boost::shared_lock<boost::shared_mutex>(rwlock), collection);  }
+    typedef RWCollectionView<T, boost::shared_lock<boost::shared_mutex>> WriteView;
+    WriteView getWriteView() {
+        return WriteView(boost::unique_lock<boost::shared_mutex>(rwlock), collection);
+    }
+#endif
 };
-
-#endif // BITCOIN_RWCOLLECTION_H

@@ -114,7 +114,7 @@ void ModalOverlay::tipUpdate(int count, const QDateTime &blockDate,
             QPair<qint64, double> sample = blockProcessTime[i];
 
             // take first sample after 500 seconds or last available one
-            if (sample.first < (currentDate.toMSecsSinceEpoch() - 500 * 1000) || i == blockProcessTime.size() - 1) {
+            if (sample.first < currentDateDiff || i == blockProcessTime.size() - 1) {
                 progressDelta = progressStart-sample.second;
                 timeDelta = blockProcessTime[0].first - sample.first;
                 progressPerHour = progressDelta/(double)timeDelta*1000*3600;

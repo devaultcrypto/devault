@@ -143,7 +143,7 @@ endif()
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   add_compiler_flag(-Wrange-loop-analysis)
   # For 17 we need BOOST_NO_AUTO_PTR defined for boost
-  add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR") # still needed?
+  add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_VARIANT")
 else()
   # secp256k1 Linux gcc
   add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
