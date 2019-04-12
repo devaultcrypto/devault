@@ -75,8 +75,10 @@ void SetPassphraseDialog::accept() {
 
     secureClearPassFields();
 
-    if (newpass1.empty() || newpass2.empty()) {
-        // Cannot encrypt with empty passphrase
+    if (newpass1.empty() || newpass2.empty() || (newpass1.size() < 4)) {
+        if (newpass1.size() < 4) QMessageBox::critical(this, tr("failed"), tr("The supplied passphrase is too short, it must be at least 4 characters"));
+        // Cannot encrypt with empty passphrase or less < 4 characters
+        newpass1.clear();
         return;
     }
     if (newpass1 == newpass2) {
