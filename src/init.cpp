@@ -482,6 +482,14 @@ std::string HelpMessage(HelpMessageMode mode) {
         "-txindex", strprintf(_("Maintain a full transaction index, used by "
                                 "the getrawtransaction rpc call (default: %d)"),
                               DEFAULT_TXINDEX));
+    strUsage += HelpMessageOpt("-addressindex", strprintf(_("Maintain a full address index, used to query for the balance,"
+                                                            " txids and unspent outputs for addresses (default: %u)"), DEFAULT_ADDRESSINDEX));
+#ifdef EXTRA_INDEXES    
+    strUsage += HelpMessageOpt("-timestampindex", strprintf(_("Maintain a timestamp index for block hashes,"
+                                                              " used to query blocks hashes by a range of timestamps (default: %u)"), DEFAULT_TIMESTAMPINDEX));
+    strUsage += HelpMessageOpt("-spentindex", strprintf(_("Maintain a full spent index, used to query the spending txid "
+                                                          "and input index for an outpoint (default: %u)"), DEFAULT_SPENTINDEX));
+#endif
     strUsage += HelpMessageGroup(_("Connection options:"));
     strUsage += HelpMessageOpt(
         "-addnode=<ip>",
@@ -2115,10 +2123,15 @@ bool AppInitMain(Config &config,
 
                 // Check for changed -txindex state
                 if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
-                    strLoadError = _("You need to rebuild the database using "
-                                     "-reindex-chainstate to change -txindex");
+                    strLoadError = _("You need to remove the blockchain files and restart due to -txindex change");
                     break;
                 }
+              
+                if (fAddressIndex != gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX)) {
+                    strLoadError = _("You need to remove the blockchain files and restart due to -addressindex change");
+                    break;
+                }
+
 
                 // Check for changed -prune state.  What we are concerned about
                 // is a user who has pruned blocks in the past, but is now

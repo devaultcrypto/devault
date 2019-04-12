@@ -6,6 +6,7 @@
 #ifndef BITCOIN_TXMEMPOOL_H
 #define BITCOIN_TXMEMPOOL_H
 
+#include "addrindex.h"
 #include "amount.h"
 #include "coins.h"
 #include "indirectmap.h"
@@ -563,6 +564,12 @@ private:
     typedef std::map<txiter, TxLinks, CompareIteratorByHash> txlinksMap;
     txlinksMap mapLinks;
 
+    typedef std::map<CMempoolAddrDeltaKey, CMempoolAddrDelta, CMempoolAddrDeltaKeyCompare> addrDeltaMap;
+    addrDeltaMap mapAddr;
+    
+    typedef std::map<uint256, std::vector<CMempoolAddrDeltaKey> > addrDeltaMapInserted;
+    addrDeltaMapInserted mapAddrInserted;
+    
     void UpdateParent(txiter entry, txiter parent, bool add);
     void UpdateChild(txiter entry, txiter child, bool add);
 
@@ -601,6 +608,12 @@ public:
     bool addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
                       setEntries &setAncestors, bool validFeeEstimate = true);
 
+    void addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCache &view);
+    bool getAddrIndex(std::vector<std::string> &addresses,
+                      std::vector<std::pair<CMempoolAddrDeltaKey, CMempoolAddrDelta> > &results);
+    bool removeAddrIndex(const uint256 txhash);
+    
+    
     void removeRecursive(
         const CTransaction &tx,
         MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);

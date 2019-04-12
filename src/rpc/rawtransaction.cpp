@@ -36,26 +36,26 @@
 
 #include <univalue.h>
 
-void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
-              UniValue &entry) {
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry) {
     // Call into TxToUniv() in bitcoin-common to decode the transaction hex.
     //
     // Blockchain contextual information (confirmations and blocktime) is not
     // available to code in bitcoin-common, so we query them here and push the
     // data into the returned UniValue.
     TxToUniv(tx, uint256(), entry, true, RPCSerializationFlags());
-
     if (!hashBlock.IsNull()) {
         entry.pushKV("blockhash", hashBlock.GetHex());
         BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
         if (mi != mapBlockIndex.end() && (*mi).second) {
             CBlockIndex *pindex = (*mi).second;
             if (chainActive.Contains(pindex)) {
+                entry.pushKV("height", pindex->nHeight);
                 entry.pushKV("confirmations",
                              1 + chainActive.Height() - pindex->nHeight);
                 entry.pushKV("time", pindex->GetBlockTime());
                 entry.pushKV("blocktime", pindex->GetBlockTime());
             } else {
+                entry.pushKV("height", -1);
                 entry.pushKV("confirmations", 0);
             }
         }
