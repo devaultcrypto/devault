@@ -2123,15 +2123,13 @@ bool AppInitMain(Config &config,
 
                 // Check for changed -txindex state
                 if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
-                    strLoadError = _("You need to rebuild the database using "
-                                     "-reindex-chainstate to change -txindex");
+                    strLoadError = _("You need to remove the blockchain files and restart due to -txindex change");
                     break;
                 }
               
                 if (fAddressIndex != gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX)) {
-                  strLoadError = _("You need to rebuild the database using "
-                                   "-reindex-chainstate to change -addressindex");
-                  break;
+                    strLoadError = _("You need to remove the blockchain files and restart due to -addressindex change");
+                    break;
                 }
 
 
