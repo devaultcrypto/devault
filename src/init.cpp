@@ -2123,13 +2123,15 @@ bool AppInitMain(Config &config,
 
                 // Check for changed -txindex state
                 if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
-                    strLoadError = _("You need to remove the blockchain files and restart due to -txindex change");
-                    break;
+                    strLoadError = _("In order to activate transaction indexing (-txindex) the current blockchain files (blocks & chainstate folders)" 
+				     " must be removed. DO NOT remove your 'wallets' folders or wallet.dat file");
+		    break;
                 }
               
                 if (fAddressIndex != gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX)) {
-                    strLoadError = _("You need to remove the blockchain files and restart due to -addressindex change");
-                    break;
+                    strLoadError = _("In order to activate address indexing (-addressindex) the current blockchain files (blocks & chainstate folders)" 
+				     " must be removed. DO NOT remove your 'wallets' folders or wallet.dat file");
+		    break;
                 }
 
 
@@ -2267,12 +2269,11 @@ bool AppInitMain(Config &config,
                 bool fRet;
                 uiInterface.ThreadSafeQuestion.fire(
                                                     strLoadError + ".\n\n" +
-                                                    _("Do you want to rebuild the block database now?"),
+                                                    _(""),
                                                     strLoadError + ".\nPlease restart with -reindex or "
                                                     "-reindex-chainstate to recover.",
                                                     "",
-                                                    CClientUIInterface::MSG_ERROR |
-                                                    CClientUIInterface::BTN_ABORT, &fRet);
+                                                    CClientUIInterface::MSG_ERROR, &fRet);
                 if (fRet) {
                     fReindex = true;
                     fRequestShutdown = false;
