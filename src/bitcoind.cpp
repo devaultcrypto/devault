@@ -55,27 +55,38 @@ void WaitForShutdown() {
 }
 
 void getPassphrase(SecureString& walletPassphrase) {
-  std::cout << "Enter a Wallet Encryption password (upto 80 characters long)\n";
+  std::cout << "Enter a Wallet Encryption password (at least 4 characters and upto 40 characters long)\n";
   SecureString pass1;
   SecureString pass2;
   int char_count=0; // This is used to handle Ctrl-C which would create
   // an infinite loop and crash below otherwise
   char c='0';
+  const int min_char_count = 2*4 + 1;
   do {
-    while (c != '\n') {
-      std::cin.get(c);
-      char_count++;
-      if (char_count++ > 80) exit(0);
-      if (c != '\n') pass1.push_back(c);
-    }
-    c = '0';
-    char_count = 0;
-    std::cout << "Confirm password\n";
-    while (c != '\n') {
-      std::cin.get(c);
-      if (char_count++ > 80) exit(0);
-      if (c != '\n') pass2.push_back(c);
-    }
+      do {
+          do {
+              std::cin.get(c);
+              char_count++;
+              if (char_count++ > 81) {
+                  // Don't print message, just exit because it can be due to Ctrl-C
+                  exit(0);
+              }
+              if (c != '\n') pass1.push_back(c);
+          } while (c != '\n');
+          if (char_count < min_char_count) {
+              std::cout << "Password must be at least 4 characters long, please retry\n";
+              char_count = 0;
+              pass1.clear();
+          }
+      } while (char_count < min_char_count);
+      c = '0';
+      char_count = 0;
+      std::cout << "Confirm password\n";
+      while (c != '\n') {
+          std::cin.get(c);
+          if (char_count++ > 81) exit(0);
+          if (c != '\n') pass2.push_back(c);
+      }
   } while (pass1 != pass2);
   walletPassphrase   = pass1;
 }
