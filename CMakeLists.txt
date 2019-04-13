@@ -1,6 +1,9 @@
 # Copyright (c) 2017 The Bitcoin developers
 
 cmake_minimum_required(VERSION 3.5)
+
+#cmake_policy(SET CMP0025 OLD)
+
 project(DeVault)
 
 # Add path for custom modules

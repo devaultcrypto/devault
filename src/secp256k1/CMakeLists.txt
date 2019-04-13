@@ -98,6 +98,7 @@ endfunction(add_secp256k1_bench)
 
 # ECDH module
 option(SECP256K1_ENABLE_MODULE_ECDH "Build libsecp256k1's ECDH module" OFF)
+add_feature_info(WITH_ECHD_MODULE SECP256K1_ENABLE_MODULE_ECDH "Build libsecp256k1's ECDH module")
 if(SECP256K1_ENABLE_MODULE_ECDH)
 	set(ENABLE_MODULE_ECDH 1)
 	add_secp256k1_bench(bench_ecdh src/bench_ecdh.c)
@@ -105,6 +106,7 @@ endif()
 
 # MultiSet module
 option(SECP256K1_ENABLE_MODULE_MULTISET "Build libsecp256k1's MULTISET module" ON)
+add_feature_info(WITH_MULTISET SECP256K1_ENABLE_MODULE_MULTISET "Build libsecp256k1's MULTISET module")
 if(SECP256K1_ENABLE_MODULE_MULTISET)
     set(ENABLE_MODULE_MULTISET 1)
 	add_secp256k1_bench(bench_multiset src/bench_multiset.c)
@@ -112,6 +114,7 @@ endif()
 
 # Recovery module
 option(SECP256K1_ENABLE_MODULE_RECOVERY "Build libsecp256k1's recovery module" ON)
+add_feature_info(WITH_MODULE_RECOVERY SECP256K1_ENABLE_MODULE_RECOVERY "Build libsecp256k1's recovery module")
 if(SECP256K1_ENABLE_MODULE_RECOVERY)
 	set(ENABLE_MODULE_RECOVERY 1)
 	add_secp256k1_bench(bench_recover src/bench_recover.c)
@@ -119,12 +122,14 @@ endif()
 
 # Schnorr module
 option(SECP256K1_ENABLE_MODULE_SCHNORR "Build libsecp256k1's Schnorr module" ON)
+add_feature_info(WITH_SCHNORR SECP256K1_ENABLE_MODULE_SCHNORR "Build libsecp256k1's Schnorr module")
 if(SECP256K1_ENABLE_MODULE_SCHNORR)
 	set(ENABLE_MODULE_SCHNORR 1)
 endif()
 
 # Static precomputation for eliptic curve mutliplication
 option(SECP256K1_ECMULT_STATIC_PRECOMPUTATION "Precompute libsecp256k1's eliptic curve mutliplication tables" ON)
+add_feature_info(WITH_PRECOMPUTATION SECP256K1_ECMULT_STATIC_PRECOMPUTATION "Precompute libsecp256k1's eliptic curve mutliplication tables")
 if(SECP256K1_ECMULT_STATIC_PRECOMPUTATION)
 	set(USE_ECMULT_STATIC_PRECOMPUTATION 1)
 
@@ -149,7 +154,8 @@ configure_file(src/libsecp256k1-config.h.cmake.in src/libsecp256k1-config.h ESCA
 target_compile_definitions(secp256k1 PRIVATE HAVE_CONFIG_H SECP256K1_BUILD)
 
 # Tests
-option(SECP256K1_BUILD_TEST "Build secp256k1's unit tests" ON)
+option(SECP256K1_BUILD_TEST "Build secp256k1's unit tests" OFF)
+add_feature_info(WITH_SECP256K1_TESTS SECP256K1_BUILD_TEST "Build secp256k1's unit tests")
 if(SECP256K1_BUILD_TEST)
 	include(TestSuite)
 	create_test_suite(secp256k1)

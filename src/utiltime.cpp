@@ -11,8 +11,10 @@
 
 #include <cassert>
 #include <atomic>
+#include <sstream>
+#include <iomanip> // for put_time
 #include <chrono>
-#include <boost/thread.hpp>
+#include <thread>
 
 //!< For unit testing
 static std::atomic<int64_t> nMockTime(0);
@@ -54,12 +56,7 @@ int64_t GetSystemTimeInSeconds() {
     return GetTimeMicros() / 1000000;
 }
 
-// Use this when we go to std::thread
-// void MilliSleep(int64_t n) { std::this_thread::sleep_for(std::chrono::milliseconds(n)); }
-
-void MilliSleep(int64_t n) {
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(n));
-}
+void MilliSleep(int64_t n) { std::this_thread::sleep_for(std::chrono::milliseconds(n)); }
 
 std::string DateTimeStrFormat(const char *pszFormat, int64_t nTime) {
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(nTime);

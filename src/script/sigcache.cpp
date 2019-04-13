@@ -12,11 +12,11 @@
 #include "uint256.h"
 #include "util.h"
 
-
 #ifdef HAVE_STD_SHARED_MUTEX
 #include <shared_mutex>
 #else
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 #endif
 
 namespace {

@@ -15,8 +15,7 @@
 #include "util.h"
 #include "validation.h"
 
-#include <boost/thread.hpp>
-
+#include <thread>
 #include <cstdint>
 
 static const char DB_COIN = 'C';
@@ -390,7 +389,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(
 
     // Load mapBlockIndex
     while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
+        interruption_point(ShutdownRequested());
         std::pair<char, uint256> key;
         if (!pcursor->GetKey(key) || key.first != DB_BLOCK_INDEX) {
             break;
@@ -504,10 +503,7 @@ bool CCoinsViewDB::Upgrade() {
     std::pair<uint8_t, uint256> key;
     std::pair<uint8_t, uint256> prev_key = {DB_COINS, uint256()};
     while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        if (ShutdownRequested()) {
-            break;
-        }
+        interruption_point(ShutdownRequested());
 
         if (!pcursor->GetKey(key) || key.first != DB_COINS) {
             break;

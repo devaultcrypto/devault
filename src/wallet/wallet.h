@@ -20,8 +20,6 @@
 #include "wallet/walletdb.h"
 #include "signals-cpp/signals.h"
 
-#include <boost/thread.hpp>
-
 #include <algorithm>
 #include <atomic>
 #include <cstdint>

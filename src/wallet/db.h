@@ -152,6 +152,7 @@ protected:
     bool fReadOnly;
     bool fFlushOnClose;
     CDBEnv *env;
+    std::atomic<bool> interrupt;
 
 public:
     explicit CDB(CWalletDBWrapper &dbw, const char *pszMode = "r+",
@@ -159,6 +160,7 @@ public:
     ~CDB() { Close(); }
 
     void Flush();
+    void Interrupt();
     void Close();
     static bool Recover(const std::string &filename, void *callbackDataIn,
                         bool (*recoverKVcallback)(void *callbackData,

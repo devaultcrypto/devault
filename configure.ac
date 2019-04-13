@@ -437,7 +437,7 @@ case $host in
        AC_MSG_ERROR("windres not found")
      fi
 
-     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB"
+     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DHAVE_STD_SHARED_MUTEX"
      LEVELDB_TARGET_FLAGS="-DOS_WINDOWS"
      if test "x$CXXFLAGS_overridden" = "xno"; then
        CXXFLAGS="$CXXFLAGS -w"
@@ -528,6 +528,7 @@ case $host in
      ;;
    *linux*)
      TARGET_OS=linux
+     CPPFLAGS="$CPPFLAGS -DHAVE_STD_SHARED_MUTEX"
      LEVELDB_TARGET_FLAGS="-DOS_LINUX"
      ;;
    *freebsd*)
@@ -537,6 +538,7 @@ case $host in
      LEVELDB_TARGET_FLAGS="-DOS_OPENBSD"
      ;;
    *)
+     CPPFLAGS="$CPPFLAGS -DHAVE_STD_SHARED_MUTEX"
      OTHER_OS=`echo ${host_os} | awk '{print toupper($0)}'`
      AC_MSG_WARN([Guessing LevelDB OS as OS_${OTHER_OS}, please check whether this is correct, if not add an entry to configure.ac.])
      LEVELDB_TARGET_FLAGS="-DOS_${OTHER_OS}"
@@ -809,7 +811,6 @@ AX_BOOST_BASE([MINIMUM_REQUIRED_BOOST])
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 AX_BOOST_THREAD
-AX_BOOST_CHRONO
 
 dnl Boost 1.56 through 1.62 allow using std::atomic instead of its own atomic
 dnl counter implementations. In 1.63 and later the std::atomic approach is default.
@@ -855,7 +856,11 @@ if test x$use_tests = xyes; then
 fi
 
 if test x$use_boost = xyes; then
-BOOST_LIBS="$BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_FILESYSTEM_LIB $BOOST_THREAD_LIB $BOOST_CHRONO_LIB"
+BOOST_LIBS="$BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_FILESYSTEM_LIB"
+fi
+
+if test x$TARGET_OS = xdarwin; then
+BOOST_LIBS="$BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_FILESYSTEM_LIB $BOOST_THREAD"
 fi
 
 if test x$use_pkgconfig = xyes; then

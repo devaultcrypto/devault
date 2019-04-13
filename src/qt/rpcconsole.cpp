@@ -965,10 +965,10 @@ void RPCConsole::updateNetworkState() {
         QString::number(clientModel->getNumConnections()) + " (";
     connections +=
         tr("In:") + " " +
-        QString::number(clientModel->getNumConnections(CONNECTIONS_IN)) + " / ";
+        QString::number(clientModel->getNumConnections(CConnman::CONNECTIONS_IN)) + " / ";
     connections +=
         tr("Out:") + " " +
-        QString::number(clientModel->getNumConnections(CONNECTIONS_OUT)) + ")";
+        QString::number(clientModel->getNumConnections(CConnman::CONNECTIONS_OUT)) + ")";
 
     if (!clientModel->getNetworkActive()) {
         connections += " (" + tr("Network activity disabled") + ")";

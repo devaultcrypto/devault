@@ -841,7 +841,7 @@ static int CommandLineRawTx(int argc, char *argv[],
         OutputTx(CTransaction(tx));
     }
 
-    catch (const boost::thread_interrupted &) {
+    catch (const thread_interrupted &) {
         throw;
     } catch (const std::exception &e) {
         strPrint = std::string("error: ") + e.what();

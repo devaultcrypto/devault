@@ -28,6 +28,8 @@ void StartShutdown();
 bool ShutdownRequested();
 /** Interrupt threads */
 void Interrupt();
+/** Interrupt all script checking threads once they're out of work */
+void InterruptThreadScriptCheck();
 void Shutdown();
 //! Initialize the logging infrastructure
 void InitLogging();

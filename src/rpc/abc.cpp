@@ -10,8 +10,6 @@
 
 #include <univalue.h>
 
-#include <boost/lexical_cast.hpp>
-
 static UniValue getexcessiveblock(const Config &config,
                                   const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 0) {
@@ -50,10 +48,7 @@ static UniValue setexcessiveblock(Config &config,
         ebs = request.params[0].get_int64();
     } else {
         std::string temp = request.params[0].get_str();
-        if (temp[0] == '-') {
-            boost::throw_exception(boost::bad_lexical_cast());
-        }
-        ebs = boost::lexical_cast<uint64_t>(temp);
+        ebs = std::stoi(temp);
     }
 
     // Do not allow maxBlockSize to be set below historic 1MB limit
