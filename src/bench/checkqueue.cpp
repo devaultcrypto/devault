@@ -9,7 +9,7 @@
 #include "util.h"
 #include "validation.h"
 
-#include <boost/thread/thread.hpp>
+#include <thread>
 
 #include <vector>
 
@@ -33,9 +33,9 @@ static void CCheckQueueSpeedPrevectorJob(benchmark::State &state) {
         void swap(PrevectorJob &x) { p.swap(x.p); };
     };
     CCheckQueue<PrevectorJob> queue{QUEUE_BATCH_SIZE};
-    boost::thread_group tg;
+    std::vector<std::thread> tg;
     for (auto x = 0; x < std::max(MIN_CORES, GetNumCores()); ++x) {
-        tg.create_thread([&] { queue.Thread(); });
+        tg.emplace_back(std::thread([&] { queue.Thread(); }));
     }
     while (state.KeepRunning()) {
         // Make insecure_rand here so that each iteration is identical.

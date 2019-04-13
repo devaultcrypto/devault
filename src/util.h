@@ -31,8 +31,7 @@
 #include <vector>
 
 #include "signals-cpp/signals.h"
-//#include <boost/optional.hpp>
-#include <boost/thread/condition_variable.hpp> // for boost::thread_interrupted
+#include <condition_variable>
 
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
@@ -48,6 +47,16 @@ extern CTranslationInterface translationInterface;
 
 extern const char *const BITCOIN_CONF_FILENAME;
 extern const char *const BITCOIN_PID_FILENAME;
+
+
+class thread_interrupted {};
+
+inline void interruption_point(bool interrupt) {
+    if (interrupt) {
+        throw thread_interrupted();
+    }
+}
+
 
 /**
  * Translation function: Call Translate signal on UI interface, which returns a
@@ -263,7 +272,7 @@ template <typename Callable> void TraceThread(const char *name, Callable func) {
         LogPrintf("%s thread start\n", name);
         func();
         LogPrintf("%s thread exit\n", name);
-    } catch (const boost::thread_interrupted &) {
+    } catch (const thread_interrupted &) {
         LogPrintf("%s thread interrupt\n", name);
         throw;
     } catch (const std::exception &e) {

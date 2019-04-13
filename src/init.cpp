@@ -57,13 +57,13 @@
 #include <cstdint>
 #include <cstdio>
 #include <memory>
+#include <thread>
 
 #ifndef WIN32
 #include <signal.h>
 #endif
 
 #include <boost/interprocess/sync/file_lock.hpp>
-#include <boost/thread.hpp>
 
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
@@ -177,7 +177,12 @@ static std::unique_ptr<CCoinsViewErrorCatcher> pcoinscatcher;
 ////static std::unique_ptr<CCoinsViewErrorCatcher> prewardscatcher;
 static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
-static boost::thread_group threadGroup;
+
+static std::thread scheduler_thread;
+static std::vector<std::thread> script_check_threads;
+static std::thread import_thread;
+
+
 static CScheduler scheduler;
 
 void Interrupt() {
@@ -187,6 +192,8 @@ void Interrupt() {
     InterruptREST();
     InterruptTorControl();
     InterruptMapPort();
+    scheduler.interrupt(false);
+    InterruptThreadScriptCheck();
     if (g_connman) {
         g_connman->Interrupt();
     }
@@ -229,8 +236,11 @@ void Shutdown() {
 
     // After everything has been shut down, but before things get flushed, stop
     // the CScheduler/checkqueue threadGroup
-    threadGroup.interrupt_all();
-    threadGroup.join_all();
+    scheduler.stop();
+    if (scheduler_thread.joinable()) scheduler_thread.join();
+    for (auto&& thread : script_check_threads) thread.join();
+    script_check_threads.clear();
+    if (import_thread.joinable()) import_thread.join();
 
     if (fDumpMempoolLater &&
         gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
@@ -1579,7 +1589,8 @@ bool AppInitParameterInteraction(Config &config, RPCServer &rpcServer) {
     } else if (nScriptCheckThreads > MAX_SCRIPTCHECK_THREADS) {
         nScriptCheckThreads = MAX_SCRIPTCHECK_THREADS;
     }
-
+ 
+    
     // Configure excessive block size.
     const uint64_t nProposedExcessiveBlockSize =
         gArgs.GetArg("-excessiveblocksize", DEFAULT_MAX_BLOCK_SIZE);
@@ -1849,19 +1860,16 @@ bool AppInitMain(Config &config,
     InitSignatureCache();
     InitScriptExecutionCache();
 
-    LogPrintf("Using %u threads for script verification\n",
-              nScriptCheckThreads);
+    LogPrintf("Using %u threads for script verification\n",              nScriptCheckThreads);
     if (nScriptCheckThreads) {
-        for (int i = 0; i < nScriptCheckThreads - 1; i++) {
-            threadGroup.create_thread(&ThreadScriptCheck);
-        }
+        script_check_threads.reserve(nScriptCheckThreads - 1);
+        for (int i = 0; i < nScriptCheckThreads - 1; i++) script_check_threads.emplace_back(&ThreadScriptCheck);
     }
 
+    
     // Start the lightweight task scheduler thread
-    CScheduler::Function serviceLoop =
-      std::bind(&CScheduler::serviceQueue, &scheduler);
-    threadGroup.create_thread(std::bind(&TraceThread<CScheduler::Function>,
-                                          "scheduler", serviceLoop));
+    CScheduler::Function serviceLoop = std::bind(&CScheduler::serviceQueue, &scheduler);
+    scheduler_thread = std::thread(std::bind(&TraceThread<CScheduler::Function>, "scheduler", serviceLoop));
 
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
     GetMainSignals().RegisterWithMempoolSignals(g_mempool);
@@ -2135,6 +2143,7 @@ bool AppInitMain(Config &config,
                 }
 
 
+
                 // Check for changed -prune state.  What we are concerned about
                 // is a user who has pruned blocks in the past, but is now
                 // trying to run unpruned.
@@ -2339,8 +2348,10 @@ bool AppInitMain(Config &config,
         vImportFiles.push_back(strFile);
     }
 
-    threadGroup.create_thread(
-                              std::bind(&ThreadImport, std::ref(config), vImportFiles));
+    auto import_bind = std::bind(ThreadImport, std::ref(config), vImportFiles);
+    import_thread = std::thread(&TraceThread<decltype(import_bind)>, "bitcoin-import", std::move(import_bind));
+    
+    //threadGroup.create_thread(std::bind(&ThreadImport, std::ref(config), vImportFiles));
 
     // Wait for genesis block to be processed
     {

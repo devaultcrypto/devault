@@ -13,8 +13,7 @@
 #include "utilstrencodings.h"
 #include "wallet/walletutil.h"
 
-#include <boost/thread.hpp>
-#include <boost/version.hpp>
+#include <thread>
 
 #include <cstdint>
 
@@ -109,7 +108,7 @@ bool CDBEnv::Open(const fs::path &pathIn) {
         return true;
     }
 
-    boost::this_thread::interruption_point();
+    //interruption_point(interrupt);
 
     strPath = pathIn.string();
     fs::path pathLogDir = pathIn / "database";
@@ -156,7 +155,7 @@ void CDBEnv::MakeMock() {
         throw std::runtime_error("CDBEnv::MakeMock: Already initialized");
     }
 
-    boost::this_thread::interruption_point();
+    //interruption_point(interrupt);
 
     LogPrint(BCLog::DB, "CDBEnv::MakeMock\n");
 
@@ -199,6 +198,8 @@ CDBEnv::VerifyResult CDBEnv::Verify(const std::string &strFile,
     bool fRecovered = (*recoverFunc)(strFile, out_backup_filename);
     return (fRecovered ? VerifyResult::RECOVER_OK : VerifyResult::RECOVER_FAIL);
 }
+
+void CDB::Interrupt() { interrupt = true; }
 
 bool CDB::Recover(const std::string &filename, void *callbackDataIn,
                   bool (*recoverKVcallback)(void *callbackData,
@@ -417,6 +418,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
     fReadOnly = (!strchr(pszMode, '+') && !strchr(pszMode, 'w'));
     fFlushOnClose = fFlushOnCloseIn;
     env = dbw.env;
+    interrupt=false;
     if (dbw.IsDummy()) {
         return;
     }
@@ -703,7 +705,7 @@ bool CDB::PeriodicFlush(CWalletDBWrapper &dbw) {
         }
 
         if (nRefCount == 0) {
-            boost::this_thread::interruption_point();
+            //interruption_point(interrupt);
             std::map<std::string, int>::iterator mi =
                 env->mapFileUseCount.find(strFile);
             if (mi != env->mapFileUseCount.end()) {

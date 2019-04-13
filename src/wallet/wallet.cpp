@@ -36,8 +36,6 @@
 #include "wallet/finaltx.h"
 #include "wallet/mnemonic.h"
 
-#include <boost/algorithm/string/replace.hpp>
-
 #include <cassert>
 #include <future>
 #include <random>
@@ -1027,7 +1025,7 @@ bool CWallet::AddToWallet(const CWalletTx &wtxIn, bool fFlushOnClose) {
     std::string strCmd = gArgs.GetArg("-walletnotify", "");
 
     if (!strCmd.empty()) {
-        boost::replace_all(strCmd, "%s", wtxIn.GetId().GetHex());
+        strCmd.replace(strCmd.find("%s"), 2, wtxIn.GetId().GetHex());
         std::thread t(runCommand, strCmd);
         // Thread runs free.
         t.detach();

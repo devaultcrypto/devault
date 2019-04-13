@@ -76,7 +76,7 @@
 #include <malloc.h>
 #endif
 
-#include <boost/thread.hpp>
+#include <thread>
 
 #include <openssl/conf.h>
 #include <openssl/rand.h>
@@ -703,7 +703,7 @@ void ClearDatadirCache() {
 
 fs::path GetConfigFile(const std::string &confPath) {
     fs::path pathConfigFile(confPath);
-    if (!pathConfigFile.is_complete()) {
+    if (!pathConfigFile.is_absolute()) {
         pathConfigFile = GetDataDir(false) / pathConfigFile;
     }
 
@@ -800,7 +800,7 @@ std::string ArgsManager::GetChainName() const {
 #ifndef WIN32
 fs::path GetPidFile() {
     fs::path pathPidFile(gArgs.GetArg("-pid", BITCOIN_PID_FILENAME));
-    if (!pathPidFile.is_complete()) {
+    if (!pathPidFile.is_absolute()) {
         pathPidFile = GetDataDir() / pathPidFile;
     }
     return pathPidFile;
@@ -1028,7 +1028,7 @@ bool SetupNetworking() {
 }
 
 int GetNumCores() {
-    return boost::thread::physical_concurrency();
+    return std::thread::hardware_concurrency();
 }
 
 std::string CopyrightHolders(const std::string &strPrefix) {

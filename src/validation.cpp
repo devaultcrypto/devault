@@ -54,7 +54,7 @@
 #include <thread>
 #include <functional> // for bind
 
-#include <boost/thread.hpp>
+#include <thread>
 
 #if defined(NDEBUG)
 #error "DeVault cannot be compiled without assertions."
@@ -1620,6 +1620,9 @@ void ThreadScriptCheck() {
     scriptcheckqueue.Thread();
 }
 
+void InterruptThreadScriptCheck() { scriptcheckqueue.Interrupt(); }
+
+
 int32_t ComputeBlockVersion(const CBlockIndex *pindexPrev,
                             const Consensus::Params &params) {
     int32_t nVersion = VERSIONBITS_TOP_BITS;
@@ -2952,17 +2955,13 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
     CBlockIndex *pindexMostWork = nullptr;
     CBlockIndex *pindexNewTip = nullptr;
     do {
-        boost::this_thread::interruption_point();
+        interruption_point(ShutdownRequested());
 
         if (GetMainSignals().CallbacksPending() > 10) {
             // Block until the validation queue drains. This should largely
             // never happen in normal operation, however may happen during
             // reindex, causing memory blowup  if we run too far ahead.
             SyncWithValidationInterfaceQueue();
-        }
-
-        if (ShutdownRequested()) {
-            break;
         }
 
         const CBlockIndex *pindexFork;
@@ -4416,7 +4415,7 @@ static bool LoadBlockIndexDB(const Config &config) {
         return false;
     }
 
-    boost::this_thread::interruption_point();
+    interruption_point(ShutdownRequested());
 
     // Calculate nChainWork
     std::vector<std::pair<int, CBlockIndex *>> vSortedByHeight;
@@ -4610,21 +4609,18 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
     LogPrintf("[0%%]...");
     for (CBlockIndex *pindex = chainActive.Tip(); pindex && pindex->pprev;
          pindex = pindex->pprev) {
-        boost::this_thread::interruption_point();
-        int percentageDone = std::max(
-            1, std::min(
-                   99,
-                   (int)(((double)(chainActive.Height() - pindex->nHeight)) /
-                         (double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100))));
+        interruption_point(ShutdownRequested());
+        int percentageDone = std::max(1, std::min(99,
+                                                  (int)(((double)(chainActive.Height() - pindex->nHeight)) /
+                                                        (double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100))));
 
         if (reportDone < percentageDone / 10) {
             // report every 10% step
             LogPrintf("[%d%%]...", percentageDone);
             reportDone = percentageDone / 10;
         }
-
-        uiInterface.ShowProgress.fire(_("Verifying blocks..."), percentageDone,
-                                 false);
+        
+        uiInterface.ShowProgress.fire(_("Verifying blocks..."), percentageDone, false);
         if (pindex->nHeight < chainActive.Height() - nCheckDepth) {
             break;
         }
@@ -4689,9 +4685,6 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
             }
         }
 
-        if (ShutdownRequested()) {
-            return true;
-        }
     }
 
     if (pindexFailure) {
@@ -4705,7 +4698,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
     if (nCheckLevel >= 4) {
         CBlockIndex *pindex = pindexState;
         while (pindex != chainActive.Tip()) {
-            boost::this_thread::interruption_point();
+            interruption_point(ShutdownRequested());
             uiInterface.ShowProgress.fire(
                 _("Verifying blocks..."),
                 std::max(
@@ -5032,7 +5025,7 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                              CLIENT_VERSION);
         uint64_t nRewind = blkdat.GetPos();
         while (!blkdat.eof()) {
-            boost::this_thread::interruption_point();
+            interruption_point(ShutdownRequested());
 
             blkdat.SetPos(nRewind);
             // Start one byte further next time, in case of failure.
@@ -5532,6 +5525,7 @@ bool LoadMempool(const Config &config) {
         file >> num;
         double prioritydummy = 0;
         while (num--) {
+            interruption_point(ShutdownRequested());
             CTransactionRef tx;
             int64_t nTime;
             int64_t nFeeDelta;
@@ -5557,10 +5551,6 @@ bool LoadMempool(const Config &config) {
                 }
             } else {
                 ++skipped;
-            }
-
-            if (ShutdownRequested()) {
-                return false;
             }
         }
         std::map<uint256, Amount> mapDeltas;

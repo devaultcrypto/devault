@@ -7,12 +7,12 @@
 
 #include "noncopyable.h"
 #include <boost/range/iterator.hpp>
-#include <boost/thread/locks.hpp>
 
 #ifdef HAVE_STD_SHARED_MUTEX
 #include <shared_mutex>
 #else
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 #endif
 
 #include <iterator>

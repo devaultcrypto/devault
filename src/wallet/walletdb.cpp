@@ -20,9 +20,7 @@
 #include "utiltime.h"
 #include "wallet/wallet.h"
 
-#include <boost/thread.hpp>
-#include <boost/version.hpp>
-
+#include <thread>
 #include <atomic>
 
 //
@@ -609,7 +607,7 @@ DBErrors CWalletDB::LoadWallet(CWallet *pwallet) {
         //LogPrintf("nKeysLeftSinceAutoBackup: %d\n", pwallet->nKeysLeftSinceAutoBackup);
 
         
-    } catch (const boost::thread_interrupted &) {
+    } catch (const thread_interrupted &) {
         throw;
     } catch (...) {
         result = DBErrors::CORRUPT;
@@ -711,7 +709,7 @@ DBErrors CWalletDB::FindWalletTx(std::vector<TxId> &txIds,
             }
         }
         pcursor->close();
-    } catch (const boost::thread_interrupted &) {
+    } catch (const thread_interrupted &) {
         throw;
     } catch (...) {
         result = DBErrors::CORRUPT;

@@ -22,16 +22,25 @@
 #include "wallet.h"
 #include "mnemonic.h"
 #include "utilsplitstring.h"
-#include <string.h> // for memcpy
-#include <boost/algorithm/string.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <string.h> // for memcpy
 #include <univalue.h>
 
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <iomanip> // for get_time
 
+int64_t static DecodeDumpTime(const std::string& str) {
+#pragma warning "Need to check as converted from boost, also no locale";
+  std::istringstream iss(str);
+  std::tm tm = {};
+  iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
+  auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+  return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+  // return (ptime - epoch).total_seconds();
+}
+/*
 static int64_t DecodeDumpTime(const std::string &str) {
     static const boost::posix_time::ptime epoch =
         boost::posix_time::from_time_t(0);
@@ -45,6 +54,7 @@ static int64_t DecodeDumpTime(const std::string &str) {
     if (ptime.is_not_a_date_time()) return 0;
     return (ptime - epoch).total_seconds();
 }
+*/
 
 static std::string EncodeDumpString(const std::string &str) {
     std::stringstream ret;
@@ -576,7 +586,7 @@ UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
         }
 
         std::vector<std::string> vstr;
-        boost::split(vstr, line, boost::is_any_of(" "));
+        Split(vstr, line, " ");
         if (vstr.size() < 2) {
             continue;
         }
@@ -594,16 +604,14 @@ UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
             std::string strLabel;
             bool fLabel = true;
             for (unsigned int nStr = 2; nStr < vstr.size(); nStr++) {
-                if (boost::algorithm::starts_with(vstr[nStr], "#")) {
-                    break;
-                }
+                if (vstr[nStr].substr(0,1) == "#") break;
                 if (vstr[nStr] == "change=1") {
                     fLabel = false;
                 }
                 if (vstr[nStr] == "reserve=1") {
                     fLabel = false;
                 }
-                if (boost::algorithm::starts_with(vstr[nStr], "label=")) {
+                if (vstr[nStr].substr(0,6) == "label=") {
                     strLabel = DecodeDumpString(vstr[nStr].substr(6));
                     fLabel = true;
                 }
