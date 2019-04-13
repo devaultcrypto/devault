@@ -924,25 +924,28 @@ else
     esac
   fi
 
-  if test "x$use_rocksdb" = "xyes"; then
-     AC_CHECK_HEADER([rocksdb/db.h],
-       [AC_DEFINE([ENABLE_ROCKSDB],[1],[Define to 1 to enable ROCKSDB functions])],
-       [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
-        use_zmq=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-     AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-l:librocksdb.a,
-       [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
-        use_rocksdb=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-     BITCOIN_QT_CHECK([AC_CHECK_LIB([rocksdb], [main],[ROCSKDB_LIBS=-l:librocksdb.a], [have_rocksdb=no])])
-  else
-    AC_DEFINE_UNQUOTED([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])
-  fi
 
   if test x$use_qr != xno; then
     BITCOIN_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])
     BITCOIN_QT_CHECK([AC_CHECK_HEADER([qrencode.h],, have_qrencode=no)])
   fi
+fi
+
+
+if test "x$use_rocksdb" = "xyes"; then
+   AC_CHECK_HEADER([rocksdb/db.h],
+       [AC_DEFINE([ENABLE_ROCKSDB],[1],[Define to 1 to enable ROCKSDB functions])],
+       [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
+        use_rocksdb=no
+        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
+        ROCKSDB_LIBS=-lrocksdb
+   AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-lrocksdb,
+       [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
+        use_rocksdb=no
+        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
+   BITCOIN_QT_CHECK([AC_CHECK_LIB([rocksdb], [main],[ROCSKDB_LIBS=-lrocksdb], [have_rocksdb=no])])
+else
+   AC_DEFINE_UNQUOTED([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
