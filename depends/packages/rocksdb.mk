@@ -12,7 +12,11 @@ else
 ifeq ($(host_os),darwin)
 	sys_os=Darwin
 else
+ifeq ($(host_os),linux)
+	sys_os=Linux
+else  
 	sys_os=$(host_os)
+endif	
 endif	
 endif	
 
