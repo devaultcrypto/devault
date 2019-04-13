@@ -559,7 +559,7 @@ devault_seeder_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-devault_seeder_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+devault_seeder_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(ROCKSDB_LIBS)
 #
 
 # devault-tx binary #
