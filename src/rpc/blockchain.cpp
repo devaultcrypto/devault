@@ -30,8 +30,9 @@
 #include "validation.h"
 #include "warnings.h"
 #include "cashaddrenc.h"
+#include "init.h" // for ShutdownRequested
 
-#include <boost/thread/thread.hpp> // boost::thread::interrupt
+#include <thread> // boost::thread::interrupt
 
 #include <condition_variable>
 #include <cstdint>
@@ -1151,7 +1152,7 @@ static bool GetUTXOStats(CCoinsView *view, CCoinsStats &stats) {
     uint256 prevkey;
     std::map<uint32_t, Coin> outputs;
     while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
+        interruption_point(ShutdownRequested());
         COutPoint key;
         Coin coin;
         if (pcursor->GetKey(key) && pcursor->GetValue(coin)) {
@@ -1405,29 +1406,6 @@ UniValue verifychain(const Config &config, const JSONRPCRequest &request) {
                                 nCheckDepth);
 }
 
-/** Implementation of IsSuperMajority with better feedback */
-static UniValue SoftForkMajorityDesc(int version, CBlockIndex *pindex,
-                                     const Consensus::Params &consensusParams) {
-    UniValue rv(UniValue::VOBJ);
-    bool activated = false;
-    switch (version) {
-        case 5:
-            activated = true;
-            break;
-    }
-    rv.pushKV("status", activated);
-    return rv;
-}
-
-static UniValue SoftForkDesc(const std::string &name, int version,
-                             CBlockIndex *pindex,
-                             const Consensus::Params &consensusParams) {
-    UniValue rv(UniValue::VOBJ);
-    rv.pushKV("id", name);
-    rv.pushKV("version", version);
-    rv.pushKV("reject", SoftForkMajorityDesc(version, pindex, consensusParams));
-    return rv;
-}
 
 UniValue getblockchaininfo(const Config &config,
                            const JSONRPCRequest &request) {

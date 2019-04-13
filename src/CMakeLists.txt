@@ -143,7 +143,7 @@ endif()
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   add_compiler_flag(-Wrange-loop-analysis)
   # For 17 we need BOOST_NO_AUTO_PTR defined for boost
-  add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_VARIANT")
+  add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
 else()
   # secp256k1 Linux gcc
   add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
@@ -276,7 +276,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 # Boost packages
-set(BOOST_PACKAGES_REQUIRED filesystem thread)
+find_package(Filesystem)
+if (Filesystem_FOUND)
+  message(STATUS "Found filesystem")
+else()
+  set(BOOST_PACKAGES_REQUIRED filesystem)
+endif()
 
 function(prepend var prefix)
 	set(listVar "")
@@ -286,10 +291,14 @@ function(prepend var prefix)
 	set(${var} "${listVar}" PARENT_SCOPE)
 endfunction(prepend)
 
-prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
+if (NOT Filesystem_FOUND)
+  prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
 
-find_package(Boost 1.58 REQUIRED ${BOOST_PACKAGES_REQUIRED})
-target_link_libraries(util univalue crypto ${BOOST_LIBRARIES})
+  find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  target_link_libraries(util univalue crypto ${BOOST_LIBRARIES})
+else()
+  target_link_libraries(util univalue crypto std::filesystem)
+endif()
 
 # Make sure boost uses std::atomic (it doesn't before 1.63)
 target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_ATOMIC)

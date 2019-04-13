@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <vector>
 
-#include <boost/thread/condition_variable.hpp>
-#include <boost/thread/mutex.hpp>
+#include <condition_variable>
+#include <mutex>
 
 template <typename T> class CCheckQueueControl;
 
@@ -28,13 +28,13 @@ template <typename T> class CCheckQueueControl;
 template <typename T> class CCheckQueue {
 private:
     //! Mutex to protect the inner state
-    boost::mutex mutex;
+    std::mutex mutex;
 
     //! Worker threads block on this when out of work
-    boost::condition_variable condWorker;
+    std::condition_variable condWorker;
 
     //! Master thread blocks on this when out of work
-    boost::condition_variable condMaster;
+    std::condition_variable condMaster;
 
     //! The queue of elements to be processed.
     //! As the order of booleans doesn't matter, it is used as a LIFO (stack)
@@ -49,6 +49,9 @@ private:
     //! The temporary evaluation result.
     bool fAllOk;
 
+    //! Whether we are shutting done
+    bool fQuit;
+
     /**
      * Number of verifications that haven't completed yet.
      * This includes elements that are no longer queued, but still in the
@@ -61,14 +64,14 @@ private:
 
     /** Internal function that does bulk of the verification work. */
     bool Loop(bool fMaster = false) {
-        boost::condition_variable &cond = fMaster ? condMaster : condWorker;
+        std::condition_variable &cond = fMaster ? condMaster : condWorker;
         std::vector<T> vChecks;
         vChecks.reserve(nBatchSize);
         unsigned int nNow = 0;
         bool fOk = true;
         do {
             {
-                boost::unique_lock<boost::mutex> lock(mutex);
+                std::unique_lock<std::mutex> lock(mutex);
                 // first do the clean-up of the previous loop run (allowing us
                 // to do it in the same critsect)
                 if (nNow) {
@@ -85,7 +88,7 @@ private:
                 }
                 // logically, the do loop starts here
                 while (queue.empty()) {
-                    if (fMaster && nTodo == 0) {
+                    if ((fMaster || fQuit) && nTodo == 0) {
                         nTotal--;
                         bool fRet = fAllOk;
                         // reset the status for new work later
@@ -96,7 +99,7 @@ private:
                         return fRet;
                     }
                     nIdle++;
-                    cond.wait(lock); // wait
+                    cond.wait(lock, [this, fMaster] { return !queue.empty() || ((fMaster || fQuit) && nTodo == 0); });
                     nIdle--;
                 }
                 // Decide how many work units to process now.
@@ -133,15 +136,24 @@ private:
 
 public:
     //! Mutex to ensure only one concurrent CCheckQueueControl
-    boost::mutex ControlMutex;
+    std::mutex ControlMutex;
 
     //! Create a new check queue
     explicit CCheckQueue(unsigned int nBatchSizeIn)
-        : nIdle(0), nTotal(0), fAllOk(true), nTodo(0),
-          nBatchSize(nBatchSizeIn) {}
+        : nIdle(0), nTotal(0), fAllOk(true), fQuit(false), nTodo(0),nBatchSize(nBatchSizeIn) {}
 
     //! Worker thread
     void Thread() { Loop(); }
+
+    void Interrupt() {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            fQuit = true;
+        }
+        condWorker.notify_all();
+        condMaster.notify_all();
+    }
+
 
     //! Wait until execution finishes, and return whether all evaluations were
     //! successful.
@@ -149,7 +161,7 @@ public:
 
     //! Add a batch of checks to the queue
     void Add(std::vector<T> &vChecks) {
-        boost::unique_lock<boost::mutex> lock(mutex);
+        std::unique_lock<std::mutex> lock(mutex);
         for (T &check : vChecks) {
             queue.push_back(T());
             check.swap(queue.back());

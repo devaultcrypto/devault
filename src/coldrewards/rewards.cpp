@@ -15,8 +15,6 @@
 #include "script/standard.h"
 #include "validation.h"
 
-#include <boost/thread.hpp>
-
 using namespace std;
 
 CCriticalSection cs_rewardsdb;
@@ -121,8 +119,7 @@ bool CColdRewards::FindReward(const Consensus::Params& consensusParams, int Heig
   bool found = false;
   auto *pcursor = pdb->Cursor();
   while (pcursor->Valid()) {
-    boost::this_thread::interruption_point();
-    if (ShutdownRequested()) { break; }
+    interruption_point(ShutdownRequested());
 
     if (!pcursor->GetKey(key)) { break; }
 

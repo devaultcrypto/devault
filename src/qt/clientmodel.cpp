@@ -51,11 +51,11 @@ ClientModel::~ClientModel() {
 int ClientModel::getNumConnections(unsigned int flags) const {
     CConnman::NumConnections connections = CConnman::CONNECTIONS_NONE;
 
-    if (flags == CONNECTIONS_IN)
+    if (flags == CConnman::CONNECTIONS_IN)
         connections = CConnman::CONNECTIONS_IN;
-    else if (flags == CONNECTIONS_OUT)
+    else if (flags == CConnman::CONNECTIONS_OUT)
         connections = CConnman::CONNECTIONS_OUT;
-    else if (flags == CONNECTIONS_ALL)
+    else if (flags == CConnman::CONNECTIONS_ALL)
         connections = CConnman::CONNECTIONS_ALL;
 
     if (g_connman) return g_connman->GetNodeCount(connections);

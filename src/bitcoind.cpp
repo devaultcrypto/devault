@@ -21,9 +21,9 @@
 #include "utilstrencodings.h"
 #include "walletinitinterface.h"
 #include "support/allocators/secure.h"
-#include <cstdint>
-#include <boost/thread.hpp>
 
+#include <cstdint>
+#include <thread>
 #include <cstdio>
 
 /* Introduction text for doxygen: */

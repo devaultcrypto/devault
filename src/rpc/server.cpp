@@ -14,13 +14,10 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "utilsplitstring.h"
 #include "signals-cpp/signals.h"
 
 #include <univalue.h>
-
-#include <boost/algorithm/string/case_conv.hpp> // for to_upper()
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <memory> // for unique_ptr
 #include <functional> // for bind
@@ -270,7 +267,7 @@ std::string CRPCTable::help(Config &config, const std::string &strCommand,
                     }
                     category = pcmd->category;
                     std::string firstLetter = category.substr(0, 1);
-                    boost::to_upper(firstLetter);
+                    ToUpper(firstLetter[0]);
                     strRet +=
                         "== " + firstLetter + category.substr(1) + " ==\n";
                 }
@@ -488,8 +485,7 @@ transformNamedArguments(const JSONRPCRequest &in,
     int hole = 0;
     for (const std::string &argNamePattern : argNames) {
         std::vector<std::string> vargNames;
-        boost::algorithm::split(vargNames, argNamePattern,
-                                boost::algorithm::is_any_of("|"));
+        Split(vargNames, argNamePattern, "|");
         auto fr = argsIn.end();
         for (const std::string &argName : vargNames) {
             fr = argsIn.find(argName);
