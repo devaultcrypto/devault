@@ -22,7 +22,7 @@ env:
     - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
     - SDK_URL=http://proteanx.com/sdk
     - WINEDEBUG=fixme-all
-    - DOCKER_PACKAGES="build-essential libtool cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache"
+    - DOCKER_PACKAGES="build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache"
 before_install:
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/pyenv/d' | tr "\n" ":" | sed "s|::|:|g")
@@ -43,7 +43,7 @@ jobs:
     - name: 'ARM'
       env: >-
         HOST=arm-linux-gnueabihf
-        PACKAGES="cmake python3 g++-arm-linux-gnueabihf gperf"
+        PACKAGES="python3 g++-arm-linux-gnueabihf gperf"
         DEP_OPTS="NO_QT=1"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
@@ -53,7 +53,7 @@ jobs:
     - name: '32-bit Linux + dash'
       env: >-
         HOST=i686-pc-linux-gnu
-        PACKAGES="cmake g++-multilib python3-zmq bc gperf"
+        PACKAGES="g++-multilib python3-zmq bc gperf"
         DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
@@ -64,7 +64,7 @@ jobs:
     - name: '64-bit Linux (bionic)'
       env: >-
         HOST=x86_64-unknown-linux-gnu
-        PACKAGES="cmake python3-zmq qtbase5-dev qttools5-dev-tools protobuf-compiler libdbus-1-dev libharfbuzz-dev libprotobuf-dev"
+        PACKAGES="python3-zmq qtbase5-dev qttools5-dev-tools protobuf-compiler libdbus-1-dev libharfbuzz-dev libprotobuf-dev"
         DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1 ALLOW_HOST_PACKAGES=1"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
@@ -75,7 +75,7 @@ jobs:
       env: >-
         HOST=x86_64-unknown-linux-gnu
         DOCKER_NAME_TAG=ubuntu:16.04
-        PACKAGES="cmake g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev"
+        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev"
         NO_DEPENDS=1
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
@@ -86,7 +86,7 @@ jobs:
       env: >-
         HOST=i686-w64-mingw32
         DPKG_ADD_ARCH="i386"
-        PACKAGES="cmake python3 nsis g++-mingw-w64-i686 wine-binfmt wine32"
+        PACKAGES="python3 nsis g++-mingw-w64-i686 wine-binfmt wine32"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="deploy"
@@ -95,7 +95,7 @@ jobs:
     - name: 'Win64'
       env: >-
         HOST=x86_64-w64-mingw32
-        PACKAGES="cmake python3 nsis g++-mingw-w64-x86-64 wine-binfmt wine64"
+        PACKAGES="python3 nsis g++-mingw-w64-x86-64 wine-binfmt wine64"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="deploy"
