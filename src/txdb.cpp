@@ -294,7 +294,7 @@ bool CBlockTreeDB::ReadAddrIndex(const std::string& addr,
     }
     
     while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
+        interruption_point(ShutdownRequested());
         std::pair<char,CAddrIndexKey> key;
         if (pcursor->GetKey(key) && key.first == DB_ADDRESSINDEX) {
             if (key.second.addr == addr) {
@@ -332,7 +332,7 @@ bool CBlockTreeDB::ReadTimestampIndex(const unsigned int &high, const unsigned i
     pcursor->Seek(std::make_pair(DB_TIMESTAMPINDEX, CTimestampIndexIteratorKey(low)));
     
     while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
+        interruption_point(ShutdownRequested());
         std::pair<char, CTimestampIndexKey> key;
         if (pcursor->GetKey(key) && key.first == DB_TIMESTAMPINDEX && key.second.timestamp < high) {
             if (fActiveOnly) {
