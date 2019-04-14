@@ -1,4 +1,4 @@
-packages:=boost openssl libevent zeromq
+packages:=rocksdb boost openssl libevent zeromq
 native_packages := native_ccache
 
 qt_native_packages = 
