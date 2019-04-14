@@ -43,7 +43,7 @@ jobs:
     - name: 'ARM'
       env: >-
         HOST=arm-linux-gnueabihf
-        PACKAGES="cmake python3 g++-arm-linux-gnueabihf gperf"
+        PACKAGES="python3 g++-arm-linux-gnueabihf gperf"
         DEP_OPTS="NO_QT=1"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
@@ -54,7 +54,7 @@ jobs:
       env: >-
         HOST=i686-pc-linux-gnu
         PACKAGES="cmake g++-multilib python3-zmq bc gperf"
-        DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1"
+        DEP_OPTS="NO_QT=1 NO_UPNP=1"
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="install"
@@ -64,23 +64,23 @@ jobs:
     - name: '64-bit Linux (bionic)'
       env: >-
         HOST=x86_64-unknown-linux-gnu
-        PACKAGES="cmake python3-zmq qtbase5-dev qttools5-dev-tools protobuf-compiler libdbus-1-dev libharfbuzz-dev libprotobuf-dev"
-        DEP_OPTS="NO_QT=1 NO_UPNP=1 DEBUG=1 ALLOW_HOST_PACKAGES=1"
+        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev librocksdb-dev"
+        NO_DEPENDS=1
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="install"
-        BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports --enable-debug CXXFLAGS=\"-g0 -O2\""
+        BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports CXXFLAGS=\"-g0 -O2\""
 
     - name: '64-bit Linux (xenial)'
       env: >-
         HOST=x86_64-unknown-linux-gnu
         DOCKER_NAME_TAG=ubuntu:16.04
-        PACKAGES="cmake g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev"
+        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev librocksdb-dev"
         NO_DEPENDS=1
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="install"
-        BITCOIN_CONFIG="--enable-zmq --with-gui=qt5 CPPFLAGS=-DDEBUG_LOCKORDER --with-sanitizers=thread --disable-hardening --disable-asm CC=gcc-7 CXX=g++-7"
+        BITCOIN_CONFIG="--with-gui=qt5 --enable-zmq --enable-glibc-back-compat --enable-reduce-exports --disable-hardening  CC=gcc-7 CXX=g++-7"
 
     - name: 'Win32'
       env: >-
@@ -90,7 +90,7 @@ jobs:
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="deploy"
-        BITCOIN_CONFIG="--enable-reduce-exports --disable-gui-tests --with-seeder=false"
+        BITCOIN_CONFIG="--enable-reduce-exports --disable-gui-tests"
 
     - name: 'Win64'
       env: >-
@@ -99,7 +99,7 @@ jobs:
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="deploy"
-        BITCOIN_CONFIG="--enable-reduce-exports --disable-gui-tests --with-seeder=false"
+        BITCOIN_CONFIG="--enable-reduce-exports --disable-gui-tests"
 
     - name: 'MacOS '
       env: >-
