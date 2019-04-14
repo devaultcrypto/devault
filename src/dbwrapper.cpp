@@ -73,7 +73,7 @@ public:
 
             assert(p <= limit);
             base[std::min(bufsize - 1, (int)(p - base))] = '\0';
-            LogPrintf("leveldb: %s", base);
+            LogPrintf("datadb: %s", base);
             if (base != buffer) {
                 delete[] base;
             }
@@ -129,16 +129,20 @@ CDBWrapper::CDBWrapper(const fs::path &path, size_t nCacheSize, bool fMemory,
         options.env = penv;
     } else {
         if (fWipe) {
-            LogPrintf("Wiping LevelDB in %s\n", path.string());
+            LogPrintf("Wiping DatalDB in %s\n", path.string());
             datadb::Status result = datadb::DestroyDB(path.string(), options);
             dbwrapper_private::HandleError(result);
         }
         TryCreateDirectories(path);
-        LogPrintf("Opening LevelDB in %s\n", path.string());
+        LogPrintf("Opening DataDB in %s\n", path.string());
     }
     datadb::Status status = datadb::DB::Open(options, path.string(), &pdb);
     dbwrapper_private::HandleError(status);
+#ifdef USE_ROCKSDB
+    LogPrintf("Opened RocksDB successfully\n");
+#else
     LogPrintf("Opened LevelDB successfully\n");
+#endif
 
     if (gArgs.GetBoolArg("-forcecompactdb", false)) {
         LogPrintf("Starting database compaction of %s\n", path.string());
