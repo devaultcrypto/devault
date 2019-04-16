@@ -6,7 +6,7 @@
 #include "config/bitcoin-config.h"
 #endif
 
-#include "fs.h"
+#include "fs_util.h"
 #include "dvtui.h"
 #include "guiutil.h"
 #include "intro.h"

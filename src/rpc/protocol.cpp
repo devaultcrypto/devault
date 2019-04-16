@@ -8,6 +8,7 @@
 #include "random.h"
 #include "tinyformat.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
 #include "version.h"
@@ -63,16 +64,6 @@ UniValue JSONRPCError(int code, const std::string &message) {
  * recognizability in debugging/logging purposes)
  */
 static const std::string COOKIEAUTH_USER = "__cookie__";
-/** Default name for auth cookie file */
-static const std::string COOKIEAUTH_FILE = ".cookie";
-
-fs::path GetAuthCookieFile() {
-    fs::path path(gArgs.GetArg("-rpccookiefile", COOKIEAUTH_FILE));
-    if (!path.is_absolute()) {
-        path = GetDataDir() / path;
-    }
-    return path;
-}
 
 bool GenerateAuthCookie(std::string *cookie_out) {
     const size_t COOKIE_SIZE = 32;

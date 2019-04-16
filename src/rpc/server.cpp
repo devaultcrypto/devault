@@ -7,12 +7,12 @@
 #include "rpc/server.h"
 
 #include "config.h"
-#include "fs.h"
 #include "init.h"
 #include "random.h"
 #include "sync.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utilstrencodings.h"
 #include "utilsplitstring.h"
 #include "signals-cpp/signals.h"

@@ -16,7 +16,7 @@
 #include "script/script.h"
 #include "script/standard.h"
 #include "sync.h"
-#include "util.h"
+#include "fs_util.h"
 #include "utiltime.h"
 #include "validation.h"
 #include "wallet.h"

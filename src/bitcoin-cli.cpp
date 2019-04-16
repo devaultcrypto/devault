@@ -9,11 +9,11 @@
 
 #include "chainparamsbase.h"
 #include "clientversion.h"
-#include "fs.h"
 #include "rpc/client.h"
 #include "rpc/protocol.h"
 #include "support/events.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utilstrencodings.h"
 
 #include <cstdio>

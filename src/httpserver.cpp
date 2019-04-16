@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <future>
+#include <deque>
 
 /** Maximum size of http request (request line + headers) */
 static const size_t MAX_HEADERS_SIZE = 8192;

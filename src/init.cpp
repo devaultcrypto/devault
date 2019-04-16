@@ -18,7 +18,6 @@
 #include "config.h"
 #include "consensus/validation.h"
 #include "diskblockpos.h"
-#include "fs.h"
 #include "httprpc.h"
 #include "httpserver.h"
 #include "key.h"
@@ -40,6 +39,7 @@
 #include "txmempool.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "validationinterface.h"
@@ -1823,8 +1823,7 @@ bool AppInitMain(Config &config,
 
     if (logger.m_print_to_file) {
         if (!logger.OpenDebugLog()) {
-            return InitError(strprintf("Could not open debug log file %s",
-                                       logger.GetDebugLogPath().string()));
+            return InitError(strprintf("Could not open debug log file %s",GetDebugLogPath().string()));
         }
     }
     // Can only remove older after creating new one since there are LogPrintf in there!

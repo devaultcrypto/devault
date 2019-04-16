@@ -20,6 +20,7 @@
 #include "script/sign.h"
 #include "univalue.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "utilsplitstring.h"

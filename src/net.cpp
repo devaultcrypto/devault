@@ -9,6 +9,7 @@
 
 #include "net.h"
 
+#include "addrdb.h"
 #include "addrman.h"
 #include "chainparams.h"
 #include "clientversion.h"

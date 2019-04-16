@@ -105,6 +105,7 @@ BITCOIN_CORE_H = \
   timestampindex.h \
   addrman.h \
   avalanche.h \
+	ban.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -141,6 +142,7 @@ BITCOIN_CORE_H = \
   diskblockpos.h \
   dstencode.h \
   fs.h \
+  fs_util.h \
   globals.h \
   httprpc.h \
   httpserver.h \
@@ -461,6 +463,7 @@ libbitcoin_util_a_SOURCES = \
   compat/glibcxx_sanity.cpp \
   compat/strnlen.cpp \
   fs.cpp \
+  fs_util.cpp \
   logging.cpp \
   random.cpp \
   rcu.cpp \

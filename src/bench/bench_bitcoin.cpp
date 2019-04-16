@@ -8,6 +8,7 @@
 #include "key.h"
 #include "random.h"
 #include "util.h"
+#include "fs_util.h"
 #include "validation.h"
 
 #include <boost/lexical_cast.hpp>

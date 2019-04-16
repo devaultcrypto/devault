@@ -8,12 +8,12 @@
 #include "addrman.h"
 #include "chainparams.h"
 #include "clientversion.h"
-#include "fs.h"
 #include "hash.h"
 #include "random.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "util.h"
+#include "fs_util.h"
 
 CBanDB::CBanDB(const CChainParams &chainParamsIn) : chainParams(chainParamsIn) {
     pathBanlist = GetDataDir() / "banlist.dat";

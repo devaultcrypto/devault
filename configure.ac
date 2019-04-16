@@ -943,7 +943,6 @@ if test "x$use_rocksdb" = "xyes"; then
        [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
         use_rocksdb=no
         AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-        ROCKSDB_LIBS=-lrocksdb
    AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-lrocksdb,
        [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
         use_rocksdb=no

@@ -6,6 +6,7 @@
 
 #include "logging.h"
 #include "util.h"
+#include "fs_util.h"
 #include "utiltime.h"
 #include <chrono>
 
@@ -31,16 +32,6 @@ BCLog::Logger &GetLogger() {
 
 static int FileWriteStr(const std::string &str, FILE *fp) {
     return fwrite(str.data(), 1, str.size(), fp);
-}
-
-
-fs::path BCLog::Logger::GetDebugLogPath() {
-    fs::path logfile(gArgs.GetArg("-debuglogfile", DEFAULT_DEBUGLOGFILE));
-    if (logfile.is_absolute()) {
-        return logfile;
-    } else {
-        return GetDataDir() / logfile;
-    }
 }
 
 bool BCLog::Logger::OpenDebugLog() {

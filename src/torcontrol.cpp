@@ -6,7 +6,7 @@
 #include "crypto/hmac_sha256.h"
 #include "net.h"
 #include "netbase.h"
-#include "util.h"
+#include "fs_util.h"
 #include "utilstrencodings.h"
 #include "utilsplitstring.h"
 

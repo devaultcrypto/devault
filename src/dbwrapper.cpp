@@ -5,9 +5,7 @@
 #include "dbwrapper.h"
 
 #include "random.h"
-#include "util.h"
-
-#include "fs.h"
+#include "fs_util.h"
 
 #include <algorithm>
 #include <cstdint>

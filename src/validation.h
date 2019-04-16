@@ -17,7 +17,6 @@
 #include "coins.h"
 #include "consensus/consensus.h"
 #include "diskblockpos.h"
-#include "fs.h"
 #include "protocol.h" // For CMessageHeader::MessageMagic
 #include "script/script_error.h"
 #include "sync.h"
@@ -360,11 +359,6 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes = 0);
  * Open a block file (blk?????.dat).
  */
 FILE *OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly = false);
-
-/**
- * Translation to a filesystem path.
- */
-fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
 
 /**
  * Import blocks from an external file.
