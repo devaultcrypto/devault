@@ -11,7 +11,6 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "dstencode.h"
-#include "fs.h"
 #include "init.h"
 #include "key.h"
 #include "keystore.h"

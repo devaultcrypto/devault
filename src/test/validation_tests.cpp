@@ -9,6 +9,7 @@
 #include "primitives/transaction.h"
 #include "test/test_bitcoin.h"
 #include "util.h"
+#include "fs_util.h"
 #include "validation.h"
 
 #include <cstdint>

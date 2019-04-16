@@ -5,7 +5,7 @@
 
 #include "minerwhitelist.h"
 #include "chain.h"
-#include "util.h"
+#include "fs_util.h"
 #include "consensus/consensus.h"
 #include "chainparams.h"
 #include <unordered_map>

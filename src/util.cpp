@@ -10,11 +10,13 @@
 #include "util.h"
 
 #include "chainparamsbase.h"
-#include "fs.h"
+#include "fs_util.h"
 #include "random.h"
 #include "serialize.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
+
+#include <boost/filesystem/fstream.hpp>
 
 #include <cstdarg>
 
@@ -85,7 +87,6 @@
 const int64_t nStartupTime = GetTime();
 
 const char *const BITCOIN_CONF_FILENAME = "devault.conf";
-const char *const BITCOIN_PID_FILENAME = "devaultd.pid";
 
 ArgsManager gArgs;
 
@@ -590,126 +591,6 @@ void PrintExceptionContinue(const std::exception *pex, const char *pszThread) {
     fprintf(stderr, "\n\n************************\n%s\n", message.c_str());
 }
 
-fs::path GetDefaultDataDir() {
-// Windows < Vista: C:\Documents and Settings\Username\Application Data\Bitcoin
-// Windows >= Vista: C:\Users\Username\AppData\Roaming\Bitcoin
-// Mac: ~/Library/Application Support/Bitcoin
-// Unix: ~/.bitcoin
-#ifdef WIN32
-    // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "DeVault";
-#else
-    fs::path pathRet;
-    char *pszHome = getenv("HOME");
-    if (pszHome == nullptr || strlen(pszHome) == 0) {
-        pathRet = fs::path("/");
-    } else {
-        pathRet = fs::path(pszHome);
-    }
-#ifdef MAC_OSX
-    // Mac
-    return pathRet / "Library/Application Support/DeVault";
-#else
-    // Unix
-    return pathRet / ".devault";
-#endif
-#endif
-}
-
-static fs::path pathCached;
-static fs::path pathCachedNetSpecific;
-static CCriticalSection csPathCached;
-
-bool CheckIfWalletDatExists(bool fNetSpecific) {
-  fs::path path;
-  if (gArgs.IsArgSet("-datadir")) {
-    path = fs::system_complete(gArgs.GetArg("-datadir", ""));
-    if (!fs::is_directory(path)) {
-      return false;
-    }
-  } else {
-    path = GetDefaultDataDir();
-  }
-  
-  if (fNetSpecific) {
-    path /= BaseParams().DataDir();
-  }
-  
-  path /= "wallets";
-  path /= "wallet.dat";
-  return fs::exists(path);
-}
-
-const fs::path &GetDataDir(bool fNetSpecific) {
-    LOCK(csPathCached);
-
-    fs::path &path = fNetSpecific ? pathCachedNetSpecific : pathCached;
-
-    // This can be called during exceptions by LogPrintf(), so we cache the
-    // value so we don't have to do memory allocations after that.
-    if (!path.empty()) {
-        return path;
-    }
-
-    if (gArgs.IsArgSet("-datadir")) {
-        path = fs::system_complete(gArgs.GetArg("-datadir", ""));
-        if (!fs::is_directory(path)) {
-            path = "";
-            return path;
-        }
-    } else {
-        path = GetDefaultDataDir();
-    }
-
-    if (fNetSpecific) {
-        path /= BaseParams().DataDir();
-    }
-
-    fs::create_directories(path);
-    // Make sure this wallets subdirectory exists too
-    fs::create_directories(path / "wallets");
-
-    return path;
-}
-
-const fs::path GetDataDirNoCreate() {
-  // copy instead of reference
-  fs::path path = pathCachedNetSpecific;
-  
-  // This can be called during exceptions by LogPrintf(), so we cache the
-  // value so we don't have to do memory allocations after that.
-  if (!path.empty()) {
-    return path;
-  }
-  
-  if (gArgs.IsArgSet("-datadir")) {
-    path = fs::system_complete(gArgs.GetArg("-datadir", ""));
-    if (!fs::is_directory(path)) {
-      path = "";
-      return path;
-    }
-  } else {
-    path = GetDefaultDataDir();
-  }
-  return path;
-}
-
-void ClearDatadirCache() {
-    LOCK(csPathCached);
-
-    pathCached = fs::path();
-    pathCachedNetSpecific = fs::path();
-}
-
-fs::path GetConfigFile(const std::string &confPath) {
-    fs::path pathConfigFile(confPath);
-    if (!pathConfigFile.is_absolute()) {
-        pathConfigFile = GetDataDir(false) / pathConfigFile;
-    }
-
-    return pathConfigFile;
-}
-
 static std::string TrimString(const std::string& str, const std::string& pattern)
 {
   std::string::size_type front = str.find_first_not_of(pattern);
@@ -797,78 +678,6 @@ std::string ArgsManager::GetChainName() const {
     return CBaseChainParams::MAIN;
 }
 
-#ifndef WIN32
-fs::path GetPidFile() {
-    fs::path pathPidFile(gArgs.GetArg("-pid", BITCOIN_PID_FILENAME));
-    if (!pathPidFile.is_absolute()) {
-        pathPidFile = GetDataDir() / pathPidFile;
-    }
-    return pathPidFile;
-}
-
-void CreatePidFile(const fs::path &path, pid_t pid) {
-    FILE *file = fsbridge::fopen(path, "w");
-    if (file) {
-        fprintf(file, "%d\n", pid);
-        fclose(file);
-    }
-}
-#endif
-
-bool RenameOver(fs::path src, fs::path dest) {
-#ifdef WIN32
-    return MoveFileExA(src.string().c_str(), dest.string().c_str(),
-                       MOVEFILE_REPLACE_EXISTING) != 0;
-#else
-    int rc = std::rename(src.string().c_str(), dest.string().c_str());
-    return (rc == 0);
-#endif /* WIN32 */
-}
-
-/**
- * Ignores exceptions thrown by Boost's create_directories if the requested
- * directory exists. Specifically handles case where path p exists, but it
- * wasn't possible for the user to write to the parent directory.
- */
-bool TryCreateDirectories(const fs::path &p) {
-    try {
-        return fs::create_directories(p);
-    } catch (const fs::filesystem_error &) {
-        if (!fs::exists(p) || !fs::is_directory(p)) {
-            throw;
-        }
-    }
-
-    // create_directory didn't create the directory, it had to have existed
-    // already.
-    return false;
-}
-
-void FileCommit(FILE *file) {
-    // Harmless if redundantly called.
-    fflush(file);
-#ifdef WIN32
-    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(file));
-    FlushFileBuffers(hFile);
-#else
-#if defined(__linux__) || defined(__NetBSD__)
-    fdatasync(fileno(file));
-#elif defined(__APPLE__) && defined(F_FULLFSYNC)
-    fcntl(fileno(file), F_FULLFSYNC, 0);
-#else
-    fsync(fileno(file));
-#endif
-#endif
-}
-
-bool TruncateFile(FILE *file, unsigned int length) {
-#if defined(WIN32)
-    return _chsize(_fileno(file), length) == 0;
-#else
-    return ftruncate(fileno(file), length) == 0;
-#endif
-}
-
 /**
  * This function tries to raise the file descriptor limit to the requested
  * number. It returns the actual file descriptor limit (which may be more or
@@ -895,69 +704,6 @@ int RaiseFileDescriptorLimit(int nMinFD) {
 #endif
 }
 
-/**
- * This function tries to make a particular range of a file allocated
- * (corresponding to disk space) it is advisory, and the range specified in the
- * arguments will never contain live data.
- */
-void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length) {
-#if defined(WIN32)
-    // Windows-specific version.
-    HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(file));
-    LARGE_INTEGER nFileSize;
-    int64_t nEndPos = (int64_t)offset + length;
-    nFileSize.u.LowPart = nEndPos & 0xFFFFFFFF;
-    nFileSize.u.HighPart = nEndPos >> 32;
-    SetFilePointerEx(hFile, nFileSize, 0, FILE_BEGIN);
-    SetEndOfFile(hFile);
-#elif defined(MAC_OSX)
-    // OSX specific version.
-    fstore_t fst;
-    fst.fst_flags = F_ALLOCATECONTIG;
-    fst.fst_posmode = F_PEOFPOSMODE;
-    fst.fst_offset = 0;
-    fst.fst_length = (off_t)offset + length;
-    fst.fst_bytesalloc = 0;
-    if (fcntl(fileno(file), F_PREALLOCATE, &fst) == -1) {
-        fst.fst_flags = F_ALLOCATEALL;
-        fcntl(fileno(file), F_PREALLOCATE, &fst);
-    }
-    ftruncate(fileno(file), fst.fst_length);
-#elif defined(__linux__)
-    // Version using posix_fallocate.
-    off_t nEndPos = (off_t)offset + length;
-    posix_fallocate(fileno(file), 0, nEndPos);
-#else
-    // Fallback version
-    // TODO: just write one byte per block
-    static const char buf[65536] = {};
-    fseek(file, offset, SEEK_SET);
-    while (length > 0) {
-        unsigned int now = 65536;
-        if (length < now) {
-            now = length;
-        }
-        // Allowed to fail; this function is advisory anyway.
-        fwrite(buf, 1, now, file);
-        length -= now;
-    }
-#endif
-}
-
-#ifdef WIN32
-fs::path GetSpecialFolderPath(int nFolder, bool fCreate) {
-    char pszPath[MAX_PATH] = "";
-
-    if (SHGetSpecialFolderPathA(nullptr, pszPath, nFolder, fCreate)) {
-        return fs::path(pszPath);
-    }
-
-    LogPrintf(
-        "SHGetSpecialFolderPathA() failed, could not obtain requested path.\n");
-    return fs::path("");
-}
-#endif
-
 void runCommand(const std::string &strCommand) {
     if (strCommand.empty()) {
         return;
@@ -982,36 +728,6 @@ void RenameThread(const char *name) {
     // Prevent warnings for unused parameters...
     (void)name;
 #endif
-}
-
-void SetupEnvironment() {
-#ifdef HAVE_MALLOPT_ARENA_MAX
-    // glibc-specific: On 32-bit systems set the number of arenas to 1. By
-    // default, since glibc 2.10, the C library will create up to two heap
-    // arenas per core. This is known to cause excessive virtual address space
-    // usage in our usage. Work around it by setting the maximum number of
-    // arenas to 1.
-    if (sizeof(void *) == 4) {
-        mallopt(M_ARENA_MAX, 1);
-    }
-#endif
-// On most POSIX systems (e.g. Linux, but not BSD) the environment's locale may
-// be invalid, in which case the "C" locale is used as fallback.
-#if !defined(WIN32) && !defined(MAC_OSX) && !defined(__FreeBSD__) &&           \
-    !defined(__OpenBSD__)
-    try {
-        // Raises a runtime error if current locale is invalid.
-        std::locale("");
-    } catch (const std::runtime_error &) {
-        setenv("LC_ALL", "C", 1);
-    }
-#endif
-    // The path locale is lazy initialized and to avoid deinitialization errors
-    // in multithreading environments, it is set explicitly by the main thread.
-    // A dummy locale is used to extract the internal default locale, used by
-    // fs::path, which is then used to explicitly imbue the path.
-    std::locale loc = fs::path::imbue(std::locale::classic());
-    fs::path::imbue(loc);
 }
 
 bool SetupNetworking() {

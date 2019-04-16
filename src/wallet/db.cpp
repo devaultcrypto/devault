@@ -6,10 +6,9 @@
 #include "db.h"
 
 #include "addrman.h"
-#include "fs.h"
 #include "hash.h"
 #include "protocol.h"
-#include "util.h"
+#include "fs_util.h"
 #include "utilstrencodings.h"
 #include "wallet/walletutil.h"
 

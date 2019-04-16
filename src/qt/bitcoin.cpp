@@ -31,6 +31,7 @@
 #include "rpc/server.h"
 #include "ui_interface.h"
 #include "uint256.h"
+#include "fs_util.h"
 #include "util.h"
 #include "warnings.h"
 

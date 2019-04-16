@@ -7,7 +7,6 @@
 #ifndef BITCOIN_LOGGING_H
 #define BITCOIN_LOGGING_H
 
-#include "fs.h"
 #include "tinyformat.h"
 
 #include <atomic>
@@ -89,7 +88,6 @@ public:
     /** Send a string to the log output */
     int LogPrintStr(const std::string &str);
 
-    fs::path GetDebugLogPath();
     bool OpenDebugLog();
     void ShrinkDebugFile();
     std::string RenameLastDebugFile();

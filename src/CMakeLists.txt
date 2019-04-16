@@ -246,6 +246,7 @@ add_library(util
 	threadinterrupt.cpp
 	uint256.cpp
 	util.cpp
+	fs_util.cpp
 	utilmoneystr.cpp
 	utilstrencodings.cpp
 	utiltime.cpp

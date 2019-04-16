@@ -9,7 +9,7 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "crypto/sha256.h"
-#include "fs.h"
+#include "fs_util.h"
 #include "key.h"
 #include "logging.h"
 #include "miner.h"

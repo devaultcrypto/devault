@@ -12,7 +12,7 @@
 #include "random.h"
 #include "ui_interface.h"
 #include "uint256.h"
-#include "util.h"
+#include "fs_util.h"
 #include "validation.h"
 
 #include <thread>

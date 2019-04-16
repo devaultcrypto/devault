@@ -15,7 +15,6 @@
 #endif
 
 #include "compat.h"
-#include "fs.h"
 #include "logging.h"
 #include "sync.h"
 #include "tinyformat.h"
@@ -46,8 +45,6 @@ public:
 extern CTranslationInterface translationInterface;
 
 extern const char *const BITCOIN_CONF_FILENAME;
-extern const char *const BITCOIN_PID_FILENAME;
-
 
 class thread_interrupted {};
 
@@ -69,7 +66,6 @@ inline std::string _(const char *psz) {
   return (rv != "") ? rv : psz;
 }
 
-void SetupEnvironment();
 bool SetupNetworking();
 
 template <typename... Args> bool error(const char *fmt, const Args &... args) {
@@ -78,25 +74,7 @@ template <typename... Args> bool error(const char *fmt, const Args &... args) {
 }
 
 void PrintExceptionContinue(const std::exception *pex, const char *pszThread);
-void FileCommit(FILE *file);
-bool TruncateFile(FILE *file, unsigned int length);
 int RaiseFileDescriptorLimit(int nMinFD);
-void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length);
-bool RenameOver(fs::path src, fs::path dest);
-bool TryCreateDirectories(const fs::path &p);
-fs::path GetDefaultDataDir();
-const fs::path &GetDataDir(bool fNetSpecific = true);
-const fs::path GetDataDirNoCreate();
-bool CheckIfWalletDatExists(bool fNetSpecific = true);
-void ClearDatadirCache();
-fs::path GetConfigFile(const std::string &confPath);
-#ifndef WIN32
-fs::path GetPidFile();
-void CreatePidFile(const fs::path &path, pid_t pid);
-#endif
-#ifdef WIN32
-fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
-#endif
 void runCommand(const std::string &strCommand);
 
 inline bool IsSwitchChar(char c) {

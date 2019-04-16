@@ -15,15 +15,19 @@
 #include "cashaddr.h"
 #include "config.h"
 #include "dstencode.h"
-#include "fs.h"
 #include "init.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "protocol.h"
 #include "script/script.h"
 #include "script/standard.h"
+#include "fs_util.h"
 #include "util.h"
 #include "utilstrencodings.h"
+
+// for BoostPathToQString
+#include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
