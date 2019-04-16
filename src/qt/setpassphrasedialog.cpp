@@ -91,8 +91,11 @@ void SetPassphraseDialog::accept() {
 }
 
 void SetPassphraseDialog::textChanged() {
+    int len =  ui->passEdit2->text().toStdString().length();
+    bool len_ok = (len > 3);
     // Validate input, set Ok button to enabled when acceptable
-    bool acceptable = !ui->passEdit2->text().isEmpty() && !ui->passEdit3->text().isEmpty();
+    // (i.e both fields not empty, matching and greater than minimum length
+    bool acceptable = ui->passEdit2->text() == ui->passEdit3->text() && !ui->passEdit2->text().isEmpty() && !ui->passEdit3->text().isEmpty() && len_ok;
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(acceptable);
 }
 
