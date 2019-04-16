@@ -7,7 +7,7 @@
 
 #include "primitives/transaction.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 /** Coin Control Features. */
 class CCoinControl {
@@ -22,9 +22,9 @@ public:
     //! Override automatic min/max checks on fee, m_feerate must be set if true
     bool fOverrideFeeRate;
     //! Override the default payTxFee if set
-    boost::optional<CFeeRate> m_feerate;
+    std::optional<CFeeRate> m_feerate;
     //! Override the default confirmation target if set
-    boost::optional<unsigned int> m_confirm_target;
+    std::optional<unsigned int> m_confirm_target;
 
     CCoinControl() { SetNull(); }
 
