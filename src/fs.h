@@ -6,7 +6,7 @@
 // clang-format off
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 #if _cpp_lib_filesystem

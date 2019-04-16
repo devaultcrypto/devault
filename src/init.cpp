@@ -60,7 +60,7 @@
 #include <thread>
 
 #ifndef WIN32
-#include <signal.h>
+#include <csignal>
 #endif
 
 #include <boost/interprocess/sync/file_lock.hpp>
