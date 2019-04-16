@@ -38,6 +38,7 @@
 #include <cassert>
 #include <future>
 #include <random>
+#include <optional>
 #ifdef HAVE_VARIANT
 #include <variant>
 #endif
@@ -2544,7 +2545,7 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
     nValueRet = Amount::zero();
 
     // List of values less than target
-    boost::optional<CInputCoin> coinLowestLarger;
+    std::optional<CInputCoin> coinLowestLarger;
     std::vector<CInputCoin> vValue;
     Amount nTotalLower = Amount::zero();
 
@@ -2604,7 +2605,7 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
             return false;
         }
 
-        setCoinsRet.insert(coinLowestLarger.get());
+        setCoinsRet.insert(coinLowestLarger.value());
         nValueRet += coinLowestLarger->txout.nValue;
         return true;
     }
@@ -2627,7 +2628,7 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
     if (coinLowestLarger &&
         ((nBest != nTargetValue && nBest < nTargetValue + MIN_CHANGE) ||
          coinLowestLarger->txout.nValue <= nBest)) {
-        setCoinsRet.insert(coinLowestLarger.get());
+        setCoinsRet.insert(coinLowestLarger.value());
         nValueRet += coinLowestLarger->txout.nValue;
     } else {
         for (unsigned int i = 0; i < vValue.size(); i++) {
