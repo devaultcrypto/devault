@@ -119,7 +119,7 @@ bool CColdRewards::FindReward(const Consensus::Params& consensusParams, int Heig
   Amount balance;
   Amount minReward;
   bool found = false;
-  auto *pcursor = pdb->Cursor();
+  std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     boost::this_thread::interruption_point();
     if (ShutdownRequested()) { break; }
