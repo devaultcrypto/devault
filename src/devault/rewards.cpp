@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "coldrewards/rewards.h"
-#include "coldrewards/rewards_calculation.h"
+#include "devault/rewards.h"
+#include "devault/rewards_calculation.h"
 #include "amount.h"
 #include "config.h"
 #include "consensus/consensus.h"

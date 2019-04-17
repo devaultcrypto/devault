@@ -203,8 +203,7 @@ add_subdirectory(univalue)
 #--------------------------------------------------------------------------------
 # DeVault
 #--------------------------------------------------------------------------------
-add_subdirectory(coldrewards)
-add_subdirectory(budget)
+add_subdirectory(devault)
 #
 #--------------------------------------------------------------------------------
 
@@ -363,7 +362,7 @@ add_library(devaultconsensus
 	utilstrencodings.cpp
 )
 
-target_link_libraries(devaultconsensus common coldrewards budget)
+target_link_libraries(devaultconsensus common devault)
 
 # Bitcoin server facilities
 add_library(server

@@ -27,8 +27,8 @@
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "validationinterface.h"
-#include "coldrewards/rewards.h"
-#include "budget/budget.h"
+#include "devault/rewards.h"
+#include "devault/budget.h"
 
 #include <algorithm>
 #include <queue>

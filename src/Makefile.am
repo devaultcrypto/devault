@@ -129,10 +129,10 @@ BITCOIN_CORE_H = \
   compat/sanity.h \
   compressor.h \
   config.h \
-	budget/budget.h \
-  coldrewards/rewards.h \
-  coldrewards/rewardsview.h \
-  coldrewards/rewards_calculation.h \
+	devault/budget.h \
+  devault/rewards.h \
+  devault/rewardsview.h \
+  devault/rewards_calculation.h \
   consensus/activation.h \
   consensus/consensus.h \
   consensus/tx_verify.h \
@@ -255,10 +255,10 @@ libbitcoin_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   config.cpp \
-	budget/budget.cpp \
-	coldrewards/rewards.cpp \
-	coldrewards/rewards_calculation.cpp \
-	coldrewards/rewardsview.cpp \
+	devault/budget.cpp \
+	devault/rewards.cpp \
+	devault/rewards_calculation.cpp \
+	devault/rewardsview.cpp \
   consensus/activation.cpp \
   consensus/tx_verify.cpp \
   globals.cpp \

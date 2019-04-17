@@ -51,8 +51,8 @@
 #include "walletinitinterface.h"
 #include "warnings.h"
 
-#include "coldrewards/rewards.h"
-#include "budget/budget.h"
+#include "devault/rewards.h"
+#include "devault/budget.h"
 
 #include <cstdint>
 #include <cstdio>
