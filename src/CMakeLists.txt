@@ -152,7 +152,7 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR")
   endif()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  add_definitions("-DBOOST_NO_AUTO_PTR DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
+  add_definitions("-DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
   add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
 else()
   # secp256k1 Linux gcc
