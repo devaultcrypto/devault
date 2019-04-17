@@ -11,4 +11,4 @@ add_executable(devault-seeder
 	main.cpp
 )
 
-target_link_libraries(devault-seeder common)
+target_link_libraries(devault-seeder common pthread)
