@@ -3461,12 +3461,12 @@ bool PeerLogicValidation::ProcessMessages(const Config &config, CNode *pfrom,
                      __func__, SanitizeString(strCommand), nMessageSize,
                      e.what());
         } else {
-            PrintExceptionContinue(&e, "ProcessMessages()");
+            if (!ShutdownRequested()) PrintExceptionContinue(&e, "ProcessMessages()");
         }
     } catch (const std::exception &e) {
-        PrintExceptionContinue(&e, "ProcessMessages()");
+         if (!ShutdownRequested()) PrintExceptionContinue(&e, "ProcessMessages()");
     } catch (...) {
-        PrintExceptionContinue(nullptr, "ProcessMessages()");
+         if (!ShutdownRequested()) PrintExceptionContinue(nullptr, "ProcessMessages()");
     }
 
     if (!fRet) {
