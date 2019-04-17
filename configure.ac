@@ -437,7 +437,7 @@ case $host in
        AC_MSG_ERROR("windres not found")
      fi
 
-     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DHAVE_STD_SHARED_MUTEX"
+     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS"
      LEVELDB_TARGET_FLAGS="-DOS_WINDOWS"
      if test "x$CXXFLAGS_overridden" = "xno"; then
        CXXFLAGS="$CXXFLAGS -w"
@@ -538,7 +538,7 @@ case $host in
      LEVELDB_TARGET_FLAGS="-DOS_OPENBSD"
      ;;
    *)
-     CPPFLAGS="$CPPFLAGS -DHAVE_STD_SHARED_MUTEX"
+     CPPFLAGS="$CPPFLAGS"
      OTHER_OS=`echo ${host_os} | awk '{print toupper($0)}'`
      AC_MSG_WARN([Guessing LevelDB OS as OS_${OTHER_OS}, please check whether this is correct, if not add an entry to configure.ac.])
      LEVELDB_TARGET_FLAGS="-DOS_${OTHER_OS}"

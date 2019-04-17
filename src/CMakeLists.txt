@@ -143,7 +143,15 @@ endif()
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   add_compiler_flag(-Wrange-loop-analysis)
   # For 17 we need BOOST_NO_AUTO_PTR defined for boost
-  add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
+  string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
+  message(STATUS "Darwin Version : ${CMAKE_SYSTEM_VERSION} found, major version ${DARWIN_MAJOR_VERSION} ")
+  # HAVE_VARIANT means support for std::variant and std::optional
+  if (DARWIN_MAJOR_VERSION GREATER 17) # 17 is High Sierra
+    add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
+  else()
+    add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR")
+  endif()
+  
 else()
   # secp256k1 Linux gcc
   add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
