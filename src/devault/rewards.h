@@ -6,7 +6,7 @@
 #pragma once
 #include "config/bitcoin-config.h"
 #include "chain.h"
-#include "coldrewards/rewardsview.h"
+#include "rewardsview.h"
 #include "amount.h"
 // for now
 #include "validation.h"

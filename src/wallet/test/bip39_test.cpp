@@ -1,5 +1,5 @@
-#include "dictionary.h"
-#include "mnemonic.h"
+#include "wallet/dictionary.h"
+#include "wallet/mnemonic.h"
 #include "utilstrencodings.h"
 #include <array>
 #include <assert.h>

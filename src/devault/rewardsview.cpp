@@ -7,7 +7,7 @@
 
 // Copy from Bitcoin/txdb.cpp
 
-#include "coldrewards/rewardsview.h"
+#include "devault/rewardsview.h"
 #include "chainparams.h"
 #include "init.h"
 #include "random.h"
