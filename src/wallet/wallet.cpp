@@ -2799,7 +2799,7 @@ bool CWallet::FundTransaction(CMutableTransaction &tx, Amount &nFeeRet,
                               int &nChangePosInOut, std::string &strFailReason,
                               bool lockUnspents,
                               const std::set<int> &setSubtractFeeFromOutputs,
-                              CCoinControl coinControl, bool keepReserveKey) {
+                              CCoinControl& coinControl, bool keepReserveKey) {
     std::vector<CRecipient> vecSend;
 
     // Turn the txout set into a CRecipient vector.

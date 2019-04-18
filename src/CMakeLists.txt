@@ -170,6 +170,9 @@ include(BrewHelper)
 find_brew_prefix(OPENSSL_ROOT_DIR openssl)
 find_package(OpenSSL REQUIRED)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads)
+
 # libtool style configure
 add_subdirectory(config)
 
@@ -428,8 +431,9 @@ target_link_libraries(server
 	${EVENT_LIBRARY}
 	${EVENT_PTHREAD_LIBRARY}
 	devaultconsensus
-  ${DB_LIBRARIES}
-  ${MINIUPNP_LIBRARY}
+        ${DB_LIBRARIES}
+        ${MINIUPNP_LIBRARY}
+	Threads::Threads
 )
 
 if (BUILD_TEST_BENCH)
@@ -447,7 +451,7 @@ if(BUILD_WALLET)
 endif()
 
 # ZeroMQ
-if(BUILD_ZMQ)
+if (BUILD_ZMQ)
 	add_subdirectory(zmq)
 	target_link_libraries(server zmq)
 endif()
