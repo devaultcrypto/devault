@@ -26,8 +26,8 @@
 #include "walletmodel.h"
 
 #include "init.h"
-#include "interface/handler.h"
-#include "interface/node.h"
+#include "interfaces/handler.h"
+#include "interfaces/node.h"
 #include "rpc/server.h"
 #include "ui_interface.h"
 #include "uint256.h"
@@ -169,7 +169,7 @@ void DebugMessageHandler(QtMsgType type, const QMessageLogContext &context,
 class DeVault : public QObject {
     Q_OBJECT
 public:
-    explicit DeVault(interface::Node& node, SecureString& strWalletPassphrase,
+    explicit DeVault(interfaces::Node& node, SecureString& strWalletPassphrase,
                      std::vector<std::string>& wordlist);
 
     /**
@@ -194,14 +194,14 @@ private:
     SecureString walletPassphrase;
     // TODO: Set this for it for be used
     std::vector<std::string> words;
-    interface::Node& m_node;
+    interfaces::Node &m_node;
 };
 
 /** Main Bitcoin application object */
 class BitcoinApplication : public QApplication {
     Q_OBJECT
 public:
-    explicit BitcoinApplication(interface::Node& node, int &argc, char **argv);
+    explicit BitcoinApplication(interfaces::Node &node, int &argc, char **argv);
     ~BitcoinApplication();
 
     void initPlatformStyle();
@@ -244,7 +244,7 @@ Q_SIGNALS:
 
 private:
     QThread *coreThread;
-    interface::Node& m_node;
+    interfaces::Node &m_node;
     OptionsModel *optionsModel;
     ClientModel *clientModel;
     BitcoinGUI *window;
@@ -263,7 +263,7 @@ private:
 
 #include "bitcoin.moc"
 
-DeVault::DeVault(interface::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
+DeVault::DeVault(interfaces::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
     : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist), m_node(node) {}
 
 void DeVault::handleRunawayException(const std::exception *e) {
@@ -315,7 +315,7 @@ void DeVault::shutdown() {
     }
 }
 
-BitcoinApplication::BitcoinApplication(interface::Node& node, int &argc, char **argv)
+BitcoinApplication::BitcoinApplication(interfaces::Node& node, int &argc, char **argv)
     : QApplication(argc, argv), coreThread(nullptr), m_node(node),optionsModel(nullptr), clientModel(nullptr),
       window(nullptr), pollShutdownTimer(nullptr), 
 #ifdef ENABLE_WALLET
@@ -606,7 +606,7 @@ static void MigrateSettings() {
 int main(int argc, char *argv[]) {
     SetupEnvironment();
 
-    std::unique_ptr<interface::Node> node = interface::MakeNode();
+    std::unique_ptr<interfaces::Node> node = interfaces::MakeNode();
 
     /// 1. Parse command-line options. These take precedence over anything else.
     // Command-line options take precedence:
@@ -750,7 +750,7 @@ int main(int argc, char *argv[]) {
     app.createOptionsModel(gArgs.GetBoolArg("-resetguisettings", false));
 
     // Subscribe to global signals from core
-    std::unique_ptr<interface::Handler> handler = node->handleInitMessage(InitMessage);
+    std::unique_ptr<interfaces::Handler> handler = node->handleInitMessage(InitMessage);
 
     // Get global config
     Config &config = const_cast<Config &>(GetConfig());
