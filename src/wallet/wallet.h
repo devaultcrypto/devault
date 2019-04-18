@@ -970,7 +970,7 @@ public:
                          int &nChangePosInOut, std::string &strFailReason,
                          bool lockUnspents,
                          const std::set<int> &setSubtractFeeFromOutputs,
-                         CCoinControl coinControl, bool keepReserveKey = true);
+                         CCoinControl& coinControl, bool keepReserveKey = true);
     bool SignTransaction(CMutableTransaction &tx);
 
     /**
