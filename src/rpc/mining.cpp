@@ -626,10 +626,7 @@ static UniValue getblocktemplate(const Config &config,
         entry.pushKV("data", EncodeHexTx(tx));
         entry.pushKV("txid", txId.GetHex());
         entry.pushKV("hash", tx.GetHash().GetHex());
-        entry.pushKV("fee",
-                     pblocktemplate->entries[index_in_template].fees.toInt());
-        int64_t nTxSigOps =
-            pblocktemplate->entries[index_in_template].sigOpCount;
+        int64_t nTxSigOps = pblocktemplate->entries[index_in_template].txSigOps;
         entry.pushKV("sigops", nTxSigOps);
 
         transactions.push_back(entry);
