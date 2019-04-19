@@ -282,7 +282,7 @@ public:
         // Data as of block
         // 000000000005b07ecf85563034d13efd81c1a29e47e22b20f4fc6919d5b09cd6
         // (height 1223263)
-        chainTxData = ChainTxData{1554820236, 66289, 1};
+        chainTxData = ChainTxData{1555682037, 85317, 1};
     }
 };
 
