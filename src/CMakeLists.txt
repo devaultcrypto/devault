@@ -260,8 +260,6 @@ add_library(util
 	compat/glibc_sanity.cpp
 	compat/glibcxx_sanity.cpp
 	fs.cpp
-	interfaces/handler.cpp
-	interfaces/node.cpp
 	logging.cpp
 	random.cpp # needs libsodium
 	rcu.cpp
@@ -397,6 +395,8 @@ add_library(server
 	httprpc.cpp
 	httpserver.cpp
 	init.cpp
+	interfaces/handler.cpp
+	interfaces/node.cpp
 	dbwrapper.cpp
 	merkleblock.cpp
 	miner.cpp

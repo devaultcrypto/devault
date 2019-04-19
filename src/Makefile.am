@@ -263,6 +263,8 @@ libbitcoin_server_a_SOURCES = \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
+  interfaces/handler.cpp \
+  interfaces/node.cpp \
   dbwrapper.cpp \
   merkleblock.cpp \
   miner.cpp \
@@ -460,8 +462,6 @@ libbitcoin_util_a_SOURCES = \
   compat/glibcxx_sanity.cpp \
   fs.cpp \
   fs_util.cpp \
-  interfaces/handler.cpp \
-  interfaces/node.cpp \
   logging.cpp \
   random.cpp \
   rcu.cpp \
