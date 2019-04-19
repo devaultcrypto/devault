@@ -500,7 +500,7 @@ void BitcoinApplication::initializeResult(bool success) {
     // Log this only after AppInit2 finishes, as then logging setup is
     // guaranteed complete.
     qWarning() << "Platform customization:" << platformStyle->getName();
-    clientModel = new ClientModel(optionsModel);
+    clientModel = new ClientModel(m_node, optionsModel);
     window->setClientModel(clientModel);
 
 #ifdef ENABLE_WALLET

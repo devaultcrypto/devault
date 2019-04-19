@@ -18,6 +18,7 @@
 
 #include "chainparams.h"
 #include "config.h"
+#include "interfaces/node.h"
 #include "netbase.h"
 #include "rpc/client.h"
 #include "rpc/server.h"
@@ -640,8 +641,10 @@ void RPCConsole::setClientModel(ClientModel *model) {
         connect(model, SIGNAL(numConnectionsChanged(int)), this,
                 SLOT(setNumConnections(int)));
 
-        setNumBlocks(model->getNumBlocks(), model->getLastBlockDate(),
-                     model->getVerificationProgress(nullptr), false);
+        interfaces::Node &node = clientModel->node();
+        setNumBlocks(node.getNumBlocks(),
+                     QDateTime::fromTime_t(node.getLastBlockTime()),
+                     node.getVerificationProgress(), false);
         connect(model, SIGNAL(numBlocksChanged(int, QDateTime, double, bool)),
                 this, SLOT(setNumBlocks(int, QDateTime, double, bool)));
 
@@ -649,8 +652,7 @@ void RPCConsole::setClientModel(ClientModel *model) {
         connect(model, SIGNAL(networkActiveChanged(bool)), this,
                 SLOT(setNetworkActive(bool)));
 
-        updateTrafficStats(model->getTotalBytesRecv(),
-                           model->getTotalBytesSent());
+        updateTrafficStats(node.getTotalBytesRecv(), node.getTotalBytesSent());
         connect(model, SIGNAL(bytesChanged(quint64, quint64)), this,
                 SLOT(updateTrafficStats(quint64, quint64)));
 
@@ -961,7 +963,7 @@ void RPCConsole::updateNetworkState() {
         tr("Out:") + " " +
         QString::number(clientModel->getNumConnections(CConnman::CONNECTIONS_OUT)) + ")";
 
-    if (!clientModel->getNetworkActive()) {
+    if (!clientModel->node().getNetworkActive()) {
         connections += " (" + tr("Network activity disabled") + ")";
     }
 

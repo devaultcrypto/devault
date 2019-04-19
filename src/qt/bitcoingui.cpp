@@ -512,9 +512,9 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel) {
         modalOverlay->setKnownBestHeight(
             _clientModel->getHeaderTipHeight(),
             QDateTime::fromTime_t(_clientModel->getHeaderTipTime()));
-        setNumBlocks(_clientModel->getNumBlocks(),
-                     _clientModel->getLastBlockDate(),
-                     _clientModel->getVerificationProgress(nullptr), false);
+        setNumBlocks(m_node.getNumBlocks(),
+                     QDateTime::fromTime_t(m_node.getLastBlockTime()),
+                     m_node.getVerificationProgress(), false);
         connect(_clientModel,
                 SIGNAL(numBlocksChanged(int, QDateTime, double, bool)), this,
                 SLOT(setNumBlocks(int, QDateTime, double, bool)));
@@ -756,7 +756,7 @@ void BitcoinGUI::updateNetworkState() {
 
     QString tooltip;
 
-    if (clientModel->getNetworkActive()) {
+    if (m_node.getNetworkActive()) {
         tooltip = tr("%n active connection(s) to DeVault network", "", count) +
                   QString(".<br>") + tr("Click to disable network activity.");
     } else {
@@ -1224,9 +1224,7 @@ void BitcoinGUI::unsubscribeFromCoreSignals() {
 }
 
 void BitcoinGUI::toggleNetworkActive() {
-    if (clientModel) {
-        clientModel->setNetworkActive(!clientModel->getNetworkActive());
-    }
+    m_node.setNetworkActive(!m_node.getNetworkActive());
 }
 
 UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(
