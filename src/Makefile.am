@@ -587,10 +587,6 @@ if BUILD_BITCOIN_LIBS
 include_HEADERS = script/devaultconsensus.h
 libdevaultconsensus_la_SOURCES = $(crypto_libbitcoin_crypto_base_a_SOURCES) $(libbitcoin_consensus_a_SOURCES)
 
-if GLIBC_BACK_COMPAT
-  libdevaultconsensus_la_SOURCES += compat/glibc_compat.cpp
-endif
-
 libdevaultconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
 libdevaultconsensus_la_LIBADD = $(LIBSECP256K1)
 libdevaultconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
@@ -640,10 +636,6 @@ clean-local:
 	  $(CPPFLAGS) $(AM_CXXFLAGS) $(QT_INCLUDES) $(AM_CXXFLAGS) $(PIE_FLAGS) $(CXXFLAGS) -c -o $@ $<
 
 check-symbols: $(bin_PROGRAMS)
-if GLIBC_BACK_COMPAT
-	@echo "Checking glibc back compat..."
-	$(AM_V_at) READELF=$(READELF) CPPFILT=$(CPPFILT) $(top_srcdir)/contrib/devtools/symbol-check.py < $(bin_PROGRAMS)
-endif
 
 check-security: $(bin_PROGRAMS)
 if HARDEN
