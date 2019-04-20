@@ -246,10 +246,9 @@ add_library(util
 	clientversion.cpp
 	compat/glibc_sanity.cpp
 	compat/glibcxx_sanity.cpp
-	compat/strnlen.cpp
 	fs.cpp
 	logging.cpp
-	random.cpp
+	random.cpp # needs openssl
 	rcu.cpp
 	rpc/protocol.cpp
 	support/cleanse.cpp
@@ -257,7 +256,7 @@ add_library(util
 	sync.cpp
 	threadinterrupt.cpp
 	uint256.cpp
-	util.cpp
+	util.cpp # needs openssl
 	fs_util.cpp
 	utilmoneystr.cpp
 	utilstrencodings.cpp
@@ -288,13 +287,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_compile_definitions(util PUBLIC BOOST_THREAD_USE_LIB)
 endif()
 
-# Boost packages
-find_package(Filesystem)
-if (Filesystem_FOUND)
-  message(STATUS "Found filesystem")
-else()
-  set(BOOST_PACKAGES_REQUIRED filesystem)
-endif()
+# Boost packages required (Later check for and replace with std::filesystem
+# but currently not working with any compilers)
+set(BOOST_PACKAGES_REQUIRED filesystem)
 
 function(prepend var prefix)
 	set(listVar "")
@@ -304,14 +299,9 @@ function(prepend var prefix)
 	set(${var} "${listVar}" PARENT_SCOPE)
 endfunction(prepend)
 
-if (NOT Filesystem_FOUND)
-  prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
-
-  find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
-  target_link_libraries(util univalue crypto ${BOOST_LIBRARIES})
-else()
-  target_link_libraries(util univalue crypto std::filesystem)
-endif()
+prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
+find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL ${BOOST_LIBRARIES})
 
 # Make sure boost uses std::atomic (it doesn't before 1.63)
 target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_ATOMIC)
