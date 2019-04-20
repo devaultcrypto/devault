@@ -478,11 +478,6 @@ libbitcoin_util_a_SOURCES = \
   utiltime.cpp \
   $(BITCOIN_CORE_H)
 
-if GLIBC_BACK_COMPAT
-libbitcoin_util_a_SOURCES += compat/glibc_compat.cpp
-AM_LDFLAGS += $(COMPAT_LDFLAGS)
-endif
-
 # cli: shared between devault-cli and devault-qt
 libbitcoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
