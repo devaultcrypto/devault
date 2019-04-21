@@ -2728,9 +2728,7 @@ static CBlockIndex *FindMostWorkChain() {
 
                 if (pindexNew->nChainWork > requiredWork) {
                     // We have enough, clear the parked state.
-                    LogPrintf("Unpark block %s as its chain has accumulated "
-                              "enough PoW.\n",
-                              pindexTest->GetBlockHash().ToString());
+                    LogPrintf("Unpark block %s as its chain has accumulated enough PoW.\n", pindexTest->GetBlockHash().ToString());
                     fParkedChain = false;
                     UnparkBlock(pindexTest);
                 }
@@ -4040,8 +4038,7 @@ static bool AcceptBlock(const Config &config,
     if (gArgs.GetBoolArg("-parkdeepreorg", true)) {
         const CBlockIndex *pindexFork = chainActive.FindFork(pindex);
         if (pindexFork && pindexFork->nHeight + 1 < pindex->nHeight) {
-            LogPrintf("Park block %s as it would cause a deep reorg.\n",
-                      pindex->GetBlockHash().ToString());
+            LogPrintf("Park block %s as it would cause a deep reorg.\n", pindex->GetBlockHash().ToString());
             pindex->nStatus = pindex->nStatus.withParked();
             setDirtyBlockIndex.insert(pindex);
         }

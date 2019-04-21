@@ -30,10 +30,9 @@ class CColdRewards {
   bool UpdateWithBlock(const Config &config, CBlockIndex *pindexNew);
   void Setup(const Consensus::Params& consensusParams);
 
-  CTxOut GetPayment(const Coin &coin, Amount reward);
+  CTxOut GetPayment(const CRewardValue &coin, Amount reward);
   bool FindReward(const Consensus::Params& consensusParams, int Height, CTxOut &out);
   void FillPayments(const Consensus::Params& consensusParams, CMutableTransaction &txNew, int nHeight);
   bool Validate(const Consensus::Params& consensusParams, const CBlock &block, int nHeight, Amount &reward);
-  void ReplaceCoin(const COutPoint &key, int nNewHeight);
   void UpdateRewardsDB(int nNewHeight);
 };
