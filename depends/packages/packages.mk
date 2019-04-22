@@ -1,4 +1,4 @@
-packages:= boost openssl libevent zeromq
+packages:= boost openssl libevent zeromq libgmp
 native_packages := native_ccache
 
 qt_native_packages = 
