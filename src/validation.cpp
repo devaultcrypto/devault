@@ -5499,9 +5499,8 @@ bool LoadMempool(const Config &config) {
 
             Amount amountdelta(nFeeDelta);
             if (amountdelta != Amount::zero()) {
-                g_mempool.PrioritiseTransaction(tx->GetId(),
-                                                tx->GetId().ToString(),
-                                                prioritydummy, amountdelta);
+                g_mempool.PrioritiseTransaction(tx->GetId(), prioritydummy,
+                                                amountdelta);
             }
             CValidationState state;
             if (nTime + nExpiryTimeout > nNow) {
@@ -5521,8 +5520,7 @@ bool LoadMempool(const Config &config) {
         file >> mapDeltas;
 
         for (const auto &i : mapDeltas) {
-            g_mempool.PrioritiseTransaction(i.first, i.first.ToString(),
-                                            prioritydummy, i.second);
+            g_mempool.PrioritiseTransaction(i.first, prioritydummy, i.second);
         }
     } catch (const std::exception &e) {
         LogPrintf("Failed to deserialize mempool data on disk: %s. Continuing "
