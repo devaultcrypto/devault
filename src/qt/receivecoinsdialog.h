@@ -41,7 +41,7 @@ public:
     };
 
     explicit ReceiveCoinsDialog(const PlatformStyle *platformStyle,
-                                const Config *configIn, QWidget *parent = 0);
+                                const Config *configIn, QWidget *parent = nullptr);
     ~ReceiveCoinsDialog();
 
     void setModel(WalletModel *model);

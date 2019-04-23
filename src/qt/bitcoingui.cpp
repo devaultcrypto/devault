@@ -78,7 +78,7 @@ const std::string BitcoinGUI::DEFAULT_UIPLATFORM =
 BitcoinGUI::BitcoinGUI(const Config *configIn,
                        const PlatformStyle *_platformStyle,
                        const NetworkStyle *networkStyle, QWidget *parent)
-    : QMainWindow(parent), enableWallet(false), dvtLogoAction(0), platformStyle(_platformStyle),
+    : QMainWindow(parent), enableWallet(false), dvtLogoAction(nullptr), platformStyle(_platformStyle),
       config(configIn) {
     QSettings settings;
     if (!restoreGeometry(settings.value("MainWindowGeometry").toByteArray())) {
@@ -116,7 +116,7 @@ BitcoinGUI::BitcoinGUI(const Config *configIn,
 #endif
     setWindowTitle(windowTitle);
 
-    rpcConsole = new RPCConsole(_platformStyle, 0);
+    rpcConsole = new RPCConsole(_platformStyle, nullptr);
     helpMessageDialog = new HelpMessageDialog(this, false);
 #ifdef ENABLE_WALLET
     if (enableWallet) {
@@ -1204,7 +1204,7 @@ void BitcoinGUI::showProgress(const QString &title, int nProgress) {
         progressDialog = new QProgressDialog(title, "", 0, 100);
         progressDialog->setWindowModality(Qt::ApplicationModal);
         progressDialog->setMinimumDuration(0);
-        progressDialog->setCancelButton(0);
+        progressDialog->setCancelButton(nullptr);
         progressDialog->setAutoClose(false);
         progressDialog->setValue(0);
     } else if (progressDialog) {
@@ -1271,7 +1271,7 @@ void BitcoinGUI::toggleNetworkActive() {
 
 UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(
     const PlatformStyle *platformStyle)
-    : optionsModel(0), menu(0) {
+    : optionsModel(nullptr), menu(nullptr) {
     createContextMenu();
     setToolTip(tr("Unit to show amounts in. Click to select another unit."));
     QList<BitcoinUnits::Unit> units = BitcoinUnits::availableUnits();

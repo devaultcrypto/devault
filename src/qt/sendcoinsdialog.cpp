@@ -32,7 +32,7 @@
 
 SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle,
                                  QWidget *parent)
-    : QDialog(parent), ui(new Ui::SendCoinsDialog), clientModel(0), model(0),
+    : QDialog(parent), ui(new Ui::SendCoinsDialog), clientModel(nullptr), model(nullptr),
       fNewRecipientAllowed(true), fFeeMinimized(false),
       platformStyle(_platformStyle) {
     ui->setupUi(this);
@@ -445,7 +445,7 @@ SendCoinsEntry *SendCoinsDialog::addEntry() {
 }
 
 void SendCoinsDialog::updateTabsAndLabels() {
-    setupTabChain(0);
+    setupTabChain(nullptr);
     coinControlUpdateLabels();
 }
 
@@ -477,7 +477,7 @@ QWidget *SendCoinsDialog::setupTabChain(QWidget *prev) {
 }
 
 void SendCoinsDialog::setAddress(const QString &address) {
-    SendCoinsEntry *entry = 0;
+    SendCoinsEntry *entry = nullptr;
     // Replace the first entry if it is still unused
     if (ui->entries->count() == 1) {
         SendCoinsEntry *first =
@@ -498,7 +498,7 @@ void SendCoinsDialog::pasteEntry(const SendCoinsRecipient &rv) {
         return;
     }
 
-    SendCoinsEntry *entry = 0;
+    SendCoinsEntry *entry = nullptr;
     // Replace the first entry if it is still unused
     if (ui->entries->count() == 1) {
         SendCoinsEntry *first =

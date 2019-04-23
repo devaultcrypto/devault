@@ -202,7 +202,7 @@ public:
             }
             return rec;
         }
-        return 0;
+        return nullptr;
     }
 
     QString describe(TransactionRecord *rec, int unit) {

@@ -64,21 +64,21 @@ public:
 
         while (1) {
             static struct option long_options[] = {
-                {"host", required_argument, 0, 'h'},
-                {"ns", required_argument, 0, 'n'},
-                {"mbox", required_argument, 0, 'm'},
-                {"threads", required_argument, 0, 't'},
-                {"dnsthreads", required_argument, 0, 'd'},
-                {"port", required_argument, 0, 'p'},
-                {"onion", required_argument, 0, 'o'},
-                {"proxyipv4", required_argument, 0, 'i'},
-                {"proxyipv6", required_argument, 0, 'k'},
-                {"filter", required_argument, 0, 'w'},
+                {"host", required_argument, nullptr, 'h'},
+                {"ns", required_argument, nullptr, 'n'},
+                {"mbox", required_argument, nullptr, 'm'},
+                {"threads", required_argument, nullptr, 't'},
+                {"dnsthreads", required_argument, nullptr, 'd'},
+                {"port", required_argument, nullptr, 'p'},
+                {"onion", required_argument, nullptr, 'o'},
+                {"proxyipv4", required_argument, nullptr, 'i'},
+                {"proxyipv6", required_argument, nullptr, 'k'},
+                {"filter", required_argument, nullptr, 'w'},
                 {"testnet", no_argument, &fUseTestNet, 1},
                 {"wipeban", no_argument, &fWipeBan, 1},
                 {"wipeignore", no_argument, &fWipeBan, 1},
-                {"help", no_argument, 0, 'h'},
-                {0, 0, 0, 0}};
+                {"help", no_argument, nullptr, 'h'},
+                {nullptr, 0, nullptr, 0}};
             int option_index = 0;
             int c =
                 getopt_long(argc, argv, "h:n:m:t:p:d:o:i:k:w:", long_options,

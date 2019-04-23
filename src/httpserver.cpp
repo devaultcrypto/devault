@@ -361,8 +361,8 @@ static void libevent_log_cb(int severity, const char *msg) {
 }
 
 bool InitHTTPServer(Config &config) {
-    struct evhttp *http = 0;
-    struct event_base *base = 0;
+    struct evhttp *http = nullptr;
+    struct event_base *base = nullptr;
 
     if (!InitHTTPAllowList()) return false;
 

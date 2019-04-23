@@ -156,14 +156,14 @@ public:
         if (idx >= 0 && idx < cachedAddressTable.size()) {
             return &cachedAddressTable[idx];
         } else {
-            return 0;
+            return nullptr;
         }
     }
 };
 
 AddressTableModel::AddressTableModel(CWallet *_wallet, WalletModel *parent)
     : QAbstractTableModel(parent), walletModel(parent), wallet(_wallet),
-      priv(0) {
+      priv(nullptr) {
     columns << tr("Label") << tr("Address");
     priv = new AddressTablePriv(wallet, this);
     priv->refreshAddressTable();
@@ -299,7 +299,7 @@ QVariant AddressTableModel::headerData(int section, Qt::Orientation orientation,
 }
 
 Qt::ItemFlags AddressTableModel::flags(const QModelIndex &index) const {
-    if (!index.isValid()) return 0;
+    if (!index.isValid()) return nullptr;
     AddressTableEntry *rec =
         static_cast<AddressTableEntry *>(index.internalPointer());
 

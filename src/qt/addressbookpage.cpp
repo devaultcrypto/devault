@@ -23,7 +23,7 @@
 
 AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode,
                                  Tabs _tab, QWidget *parent)
-    : QDialog(parent), ui(new Ui::AddressBookPage), model(0), mode(_mode),
+    : QDialog(parent), ui(new Ui::AddressBookPage), model(nullptr), mode(_mode),
       tab(_tab) {
     ui->setupUi(this);
 
