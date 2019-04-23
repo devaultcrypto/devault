@@ -12,9 +12,10 @@
 #include "validation.h"
 
 #include <atomic>
+#include <functional> // for bind
 #include <future>
 #include <list>
-#include <functional> // for bind
+#include <memory>
 
 #include "signals-cpp/signals.h"
 
@@ -55,7 +56,7 @@ static CMainSignals g_signals;
 
 void CMainSignals::RegisterBackgroundSignalScheduler(CScheduler &scheduler) {
     assert(!m_internals);
-    m_internals.reset(new MainSignalsInstance(&scheduler));
+    m_internals = std::make_unique<MainSignalsInstance>(&scheduler);
 }
 
 void CMainSignals::UnregisterBackgroundSignalScheduler() {

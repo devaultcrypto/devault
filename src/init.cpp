@@ -1775,7 +1775,7 @@ bool AppInitSanityChecks() {
     LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
     RandomInit();
     ECC_Start();
-    globalVerifyHandle.reset(new ECCVerifyHandle());
+    globalVerifyHandle = std::make_unique<ECCVerifyHandle>();
 
     // Sanity check
     if (!InitSanityCheck()) {
@@ -1900,12 +1900,12 @@ bool AppInitMain(Config &config,
     // need to reindex later.
 
     assert(!g_connman);
-    g_connman = std::unique_ptr<CConnman>(
-        new CConnman(config, GetRand(std::numeric_limits<uint64_t>::max()),
-                     GetRand(std::numeric_limits<uint64_t>::max())));
+    g_connman = std::make_unique<CConnman>(
+        config, GetRand(std::numeric_limits<uint64_t>::max()),
+                     GetRand(std::numeric_limits<uint64_t>::max()));
     CConnman &connman = *g_connman;
 
-    peerLogic.reset(new PeerLogicValidation(&connman, scheduler));
+    peerLogic = std::make_unique<PeerLogicValidation>(&connman, scheduler);
     RegisterValidationInterface(peerLogic.get());
 
     // sanitize comments per BIP-0014, format user agent and check total size
@@ -2094,8 +2094,8 @@ bool AppInitMain(Config &config,
                 /////prewardsTip.reset();
                 /////prewardscatcher.reset();
 
-                pblocktree.reset(
-                    new CBlockTreeDB(nBlockTreeDBCache, false, fReset));
+                pblocktree = std::make_unique<CBlockTreeDB>(
+                    nBlockTreeDBCache, false, fReset);
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
@@ -2166,20 +2166,20 @@ bool AppInitMain(Config &config,
                 // At this point we're either in reindex or we've loaded a
                 // useful block tree into mapBlockIndex!
 
-                pcoinsdbview.reset(new CCoinsViewDB(nCoinDBCache, false, fReset || fReindexChainState));
+                pcoinsdbview = std::make_unique<CCoinsViewDB>(nCoinDBCache, false, fReset || fReindexChainState);
               
-                prewardsdb.reset(new CRewardsViewDB("rewards",
-                                                  nCoinDBCache, false, fReset || fReindexChainState));
+                prewardsdb = std::make_unique<CRewardsViewDB>("rewards",
+                                                  nCoinDBCache, false, fReset || fReindexChainState);
               
                 ////prewardscatcher.reset(new CCoinsViewErrorCatcher(prewardsdb.get()));
                 /////prewardsTip.reset(new CCoinsViewCache(prewardscatcher.get()));
                 
-                prewards.reset(new CColdRewards(chainparams.GetConsensus(), prewardsdb.get()));
+                prewards = std::make_unique<CColdRewards>(chainparams.GetConsensus(), prewardsdb.get());
 
-                pbudget.reset(new CBudget(config));
+                pbudget = std::make_unique<CBudget>(config);
                 
-                pcoinscatcher.reset(
-                    new CCoinsViewErrorCatcher(pcoinsdbview.get()));
+                pcoinscatcher = std::make_unique<CCoinsViewErrorCatcher>(
+                    pcoinsdbview.get());
 
                 // If necessary, upgrade from older database format.
                 // This is a no-op if we cleared the coinsviewdb with -reindex
@@ -2199,7 +2199,7 @@ bool AppInitMain(Config &config,
                 }
 
                 // The on-disk coinsdb is now in a good state, create the cache
-                pcoinsTip.reset(new CCoinsViewCache(pcoinscatcher.get()));
+                pcoinsTip = std::make_unique<CCoinsViewCache>(pcoinscatcher.get());
    
                 if (!fReindex && !fReindexChainState) {
                     // LoadChainTip sets chainActive based on pcoinsTip's best

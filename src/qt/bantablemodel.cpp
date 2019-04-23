@@ -13,6 +13,7 @@
 
 #include <QDebug>
 #include <QList>
+#include <memory>
 
 bool BannedNodeLessThan::operator()(const CCombinedBan &left,
                                     const CCombinedBan &right) const {
@@ -75,7 +76,7 @@ public:
 BanTableModel::BanTableModel(ClientModel *parent)
     : QAbstractTableModel(parent), clientModel(parent) {
     columns << tr("IP/Netmask") << tr("Banned Until");
-    priv.reset(new BanTablePriv());
+    priv = std::make_unique<BanTablePriv>();
     // default to unsorted
     priv->sortColumn = -1;
 

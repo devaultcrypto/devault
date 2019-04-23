@@ -20,6 +20,7 @@
 #include <QDesktopServices>
 #include <QPainter>
 #include <QUrl>
+#include <memory>
 
 #define DECORATION_SIZE 54
 #define NUM_ITEMS 5
@@ -241,7 +242,7 @@ void OverviewPage::setWalletModel(WalletModel *model) {
     transactionView->setModel(model);
     if (model && model->getOptionsModel()) {
         // Set up transaction list
-        filter.reset(new TransactionFilterProxy());
+        filter = std::make_unique<TransactionFilterProxy>();
         filter->setSourceModel(model->getTransactionTableModel());
         filter->setLimit(NUM_ITEMS);
         filter->setDynamicSortFilter(true);

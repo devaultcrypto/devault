@@ -108,9 +108,9 @@ TestingSetup::TestingSetup(const std::string &chainName)
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
     g_mempool.setSanityCheck(1.0);
-    pblocktree.reset(new CBlockTreeDB(1 << 20, true));
-    pcoinsdbview.reset(new CCoinsViewDB(1 << 23, true));
-    pcoinsTip.reset(new CCoinsViewCache(pcoinsdbview.get()));
+    pblocktree = std::make_unique<CBlockTreeDB>(1 << 20, true);
+    pcoinsdbview = std::make_unique<CCoinsViewDB>(1 << 23, true);
+    pcoinsTip = std::make_unique<CCoinsViewCache>(pcoinsdbview.get());
     if (!LoadGenesisBlock(chainparams)) {
         throw std::runtime_error("InitBlockIndex failed.");
     }
@@ -126,9 +126,9 @@ TestingSetup::TestingSetup(const std::string &chainName)
     }
 
     // Deterministic randomness for tests.
-    g_connman = std::unique_ptr<CConnman>(new CConnman(config, 0x1337, 0x1337));
+    g_connman = std::make_unique<CConnman>(config, 0x1337, 0x1337);
     connman = g_connman.get();
-    peerLogic.reset(new PeerLogicValidation(connman, scheduler));
+    peerLogic = std::make_unique<PeerLogicValidation>(connman, scheduler);
 }
 
 TestingSetup::~TestingSetup() {
