@@ -84,7 +84,7 @@ public:
     /**
      * Precondition: worker threads have all stopped (they have all been joined)
      */
-    ~WorkQueue() {}
+    ~WorkQueue() = default;
 
     /** Enqueue a work item */
     bool Enqueue(WorkItem *item) {
@@ -122,7 +122,7 @@ public:
 };
 
 struct HTTPPathHandler {
-    HTTPPathHandler() {}
+    HTTPPathHandler() = default;
     HTTPPathHandler(std::string _prefix, bool _exactMatch,
                     HTTPRequestHandler _handler)
         : prefix(_prefix), exactMatch(_exactMatch), handler(_handler) {}

@@ -2551,7 +2551,7 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
 
 class CNetCleanup {
 public:
-    CNetCleanup() {}
+    CNetCleanup() = default;
 
     ~CNetCleanup() {
 #ifdef WIN32

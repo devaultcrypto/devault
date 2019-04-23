@@ -551,7 +551,7 @@ namespace detail {
     // whereas a naive implementation based on inheritance does not.
     class FormatArg {
     public:
-        FormatArg() {}
+        FormatArg() = default;
 
         template <typename T>
         explicit FormatArg(const T &value)

@@ -20,7 +20,7 @@ const fs::path &GetDataDir(bool fNetSpecific = true);
 const fs::path GetDataDirNoCreate();
 void ClearDatadirCache();
 fs::path GetConfigFile(const std::string &confPath);
-bool RenameOver(fs::path src, fs::path dest);
+bool RenameOver(const fs::path& src, const fs::path& dest);
 bool TryCreateDirectories(const fs::path &p);
 void FileCommit(FILE *file);
 bool TruncateFile(FILE *file, unsigned int length);

@@ -238,8 +238,7 @@ std::string BCLog::Logger::RenameLastDebugFile(){
 void BCLog::Logger::RemoveOlderDebugFiles() {
     int days_to_keep = gArgs.GetArg("-keeplogfiles", DEFAULT_DEBUGLOGFILE_KEEPDAYS);
     days_to_keep = std::max(1, days_to_keep);
-    fs::path pathLog = GetDataDir();
-    fs::directory_iterator dir_it(pathLog);
+    fs::directory_iterator dir_it(GetDataDir());
     for(const auto& it : dir_it) {
         if (!fs::is_regular_file(it.status())) continue;
         std::string filename = it.path().filename().string();

@@ -744,7 +744,7 @@ public:
         SetNull();
     }
 
-    ~CWallet() {
+    ~CWallet() override {
         delete pwalletdbEncryption;
         pwalletdbEncryption = nullptr;
     }
@@ -1205,7 +1205,7 @@ public:
         fInternal = false;
     }
 
-    ~CReserveKey() { ReturnKey(); }
+    ~CReserveKey() override { ReturnKey(); }
 
     void ReturnKey();
     bool GetReservedKey(CPubKey &pubkey, bool internal = false);

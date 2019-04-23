@@ -130,7 +130,7 @@ public:
         SetString(strBase58c.c_str(), Params().Base58Prefix(Type).size());
     }
 
-    CBitcoinExtKeyBase() {}
+    CBitcoinExtKeyBase() = default;
 };
 
 typedef CBitcoinExtKeyBase<CExtKey, BIP32_EXTKEY_SIZE,

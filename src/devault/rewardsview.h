@@ -16,7 +16,7 @@
 
 class CRewardsViewDBCursor : public CCoinsViewCursor {
   public:
-  ~CRewardsViewDBCursor() {}
+  ~CRewardsViewDBCursor() override = default;
 
   bool GetKey(COutPoint &key) const override;
   bool GetValue(Coin &coin) const override;

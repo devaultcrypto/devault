@@ -576,8 +576,8 @@ namespace sha256 {
 
 } // namespace sha256
 
-typedef void (*TransformType)(uint32_t *, const uint8_t *, size_t);
-typedef void (*TransformD64Type)(uint8_t *, const uint8_t *);
+using TransformType = void (*)(uint32_t *, const uint8_t *, size_t);
+using TransformD64Type = void (*)(uint8_t *, const uint8_t *);
 
 template <TransformType tr>
 void TransformD64Wrapper(uint8_t *out, const uint8_t *in) {

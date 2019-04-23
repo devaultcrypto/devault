@@ -168,7 +168,7 @@ UniValue ValueFromAmount(const Amount amount) {
     return UniValue(UniValue::VNUM, strprintf("%s%d.%03d", sign ? "-" : "", quotient, remainder));
 }
 
-uint256 ParseHashV(const UniValue &v, std::string strName) {
+uint256 ParseHashV(const UniValue &v, const std::string& strName) {
     std::string strHex;
     if (v.isStr()) {
         strHex = v.get_str();
@@ -191,10 +191,10 @@ uint256 ParseHashV(const UniValue &v, std::string strName) {
     result.SetHex(strHex);
     return result;
 }
-uint256 ParseHashO(const UniValue &o, std::string strKey) {
+uint256 ParseHashO(const UniValue &o, const std::string& strKey) {
     return ParseHashV(find_value(o, strKey), strKey);
 }
-std::vector<uint8_t> ParseHexV(const UniValue &v, std::string strName) {
+std::vector<uint8_t> ParseHexV(const UniValue &v, const std::string& strName) {
     std::string strHex;
     if (v.isStr()) {
         strHex = v.get_str();
@@ -207,7 +207,7 @@ std::vector<uint8_t> ParseHexV(const UniValue &v, std::string strName) {
 
     return ParseHex(strHex);
 }
-std::vector<uint8_t> ParseHexO(const UniValue &o, std::string strKey) {
+std::vector<uint8_t> ParseHexO(const UniValue &o, const std::string& strKey) {
     return ParseHexV(find_value(o, strKey), strKey);
 }
 

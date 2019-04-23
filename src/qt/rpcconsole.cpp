@@ -98,7 +98,7 @@ public:
         connect(&timer, SIGNAL(timeout()), this, SLOT(timeout()));
         timer.start(millis);
     }
-    ~QtRPCTimerBase() {}
+    ~QtRPCTimerBase() = default;
 private Q_SLOTS:
     void timeout() { func(); }
 
@@ -109,7 +109,7 @@ private:
 
 class QtRPCTimerInterface : public RPCTimerInterface {
 public:
-    ~QtRPCTimerInterface() {}
+    ~QtRPCTimerInterface() = default;
     const char *Name() override { return "Qt"; }
     RPCTimerBase *NewTimer(std::function<void(void)> &func,
                            int64_t millis) override {
