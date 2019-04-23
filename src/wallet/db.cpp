@@ -12,6 +12,7 @@
 #include "utilstrencodings.h"
 #include "wallet/walletutil.h"
 
+#include <memory>
 #include <thread>
 
 #include <cstdint>
@@ -85,7 +86,7 @@ void CDBEnv::EnvShutdown() {
 }
 
 void CDBEnv::Reset() {
-    dbenv.reset(new DbEnv(DB_CXX_NO_EXCEPTIONS));
+    dbenv = std::make_unique<DbEnv>(DB_CXX_NO_EXCEPTIONS);
     fDbEnvInit = false;
     fMockDb = false;
 }

@@ -11,6 +11,8 @@
 #include "primitives/transaction.h"
 #include <consensus/validation.h>
 
+#include <memory>
+
 // Group Address with % for safety/clarity
 struct BudgetStruct {
   std::string MainNetAddress;
@@ -91,8 +93,8 @@ Amount CBudget::CalculateSuperBlockRewards(int nHeight, const Amount &nOverallRe
 CBudget::CBudget(const Config &config) {
   const CChainParams &chainparams = config.GetChainParams();
 
-  nPayment.reset(new Amount[BudgetSize]);
-  Scripts.reset(new CScript[BudgetSize]);
+  nPayment = std::make_unique<Amount[]>(BudgetSize);
+  Scripts = std::make_unique<CScript[]>(BudgetSize);
 
   nBlocksPerPeriod = (chainparams.GetConsensus().nBlocksPerYear / 12);
   

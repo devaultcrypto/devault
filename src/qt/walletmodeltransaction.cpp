@@ -4,6 +4,8 @@
 
 #include "walletmodeltransaction.h"
 
+#include <memory>
+
 #include "policy/policy.h"
 #include "wallet/wallet.h"
 
@@ -56,7 +58,7 @@ Amount WalletModelTransaction::getTotalTransactionAmount() const {
 }
 
 void WalletModelTransaction::newPossibleKeyChange(CWallet *wallet) {
-    keyChange.reset(new CReserveKey(wallet));
+    keyChange = std::make_unique<CReserveKey>(wallet);
 }
 
 CReserveKey *WalletModelTransaction::getPossibleKeyChange() {

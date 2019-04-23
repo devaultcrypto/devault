@@ -31,6 +31,7 @@
 #include "devault/budget.h"
 
 #include <algorithm>
+#include <memory>
 #include <queue>
 #include <utility>
 
@@ -133,7 +134,7 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
 
     resetBlock();
 
-    pblocktemplate.reset(new CBlockTemplate());
+    pblocktemplate = std::make_unique<CBlockTemplate>();
     if (!pblocktemplate.get()) {
         return nullptr;
     }

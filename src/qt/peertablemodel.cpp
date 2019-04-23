@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QList>
 #include <QTimer>
+#include <memory>
 
 bool NodeLessThan::operator()(const CNodeCombinedStats &left,
                               const CNodeCombinedStats &right) const {
@@ -106,7 +107,7 @@ PeerTableModel::PeerTableModel(ClientModel *parent)
     : QAbstractTableModel(parent), clientModel(parent), timer(0) {
     columns << tr("NodeId") << tr("Node/Service") << tr("User Agent")
             << tr("Ping");
-    priv.reset(new PeerTablePriv());
+    priv = std::make_unique<PeerTablePriv>();
     // default to unsorted
     priv->sortColumn = -1;
 

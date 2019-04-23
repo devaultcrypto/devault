@@ -5,6 +5,8 @@
 
 #include "net_processing.h"
 
+#include <memory>
+
 #include "addrman.h"
 #include "arith_uint256.h"
 #include "blockencodings.h"
@@ -958,7 +960,7 @@ PeerLogicValidation::PeerLogicValidation(CConnman *connmanIn,
                                          CScheduler &scheduler)
     : connman(connmanIn), m_stale_tip_check_time(0) {
     // Initialize global variables that cannot be constructed at startup.
-    recentRejects.reset(new CRollingBloomFilter(120000, 0.000001));
+    recentRejects = std::make_unique<CRollingBloomFilter>(120000, 0.000001);
 
     const Consensus::Params &consensusParams = Params().GetConsensus();
     // Stale tip checking and peer eviction are on two different timers, but we
@@ -2796,9 +2798,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                                              &queuedBlockIt)) {
                         if (!(*queuedBlockIt)->partialBlock) {
                             (*queuedBlockIt)
-                                ->partialBlock.reset(
-                                    new PartiallyDownloadedBlock(config,
-                                                                 &g_mempool));
+                                ->partialBlock = std::make_unique<PartiallyDownloadedBlock>(
+                                    config,
+                                                                 &g_mempool);
                         } else {
                             // The block was already in flight using compact
                             // blocks from the same peer.
@@ -3230,7 +3232,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             Misbehaving(pfrom, 100, "oversized-bloom-filter");
         } else {
             LOCK(pfrom->cs_filter);
-            pfrom->pfilter.reset(new CBloomFilter(filter));
+            pfrom->pfilter = std::make_unique<CBloomFilter>(filter);
             pfrom->pfilter->UpdateEmptyFull();
             pfrom->fRelayTxes = true;
         }
@@ -3265,7 +3267,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     else if (strCommand == NetMsgType::FILTERCLEAR) {
         LOCK(pfrom->cs_filter);
         if (pfrom->GetLocalServices() & NODE_BLOOM) {
-            pfrom->pfilter.reset(new CBloomFilter());
+            pfrom->pfilter = std::make_unique<CBloomFilter>();
         }
         pfrom->fRelayTxes = true;
     }
