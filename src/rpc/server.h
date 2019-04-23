@@ -59,7 +59,7 @@ private:
     RWCollection<RPCCommandMap> commands;
 
 public:
-    RPCServer() {}
+    RPCServer() = default;
 
     /**
      * Attempts to execute an RPC command from the given request.
@@ -123,7 +123,7 @@ void RPCTypeCheckObj(const UniValue &o,
  */
 class RPCTimerBase {
 public:
-    virtual ~RPCTimerBase() {}
+    virtual ~RPCTimerBase() = default;
 };
 
 /**
@@ -131,7 +131,7 @@ public:
  */
 class RPCTimerInterface {
 public:
-    virtual ~RPCTimerInterface() {}
+    virtual ~RPCTimerInterface() = default;
 
     /**
      * Implementation name

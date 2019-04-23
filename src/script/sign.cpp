@@ -270,7 +270,7 @@ namespace {
 struct Stacks {
     std::vector<valtype> script;
 
-    Stacks() {}
+    Stacks() = default;
     explicit Stacks(const std::vector<valtype> &scriptSigStack_)
         : script(scriptSigStack_) {}
     explicit Stacks(const SignatureData &data) {
@@ -356,7 +356,7 @@ namespace {
 /** Dummy signature checker which accepts all signatures. */
 class DummySignatureChecker : public BaseSignatureChecker {
 public:
-    DummySignatureChecker() {}
+    DummySignatureChecker() = default;
 
     bool CheckSig(const std::vector<uint8_t> &scriptSig,
                   const std::vector<uint8_t> &vchPubKey,

@@ -47,7 +47,7 @@ public:
         return false;
     }
 
-    virtual ~BaseSignatureChecker() {}
+    virtual ~BaseSignatureChecker() = default;
 };
 
 class TransactionSignatureChecker : public BaseSignatureChecker {

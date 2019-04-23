@@ -91,7 +91,7 @@ public:
 /** Specialization of CCoinsViewCursor to iterate over a CCoinsViewDB */
 class CCoinsViewDBCursor : public CCoinsViewCursor {
 public:
-    ~CCoinsViewDBCursor() {}
+    ~CCoinsViewDBCursor() = default;
 
     bool GetKey(COutPoint &key) const override;
     bool GetValue(Coin &coin) const override;

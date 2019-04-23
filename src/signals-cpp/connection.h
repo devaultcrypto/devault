@@ -44,7 +44,7 @@ namespace signalz {
         };
 
     public:
-        inline connection() { }
+        inline connection() = default;
         inline connection(std::shared_ptr<data> d) : m_data(std::move(d)) { }
 
         /// Checks if the `connection` represented by this object is (still) connected.

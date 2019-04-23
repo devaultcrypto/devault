@@ -49,7 +49,7 @@ Arena::Arena(void *base_in, size_t size_in, size_t alignment_in)
     chunks_free.emplace(base, size_in);
 }
 
-Arena::~Arena() {}
+Arena::~Arena() = default;
 
 void *Arena::alloc(size_t size) {
     // Round to next multiple of alignment
@@ -255,7 +255,7 @@ LockedPool::LockedPool(std::unique_ptr<LockedPageAllocator> allocator_in,
     : allocator(std::move(allocator_in)), lf_cb(lf_cb_in),
       cumulative_bytes_locked(0) {}
 
-LockedPool::~LockedPool() {}
+LockedPool::~LockedPool() = default;
 void *LockedPool::alloc(size_t size) {
     std::lock_guard<std::mutex> lock(mutex);
 

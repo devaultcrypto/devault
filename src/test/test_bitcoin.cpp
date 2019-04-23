@@ -201,7 +201,7 @@ CBlock TestChain100Setup::CreateAndProcessBlock(
     return result;
 }
 
-TestChain100Setup::~TestChain100Setup() {}
+TestChain100Setup::~TestChain100Setup() = default;
 
 CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction &tx,
                                                CTxMemPool *pool) {

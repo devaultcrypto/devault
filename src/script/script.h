@@ -420,7 +420,7 @@ protected:
     }
 
 public:
-    CScript() {}
+    CScript() = default;
     CScript(const_iterator pbegin, const_iterator pend)
         : CScriptBase(pbegin, pend) {}
     CScript(std::vector<uint8_t>::const_iterator pbegin,
@@ -665,8 +665,8 @@ class CReserveScript {
 public:
     CScript reserveScript;
     virtual void KeepScript() {}
-    CReserveScript() {}
-    virtual ~CReserveScript() {}
+    CReserveScript() = default;
+    virtual ~CReserveScript() = default;
 };
 
 #endif // BITCOIN_SCRIPT_SCRIPT_H

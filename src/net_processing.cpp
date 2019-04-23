@@ -4337,7 +4337,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
 
 class CNetProcessingCleanup {
 public:
-    CNetProcessingCleanup() {}
+    CNetProcessingCleanup() = default;
     ~CNetProcessingCleanup() {
         // orphan transactions
         mapOrphanTransactions.clear();

@@ -24,7 +24,7 @@ public:
     explicit BaseSignatureCreator(const CKeyStore *keystoreIn)
         : keystore(keystoreIn) {}
     const CKeyStore &KeyStore() const { return *keystore; };
-    virtual ~BaseSignatureCreator() {}
+    virtual ~BaseSignatureCreator() = default;
     virtual const BaseSignatureChecker &Checker() const = 0;
 
     /** Create a singular (non-script) signature. */
@@ -77,7 +77,7 @@ public:
 struct SignatureData {
     CScript scriptSig;
 
-    SignatureData() {}
+    SignatureData() = default;
     explicit SignatureData(const CScript &script) : scriptSig(script) {}
 };
 

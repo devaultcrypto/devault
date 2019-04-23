@@ -174,7 +174,7 @@ public:
         }
     }
 
-    ~CCheckQueue() {}
+    ~CCheckQueue() = default;
 };
 
 /**
