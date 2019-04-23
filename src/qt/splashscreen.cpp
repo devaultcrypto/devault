@@ -27,7 +27,7 @@
 #include <QRadialGradient>
 
 SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle)
-    : QWidget(0, f), curAlignment(0) {
+    : QWidget(nullptr, f), curAlignment(0) {
 
     float fontFactor            = 1.0;
     float devicePixelRatio      = 1.0;

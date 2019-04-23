@@ -9,7 +9,7 @@
 
 WalletModelTransaction::WalletModelTransaction(
     const QList<SendCoinsRecipient> &_recipients)
-    : recipients(_recipients), walletTransaction(0), fee() {}
+    : recipients(_recipients), walletTransaction(nullptr), fee() {}
 
 QList<SendCoinsRecipient> WalletModelTransaction::getRecipients() const {
     return recipients;

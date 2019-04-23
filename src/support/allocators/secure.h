@@ -35,7 +35,7 @@ template <typename T> struct secure_allocator : public std::allocator<T> {
         typedef secure_allocator<_Other> other;
     };
 
-    T *allocate(std::size_t n, const void *hint = 0) {
+    T *allocate(std::size_t n, const void *hint = nullptr) {
         return static_cast<T *>(
             LockedPoolManager::Instance().alloc(sizeof(T) * n));
     }

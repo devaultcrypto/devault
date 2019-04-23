@@ -26,7 +26,7 @@ class OptionsModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    explicit OptionsModel(QObject *parent = 0, bool resetSettings = false);
+    explicit OptionsModel(QObject *parent = nullptr, bool resetSettings = false);
 
     enum OptionID {
         StartAtStartup,      // bool

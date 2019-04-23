@@ -116,7 +116,7 @@ void FreespaceChecker::check() {
 }
 
 Intro::Intro(QWidget *parent)
-    : QDialog(parent), ui(new Ui::Intro), thread(0), signalled(false) {
+    : QDialog(parent), ui(new Ui::Intro), thread(nullptr), signalled(false) {
     if(DVTUI::customThemeIsSet()) {
         QString appstyle = "fusion";
         QApplication::setStyle(appstyle);
@@ -203,7 +203,7 @@ bool Intro::pickDataDirectory() {
                 }
                 break;
             } catch (const fs::filesystem_error &) {
-                QMessageBox::critical(0, tr(PACKAGE_NAME),
+                QMessageBox::critical(nullptr, tr(PACKAGE_NAME),
                                       tr("Error: Specified data directory "
                                          "\"%1\" cannot be created.")
                                           .arg(dataDir));

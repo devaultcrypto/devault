@@ -52,7 +52,7 @@ public:
         }
     }
 
-    Amount value(bool *valid_out = 0) const { return parse(text(), valid_out); }
+    Amount value(bool *valid_out = nullptr) const { return parse(text(), valid_out); }
 
     void setValue(const Amount value) {
         lineEdit()->setText(BitcoinUnits::format(
@@ -134,7 +134,7 @@ private:
      * return validity.
      * @note Must return 0 if !valid.
      */
-    Amount parse(const QString &text, bool *valid_out = 0) const {
+    Amount parse(const QString &text, bool *valid_out = nullptr) const {
         Amount val = Amount::zero();
         bool valid = BitcoinUnits::parse(currentUnit, text, &val);
         if (valid) {
@@ -174,7 +174,7 @@ protected:
             return StepUpEnabled;
         }
 
-        StepEnabled rv = 0;
+        StepEnabled rv = nullptr;
         bool valid = false;
         Amount val = value(&valid);
         if (valid) {
@@ -195,7 +195,7 @@ Q_SIGNALS:
 #include "bitcoinamountfield.moc"
 
 BitcoinAmountField::BitcoinAmountField(QWidget *parent)
-    : QWidget(parent), amount(0) {
+    : QWidget(parent), amount(nullptr) {
     amount = new AmountSpinBox(this);
     amount->setLocale(QLocale::c());
     amount->installEventFilter(this);

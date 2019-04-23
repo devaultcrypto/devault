@@ -31,8 +31,8 @@ static int64_t nLastHeaderTipUpdateNotification = 0;
 static int64_t nLastBlockTipUpdateNotification = 0;
 
 ClientModel::ClientModel(OptionsModel *_optionsModel, QObject *parent)
-    : QObject(parent), optionsModel(_optionsModel), peerTableModel(0),
-      banTableModel(0), pollTimer(0) {
+    : QObject(parent), optionsModel(_optionsModel), peerTableModel(nullptr),
+      banTableModel(nullptr), pollTimer(nullptr) {
     cachedBestHeaderHeight = -1;
     cachedBestHeaderTime = -1;
     peerTableModel = new PeerTableModel(this);

@@ -60,7 +60,7 @@ public:
     static const std::string DEFAULT_UIPLATFORM;
 
     explicit BitcoinGUI(const Config *, const PlatformStyle *platformStyle,
-                        const NetworkStyle *networkStyle, QWidget *parent = 0);
+                        const NetworkStyle *networkStyle, QWidget *parent = nullptr);
     ~BitcoinGUI();
 
     int getConnectedNodeCount();

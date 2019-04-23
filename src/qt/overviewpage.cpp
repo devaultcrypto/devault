@@ -117,7 +117,7 @@ public:
 #include "overviewpage.moc"
 
 OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent)
-    : QWidget(parent), ui(new Ui::OverviewPage), clientModel(0), walletModel(0),
+    : QWidget(parent), ui(new Ui::OverviewPage), clientModel(nullptr), walletModel(nullptr),
       currentBalance(-SATOSHI), currentUnconfirmedBalance(-SATOSHI),
       currentImmatureBalance(-SATOSHI), currentWatchOnlyBalance(-SATOSHI),
       currentWatchUnconfBalance(-SATOSHI),
@@ -140,7 +140,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent)
     ui->labelWalletStatus9->setIcon(icon);
 
     // Recent transactions
-    transactionView = new TransactionView(platformStyle, NULL);
+    transactionView = new TransactionView(platformStyle, nullptr);
     //ui->transactionFrame->setVisible(true);
     ui->transactionLayout->addWidget(transactionView);
     //ui->transactionLayout->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Expanding);

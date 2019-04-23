@@ -37,7 +37,7 @@ class BanTableModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
-    explicit BanTableModel(ClientModel *parent = 0);
+    explicit BanTableModel(ClientModel *parent = nullptr);
     ~BanTableModel();
     void startAutoRefresh();
     void stopAutoRefresh();

@@ -28,7 +28,7 @@
 #include <qrencode.h>
 #endif
 
-QRImageWidget::QRImageWidget(QWidget *parent) : QLabel(parent), contextMenu(0) {
+QRImageWidget::QRImageWidget(QWidget *parent) : QLabel(parent), contextMenu(nullptr) {
     contextMenu = new QMenu(this);
     QAction *saveImageAction = new QAction(tr("&Save Image..."), this);
     connect(saveImageAction, SIGNAL(triggered()), this, SLOT(saveImage()));
@@ -78,7 +78,7 @@ void QRImageWidget::contextMenuEvent(QContextMenuEvent *event) {
 
 ReceiveRequestDialog::ReceiveRequestDialog(const Config *configIn,
                                            QWidget *parent)
-    : QDialog(parent), ui(new Ui::ReceiveRequestDialog), model(0),
+    : QDialog(parent), ui(new Ui::ReceiveRequestDialog), model(nullptr),
       config(configIn) {
     ui->setupUi(this);
 

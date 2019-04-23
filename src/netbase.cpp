@@ -623,7 +623,7 @@ bool ConnectThroughProxy(const proxyType &proxy, const std::string &strDest,
         if (!Socks5(strDest, (unsigned short)port, &random_auth, hSocket)) {
             return false;
         }
-    } else if (!Socks5(strDest, (unsigned short)port, 0, hSocket)) {
+    } else if (!Socks5(strDest, (unsigned short)port, nullptr, hSocket)) {
         return false;
     }
     return true;

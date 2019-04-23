@@ -312,8 +312,8 @@ void DeVault::shutdown() {
 }
 
 BitcoinApplication::BitcoinApplication(int &argc, char **argv)
-    : QApplication(argc, argv), coreThread(0), optionsModel(0), clientModel(0),
-      window(0), pollShutdownTimer(0),
+    : QApplication(argc, argv), coreThread(nullptr), optionsModel(nullptr), clientModel(nullptr),
+      window(nullptr), pollShutdownTimer(nullptr),
 #ifdef ENABLE_WALLET
       m_wallet_models(),
 #endif
@@ -335,11 +335,11 @@ BitcoinApplication::~BitcoinApplication() {
     }
 
     delete window;
-    window = 0;
+    window = nullptr;
     delete optionsModel;
-    optionsModel = 0;
+    optionsModel = nullptr;
     delete platformStyle;
-    platformStyle = 0;
+    platformStyle = nullptr;
 }
 
 void BitcoinApplication::initPlatformStyle() 
@@ -368,7 +368,7 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
   }
   if (CheckIfWalletDatExists()) return true;
   
-  SetPassphraseDialog dlg(0);
+  SetPassphraseDialog dlg(nullptr);
   dlg.exec();
   password = dlg.getPassword();
 #endif
@@ -383,7 +383,7 @@ bool BitcoinApplication::createWindow(const Config *config,
         if (pss.empty()) return false;
     }
 #endif
-    window = new BitcoinGUI(config, platformStyle, networkStyle, 0);
+    window = new BitcoinGUI(config, platformStyle, networkStyle, nullptr);
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window,
@@ -392,7 +392,7 @@ bool BitcoinApplication::createWindow(const Config *config,
 }
 
 void BitcoinApplication::createSplashScreen(const NetworkStyle *networkStyle) {
-    SplashScreen *splash = new SplashScreen(0, networkStyle);
+    SplashScreen *splash = new SplashScreen(nullptr, networkStyle);
     // We don't hold a direct pointer to the splash screen after creation, but
     // the splash screen will take care of deleting itself when slotFinish
     // happens.
@@ -466,7 +466,7 @@ void BitcoinApplication::requestShutdown(Config &config) {
     qDebug() << __func__ << ": Requesting shutdown";
     startThread();
     window->hide();
-    window->setClientModel(0);
+    window->setClientModel(nullptr);
     pollShutdownTimer->stop();
 
 #ifdef ENABLE_WALLET
@@ -477,7 +477,7 @@ void BitcoinApplication::requestShutdown(Config &config) {
     m_wallet_models.clear();
 #endif
     delete clientModel;
-    clientModel = 0;
+    clientModel = nullptr;
 
     StartShutdown();
 
@@ -547,7 +547,7 @@ void BitcoinApplication::shutdownResult() {
 
 void BitcoinApplication::handleRunawayException(const QString &message) {
     QMessageBox::critical(
-        0, "Runaway exception",
+        nullptr, "Runaway exception",
         BitcoinGUI::tr("A fatal error occurred. Devault can no longer continue "
                        "safely and will quit.") +
             QString("\n\n") + message);
@@ -698,7 +698,7 @@ int main(int argc, char *argv[]) {
         gArgs.ReadConfigFile(gArgs.GetArg("-conf", BITCOIN_CONF_FILENAME));
     } catch (const std::exception &e) {
         QMessageBox::critical(
-            0, QObject::tr(PACKAGE_NAME),
+            nullptr, QObject::tr(PACKAGE_NAME),
             QObject::tr("Error: Cannot parse configuration file: %1. Only use "
                         "key=value syntax.")
                 .arg(e.what()));
@@ -718,7 +718,7 @@ int main(int argc, char *argv[]) {
     try {
         SelectParams(gArgs.GetChainName());
     } catch (std::exception &e) {
-        QMessageBox::critical(0, QObject::tr(PACKAGE_NAME),
+        QMessageBox::critical(nullptr, QObject::tr(PACKAGE_NAME),
                               QObject::tr("Error: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
