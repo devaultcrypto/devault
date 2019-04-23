@@ -57,7 +57,7 @@ public:
     }
 
     //! Destructor (again necessary because of memlocking).
-    ~CKey() {}
+    ~CKey() = default;
 
     friend bool operator==(const CKey &a, const CKey &b) {
         return a.fCompressed == b.fCompressed && a.size() == b.size() &&

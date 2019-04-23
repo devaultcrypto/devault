@@ -81,7 +81,7 @@ public:
     const ChainTxData &TxData() const { return chainTxData; }
 
 protected:
-    CChainParams() {}
+    CChainParams() = default;
 
     Consensus::Params consensus;
     CMessageHeader::MessageMagic diskMagic;

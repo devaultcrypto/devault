@@ -5642,7 +5642,7 @@ double GuessVerificationProgress(const ChainTxData &data, CBlockIndex *pindex) {
 
 class CMainCleanup {
 public:
-    CMainCleanup() {}
+    CMainCleanup() = default;
     ~CMainCleanup() {
         // block headers
         for (const std::pair<const uint256, CBlockIndex *> &it :

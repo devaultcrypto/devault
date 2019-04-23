@@ -48,7 +48,7 @@ public:
         std::string s(val_);
         setStr(s);
     }
-    ~UniValue() {}
+    ~UniValue() = default;
 
     void clear();
 

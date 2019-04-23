@@ -43,7 +43,7 @@ namespace signalz {
     /// all other members which ensures that all other data members are still available and
     /// valid to finish potential callback running in parallel on other threads. The 
     struct connections {
-        inline connections()  { }
+        inline connections()  = default;
         inline ~connections() { disconnect_all(true); }
 
         /// Connects to the given `signal` `s` and adds the created `connection` to

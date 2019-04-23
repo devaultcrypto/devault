@@ -47,7 +47,7 @@ public:
         return false;
     }
 
-    virtual ~BaseSignatureChecker() {}
+    virtual ~BaseSignatureChecker() = default;
 };
 
 class TransactionSignatureChecker : public BaseSignatureChecker {
@@ -70,9 +70,9 @@ public:
     bool CheckSig(const std::vector<uint8_t> &vchSigIn,
                   const std::vector<uint8_t> &vchPubKey,
                   const CScript &scriptCode,
-                  uint32_t flags) const final override;
-    bool CheckLockTime(const CScriptNum &nLockTime) const final override;
-    bool CheckSequence(const CScriptNum &nSequence) const final override;
+                  uint32_t flags) const final ;
+    bool CheckLockTime(const CScriptNum &nLockTime) const final ;
+    bool CheckSequence(const CScriptNum &nSequence) const final ;
 };
 
 class MutableTransactionSignatureChecker : public TransactionSignatureChecker {

@@ -11,7 +11,7 @@
 
 #include <boost/range/adaptor/sliced.hpp>
 
-typedef boost::sliced_range<const valtype> slicedvaltype;
+using slicedvaltype = boost::sliced_range<const valtype>;
 
 /**
  * A canonical signature exists of: <30> <total len> <02> <len R> <R> <02> <len

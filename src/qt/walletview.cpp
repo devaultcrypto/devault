@@ -92,7 +92,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, const Config *cfg,
     connect(overviewPage->transactionView, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
 }
 
-WalletView::~WalletView() {}
+WalletView::~WalletView() = default;
 
 void WalletView::setBitcoinGUI(BitcoinGUI *gui) {
     if (gui) {

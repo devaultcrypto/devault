@@ -35,7 +35,7 @@ public:
     /** Close wallets */
     virtual void Close() = 0;
 
-    virtual ~WalletInitInterface() {}
+    virtual ~WalletInitInterface() = default;
 };
 
 #endif // WALLETINITINTERFACE_H

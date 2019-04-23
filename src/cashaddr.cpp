@@ -7,7 +7,7 @@
 
 namespace {
 
-typedef std::vector<uint8_t> data;
+using data = std::vector<uint8_t>;
 
 /**
  * The cashaddr character set for encoding.

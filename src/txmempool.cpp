@@ -412,7 +412,7 @@ CTxMemPool::CTxMemPool() : nTransactionsUpdated(0) {
     nCheckFrequency = 0;
 }
 
-CTxMemPool::~CTxMemPool() {}
+CTxMemPool::~CTxMemPool() = default;
 
 bool CTxMemPool::isSpent(const COutPoint &outpoint) {
     LOCK(cs);

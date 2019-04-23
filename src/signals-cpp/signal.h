@@ -37,7 +37,7 @@ namespace signalz {
     template<typename SIGNATURE>
     struct signal {
 
-        inline signal()  { }
+        inline signal()  = default;
         inline ~signal() { disconnect_all(true); }
 
         inline connection connect(std::function<SIGNATURE> target) {

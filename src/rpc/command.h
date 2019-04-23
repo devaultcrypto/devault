@@ -34,7 +34,7 @@ private:
 
 public:
     RPCCommand(const std::string &nameIn) : name(nameIn) {}
-    virtual ~RPCCommand() {}
+    virtual ~RPCCommand() = default;
 
     /**
      * It is recommended to override Execute(JSONRPCRequest) only if the entire

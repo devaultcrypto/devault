@@ -170,7 +170,7 @@ public:
      */
     CMerkleBlock(const CBlock &block, const std::set<TxId> &txids);
 
-    CMerkleBlock() {}
+    CMerkleBlock() = default;
 
     ADD_SERIALIZE_METHODS;
 

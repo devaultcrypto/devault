@@ -21,7 +21,7 @@ protected:
     mutable CCriticalSection cs_KeyStore;
 
 public:
-    virtual ~CKeyStore() {}
+    virtual ~CKeyStore() = default;
 
     //! Add a key to the store.
     virtual bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) = 0;
@@ -70,16 +70,16 @@ public:
     bool HaveKey(const CKeyID &address) const override;
     std::set<CKeyID> GetKeys() const override;
     bool GetKey(const CKeyID &address, CKey &keyOut) const override;
-    virtual bool AddCScript(const CScript &redeemScript) override;
-    virtual bool HaveCScript(const CScriptID &hash) const override;
+    bool AddCScript(const CScript &redeemScript) override;
+    bool HaveCScript(const CScriptID &hash) const override;
     std::set<CScriptID> GetCScripts() const override;
-    virtual bool GetCScript(const CScriptID &hash,
+    bool GetCScript(const CScriptID &hash,
                             CScript &redeemScriptOut) const override;
 
-    virtual bool AddWatchOnly(const CScript &dest) override;
-    virtual bool RemoveWatchOnly(const CScript &dest) override;
-    virtual bool HaveWatchOnly(const CScript &dest) const override;
-    virtual bool HaveWatchOnly() const override;
+    bool AddWatchOnly(const CScript &dest) override;
+    bool RemoveWatchOnly(const CScript &dest) override;
+    bool HaveWatchOnly(const CScript &dest) const override;
+    bool HaveWatchOnly() const override;
     virtual bool GetHDChain(CHDChain& hdChainRet) const;
 
 };

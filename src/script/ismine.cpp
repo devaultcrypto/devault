@@ -11,7 +11,7 @@
 #include "script/sign.h"
 #include "script/standard.h"
 
-typedef std::vector<uint8_t> valtype;
+using valtype = std::vector<uint8_t>;
 
 unsigned int HaveKeys(const std::vector<valtype> &pubkeys,
                       const CKeyStore &keystore) {

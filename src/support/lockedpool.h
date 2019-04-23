@@ -17,7 +17,7 @@
  */
 class LockedPageAllocator {
 public:
-    virtual ~LockedPageAllocator() {}
+    virtual ~LockedPageAllocator() = default;
     /**
      * Allocate and lock memory pages.
      * If len is not a multiple of the system page size, it is rounded up.
@@ -195,7 +195,7 @@ private:
     public:
         LockedPageArena(LockedPageAllocator *alloc_in, void *base_in,
                         size_t size, size_t align);
-        ~LockedPageArena();
+        ~LockedPageArena() override;
 
     private:
         void *base;
