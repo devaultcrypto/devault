@@ -598,8 +598,8 @@ bool HaveNameProxy() {
 
 bool IsProxy(const CNetAddr &addr) {
     LOCK(cs_proxyInfos);
-    for (int i = 0; i < NET_MAX; i++) {
-        if (addr == static_cast<CNetAddr>(proxyInfo[i].proxy)) {
+    for (const auto& n : proxyInfo) {
+        if (addr == static_cast<CNetAddr>(n.proxy)) {
             return true;
         }
     }

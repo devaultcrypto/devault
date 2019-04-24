@@ -175,7 +175,7 @@ CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
     // Find the first block the caller has in the main chain
     for (const uint256 &hash : locator.vHave) {
-        BlockMap::iterator mi = mapBlockIndex.find(hash);
+        auto mi = mapBlockIndex.find(hash);
         if (mi != mapBlockIndex.end()) {
             CBlockIndex *pindex = (*mi).second;
             if (chain.Contains(pindex)) {
@@ -1757,7 +1757,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         // defaults can be easily reviewed. This setting doesn't force the
         // selection of any particular chain but makes validating some faster by
         // effectively caching the result of part of the verification.
-        BlockMap::const_iterator it = mapBlockIndex.find(hashAssumeValid);
+        auto it = mapBlockIndex.find(hashAssumeValid);
         if (it != mapBlockIndex.end()) {
             if (it->second->GetAncestor(pindex->nHeight) == pindex &&
                 pindexBestHeader->GetAncestor(pindex->nHeight) == pindex &&
@@ -2283,7 +2283,7 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
               pcoinsTip->GetCacheSize());
     if (!warningMessages.empty()) {
       std::string mess = "";
-      for (size_t i=0;i<warningMessages.size();i++) mess += warningMessages[i]+",";
+      for (auto& w : warningMessages) mess += w+",";
       LogPrintf(" warning='%s'",mess);
     }
     LogPrintf("\n");
@@ -3187,7 +3187,7 @@ void UpdateFlags(CBlockIndex *pindex, F f, C fchild) {
     UpdateFlagsForBlock(pindex, pindex, f);
 
     // Update the flags from this block and all its descendants.
-    BlockMap::iterator it = mapBlockIndex.begin();
+    auto it = mapBlockIndex.begin();
     while (it != mapBlockIndex.end()) {
         UpdateFlagsForBlock(pindex, it->second, fchild);
         it++;
@@ -3277,7 +3277,7 @@ bool IsBlockFinalized(const CBlockIndex *pindex) {
 static CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
     // Check for duplicate
     uint256 hash = block.GetHash();
-    BlockMap::iterator it = mapBlockIndex.find(hash);
+    auto it = mapBlockIndex.find(hash);
     if (it != mapBlockIndex.end()) {
         return it->second;
     }
@@ -3288,10 +3288,10 @@ static CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
     // to avoid miners withholding blocks but broadcasting headers, to get a
     // competitive advantage.
     pindexNew->nSequenceId = 0;
-    BlockMap::iterator mi =
+    auto mi =
         mapBlockIndex.insert(std::make_pair(hash, pindexNew)).first;
     pindexNew->phashBlock = &((*mi).first);
-    BlockMap::iterator miPrev = mapBlockIndex.find(block.hashPrevBlock);
+    auto miPrev = mapBlockIndex.find(block.hashPrevBlock);
     if (miPrev != mapBlockIndex.end()) {
         pindexNew->pprev = (*miPrev).second;
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
@@ -3800,7 +3800,7 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
 
     // Check for duplicate
     uint256 hash = block.GetHash();
-    BlockMap::iterator miSelf = mapBlockIndex.find(hash);
+    auto miSelf = mapBlockIndex.find(hash);
     CBlockIndex *pindex = nullptr;
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
         if (miSelf != mapBlockIndex.end()) {
@@ -3825,7 +3825,7 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
         }
 
         // Get prev block index
-        BlockMap::iterator mi = mapBlockIndex.find(block.hashPrevBlock);
+        auto mi = mapBlockIndex.find(block.hashPrevBlock);
         if (mi == mapBlockIndex.end()) {
             return state.DoS(10, error("%s: prev block not found", __func__), 0,
                              "prev-blk-not-found");
@@ -4396,7 +4396,7 @@ CBlockIndex *InsertBlockIndex(uint256 hash) {
     }
 
     // Return existing
-    BlockMap::iterator mi = mapBlockIndex.find(hash);
+    auto mi = mapBlockIndex.find(hash);
     if (mi != mapBlockIndex.end()) {
         return (*mi).second;
     }
@@ -4557,7 +4557,7 @@ bool LoadChainTip(const Config &config) {
     }
 
     // Load pointer to end of best chain
-    BlockMap::iterator it = mapBlockIndex.find(pcoinsTip->GetBestBlock());
+    auto it = mapBlockIndex.find(pcoinsTip->GetBestBlock());
     if (it == mapBlockIndex.end()) {
         return false;
     }
@@ -5126,12 +5126,9 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                               std::multimap<uint256, CDiskBlockPos>::iterator>
                         range = mapBlocksUnknownParent.equal_range(head);
                     while (range.first != range.second) {
-                        std::multimap<uint256, CDiskBlockPos>::iterator it =
-                            range.first;
-                        std::shared_ptr<CBlock> pblockrecursive =
-                            std::make_shared<CBlock>();
-                        if (ReadBlockFromDisk(*pblockrecursive, it->second,
-                                              config)) {
+                        auto it = range.first;
+                        std::shared_ptr<CBlock> pblockrecursive = std::make_shared<CBlock>();
+                        if (ReadBlockFromDisk(*pblockrecursive, it->second, config)) {
                             LogPrint(
                                 BCLog::REINDEX,
                                 "%s: Processing out of order child %s of %s\n",

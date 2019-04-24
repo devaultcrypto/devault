@@ -78,7 +78,7 @@ Amount CBudget::CalculateSuperBlockRewards(int nHeight, const Amount &nOverallRe
   // Get Sum of the %s to get a gain factor since we must include block rewards
   // and scale appropriately
   int PerCentSum = 0;
-  for (int i = 0; i < BudgetSize; i++) PerCentSum += Payouts[i].percent;
+  for (const auto& p : Payouts) PerCentSum += p.percent;
   int ScaleFactor = (100-PerCentSum);
   
   // Overall Reward should be an integer - so divide by COIN and then re-mulitply

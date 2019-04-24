@@ -480,7 +480,7 @@ static UniValue getblocktemplate(const Config &config,
             }
 
             uint256 hash = block.GetHash();
-            BlockMap::iterator mi = mapBlockIndex.find(hash);
+            auto mi = mapBlockIndex.find(hash);
             if (mi != mapBlockIndex.end()) {
                 CBlockIndex *pindex = mi->second;
                 if (pindex->IsValid(BlockValidity::SCRIPTS)) {
@@ -747,7 +747,7 @@ static UniValue submitblock(const Config &config,
     bool fBlockPresent = false;
     {
         LOCK(cs_main);
-        BlockMap::iterator mi = mapBlockIndex.find(hash);
+        auto mi = mapBlockIndex.find(hash);
         if (mi != mapBlockIndex.end()) {
             CBlockIndex *pindex = mi->second;
             if (pindex->IsValid(BlockValidity::SCRIPTS)) {
@@ -824,6 +824,5 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterMiningRPCCommands(CRPCTable &t) {
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
+  for (auto& command : commands) { t.appendCommand(command.name, &command); }
 }

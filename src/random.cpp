@@ -444,10 +444,8 @@ bool Random_SanityCheck() {
         }
 
         num_overwritten = 0;
-        for (int x = 0; x < NUM_OS_RANDOM_BYTES; ++x) {
-            if (overwritten[x]) {
-                num_overwritten += 1;
-            }
+        for (bool x : overwritten) {
+            if (x) {num_overwritten += 1;}
         }
 
         tries += 1;

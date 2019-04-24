@@ -610,8 +610,6 @@ void BlockAssembler::addPriorityTxs() {
     TxCoinAgePriorityCompare pricomparer;
     std::map<CTxMemPool::txiter, double, CTxMemPool::CompareIteratorByHash>
         waitPriMap;
-    typedef std::map<CTxMemPool::txiter, double,
-                     CTxMemPool::CompareIteratorByHash>::iterator waitPriIter;
     double actualPriority = -1;
 
     vecPriority.reserve(mempool->mapTx.size());
@@ -677,7 +675,7 @@ void BlockAssembler::addPriorityTxs() {
         // This tx was successfully added, so add transactions that depend
         // on this one to the priority queue to try again.
         for (CTxMemPool::txiter child : mempool->GetMemPoolChildren(iter)) {
-            waitPriIter wpiter = waitPriMap.find(child);
+            auto wpiter = waitPriMap.find(child);
             if (wpiter == waitPriMap.end()) {
                 continue;
             }

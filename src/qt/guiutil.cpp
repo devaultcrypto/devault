@@ -203,24 +203,23 @@ bool parseBitcoinURI(const QString &scheme, const QUrl &uri,
 
     QUrlQuery uriQuery(uri);
     QList<QPair<QString, QString>> items = uriQuery.queryItems();
-    for (QList<QPair<QString, QString>>::iterator i = items.begin();
-         i != items.end(); i++) {
+    for (auto& i : items) {
         bool fShouldReturnFalse = false;
-        if (i->first.startsWith("req-")) {
-            i->first.remove(0, 4);
+        if (i.first.startsWith("req-")) {
+            i.first.remove(0, 4);
             fShouldReturnFalse = true;
         }
 
-        if (i->first == "label") {
-            rv.label = i->second;
+        if (i.first == "label") {
+            rv.label = i.second;
             fShouldReturnFalse = false;
         }
-        if (i->first == "message") {
-            rv.message = i->second;
+        if (i.first == "message") {
+            rv.message = i.second;
             fShouldReturnFalse = false;
-        } else if (i->first == "amount") {
-            if (!i->second.isEmpty()) {
-                if (!BitcoinUnits::parse(BitcoinUnits::DVT, i->second,
+        } else if (i.first == "amount") {
+            if (!i.second.isEmpty()) {
+                if (!BitcoinUnits::parse(BitcoinUnits::DVT, i.second,
                                          &rv.amount)) {
                     return false;
                 }

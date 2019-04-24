@@ -105,7 +105,7 @@ std::string FormatSubVersion(const std::string &name, int nClientVersion,
     ss << "/";
     ss << name << ":" << FormatVersion(nClientVersion);
     if (!comments.empty()) {
-        std::vector<std::string>::const_iterator it(comments.begin());
+        auto it(comments.begin());
         ss << "(" << *it;
         for (++it; it != comments.end(); ++it)
             ss << "; " << *it;

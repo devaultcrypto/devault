@@ -41,7 +41,7 @@ template <unsigned int BITS> void base_blob<BITS>::SetHex(const char *psz) {
     }
 
     psz--;
-    uint8_t *p1 = (uint8_t *)data;
+    auto *p1 = (uint8_t *)data;
     uint8_t *pend = p1 + WIDTH;
     while (psz >= pbegin && p1 < pend) {
         *p1 = ::HexDigit(*psz--);

@@ -312,8 +312,7 @@ WalletModel::sendCoins(WalletModelTransaction &transaction) {
             {
                 LOCK(wallet->cs_wallet);
 
-                std::map<CTxDestination, CAddressBookData>::iterator mi =
-                    wallet->mapAddressBook.find(dest);
+                auto mi = wallet->mapAddressBook.find(dest);
 
                 // Check if we have a new address or an updated label
                 if (mi == wallet->mapAddressBook.end()) {

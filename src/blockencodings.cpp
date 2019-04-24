@@ -133,8 +133,7 @@ ReadStatus PartiallyDownloadedBlock::InitData(
             pool->vTxHashes;
         for (auto txHash : vTxHashes) {
             uint64_t shortid = cmpctblock.GetShortID(txHash.first);
-            std::unordered_map<uint64_t, uint32_t>::iterator idit =
-                shorttxids.find(shortid);
+            auto idit = shorttxids.find(shortid);
             if (idit != shorttxids.end()) {
                 if (!have_txn[idit->second]) {
                     txns_available[idit->second] = txHash.second->GetSharedTx();
@@ -162,8 +161,7 @@ ReadStatus PartiallyDownloadedBlock::InitData(
 
     for (auto &extra_txn : extra_txns) {
         uint64_t shortid = cmpctblock.GetShortID(extra_txn.first);
-        std::unordered_map<uint64_t, uint32_t>::iterator idit =
-            shorttxids.find(shortid);
+        auto idit = shorttxids.find(shortid);
         if (idit != shorttxids.end()) {
             if (!have_txn[idit->second]) {
                 txns_available[idit->second] = extra_txn.second;
