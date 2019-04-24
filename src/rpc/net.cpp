@@ -717,10 +717,10 @@ static UniValue listbanned(const Config &config,
     g_connman->GetBanned(banMap);
 
     UniValue bannedAddresses(UniValue::VARR);
-    for (banmap_t::iterator it = banMap.begin(); it != banMap.end(); it++) {
-        CBanEntry banEntry = (*it).second;
+    for (const auto& it : banMap) {
+        CBanEntry banEntry = it.second;
         UniValue rec(UniValue::VOBJ);
-        rec.pushKV("address", (*it).first.ToString());
+        rec.pushKV("address", it.first.ToString());
         rec.pushKV("banned_until", banEntry.nBanUntil);
         rec.pushKV("ban_created", banEntry.nCreateTime);
         rec.pushKV("ban_reason", banEntry.banReasonToString());
@@ -794,7 +794,5 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterNetRPCCommands(CRPCTable &t) {
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++) {
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
-    }
+    for (auto& command : commands) { t.appendCommand(command.name, &command); }
 }

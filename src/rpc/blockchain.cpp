@@ -1354,7 +1354,7 @@ UniValue gettxout(const Config &config, const JSONRPCRequest &request) {
         }
     }
 
-    BlockMap::iterator it = mapBlockIndex.find(pcoinsTip->GetBestBlock());
+    auto it = mapBlockIndex.find(pcoinsTip->GetBestBlock());
     CBlockIndex *pindex = it->second;
     ret.pushKV("bestblock", pindex->GetBlockHash().GetHex());
     if (coin.GetHeight() == MEMPOOL_HEIGHT) {
@@ -1553,10 +1553,9 @@ UniValue getchaintips(const Config &config, const JSONRPCRequest &request) {
         }
     }
 
-    for (std::set<const CBlockIndex *>::iterator it = setOrphans.begin();
-         it != setOrphans.end(); ++it) {
-        if (setPrevs.erase(*it) == 0) {
-            setTips.insert(*it);
+    for (auto& it : setOrphans) {
+        if (setPrevs.erase(it) == 0) {
+            setTips.insert(it);
         }
     }
 
@@ -2022,7 +2021,5 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterBlockchainRPCCommands(CRPCTable &t) {
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++) {
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
-    }
+    for (auto& command : commands) { t.appendCommand(command.name, &command); }
 }

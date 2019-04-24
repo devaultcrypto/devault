@@ -784,9 +784,9 @@ void RPCConsole::setClientModel(ClientModel *model) {
         // Setup autocomplete and attach it
         QStringList wordList;
         std::vector<std::string> commandList = tableRPC.listCommands();
-        for (size_t i = 0; i < commandList.size(); ++i) {
-            wordList << commandList[i].c_str();
-            wordList << ("help " + commandList[i]).c_str();
+        for (const auto& c : commandList) {
+            wordList << c.c_str();
+            wordList << ("help " + c).c_str();
         }
 
         wordList << "help-console";
@@ -1185,10 +1185,9 @@ void RPCConsole::peerLayoutAboutToChange() {
     QModelIndexList selected =
         ui->peerWidget->selectionModel()->selectedIndexes();
     cachedNodeids.clear();
-    for (int i = 0; i < selected.size(); i++) {
+    for (const auto& i : selected) {
         const CNodeCombinedStats *stats =
-            clientModel->getPeerTableModel()->getNodeStats(
-                selected.at(i).row());
+            clientModel->getPeerTableModel()->getNodeStats(i.row());
         cachedNodeids.append(stats->nodeStats.nodeid);
     }
 }

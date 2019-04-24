@@ -83,9 +83,9 @@ static enum RetFormat ParseDataFormat(std::string &param,
     param = strReq.substr(0, pos);
     const std::string suff(strReq, pos + 1);
 
-    for (size_t i = 0; i < ARRAYLEN(rf_names); i++) {
-        if (suff == rf_names[i].name) {
-            return rf_names[i].rf;
+    for (const auto& i : rf_names) {
+        if (suff == i.name) {
+            return i.rf;
         }
     }
 
@@ -96,10 +96,10 @@ static enum RetFormat ParseDataFormat(std::string &param,
 
 static std::string AvailableDataFormatsString() {
     std::string formats = "";
-    for (size_t i = 0; i < ARRAYLEN(rf_names); i++) {
-        if (strlen(rf_names[i].name) > 0) {
+    for (const auto& i : rf_names) {
+        if (strlen(i.name) > 0) {
             formats.append(".");
-            formats.append(rf_names[i].name);
+            formats.append(i.name);
             formats.append(", ");
         }
     }
@@ -164,7 +164,7 @@ static bool rest_headers(Config &config, HTTPRequest *req,
     headers.reserve(count);
     {
         LOCK(cs_main);
-        BlockMap::const_iterator it = mapBlockIndex.find(hash);
+        auto it = mapBlockIndex.find(hash);
         const CBlockIndex *pindex =
             (it != mapBlockIndex.end()) ? it->second : nullptr;
         while (pindex != nullptr && chainActive.Contains(pindex)) {
@@ -693,9 +693,8 @@ static const struct {
 };
 
 bool StartREST() {
-    for (size_t i = 0; i < ARRAYLEN(uri_prefixes); i++) {
-        RegisterHTTPHandler(uri_prefixes[i].prefix, false,
-                            uri_prefixes[i].handler);
+    for (const auto& i : uri_prefixes) {
+        RegisterHTTPHandler(i.prefix, false,i.handler);
     }
 
     return true;
@@ -704,7 +703,7 @@ bool StartREST() {
 void InterruptREST() {}
 
 void StopREST() {
-    for (size_t i = 0; i < ARRAYLEN(uri_prefixes); i++) {
-        UnregisterHTTPHandler(uri_prefixes[i].prefix, false);
+    for (const auto& i : uri_prefixes) {
+        UnregisterHTTPHandler(i.prefix, false);
     }
 }

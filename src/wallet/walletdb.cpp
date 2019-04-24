@@ -733,7 +733,7 @@ DBErrors CWalletDB::ZapSelectTx(std::vector<TxId> &txIdsIn,
 
     // Erase each matching wallet TX.
     bool delerror = false;
-    std::vector<TxId>::iterator it = txIdsIn.begin();
+    auto it = txIdsIn.begin();
     for (const TxId &txid : txIds) {
         while (it < txIdsIn.end() && (*it) < txid) {
             it++;
@@ -829,7 +829,7 @@ bool CWalletDB::Recover(const std::string &filename,
 
 bool CWalletDB::RecoverKeysOnlyFilter(void *callbackData, CDataStream ssKey,
                                       CDataStream ssValue) {
-    CWallet *dummyWallet = reinterpret_cast<CWallet *>(callbackData);
+    auto *dummyWallet = reinterpret_cast<CWallet *>(callbackData);
     CWalletScanState dummyWss;
     std::string strType, strErr;
     bool fReadOK;

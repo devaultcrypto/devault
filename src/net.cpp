@@ -533,7 +533,7 @@ bool CConnman::IsBanned(CNetAddr ip) {
 bool CConnman::IsBanned(CSubNet subnet) {
     LOCK(cs_setBanned);
 
-    banmap_t::iterator i = setBanned.find(subnet);
+    auto i = setBanned.find(subnet);
     if (i != setBanned.end()) {
         CBanEntry banEntry = (*i).second;
         if (GetTime() < banEntry.nBanUntil) {
@@ -631,7 +631,7 @@ void CConnman::SweepBanned() {
     bool notifyUI = false;
     {
         LOCK(cs_setBanned);
-        banmap_t::iterator it = setBanned.begin();
+        auto it = setBanned.begin();
         while (it != setBanned.end()) {
             CSubNet subNet = (*it).first;
             CBanEntry banEntry = (*it).second;
@@ -811,8 +811,7 @@ bool CNode::ReceiveMsgBytes(const Config &config, const char *pch,
         if (msg.complete()) {
             // Store received bytes per message command to prevent a memory DOS,
             // only allow valid commands.
-            mapMsgCmdSize::iterator i =
-                mapRecvBytesPerMsgCmd.find(msg.hdr.pchCommand.data());
+            auto i = mapRecvBytesPerMsgCmd.find(msg.hdr.pchCommand.data());
             if (i == mapRecvBytesPerMsgCmd.end()) {
                 i = mapRecvBytesPerMsgCmd.find(NET_MESSAGE_COMMAND_OTHER);
             }
@@ -2948,8 +2947,7 @@ void CNode::AskFor(const CInv &inv) {
     // We're using mapAskFor as a priority queue, the key is the earliest time
     // the request can be sent.
     int64_t nRequestTime;
-    limitedmap<uint256, int64_t>::const_iterator it =
-        mapAlreadyAskedFor.find(inv.hash);
+    auto it = mapAlreadyAskedFor.find(inv.hash);
     if (it != mapAlreadyAskedFor.end()) {
         nRequestTime = it->second;
     } else {

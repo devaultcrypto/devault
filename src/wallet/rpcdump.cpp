@@ -1451,7 +1451,7 @@ void RegisterDumpRPCCommands(CRPCTable &t) {
         return;
     }
 
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++) {
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
+    for (auto& command : commands) {
+        t.appendCommand(command.name, &command);
     }
 }

@@ -222,11 +222,8 @@ std::string CRPCTable::help(Config &config, const std::string &strCommand,
     std::vector<std::pair<std::string, const ContextFreeRPCCommand *>>
         vCommands;
 
-    for (std::map<std::string, const ContextFreeRPCCommand *>::const_iterator
-             mi = mapCommands.begin();
-         mi != mapCommands.end(); ++mi) {
-        vCommands.push_back(
-            std::make_pair(mi->second->category + mi->first, mi->second));
+    for (const auto& m : mapCommands) {
+        vCommands.push_back(std::make_pair(m.second->category + m.first, m.second));
     }
     sort(vCommands.begin(), vCommands.end());
 
@@ -358,8 +355,7 @@ CRPCTable::CRPCTable() {
 
 const ContextFreeRPCCommand *CRPCTable::
 operator[](const std::string &name) const {
-    std::map<std::string, const ContextFreeRPCCommand *>::const_iterator it =
-        mapCommands.find(name);
+    auto it = mapCommands.find(name);
     if (it == mapCommands.end()) {
         return nullptr;
     }
@@ -374,8 +370,7 @@ bool CRPCTable::appendCommand(const std::string &name,
     }
 
     // don't allow overwriting for now
-    std::map<std::string, const ContextFreeRPCCommand *>::const_iterator it =
-        mapCommands.find(name);
+    auto it = mapCommands.find(name);
     if (it != mapCommands.end()) {
         return false;
     }

@@ -19,6 +19,7 @@
 #include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "timedata.h"
+#include "reverse_iterator.h"
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validation.h"
@@ -373,8 +374,7 @@ static UniValue getaccount(const Config &config,
     }
 
     std::string strAccount;
-    std::map<CTxDestination, CAddressBookData>::iterator mi =
-        pwallet->mapAddressBook.find(dest);
+    auto mi = pwallet->mapAddressBook.find(dest);
     if (mi != pwallet->mapAddressBook.end() && !(*mi).second.name.empty()) {
         strAccount = (*mi).second.name;
     }
@@ -1525,8 +1525,7 @@ UniValue ListReceived(const Config &config, CWallet *const pwallet,
     for (auto item_it = start; item_it != end; ++item_it) {
         const CTxDestination &address = item_it->first;
         const std::string &label = item_it->second.name;
-        std::map<CTxDestination, tallyitem>::iterator it =
-            mapTally.find(address);
+        auto it = mapTally.find(address);
         if (it == mapTally.end() && !fIncludeEmpty) {
             continue;
         }
@@ -1965,17 +1964,16 @@ static UniValue listtransactions(const Config &config,
     const CWallet::TxItems &txOrdered = pwallet->wtxOrdered;
 
     // iterate backwards until we have nCount items to return:
-    for (CWallet::TxItems::const_reverse_iterator it = txOrdered.rbegin();
-         it != txOrdered.rend(); ++it) {
-        CWalletTx *const pwtx = (*it).second.first;
+    for (auto& it : reverse_iterate(txOrdered)) {
+        CWalletTx *const pwtx = it.second.first;
         if (pwtx != nullptr) {
             ListTransactions(pwallet, *pwtx, strAccount, 0, true, ret, filter);
         }
-        CAccountingEntry *const pacentry = (*it).second.second;
+        CAccountingEntry *const pacentry = it.second.second;
         if (pacentry != nullptr) {
             AcentryToJSON(*pacentry, strAccount, ret);
         }
-
+        
         if ((int)ret.size() >= (nCount + nFrom)) {
             break;
         }
@@ -1992,9 +1990,9 @@ static UniValue listtransactions(const Config &config,
 
     std::vector<UniValue> arrTmp = ret.getValues();
 
-    std::vector<UniValue>::iterator first = arrTmp.begin();
+    auto first = arrTmp.begin();
     std::advance(first, nFrom);
-    std::vector<UniValue>::iterator last = arrTmp.begin();
+    auto last = arrTmp.begin();
     std::advance(last, nFrom + nCount);
 
     if (last != arrTmp.end()) {
@@ -2242,7 +2240,7 @@ static UniValue listsinceblock(const Config &config,
         uint256 blockId;
 
         blockId.SetHex(request.params[0].get_str());
-        BlockMap::iterator it = mapBlockIndex.find(blockId);
+        auto it = mapBlockIndex.find(blockId);
         if (it == mapBlockIndex.end()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
         }
@@ -3898,7 +3896,5 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterWalletRPCCommands(CRPCTable &t) {
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++) {
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
-    }
+    for (auto& command : commands) { t.appendCommand(command.name, &command); }
 }

@@ -511,9 +511,9 @@ static bool findSigHashFlags(SigHashType &sigHashType,
                              const std::string &flagStr) {
     sigHashType = SigHashType();
 
-    for (unsigned int i = 0; i < N_SIGHASH_OPTS; i++) {
-        if (flagStr == sigHashOptions[i].flagStr) {
-            sigHashType = SigHashType(sigHashOptions[i].flags);
+  for (const auto& s : sigHashOptions) {
+        if (flagStr == s.flagStr) {
+            sigHashType = SigHashType(s.flags);
             return true;
         }
     }

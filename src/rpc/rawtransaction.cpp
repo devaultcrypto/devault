@@ -45,7 +45,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry) 
     TxToUniv(tx, uint256(), entry, true, RPCSerializationFlags());
     if (!hashBlock.IsNull()) {
         entry.pushKV("blockhash", hashBlock.GetHex());
-        BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
+        auto mi = mapBlockIndex.find(hashBlock);
         if (mi != mapBlockIndex.end() && (*mi).second) {
             CBlockIndex *pindex = (*mi).second;
             if (chainActive.Contains(pindex)) {
@@ -181,7 +181,7 @@ static UniValue getrawtransaction(const Config &config,
     if (!request.params[2].isNull()) {
         uint256 blockhash = ParseHashV(request.params[2], "parameter 3");
         if (!blockhash.IsNull()) {
-            BlockMap::iterator it = mapBlockIndex.find(blockhash);
+            auto it = mapBlockIndex.find(blockhash);
             if (it == mapBlockIndex.end()) {
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                                    "Block hash not found");
@@ -1347,7 +1347,5 @@ static const ContextFreeRPCCommand commands[] = {
 // clang-format on
 
 void RegisterRawTransactionRPCCommands(CRPCTable &t) {
-    for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++) {
-        t.appendCommand(commands[vcidx].name, &commands[vcidx]);
-    }
+    for (auto& command : commands) { t.appendCommand(command.name, &command); }
 }

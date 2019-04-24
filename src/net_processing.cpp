@@ -292,7 +292,7 @@ struct CNodeState {
 static std::map<NodeId, CNodeState> mapNodeState GUARDED_BY(cs_main);
 
 static CNodeState *State(NodeId pnode) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-    std::map<NodeId, CNodeState>::iterator it = mapNodeState.find(pnode);
+    auto it = mapNodeState.find(pnode);
     if (it == mapNodeState.end()) {
         return nullptr;
     }
@@ -350,9 +350,7 @@ static void PushNodeVersion(const Config &config, CNode *pnode,
 // peer.
 static bool MarkBlockAsReceived(const uint256 &hash)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-    std::map<uint256,
-             std::pair<NodeId, std::list<QueuedBlock>::iterator>>::iterator
-        itInFlight = mapBlocksInFlight.find(hash);
+    auto itInFlight = mapBlocksInFlight.find(hash);
     if (itInFlight != mapBlocksInFlight.end()) {
         CNodeState *state = State(itInFlight->second.first);
         state->nBlocksInFlightValidHeaders -=
@@ -391,9 +389,7 @@ MarkBlockAsInFlight(const Config &config, NodeId nodeid, const uint256 &hash,
     assert(state != nullptr);
 
     // Short-circuit most stuff in case its from the same node.
-    std::map<uint256,
-             std::pair<NodeId, std::list<QueuedBlock>::iterator>>::iterator
-        itInFlight = mapBlocksInFlight.find(hash);
+    auto itInFlight = mapBlocksInFlight.find(hash);
     if (itInFlight != mapBlocksInFlight.end() &&
         itInFlight->second.first == nodeid) {
         if (pit) {
@@ -405,7 +401,7 @@ MarkBlockAsInFlight(const Config &config, NodeId nodeid, const uint256 &hash,
     // Make sure it's not listed somewhere already.
     MarkBlockAsReceived(hash);
 
-    std::list<QueuedBlock>::iterator it = state->vBlocksInFlight.insert(
+    auto it = state->vBlocksInFlight.insert(
         state->vBlocksInFlight.end(),
         {hash, pindex, pindex != nullptr,
          std::unique_ptr<PartiallyDownloadedBlock>(
@@ -440,8 +436,7 @@ static void ProcessBlockAvailability(NodeId nodeid)
     assert(state != nullptr);
 
     if (!state->hashLastUnknownBlock.IsNull()) {
-        BlockMap::iterator itOld =
-            mapBlockIndex.find(state->hashLastUnknownBlock);
+        auto itOld = mapBlockIndex.find(state->hashLastUnknownBlock);
         if (itOld != mapBlockIndex.end() && itOld->second->nChainWork > 0) {
             if (state->pindexBestKnownBlock == nullptr ||
                 itOld->second->nChainWork >=
@@ -461,7 +456,7 @@ static void UpdateBlockAvailability(NodeId nodeid, const uint256 &hash)
 
     ProcessBlockAvailability(nodeid);
 
-    BlockMap::iterator it = mapBlockIndex.find(hash);
+    auto it = mapBlockIndex.find(hash);
     if (it != mapBlockIndex.end() && it->second->nChainWork > 0) {
         // An actually better block was announced.
         if (state->pindexBestKnownBlock == nullptr ||
@@ -816,8 +811,7 @@ bool AddOrphanTx(const CTransactionRef &tx, NodeId peer)
 }
 
 static int EraseOrphanTx(uint256 hash) EXCLUSIVE_LOCKS_REQUIRED(g_cs_orphans) {
-    std::map<uint256, COrphanTx>::iterator it =
-        mapOrphanTransactions.find(hash);
+    auto it = mapOrphanTransactions.find(hash);
     if (it == mapOrphanTransactions.end()) {
         return 0;
     }
@@ -838,10 +832,10 @@ static int EraseOrphanTx(uint256 hash) EXCLUSIVE_LOCKS_REQUIRED(g_cs_orphans) {
 void EraseOrphansFor(NodeId peer) {
     LOCK(g_cs_orphans);
     int nErased = 0;
-    std::map<uint256, COrphanTx>::iterator iter = mapOrphanTransactions.begin();
+    auto iter = mapOrphanTransactions.begin();
     while (iter != mapOrphanTransactions.end()) {
         // Increment to avoid iterator becoming invalid.
-        std::map<uint256, COrphanTx>::iterator maybeErase = iter++;
+        auto maybeErase = iter++;
         if (maybeErase->second.fromPeer == peer) {
             nErased += EraseOrphanTx(maybeErase->second.tx->GetId());
         }
@@ -863,10 +857,9 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans) {
         int nErased = 0;
         int64_t nMinExpTime =
             nNow + ORPHAN_TX_EXPIRE_TIME - ORPHAN_TX_EXPIRE_INTERVAL;
-        std::map<uint256, COrphanTx>::iterator iter =
-            mapOrphanTransactions.begin();
+        auto iter =  mapOrphanTransactions.begin();
         while (iter != mapOrphanTransactions.end()) {
-            std::map<uint256, COrphanTx>::iterator maybeErase = iter++;
+            auto maybeErase = iter++;
             if (maybeErase->second.nTimeExpire <= nNow) {
                 nErased += EraseOrphanTx(maybeErase->second.tx->GetId());
             } else {
@@ -885,8 +878,7 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans) {
     while (mapOrphanTransactions.size() > nMaxOrphans) {
         // Evict a random orphan:
         uint256 randomhash = GetRandHash();
-        std::map<uint256, COrphanTx>::iterator it =
-            mapOrphanTransactions.lower_bound(randomhash);
+        auto it = mapOrphanTransactions.lower_bound(randomhash);
         if (it == mapOrphanTransactions.end()) {
             it = mapOrphanTransactions.begin();
         }
@@ -989,16 +981,14 @@ void PeerLogicValidation::BlockConnected(
         const CTransaction &tx = *ptx;
 
         // Which orphan pool entries must we evict?
-        for (size_t j = 0; j < tx.vin.size(); j++) {
-            auto itByPrev = mapOrphanTransactionsByPrev.find(tx.vin[j].prevout);
+        for (auto& j : tx.vin) {
+            auto itByPrev = mapOrphanTransactionsByPrev.find(j.prevout);
             if (itByPrev == mapOrphanTransactionsByPrev.end()) {
                 continue;
             }
 
-            for (auto mi = itByPrev->second.begin();
-                 mi != itByPrev->second.end(); ++mi) {
-                const CTransaction &orphanTx = *(*mi)->second.tx;
-                const uint256 &orphanHash = orphanTx.GetHash();
+            for (auto& mi : itByPrev->second) {
+                const uint256 &orphanHash = mi->second.tx->GetHash();
                 vOrphanErase.push_back(orphanHash);
             }
         }
@@ -1118,8 +1108,7 @@ void PeerLogicValidation::BlockChecked(const CBlock &block,
     LOCK(cs_main);
 
     const uint256 hash(block.GetHash());
-    std::map<uint256, std::pair<NodeId, bool>>::iterator it =
-        mapBlockSource.find(hash);
+    auto it = mapBlockSource.find(hash);
 
     int nDoS = 0;
     if (state.IsInvalid(nDoS)) {
@@ -1264,7 +1253,7 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
     bool need_activate_chain = false;
     {
         LOCK(cs_main);
-        BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
+        auto mi = mapBlockIndex.find(inv.hash);
         if (mi != mapBlockIndex.end()) {
             if (mi->second->nChainTx &&
                 !mi->second->IsValid(BlockValidity::SCRIPTS) &&
@@ -1284,7 +1273,7 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
     }
 
     LOCK(cs_main);
-    BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
+    auto mi = mapBlockIndex.find(inv.hash);
     if (mi != mapBlockIndex.end()) {
         send = BlockRequestAllowed(mi->second, consensusParams);
         if (!send) {
@@ -2344,7 +2333,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
         LOCK(cs_main);
 
-        BlockMap::iterator it = mapBlockIndex.find(req.blockhash);
+        auto it = mapBlockIndex.find(req.blockhash);
         if (it == mapBlockIndex.end() || !it->second->nStatus.hasData()) {
             LogPrint(BCLog::NET,
                      "Peer %d sent us a getblocktxn for a block we don't have",
@@ -2397,7 +2386,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         const CBlockIndex *pindex = nullptr;
         if (locator.IsNull()) {
             // If locator is null, return the hashStop block
-            BlockMap::iterator mi = mapBlockIndex.find(hashStop);
+            auto mi = mapBlockIndex.find(hashStop);
             if (mi == mapBlockIndex.end()) {
                 return true;
             }
@@ -2506,12 +2495,11 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                 if (itByPrev == mapOrphanTransactionsByPrev.end()) {
                     continue;
                 }
-                for (auto mi = itByPrev->second.begin();
-                     mi != itByPrev->second.end(); ++mi) {
-                    const CTransactionRef &porphanTx = (*mi)->second.tx;
+                for (auto& mi : itByPrev->second) {
+                    const CTransactionRef &porphanTx = mi->second.tx;
                     const CTransaction &orphanTx = *porphanTx;
                     const uint256 &orphanId = orphanTx.GetId();
-                    NodeId fromPeer = (*mi)->second.fromPeer;
+                    NodeId fromPeer = mi->second.fromPeer;
                     bool fMissingInputs2 = false;
                     // Use a dummy CValidationState so someone can't setup nodes
                     // to counter-DoS based on orphan resolution (that is,
@@ -2750,10 +2738,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                 nodestate->m_last_block_announcement = GetTime();
             }
 
-            std::map<uint256,
-                     std::pair<NodeId, std::list<QueuedBlock>::iterator>>::
-                iterator blockInFlightIt =
-                    mapBlocksInFlight.find(pindex->GetBlockHash());
+            auto blockInFlightIt = mapBlocksInFlight.find(pindex->GetBlockHash());
             bool fAlreadyInFlight = blockInFlightIt != mapBlocksInFlight.end();
 
             if (pindex->nStatus.hasData()) {
@@ -2951,9 +2936,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         {
             LOCK(cs_main);
 
-            std::map<uint256,
-                     std::pair<NodeId, std::list<QueuedBlock>::iterator>>::
-                iterator it = mapBlocksInFlight.find(resp.blockhash);
+            auto it = mapBlocksInFlight.find(resp.blockhash);
             if (it == mapBlocksInFlight.end() ||
                 !it->second.second->partialBlock ||
                 it->second.first != pfrom->GetId()) {
@@ -3865,7 +3848,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
             // send all headers past that one. If we come across an headers that
             // aren't on chainActive, give up.
             for (const uint256 &hash : pto->vBlockHashesToAnnounce) {
-                BlockMap::iterator mi = mapBlockIndex.find(hash);
+                auto mi = mapBlockIndex.find(hash);
                 assert(mi != mapBlockIndex.end());
                 const CBlockIndex *pindex = mi->second;
                 if (chainActive[pindex->nHeight] != pindex) {
@@ -3969,7 +3952,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
             if (!pto->vBlockHashesToAnnounce.empty()) {
                 const uint256 &hashToAnnounce =
                     pto->vBlockHashesToAnnounce.back();
-                BlockMap::iterator mi = mapBlockIndex.find(hashToAnnounce);
+                auto mi = mapBlockIndex.find(hashToAnnounce);
                 assert(mi != mapBlockIndex.end());
                 const CBlockIndex *pindex = mi->second;
 
@@ -4100,7 +4083,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
                 // Fetch the top element from the heap
                 std::pop_heap(vInvTx.begin(), vInvTx.end(),
                               compareInvMempoolOrder);
-                std::set<uint256>::iterator it = vInvTx.back();
+                auto it = vInvTx.back();
                 vInvTx.pop_back();
                 uint256 hash = *it;
                 // Remove it from the to-be-sent set

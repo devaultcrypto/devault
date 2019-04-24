@@ -66,7 +66,7 @@ const CBlockIndex *CChain::FindFork(const CBlockIndex *pindex) const {
 }
 
 CBlockIndex *CChain::FindEarliestAtLeast(int64_t nTime) const {
-    std::vector<CBlockIndex *>::const_iterator lower =
+    auto lower =
         std::lower_bound(vChain.begin(), vChain.end(), nTime,
                          [](CBlockIndex *pBlock, const int64_t &time) -> bool {
                              return pBlock->GetBlockTimeMax() < time;
