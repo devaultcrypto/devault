@@ -175,6 +175,10 @@ if(SECP256K1_BUILD_TEST)
 endif(SECP256K1_BUILD_TEST)
 
 # Benchmarks
-add_secp256k1_bench(bench_verify src/bench_verify.c)
-add_secp256k1_bench(bench_sign src/bench_sign.c)
-add_secp256k1_bench(bench_internal src/bench_internal.c)
+option(SECP256K1_BUILD_BENCH "Build secp256k1's benchmarks" OFF)
+add_feature_info(WITH_SECP256K1_BENCH SECP256K1_BUILD_BENCH "Build secp256k1's benchmarks")
+if(SECP256K1_BUILD_BENCH)
+  add_secp256k1_bench(bench_verify src/bench_verify.c)
+  add_secp256k1_bench(bench_sign src/bench_sign.c)
+  add_secp256k1_bench(bench_internal src/bench_internal.c)
+endif()
