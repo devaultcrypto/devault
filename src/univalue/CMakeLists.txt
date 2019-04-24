@@ -3,7 +3,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(univalue)
 
-option(UNIVALUE_BUILD_TESTS "Build univalue's unit tests" ON)
+option(UNIVALUE_BUILD_TESTS "Build univalue's unit tests" OFF)
+add_feature_info(WITH_UNIVALUE_TESTS UNIVALUE_BUILD_TESTS "Enable univalue's unit tests")
 
 # TODO: Version info
 add_library(univalue
