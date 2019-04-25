@@ -29,6 +29,8 @@
 
 #include <univalue.h>
 
+#include <iostream>
+#include <fstream>
 #include <cstdint>
 #ifdef HAVE_MALLOC_INFO
 #include <malloc.h>
