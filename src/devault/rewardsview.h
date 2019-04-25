@@ -5,29 +5,26 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-// Copy from Bitcoin/txdb.h
+// No longer dependent on txdb.h, but some stuff copied/used
 
 #pragma once
-#include "config/bitcoin-config.h"
+#include "coinreward.h"
 #include "chain.h"
-// for now
-#include "txdb.h"
+#include "config/bitcoin-config.h"
+#include "dbwrapper.h"
 #include "validation.h"
 
-class CRewardsViewDBCursor : public CCoinsViewCursor {
+class CRewardsViewDBCursor {
   public:
-  ~CRewardsViewDBCursor() override = default;
+  bool GetKey(COutPoint &key) const;
+  bool GetValue(CRewardValue &coin) const { return pcursor->GetValue(coin); }
+  unsigned int GetValueSize() const { return pcursor->GetValueSize(); }
 
-  bool GetKey(COutPoint &key) const override;
-  bool GetValue(Coin &coin) const override;
-  unsigned int GetValueSize() const override;
-
-  bool Valid() const override;
-  void Next() override;
+  bool Valid() const { return keyTmp.first == DB_REWARD; }
+  void Next();
 
   private:
-  CRewardsViewDBCursor(CDBIterator *pcursorIn)
-      : CCoinsViewCursor(uint256()), pcursor(pcursorIn) {}
+  CRewardsViewDBCursor(CDBIterator *pcursorIn) : pcursor(pcursorIn) {}
   std::unique_ptr<CDBIterator> pcursor;
   std::pair<char, COutPoint> keyTmp;
 
@@ -35,22 +32,29 @@ class CRewardsViewDBCursor : public CCoinsViewCursor {
 };
 
 /** CCoinsView backed by the coin database (chainstate/) */
-class CRewardsViewDB final : public CCoinsView {
+class CRewardsViewDB {
   protected:
   CDBWrapper db;
 
   public:
   explicit CRewardsViewDB(const std::string &dbname, size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
-  bool GetCoin(const COutPoint &outpoint, Coin &coin) const override;
-  bool HaveCoin(const COutPoint &outpoint) const override;
-  // Added for Cold Rewards
-  bool PutCoin(const COutPoint &outpoint, const Coin &coin);
-  bool EraseCoin(const COutPoint &outpoint);
-  // End
+  bool HaveCoin(const COutPoint &outpoint) const { return db.Exists(std::pair(DB_REWARD, outpoint)); }
+  bool EraseCoin(const COutPoint &outpoint) { return db.Erase(std::pair(DB_REWARD, outpoint)); }
 
-  CRewardsViewDBCursor *Cursor() const override;
+  // Batch ops
+  bool Add(const std::vector<std::pair<COutPoint, CRewardValue> >& vect);
+  bool InActivate(std::vector<std::pair<COutPoint, CRewardValue> >& vect);
+  bool Erase(const std::vector<COutPoint>& vect);
+
+  // Extra parameter Height
+  bool PutCoinWithHeight(const COutPoint &outpoint, const CRewardValue &coin) {    return db.Write(std::pair(DB_REWARD, outpoint), coin);  }
+  bool GetCoinWithHeight(const COutPoint &outpoint, CRewardValue &coin) const {
+    return db.Read(std::pair(DB_REWARD, outpoint), coin);
+  }
+
+  CRewardsViewDBCursor *Cursor() const;
 
   bool Flush();
-  size_t EstimateSize() const override;
+  size_t EstimateSize() const;
 };

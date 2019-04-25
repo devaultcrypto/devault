@@ -6,12 +6,12 @@
 project(devault)
 
 file(GLOB DEVAULT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-source_group("RewardHeaders" FILES ${DEVAULT_HEADERS})
+source_group("DevaultHeaders" FILES ${DEVAULT_HEADERS})
 
 
 # The library
 add_library(devault
-  ${DEVUALT_HEADERS}
+  ${DEVAULT_HEADERS}
 	rewards.cpp
 	rewards_calculation.cpp
   rewardsview.cpp

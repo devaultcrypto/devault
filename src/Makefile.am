@@ -130,6 +130,7 @@ BITCOIN_CORE_H = \
   compressor.h \
   config.h \
 	devault/budget.h \
+  devault/coinreward.h \
   devault/rewards.h \
   devault/rewardsview.h \
   devault/rewards_calculation.h \
