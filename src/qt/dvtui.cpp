@@ -24,6 +24,7 @@ bool DVTUI::customThemeIsSet() {
     const QString DVTUI::s_Dark = "rgb(50,50,50)"; // #323232
     const QString DVTUI::s_Light = "rgb(211,211,211)";
     const QString DVTUI::s_white = "rgb(255,255,255)";
+    const QString DVTUI::s_grey = "rgb(111,111,111)";
 
     const QString DVTUI::s_hightlight_dark = "rgba(30,30,30)";
     const QString DVTUI::s_hightlight_darkest = "rgba(15,15,15)";
@@ -95,7 +96,7 @@ bool DVTUI::customThemeIsSet() {
             "{ border-right: none; border-bottom: none; }"                    
             
             "#payAmount > QAbstractSpinBox, #payAmount > QComboBox"
-            "{ min-height: 27px; font-size: 18px; color: " +  s_LBlue +"; font-weight: light;}"
+            "{ min-height: 27px; min-width: 80px; font-size: 18px; color: " +  s_LBlue +"; font-weight: light;}"
             
             //Progress Bar
             "QProgressBar "
@@ -174,10 +175,10 @@ bool DVTUI::customThemeIsSet() {
 
             //Buttons (and Icons)
             "QPushButton "
-            "{ background-color: " + s_hightlight_dark + "; color: " + s_Light + "; border: 1px outset rgb(33,33,33); padding: 6px; border-radius: 0px;}"
+            "{ background-color: " + s_hightlight_dark + "; color: " + s_white + "; border: 1px outset rgb(33,33,33); padding: 6px; border-radius: 0px;}"
             "QPushButton:hover {border: 1px solid "+ s_LBlue + "}"
-            "QPushButton:pressed {background-color: " + s_Darker + "; border: 1px solid "+ s_LBlue + "}"
-            "QPushButton:disabled { color: " + s_Dark + "}"
+            "QPushButton:pressed {background-color: " + s_LBlue + "}"
+            "QPushButton:disabled { color: " + s_grey + "}"
 
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
             "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"                   
