@@ -16,7 +16,12 @@
 #include "utilstrencodings.h"
 #include "utiltime.h"
 
+#ifndef NO_BOOST_FILESYSTEM
 #include <boost/filesystem/fstream.hpp>
+using fs::ifstream;
+#else
+using std::ifstream;
+#endif
 
 #include <cstdarg>
 
@@ -644,9 +649,7 @@ void ArgsManager::ReadConfigFile(const std::string &confPath) {
         LOCK(cs_args);
         m_config_args.clear();
     }
-
-    fs::ifstream stream(GetConfigFile(confPath));
-
+    ifstream stream(GetConfigFile(confPath));
     // ok to not have a config file
     if (stream.good()) {
         ReadConfigStream(stream);
