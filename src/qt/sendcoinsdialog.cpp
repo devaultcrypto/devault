@@ -14,6 +14,7 @@
 #include "platformstyle.h"
 #include "sendcoinsentry.h"
 #include "walletmodel.h"
+#include "dvtui.h"
 
 #include "chainparams.h"
 #include "dstencode.h"
@@ -36,6 +37,11 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle,
       fNewRecipientAllowed(true), fFeeMinimized(false),
       platformStyle(_platformStyle) {
     ui->setupUi(this);
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
     if (!_platformStyle->getImagesOnButtons()) {
         ui->addButton->setIcon(QIcon());
@@ -819,7 +825,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString &text) {
         } else if (!IsValidDestination(dest)) {
             // Invalid address
             ui->labelCoinControlChangeLabel->setText(
-                tr("Warning: Invalid Bitcoin address"));
+                tr("Warning: Invalid DeVault address"));
         } else {
             // Valid address
             if (!model->IsSpendable(dest)) {

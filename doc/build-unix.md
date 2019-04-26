@@ -97,6 +97,27 @@ BerkeleyDB 5.3 or later is required for the wallet. This can be installed with:
 
         sudo apt-get install libdb-dev libdb++-dev
 
+-----------------------------------------
+On Ubuntu 16.04 (xenial) and Debian 9 (stretch) and under you will need to
+install a C++17 compatible compiler to build devault.
+
+For Ubuntu Xenial only - 
+
+        sudo apt-get install software-properties-common -y
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+        sudo apt-get update
+
+Now for both Ubuntu Xenial & Debian Stretch
+
+        sudo apt-get install g++-7 -y
+
+Now you will need to either update your default gcc compiler to gcc-7/g++-7 or
+specify it in your configure like below -
+
+        ./configure CC=gcc-7 CXX=g++-7
+
+-----------------------------------------
+
 See the section "Disable-wallet mode" to build DeVault without wallet.
 
 Optional (see --with-miniupnpc and --enable-upnp-default):

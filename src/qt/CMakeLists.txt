@@ -12,7 +12,7 @@ SET(PROJECT_DESCRIPTION  "CMake build system template for Qt based projects")
 SET(PROJECT_COPYRIGHT    "Copyright (C) 2019 DeVault Developers")
 SET(PROJECT_CONTACT      "jonspock@protonmail.com")
 SET(PROJECT_VENDOR       "Jon Spock")
-SET(ORG_WEBSITE          "http://devault.cc")
+SET(ORG_WEBSITE          "https://devault.cc")
 
 # For projects using Git, use git version patch
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")

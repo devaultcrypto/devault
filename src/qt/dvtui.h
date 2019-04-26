@@ -28,6 +28,7 @@ class DVTUI
     static const QString s_Dark; // #323232
     static const QString s_Light;
     static const QString s_white;
+    static const QString s_grey;
 
     static const QString s_hightlight_dark;
     static const QString s_hightlight_darkest;

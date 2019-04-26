@@ -736,7 +736,7 @@ void BitcoinGUI::gotoOverviewPage() {
 
 void BitcoinGUI::openDVT_global()
 {
-    QDesktopServices::openUrl(QUrl("http://devault.cc", QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("https://devault.cc", QUrl::TolerantMode));
 }
 
 void BitcoinGUI::gotoReceiveCoinsPage() {
