@@ -1023,7 +1023,7 @@ void BitcoinGUI::incomingTransaction(const QString &date, int unit,
     QString msg = tr("Date: %1\n").arg(date) +
                   tr("Amount: %1\n")
                       .arg(BitcoinUnits::formatWithUnit(unit, amount, true));
-    if (WalletModel::isMultiwallet() && !walletName.isEmpty()) {
+    if (m_node.getWallets().size() > 1 && !walletName.isEmpty()) {
         msg += tr("Wallet: %1\n").arg(walletName);
     }
     msg += tr("Type: %1\n").arg(type);

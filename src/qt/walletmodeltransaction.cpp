@@ -2,28 +2,28 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "walletmodeltransaction.h"
+#include <qt/walletmodeltransaction.h>
 
 #include <memory>
 
+#include <interfaces/node.h>
 #include "policy/policy.h"
-#include "wallet/wallet.h"
+//#include "wallet/wallet.h"
 
 WalletModelTransaction::WalletModelTransaction(
     const QList<SendCoinsRecipient> &_recipients)
-    : recipients(_recipients), walletTransaction(nullptr), fee() {}
+    : recipients(_recipients), fee() {}
 
 QList<SendCoinsRecipient> WalletModelTransaction::getRecipients() const {
     return recipients;
 }
 
-CTransactionRef &WalletModelTransaction::getTransaction() {
-    return walletTransaction;
+std::unique_ptr<interfaces::PendingWalletTx> &WalletModelTransaction::getWtx() {
+    return wtx;
 }
 
 unsigned int WalletModelTransaction::getTransactionSize() {
-    return !walletTransaction ? 0
-                              : CTransaction(*walletTransaction).GetTotalSize();
+    return wtx ? wtx->get().GetTotalSize() : 0;
 }
 
 Amount WalletModelTransaction::getTransactionFee() const {
@@ -35,6 +35,7 @@ void WalletModelTransaction::setTransactionFee(const Amount newFee) {
 }
 
 void WalletModelTransaction::reassignAmounts(int nChangePosRet) {
+    const CTransaction *walletTransaction = &wtx->get();
     int i = 0;
     for (SendCoinsRecipient &rcp : recipients) {
         {
@@ -55,12 +56,4 @@ Amount WalletModelTransaction::getTotalTransactionAmount() const {
         totalTransactionAmount += rcp.amount;
     }
     return totalTransactionAmount;
-}
-
-void WalletModelTransaction::newPossibleKeyChange(CWallet *wallet) {
-    keyChange = std::make_unique<CReserveKey>(wallet);
-}
-
-CReserveKey *WalletModelTransaction::getPossibleKeyChange() {
-    return keyChange.get();
 }

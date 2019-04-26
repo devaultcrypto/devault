@@ -25,6 +25,8 @@
 #include "wallet/fees.h"
 #include "wallet/wallet.h"
 
+#include <interfaces/node.h>
+
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -171,10 +173,11 @@ void SendCoinsDialog::setModel(WalletModel *_model) {
             }
         }
 
-        setBalance(_model->getBalance(), _model->getUnconfirmedBalance(),
-                   _model->getImmatureBalance(), _model->getWatchBalance(),
-                   _model->getWatchUnconfirmedBalance(),
-                   _model->getWatchImmatureBalance());
+        interfaces::WalletBalances balances = _model->wallet().getBalances();
+        setBalance(balances.balance, balances.unconfirmed_balance,
+                   balances.immature_balance, balances.watch_only_balance,
+                   balances.unconfirmed_watch_only_balance,
+                   balances.immature_watch_only_balance);
         connect(
             _model,
             SIGNAL(
@@ -399,7 +402,7 @@ void SendCoinsDialog::on_sendButton_clicked() {
         accept();
         CoinControlDialog::coinControl()->UnSelectAll();
         coinControlUpdateLabels();
-        Q_EMIT coinsSent(currentTransaction.getTransaction()->GetId());
+        Q_EMIT coinsSent(currentTransaction.getWtx()->get().GetId());
     }
     fNewRecipientAllowed = true;
 }
@@ -546,7 +549,7 @@ void SendCoinsDialog::setBalance(const Amount balance,
 }
 
 void SendCoinsDialog::updateDisplayUnit() {
-    setBalance(model->getBalance(), Amount::zero(), Amount::zero(),
+    setBalance(model->wallet().getBalance(), Amount::zero(), Amount::zero(),
                Amount::zero(), Amount::zero(), Amount::zero());
     ui->customFee->setDisplayUnit(model->getOptionsModel()->getDisplayUnit());
     updateMinFeeLabel();
@@ -637,7 +640,7 @@ void SendCoinsDialog::useAvailableBalance(SendCoinsEntry *entry) {
     }
 
     // Calculate available amount to send.
-    Amount amount = model->getBalance(&coin_control);
+    Amount amount = model->wallet().getAvailableBalance(coin_control);
     for (int i = 0; i < ui->entries->count(); ++i) {
         SendCoinsEntry *e =
             qobject_cast<SendCoinsEntry *>(ui->entries->itemAt(i)->widget());
@@ -828,7 +831,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString &text) {
                 tr("Warning: Invalid DeVault address"));
         } else {
             // Valid address
-            if (!model->IsSpendable(dest)) {
+            if (!model->wallet().isSpendable(dest)) {
                 ui->labelCoinControlChangeLabel->setText(
                     tr("Warning: Unknown change address"));
 
