@@ -22,7 +22,7 @@
 #define _POSIX_C_SOURCE 200112L
 
 #endif // __linux__
-
+#include <cstring>
 #include <algorithm>
 #include <fcntl.h>
 #include <sys/resource.h>
@@ -120,7 +120,8 @@ static CCriticalSection csPathCached;
 bool CheckIfWalletDatExists(bool fNetSpecific) {
   fs::path path;
   if (gArgs.IsArgSet("-datadir")) {
-    path = fs::system_complete(gArgs.GetArg("-datadir", ""));
+    fs::path p = (gArgs.GetArg("-datadir", ""));
+    path = fs::absolute(p);
     if (!fs::is_directory(path)) {
       return false;
     }
@@ -149,7 +150,8 @@ const fs::path &GetDataDir(bool fNetSpecific) {
     }
 
     if (gArgs.IsArgSet("-datadir")) {
-        path = fs::system_complete(gArgs.GetArg("-datadir", ""));
+        fs::path p = (gArgs.GetArg("-datadir", ""));
+        path = fs::absolute(p);
         if (!fs::is_directory(path)) {
             path = "";
             return path;
@@ -180,7 +182,8 @@ const fs::path GetDataDirNoCreate() {
   }
   
   if (gArgs.IsArgSet("-datadir")) {
-    path = fs::system_complete(gArgs.GetArg("-datadir", ""));
+    fs::path p = (gArgs.GetArg("-datadir", ""));
+    path = fs::absolute(p);
     if (!fs::is_directory(path)) {
       path = "";
       return path;

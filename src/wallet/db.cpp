@@ -272,7 +272,13 @@ bool CDB::VerifyEnvironment(const std::string &walletFile,
     LogPrintf("Using wallet %s\n", walletFile);
 
     // Wallet file must be a plain filename without a directory
+    fs::path WF = walletFile;
+
+#ifndef NO_BOOST_FILESYSTEM
     if (walletFile != fs::basename(walletFile) + fs::extension(walletFile)) {
+#else
+    if (walletFile != WF.stem() + WF.extension()) {
+#endif
         errorStr = strprintf(_("Wallet %s resides outside wallet directory %s"),
                              walletFile, walletDir.string());
         return false;
