@@ -223,7 +223,7 @@ std::string CRPCTable::help(Config &config, const std::string &strCommand,
         vCommands;
 
     for (const auto& m : mapCommands) {
-        vCommands.push_back(std::make_pair(m.second->category + m.first, m.second));
+        vCommands.emplace_back(m.second->category + m.first, m.second);
     }
     sort(vCommands.begin(), vCommands.end());
 

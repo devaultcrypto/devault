@@ -547,7 +547,7 @@ static void MutateTxSign(CMutableTransaction &tx, const std::string &flagStr) {
     }
 
     std::vector<CTransaction> txVariants;
-    txVariants.push_back(CTransaction(tx));
+    txVariants.emplace_back(tx);
 
     // mergedTx will end up with all the signatures; it starts as a clone of the
     // raw tx:

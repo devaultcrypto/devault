@@ -302,7 +302,7 @@ bool CBlockTreeDB::ReadAddrIndex(const std::string& addr,
                 }
                 Amount nValue;
                 if (pcursor->GetValue(nValue)) {
-                    addressIndex.push_back(std::make_pair(key.second, nValue));
+                    addressIndex.emplace_back(key.second, nValue);
                     pcursor->Next();
                 } else {
                     return error("failed to get address index value");
@@ -336,10 +336,10 @@ bool CBlockTreeDB::ReadTimestampIndex(const unsigned int &high, const unsigned i
         if (pcursor->GetKey(key) && key.first == DB_TIMESTAMPINDEX && key.second.timestamp < high) {
             if (fActiveOnly) {
                 if (HashOnchainActive(key.second.blockHash)) {
-                    hashes.push_back(std::make_pair(key.second.blockHash, key.second.timestamp));
+                    hashes.emplace_back(key.second.blockHash, key.second.timestamp);
                 }
             } else {
-                hashes.push_back(std::make_pair(key.second.blockHash, key.second.timestamp));
+                hashes.emplace_back(key.second.blockHash, key.second.timestamp);
             }
             
             pcursor->Next();

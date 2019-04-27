@@ -107,8 +107,7 @@ static bool SignStep(const BaseSignatureCreator &creator,
         case TX_SCRIPTHASH:
             if (creator.KeyStore().GetCScript(uint160(vSolutions[0]),
                                               scriptRet)) {
-                ret.push_back(
-                    std::vector<uint8_t>(scriptRet.begin(), scriptRet.end()));
+                ret.emplace_back(scriptRet.begin(), scriptRet.end());
                 return true;
             }
 
@@ -116,7 +115,7 @@ static bool SignStep(const BaseSignatureCreator &creator,
 
         case TX_MULTISIG:
             // workaround CHECKMULTISIG bug
-            ret.push_back(valtype());
+            ret.emplace_back();
             return (SignN(vSolutions, creator, scriptPubKey, ret));
 
         default:
@@ -155,8 +154,7 @@ bool ProduceSignature(const BaseSignatureCreator &creator,
         script = subscript = CScript(result[0].begin(), result[0].end());
         solved = solved && SignStep(creator, script, result, whichType) &&
                  whichType != TX_SCRIPTHASH;
-        result.push_back(
-            std::vector<uint8_t>(subscript.begin(), subscript.end()));
+        result.emplace_back(subscript.begin(), subscript.end());
     }
 
     sigdata.scriptSig = PushAll(result);
@@ -250,7 +248,7 @@ static std::vector<valtype> CombineMultisig(
     unsigned int nSigsHave = 0;
     // pop-one-too-many workaround
     std::vector<valtype> result;
-    result.push_back(valtype());
+    result.emplace_back();
     for (unsigned int i = 0; i < nPubKeys && nSigsHave < nSigsRequired; i++) {
         if (sigs.count(vSolutions[i + 1])) {
             result.push_back(sigs[vSolutions[i + 1]]);
@@ -260,7 +258,7 @@ static std::vector<valtype> CombineMultisig(
 
     // Fill any missing with OP_0:
     for (unsigned int i = nSigsHave; i < nSigsRequired; i++) {
-        result.push_back(valtype());
+        result.emplace_back();
     }
 
     return result;

@@ -23,7 +23,7 @@ CMerkleBlock::CMerkleBlock(const CBlock &block, CBloomFilter &filter) {
         const uint256 &txid = tx->GetId();
         if (filter.IsRelevantAndUpdate(*tx)) {
             vMatch.push_back(true);
-            vMatchedTxn.push_back(std::make_pair(i, txid));
+            vMatchedTxn.emplace_back(i, txid);
         } else {
             vMatch.push_back(false);
         }

@@ -2344,7 +2344,7 @@ bool AppInitMain(Config &config,
 
     std::vector<fs::path> vImportFiles;
     for (const std::string &strFile : gArgs.GetArgs("-loadblock")) {
-        vImportFiles.push_back(strFile);
+        vImportFiles.emplace_back(strFile);
     }
 
     auto import_bind = std::bind(ThreadImport, std::ref(config), vImportFiles);

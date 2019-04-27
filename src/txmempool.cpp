@@ -521,7 +521,7 @@ bool CTxMemPool::getAddrIndex(std::vector<std::string> &addresses,
     for (const auto& it : addresses) {
         auto ait = mapAddr.lower_bound(CMempoolAddrDeltaKey(it));
         while (ait != mapAddr.end() && (*ait).first.addr == it) {
-            results.push_back(*ait);
+            results.emplace_back(*ait);
             ait++;
         }
     }
