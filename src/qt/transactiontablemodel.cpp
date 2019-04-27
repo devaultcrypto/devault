@@ -372,7 +372,7 @@ TransactionTableModel::formatTxType(const TransactionRecord *wtx) const {
         case TransactionRecord::SendToOther:
             return tr("Sent to");
         case TransactionRecord::SendToSelf:
-            return tr("Payment to yourself");
+            return tr("Paid to self");
         case TransactionRecord::Generated:
             return tr("Mined");
         case TransactionRecord::Reward:
