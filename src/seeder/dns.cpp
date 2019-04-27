@@ -87,7 +87,7 @@ static int parse_name(const uint8_t **inpos, const uint8_t *inend,
             octet--;
             buf[bufused++] = c;
         }
-    } while (1);
+    } while (true);
 }
 
 //  0: k
@@ -577,7 +577,7 @@ int dnsserver(dns_opt_t *opt) {
     msg.msg_control = &cmsg;
     msg.msg_controllen = sizeof(cmsg);
 
-    for (; 1; ++(opt->nRequests)) {
+    for (; true; ++(opt->nRequests)) {
         ssize_t insize = recvmsg(listenSocket, &msg, 0);
         //    uint8_t *addr = (uint8_t*)&si_other.sin_addr.s_addr;
         //    printf("DNS: Request %llu from %i.%i.%i.%i:%i of %i bytes\n",

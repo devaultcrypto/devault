@@ -239,7 +239,7 @@ class CSeederNode {
             }
             // printf("%s: done processing %s\n", ToString(you).c_str(),
             //        strCommand.c_str());
-        } while (1);
+        } while (true);
         return false;
     }
 

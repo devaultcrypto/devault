@@ -62,7 +62,7 @@ public:
             "\n";
         bool showHelp = false;
 
-        while (1) {
+        while (true) {
             static struct option long_options[] = {
                 {"host", required_argument, nullptr, 'h'},
                 {"ns", required_argument, nullptr, 'n'},
@@ -199,7 +199,7 @@ extern "C" void *ThreadCrawler(void *data) {
 
         db.ResultMany(ips);
         db.Add(addr);
-    } while (1);
+    } while (true);
     return nullptr;
 }
 
@@ -328,7 +328,7 @@ extern "C" uint32_t GetIPList(void *data, char *requestedHostname, addr_t *addr,
             if (j == size) {
                 j = i;
             }
-        } while (1);
+        } while (true);
         addr[i] = thisflag.cache[j];
         thisflag.cache[j] = thisflag.cache[i];
         thisflag.cache[i] = addr[i];
@@ -406,7 +406,7 @@ extern "C" void *ThreadDumper(void *) {
                     stat[2], stat[3], stat[4]);
             fclose(ff);
         }
-    } while (1);
+    } while (true);
     return nullptr;
 }
 
@@ -438,7 +438,7 @@ extern "C" void *ThreadStats(void *) {
                stats.nBanned, (unsigned long long)requests,
                (unsigned long long)queries);
         Sleep(1000);
-    } while (1);
+    } while (true);
     return nullptr;
 }
 
@@ -462,7 +462,7 @@ extern "C" void *ThreadSeeder(void *) {
             }
         }
         Sleep(1800000);
-    } while (1);
+    } while (true);
     return nullptr;
 }
 

@@ -66,7 +66,7 @@ bool CAddrDb::Get_(CServiceResult &ip, int &wait) {
             ip.ourLastSuccess = idToInfo[ret].ourLastSuccess;
             break;
         }
-    } while (1);
+    } while (true);
 
     nDirty++;
     return true;

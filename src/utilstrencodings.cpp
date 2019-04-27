@@ -194,7 +194,7 @@ std::vector<uint8_t> DecodeBase64(const char *p, bool *pfInvalid) {
     int mode = 0;
     int left = 0;
 
-    while (1) {
+    while (true) {
         int dec = decode64_table[(uint8_t)*p];
         if (dec == -1) break;
         p++;
@@ -338,7 +338,7 @@ std::vector<uint8_t> DecodeBase32(const char *p, bool *pfInvalid) {
     int mode = 0;
     int left = 0;
 
-    while (1) {
+    while (true) {
         int dec = decode32_table[(uint8_t)*p];
         if (dec == -1) break;
         p++;
