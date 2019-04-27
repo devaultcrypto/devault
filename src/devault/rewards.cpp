@@ -113,7 +113,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
   return true;
 }
 
-bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex) {
+bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, bool undoReward) {
 
   int nHeight = pindex->nHeight;
 
@@ -168,7 +168,7 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex) {
       }
     } else {
       // Coinbase. Size > 1 => Cold Reward if not Superblock
-      if ((tx->vout.size() > 1) && !IsSuperBlock(nHeight)) {
+      if ((tx->vout.size() > 1) && !IsSuperBlock(nHeight) && undoReward) {
           // coinbase, but need to rewind the last paid height
           bool ok = RestoreRewardAtHeight(nHeight);
           if (!ok) {
@@ -352,7 +352,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
   } else {
     reward = Amount();
     bool valid = (size == 1);
-    if (!valid) LogPrintf("Cold Reward invalid since no Reward found but size != 1 (reward in coinbase)");
+    if (!valid) LogPrintf("Cold Reward invalid since no Reward found but size != 1 (reward in coinbase)\n");
     return valid;
   }
 }
