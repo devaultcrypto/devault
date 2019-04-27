@@ -35,7 +35,7 @@ class CColdRewards {
   void FillPayments(const Consensus::Params& consensusParams, CMutableTransaction &txNew, int nHeight);
   bool Validate(const Consensus::Params& consensusParams, const CBlock &block, int nHeight, Amount &reward);
   void UpdateRewardsDB(int nNewHeight);
-  bool UndoBlock(const CBlock &block, const CBlockIndex *pindex);
+  bool UndoBlock(const CBlock &block, const CBlockIndex *pindex, bool undoReward=true);
   bool RestoreRewardAtHeight(int Height);
   std::map<COutPoint, CRewardValue> GetRewards();
   std::vector<CRewardValue> GetOrderedRewards();
