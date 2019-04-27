@@ -563,7 +563,7 @@ std::string HelpExampleRpc(const std::string &methodname,
     return "> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", "
            "\"id\":\"curltest\", "
            "\"method\": \"" +
-           methodname + "\", \"params\": [" + args +
+           methodname + R"(", "params": [)" + args +
            "] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n";
 }
 

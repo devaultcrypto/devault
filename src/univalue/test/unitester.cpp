@@ -139,19 +139,19 @@ void unescape_unicode_test()
     UniValue val;
     bool testResult;
     // Escaped ASCII (quote)
-    testResult = val.read("[\"\\u0022\"]");
+    testResult = val.read(R"(["\u0022"])");
     f_assert(testResult);
     f_assert(val[0].get_str() == "\"");
     // Escaped Basic Plane character, two-byte UTF-8
-    testResult = val.read("[\"\\u0191\"]");
+    testResult = val.read(R"(["\u0191"])");
     f_assert(testResult);
     f_assert(val[0].get_str() == "\xc6\x91");
     // Escaped Basic Plane character, three-byte UTF-8
-    testResult = val.read("[\"\\u2191\"]");
+    testResult = val.read(R"(["\u2191"])");
     f_assert(testResult);
     f_assert(val[0].get_str() == "\xe2\x86\x91");
     // Escaped Supplementary Plane character U+1d161
-    testResult = val.read("[\"\\ud834\\udd61\"]");
+    testResult = val.read(R"(["\ud834\udd61"])");
     f_assert(testResult);
     f_assert(val[0].get_str() == "\xf0\x9d\x85\xa1");
 }

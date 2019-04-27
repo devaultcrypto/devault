@@ -301,10 +301,10 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
             "address to.\n"
             "\nExamples:\n" +
             HelpExampleCli("setlabel",
-                           "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\" \"tabby\"") +
+                           R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u" "tabby")") +
             HelpExampleRpc(
                 "setlabel",
-                "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\", \"tabby\""));
+                R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u", "tabby")"));
     }
     LOCK2(cs_main, pwallet->cs_wallet);
 
@@ -525,7 +525,7 @@ static UniValue sendtoaddress(const Config &config,
                                             "outpost\"") +
             HelpExampleCli(
                 "sendtoaddress",
-                "\"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\" 0.1 \"\" \"\" true") +
+                R"("devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9" 0.1 "" "" true)") +
             HelpExampleRpc("sendtoaddress", "\"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9"
                                             "dd\", 0.1, \"donation\", \"seans "
                                             "outpost\""));
@@ -666,7 +666,7 @@ static UniValue signmessage(const Config &config,
             "\nCreate the signature\n" +
             HelpExampleCli(
                 "signmessage",
-                "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\" \"my message\"") +
+                R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u" "my message")") +
             "\nVerify the signature\n" +
             HelpExampleCli("verifymessage", "\"devault:qplxfq6jfqappmgemvgqup64mg592rh2ssyv8zcze7"
                                             "XX\" \"signature\" \"my "
@@ -674,7 +674,7 @@ static UniValue signmessage(const Config &config,
             "\nAs json rpc\n" +
             HelpExampleRpc(
                 "signmessage",
-                "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\", \"my message\""));
+                R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u", "my message")"));
     }
 
     LOCK2(cs_main, pwallet->cs_wallet);
@@ -1020,16 +1020,16 @@ static UniValue movecmd(const Config &config, const JSONRPCRequest &request) {
             "\nMove 0.01 " +
             CURRENCY_UNIT +
             " from the default account to the account named tabby\n" +
-            HelpExampleCli("move", "\"\" \"tabby\" 0.01") + "\nMove 0.01 " +
+            HelpExampleCli("move", R"("" "tabby" 0.01)") + "\nMove 0.01 " +
             CURRENCY_UNIT +
             " timotei to akiko with a comment and funds have 6 "
             "confirmations\n" +
             HelpExampleCli("move",
-                           "\"timotei\" \"akiko\" 0.01 6 \"happy birthday!\"") +
+                           R"("timotei" "akiko" 0.01 6 "happy birthday!")") +
             "\nAs a json rpc call\n" +
             HelpExampleRpc(
                 "move",
-                "\"timotei\", \"akiko\", 0.01, 6, \"happy birthday!\""));
+                R"("timotei", "akiko", 0.01, 6, "happy birthday!")"));
     }
 
     ObserveSafeMode();
@@ -1109,7 +1109,7 @@ static UniValue sendfrom(const Config &config, const JSONRPCRequest &request) {
             " from the default account to the address, must have at least 1 "
             "confirmation\n" +
             HelpExampleCli("sendfrom",
-                           "\"\" \"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\" 0.01") +
+                           R"("" "devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9" 0.01)") +
             "\nSend 0.01 from the tabby account to the given address, funds "
             "must have at least 6 confirmations\n" +
             HelpExampleCli("sendfrom",
@@ -2685,9 +2685,9 @@ static UniValue walletpassphrasechange(const Config &config,
             "2. \"newpassphrase\"      (string) The new passphrase\n"
             "\nExamples:\n" +
             HelpExampleCli("walletpassphrasechange",
-                           "\"old one\" \"new one\"") +
+                           R"("old one" "new one")") +
             HelpExampleRpc("walletpassphrasechange",
-                           "\"old one\", \"new one\""));
+                           R"("old one", "new one")"));
     }
 
     LOCK2(cs_main, pwallet->cs_wallet);
@@ -3472,7 +3472,7 @@ static UniValue fundrawtransaction(const Config &config,
             "\nExamples:\n"
             "\nCreate a transaction with no inputs\n" +
             HelpExampleCli("createrawtransaction",
-                           "\"[]\" \"{\\\"myaddress\\\":0.01}\"") +
+                           R"("[]" "{\"myaddress\":0.01}")") +
             "\nAdd sufficient unsigned inputs to meet the output value\n" +
             HelpExampleCli("fundrawtransaction", "\"rawtransactionhex\"") +
             "\nSign the transaction\n" +
