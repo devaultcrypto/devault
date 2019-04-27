@@ -459,7 +459,7 @@ static UniValue verifymessage(const Config &config,
             "\nCreate the signature\n" +
             HelpExampleCli(
                 "signmessage",
-                "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX\" \"my message\"") +
+                R"("1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX" "my message")") +
             "\nVerify the signature\n" +
             HelpExampleCli("verifymessage", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4"
                                             "XX\" \"signature\" \"my "
@@ -527,14 +527,14 @@ static UniValue signmessagewithprivkey(const Config &config,
             "\nExamples:\n"
             "\nCreate the signature\n" +
             HelpExampleCli("signmessagewithprivkey",
-                           "\"privkey\" \"my message\"") +
+                           R"("privkey" "my message")") +
             "\nVerify the signature\n" +
             HelpExampleCli("verifymessage", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4"
                                             "XX\" \"signature\" \"my "
                                             "message\"") +
             "\nAs json rpc\n" +
             HelpExampleRpc("signmessagewithprivkey",
-                           "\"privkey\", \"my message\""));
+                           R"("privkey", "my message")"));
     }
 
     std::string strPrivkey = request.params[0].get_str();
@@ -748,8 +748,8 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
                                  "  }\n"
                                  "]\n"
                                  "\nExamples:\n"
-                                 + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-                                 + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
+                                 + HelpExampleCli("getaddressmempool", R"('{"addresses": ["12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"]}')")
+                                 + HelpExampleRpc("getaddressmempool", R"({"addresses": ["12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"]})")
                                  );
 
     std::vector<std::string> addresses;

@@ -335,7 +335,7 @@ QString getSaveFileName(QWidget *parent, const QString &caption,
 
     /* Extract first suffix from filter pattern "Description (*.foo)" or
      * "Description (*.foo *.bar ...) */
-    QRegExp filter_re(".* \\(\\*\\.(.*)[ \\)]");
+    QRegExp filter_re(R"(.* \(\*\.(.*)[ \)])");
     QString selectedSuffix;
     if (filter_re.exactMatch(selectedFilter)) {
         selectedSuffix = filter_re.cap(1);
@@ -379,7 +379,7 @@ QString getOpenFileName(QWidget *parent, const QString &caption,
     if (selectedSuffixOut) {
         /* Extract first suffix from filter pattern "Description (*.foo)" or
          * "Description (*.foo *.bar ...) */
-        QRegExp filter_re(".* \\(\\*\\.(.*)[ \\)]");
+        QRegExp filter_re(R"(.* \(\*\.(.*)[ \)])");
         QString selectedSuffix;
         if (filter_re.exactMatch(selectedFilter)) {
             selectedSuffix = filter_re.cap(1);

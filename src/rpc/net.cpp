@@ -255,8 +255,8 @@ static UniValue addnode(const Config &config, const JSONRPCRequest &request) {
             "list, 'remove' to remove a node from the list, 'onetry' to try a "
             "connection to the node once\n"
             "\nExamples:\n" +
-            HelpExampleCli("addnode", "\"192.168.0.6:33039\" \"onetry\"") +
-            HelpExampleRpc("addnode", "\"192.168.0.6:33039\", \"onetry\""));
+            HelpExampleCli("addnode", R"("192.168.0.6:33039" "onetry")") +
+            HelpExampleRpc("addnode", R"("192.168.0.6:33039", "onetry")"));
     }
 
     if (!g_connman) {
@@ -632,9 +632,9 @@ static UniValue setban(const Config &config, const JSONRPCRequest &request) {
             "4. \"absolute\"     (boolean, optional) If set, the bantime must "
             "be a absolute timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
             "\nExamples:\n" +
-            HelpExampleCli("setban", "\"192.168.0.6\" \"add\" 86400") +
-            HelpExampleCli("setban", "\"192.168.0.0/24\" \"add\"") +
-            HelpExampleRpc("setban", "\"192.168.0.6\", \"add\", 86400"));
+            HelpExampleCli("setban", R"("192.168.0.6" "add" 86400)") +
+            HelpExampleCli("setban", R"("192.168.0.0/24" "add")") +
+            HelpExampleRpc("setban", R"("192.168.0.6", "add", 86400)"));
     }
 
     if (!g_connman) {

@@ -159,9 +159,9 @@ static UniValue getrawtransaction(const Config &config,
             HelpExampleCli("getrawtransaction", "\"mytxid\" true") +
             HelpExampleRpc("getrawtransaction", "\"mytxid\", true") +
             HelpExampleCli("getrawtransaction",
-                           "\"mytxid\" false \"myblockhash\"") +
+                           R"("mytxid" false "myblockhash")") +
             HelpExampleCli("getrawtransaction",
-                           "\"mytxid\" true \"myblockhash\""));
+                           R"("mytxid" true "myblockhash")"));
     }
 
     LOCK(cs_main);
@@ -712,7 +712,7 @@ static UniValue combinerawtransaction(const Config &config,
 
             "\nExamples:\n" +
             HelpExampleCli("combinerawtransaction",
-                           "[\"myhex1\", \"myhex2\", \"myhex3\"]"));
+                           R"(["myhex1", "myhex2", "myhex3"])"));
     }
 
     UniValue txs = request.params[0].get_array();

@@ -91,11 +91,11 @@ UniValue importprivkey(const Config &config, const JSONRPCRequest &request) {
             "\nImport the private key with rescan\n" +
             HelpExampleCli("importprivkey", "\"mykey\"") +
             "\nImport using a label and without rescan\n" +
-            HelpExampleCli("importprivkey", "\"mykey\" \"testing\" false") +
+            HelpExampleCli("importprivkey", R"("mykey" "testing" false)") +
             "\nImport using default blank label and without rescan\n" +
-            HelpExampleCli("importprivkey", "\"mykey\" \"\" false") +
+            HelpExampleCli("importprivkey", R"("mykey" "" false)") +
             "\nAs a JSON-RPC call\n" +
-            HelpExampleRpc("importprivkey", "\"mykey\", \"testing\", false"));
+            HelpExampleRpc("importprivkey", R"("mykey", "testing", false)"));
 
     LOCK2(cs_main, pwallet->cs_wallet);
 
@@ -255,10 +255,10 @@ UniValue importaddress(const Config &config, const JSONRPCRequest &request) {
             "\nImport a script with rescan\n" +
             HelpExampleCli("importaddress", "\"myscript\"") +
             "\nImport using a label without rescan\n" +
-            HelpExampleCli("importaddress", "\"myscript\" \"testing\" false") +
+            HelpExampleCli("importaddress", R"("myscript" "testing" false)") +
             "\nAs a JSON-RPC call\n" +
             HelpExampleRpc("importaddress",
-                           "\"myscript\", \"testing\", false"));
+                           R"("myscript", "testing", false)"));
     }
 
     std::string strLabel = "";
@@ -464,9 +464,9 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
             "\nImport a public key with rescan\n" +
             HelpExampleCli("importpubkey", "\"mypubkey\"") +
             "\nImport using a label without rescan\n" +
-            HelpExampleCli("importpubkey", "\"mypubkey\" \"testing\" false") +
+            HelpExampleCli("importpubkey", R"("mypubkey" "testing" false)") +
             "\nAs a JSON-RPC call\n" +
-            HelpExampleRpc("importpubkey", "\"mypubkey\", \"testing\", false"));
+            HelpExampleRpc("importpubkey", R"("mypubkey", "testing", false)"));
     }
 
     std::string strLabel = "";
@@ -1312,7 +1312,7 @@ UniValue importmulti(const Config &config, const JSONRPCRequest &mainRequest) {
             "\nExamples:\n" +
             HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }, "
                                           "{ \"scriptPubKey\": { \"address\": \"<my 2nd address>\" }, \"label\": \"example 2\", \"timestamp\": 1455191480 }]'") +
-            HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }]' '{ \"rescan\": false}'") +
+            HelpExampleCli("importmulti", R"('[{ "scriptPubKey": { "address": "<my address>" }, "timestamp":1455191478 }]' '{ "rescan": false}')") +
 
             "\nResponse is an array with the same size as the input that has the execution result :\n"
             "  [{ \"success\": true } , { \"success\": false, \"error\": { \"code\": -1, \"message\": \"Internal Server Error\"} }, ... ]\n");
