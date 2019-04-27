@@ -2397,8 +2397,7 @@ void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe,
                 (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) !=
                 ISMINE_NO;
 
-            vCoins.push_back(
-                COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+            vCoins.emplace_back(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx);
 
             // Checks the sum amount of all UTXO's.
             if (nMinimumSumAmount != MAX_MONEY) {
@@ -3096,9 +3095,8 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
             // Note how the sequence number is set to non-maxint so that the
             // nLockTime set above actually works.
             for (const auto &coin : setCoins) {
-                txNew.vin.push_back(
-                    CTxIn(coin.outpoint, CScript(),
-                          std::numeric_limits<uint32_t>::max() - 1));
+                txNew.vin.emplace_back(coin.outpoint, CScript(),
+                          std::numeric_limits<uint32_t>::max() - 1);
             }
 
             // Fill in dummy signatures for fee calculation.

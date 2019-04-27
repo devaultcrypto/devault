@@ -66,7 +66,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
           LogPrint(BCLog::COLD, "%s : Writing to Rewards db, value of %d at Height %d\n", __func__, balance / COIN,
                    nHeight);
           CRewardValue e(out, nHeight, nHeight, nHeight);
-          rewardAdditions.push_back(std::pair(outpoint, e));
+          rewardAdditions.emplace_back(outpoint, e);
           db_change = true;
         }
         n++;
@@ -89,7 +89,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
               LogPrint(BCLog::COLD, "%s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
                        nHeight, coinr.GetValue() / COIN);
           }
-          rewardErasures.push_back(std::pair(outpoint, coinr));
+          rewardErasures.emplace_back(outpoint, coinr);
           db_change = true;
           // viable_utxos--;
         }
@@ -140,7 +140,7 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex) {
             // if active, restore height
             val.SetHeight(val.GetOldHeight());
           }
-          rewardUpdates.push_back(std::pair(out,val));
+          rewardUpdates.emplace_back(out,val);
         }
       }
     }

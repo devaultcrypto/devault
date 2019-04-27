@@ -619,7 +619,7 @@ void BlockAssembler::addPriorityTxs() {
         double dPriority = mi->GetPriority(nHeight);
         Amount dummy;
         mempool->ApplyDeltas(mi->GetTx().GetId(), dPriority, dummy);
-        vecPriority.push_back(TxCoinAgePriority(dPriority, mi));
+        vecPriority.emplace_back(dPriority, mi);
     }
     std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
 
@@ -680,7 +680,7 @@ void BlockAssembler::addPriorityTxs() {
                 continue;
             }
 
-            vecPriority.push_back(TxCoinAgePriority(wpiter->second, child));
+            vecPriority.emplace_back(wpiter->second, child);
             std::push_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
             waitPriMap.erase(wpiter);
         }

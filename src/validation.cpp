@@ -1454,7 +1454,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
         if (fAddressIndex) {
             for (uint32_t k = tx.vout.size(); k-- > 0;) {
                 const CTxOut &out = tx.vout[k];
-                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(out),pindex->nHeight, i, hash, k, false), out.nValue));
+                addrIndex.emplace_back(CAddrIndexKey(GetAddr(out),pindex->nHeight, i, hash, k, false), out.nValue);
             }
         }
         
@@ -1470,7 +1470,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
             const CTxIn input = tx.vin[j];
             if (fAddressIndex) {
                 const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
-                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(prevout),pindex->nHeight, i, hash, j, true), -prevout.nValue));
+                addrIndex.emplace_back(CAddrIndexKey(GetAddr(prevout),pindex->nHeight, i, hash, j, true), -prevout.nValue);
             }
         }
     }
@@ -1573,7 +1573,7 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
     std::vector<std::pair<uint256, CDiskTxPos>> vPos;
     vPos.reserve(block.vtx.size());
     for (const CTransactionRef &tx : block.vtx) {
-        vPos.push_back(std::make_pair(tx->GetHash(), pos));
+        vPos.emplace_back(tx->GetHash(), pos);
         pos.nTxOffset += ::GetSerializeSize(*tx, SER_DISK, CLIENT_VERSION);
     }
 
@@ -1849,7 +1849,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         if (fAddressIndex) {
           for (unsigned int k = 0; k < tx.vout.size(); k++) {
             const CTxOut &out = tx.vout[k];
-            addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(out), pindex->nHeight, i, txhash, k, false), out.nValue));
+            addrIndex.emplace_back(CAddrIndexKey(GetAddr(out), pindex->nHeight, i, txhash, k, false), out.nValue);
           }
         }
       
@@ -1882,7 +1882,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
             for (size_t j = 0; j < tx.vin.size(); j++) {
                 const CTxIn input = tx.vin[j];
                 const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
-                addrIndex.push_back(std::make_pair(CAddrIndexKey(GetAddr(prevout), pindex->nHeight, i, txhash, j, true), -prevout.nValue));
+                addrIndex.emplace_back(CAddrIndexKey(GetAddr(prevout), pindex->nHeight, i, txhash, j, true), -prevout.nValue);
             }
             i++;
         }
@@ -1919,7 +1919,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
         control.Add(vChecks);
 
-        blockundo.vtxundo.push_back(CTxUndo());
+        blockundo.vtxundo.emplace_back();
         SpendCoins(view, tx, blockundo.vtxundo.back(), pindex->nHeight);
     }
 
@@ -2114,7 +2114,7 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
                     std::vector<std::pair<int, const CBlockFileInfo *>> vFiles;
                     vFiles.reserve(setDirtyFileInfo.size());
                     for (int i : setDirtyFileInfo) {
-                        vFiles.push_back(std::make_pair(i, &vinfoBlockFile[i]));
+                        vFiles.emplace_back(i, &vinfoBlockFile[i]);
                     }
 
                     setDirtyFileInfo.clear();
@@ -4395,7 +4395,7 @@ static bool LoadBlockIndexDB(const Config &config) {
     vSortedByHeight.reserve(mapBlockIndex.size());
     for (const auto& item : mapBlockIndex) {
         CBlockIndex *pindex = item.second;
-        vSortedByHeight.push_back(std::make_pair(pindex->nHeight, pindex));
+        vSortedByHeight.emplace_back(pindex->nHeight, pindex);
     }
 
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
