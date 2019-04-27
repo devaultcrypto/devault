@@ -61,8 +61,17 @@ TransactionRecord::decomposeTransaction(const CWallet *wallet,
                     sub.address = mapValue["from"];
                 }
                 if (wtx.IsCoinBase()) {
-                    // Generated
+                  // Generated, but will differentiate, budget,
+                  // cold reward and mined (generated) based on number of elements present
+                  if (wtx.tx->vout.size() > 2) {
+                    sub.type = TransactionRecord::Budget;
+                  } else {
+                    sub.type = TransactionRecord::Reward;
+                  }
+                  // Element 0 is Always Mined
+                  if (i == 0) {
                     sub.type = TransactionRecord::Generated;
+                  }
                 }
 
                 parts.append(sub);
@@ -183,7 +192,10 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx) {
             status.status = TransactionStatus::OpenUntilDate;
             status.open_for = wtx.tx->nLockTime;
         }
-    } else if (type == TransactionRecord::Generated) {
+    } else if (type == TransactionRecord::Generated ||
+               type == TransactionRecord::Reward ||
+               type == TransactionRecord::Budget
+               ) {
         // For generated transactions, determine maturity
         if (wtx.GetBlocksToMaturity() > 0) {
             status.status = TransactionStatus::Immature;

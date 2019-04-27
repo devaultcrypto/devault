@@ -372,9 +372,13 @@ TransactionTableModel::formatTxType(const TransactionRecord *wtx) const {
         case TransactionRecord::SendToOther:
             return tr("Sent to");
         case TransactionRecord::SendToSelf:
-            return tr("Payment to yourself");
+            return tr("Paid to self");
         case TransactionRecord::Generated:
             return tr("Mined");
+        case TransactionRecord::Reward:
+            return tr("ColdReward");
+        case TransactionRecord::Budget:
+            return tr("Buget payment");
         default:
             return QString();
     }
@@ -385,6 +389,10 @@ TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx) const {
     switch (wtx->type) {
         case TransactionRecord::Generated:
             return QIcon(":/icons/tx_mined");
+        case TransactionRecord::Budget:
+            return QIcon(":/icons/budget");
+        case TransactionRecord::Reward:
+            return QIcon(":/icons/reward");
         case TransactionRecord::RecvWithAddress:
         case TransactionRecord::RecvFromOther:
             return QIcon(":/icons/tx_input");
@@ -413,6 +421,8 @@ QString TransactionTableModel::formatTxToAddress(const TransactionRecord *wtx,
         case TransactionRecord::RecvWithAddress:
         case TransactionRecord::SendToAddress:
         case TransactionRecord::Generated:
+        case TransactionRecord::Reward:
+        case TransactionRecord::Budget:
             return lookupAddress(wtx->address, tooltip) + watchAddress;
         case TransactionRecord::SendToOther:
             return QString::fromStdString(wtx->address) + watchAddress;
@@ -428,6 +438,8 @@ TransactionTableModel::addressColor(const TransactionRecord *wtx) const {
     switch (wtx->type) {
         case TransactionRecord::RecvWithAddress:
         case TransactionRecord::SendToAddress:
+        case TransactionRecord::Reward:
+        case TransactionRecord::Budget:
         case TransactionRecord::Generated: {
             QString label =
                 walletModel->getAddressTableModel()->labelForAddress(

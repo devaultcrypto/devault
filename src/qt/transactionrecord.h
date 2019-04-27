@@ -88,6 +88,8 @@ public:
     enum Type {
         Other,
         Generated,
+        Budget,
+        Reward,
         SendToAddress,
         SendToOther,
         RecvWithAddress,
