@@ -387,10 +387,12 @@ TransactionTableModel::formatTxType(const TransactionRecord *wtx) const {
 QVariant
 TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx) const {
     switch (wtx->type) {
-      case TransactionRecord::Generated:
-      case TransactionRecord::Budget:
-      case TransactionRecord::Reward:
+        case TransactionRecord::Generated:
             return QIcon(":/icons/tx_mined");
+        case TransactionRecord::Budget:
+            return QIcon(":/icons/budget");
+        case TransactionRecord::Reward:
+            return QIcon(":/icons/reward");
         case TransactionRecord::RecvWithAddress:
         case TransactionRecord::RecvFromOther:
             return QIcon(":/icons/tx_input");
