@@ -9,13 +9,10 @@
 #include <cstdio>
 #include <string>
 
-#if _cpp_lib_filesystem
+#ifdef NO_BOOST_FILESYSTEM
 #include <filesystem>
-#define NO_BOOST_FILESYSTEM
 #else
 #include <boost/filesystem.hpp>
-//#include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
-//#include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/path.hpp>
 #endif
 

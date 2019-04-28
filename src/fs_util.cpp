@@ -371,8 +371,10 @@ void SetupEnvironment() {
     // in multithreading environments, it is set explicitly by the main thread.
     // A dummy locale is used to extract the internal default locale, used by
     // fs::path, which is then used to explicitly imbue the path.
+#ifndef NO_BOOST_FILESYSTEM    
     std::locale loc = fs::path::imbue(std::locale::classic());
     fs::path::imbue(loc);
+#endif
 }
 
 

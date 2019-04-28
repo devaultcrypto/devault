@@ -332,9 +332,12 @@ bool WalletInit::Verify(const CChainParams &chainParams) {
                                          "characters in -wallet filename."),
                                        walletFile));
         }
-
+#ifdef NO_BOOST_FILESYSTEM
+        fs::path wallet_path = GetWalletDir() / walletFile;
+#else
         fs::path wallet_path = fs::absolute(walletFile, GetWalletDir());
-
+#endif
+        
         if (fs::exists(wallet_path) && (!fs::is_regular_file(wallet_path) ||
                                         fs::is_symlink(wallet_path))) {
             return InitError(strprintf(_("Error loading wallet %s. -wallet "
@@ -408,8 +411,12 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) {
           return false;
         }
         fs::path added_dir = BaseParams().DataDir();
+#ifdef NO_BOOST_FILESYSTEM
+        fs::path wallet_path = GetWalletDirNoCreate(added_dir) / walletFile;
+#else
         fs::path wallet_path = fs::absolute(walletFile, GetWalletDirNoCreate(added_dir));
-
+#endif
+        
         if (fs::exists(wallet_path)) {
           return true;
         }
