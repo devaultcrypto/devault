@@ -50,6 +50,17 @@ namespace {
         CReserveKey m_key;
     };
 
+    //! Construct wallet TxOut struct.
+    WalletTxOut MakeWalletTxOut(CWallet &wallet, const CWalletTx &wtx, int n,
+                                int depth) {
+        WalletTxOut result;
+        result.txout = wtx.tx->vout[n];
+        result.time = wtx.GetTxTime();
+        result.depth_in_main_chain = depth;
+        result.is_spent = wallet.IsSpent(wtx.GetId(), n);
+        return result;
+    }
+
     class WalletImpl : public Wallet {
     public:
         WalletImpl(CWallet &wallet) : m_wallet(wallet) {}
@@ -187,6 +198,37 @@ namespace {
             return m_wallet.GetAvailableBalance(&coin_control);
         }
         bool hdEnabled() override { return true; }
+        CoinsList listCoins() override {
+            LOCK2(::cs_main, m_wallet.cs_wallet);
+            CoinsList result;
+            for (const auto &entry : m_wallet.ListCoins()) {
+                auto &group = result[entry.first];
+                for (const auto &coin : entry.second) {
+                    group.emplace_back(COutPoint(coin.tx->GetId(), coin.i),
+                                       MakeWalletTxOut(m_wallet, *coin.tx,
+                                                       coin.i, coin.nDepth));
+                }
+            }
+            return result;
+        }
+        std::vector<WalletTxOut>
+        getCoins(const std::vector<COutPoint> &outputs) override {
+            LOCK2(::cs_main, m_wallet.cs_wallet);
+            std::vector<WalletTxOut> result;
+            result.reserve(outputs.size());
+            for (const auto &output : outputs) {
+                result.emplace_back();
+                auto it = m_wallet.mapWallet.find(output.GetTxId());
+                if (it != m_wallet.mapWallet.end()) {
+                    int depth = it->second.GetDepthInMainChain();
+                    if (depth >= 0) {
+                        result.back() = MakeWalletTxOut(m_wallet, it->second,
+                                                        output.GetN(), depth);
+                    }
+                }
+            }
+            return result;
+        }
         std::unique_ptr<Handler>
         handleShowProgress(ShowProgressFn fn) override {
             return MakeHandler(m_wallet.ShowProgress.connect(fn));

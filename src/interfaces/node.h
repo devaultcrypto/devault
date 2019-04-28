@@ -20,6 +20,8 @@
 #include <vector>
 
 #include <support/allocators/secure.h>
+class CCoinControl;
+class CFeeRate;
 struct CNodeStateStats;
 struct CNodeStats;
 class Config;
@@ -151,8 +153,18 @@ public:
     //! Get network active.
     virtual bool getNetworkActive() = 0;
 
+    //! Get minimum fee.
+    virtual Amount getMinimumFee(unsigned int tx_bytes,
+                                 const CCoinControl &coin_control) = 0;
+
     //! Get max tx fee.
     virtual Amount getMaxTxFee() = 0;
+
+    //! Get dust relay fee.
+    virtual CFeeRate getDustRelayFee() = 0;
+
+    //! Get pay tx fee.
+    virtual CFeeRate getPayTxFee() = 0;
 
     //! Execute rpc command.
     virtual UniValue executeRpc(Config &config, const std::string &command,
