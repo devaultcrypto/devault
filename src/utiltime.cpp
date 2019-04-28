@@ -70,6 +70,13 @@ std::string DateTimeStrFormat(const char *pszFormat, int64_t nTime) {
   return ss.str();
 }
 
+// Custom format since Windows doesn't like ":" in filenames
+// Specifically for renaming debug.log fiels
+std::string FormatDebugLogDateTime(int64_t nTime) {
+    return DateTimeStrFormat("%Y-%m-%dT%H-%M-%SZ", nTime);
+}
+
+
 std::string FormatISO8601DateTime(int64_t nTime) {
     return DateTimeStrFormat("%Y-%m-%dT%H:%M:%SZ", nTime);
 }

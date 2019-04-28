@@ -218,7 +218,6 @@ void BCLog::Logger::ShrinkDebugFile() {
         fclose(file);
     }
 }
-/*
 std::string BCLog::Logger::RenameLastDebugFile(){
   fs::path pathLog = GetDataDir();
   pathLog /= DEFAULT_DEBUGLOGFILE;
@@ -230,7 +229,7 @@ std::string BCLog::Logger::RenameLastDebugFile(){
 #else
     auto last_write_int = last_write_time; // no change
 #endif
-    std::string s = "debug-"+FormatISO8601DateTime(last_write_int)+".log";
+    std::string s = "debug-"+FormatDebugLogDateTime(last_write_int)+".log";
     oldLog /= s;
     fs::rename(pathLog, oldLog);
     return oldLog.string();
@@ -263,7 +262,7 @@ void BCLog::Logger::RemoveOlderDebugFiles() {
             }
         }
     }
-} */
+} 
 
 void BCLog::Logger::EnableCategory(LogFlags category) {
     m_categories |= category;

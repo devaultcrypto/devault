@@ -90,8 +90,8 @@ public:
 
     bool OpenDebugLog();
     void ShrinkDebugFile();
- //   std::string RenameLastDebugFile();
- //   void RemoveOlderDebugFiles();
+    std::string RenameLastDebugFile();
+    void RemoveOlderDebugFiles();
 
 
     void EnableCategory(LogFlags category);

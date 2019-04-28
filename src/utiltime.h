@@ -1,10 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2019 DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_UTILTIME_H
-#define BITCOIN_UTILTIME_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -37,5 +37,5 @@ std::string DateTimeStrFormat(const char *pszFormat, int64_t nTime);
 std::string FormatISO8601DateTime(int64_t nTime);
 std::string FormatISO8601Date(int64_t nTime);
 std::string FormatISO8601Time(int64_t nTime);
+std::string FormatDebugLogDateTime(int64_t nTime); // for debug.log renaming
 
-#endif // BITCOIN_UTILTIME_H
