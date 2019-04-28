@@ -218,7 +218,7 @@ void BCLog::Logger::ShrinkDebugFile() {
         fclose(file);
     }
 }
-
+/*
 std::string BCLog::Logger::RenameLastDebugFile(){
   fs::path pathLog = GetDataDir();
   pathLog /= DEFAULT_DEBUGLOGFILE;
@@ -263,7 +263,7 @@ void BCLog::Logger::RemoveOlderDebugFiles() {
             }
         }
     }
-}
+} */
 
 void BCLog::Logger::EnableCategory(LogFlags category) {
     m_categories |= category;

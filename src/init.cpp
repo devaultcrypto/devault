@@ -1812,7 +1812,7 @@ bool AppInitMain(Config &config,
 #endif
 
     BCLog::Logger &logger = GetLogger();
-    std::string RenamedLogfile = logger.RenameLastDebugFile();
+//    std::string RenamedLogfile = logger.RenameLastDebugFile();
   
     bool default_shrinkdebugfile = logger.DefaultShrinkDebugFile();
     if (gArgs.GetBoolArg("-shrinkdebugfile", default_shrinkdebugfile)) {
@@ -1827,8 +1827,8 @@ bool AppInitMain(Config &config,
         }
     }
     // Can only remove older after creating new one since there are LogPrintf in there!
-    if (RenamedLogfile != "") LogPrintf("Renamed old log file %s to %s\n",DEFAULT_DEBUGLOGFILE, RenamedLogfile);
-    logger.RemoveOlderDebugFiles();
+ /*   if (RenamedLogfile != "") LogPrintf("Renamed old log file %s to %s\n",DEFAULT_DEBUGLOGFILE, RenamedLogfile);
+    logger.RemoveOlderDebugFiles(); */
 
 
     if (!logger.m_log_timestamps) {
@@ -1848,10 +1848,10 @@ bool AppInitMain(Config &config,
         !fs::path(gArgs.GetArg("-datadir", "")).is_absolute()) {
         LogPrintf("Warning: relative datadir option '%s' specified, which will "
                   "be interpreted relative to the current working directory "
-                  "'%s'. This is fragile, because if bitcoin is started in the "
+                  "'%s'. This is fragile, because if devault is started in the "
                   "future from a different location, it will be unable to "
                   "locate the current data files. There could also be data "
-                  "loss if bitcoin is started while in a temporary "
+                  "loss if devault is started while in a temporary "
                   "directory.\n",
                   gArgs.GetArg("-datadir", ""), fs::current_path().string());
     }
