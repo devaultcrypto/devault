@@ -154,7 +154,7 @@ public:
 
 static constexpr Amount SATOSHI = Amount::satoshi();
 static constexpr Amount MINCOIN = Amount::min_coin();
-static constexpr Amount COIN = 100000000 * SATOSHI;
+static constexpr Amount COIN = COIN_PRECISION * SATOSHI;
 static constexpr Amount CENT = COIN / 100;
 
 extern const std::string CURRENCY_UNIT;
