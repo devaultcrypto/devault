@@ -26,8 +26,18 @@
 #include "utilstrencodings.h"
 
 // for BoostPathToQString
+#ifdef NO_BOOST_FILESYSTEM
+#include <fstream>
+using std::ifstream;
+using std::ofstream;
+using std::fstream;
+#else
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 #include <boost/filesystem/fstream.hpp>
+using fs::fstream;
+using fs::ifstream;
+using fs::ofstream;
+#endif
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
@@ -67,7 +77,10 @@
 #include <QFontDatabase>
 #endif
 
+
+#ifndef NO_BOOST_FILESYSTEM
 static fs::detail::utf8_codecvt_facet utf8;
+#endif
 
 #if defined(Q_OS_MAC)
 // These Mac includes must be done in the global namespace
@@ -718,7 +731,7 @@ static fs::path GetAutostartFilePath() {
 }
 
 bool GetStartOnSystemStartup() {
-    fs::ifstream optionFile(GetAutostartFilePath());
+    fstream optionFile(GetAutostartFilePath());
     if (!optionFile.good()) {
         return false;
     }
@@ -749,8 +762,8 @@ bool SetStartOnSystemStartup(bool fAutoStart) {
 
         fs::create_directories(GetAutostartDir());
 
-        fs::ofstream optionFile(GetAutostartFilePath(),
-                                std::ios_base::out | std::ios_base::trunc);
+        ofstream optionFile(GetAutostartFilePath(),
+                            std::ios_base::out | std::ios_base::trunc);
         if (!optionFile.good()) {
             return false;
         }
@@ -882,11 +895,19 @@ void setClipboard(const QString &str) {
 }
 
 fs::path qstringToBoostPath(const QString &path) {
+#ifdef NO_BOOST_FILESYSTEM
+    return fs::path(path.toStdString());
+#else
     return fs::path(path.toStdString(), utf8);
+#endif
 }
 
 QString boostPathToQString(const fs::path &path) {
+#ifdef NO_BOOST_FILESYSTEM
+    return QString::fromStdString(path.string());
+#else
     return QString::fromStdString(path.string(utf8));
+#endif
 }
 
 QString formatDurationStr(int secs) {

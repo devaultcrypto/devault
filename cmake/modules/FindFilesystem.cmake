@@ -14,13 +14,6 @@ Options
 
 The ``COMPONENTS`` argument to this module supports the following values:
 
-.. find-component:: Experimental
-    :name: fs.Experimental
-
-    Allows the module to find the "experimental" Filesystem TS version of the
-    Filesystem library. This is the library that should be used with the
-    ``std::experimental::filesystem`` namespace.
-
 .. find-component:: Final
     :name: fs.Final
 
@@ -29,9 +22,7 @@ The ``COMPONENTS`` argument to this module supports the following values:
 If no components are provided, behaves as if the
 :find-component:`fs.Final` component was specified.
 
-If both :find-component:`fs.Experimental` and :find-component:`fs.Final` are
-provided, first looks for ``Final``, and falls back to ``Experimental`` in case
-of failure. If ``Final`` is found, :imp-target:`std::filesystem` and all
+If ``Final`` is found, :imp-target:`std::filesystem` and all
 :ref:`variables <fs.variables>` will refer to the ``Final`` version.
 
 
@@ -58,11 +49,6 @@ Imported Targets
 
 Variables
 *********
-
-.. variable:: CXX_FILESYSTEM_IS_EXPERIMENTAL
-
-    Set to ``TRUE`` when the :find-component:`fs.Experimental` version of C++
-    filesystem library was found, otherwise ``FALSE``.
 
 .. variable:: CXX_FILESYSTEM_HAVE_FS
 
@@ -121,48 +107,24 @@ endif()
 
 # Warn on any unrecognized components
 set(extra_components ${want_components})
-list(REMOVE_ITEM extra_components Final Experimental)
+list(REMOVE_ITEM extra_components Final)
 foreach(component IN LISTS extra_components)
     message(WARNING "Extraneous find_package component for Filesystem: ${component}")
 endforeach()
 
 # Detect which of Experimental and Final we should look for
-set(find_experimental TRUE)
 set(find_final TRUE)
 if(NOT "Final" IN_LIST want_components)
     set(find_final FALSE)
 endif()
-if(NOT "Experimental" IN_LIST want_components)
-    set(find_experimental FALSE)
-endif()
 
-if(find_final)
-    check_include_file_cxx("filesystem" _CXX_FILESYSTEM_HAVE_HEADER)
-    mark_as_advanced(_CXX_FILESYSTEM_HAVE_HEADER)
-    if(_CXX_FILESYSTEM_HAVE_HEADER)
-        # We found the non-experimental header. Don't bother looking for the
-        # experimental one.
-        set(find_experimental FALSE)
-    endif()
-else()
-    set(_CXX_FILESYSTEM_HAVE_HEADER FALSE)
-endif()
-
-if(find_experimental)
-    check_include_file_cxx("experimental/filesystem" _CXX_FILESYSTEM_HAVE_EXPERIMENTAL_HEADER)
-    mark_as_advanced(_CXX_FILESYSTEM_HAVE_EXPERIMENTAL_HEADER)
-else()
-    set(_CXX_FILESYSTEM_HAVE_EXPERIMENTAL_HEADER FALSE)
-endif()
+check_include_file_cxx("filesystem" _CXX_FILESYSTEM_HAVE_HEADER)
+mark_as_advanced(_CXX_FILESYSTEM_HAVE_HEADER)
 
 if(_CXX_FILESYSTEM_HAVE_HEADER)
     set(_have_fs TRUE)
     set(_fs_header filesystem)
     set(_fs_namespace std::filesystem)
-elseif(_CXX_FILESYSTEM_HAVE_EXPERIMENTAL_HEADER)
-    set(_have_fs TRUE)
-    set(_fs_header experimental/filesystem)
-    set(_fs_namespace std::experimental::filesystem)
 else()
     set(_have_fs FALSE)
 endif()
@@ -176,13 +138,16 @@ set(_found FALSE)
 if(CXX_FILESYSTEM_HAVE_FS)
     # We have some filesystem library available. Do link checks
     string(CONFIGURE [[
-        #include <@CXX_FILESYSTEM_HEADER@>
+        #include <filesystem>
 
         int main() {
-            auto cwd = @CXX_FILESYSTEM_NAMESPACE@::current_path();
+            auto cwd = std::filesystem::current_path();
             return static_cast<int>(cwd.string().size());
         }
     ]] code @ONLY)
+
+
+    set(CMAKE_REQUIRED_FLAGS "-std=c++17")
 
     # Try to compile a simple filesystem program without any linker flags
     check_cxx_source_compiles("${code}" CXX_FILESYSTEM_NO_LINK_NEEDED)

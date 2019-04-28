@@ -179,8 +179,15 @@ add_subdirectory(config)
 # libraries
 add_subdirectory(crypto)
 
-#find_package(bzip2)
-#find_package(lz4)
+# Boost packages required (Later check for and replace with std::filesystem
+# but currently not working with any compilers)
+find_package(Filesystem)
+if (Filesystem_FOUND)
+  message(STATUS "Found std::filesystem , adding define NO_BOOST_FILESYSTEM")
+  add_definitions("-DNO_BOOST_FILESYSTEM")
+else()
+  set(BOOST_PACKAGES_REQUIRED filesystem)
+endif()
 
 # Can change to LevelDB if needed
 if (BUILD_ROCKSDB)
@@ -287,10 +294,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_compile_definitions(util PUBLIC BOOST_THREAD_USE_LIB)
 endif()
 
-# Boost packages required (Later check for and replace with std::filesystem
-# but currently not working with any compilers)
-set(BOOST_PACKAGES_REQUIRED filesystem)
-
 function(prepend var prefix)
 	set(listVar "")
 	foreach(f ${ARGN})
@@ -299,9 +302,16 @@ function(prepend var prefix)
 	set(${var} "${listVar}" PARENT_SCOPE)
 endfunction(prepend)
 
-prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
-find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
-target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL ${BOOST_LIBRARIES})
+if (Filesystem_FOUND)
+  # Still need Boost header files, but no linkage
+  find_package(Boost 1.58)
+  target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL std::filesystem)
+else()
+  prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
+  find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL ${BOOST_LIBRARIES})
+endif()
+
 
 # Make sure boost uses std::atomic (it doesn't before 1.63)
 target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_ATOMIC)
