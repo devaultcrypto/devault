@@ -29,6 +29,9 @@
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
 
+#include <interfaces/handler.h>
+#include <interfaces/node.h>
+
 #include <QDebug>
 #include <QSet>
 #include <QTimer>
@@ -37,19 +40,18 @@
 
 WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet,
                          interfaces::Node &node,
-                         const PlatformStyle *platformStyle, CWallet *_wallet,
+                         const PlatformStyle *platformStyle,
                          OptionsModel *_optionsModel, QObject *parent)
     : QObject(parent), m_wallet(std::move(wallet)), m_node(node), 
-      cwallet(_wallet), optionsModel(_optionsModel), addressTableModel(nullptr),
+      optionsModel(_optionsModel), addressTableModel(nullptr),
       transactionTableModel(nullptr), recentRequestsTableModel(nullptr), 
       cachedEncryptionStatus(Unencrypted), cachedNumBlocks(0) {
     fHaveWatchOnly = m_wallet->haveWatchOnly();
     fForceCheckBalanceChanged = false;
 
     addressTableModel = new AddressTableModel(this);
-    transactionTableModel =
-        new TransactionTableModel(platformStyle, cwallet, this);
-    recentRequestsTableModel = new RecentRequestsTableModel(cwallet, this);
+    transactionTableModel = new TransactionTableModel(platformStyle, this);
+    recentRequestsTableModel = new RecentRequestsTableModel(this);
 
     // This timer will be fired repeatedly to update the balance
     pollTimer = new QTimer(this);
