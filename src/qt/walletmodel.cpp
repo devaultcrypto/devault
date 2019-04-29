@@ -46,7 +46,7 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet,
     fHaveWatchOnly = m_wallet->haveWatchOnly();
     fForceCheckBalanceChanged = false;
 
-    addressTableModel = new AddressTableModel(cwallet, this);
+    addressTableModel = new AddressTableModel(this);
     transactionTableModel =
         new TransactionTableModel(platformStyle, cwallet, this);
     recentRequestsTableModel = new RecentRequestsTableModel(cwallet, this);
