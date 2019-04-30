@@ -374,7 +374,7 @@
     </message>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
         <source>Options:</source>
         <translation>هەڵبژاردنەکان:</translation>

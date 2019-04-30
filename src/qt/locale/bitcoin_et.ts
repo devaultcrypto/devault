@@ -1732,7 +1732,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
         <source>Options:</source>
         <translation>Valikud:</translation>
@@ -1758,7 +1758,7 @@
         <translation>Tööta taustal ning aktsepteeri käsklusi</translation>
     </message>
     <message>
-        <source>Bitcoin ABC</source>
+        <source>DeVault</source>
         <translation>Bitcoini ABC</translation>
     </message>
     <message>

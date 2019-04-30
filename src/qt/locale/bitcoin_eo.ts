@@ -1312,7 +1312,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
         <source>Options:</source>
         <translation>Agordoj:</translation>
@@ -1338,7 +1338,7 @@
         <translation>Ruli fone kiel demono kaj akcepti komandojn</translation>
     </message>
     <message>
-        <source>Bitcoin ABC</source>
+        <source>DeVault</source>
         <translation>ABC Bitmono</translation>
     </message>
     <message>

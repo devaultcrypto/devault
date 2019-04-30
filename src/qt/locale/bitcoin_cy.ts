@@ -478,13 +478,13 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
         <source>Options:</source>
         <translation>Opsiynau:</translation>
     </message>
     <message>
-        <source>Bitcoin ABC</source>
+        <source>DeVault</source>
         <translation>ABC Bitcoin</translation>
     </message>
     <message>

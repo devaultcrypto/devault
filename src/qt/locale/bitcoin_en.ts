@@ -3884,7 +3884,7 @@
     </message>
 </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
         <location filename="../bitcoinstrings.cpp" line="+507"/>
         <source>Options:</source>
@@ -3972,8 +3972,8 @@
     </message>
     <message>
         <location line="-594"/>
-        <source>Bitcoin ABC</source>
-        <translation type="unfinished">Bitcoin ABC</translation>
+        <source>DeVault</source>
+        <translation type="unfinished">DeVault</translation>
     </message>
     <message>
         <location line="+1"/>

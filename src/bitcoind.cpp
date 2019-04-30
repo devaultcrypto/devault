@@ -31,11 +31,10 @@
  *
  * \section intro_sec Introduction
  *
- * This is the developer documentation of Bitcoin ABC
- * (https://www.bitcoinabc.org/). Bitcoin ABC is a client for the digital
- * currency called Bitcoin Cash (https://www.bitcoincash.org/), which enables
- * instant payments to anyone, anywhere in the world. Bitcoin Cash uses
- * peer-to-peer technology to operate with no central authority: managing
+ * This is the developer documentation of DeVault
+ * (https://www.devault.cc/). DeVault Core is a client for the digital
+ * currency called Devault, which enables, instant payments to anyone, anywhere in the world.
+ * DeVault uses peer-to-peer technology to operate with no central authority: managing
  * transactions and issuing money are carried out collectively by the network.
  *
  * The software is a community-driven open source project, released under the
@@ -107,7 +106,7 @@ bool AppInit(int argc, char *argv[]) {
     //
     // Parameters
     //
-    // If Qt is used, parameters/bitcoin.conf are parsed in qt/bitcoin.cpp's
+    // If Qt is used, parameters/devault.conf are parsed in qt/bitcoin.cpp's
     // main()
     gArgs.ParseParameters(argc, argv);
 

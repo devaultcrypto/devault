@@ -500,6 +500,6 @@ Alihkan fail data ke dalam tab semasa</translation>
     </message>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     </context>
 </TS>

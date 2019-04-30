@@ -59,7 +59,7 @@
     <name>BitcoinGUI</name>
     <message>
         <source>Bitcoin</source>
-        <translation>Bitcoin ABC</translation>
+        <translation>DeVault</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -226,14 +226,14 @@
     </message>
     </context>
 <context>
-    <name>bitcoin-abc</name>
+    <name>devault-core</name>
     <message>
-        <source>Bitcoin ABC</source>
-        <translation>Bitcoin ABC</translation>
+        <source>DeVault</source>
+        <translation>DeVault</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
-        <translation>bitcoin-abc</translation>
+        <translation>devault-core</translation>
     </message>
     <message>
         <source>Information</source>

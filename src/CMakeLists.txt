@@ -240,7 +240,7 @@ source_group("ScriptHeaders" FILES ${SCRIPT_HEADERS})
 file(GLOB SUPPORT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/support/*.h ${CMAKE_CURRENT_SOURCE_DIR}/support/allocators/*.h)
 source_group("SupportHeaders" FILES ${SUPPORT_HEADERS})
 
-# Because the Bitcoin ABc source code is disorganised, we
+# Because the DeVault source code is disorganised, we
 # end up with a bunch of libraries without any aparent
 # cohesive structure. This is inherited from Bitcoin Core
 # and reflecting this.

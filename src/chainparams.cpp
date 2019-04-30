@@ -147,7 +147,7 @@ public:
         // we'll fall back to using them as a oneshot if they dont support the
         // service bits we want, but we should get them updated to support all
         // service bits wanted by any release ASAP to avoid it where possible.
-        // Bitcoin ABC seeder
+        // DeVault seeder
         vSeeds.emplace_back("seed.devault.com");
 
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
