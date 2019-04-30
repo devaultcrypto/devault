@@ -24,6 +24,7 @@ option(BUILD_BENCH "Build benchmark code" OFF)
 option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" ON)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
+option(ENABLE_REDUCE_EXPORTS "Reduce the amount of exported symbols" OFF)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -36,6 +37,7 @@ add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
 add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
 add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
 add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
+add_feature_info(WITH_REDUCED_EXPORTS ENABLE_REDUCE_EXPORTS "Reduce amount of exported symbols")
 
 set(CMAKE_REQUIRED_QUIET true)
 
@@ -74,6 +76,20 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 	# Build all static so there is no dll file to distribute.
 	add_compiler_flag(-static)
+endif()
+
+if(ENABLE_REDUCE_EXPORTS)
+	# Default visibility is set by CMAKE_<LANG>_VISIBILITY_PRESET, but this
+	# doesn't tell if the visibility set is effective.
+	# Check if the flag -fvisibility=hidden is supported, as using the hidden
+	# visibility is a requirement to reduce exports.
+	check_compiler_flag(HAS_CXX_FVISIBILITY CXX -fvisibility=hidden)
+	if(NOT HAS_CXX_FVISIBILITY)
+		message(FATAL_ERROR "Cannot set default symbol visibility. Use -DENABLE_REDUCE_EXPORTS=OFF.")
+	endif()
+
+	# Also hide symbols from static libraries
+	add_linker_flag(-Wl,--exclude-libs,ALL)
 endif()
 
 # All windows code is PIC, forcing it on just adds useless compile warnings
