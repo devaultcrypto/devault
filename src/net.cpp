@@ -1524,7 +1524,7 @@ void CConnman::ThreadSocketHandler() {
                               nTime - pnode->nLastSend);
                     pnode->fDisconnect = true;
                 } else if (nTime - pnode->nLastRecv >
-                           (pnode->nVersion > LAUNCH_VERSION ? TIMEOUT_INTERVAL
+                           (pnode->nVersion > BIP0031_VERSION ? TIMEOUT_INTERVAL
                                                               : 90 * 60)) {
                     LogPrintf("socket receive timeout: %is\n",
                               nTime - pnode->nLastRecv);
