@@ -201,7 +201,7 @@ public:
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 6 * 60 * 60; // 6 hours
         consensus.nPowTargetSpacing = 1 * 1; // 1 second
-        consensus.nBlocksPerYear = 30 * 24 * 365.25;
+        consensus.nBlocksPerYear = 2400; // 30 * 24 * 365.25;
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -264,7 +264,7 @@ public:
 
         // Rewards
         consensus.nPerCentPerYear = {1500,12,9,7,5};
-        consensus.nMinRewardBlocks = 2000; // consensus.nBlocksPerYear/12; // every month
+        consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward =  50 * COIN;
         consensus.nMaxReward = 62500 * COIN;
