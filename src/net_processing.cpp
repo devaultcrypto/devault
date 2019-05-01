@@ -1045,7 +1045,7 @@ void PeerLogicValidation::NewPoWValidBlock(
         AssertLockHeld(cs_main);
 
         // TODO: Avoid the repeated-serialization here
-        if (pnode->nVersion < INVALID_CB_NO_BAN_VERSION || pnode->fDisconnect) {
+        if (pnode->nVersion < LAUNCH_VERSION || pnode->fDisconnect) {
             return;
         }
         ProcessBlockAvailability(pnode->GetId());
@@ -1212,7 +1212,7 @@ static void RelayAddress(const CAddress &addr, bool fReachable,
     assert(nRelayNodes <= best.size());
 
     auto sortfunc = [&best, &hasher, nRelayNodes](CNode *pnode) {
-        if (pnode->nVersion >= CADDR_TIME_VERSION) {
+        if (pnode->nVersion >= LAUNCH_VERSION) {
             uint64_t hashKey =
                 CSipHasher(hasher).Write(pnode->GetId()).Finalize();
             for (unsigned int i = 0; i < nRelayNodes; i++) {
@@ -1786,7 +1786,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     if (!(pfrom->GetLocalServices() & NODE_BLOOM) &&
         (strCommand == NetMsgType::FILTERLOAD ||
          strCommand == NetMsgType::FILTERADD)) {
-        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
+        if (pfrom->nVersion >= LAUNCH_VERSION) {
             LOCK(cs_main);
             Misbehaving(pfrom, 100, "no-bloom-version");
             return false;
@@ -1977,7 +1977,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             }
 
             // Get recent addresses
-            if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION ||
+            if (pfrom->fOneShot || pfrom->nVersion >= LAUNCH_VERSION ||
                 connman->GetAddressCount() < 1000) {
                 connman->PushMessage(
                     pfrom,
@@ -2038,14 +2038,14 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                          : ""));
         }
 
-        if (pfrom->nVersion >= SENDHEADERS_VERSION) {
+        if (pfrom->nVersion >= LAUNCH_VERSION) {
             // Tell our peer we prefer to receive headers rather than inv's
             // We send this to non-NODE NETWORK peers as well, because even
             // non-NODE NETWORK peers can announce blocks (such as pruning
             // nodes)
             connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SENDHEADERS));
         }
-        if (pfrom->nVersion >= SHORT_IDS_BLOCKS_VERSION) {
+        if (pfrom->nVersion >= LAUNCH_VERSION) {
             // Tell our peer we are willing to provide version 1 or 2
             // cmpctblocks. However, we do not request new block announcements
             // using cmpctblock messages. We send this to non-NODE NETWORK peers
@@ -2071,7 +2071,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
         vRecv >> vAddr;
 
         // Don't want addr from older versions unless seeding
-        if (pfrom->nVersion < CADDR_TIME_VERSION &&
+        if (pfrom->nVersion < LAUNCH_VERSION &&
             connman->GetAddressCount() > 1000) {
             return true;
         }
@@ -3126,7 +3126,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
     }
 
     else if (strCommand == NetMsgType::PING) {
-        if (pfrom->nVersion > BIP0031_VERSION) {
+        if (pfrom->nVersion > LAUNCH_VERSION) {
             uint64_t nonce = 0;
             vRecv >> nonce;
             // Echo the message back with the nonce. This allows for two useful
@@ -3707,7 +3707,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
         }
         pto->fPingQueued = false;
         pto->nPingUsecStart = GetTimeMicros();
-        if (pto->nVersion > BIP0031_VERSION) {
+        if (pto->nVersion > LAUNCH_VERSION) {
             pto->nPingNonceSent = nonce;
             connman->PushMessage(pto, msgMaker.Make(NetMsgType::PING, nonce));
         } else {
@@ -4275,7 +4275,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
     //
     // We don't want white listed peers to filter txs to us if we have
     // -whitelistforcerelay
-    if (pto->nVersion >= FEEFILTER_VERSION &&
+    if (pto->nVersion >= LAUNCH_VERSION &&
         gArgs.GetBoolArg("-feefilter", DEFAULT_FEEFILTER) &&
         !(pto->fWhitelisted && gArgs.GetBoolArg("-whitelistforcerelay",
                                                 DEFAULT_WHITELISTFORCERELAY))) {
