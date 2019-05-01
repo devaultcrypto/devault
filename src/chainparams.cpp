@@ -263,8 +263,8 @@ public:
         //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
 
         // Rewards
-        consensus.nPerCentPerYear = {15,12,9,7,5};
-        consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
+        consensus.nPerCentPerYear = {1500,12,9,7,5};
+        consensus.nMinRewardBlocks = 2000; // consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward =  50 * COIN;
         consensus.nMaxReward = 62500 * COIN;
