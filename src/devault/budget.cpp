@@ -24,8 +24,8 @@ struct BudgetStruct {
 // Consts until change is required
 // Reward Address & Percentage
 const BudgetStruct Payouts[] = {
-    {"devault:qryvj8ezelgrgmr22myc7suwnn7pal9a0vtvtwfr96", "dvtest:qr7ykrf6f4l0nzfqxm9zjjkjp7u4gqc5pqq0z0xgkv", "Community",15},
-    {"devault:qpd3d3ufpcwa2n6ghqnmlrcw62syh68cjvc98u84ws", "dvtest:qp8vn04p90perjcynnp3nml659qg05h72czdpassen", "CoreDevs", 10},
+    {"devault:qryvj8ezelgrgmr22myc7suwnn7pal9a0vtvtwfr96", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community",15},
+    {"devault:qpd3d3ufpcwa2n6ghqnmlrcw62syh68cjvc98u84ws", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
     {"devault:qz4nj7c6x5uf5ar6rqjj602eyux26t0ftuarvygttl", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs", 5},
     {"devault:qzeyacx0xhvpd0zq7neyywed0qs4yfh2psr36ntaep", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDevs",5},
     {"devault:qzjjtr6pxrkh69ugsvjcwj4h7dexvx72ayh3vkgrwt", "dvtest:qqltstfypfuftlgrvqdfml4js0y3yxdpgya2krkhk5", "Marketing",5},
