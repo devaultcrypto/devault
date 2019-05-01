@@ -24,6 +24,7 @@ class CColdRewards {
   int64_t nMinBlocks;
   Amount nMinBalance;
   Amount nMaxReward;
+  Amount nMinReward;
 
 
   public:

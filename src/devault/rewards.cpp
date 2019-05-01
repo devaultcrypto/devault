@@ -37,6 +37,7 @@ void CColdRewards::Setup(const Consensus::Params &consensusParams) {
   nMinBlocks = consensusParams.nMinRewardBlocks;
   nMinBalance = consensusParams.nMinRewardBalance;
   nMaxReward = consensusParams.nMaxReward;
+  nMinReward = consensusParams.nMinReward;
 }
 
 bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew) {
@@ -218,8 +219,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
 
     // get Height (last reward)
     if (the_reward.IsActive()) {
-      if (nHeight < minHeight) { // Later change to :  
-        //if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
+      if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
         HeightDiff = Height - nHeight;
         if (HeightDiff > nMinBlocks) { 
           balance = the_reward.GetValue();
@@ -227,7 +227,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
           LogPrint(BCLog::COLD, "%s: Got coin from Height %d, with balance = %d COINS, Height Diff = %d(%d), reward = %d\n",
                    __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
           // Check reward amount to make sure it's > min
-          if (reward > Amount()) {
+          if (reward >= nMinReward) {
             // This is one of the oldest unrewarded UTXO with a + reward value
             // But there could be other valid UTXOs at same Height and same RewardValue
             if (reward < nMaxReward)

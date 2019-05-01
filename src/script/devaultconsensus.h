@@ -60,9 +60,7 @@ enum {
     devaultconsensus_SCRIPT_FLAGS_VERIFY_ALL =
         devaultconsensus_SCRIPT_FLAGS_VERIFY_P2SH |
         devaultconsensus_SCRIPT_FLAGS_VERIFY_DERSIG |
-        devaultconsensus_SCRIPT_FLAGS_VERIFY_NULLDUMMY |
-        devaultconsensus_SCRIPT_FLAGS_VERIFY_CHECKLOCKTIMEVERIFY |
-        devaultconsensus_SCRIPT_FLAGS_VERIFY_CHECKSEQUENCEVERIFY,
+        devaultconsensus_SCRIPT_FLAGS_VERIFY_NULLDUMMY
 };
 
 /// Returns 1 if the input nIn of the serialized transaction pointed to by txTo
