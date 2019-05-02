@@ -268,6 +268,7 @@ add_library(util
 	utilmoneystr.cpp
 	utilstrencodings.cpp
 	utiltime.cpp
+  ui_interface.cpp # for InitError in fs_util
 )
 
 target_compile_definitions(util PUBLIC HAVE_CONFIG_H)
@@ -413,7 +414,6 @@ add_library(server
 	torcontrol.cpp
 	txdb.cpp
 	txmempool.cpp
-	ui_interface.cpp
 	validation.cpp
 	validationinterface.cpp
 )

@@ -61,9 +61,9 @@
 
 #ifndef WIN32
 #include <csignal>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
-
-#include <boost/interprocess/sync/file_lock.hpp>
 
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
@@ -1732,38 +1732,6 @@ bool AppInitParameterInteraction(Config &config, RPCServer &rpcServer) {
 
     nMaxTipAge = gArgs.GetArg("-maxtipage", DEFAULT_MAX_TIP_AGE);
 
-    return true;
-}
-
-static bool LockDataDirectory(bool probeOnly) {
-    std::string strDataDir = GetDataDir().string();
-
-    // Make sure only a single Bitcoin process is using the data directory.
-    fs::path pathLockFile = GetDataDir() / ".lock";
-    // empty lock file; created if it doesn't exist.
-    FILE *file = fsbridge::fopen(pathLockFile, "a");
-    if (file) {
-        fclose(file);
-    }
-
-    try {
-        static boost::interprocess::file_lock lock(
-            pathLockFile.string().c_str());
-        if (!lock.try_lock()) {
-            return InitError(
-                strprintf(_("Cannot obtain a lock on data directory %s. %s is "
-                            "probably already running."),
-                          strDataDir, _(PACKAGE_NAME)));
-        }
-        if (probeOnly) {
-            lock.unlock();
-        }
-    } catch (const boost::interprocess::interprocess_exception &e) {
-        return InitError(strprintf(_("Cannot obtain a lock on data directory "
-                                     "%s. %s is probably already running.") +
-                                       " %s.",
-                                   strDataDir, _(PACKAGE_NAME), e.what()));
-    }
     return true;
 }
 

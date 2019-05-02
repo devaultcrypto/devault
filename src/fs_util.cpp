@@ -10,6 +10,8 @@
 #include "fs_util.h"
 #include "util.h"
 #include "chainparamsbase.h"
+#include "ui_interface.h"
+#include <boost/interprocess/sync/file_lock.hpp>
 
 #ifndef WIN32
 // for posix_fallocate
@@ -378,3 +380,84 @@ void SetupEnvironment() {
 }
 
 
+
+/**
+ * A map that contains all the currently held directory locks. After successful
+ * locking, these will be held here until the global destructor cleans them up
+ * and thus automatically unlocks them, or ReleaseDirectoryLocks is called.
+ */
+static std::map<std::string, std::unique_ptr<boost::interprocess::file_lock>>
+    dir_locks;
+/** Mutex to protect dir_locks. */
+static std::mutex cs_dir_locks;
+
+bool LockDirectory(const fs::path &directory, const std::string lockfile_name,
+                   bool probe_only) {
+    std::lock_guard<std::mutex> ulock(cs_dir_locks);
+    fs::path pathLockFile = directory / lockfile_name;
+
+    // If a lock for this directory already exists in the map, don't try to
+    // re-lock it
+    if (dir_locks.count(pathLockFile.string())) {
+        return true;
+    }
+
+    // Create empty lock file if it doesn't exist.
+    FILE *file = fsbridge::fopen(pathLockFile, "a");
+    if (file) {
+        fclose(file);
+    }
+
+    try {
+        auto lock = std::make_unique<boost::interprocess::file_lock>(
+            pathLockFile.string().c_str());
+        if (!lock->try_lock()) {
+            return false;
+        }
+        if (!probe_only) {
+            // Lock successful and we're not just probing, put it into the map
+            dir_locks.emplace(pathLockFile.string(), std::move(lock));
+        }
+    } catch (const boost::interprocess::interprocess_exception &e) {
+        return error("Error while attempting to lock directory %s: %s",
+                     directory.string(), e.what());
+    }
+    return true;
+}
+
+void ReleaseDirectoryLocks() {
+    std::lock_guard<std::mutex> ulock(cs_dir_locks);
+    dir_locks.clear();
+}
+
+bool LockDataDirectory(bool probeOnly) {
+    std::string strDataDir = GetDataDir().string();
+
+    // Make sure only a single Bitcoin process is using the data directory.
+    fs::path pathLockFile = GetDataDir() / ".lock";
+    // empty lock file; created if it doesn't exist.
+    FILE *file = fsbridge::fopen(pathLockFile, "a");
+    if (file) {
+        fclose(file);
+    }
+
+    try {
+        static boost::interprocess::file_lock lock(
+            pathLockFile.string().c_str());
+        if (!lock.try_lock()) {
+            return InitError(
+                strprintf(_("Cannot obtain a lock on data directory %s. %s is "
+                            "probably already running."),
+                          strDataDir, _(PACKAGE_NAME)));
+        }
+        if (probeOnly) {
+            lock.unlock();
+        }
+    } catch (const boost::interprocess::interprocess_exception &e) {
+        return InitError(strprintf(_("Cannot obtain a lock on data directory "
+                                     "%s. %s is probably already running.") +
+                                       " %s.",
+                                   strDataDir, _(PACKAGE_NAME), e.what()));
+    }
+    return true;
+}

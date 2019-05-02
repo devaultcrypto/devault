@@ -294,7 +294,6 @@ libbitcoin_server_a_SOURCES = \
   torcontrol.cpp \
   txdb.cpp \
   txmempool.cpp \
-  ui_interface.cpp \
   validation.cpp \
   validationinterface.cpp \
   $(BITCOIN_CORE_H)
@@ -472,6 +471,7 @@ libbitcoin_util_a_SOURCES = \
   support/cleanse.cpp \
   sync.cpp \
   threadinterrupt.cpp \
+  ui_interface.cpp \
   uint256.cpp \
   uint256.h \
   util.cpp \
