@@ -321,7 +321,6 @@ target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_
 add_library(common
   ${HEADERS}
 	amount.cpp
-	base58.cpp
 	cashaddr.cpp
 	cashaddrenc.cpp
 	chainparams.cpp

@@ -33,7 +33,6 @@ BITCOIN_TESTS =\
   test/arith_uint256_tests.cpp \
   test/avalanche_tests.cpp \
   test/base32_tests.cpp \
-  test/base58_tests.cpp \
   test/base64_tests.cpp \
   test/bip32_tests.cpp \
   test/blockcheck_tests.cpp \

@@ -2,7 +2,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "base58.h"
 #include "cashaddrenc.h"
 #include "chain.h"
 #include "config.h"
@@ -510,6 +509,7 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
     return NullUniValue;
 }
 
+#ifdef IMPORTWALLET_OK
 UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -646,6 +646,7 @@ UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
 
     return NullUniValue;
 }
+#endif
 
 UniValue dumpprivkey(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
@@ -693,16 +694,10 @@ UniValue dumpprivkey(const Config &config, const JSONRPCRequest &request) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " +
                                                  strAddress + " is not known");
     }
-    
-    
-    std::vector<uint8_t> vch = Params().Base58Prefix(CChainParams::SECRET_KEY);
-    vch.insert(vch.end(), vchSecret.begin(), vchSecret.end());
-    if (vchSecret.IsCompressed()) vch.push_back(1);
-    std::string base58string = EncodeBase58Check(vch);
+        
     std::string bech32string = EncodeSecret(vchSecret);
     
     UniValue keys(UniValue::VOBJ);
-    keys.pushKV("base58",base58string);
     keys.pushKV("bech32",bech32string);
     return keys;
 }
@@ -719,8 +714,7 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
             "\nDumps all wallet keys in a human-readable format to a "
             "server-side file. This does not allow overwriting existing "
             "files.\n"
-            "Imported scripts are included in the dumpsfile, but corresponding "
-            "addresses may not be added automatically by importwallet.\n"
+            "Imported scripts are included in the dumpsfile\n"
             "Note that if your wallet contains keys which are not derived from "
             "your HD seed (e.g. imported keys), these are not covered by\n"
             "only backing up the seed itself, and must be backed up too (e.g. "
@@ -812,6 +806,7 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     CExtKey masterKey;
     masterKey.SetMaster(&vchSeed[0], vchSeed.size());
 
+    /*
     CBitcoinExtKey b58extkey;
     b58extkey.SetKey(masterKey);
 
@@ -823,7 +818,8 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     CBitcoinExtPubKey b58extpubkey;
     b58extpubkey.SetKey(masterPubkey);
     file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
-
+*/
+      
     for (size_t i = 0; i < hdChain.CountAccounts(); ++i) {
         CHDAccount acc;
         if(hdChain.GetAccount(i, acc)) {
@@ -1438,7 +1434,9 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "dumpwallet",               dumpwallet,               {"filename"} },
     { "wallet",             "importmulti",              importmulti,              {"requests","options"} },
     { "wallet",             "importprivkey",            importprivkey,            {"privkey","label","rescan"} },
+#ifdef IMPORTWALLET_OK    
     { "wallet",             "importwallet",             importwallet,             {"filename"} },
+#endif
     { "wallet",             "importaddress",            importaddress,            {"address","label","rescan","p2sh"} },
     { "wallet",             "importprunedfunds",        importprunedfunds,        {"rawtransaction","txoutproof"} },
     { "wallet",             "importpubkey",             importpubkey,             {"pubkey","label","rescan"} },
