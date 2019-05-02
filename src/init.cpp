@@ -1315,7 +1315,7 @@ void InitLogging() {
 
     fLogIPs = gArgs.GetBoolArg("-logips", DEFAULT_LOGIPS);
 
-    LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    LogPrintf("\n\n");
     LogPrintf("%s version %s\n", CLIENT_NAME, FormatFullVersion());
 }
 
