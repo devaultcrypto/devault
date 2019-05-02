@@ -241,11 +241,11 @@ public:
         nPruneAfterHeight = 1000;
 
         genesis =
-            CreateGenesisBlock(1553632924, 1894180935, 0x1d00ffff, 1, 50 * COIN);
+            CreateGenesisBlock(1556739176, 2318908127, 0x1d00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock ==
-               uint256S("00000000484cc373e7ec23902e51286bb0552d0ddae873e4be947f"
-                        "3761889c0e"));
+               uint256S("00000000afe7906457b6aaf8ffd84934746a07769fb12e45436ee6"
+                        "064efdc85e"));
         assert(genesis.hashMerkleRoot ==
                uint256S("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b"
                         "7afdeda33b"));
@@ -275,14 +275,14 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {0, uint256S("00000000484cc373e7ec23902e51286bb0552d0ddae873e4be947f"
-                               "3761889c0e")},
+                {0, uint256S("00000000afe7906457b6aaf8ffd84934746a07769fb12e45436ee6"
+                               "064efdc85e")},
             }};
 
         // Data as of block
         // 000000000005b07ecf85563034d13efd81c1a29e47e22b20f4fc6919d5b09cd6
         // (height 1223263)
-        chainTxData = ChainTxData{1555682037, 85317, 1};
+        chainTxData = ChainTxData{1556765775, 100, 1};
     }
 };
 
