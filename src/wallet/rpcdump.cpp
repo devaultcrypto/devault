@@ -30,13 +30,6 @@
 #include <iostream>
 #include <iomanip> // for get_time
 
-int64_t static DecodeDumpTime(const std::string& str) {
-  std::istringstream iss(str);
-  std::tm tm = {};
-  iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
-  auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
-  return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
-}
 
 static std::string EncodeDumpString(const std::string &str) {
     std::stringstream ret;
@@ -510,6 +503,14 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
 }
 
 #ifdef IMPORTWALLET_OK
+int64_t static DecodeDumpTime(const std::string& str) {
+  std::istringstream iss(str);
+  std::tm tm = {};
+  iss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
+  auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+  return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+}
+
 UniValue importwallet(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
