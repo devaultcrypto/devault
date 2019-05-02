@@ -26,6 +26,9 @@ void FileCommit(FILE *file);
 bool TruncateFile(FILE *file, unsigned int length);
 void AllocateFileRange(FILE *file, unsigned int offset, unsigned int length);
 void SetupEnvironment();
+bool LockDirectory(const fs::path &directory, const std::string lockfile_name, bool probe_only);
+void ReleaseDirectoryLocks();
+bool LockDataDirectory(bool probeOnly);
 
 // in validation.cpp
 /** Translation to a filesystem path. */
