@@ -77,9 +77,7 @@ using fs::ofstream;
 #include <QThread>
 #include <QUrlQuery>
 
-#if QT_VERSION >= 0x50200
 #include <QFontDatabase>
-#endif
 
 
 #ifndef NO_BOOST_FILESYSTEM
@@ -112,13 +110,7 @@ QString dateTimeStr(qint64 nTime) {
 }
 
 QFont fixedPitchFont() {
-#if QT_VERSION >= 0x50200
     return QFontDatabase::systemFont(QFontDatabase::FixedFont);
-#else
-    QFont font("Monospace");
-    font.setStyleHint(QFont::Monospace);
-    return font;
-#endif
 }
 
 static std::string MakeAddrInvalid(std::string addr, const Config &config) {
