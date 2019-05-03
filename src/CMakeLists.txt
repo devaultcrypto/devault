@@ -306,11 +306,11 @@ endfunction(prepend)
 if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
   find_package(Boost 1.58)
-  target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL std::filesystem)
+  target_link_libraries(util univalue crypto OpenSSL::SSL std::filesystem)
 else()
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
   find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
-  target_link_libraries(util univalue crypto OpenSSL::Crypto OpenSSL::SSL ${BOOST_LIBRARIES})
+  target_link_libraries(util univalue crypto OpenSSL::SSL ${BOOST_LIBRARIES})
 endif()
 
 
