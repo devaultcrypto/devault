@@ -179,32 +179,6 @@ void UpdateTransaction(CMutableTransaction &tx, unsigned int nIn,
     tx.vin[nIn].scriptSig = data.scriptSig;
 }
 
-bool SignSignature(const CKeyStore &keystore, const CScript &fromPubKey,
-                   CMutableTransaction &txTo, unsigned int nIn,
-                   const Amount amount, SigHashType sigHashType) {
-    assert(nIn < txTo.vin.size());
-
-    CTransaction txToConst(txTo);
-    TransactionSignatureCreator creator(&keystore, &txToConst, nIn, amount,
-                                        sigHashType);
-
-    SignatureData sigdata;
-    bool ret = ProduceSignature(creator, fromPubKey, sigdata);
-    UpdateTransaction(txTo, nIn, sigdata);
-    return ret;
-}
-
-bool SignSignature(const CKeyStore &keystore, const CTransaction &txFrom,
-                   CMutableTransaction &txTo, unsigned int nIn,
-                   SigHashType sigHashType) {
-    assert(nIn < txTo.vin.size());
-    CTxIn &txin = txTo.vin[nIn];
-    assert(txin.prevout.GetN() < txFrom.vout.size());
-    const CTxOut &txout = txFrom.vout[txin.prevout.GetN()];
-
-    return SignSignature(keystore, txout.scriptPubKey, txTo, nIn, txout.nValue,
-                         sigHashType);
-}
 
 static std::vector<valtype> CombineMultisig(
     const CScript &scriptPubKey, const BaseSignatureChecker &checker,

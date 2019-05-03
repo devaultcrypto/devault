@@ -8,6 +8,7 @@
 #include "keystore.h"
 #include "serialize.h"
 #include "support/allocators/secure.h"
+#include "signals-cpp/signal.h"
 
 #include <atomic>
 
@@ -140,6 +141,7 @@ protected:
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
 
     CryptedKeyMap mapCryptedKeys;
+    CHDChain hdChain;
     
 public:
     CCryptoKeyStore()
@@ -156,7 +158,7 @@ public:
     bool GetKey(const CKeyID &address, CKey &keyOut) const override;
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
     std::set<CKeyID> GetKeys() const override;
-    bool GetHDChain(CHDChain& hdChainRet) const override;
+    bool GetHDChain(CHDChain& hdChainRet) const;
 
 
     /**

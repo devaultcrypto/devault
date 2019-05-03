@@ -1,19 +1,16 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
+// Copyright (c) 2019 DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_KEYSTORE_H
-#define BITCOIN_KEYSTORE_H
+#pragma once
 
 #include "key.h"
-#include "wallet/hdchain.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "sync.h"
-
-#include "signals-cpp/signal.h"
 
 /** A virtual base class for key stores */
 class CKeyStore {
@@ -62,7 +59,6 @@ protected:
     WatchKeyMap mapWatchKeys;
     ScriptMap mapScripts;
     WatchOnlySet setWatchOnly;
-    CHDChain hdChain;
 
 public:
     bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
@@ -80,12 +76,9 @@ public:
     bool RemoveWatchOnly(const CScript &dest) override;
     bool HaveWatchOnly(const CScript &dest) const override;
     bool HaveWatchOnly() const override;
-    virtual bool GetHDChain(CHDChain& hdChainRet) const;
 
 };
 
 typedef std::vector<uint8_t, secure_allocator<uint8_t>> CKeyingMaterial;
-typedef std::map<CKeyID, std::pair<CPubKey, std::vector<uint8_t>>>
-    CryptedKeyMap;
+typedef std::map<CKeyID, std::pair<CPubKey, std::vector<uint8_t>>>  CryptedKeyMap;
 
-#endif // BITCOIN_KEYSTORE_H

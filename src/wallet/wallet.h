@@ -645,9 +645,6 @@ private:
                          const CBlockIndex *pindex = nullptr,
                          int posInBlock = 0);
 
-    /* the HD chain data model (external chain counters) */
-    CHDChain hdChain;
-
     /* HD derive new child key (on internal or external chain) */
     void DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata &metadata,
                            CKey &secret, bool internal = false);
@@ -1177,7 +1174,8 @@ public:
     bool LoadHDPubKey(const CHDPubKey &hdPubKey);
     bool AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal);
     bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
-    bool SetCryptedHDChain(const CHDChain& chain, bool memonly);
+    bool SetCryptedHDChain(const CHDChain& chain);
+    bool SetAndStoreCryptedHDChain(const CHDChain& chain);
     bool GetDecryptedHDChain(CHDChain& hdChainRet);
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
   

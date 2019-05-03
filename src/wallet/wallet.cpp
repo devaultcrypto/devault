@@ -149,7 +149,8 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal) {
     // use HD key derivation since HD was enabled during wallet creation
     DeriveNewChildKey(walletdb, metadata, secret, internal);
     CPubKey pubkey = secret.GetPubKey();
-    assert(secret.VerifyPubKey(pubkey));
+    bool ok = secret.VerifyPubKey(pubkey);
+    assert(ok);
     return pubkey;
 }
 
@@ -195,7 +196,8 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata &metadata,
   secret = childKey.key;
   
   CPubKey pubkey = secret.GetPubKey();
-  assert(secret.VerifyPubKey(pubkey));
+  bool ok = (secret.VerifyPubKey(pubkey));
+  assert(ok);
   
   // store metadata
   mapKeyMetadata[pubkey.GetID()] = metadata;
@@ -211,14 +213,15 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata &metadata,
   else {
     acc.nExternalChainCounter = nChildIndex;
   }
-  
+
+  // hdChain always unencrypted
   if (!hdChain.SetAccount(nAccountIndex, acc))
     throw std::runtime_error(std::string(__func__) + ": SetAccount failed");
   
   // Save to DB
   if (IsCrypted()) {
-    if (!SetCryptedHDChain(hdChainCurrent, false))
-      throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
+    if (!SetAndStoreCryptedHDChain(hdChainCurrent))
+      throw std::runtime_error(std::string(__func__) + ": SetAndStoreCryptedHDChain failed");
   }
   else {
     if (!SetHDChain(hdChainCurrent))
@@ -680,7 +683,8 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey) {
       
         // Should not be Null since firstRun has set it up
         if (!hdChainCurrent.IsNull()) {
-          assert(EncryptHDChain(_vMasterKey));
+          bool ok = EncryptHDChain(_vMasterKey);
+          assert(ok);
         
           CHDChain hdChainCrypted;
           GetHDChain(hdChainCrypted);
@@ -690,7 +694,8 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey) {
           assert(hdChainCurrent.GetID() == hdChainCrypted.GetID());
           assert(hdChainCurrent.GetSeedHash() != hdChainCrypted.GetSeedHash());
         
-          assert(SetCryptedHDChain(hdChainCrypted, false));
+          ok = SetAndStoreCryptedHDChain(hdChainCrypted);
+          assert(ok);
         }
       
   }
@@ -730,9 +735,6 @@ bool CWallet::FinishEncryptWallet(const SecureString &strWalletPassphrase) {
 
 bool CWallet::CreateMasteyKey(const SecureString &strWalletPassphrase,
                               CKeyingMaterial& _vMasterKey) {
-    if (IsCrypted()) {
-        return false;
-    }
   
     _vMasterKey.resize(WALLET_CRYPTO_KEY_SIZE);
     GetStrongRandBytes(&_vMasterKey[0], WALLET_CRYPTO_KEY_SIZE);
@@ -1581,11 +1583,10 @@ CPubKey CWallet::GenerateNewHDMasterKey() {
 
 bool CWallet::SetHDChain(const CHDChain &chain) {
     LOCK(cs_wallet);
-  
+
     if (!CCryptoKeyStore::SetHDChain(chain))
       return false;
 
-    hdChain = chain;
     return true;
 }
 
@@ -4613,22 +4614,27 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
     return true;
 }
 
-bool CWallet::SetCryptedHDChain(const CHDChain& chain, bool memonly) {
+bool CWallet::SetAndStoreCryptedHDChain(const CHDChain& chain) {
     LOCK(cs_wallet);
+
+    if (!SetCryptedHDChain(chain)) return false;
     
-    if (!CCryptoKeyStore::SetCryptedHDChain(chain))
-        return false;
-    
-    if (!memonly) {
-        if (pwalletdbEncryption) {
-            if (!pwalletdbEncryption->WriteCryptedHDChain(chain))
-                throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
-        } else {
-            if (!CWalletDB(*dbw).WriteCryptedHDChain(chain))
-                throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
-        }
+    if (pwalletdbEncryption) {
+      if (!pwalletdbEncryption->WriteCryptedHDChain(chain))
+        throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
+    } else {
+      if (!CWalletDB(*dbw).WriteCryptedHDChain(chain))
+        throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
     }
     
     return true;
+}
+
+bool CWallet::SetCryptedHDChain(const CHDChain& chain) {
+  LOCK(cs_wallet);
+  if (!CCryptoKeyStore::SetCryptedHDChain(chain)) {
+        return false;
+  }
+  return true;
 }
 
