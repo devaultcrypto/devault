@@ -54,6 +54,8 @@ The DeVault repo's [root README](/README.md) contains relevant information on th
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
+- [devault.conf Configuration File](devault-conf.md)
+- [Files](files.md)	
 - [Files](files.md)
 - [Fuzz-testing](fuzzing.md)
 - [Reduce Traffic](reduce-traffic.md)
