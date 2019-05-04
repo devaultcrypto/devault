@@ -528,7 +528,7 @@ int CommandLineRPC(int argc, char *argv[]) {
                             errCode.get_int() == RPC_WALLET_NOT_SPECIFIED) {
                             strPrint += "\nTry adding "
                                         "\"-rpcwallet=<filename>\" option to "
-                                        "bitcoin-cli command line.";
+                                        "devault-cli command line.";
                         }
                     }
                 } else {

@@ -211,7 +211,7 @@ void Shutdown() {
     /// part of the way, for example if the data directory was found to be
     /// locked. Be sure that anything that writes files or flushes caches only
     /// does this if the respective module was initialized.
-    RenameThread("bitcoin-shutoff");
+    RenameThread("devault-shutoff");
     g_mempool.AddTransactionsUpdated(1);
   
     // prewards->DumpOrderedRewards(); if needed for debug
@@ -1066,7 +1066,7 @@ void CleanupBlockRevFiles() {
 }
 
 void ThreadImport(const Config &config, std::vector<fs::path> vImportFiles) {
-    RenameThread("bitcoin-loadblk");
+    RenameThread("devault-loadblk");
 
     {
         CImportingNow imp;

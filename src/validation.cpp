@@ -1590,7 +1590,7 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("bitcoin-scriptch");
+    RenameThread("devault-scriptch");
     scriptcheckqueue.Thread();
 }
 
