@@ -84,7 +84,7 @@ std::string HelpMessageCli() {
     strUsage += HelpMessageOpt(
         "-rpcwallet=<walletname>",
         _("Send RPC for non-default wallet on RPC server (argument is wallet "
-          "filename in bitcoind directory, required if bitcoind/-Qt runs with "
+          "filename in devaultd directory, required if devaultd/-Qt runs with "
           "multiple wallets)"));
 
     return strUsage;
@@ -121,14 +121,14 @@ static int AppInitRPC(int argc, char *argv[]) {
         if (!gArgs.IsArgSet("-version")) {
             strUsage +=
                 "\n" + _("Usage:") + "\n" +
-                "  bitcoin-cli [options] <command> [params]  " +
+                "  devault-cli [options] <command> [params]  " +
                 strprintf(_("Send command to %s"), _(PACKAGE_NAME)) + "\n" +
-                "  bitcoin-cli [options] -named <command> [name=value] ... " +
+                "  devault-cli [options] -named <command> [name=value] ... " +
                 strprintf(_("Send command to %s (with named arguments)"),
                           _(PACKAGE_NAME)) +
-                "\n" + "  bitcoin-cli [options] help                " +
+                "\n" + "  devault-cli [options] help                " +
                 _("List commands") + "\n" +
-                "  bitcoin-cli [options] help <command>      " +
+                "  devault-cli [options] help <command>      " +
                 _("Get help for a command") + "\n";
 
             strUsage += "\n" + HelpMessageCli();

@@ -579,7 +579,7 @@ static std::string FormatException(const std::exception *pex,
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(nullptr, pszModule, sizeof(pszModule));
 #else
-    const char *pszModule = "bitcoin";
+    const char *pszModule = "devault";
 #endif
     if (pex) {
         return strprintf("EXCEPTION: %s       \n%s       \n%s in %s       \n",

@@ -56,12 +56,12 @@ static int AppInitRawTx(int argc, char *argv[]) {
     if (argc < 2 || HelpRequested(gArgs)) {
         // First part of help message is specific to this utility
         std::string strUsage =
-            strprintf(_("%s bitcoin-tx utility version"), _(PACKAGE_NAME)) +
+            strprintf(_("%s devault-tx utility version"), _(PACKAGE_NAME)) +
             " " + FormatFullVersion() + "\n\n" + _("Usage:") + "\n" +
-            "  bitcoin-tx [options] <hex-tx> [commands]  " +
-            _("Update hex-encoded bitcoin transaction") + "\n" +
-            "  bitcoin-tx [options] -create [commands]   " +
-            _("Create hex-encoded bitcoin transaction") + "\n" + "\n";
+            "  devault-tx [options] <hex-tx> [commands]  " +
+            _("Update hex-encoded devault transaction") + "\n" +
+            "  devault-tx [options] -create [commands]   " +
+            _("Create hex-encoded devault transaction") + "\n" + "\n";
 
         fprintf(stdout, "%s", strUsage.c_str());
 
@@ -809,7 +809,7 @@ static int CommandLineRawTx(int argc, char *argv[],
                 throw std::runtime_error("too few parameters");
             }
 
-            // param: hex-encoded bitcoin transaction
+            // param: hex-encoded devault transaction
             std::string strHexTx(argv[1]);
 
             // "-" implies standard input
