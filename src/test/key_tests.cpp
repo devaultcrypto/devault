@@ -57,7 +57,8 @@ std::vector<uint8_t> get_r_ECDSA(std::vector<uint8_t> sigECDSA) {
         assert(sigECDSA[4] == 0);
         std::copy(sigECDSA.begin() + 5, sigECDSA.begin() + 37, ret.begin());
     } else {
-        std::copy(sigECDSA.begin() + 4, sigECDSA.begin() + 36, ret.begin());
+        std::copy(sigECDSA.begin() + 4, sigECDSA.begin() + (4 + rlen),
+                  ret.begin() + (32 - rlen));
     }
     return ret;
 }
