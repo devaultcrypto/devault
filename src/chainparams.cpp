@@ -200,7 +200,7 @@ public:
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 6 * 60 * 60; // 6 hours
-        consensus.nPowTargetSpacing = 1 * 1; // 1 second
+        consensus.nPowTargetSpacing = 2 * 8; // 16 seconds
         consensus.nBlocksPerYear = 2400; // 30 * 24 * 365.25;
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;

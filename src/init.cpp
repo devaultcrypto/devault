@@ -2318,7 +2318,7 @@ bool AppInitMain(Config &config,
     }
 
     auto import_bind = std::bind(ThreadImport, std::ref(config), vImportFiles);
-    import_thread = std::thread(&TraceThread<decltype(import_bind)>, "bitcoin-import", std::move(import_bind));
+    import_thread = std::thread(&TraceThread<decltype(import_bind)>, "devault-import", std::move(import_bind));
     
     //threadGroup.create_thread(std::bind(&ThreadImport, std::ref(config), vImportFiles));
 
