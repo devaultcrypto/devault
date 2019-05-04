@@ -16,6 +16,8 @@
 #include "script/standard.h"
 #include "validation.h"
 
+#include "fs.h" // for Dump debug stuff
+
 using namespace std;
 
 CCriticalSection cs_rewardsdb;
