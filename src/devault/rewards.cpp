@@ -348,10 +348,10 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
     if (size > 1) {
       CTxOut coinbase_reward = txCoinbase->vout[1];
       bool valid = (out == coinbase_reward);
-      if (!valid) LogPrintf("Cold Reward invalid since TxOut doesn't match\n");
+      if (!valid) LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n", GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
       return valid;
     } else {
-      LogPrintf("Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward/COIN);
+      LogPrintf("ERROR: Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward/COIN);
       // Coinbase has Reward but FindReward can't find it
       return false;
     }
@@ -359,7 +359,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
   } else {
     reward = Amount();
     bool valid = (size == 1);
-    if (!valid) LogPrintf("Cold Reward invalid since no Reward found but size != 1 (reward in coinbase)\n");
+    if (!valid) LogPrintf("ERROR: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase)\n");
     return valid;
   }
 }
