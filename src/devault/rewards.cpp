@@ -17,6 +17,7 @@
 #include "validation.h"
 
 #include "fs.h" // for Dump debug stuff
+#include <fstream>
 
 using namespace std;
 
