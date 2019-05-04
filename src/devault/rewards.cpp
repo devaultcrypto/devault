@@ -6,6 +6,7 @@
 #include "devault/rewards.h"
 #include "amount.h"
 #include "chain.h"
+#include "cashaddrenc.h" // GetAddrFromTxOut for debug
 #include "chainparams.h"
 #include "config.h"
 #include "consensus/consensus.h"
@@ -64,8 +65,8 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
         // LogPrintf("Found spend to %d COINS at height %d\n", balance/COIN, nHeight);
         COutPoint outpoint(TxId, n); // Unique
         if (balance >= nMinBalance) {
-          LogPrint(BCLog::COLD, "%s : Writing to Rewards db, value of %d at Height %d\n", __func__, balance / COIN,
-                   nHeight);
+          LogPrint(BCLog::COLD, "CR: %s : Writing to Rewards db, addr %s, Value of %d at Height %d\n", __func__,
+                   GetAddrFromTxOut(out), balance / COIN, nHeight);
           CRewardValue e(out, nHeight, nHeight, nHeight);
           rewardAdditions.emplace_back(outpoint, e);
           db_change = true;
@@ -87,7 +88,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
           // first get Value for now
           CRewardValue coinr; // Don't need this expect for log/checking
           if (!pdb->GetCoinWithHeight(outpoint, coinr)) {
-              LogPrint(BCLog::COLD, "%s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
+              LogPrint(BCLog::COLD, "CR: %s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
                        nHeight, coinr.GetValue() / COIN);
           }
           rewardErasures.emplace_back(outpoint, coinr);
@@ -213,7 +214,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
     if (!pcursor->GetKey(key)) { break; }
-    if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "%s: cannot parse CCoins record", __func__); }
+    if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
 
     int nHeight = the_reward.GetHeight();
 
@@ -224,8 +225,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
         if (HeightDiff > nMinBlocks) { 
           balance = the_reward.GetValue();
           Amount reward = CalculateReward(consensusParams, Height, HeightDiff, balance);
-          LogPrint(BCLog::COLD, "%s: Got coin from Height %d, with balance = %d COINS, Height Diff = %d(%d), reward = %d\n",
-                   __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
+          //LogPrint(BCLog::COLD, "%s: Got coin from Height %d, with balance = %d COINS, Height Diff = %d(%d), reward = %d\n",
+            //       __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
           // Check reward amount to make sure it's > min
           if (reward >= nMinReward) {
             // This is one of the oldest unrewarded UTXO with a + reward value
@@ -242,6 +243,9 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
                 minHeight = nHeight;
                 minKey = key;
                 sel_reward = the_reward;
+                //LogPrint(BCLog::COLD, "%s : *** Reward candidate for Height %d, bal = %d, HeightDiff = %d(%d), Reward = %d\n",
+                  //     __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
+
             } else if (minHReward == selAmount) {
                 // Same reward at Same Height => Select the 'smallest' key
                 if (key < minKey) {
@@ -249,11 +253,12 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
                     minHeight = nHeight;
                     minKey = key;
                     sel_reward = the_reward;
+                   // LogPrint(BCLog::COLD, "%s : *** Reward candidate for Height %d, bal = %d, HeightDiff = %d(%d), Reward = %d\n",
+                     //      __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
+
                 }
             }
             found = true;
-            LogPrint(BCLog::COLD, "%s : *** Reward candidate for Height %d, bal = %d, HeightDiff = %d(%d), Reward = %d\n",
-                     __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
           }
         }
       }
@@ -284,7 +289,7 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
     if (!pcursor->GetKey(key)) { break; }
-    if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "%s: cannot parse CCoins record", __func__); }
+    if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
 
     int nHeight = the_reward.GetHeight();
     if (nHeight == Height) { // Bingo!
@@ -307,10 +312,12 @@ void CColdRewards::UpdateRewardsDB(int nNewHeight) {
   CRewardValue coinreward;
   pdb->GetCoinWithHeight(rewardKey, coinreward);
   // Should have erased coin with balance/height
-  LogPrint(BCLog::COLD, "%s : Attempt to erase Coin with Value %d/Height = %d\n", __func__,
-           coinreward.GetValue() / COIN, coinreward.GetOldHeight());
+  LogPrint(BCLog::COLD, "CR: %s : Replace Coin (%s) with Value %d/Creation = %d/Height = %d/NewHeight= %d/paid %d times/active %d\n", __func__,
+           GetAddrFromTxOut(coinreward.GetTxOut()),
+           coinreward.GetValue() / COIN, coinreward.GetCreationHeight(), coinreward.GetOldHeight(),
+           nNewHeight, coinreward.GetPayCount(), coinreward.IsActive());
   pdb->EraseCoin(rewardKey);
-  LogPrint(BCLog::COLD, "%s : Putting Coin with new Height = %d\n", __func__, nNewHeight);
+  //LogPrint(BCLog::COLD, "%s : Putting Coin with new Height = %d\n", __func__, nNewHeight);
   // Get Height of last payment and shift into Coin
   //CRewardValue newReward(coinreward.GetTxOut(), coinreward.GetHeight(), nNewHeight);
   CRewardValue newReward(coinreward);
@@ -341,7 +348,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
     if (size > 1) {
       CTxOut coinbase_reward = txCoinbase->vout[1];
       bool valid = (out == coinbase_reward);
-      if (!valid) LogPrintf("Cold Reward invalid since TxOut doesn't match");
+      if (!valid) LogPrintf("Cold Reward invalid since TxOut doesn't match\n");
       return valid;
     } else {
       LogPrintf("Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward/COIN);
@@ -366,7 +373,7 @@ std::map<COutPoint, CRewardValue> CColdRewards::GetRewards() {
   while (pcursor->Valid()) {
       interruption_point(ShutdownRequested());
       if (!pcursor->GetKey(key)) { break; }
-      if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "%s: cannot parse CCoins record", __func__); }
+      if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
       vals.insert(std::make_pair(key,the_reward));
       pcursor->Next();
   }
@@ -382,7 +389,7 @@ std::vector<CRewardValue> CColdRewards::GetOrderedRewards() {
   while (pcursor->Valid()) {
       interruption_point(ShutdownRequested());
       if (!pcursor->GetKey(key)) { break; }
-      if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "%s: cannot parse CCoins record", __func__); }
+      if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
       vals.push_back(the_reward);
       pcursor->Next();
   }

@@ -7,6 +7,7 @@
 #include "key.h"
 #include "pubkey.h"
 #include "script/script.h"
+#include "primitives/transaction.h"
 #include "utilstrencodings.h"
 
 #ifdef HAVE_VARIANT
@@ -297,4 +298,11 @@ CKey DecodeSecret(const std::string &addr) {
     data.erase(data.begin());
     key.Set(data.begin(), data.end(), true);
     return key;
+}
+
+std::string GetAddrFromTxOut(const CTxOut& out) {
+  CTxDestination dest;
+  ExtractDestination(out.scriptPubKey, dest);
+  std::string SDest = EncodeCashAddr(dest, Params());
+  return SDest;
 }

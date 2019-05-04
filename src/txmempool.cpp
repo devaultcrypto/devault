@@ -5,6 +5,7 @@
 
 #include "txmempool.h"
 
+#include "cashaddrenc.h"
 #include "chainparams.h" // for GetConsensus.
 #include "clientversion.h"
 #include "config.h"
@@ -496,7 +497,7 @@ void CTxMemPool::addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCach
     for (unsigned int j = 0; j < tx.vin.size(); j++) {
         const CTxIn input = tx.vin[j];
         const CTxOut &prevout = view.AccessCoin(input.prevout).GetTxOut();
-        std::string addr = GetAddr(prevout);
+        std::string addr = GetAddrFromTxOut(prevout);
         CMempoolAddrDeltaKey key(addr, txhash, j, 1);
         CMempoolAddrDelta delta(entry.GetTime(), -prevout.nValue, input.prevout.GetTxId(), input.prevout.GetN());
         mapAddr.insert(std::make_pair(key, delta));
@@ -505,7 +506,7 @@ void CTxMemPool::addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCach
 
      for (unsigned int k = 0; k < tx.vout.size(); k++) {
         const CTxOut &out = tx.vout[k];
-        std::string addr = GetAddr(out);
+        std::string addr = GetAddrFromTxOut(out);
         CMempoolAddrDeltaKey key(addr, txhash, k, 0);
         mapAddr.insert(std::make_pair(key, CMempoolAddrDelta(entry.GetTime(), out.nValue)));
         inserted.push_back(key);

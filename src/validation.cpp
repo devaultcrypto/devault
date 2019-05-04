@@ -105,13 +105,6 @@ Amount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
 CTxMemPool g_mempool;
 
-std::string GetAddr(const CTxOut& out) {
-  CTxDestination dest;
-  ExtractDestination(out.scriptPubKey, dest);
-  std::string SDest = EncodeCashAddr(dest, Params());
-  return SDest;
-}
-
 static void CheckBlockIndex(const Consensus::Params &consensusParams);
 
 /** Constant stuff for coinbase transactions we create: */
@@ -1457,7 +1450,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
         if (fAddressIndex) {
             for (uint32_t k = tx.vout.size(); k-- > 0;) {
                 const CTxOut &out = tx.vout[k];
-                addrIndex.emplace_back(CAddrIndexKey(GetAddr(out),pindex->nHeight, i, hash, k, false), out.nValue);
+                addrIndex.emplace_back(CAddrIndexKey(GetAddrFromTxOut(out),pindex->nHeight, i, hash, k, false), out.nValue);
             }
         }
         
@@ -1473,7 +1466,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
             const CTxIn input = tx.vin[j];
             if (fAddressIndex) {
                 const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
-                addrIndex.emplace_back(CAddrIndexKey(GetAddr(prevout),pindex->nHeight, i, hash, j, true), -prevout.nValue);
+                addrIndex.emplace_back(CAddrIndexKey(GetAddrFromTxOut(prevout),pindex->nHeight, i, hash, j, true), -prevout.nValue);
             }
         }
     }
@@ -1845,7 +1838,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         if (fAddressIndex) {
           for (unsigned int k = 0; k < tx.vout.size(); k++) {
             const CTxOut &out = tx.vout[k];
-            addrIndex.emplace_back(CAddrIndexKey(GetAddr(out), pindex->nHeight, i, txhash, k, false), out.nValue);
+            addrIndex.emplace_back(CAddrIndexKey(GetAddrFromTxOut(out), pindex->nHeight, i, txhash, k, false), out.nValue);
           }
         }
       
@@ -1878,7 +1871,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
             for (size_t j = 0; j < tx.vin.size(); j++) {
                 const CTxIn input = tx.vin[j];
                 const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).GetTxOut();
-                addrIndex.emplace_back(CAddrIndexKey(GetAddr(prevout), pindex->nHeight, i, txhash, j, true), -prevout.nValue);
+                addrIndex.emplace_back(CAddrIndexKey(GetAddrFromTxOut(prevout), pindex->nHeight, i, txhash, j, true), -prevout.nValue);
             }
             i++;
         }

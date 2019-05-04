@@ -10,6 +10,7 @@
 #include <vector>
 
 class CChainParams;
+class CTxOut;
 
 enum CashAddrType : uint8_t { PUBKEY_TYPE = 0, SCRIPT_TYPE = 1, SECRET_TYPE = 2 };
 
@@ -17,6 +18,8 @@ struct CashAddrContent {
     CashAddrType type;
     std::vector<uint8_t> hash;
 };
+
+std::string GetAddrFromTxOut(const CTxOut& out);
 
 std::string EncodeCashAddr(const CTxDestination &, const CChainParams &);
 std::string EncodeCashAddr(const std::string &prefix,
