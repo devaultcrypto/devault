@@ -31,6 +31,7 @@ function(gen_json_header NAME)
 endfunction()
 
 gen_json_header(JSON_HEADERS
+	data/blockfilters.json
 	data/script_tests.json
 	data/tx_invalid.json
 	data/tx_valid.json

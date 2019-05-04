@@ -11,6 +11,7 @@ TEST_SRCDIR = test
 TEST_BINARY=test/test_bitcoin$(EXEEXT)
 
 JSON_TEST_FILES = \
+  test/data/blocksfilters.json \
   test/data/script_tests.json \
   test/data/tx_invalid.json \
   test/data/tx_valid.json \

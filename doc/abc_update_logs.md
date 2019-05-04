@@ -236,7 +236,7 @@
       fix out-of-bounds memory write in key_tests
       blockfilter: Remove sharp edge (uninitialized m_filter_type) when using the compiler-generated constructor for BlockFilter
       blockfilter: Refactor and add tests for BlockFilter construction
-      blockfilter: add block filters
+##### blockfilter: add block filters
 #####  Remove obsolete comment from MANDATORY_SCRIPT_VERIFICATION_FLAGS
 ~~    Use angle bracket in include for qt tests~~
 ~~    Use angle bracket in include for remaining qt files~~
@@ -254,7 +254,7 @@
 ~~    Updated manpages for 0.19.5 release~~
 ~~    Update chainparams for 0.19.5 release~~
 ##### Merge #11880: Stop special-casing phashBlock handling in validation for TBV
-      Use WalletBalances struct in Qt
+##### Use WalletBalances struct in Qt
 ##### Remove direct bitcoin calls from qt/sendcoinsdialog.cpp
 ##### Do not allow users to get keys from keypool without reserving them
 ~~    nits in lcg_tests~~
@@ -275,11 +275,11 @@
 #####  e8c680bd5840d7b055cc618b98242ed6f980d393 serialize: Serialization support for big-endian 32-bit ints.
       [DOC] Add headers inclusion guidelines to the developer notes
       Use angle bracket in include for wallet test
-#####  [qt] Simplifies boolean expression model && model->haveWatchOnly()
-      [qt] Avoid potential null pointer dereference in TransactionView::exportClicked()
+~~ [qt] Simplifies boolean expression model && model->haveWatchOnly()~~
+##### [qt] Avoid potential null pointer dereference in TransactionView::exportClicked()
       Use angle bracket in include for seeder
       Use angle bracket in include for wallet
-      [nit] Remove redundant parameter from `CTxMemPool::PrioritiseTransaction`
+##### [nit] Remove redundant parameter from `CTxMemPool::PrioritiseTransaction`
 ##### Remove direct bitcoin calls from qt/rpcconsole.cpp
 ##### Remove direct bitcoin calls from qt/bantablemodel.cpp
 ##### Remove direct bitcoin calls from qt/peertablemodel.cpp
@@ -303,7 +303,7 @@
       Added missing notes to release notes
       Use angle bracket in include for zmq
       Use angle bracket in include for test (part 4)
-      Nits in abc-high_priority_transaction.py
+##### Nits in abc-high_priority_transaction.py
 ##### [schnorr] Refactor the signature process in reusable component
       Use angle bracket in rpcwallet and rpcdump
       Use angle bracket in include for test (part 3)
@@ -321,7 +321,7 @@
       Use angle bracket in include for compat
       Use angle bracket in include for bench
       Move interface -> interfaces
-      Add Sent and Received information to the debug menu peer list
+##### Add Sent and Received information to the debug menu peer list
       Update seeds
       Updated manpages for 0.19.4 release
       Updated chainparams for 0.19.4 release
