@@ -213,7 +213,9 @@ void Shutdown() {
     /// does this if the respective module was initialized.
     RenameThread("bitcoin-shutoff");
     g_mempool.AddTransactionsUpdated(1);
-
+  
+    // prewards->DumpOrderedRewards(); if needed for debug
+    
     StopHTTPRPC();
     StopREST();
     StopRPC();
@@ -270,7 +272,7 @@ void Shutdown() {
         }
         pcoinsTip.reset();
         pcoinscatcher.reset();
-        pcoinsdbview.reset(); /// Crash here???
+        pcoinsdbview.reset();
         pblocktree.reset();
         prewardsdb.reset();
         prewards.reset();

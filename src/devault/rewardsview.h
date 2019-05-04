@@ -39,8 +39,8 @@ class CRewardsViewDB {
   public:
   explicit CRewardsViewDB(const std::string &dbname, size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
-  bool HaveCoin(const COutPoint &outpoint) const { return db.Exists(std::pair(DB_REWARD, outpoint)); }
-  bool EraseCoin(const COutPoint &outpoint) { return db.Erase(std::pair(DB_REWARD, outpoint)); }
+  bool HaveReward(const COutPoint &outpoint) const { return db.Exists(std::pair(DB_REWARD, outpoint)); }
+  bool EraseReward(const COutPoint &outpoint) { return db.Erase(std::pair(DB_REWARD, outpoint)); }
 
   // Batch ops
   bool Add(const std::vector<std::pair<COutPoint, CRewardValue> >& vect);
@@ -48,8 +48,8 @@ class CRewardsViewDB {
   bool Erase(const std::vector<COutPoint>& vect);
 
   // Extra parameter Height
-  bool PutCoinWithHeight(const COutPoint &outpoint, const CRewardValue &coin) {    return db.Write(std::pair(DB_REWARD, outpoint), coin);  }
-  bool GetCoinWithHeight(const COutPoint &outpoint, CRewardValue &coin) const {
+  bool PutReward(const COutPoint &outpoint, const CRewardValue &coin) {    return db.Write(std::pair(DB_REWARD, outpoint), coin);  }
+  bool GetReward(const COutPoint &outpoint, CRewardValue &coin) const {
     return db.Read(std::pair(DB_REWARD, outpoint), coin);
   }
 

@@ -40,5 +40,6 @@ class CColdRewards {
   bool RestoreRewardAtHeight(int Height);
   std::map<COutPoint, CRewardValue> GetRewards();
   std::vector<CRewardValue> GetOrderedRewards();
+  void DumpOrderedRewards(const std::string& filename="");
 
 };

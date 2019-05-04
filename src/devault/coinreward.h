@@ -10,6 +10,10 @@
 #pragma once
 #include "primitives/transaction.h"
 
+// For ToString()
+#include "tinyformat.h"
+#include "cashaddrenc.h"
+
 static const char DB_REWARD = 'R';
 
 // This is the Key for CColdReward DB iterator
@@ -51,6 +55,7 @@ struct CRewardValue {
   uint32_t GetHeight() { return height; }
   uint32_t GetPayCount() { return payCount; }
   void SetHeight(uint32_t h) { height = h; }
+  void SetOldHeight(uint32_t h) { OldHeight = h; }
   bool was_paid() { return (GetHeight() != GetOldHeight()); }
   bool IsActive() { return active; }
   void SetActive(bool a) { active = a; }
@@ -75,4 +80,15 @@ struct CRewardValue {
     s >> active;
     s >> payCount;
   }
+  std::string ToString() {
+        return strprintf("CR(Addr : %s, Value %d, Creation : %d, Height : %d, OldHeight %d, PayCount % d, Active : %d)", 
+                         GetAddrFromTxOut(GetTxOut()),
+                         GetValue() / COIN,
+                         GetCreationHeight(),
+                         GetHeight(),
+                         GetOldHeight(),
+                         GetPayCount(),
+                         IsActive());
+  }
+ 
 };

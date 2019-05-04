@@ -1426,6 +1426,11 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
         return DISCONNECT_FAILED;
     }
 
+    /* If needed for debug
+       static int undoc=0;
+       if (undoc++ == 0) prewards->DumpOrderedRewards("db.txt");
+    */
+    
     // Undo databasing stuff for Rewards.
     prewards->UndoBlock(block, pindex); // add a false here if we see issues possibly
     

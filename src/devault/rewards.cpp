@@ -83,11 +83,11 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
         // Since input is a previous output, delete it from the database if it's in there
         // could be if > nMinBalance, but don't need to check
         COutPoint outpoint(in.prevout);
-        if (pdb->HaveCoin(outpoint)) {
+        if (pdb->HaveReward(outpoint)) {
           // will erase
           // first get Value for now
           CRewardValue coinr; // Don't need this expect for log/checking
-          if (!pdb->GetCoinWithHeight(outpoint, coinr)) {
+          if (!pdb->GetReward(outpoint, coinr)) {
               LogPrint(BCLog::COLD, "CR: %s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
                        nHeight, coinr.GetValue() / COIN);
           }
@@ -132,9 +132,9 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
         COutPoint out(in.prevout);
         // Inputs for Rewards means that they'd become invalid due to being spent
         // so we must revert this 
-        if (prewardsdb->HaveCoin(out)) {
+        if (prewardsdb->HaveReward(out)) {
           CRewardValue val;
-          prewardsdb->GetCoinWithHeight(out, val);
+          prewardsdb->GetReward(out, val);
           // if inactive, make inactive
           if (!val.IsActive()) {
             val.SetActive(true);
@@ -163,7 +163,7 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
         COutPoint outpoint(TxId, n); // Unique
 
         // 2. means possibly new candidates that should be removed by DB
-        if (prewardsdb->HaveCoin(outpoint)) {
+        if (prewardsdb->HaveReward(outpoint)) {
           rewardRemovals.push_back(outpoint);
         }            
         n++;
@@ -243,9 +243,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
                 minHeight = nHeight;
                 minKey = key;
                 sel_reward = the_reward;
-                //LogPrint(BCLog::COLD, "%s : *** Reward candidate for Height %d, bal = %d, HeightDiff = %d(%d), Reward = %d\n",
-                  //     __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
-
+                //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
             } else if (minHReward == selAmount) {
                 // Same reward at Same Height => Select the 'smallest' key
                 if (key < minKey) {
@@ -253,9 +251,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
                     minHeight = nHeight;
                     minKey = key;
                     sel_reward = the_reward;
-                   // LogPrint(BCLog::COLD, "%s : *** Reward candidate for Height %d, bal = %d, HeightDiff = %d(%d), Reward = %d\n",
-                     //      __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
-
+                    //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
                 }
             }
             found = true;
@@ -266,7 +262,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
       // Not Active and Sufficiently old not to be re-org back,
       // therefore delete from dB
       if ((Height - nHeight) > maxreorgdepth) {
-        pdb->EraseCoin(key);
+        pdb->EraseReward(key);
       }
     }
     //
@@ -296,7 +292,7 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
       // Restore previous height
       the_reward.SetHeight(the_reward.GetOldHeight());
       the_reward.payCount--;
-      pdb->PutCoinWithHeight(key, the_reward);
+      pdb->PutReward(key, the_reward);
       return true;
     }
     //
@@ -310,20 +306,16 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
 void CColdRewards::UpdateRewardsDB(int nNewHeight) {
   // Now re-write with new Height
   CRewardValue coinreward;
-  pdb->GetCoinWithHeight(rewardKey, coinreward);
+  pdb->GetReward(rewardKey, coinreward);
   // Should have erased coin with balance/height
-  LogPrint(BCLog::COLD, "CR: %s : Replace Coin (%s) with Value %d/Creation = %d/Height = %d/NewHeight= %d/paid %d times/active %d\n", __func__,
-           GetAddrFromTxOut(coinreward.GetTxOut()),
-           coinreward.GetValue() / COIN, coinreward.GetCreationHeight(), coinreward.GetOldHeight(),
-           nNewHeight, coinreward.GetPayCount(), coinreward.IsActive());
-  pdb->EraseCoin(rewardKey);
-  //LogPrint(BCLog::COLD, "%s : Putting Coin with new Height = %d\n", __func__, nNewHeight);
+  LogPrint(BCLog::COLD, "CR: %s : %s\n", __func__, coinreward.ToString());
+  pdb->EraseReward(rewardKey);
   // Get Height of last payment and shift into Coin
-  //CRewardValue newReward(coinreward.GetTxOut(), coinreward.GetHeight(), nNewHeight);
   CRewardValue newReward(coinreward);
+  newReward.SetOldHeight(newReward.GetHeight()); // Move Height of creation Height or last payment to OldHeight
   newReward.SetHeight(nNewHeight);
   newReward.payCount++;
-  pdb->PutCoinWithHeight(rewardKey, newReward);
+  pdb->PutReward(rewardKey, newReward);
 }
 
 // Create CTxOut based on coin and reward
@@ -395,4 +387,37 @@ std::vector<CRewardValue> CColdRewards::GetOrderedRewards() {
   }
   
   return vals;
+}
+
+void CColdRewards::DumpOrderedRewards(const std::string& filename) {
+
+    fs::path filepath;
+    if (filename == "") {
+        std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        filepath = fs::absolute("rewarddb-"+FormatDebugLogDateTime(cftime)+".log");
+    } else {
+        filepath = fs::absolute(filename);
+    }
+    std::ofstream file;
+    file.open(filepath.string().c_str());
+
+    CRewardValue val;
+    COutPoint key;
+  
+    std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
+    while (pcursor->Valid()) {
+        if (!pcursor->GetKey(key)) { break; }
+        if (!pcursor->GetValue(val)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }        
+        file << "Height " << val.GetHeight() << " ";
+        file << "payCount " << val.GetPayCount() << " ";
+        file << "active "<<  val.IsActive() << " ";
+        file << "creationHeight " << val.GetCreationHeight() << " ";
+        file << "OldHeight " << val.GetOldHeight() << " ";
+        file << "Addr: " << GetAddrFromTxOut(val.GetTxOut()) << " ";
+        file << "n " << key.GetN() << " ";
+        file << "Value " << val.GetValue()/COIN << "\n";
+        pcursor->Next();
+    }
+  
+    file.close();
 }
