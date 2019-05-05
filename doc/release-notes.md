@@ -21,6 +21,7 @@ This release includes the following features and fixes since forking from Bitcoi
  - Prompt user for Password on 1st run so that wallet will always be encrypted
  - GUI makeover
  - Exclusive use of Bech32 style addresses
+ - Replace OpenSSL dependency with Libsodium
 
 Bitcoin-ABC 19.x backports:
  

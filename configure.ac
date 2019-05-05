@@ -480,13 +480,8 @@ case $host in
          dnl It's safe to add these paths even if the functionality is disabled by
          dnl the user (--without-wallet or --without-gui for example).
 
-         openssl_prefix=`$BREW --prefix openssl 2>/dev/null`
          bdb_prefix=`$BREW --prefix berkeley-db 2>/dev/null`
          qt5_prefix=`$BREW --prefix qt5 2>/dev/null`
-         if test x$openssl_prefix != x; then
-           PKG_CONFIG_PATH="$openssl_prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
-           export PKG_CONFIG_PATH
-         fi
          if test x$bdb_prefix != x; then
            CPPFLAGS="$CPPFLAGS -I$bdb_prefix/include"
            LIBS="$LIBS -L$bdb_prefix/lib"
@@ -864,8 +859,6 @@ if test x$use_pkgconfig = xyes; then
   m4_ifdef(
     [PKG_CHECK_MODULES],
     [
-      PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
-      PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
       if test x$use_qr != xno; then
         BITCOIN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
       fi
@@ -888,11 +881,6 @@ if test x$use_pkgconfig = xyes; then
     ]
   )
 else
-  AC_CHECK_HEADER([openssl/crypto.h],,AC_MSG_ERROR(libcrypto headers missing))
-  AC_CHECK_LIB([crypto],      [main],CRYPTO_LIBS=-lcrypto, AC_MSG_ERROR(libcrypto missing))
-
-  AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
-  AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
 
   if test x$build_bitcoin_utils$build_bitcoind$bitcoin_enable_qt$use_tests != xnononono; then
     AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
@@ -932,28 +920,8 @@ else
   fi
 fi
 
-
-if test "x$use_rocksdb" = "xyes"; then
-   AC_CHECK_HEADER([rocksdb/db.h],
-       [AC_DEFINE([ENABLE_ROCKSDB],[1],[Define to 1 to enable ROCKSDB functions])],
-       [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
-        use_rocksdb=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-   AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-lrocksdb,
-       [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
-        use_rocksdb=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-   BITCOIN_QT_CHECK([AC_CHECK_LIB([rocksdb], [main],[ROCSKDB_LIBS=-lrocksdb], [have_rocksdb=no])])
-else
-   AC_DEFINE_UNQUOTED([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])
-fi
-
-save_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="${CXXFLAGS} ${CRYPTO_CFLAGS} ${SSL_CFLAGS}"
-AC_CHECK_DECLS([EVP_MD_CTX_new],,,[AC_INCLUDES_DEFAULT
-#include <openssl/x509_vfy.h>
-])
-CXXFLAGS="${save_CXXFLAGS}"
+AC_CHECK_HEADER([sodium.h],, AC_MSG_ERROR(libsodium headers missing),)
+AC_CHECK_LIB([sodium],         [main],CRYPTO_LIBS=-lsodium, AC_MSG_ERROR(libsodium missing))
 
 dnl univalue check
 
@@ -1121,12 +1089,7 @@ if test x$bitcoin_enable_qt != xno; then
   fi
 fi
 
-if test x$use_rocksdb != xno; then
-   CPPFLAGS="$CPPFLAGS -DUSE_ROCKSDB=1"
-fi
-
 AM_CONDITIONAL([ENABLE_ZMQ], [test "x$use_zmq" = "xyes"])
-AM_CONDITIONAL([ENABLE_ROCKSDB], [test "x$use_rocksdb" = "xyes"])
 
 AC_MSG_CHECKING([whether to build test_bitcoin])
 if test x$use_tests = xyes; then
@@ -1215,11 +1178,9 @@ AC_SUBST(LEVELDB_TARGET_FLAGS)
 AC_SUBST(MINIUPNPC_CPPFLAGS)
 AC_SUBST(MINIUPNPC_LIBS)
 AC_SUBST(CRYPTO_LIBS)
-AC_SUBST(SSL_LIBS)
 AC_SUBST(EVENT_LIBS)
 AC_SUBST(EVENT_PTHREADS_LIBS)
 AC_SUBST(ZMQ_LIBS)
-AC_SUBST(ROCKSDB_LIBS)
 AC_SUBST(QR_LIBS)
 AC_CONFIG_FILES([Makefile src/Makefile doc/man/Makefile share/setup.nsi share/qt/Info.plist test/config.ini])
 AC_CONFIG_FILES([contrib/devtools/split-debug.sh],[chmod +x contrib/devtools/split-debug.sh])
