@@ -1418,7 +1418,7 @@ static DisconnectResult DisconnectBlock(const CBlock &block,
 
 DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                                 const CBlock &block, const CBlockIndex *pindex,
-                                CCoinsViewCache &view, bool ignoreAddressIndex) {
+                                CCoinsViewCache &view, bool ignoreIndices) {
     bool fClean = true;
 
     if (blockUndo.vtxundo.size() + 1 != block.vtx.size()) {
@@ -1432,7 +1432,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
     */
     
     // Undo databasing stuff for Rewards.
-    prewards->UndoBlock(block, pindex); // add a false here if we see issues possibly
+    if (!ignoreIndices) prewards->UndoBlock(block, pindex); // add a false here if we see issues possibly
     
     // For fAddressIndex enabled
     // Go through all outputs and add back to addressIndex 
@@ -1504,7 +1504,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
     // Move best block pointer to previous block.
     view.SetBestBlock(block.hashPrevBlock);
 
-    if (addrIndex.size() > 0) { // only happens with fAddressIndex set
+    if (!ignoreIndices && (addrIndex.size() > 0)) { // only happens with fAddressIndex set
         if (!pblocktree->EraseAddrIndex(addrIndex)) {
             error("Failed to delete addr index");
             return DISCONNECT_FAILED;
