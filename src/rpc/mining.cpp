@@ -191,7 +191,7 @@ static UniValue generatetoaddress(const Config &config,
             "1. nblocks      (numeric, required) How many blocks are generated "
             "immediately.\n"
             "2. address      (string, required) The address to send the newly "
-            "generated bitcoin to.\n"
+            "generated DeVault to.\n"
             "3. maxtries     (numeric, optional) How many iterations to try "
             "(default = 1000000).\n"
             "\nResult:\n"
@@ -242,7 +242,7 @@ static UniValue getmininginfo(const Config &config,
             "  \"warnings\": \"...\"          (string) any network and "
             "blockchain warnings\n"
             "  \"errors\": \"...\"            (string) DEPRECATED. Same as "
-            "warnings. Only shown when bitcoind is started with "
+            "warnings. Only shown when devaultd is started with "
             "-deprecatedrpc=getmininginfo\n"
             "}\n"
             "\nExamples:\n" +
@@ -518,12 +518,12 @@ static UniValue getblocktemplate(const Config &config,
 
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0) {
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED,
-                           "Bitcoin is not connected!");
+                           "DeVault is not connected!");
     }
 
     if (IsInitialBlockDownload()) {
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD,
-                           "Bitcoin is downloading blocks...");
+                           "DeVault is downloading blocks...");
     }
 
     static unsigned int nTransactionsUpdatedLast;
