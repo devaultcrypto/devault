@@ -23,7 +23,7 @@ Dependencies
 
 Install dependencies:
 
-    brew install automake berkeley-db libtool boost miniupnpc openssl pkg-config qt5 libevent
+    brew install automake berkeley-db libtool boost miniupnpc openssl pkg-config qt5 libevent libsodium
 
 In case you want to build the disk image with `make deploy` (.dmg / optional), you need RSVG
 
@@ -32,10 +32,10 @@ In case you want to build the disk image with `make deploy` (.dmg / optional), y
 Build Devault
 -----------------
 
-1. Clone the Devault source code and cd into `DeVault`
+1. Clone the Devault source code and cd into `devault`
 
-        git clone https://github.com/DeVault/DeVault.git
-        cd DeVault
+        git clone https://github.com/devaultcrypto/devault.git
+        cd devault
 
 2.  Build DeVault:
 
@@ -43,13 +43,26 @@ Build Devault
 
     You can disable the GUI build by passing `--without-gui` to configure.
 
-    It is recommended to create a build directory to build out-of-tree. 
+    It is recommended to create a build directory to build out-of-tree.
+
+    Option 1 - Autotools
+    ---------------------
 
         ./autogen.sh
         mkdir build
         cd build
         ../configure
         make
+
+   Option 2 - Cmake
+   ---------------------
+
+      cd ../
+      mkdir build
+      cd build
+      cmake ../devault
+      make
+
 
 3.  It is recommended to build and run the unit tests:
 
@@ -62,7 +75,7 @@ Build Devault
 Running
 -------
 
-Devault is now available at `./src/devaultd`
+Devault is now available at `./src/devaultd` or `./build/devaultd` if using cmake
 
 Before running, it's recommended you create an RPC configuration file.
 
@@ -103,6 +116,5 @@ Uncheck everything except Qt Creator during the installation process.
 Notes
 -----
 
-* Tested on OS X 10.8 through 10.12 on 64-bit Intel processors only.
-
-* Building with downloaded Qt binaries is not officially supported. See the notes in [#7714](https://github.com/devault/devault/issues/7714)
+* Tested on OS X 10.11 through 10.14 on 64-bit Intel processors only.
+* Building with downloaded Qt binaries is not officially supported. 

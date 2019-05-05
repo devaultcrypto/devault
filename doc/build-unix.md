@@ -48,7 +48,7 @@ These dependencies are required:
 
  Library     | Purpose          | Description
  ------------|------------------|----------------------
- libssl      | Crypto           | Random Number Generation, Elliptic Curve Cryptography
+ libsodium   | Randomness       | Random Number Generation use
  libboost    | Utility          | Library for threading, data structures, etc
  libevent    | Networking       | OS independent asynchronous networking
 
@@ -79,15 +79,13 @@ Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 Build requirements:
 
-    sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
+    sudo apt-get install build-essential libtool autotools-dev automake pkg-config libsodium-dev libevent-dev bsdmainutils 
 
 Options when installing required Boost library files:
 
-1. On at least Ubuntu 14.04+ and Debian 7+ there are generic names for the
-individual boost development packages, so the following can be used to only
-install necessary parts of boost:
+1. On Ubuntu 16.04+ and Debian 7+ there are generic names for the individual boost development packages, so the following can be used to only install necessary parts of boost:
 
-        sudo apt-get install libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
+        sudo apt-get install libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev
 
 2. If that doesn't work, you can install all boost development packages with:
 
@@ -98,8 +96,7 @@ BerkeleyDB 5.3 or later is required for the wallet. This can be installed with:
         sudo apt-get install libdb-dev libdb++-dev
 
 -----------------------------------------
-On Ubuntu 16.04 (xenial) and Debian 9 (stretch) and under you will need to
-install a C++17 compatible compiler to build devault.
+You will also need to install a C++17 compatible compiler to build devault.
 
 For Ubuntu Xenial only - 
 
@@ -150,7 +147,7 @@ Dependency Build Instructions: Fedora
 -------------------------------------
 Build requirements:
 
-    sudo dnf install gcc-c++ libtool make autoconf automake openssl-devel libevent-devel boost-devel libdb-devel libdb-cxx-devel
+    sudo dnf install gcc-c++ libtool make autoconf automake libsodium-devel libevent-devel boost-devel libdb-devel libdb-cxx-devel
 
 Optional:
 
@@ -241,6 +238,11 @@ disable-wallet mode with:
 
     ./configure --disable-wallet
 
+or if using cmake, then during cmake step
+
+   cmake ../devault -DBUILD_WALLET=0
+
+
 Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
 call not `getwork`.
 
@@ -255,7 +257,7 @@ Setup and Build Example: Arch Linux
 -----------------------------------
 This example lists the steps necessary to setup and build a command line only, non-wallet distribution of the latest changes on Arch Linux:
 
-    pacman -S git base-devel boost libevent python
+    pacman -S git base-devel boost libevent python libsodium
     git clone https://github.com/devaultcrypto/devault.git
     cd devault/
     ./autogen.sh
