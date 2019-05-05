@@ -527,7 +527,7 @@ devaultd_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-devaultd_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(ROCKSDB_LIBS)
+devaultd_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
 # devault-cli binary #
 devault_cli_SOURCES = bitcoin-cli.cpp
@@ -545,7 +545,7 @@ devault_cli_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-devault_cli_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS) $(EVENT_LIBS) $(ROCKSDB_LIBS)
+devault_cli_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
 # devault-seeder binary #
@@ -560,7 +560,7 @@ devault_seeder_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO)
 
-devault_seeder_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS) $(ROCKSDB_LIBS)
+devault_seeder_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS) 
 #
 
 # devault-tx binary #

@@ -923,21 +923,6 @@ fi
 AC_CHECK_HEADER([sodium.h],, AC_MSG_ERROR(libsodium headers missing),)
 AC_CHECK_LIB([sodium],         [main],CRYPTO_LIBS=-lsodium, AC_MSG_ERROR(libsodium missing))
 
-if test "x$use_rocksdb" = "xyes"; then
-   AC_CHECK_HEADER([rocksdb/db.h],
-       [AC_DEFINE([ENABLE_ROCKSDB],[1],[Define to 1 to enable ROCKSDB functions])],
-       [AC_MSG_WARN([rocksdb/db.h not found, disabling ROCKSDB support])
-        use_rocksdb=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-   AC_CHECK_LIB([rocksdb],[main],ROCKSDB_LIBS=-lrocksdb,
-       [AC_MSG_WARN([librocksdb >= 5.0.0 not found, disabling rocksdb support])
-        use_rocksdb=no
-        AC_DEFINE([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])])
-   BITCOIN_QT_CHECK([AC_CHECK_LIB([rocksdb], [main],[ROCSKDB_LIBS=-lrocksdb], [have_rocksdb=no])])
-else
-   AC_DEFINE_UNQUOTED([ENABLE_ROCKSDB],[0],[Define to 1 to enable ROCKSDB functions])
-fi
-
 dnl univalue check
 
 need_bundled_univalue=yes
@@ -1104,12 +1089,7 @@ if test x$bitcoin_enable_qt != xno; then
   fi
 fi
 
-if test x$use_rocksdb != xno; then
-   CPPFLAGS="$CPPFLAGS -DUSE_ROCKSDB=1"
-fi
-
 AM_CONDITIONAL([ENABLE_ZMQ], [test "x$use_zmq" = "xyes"])
-AM_CONDITIONAL([ENABLE_ROCKSDB], [test "x$use_rocksdb" = "xyes"])
 
 AC_MSG_CHECKING([whether to build test_bitcoin])
 if test x$use_tests = xyes; then
@@ -1201,7 +1181,6 @@ AC_SUBST(CRYPTO_LIBS)
 AC_SUBST(EVENT_LIBS)
 AC_SUBST(EVENT_PTHREADS_LIBS)
 AC_SUBST(ZMQ_LIBS)
-AC_SUBST(ROCKSDB_LIBS)
 AC_SUBST(QR_LIBS)
 AC_CONFIG_FILES([Makefile src/Makefile doc/man/Makefile share/setup.nsi share/qt/Info.plist test/config.ini])
 AC_CONFIG_FILES([contrib/devtools/split-debug.sh],[chmod +x contrib/devtools/split-debug.sh])
