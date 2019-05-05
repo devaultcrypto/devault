@@ -165,10 +165,14 @@ if (EXISTS	"${CMAKE_CURRENT_SOURCE_DIR}/config/bitcoin-config.h")
 endif()
 
 
-# Create a target for OpenSSL
 include(BrewHelper)
-find_brew_prefix(OPENSSL_ROOT_DIR openssl)
-find_package(OpenSSL REQUIRED)
+
+find_package(sodium REQUIRED)
+if (SODIUM_FOUND)
+  message(STATUS "Found libsodium")
+  message(STATUS "Sodium include dir = ${sodium_INCLUDE_DIR}")
+endif()
+
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
@@ -277,7 +281,7 @@ target_include_directories(util
 		.
 		# To access the config.
 		${CMAKE_CURRENT_BINARY_DIR}
-    ${OPENSSL_INCLUDE_DIR}
+    ${sodium_INCLUDE_DIR}
 )
 
 # Target specific configs
@@ -310,7 +314,7 @@ if (Filesystem_FOUND)
 else()
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
   find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
-  target_link_libraries(util univalue crypto OpenSSL::SSL ${BOOST_LIBRARIES})
+  target_link_libraries(util univalue crypto sodium ${BOOST_LIBRARIES})
 endif()
 
 
@@ -432,7 +436,7 @@ target_link_libraries(server
 	devaultconsensus
         ${DB_LIBRARIES}
         ${MINIUPNP_LIBRARY}
-	Threads::Threads
+	      Threads::Threads
 )
 
 if (BUILD_TEST_BENCH)

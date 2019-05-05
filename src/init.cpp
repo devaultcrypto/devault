@@ -65,6 +65,8 @@
 #include <sys/stat.h>
 #endif
 
+#include <sodium/core.h>
+
 #if ENABLE_ZMQ
 #include "zmq/zmqnotificationinterface.h"
 #endif
@@ -1160,11 +1162,6 @@ bool InitSanityCheck(void) {
         return false;
     }
 
-    if (!Random_SanityCheck()) {
-        InitError("OS cryptographic RNG sanity check failure. Aborting.");
-        return false;
-    }
-
     return true;
 }
 
@@ -1743,7 +1740,7 @@ bool AppInitSanityChecks() {
     // Initialize elliptic curve code
     std::string sha256_algo = SHA256AutoDetect();
     LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
-    RandomInit();
+    if (sodium_init() < 0) { throw std::string("Libsodium initialization failed."); }
     ECC_Start();
     globalVerifyHandle = std::make_unique<ECCVerifyHandle>();
 

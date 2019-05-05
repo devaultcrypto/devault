@@ -12,6 +12,7 @@
 #include "validation.h"
 
 #include <boost/lexical_cast.hpp>
+#include <sodium/core.h>
 
 #include <memory>
 
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
     }
 
     SHA256AutoDetect();
-    RandomInit();
+    if (sodium_init() < 0) { throw std::string("Libsodium initialization failed."); }
     ECC_Start();
     SetupEnvironment();
 
