@@ -259,7 +259,7 @@ add_library(util
 	compat/glibcxx_sanity.cpp
 	fs.cpp
 	logging.cpp
-	random.cpp # needs openssl
+	random.cpp # needs libsodium
 	rcu.cpp
 	rpc/protocol.cpp
 	support/cleanse.cpp
@@ -267,7 +267,7 @@ add_library(util
 	sync.cpp
 	threadinterrupt.cpp
 	uint256.cpp
-	util.cpp # needs openssl
+	util.cpp # needs libsodium
 	fs_util.cpp
 	utilmoneystr.cpp
 	utilstrencodings.cpp
@@ -310,7 +310,7 @@ endfunction(prepend)
 if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
   find_package(Boost 1.58)
-  target_link_libraries(util univalue crypto OpenSSL::SSL std::filesystem)
+  target_link_libraries(util univalue crypto sodium std::filesystem)
 else()
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
   find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})

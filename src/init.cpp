@@ -974,11 +974,9 @@ std::string LicenseInfo() {
                        "accompanying file %s or %s"),
                      "COPYING", "<https://opensource.org/licenses/MIT>") +
            "\n" + "\n" +
-           strprintf(_("This product includes software developed by the "
-                       "OpenSSL Project for use in the OpenSSL Toolkit %s and "
-                       "cryptographic software written by Eric Young and UPnP "
+           strprintf(_("This product includes cryptographic software written by Eric Young and UPnP "
                        "software written by Thomas Bernard."),
-                     "<https://www.openssl.org>") +
+                     "") +
            "\n";
 }
 
