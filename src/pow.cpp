@@ -16,6 +16,77 @@
 #include "uint256.h"
 #include "util.h"
 
+unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const CBlockHeader *pblock, const Config &config) 
+{
+    const Consensus::Params &params = config.GetChainParams().GetConsensus();
+
+    // This cannot handle the genesis block and early blocks in general.
+    assert(pindexPrev);
+    
+    // Special difficulty rule for testnet:
+    // If the new block's timestamp is more than 2* 10 minutes then allow
+    // mining of a min-difficulty block.
+    if (params.fPowAllowMinDifficultyBlocks &&
+        (pblock->GetBlockTime() >
+         pindexPrev->GetBlockTime() + 2 * params.nPowTargetSpacing)) {
+        return UintToArith256(params.powLimit).GetCompact();
+    }
+  
+    const int nHeight = pindexPrev->nHeight + 1;
+  
+    // Don't adjust difficult for the 1st interval of blocks
+    // this means we should also start the starting value
+    // to a reasonable level !
+    if (nHeight < params.DifficultyAdjustmentInterval()) {
+      return UintToArith256(params.powLimit).GetCompact();
+    }
+  
+    assert(nHeight >= params.DifficultyAdjustmentInterval());
+
+  
+    const int64_t T = params.nPowTargetSpacing;
+    const int N = params.nZawyLwmaAveragingWindow;
+    const int k = params.nZawyLwmaAdjustedWeight;
+    const int dnorm = params.nZawyLwmaMinDenominator;
+    const bool limit_st = params.bZawyLwmaSolvetimeLimitation;
+
+    arith_uint256 sum_target;
+    int t = 0, j = 0;
+
+    // Loop through N most recent blocks.
+    for (int i = nHeight - N; i < nHeight; i++) {
+        const CBlockIndex* block = pindexPrev->GetAncestor(i);
+        const CBlockIndex* block_Prev = block->GetAncestor(i - 1);
+        int64_t solvetime = block->GetBlockTime() - block_Prev->GetBlockTime();
+
+        if (limit_st && solvetime > 6 * T) {
+            solvetime = 6 * T;
+        }
+
+        j++;
+        t += solvetime * j;  // Weighted solvetime sum.
+
+        // Target sum divided by a factor, (k N^2).
+        // The factor is a part of the final equation. However we divide sum_target here to avoid
+        // potential overflow.
+        arith_uint256 target;
+        target.SetCompact(block->nBits);
+        sum_target += target / (k * N * N);
+    }
+    // Keep t reasonable in case strange solvetimes occurred.
+    if (t < N * k / dnorm) {
+        t = N * k / dnorm;
+    }
+
+    const arith_uint256 pow_limit = UintToArith256(params.powLimit);
+    arith_uint256 next_target = t * sum_target;
+    if (next_target > pow_limit) {
+        next_target = pow_limit;
+    }
+
+    return next_target.GetCompact();
+}
+
 uint32_t GetNextWorkRequired(const CBlockIndex *pindexPrev,
                              const CBlockHeader *pblock, const Config &config) {
     const Consensus::Params &params = config.GetChainParams().GetConsensus();
@@ -28,7 +99,7 @@ uint32_t GetNextWorkRequired(const CBlockIndex *pindexPrev,
         return pindexPrev->nBits;
     }
 
-    return GetNextCashWorkRequired(pindexPrev, pblock, config);
+    return LwmaCalculateNextWorkRequired(pindexPrev, pblock, config);
     //return GetNextEDAWorkRequired(pindexPrev, pblock, config);
 }
 

@@ -162,7 +162,7 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
       for (const CTxOut &out : tx->vout) {
         // Add a new entry for each output into database with current height, etc if value > min
         Amount balance = out.nValue;
-        // LogPrintf("Found spend to %d COINS at height %d\n", balance/COIN, nHeight);
+        // LogPrintf("Found spendcOINS at height %d\n", balance/COIN, nHeight);
         COutPoint outpoint(TxId, n); // Unique
 
         // 2. means possibly new candidates that should be removed by DB
