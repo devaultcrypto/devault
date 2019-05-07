@@ -228,8 +228,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
         if (HeightDiff > nMinBlocks) { 
           balance = the_reward.GetValue();
           Amount reward = CalculateReward(consensusParams, Height, HeightDiff, balance);
-          //LogPrint(BCLog::COLD, "%s: Got coin from Height %d, with balance = %d COINS, Height Diff = %d(%d), reward = %d\n",
-            //       __func__, nHeight, the_reward.GetValue() / COIN, HeightDiff, Height, reward / COIN);
+          //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
           // Check reward amount to make sure it's > min
           if (reward >= nMinReward) {
             // This is one of the oldest unrewarded UTXO with a + reward value
@@ -238,24 +237,31 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
               minHReward = reward;
             else
               minHReward = nMaxReward;
-
-            // New cases
-            // Heigher reward at same Height => choose it
-            if (minHReward > selAmount) {
-                selAmount = minHReward;
-                minHeight = nHeight;
-                minKey = key;
-                sel_reward = the_reward;
-                //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
-            } else if (minHReward == selAmount) {
-                // Same reward at Same Height => Select the 'smallest' key
-                if (key < minKey) {
+            
+            // if older than previous solutions and passed other checks, reset the mins
+            if (nHeight < minHeight) {
+              selAmount = minHReward;
+              minHeight = nHeight;
+              minKey = key;
+              sel_reward = the_reward;
+            } else {
+              // Heigher reward at same Height => choose it
+              if (minHReward > selAmount) {
+                  selAmount = minHReward;
+                  minHeight = nHeight;
+                  minKey = key;
+                  sel_reward = the_reward;
+                  //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
+              // Same reward at Same Height => Select the 'smallest' key
+              } else if (minHReward == selAmount) {
+                  if (key < minKey) {
                     selAmount = minHReward;
                     minHeight = nHeight;
                     minKey = key;
                     sel_reward = the_reward;
                     //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
-                }
+                  }
+              }
             }
             found = true;
           }
