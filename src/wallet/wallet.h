@@ -1196,6 +1196,10 @@ public:
     }
 
     ~CReserveKey() override { ReturnKey(); }
+    CReserveKey() = default;
+    CReserveKey(const CReserveKey &) = delete;
+    CReserveKey &operator=(const CReserveKey &) = delete;
+
 
     void ReturnKey();
     bool GetReservedKey(CPubKey &pubkey, bool internal = false);
