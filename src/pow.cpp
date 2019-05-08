@@ -34,15 +34,12 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
   
     const int nHeight = pindexPrev->nHeight + 1;
   
-    // Don't adjust difficult for the 1st interval of blocks
+    // Don't adjust difficult until we have a full window worth
     // this means we should also start the starting value
     // to a reasonable level !
-    if (nHeight < params.DifficultyAdjustmentInterval()) {
+    if (nHeight <= params.nZawyLwmaAveragingWindow) {
       return UintToArith256(params.powLimit).GetCompact();
     }
-  
-    assert(nHeight >= params.DifficultyAdjustmentInterval());
-
   
     const int64_t T = params.nPowTargetSpacing;
     const int N = params.nZawyLwmaAveragingWindow;
