@@ -20,7 +20,7 @@ option(BUILD_SEEDER "Build devault-seeder" OFF)
 option(BUILD_CLI "Build devault-cli" ON)
 option(BUILD_TX "Build devault-tx" ON)
 option(BUILD_QT "Build devault-qt" ON)
-option(BUILD_TEST_BENCH "Build benchmark and test code" OFF)
+option(BUILD_BENCH "Build benchmark code" OFF)
 option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" ON)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 
@@ -33,7 +33,7 @@ add_feature_info(WITH_QT BUILD_QT "Build devault-qt")
 add_feature_info(WITH_ROCKSDB BUILD_ROCKSDB "Build with RocksDB (blockchain restart needed if switched" )
 add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
 add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
-add_feature_info(WITH_BENCH BUILD_TEST_BENCH "Build benchmark and test code")
+add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
 
 set(CMAKE_REQUIRED_QUIET true)
 
@@ -439,11 +439,11 @@ target_link_libraries(server
 	      Threads::Threads
 )
 
-if (BUILD_TEST_BENCH)
-  # Test suite.
-  add_subdirectory(test)
+# Test suite.(can always setup)
+add_subdirectory(test)
   
-  # Benchmark suite.
+# Benchmark suite.
+if (BUILD_BENCH)
   add_subdirectory(bench)
 endif()
 
