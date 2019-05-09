@@ -2169,8 +2169,6 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
         LOCK(cs_main);
 
-        std::vector<CInv> vToFetch;
-
         for (CInv &inv : vInv) {
             if (interruptMsgProc) {
                 return true;
@@ -2215,11 +2213,6 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
             // Track requests for our stuff
             GetMainSignals().Inventory(inv.hash);
-        }
-
-        if (!vToFetch.empty()) {
-            connman->PushMessage(pfrom,
-                                 msgMaker.Make(NetMsgType::GETDATA, vToFetch));
         }
     }
 
