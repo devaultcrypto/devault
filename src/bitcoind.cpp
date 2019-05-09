@@ -71,9 +71,8 @@ void getPassphrase(SecureString& walletPassphrase) {
       if (c != '\n') pass1.push_back(c);
     } while (c != '\n');
     if (char_count < min_char_count) {
-      std::cout << "Password must be at least 4 characters long, please retry\n";
-      char_count = 0;
-      pass1.clear();
+      std::cout << "Password must be at least 4 characters long, please restart and retry\n";
+      exit(0);
     }
   } while (char_count < min_char_count);
   c = '0';
