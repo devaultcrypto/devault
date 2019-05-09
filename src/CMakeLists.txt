@@ -25,6 +25,7 @@ option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" ON)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
 option(ENABLE_REDUCE_EXPORTS "Reduce the amount of exported symbols" OFF)
+option(ENABLE_QRCODE "Enable QR code display" ON)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -38,6 +39,7 @@ add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
 add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
 add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
 add_feature_info(WITH_REDUCED_EXPORTS ENABLE_REDUCE_EXPORTS "Reduce amount of exported symbols")
+add_feature_info(WITH_QRCODE ENABLE_QRCODE "Enable QR code display")
 
 set(CMAKE_REQUIRED_QUIET true)
 
