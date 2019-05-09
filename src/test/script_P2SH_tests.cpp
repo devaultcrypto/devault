@@ -403,6 +403,7 @@ BOOST_AUTO_TEST_CASE(AreInputsStandard) {
                               SigHashType().withForkId()));
     BOOST_CHECK(SignSignature(keystore, CTransaction(txFrom), txTo, 2,
                               SigHashType().withForkId()));
+
     // SignSignature doesn't know how to sign these. We're not testing
     // validating signatures, so just create dummy signatures that DO include
     // the correct P2SH scripts:

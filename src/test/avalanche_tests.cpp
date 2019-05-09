@@ -624,13 +624,13 @@ BOOST_AUTO_TEST_CASE(poll_inflight_timeout) {
         // test flacky. We'll have to come up with a better solution to test
         // this if that were to be the case. I never was able to trigger this
         // myself, so it's probably good enough.
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         AvalancheTest::runEventLoop(p);
         BOOST_CHECK(p.registerVotes(avanodeid, next(resp), updates));
 
         // Now try again but wait.
         AvalancheTest::runEventLoop(p);
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         AvalancheTest::runEventLoop(p);
         BOOST_CHECK(!p.registerVotes(avanodeid, next(resp), updates));
     }
@@ -771,7 +771,7 @@ BOOST_AUTO_TEST_CASE(event_loop) {
     BOOST_CHECK(p.startEventLoop(s));
 
     // There is one task planned in the next hour (our event loop).
-    boost::chrono::system_clock::time_point start, stop;
+    std::chrono::system_clock::time_point start, stop;
     BOOST_CHECK_EQUAL(s.getQueueInfo(start, stop), 1);
 
     // Starting twice doesn't start it twice.
@@ -798,7 +798,7 @@ BOOST_AUTO_TEST_CASE(event_loop) {
     for (int i = 0; i < 1000; i++) {
         // Technically, this is a race condition, but this should do just fine
         // as we wait up to 1s for an event that should take 10ms.
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         if (AvalancheTest::getRound(p) != queryRound) {
             break;
         }
@@ -817,7 +817,7 @@ BOOST_AUTO_TEST_CASE(event_loop) {
                     updates);
     for (int i = 0; i < 1000; i++) {
         // We make sure that we do not get a request before queryTime.
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         if (AvalancheTest::getRound(p) != responseRound) {
             BOOST_CHECK(std::chrono::steady_clock::now() > queryTime);
             break;
@@ -845,7 +845,7 @@ BOOST_AUTO_TEST_CASE(event_loop) {
 
 BOOST_AUTO_TEST_CASE(destructor) {
     CScheduler s;
-    boost::chrono::system_clock::time_point start, stop;
+    std::chrono::system_clock::time_point start, stop;
 
     // Start the scheduler thread.
     std::thread schedulerThread(std::bind(&CScheduler::serviceQueue, &s));

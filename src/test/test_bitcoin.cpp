@@ -25,6 +25,8 @@
 #include "ui_interface.h"
 #include "validation.h"
 
+#include <sodium/core.h>
+
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -51,7 +53,7 @@ extern void noui_connect();
 
 BasicTestingSetup::BasicTestingSetup(const std::string &chainName) {
     SHA256AutoDetect();
-    RandomInit();
+    if (sodium_init() < 0) { throw std::string("Libsodium initialization failed."); }
     ECC_Start();
     SetupEnvironment();
     SetupNetworking();
@@ -103,8 +105,7 @@ TestingSetup::TestingSetup(const std::string &chainName)
 
     // We have to run a scheduler thread to prevent ActivateBestChain
     // from blocking due to queue overrun.
-    threadGroup.create_thread(
-        boost::bind(&CScheduler::serviceQueue, &scheduler));
+    threadGroup.emplace_back(std::thread(std::bind(&CScheduler::serviceQueue, &scheduler)));
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
     g_mempool.setSanityCheck(1.0);
@@ -122,7 +123,7 @@ TestingSetup::TestingSetup(const std::string &chainName)
     }
     nScriptCheckThreads = 3;
     for (int i = 0; i < nScriptCheckThreads - 1; i++) {
-        threadGroup.create_thread(&ThreadScriptCheck);
+        threadGroup.emplace_back(std::thread(&ThreadScriptCheck));
     }
 
     // Deterministic randomness for tests.
@@ -132,8 +133,7 @@ TestingSetup::TestingSetup(const std::string &chainName)
 }
 
 TestingSetup::~TestingSetup() {
-    threadGroup.interrupt_all();
-    threadGroup.join_all();
+    for (auto&& thread : threadGroup) thread.join();
     GetMainSignals().FlushBackgroundCallbacks();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     g_connman.reset();

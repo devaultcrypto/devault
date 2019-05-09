@@ -357,8 +357,7 @@ void CreateCreditAndSpend(const CKeyStore &keystore, const CScript &outscript,
     inputm.vout.resize(1);
     inputm.vout[0].nValue = SATOSHI;
     inputm.vout[0].scriptPubKey = CScript();
-    bool ret =
-        SignSignature(keystore, *output, inputm, 0, SigHashType().withForkId());
+    bool ret =  SignSignature(keystore, *output, inputm, 0, SigHashType().withForkId());
     BOOST_CHECK_EQUAL(ret, success);
     CDataStream ssin(SER_NETWORK, PROTOCOL_VERSION);
     ssin << inputm;
@@ -444,9 +443,7 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
 
     // sign all inputs
     for (size_t i = 0; i < mtx.vin.size(); i++) {
-        bool hashSigned =
-            SignSignature(keystore, scriptPubKey, mtx, i, 1000 * SATOSHI,
-                          sigHashes.at(i % sigHashes.size()));
+        bool hashSigned =  SignSignature(keystore, scriptPubKey, mtx, i, 1000 * SATOSHI,sigHashes.at(i % sigHashes.size()));
         BOOST_CHECK_MESSAGE(hashSigned, "Failed to sign test transaction");
     }
 
@@ -454,13 +451,12 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
 
     // check all inputs concurrently, with the cache
     PrecomputedTransactionData txdata(tx);
-    boost::thread_group threadGroup;
+    std::vector<std::thread> threadGroup;
     CCheckQueue<CScriptCheck> scriptcheckqueue(128);
     CCheckQueueControl<CScriptCheck> control(&scriptcheckqueue);
 
     for (int i = 0; i < 20; i++) {
-        threadGroup.create_thread(boost::bind(
-            &CCheckQueue<CScriptCheck>::Thread, boost::ref(scriptcheckqueue)));
+        threadGroup.emplace_back(std::thread(std::bind(&CCheckQueue<CScriptCheck>::Thread, std::ref(scriptcheckqueue))));
     }
 
     std::vector<Coin> coins;
@@ -484,8 +480,8 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
     bool controlCheck = control.Wait();
     BOOST_CHECK(controlCheck);
 
-    threadGroup.interrupt_all();
-    threadGroup.join_all();
+    //for (auto&& thread : threadGroup) thread.interrupt();
+    for (auto&& thread : threadGroup) thread.join();
 }
 
 BOOST_AUTO_TEST_CASE(test_witness) {

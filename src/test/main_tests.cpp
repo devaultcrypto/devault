@@ -15,7 +15,7 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
 
 static void TestBlockRewards(const Consensus::Params &consensusParams) {
     const int maxYears = 4;
-    const int nMaxReward = consensusParams.nMaxMiningRewardInCoins;
+    const int nMaxReward = consensusParams.nInitialMiningRewardInCoins;
     const int nBlocksPerYear = consensusParams.nBlocksPerYear;
     Amount nInitialSubsidy = (nMaxReward/2) * COIN;
 
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(block_subsidy_test) {
 
 BOOST_AUTO_TEST_CASE(subsidy_limit_test) {
     const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
-    const int nMaxReward = chainParams->GetConsensus().nMaxMiningRewardInCoins;
+    const int nMaxReward = chainParams->GetConsensus().nInitialMiningRewardInCoins;
     Amount nSum = Amount::zero();
     for (int nHeight = 0; nHeight < 14000000; nHeight += 1000) {
         Amount nSubsidy = GetBlockSubsidy(nHeight, chainParams->GetConsensus());

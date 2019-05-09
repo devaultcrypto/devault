@@ -14,7 +14,7 @@
 #include "txdb.h"
 #include "txmempool.h"
 
-#include <boost/thread.hpp>
+#include <thread>
 
 /**
  * Version of Boost::test prior to 1.64 have issues when dealing with nullptr_t.
@@ -81,7 +81,7 @@ struct CConnmanTest {
 class PeerLogicValidation;
 struct TestingSetup : public BasicTestingSetup {
     fs::path pathTemp;
-    boost::thread_group threadGroup;
+    std::vector<std::thread> threadGroup;
     CConnman *connman;
     CScheduler scheduler;
     std::unique_ptr<PeerLogicValidation> peerLogic;

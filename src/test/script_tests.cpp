@@ -2462,8 +2462,7 @@ BOOST_AUTO_TEST_CASE(script_combineSigs) {
     BOOST_CHECK(combined.scriptSig.empty());
 
     // Single signature case:
-    SignSignature(keystore, CTransaction(txFrom), txTo, 0,
-                  SigHashType()); // changes scriptSig
+    SignSignature(keystore, CTransaction(txFrom), txTo, 0, SigHashType()); // changes scriptSig
     combined = CombineSignatures(
         scriptPubKey, MutableTransactionSignatureChecker(&txTo, 0, amount),
         SignatureData(scriptSig), empty);

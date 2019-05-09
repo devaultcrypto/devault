@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include "noncopyable.h"
 
 /**
  * This is a radix tree storing values identified by a unique key.
@@ -52,7 +53,7 @@ private:
     std::atomic<RadixElement> root;
 
 public:
-    RadixTree() : root(RadixElement()) {} = delete;
+    RadixTree() : root(RadixElement()) {}
     ~RadixTree() { root.load().release(); }
 
     /**
@@ -247,7 +248,7 @@ private:
         }
     };
 
-    struct RadixNode : public boost::noncopyable {
+    struct RadixNode : public noncopyable {
         IMPLEMENT_RCU_REFCOUNT(uint64_t);
 
     private:
