@@ -1,37 +1,27 @@
-# Locates the qrencode library
-# This module defines
-# QRENCODE_LIBRARY, the name of the library to link against
-# QRENCODE_FOUND, if false, do not try to link to SDL
-# QRENCODE_INCLUDE_DIR, where to find SDL.h
-#
-# QRENCODE_DIR: specify optional search dir
+# Try to find libqrencode
+# QRENCODE_FOUND - system has libqrencode
+# QRENCODE_INCLUDE_DIR - the libqrencode include directory
+# QRENCODE_LIBRARY - Library needed to use libqrencode
 
-FIND_PATH(QREncode_INCLUDE_DIR qrencode.h
-  HINTS
-  $ENV{QRENCODE_DIR}
-  PATH_SUFFIXES include/qrencode include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /opt/local
-  /opt
+if (QRENCODE_INCLUDE_DIR AND QRENCODE_LIBRARY)
+	# Already in cache, be silent
+	set(QRENCODE_FIND_QUIETLY TRUE)
+endif()
+
+find_path(QRENCODE_INCLUDE_DIR qrencode.h)
+
+find_library(QRENCODE_LIBRARY NAMES qrencode libqrencode)
+
+message(STATUS "QREncode lib: " ${QRENCODE_LIBRARY})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+	QREncode DEFAULT_MSG
+	QRENCODE_INCLUDE_DIR
+	QRENCODE_LIBRARY
 )
 
-FIND_LIBRARY(QREncode_LIBRARY 
-  NAMES qrencode
-  HINTS
-  $ENV{QRENCODE_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  /sw
-  /opt/local
-  /usr/local
-  /opt
-)
+mark_as_advanced(QRENCODE_INCLUDE_DIR QRENCODE_LIBRARY)
 
-IF(QREncode_LIBRARY AND QREncode_INCLUDE_DIR)
-	SET(QREncode_FOUND "YES")
-ENDIF(QREncode_LIBRARY AND QREncode_INCLUDE_DIR)
-
+set(QREncode_LIBRARIES ${QRENCODE_LIBRARY})
+set(QREncode_INCLUDE_DIRS ${QRENCODE_INCLUDE_DIR})
