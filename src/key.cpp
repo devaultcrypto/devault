@@ -303,13 +303,8 @@ void CExtKey::SetMaster(const uint8_t *seed, unsigned int nSeedLen) {
     CHMAC_SHA512(hashkey, sizeof(hashkey))
         .Write(seed, nSeedLen)
         .Finalize(vout.data());
-<<<<<<< HEAD
-    key.Set(&vout[0], &vout[32]);
-    memcpy(chaincode.begin(), &vout[32], 32);
-=======
-    key.Set(vout.data(), vout.data() + 32, true);
+    key.Set(vout.data(), vout.data() + 32);
     memcpy(chaincode.begin(), vout.data() + 32, 32);
->>>>>>> 24ad36f71... Merge #9804: Fixes subscript 0 (&var[0]) where should use (var.data()) instead.
     nDepth = 0;
     nChild = 0;
     memset(vchFingerprint, 0, sizeof(vchFingerprint));

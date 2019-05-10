@@ -18,7 +18,7 @@
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "rpc/server.h"
-#include "rpc/tojson.h"
+#include "rpc/blockchain.h"
 #include "script/script.h"
 #include "script/script_error.h"
 #include "script/sign.h"
@@ -27,15 +27,17 @@
 #include "uint256.h"
 #include "utilstrencodings.h"
 #include "validation.h"
+#include <coins.h>
+
 #ifdef ENABLE_WALLET
 #include "wallet/rpcwallet.h"
 #endif
 
 #include <cstdint>
-
 #include <univalue.h>
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry) {
+static void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
+                     UniValue &entry) {
     // Call into TxToUniv() in bitcoin-common to decode the transaction hex.
     //
     // Blockchain contextual information (confirmations and blocktime) is not

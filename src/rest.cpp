@@ -12,7 +12,7 @@
 #include "primitives/transaction.h"
 #include "rpc/blockchain.h"
 #include "rpc/server.h"
-#include "rpc/tojson.h"
+#include "rpc/blockchain.h"
 #include "streams.h"
 #include "sync.h"
 #include "txmempool.h"
@@ -20,6 +20,7 @@
 #include "utilsplitstring.h"
 #include "validation.h"
 #include "version.h"
+
 
 #include <univalue.h>
 
