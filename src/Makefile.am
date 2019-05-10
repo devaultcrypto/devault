@@ -185,7 +185,6 @@ BITCOIN_CORE_H = \
   rpc/protocol.h \
   rpc/rawtransaction.h \
   rpc/server.h \
-  rpc/tojson.h \
   rpc/register.h \
   rwcollection.h \
   scheduler.h \
