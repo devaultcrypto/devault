@@ -4,6 +4,9 @@
 
 #include "key.h"
 
+#include "cashaddrenc.h"
+#include "config.h"
+#include "chainparams.h"
 #include "dstencode.h"
 #include "script/script.h"
 #include "test/test_bitcoin.h"
@@ -16,20 +19,30 @@
 
 #include <boost/test/unit_test.hpp>
 
-static const std::string strSecret1 =
-    "5HxWvvfubhXpYYpS3tJkw6fq9jE9j18THftkZjHHfmFiWtmAbrj";
-static const std::string strSecret2 =
-    "5KC4ejrDjv152FGwP386VD1i2NYc5KkfSMyv1nGy1VGDxGHqVY3";
-static const std::string strSecret1C =
-    "Kwr371tjA9u2rFSMZjTNun2PXXP3WPZu2afRHTcta6KxEUdm1vEw";
-static const std::string strSecret2C =
-    "L3Hq7a8FEQwJkW1M2GNKDW28546Vp5miewcCzSqUD9kCAXrJdS3g";
-static const std::string addr1 = "1QFqqMUD55ZV3PJEJZtaKCsQmjLT6JkjvJ";
-static const std::string addr2 = "1F5y5E5FMc5YzdJtB9hLaUe43GDxEKXENJ";
-static const std::string addr1C = "1NoJrossxPBKfCHuJXT4HadJrXRE9Fxiqs";
-static const std::string addr2C = "1CRj2HyM1CXWzHAXLQtiGLyggNT9WQqsDs";
+/*
+testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k 
+# addr=dvtest:qp8nw8hsxhaza5y50j5q6j3unauss28f9y3l5yx8h0,hdkeypath=m/44'/1'/0'/0/33
+testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh 
+# addr=dvtest:qp9jzxnyd8n2v2jda9um7sq2wse208sgpykwdc6lzw,hdkeypath=m/44'/1'/0'/0/34
+testpriv:zzsug4madaqkz8demqh6u7paslstyafwmam2tzuasszl5mlqfq0cjhzpd70rq 
+# addr=dvtest:qrnekung3wsflx9nklq0rnjlnkhl4j9p4544pl0tgg,hdkeypath=m/44'/1'/0'/0/35
+testpriv:zp2xqfjlsf46x9ter9r3cnvvj4wena9z5r7p60zwnze3au3sqqypcsn3yt5yw 
+# addr=dvtest:qqklsqvpfyezzqtzvh2rd9eknmlwksph0gfdwdwsx4,hdkeypath=m/44'/1'/0'/0/36
+*/
 
-static const std::string strAddressBad = "1HV9Lc3sNHZxwj4Zk6fB38tEmBryq2cBiF";
+// 32/33 from HD chain
+static const std::string strSecret1 = "testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k";
+static const std::string strSecret1C = "testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh";
+static const std::string strSecret2 =  "testpriv:zzsug4madaqkz8demqh6u7paslstyafwmam2tzuasszl5mlqfq0cjhzpd70rq";
+static const std::string strSecret2C =  "testpriv:zp2xqfjlsf46x9ter9r3cnvvj4wena9z5r7p60zwnze3au3sqqypcsn3yt5yw";
+
+static const std::string addr1 =  "dvtest:qp8nw8hsxhaza5y50j5q6j3unauss28f9y3l5yx8h0";
+static const std::string addr2 =  "dvtest:qp9jzxnyd8n2v2jda9um7sq2wse208sgpykwdc6lzw";
+static const std::string addr1C = "dvtest:qrnekung3wsflx9nklq0rnjlnkhl4j9p4544pl0tgg";
+static const std::string addr2C = "dvtest:qqklsqvpfyezzqtzvh2rd9eknmlwksph0gfdwdwsx4";
+
+
+static const std::string strAddressBad = "dvtest:qqklsqvpfyezzqtzvh2rd9eknmlwksph0gfdwdwsx4";
 
 // get r value produced by ECDSA signing algorithm
 // (assumes ECDSA r is encoded in the canonical manner)
@@ -80,23 +93,16 @@ BOOST_AUTO_TEST_CASE(internal_test) {
                          "24c22e00b7bc7944a1f78"));
 }
 
-#warning "disable key_test1 test"
-/*
 BOOST_AUTO_TEST_CASE(key_test1) {
-    CBitcoinSecret bsecret1, bsecret2, bsecret1C, bsecret2C, baddress1;
-    BOOST_CHECK(bsecret1.SetString(strSecret1));
-    BOOST_CHECK(bsecret2.SetString(strSecret2));
-    BOOST_CHECK(bsecret1C.SetString(strSecret1C));
-    BOOST_CHECK(bsecret2C.SetString(strSecret2C));
-    BOOST_CHECK(!baddress1.SetString(strAddressBad));
+    //    BOOST_CHECK(!baddress1.SetString(strAddressBad));
 
-    CKey key1 = bsecret1.GetKey();
+    CKey key1 = DecodeSecret(strSecret1);
     BOOST_CHECK(key1.IsCompressed() == false);
-    CKey key2 = bsecret2.GetKey();
+    CKey key2 = DecodeSecret(strSecret2);
     BOOST_CHECK(key2.IsCompressed() == false);
-    CKey key1C = bsecret1C.GetKey();
+    CKey key1C = DecodeSecret(strSecret1C);
     BOOST_CHECK(key1C.IsCompressed() == true);
-    CKey key2C = bsecret2C.GetKey();
+    CKey key2C = DecodeSecret(strSecret2C);
     BOOST_CHECK(key2C.IsCompressed() == true);
 
     CPubKey pubkey1 = key1.GetPubKey();
@@ -124,15 +130,12 @@ BOOST_AUTO_TEST_CASE(key_test1) {
     BOOST_CHECK(!key2C.VerifyPubKey(pubkey2));
     BOOST_CHECK(key2C.VerifyPubKey(pubkey2C));
 
-    const CChainParams &chainParams = Params();
-    BOOST_CHECK(DecodeDestination(addr1, chainParams) ==
-                CTxDestination(pubkey1.GetID()));
-    BOOST_CHECK(DecodeDestination(addr2, chainParams) ==
-                CTxDestination(pubkey2.GetID()));
-    BOOST_CHECK(DecodeDestination(addr1C, chainParams) ==
-                CTxDestination(pubkey1C.GetID()));
-    BOOST_CHECK(DecodeDestination(addr2C, chainParams) ==
-                CTxDestination(pubkey2C.GetID()));
+    const Config &config = GetConfig();
+    const CChainParams &chainParams = config.GetChainParams();
+    BOOST_CHECK(DecodeDestination(addr1, chainParams) ==                CTxDestination(pubkey1.GetID()));
+    BOOST_CHECK(DecodeDestination(addr2, chainParams) ==                CTxDestination(pubkey2.GetID()));
+    BOOST_CHECK(DecodeDestination(addr1C, chainParams) ==                CTxDestination(pubkey1C.GetID()));
+    BOOST_CHECK(DecodeDestination(addr2C, chainParams) ==                CTxDestination(pubkey2C.GetID()));
 
     for (int n = 0; n < 16; n++) {
         std::string strMsg = strprintf("Very secret message %i: 11", n);
@@ -297,6 +300,5 @@ BOOST_AUTO_TEST_CASE(key_test1) {
                          "1a5b54305880517cace1bcb0cb515e2eeaffd49f1e4dd49fd7282"
                          "6b4b1573c84da49a38405d"));
 }
-*/
 
 BOOST_AUTO_TEST_SUITE_END()

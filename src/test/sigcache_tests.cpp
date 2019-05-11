@@ -5,7 +5,7 @@
 // (based on key_tests.cpp)
 
 #include "script/sigcache.h"
-
+#include "cashaddrenc.h"
 #include "dstencode.h"
 #include "key.h"
 #include "test/test_bitcoin.h"
@@ -16,10 +16,9 @@
 #include <string>
 #include <vector>
 
-static const std::string strSecret1 =
-    "5HxWvvfubhXpYYpS3tJkw6fq9jE9j18THftkZjHHfmFiWtmAbrj";
-static const std::string strSecret1C =
-    "Kwr371tjA9u2rFSMZjTNun2PXXP3WPZu2afRHTcta6KxEUdm1vEw";
+// 32/33 from HD chain
+static const std::string strSecret1 = "testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k";
+static const std::string strSecret1C = "testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh";
 
 /* We will be testing that these flags do not affect the cache entry.
  * This list must match the one found in script/sigcache.cpp , however
@@ -69,8 +68,6 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(sigcache_tests, BasicTestingSetup)
 
-#warning "Disabled sig_pubkey_hash_variations"
-#ifdef BASE58_UPGRADE
 BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
     /**
      * Making CachingTransactionSignatureChecker requires a tx. So we make a
@@ -90,13 +87,10 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
 
     uint32_t flags = 0;
 
-    CBitcoinSecret bsecret1, bsecret1C;
-    BOOST_CHECK(bsecret1.SetString(strSecret1));
-    BOOST_CHECK(bsecret1C.SetString(strSecret1C));
+    CKey key1 = DecodeSecret(strSecret1);
+    CKey key1C = DecodeSecret(strSecret1C);
 
-    CKey key1 = bsecret1.GetKey();
     BOOST_CHECK(key1.IsCompressed() == false);
-    CKey key1C = bsecret1C.GetKey();
     BOOST_CHECK(key1C.IsCompressed() == true);
 
     CPubKey pubkey1 = key1.GetPubKey();
@@ -141,9 +135,6 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
         BOOST_CHECK(testChecker.IsCached(sig, pubkey1C, hashMsg, flags));
     }
 }
-#endif
-#warning "Disabled flag_invariants"
-#ifdef BASE58_UPGRADE
 BOOST_AUTO_TEST_CASE(flag_invariants) {
     /**
      * Making CachingTransactionSignatureChecker requires a tx. So we make a
@@ -161,9 +152,7 @@ BOOST_AUTO_TEST_CASE(flag_invariants) {
 
     TestCachingTransactionSignatureChecker testChecker(checker);
 
-    CBitcoinSecret bsecret1;
-    bsecret1.SetString(strSecret1);
-    CKey key1 = bsecret1.GetKey();
+    CKey key1 = DecodeSecret(strSecret1);
     CPubKey pubkey1 = key1.GetPubKey();
 
     // there should not be any overlap
@@ -206,5 +195,4 @@ BOOST_AUTO_TEST_CASE(flag_invariants) {
         }
     }
 }
-#endif
 BOOST_AUTO_TEST_SUITE_END()
