@@ -234,6 +234,7 @@ void TestCoinbaseMessageEB(uint64_t eb, std::string cbmsg) {
                  COINBASE_FLAGS));
 }
 
+#ifdef DEBUG_THIS
 // Coinbase scriptSig has to contains the correct EB value
 // converted to MB, rounded down to the first decimal
 BOOST_AUTO_TEST_CASE(CheckCoinbase_EB) {
@@ -768,5 +769,6 @@ BOOST_AUTO_TEST_CASE(BlockAssembler_construction) {
                           DEFAULT_MAX_GENERATED_BLOCK_SIZE);
     }
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

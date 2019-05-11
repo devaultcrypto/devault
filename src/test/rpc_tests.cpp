@@ -33,6 +33,7 @@ UniValue CallRPC(std::string args) {
         throw std::runtime_error(find_value(objError, "message").get_str());
     }
 }
+#ifdef DEBUG_THIS
 
 BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
 
@@ -504,3 +505,4 @@ BOOST_AUTO_TEST_CASE(rpc_convert_values_generatetoaddress) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+#endif
