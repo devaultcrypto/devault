@@ -64,7 +64,7 @@ add_test_to_suite(devault test_devault
 	coins_tests.cpp
 #	compress_tests.cpp
 	config_tests.cpp
-## ? unknown parse hex issue	core_io_tests.cpp
+	core_io_tests.cpp
 	crypto_tests.cpp
 	cuckoocache_tests.cpp
 	dbwrapper_tests.cpp
