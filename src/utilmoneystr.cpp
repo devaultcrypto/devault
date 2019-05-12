@@ -14,7 +14,7 @@ std::string FormatMoney(const Amount amt) {
     // number formatting.
     Amount amt_abs = amt > Amount::zero() ? amt : -amt;
     std::string str =
-        strprintf("%d.%08d", amt_abs / COIN, (amt_abs % COIN) / SATOSHI);
+        strprintf("%d.%03d", amt_abs / COIN, (amt_abs % COIN) / SATOSHI);
 
     // Right-trim excess zeros before the decimal point:
     int nTrim = 0;
