@@ -31,9 +31,6 @@ endfunction()
 
 gen_json_header(JSON_HEADERS
 	data/script_tests.json
-	data/base58_keys_valid.json
-	data/base58_encode_decode.json
-	data/base58_keys_invalid.json
 	data/tx_invalid.json
 	data/tx_valid.json
 	data/sighash.json
@@ -80,7 +77,7 @@ add_test_to_suite(devault test_devault
 	hash_tests.cpp
 	inv_tests.cpp
 	jsonutil.cpp
-#	key_tests.cpp
+	key_tests.cpp
 	lcg_tests.cpp
 	limitedmap_tests.cpp
 	main_tests.cpp

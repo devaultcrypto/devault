@@ -152,8 +152,7 @@ static void Correct_Queue_range(std::vector<size_t> range) {
                                << FakeCheckCheckCompletion::n_calls);
         }
     }
-    //    tg.interrupt_all();
-    for (auto&& thread : tg) thread.join();
+    for (auto& thread : tg) if (thread.joinable()) thread.join();
 }
 
 /** Test that 0 checks is correct
