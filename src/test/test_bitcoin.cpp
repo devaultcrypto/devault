@@ -143,6 +143,8 @@ TestingSetup::~TestingSetup() {
   pcoinsTip.reset();
   pcoinsdbview.reset();
   pblocktree.reset();
+  prewards.reset();
+  prewardsdb.reset();
   fs::remove_all(pathTemp);
 }
 
