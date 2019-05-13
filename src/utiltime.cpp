@@ -66,7 +66,7 @@ std::string DateTimeStrFormat(const char *pszFormat, int64_t nTime) {
   // std::locale loc(classic, new boost::posix_time::time_facet(pszFormat));
   std::stringstream ss;
   ss.imbue(classic);  // was loc.
-  ss << std::put_time(std::localtime(&ttp), pszFormat);
+  ss << std::put_time(std::gmtime(&ttp), pszFormat);
   return ss.str();
 }
 
