@@ -2326,7 +2326,7 @@ bool AppInitMain(Config &config,
         while (!fHaveGenesis && !ShutdownRequested()) {
             condvar_GenesisWait.wait_for(lock, std::chrono::milliseconds(500));
         }
-        uiInterface.NotifyBlockTip.disconnect_all(true);
+//        uiInterface.NotifyBlockTip.disconnect_all(true);
     }
 
     // Step 11: start node
