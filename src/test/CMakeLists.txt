@@ -1,4 +1,5 @@
-# Copyright (c) 2018 The Bitcoin developers
+# Copyright(c) 2018 The Bitcoin developers
+# Copyright(c) 2019 DeVault developers
 
 project(devault-test)
 
@@ -11,7 +12,7 @@ function(gen_json_header NAME)
 	foreach(f ${ARGN})
 		set(h "${CMAKE_CURRENT_BINARY_DIR}/${f}.h")
 
-		# Get the proper name for the test variable.
+#Get the proper name for the test variable.
 		get_filename_component(TEST_NAME ${f} NAME_WE)
 		add_custom_command(OUTPUT ${h}
 			COMMAND ${PYTHON}
@@ -46,7 +47,7 @@ add_test_to_suite(devault test_devault
 	allocator_tests.cpp
 ###	amount_tests.cpp
 	arith_uint256_tests.cpp
-#	avalanche_tests.cpp
+#avalanche_tests.cpp
 	base32_tests.cpp
 	base64_tests.cpp
 	blockcheck_tests.cpp
@@ -60,9 +61,9 @@ add_test_to_suite(devault test_devault
 	cashaddrenc_tests.cpp
 	checkdatasig_tests.cpp
 	checkpoints_tests.cpp
-#	checkqueue_tests.cpp
+#checkqueue_tests.cpp
 	coins_tests.cpp
-#	compress_tests.cpp
+#compress_tests.cpp
 	config_tests.cpp
 	core_io_tests.cpp
 	crypto_tests.cpp
@@ -81,7 +82,7 @@ add_test_to_suite(devault test_devault
 	lcg_tests.cpp
 	limitedmap_tests.cpp
 	main_tests.cpp
-#	mempool_tests.cpp
+# mempool_tests.cpp
 	merkle_tests.cpp
 	miner_tests.cpp
 	monolith_opcodes_tests.cpp
@@ -90,7 +91,7 @@ add_test_to_suite(devault test_devault
 	netbase_tests.cpp
 	pmt_tests.cpp
 	policyestimator_tests.cpp
-## need to debug	pow_tests.cpp
+# pow_tests.cpp
 	prevector_tests.cpp
 	radix_tests.cpp
 	raii_event_tests.cpp
@@ -105,11 +106,11 @@ add_test_to_suite(devault test_devault
 	schnorr_tests.cpp
 	script_commitment_tests.cpp
 	script_P2SH_tests.cpp
-# FORK STUFF	script_tests.cpp
+#FORK STUFF script_tests.cpp
 	scriptflags.cpp
 	scriptnum_tests.cpp
   serialize_tests.cpp
-#	sigcache_tests.cpp
+# sigcache_tests.cpp
 	sigencoding_tests.cpp
   sighash_tests.cpp
 	sighashtype_tests.cpp
@@ -122,24 +123,24 @@ add_test_to_suite(devault test_devault
 	test_bitcoin_main.cpp
 	timedata_tests.cpp
 #	transaction_tests.cpp
-#	txvalidationcache_tests.cpp
+# txvalidationcache_tests.cpp
 	uint256_tests.cpp
-# Needs debug	undo_tests.cpp
+  undo_tests.cpp
 	univalue_tests.cpp
 	util_tests.cpp
 	validation_tests.cpp
 	work_comparator_tests.cpp
 
-	# RPC Tests
+#RPC Tests
 	../rpc/test/server_tests.cpp
 
-	# Tests generated from JSON
+#Tests generated from JSON
 	${JSON_HEADERS}
 )
 
 target_include_directories(test_devault
 	PUBLIC
-		# To access the generated json headers.
+#To access the generated json headers.
 		${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -147,12 +148,12 @@ find_package(Boost 1.58 REQUIRED unit_test_framework)
 
 target_link_libraries(test_devault Boost::unit_test_framework rpcclient server)
 
-# We need to detect if the BOOST_TEST_DYN_LINK flag is required.
+#We need to detect if the BOOST_TEST_DYN_LINK flag is required.
 set(CMAKE_REQUIRED_LIBRARIES Boost::unit_test_framework)
 check_cxx_source_compiles("
-	#define BOOST_TEST_DYN_LINK
-	#define BOOST_TEST_MAIN
-	#include <boost/test/unit_test.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>
 " BOOST_TEST_DYN_LINK)
 
 if(BOOST_TEST_DYN_LINK)
