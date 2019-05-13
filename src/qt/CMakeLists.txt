@@ -185,13 +185,6 @@ set(CMAKE_AUTOMOC ON)
 qt5_add_resources(QRC_BITCOIN_CPP bitcoin.qrc)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(mac_stuff
-	  macdockiconhandler.mm
-	  macnotificationhandler.mm
-	  )
-
-
-  
 if(BUILD_WALLET)
   file(GLOB QT_BASE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
   source_group("BaseHeaders" FILES ${QT_BASE_HEADERS})
@@ -237,8 +230,6 @@ add_library(bitcoin-qt-base
 	${QRC_BITCOIN_CPP}
 	qrc_bitcoin_locale.cpp
 
-  ${mac_stuff}
-
   )
 
 target_compile_definitions(bitcoin-qt-base PUBLIC OBJC_OLD_DISPATCH_PROTOTYPES)
@@ -255,6 +246,14 @@ target_include_directories(bitcoin-qt-base
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}/forms
 )
+
+# OSX support
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	target_sources(bitcoin-qt-base PRIVATE 
+		macdockiconhandler.mm
+		macnotificationhandler.mm
+	)
+endif()
 
 target_link_libraries(bitcoin-qt-base
 	server
