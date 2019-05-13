@@ -34,9 +34,11 @@ CScript ParseScript(const std::string &s) {
             }
 
             std::string strName(name);
-            mapOpNames[strName] = static_cast<opcodetype>(op);
             // Convenience: OP_ADD and just ADD are both recognized:
-            strName.replace(strName.find("OP_"),3,"");
+            std::size_t found = strName.find("OP_");
+            if (found!=std::string::npos) {
+              strName.replace(strName.find("OP_"),3,"");
+            }
             mapOpNames[strName] = static_cast<opcodetype>(op);
         }
     }

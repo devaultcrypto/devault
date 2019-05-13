@@ -48,7 +48,11 @@ static UniValue setexcessiveblock(Config &config,
         ebs = request.params[0].get_int64();
     } else {
         std::string temp = request.params[0].get_str();
-        ebs = std::stoi(temp);
+        if (temp[0] == '-')
+          throw JSONRPCError(
+                         RPC_INVALID_PARAMETER,
+                         std::string("Invalid parameter, excessiveblock must be positive"));
+        ebs = std::stoll(temp);
     }
 
     // Do not allow maxBlockSize to be set below historic 1MB limit

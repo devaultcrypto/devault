@@ -1432,7 +1432,7 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
     */
     
     // Undo databasing stuff for Rewards.
-    if (!ignoreIndices) prewards->UndoBlock(block, pindex); // add a false here if we see issues possibly
+    if (!ignoreIndices && prewards) prewards->UndoBlock(block, pindex); // add a false here if we see issues possibly
     
     // For fAddressIndex enabled
     // Go through all outputs and add back to addressIndex 
