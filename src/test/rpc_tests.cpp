@@ -7,17 +7,17 @@
 
 #include "config.h"
 #include "netbase.h"
+#include "utilsplitstring.h"
 
 #include "test/test_bitcoin.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <univalue.h>
 
 UniValue CallRPC(std::string args) {
     std::vector<std::string> vArgs;
-    boost::split(vArgs, args, boost::is_any_of(" \t"));
+    Split(vArgs, args, " \t");
     std::string strMethod = vArgs[0];
     vArgs.erase(vArgs.begin());
     GlobalConfig config;

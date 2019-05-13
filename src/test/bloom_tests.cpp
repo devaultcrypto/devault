@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(bloom_create_insert_key) {
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << filter;
 
-    std::vector<uint8_t> vch = ParseHex("038fc16b080000000000000001");
+    std::vector<uint8_t> vch = ParseHex("0371f9a3080000000000000001");
     std::vector<char> expected(vch.size());
 
     for (unsigned int i = 0; i < vch.size(); i++)

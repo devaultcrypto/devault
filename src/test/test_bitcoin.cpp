@@ -16,6 +16,9 @@
 #include "net_processing.h"
 #include "pubkey.h"
 #include "random.h"
+#include "devault/rewards.h"
+#include "devault/rewardsview.h"
+#include "devault/budget.h"
 #include "rpc/register.h"
 #include "rpc/server.h"
 #include "script/scriptcache.h"
@@ -106,6 +109,9 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
   pblocktree = std::make_unique<CBlockTreeDB>(1 << 20, true);
   pcoinsdbview = std::make_unique<CCoinsViewDB>(1 << 23, true);
   pcoinsTip = std::make_unique<CCoinsViewCache>(pcoinsdbview.get());
+  prewardsdb = std::make_unique<CRewardsViewDB>("rewards", 1 << 23, true);
+  prewards = std::make_unique<CColdRewards>(chainparams.GetConsensus(), prewardsdb.get());
+  pbudget = std::make_unique<CBudget>(config);
   if (!LoadGenesisBlock(chainparams)) { throw std::runtime_error("InitBlockIndex failed."); }
   {
     CValidationState state;
@@ -137,6 +143,8 @@ TestingSetup::~TestingSetup() {
   pcoinsTip.reset();
   pcoinsdbview.reset();
   pblocktree.reset();
+  prewards.reset();
+  prewardsdb.reset();
   fs::remove_all(pathTemp);
 }
 
