@@ -31,17 +31,13 @@
  */
 typedef std::vector<uint8_t, secure_allocator<uint8_t>> CPrivKey;
 
-/** An encapsulated secp256k1 private key. */
+/** An encapsulated secp256k1 private key - always compressed. */
 class CKey {
 private:
     //! Whether this private key is valid. We check for correctness when
     //! modifying the key data, so fValid should always correspond to the actual
     //! state.
     bool fValid;
-
-    //! Whether the public key corresponding to this private key is (to be)
-    //! compressed.
-    bool fCompressed;
 
     //! The actual byte data
     std::vector<uint8_t, secure_allocator<uint8_t>> keydata;
@@ -51,7 +47,7 @@ private:
 
 public:
     //! Construct an invalid private key.
-    CKey() : fValid(false), fCompressed(false) {
+    CKey() : fValid(false) {
         // Important: vch must be 32 bytes in length to not break serialization
         keydata.resize(32);
     }
@@ -60,19 +56,18 @@ public:
     ~CKey() = default;
 
     friend bool operator==(const CKey &a, const CKey &b) {
-        return a.fCompressed == b.fCompressed && a.size() == b.size() &&
+        return a.size() == b.size() &&
                memcmp(a.keydata.data(), b.keydata.data(), a.size()) == 0;
     }
 
     //! Initialize using begin and end iterators to byte data.
     template <typename T>
-    void Set(const T pbegin, const T pend, bool fCompressedIn) {
+    void Set(const T pbegin, const T pend) {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
         } else if (Check(&pbegin[0])) {
             memcpy(keydata.data(), (uint8_t *)&pbegin[0], keydata.size());
             fValid = true;
-            fCompressed = fCompressedIn;
         } else {
             fValid = false;
         }
@@ -86,12 +81,8 @@ public:
     //! Check whether this private key is valid.
     bool IsValid() const { return fValid; }
 
-    //! Check whether the public key corresponding to this private key is (to
-    //! be) compressed.
-    bool IsCompressed() const { return fCompressed; }
-
     //! Generate a new private key using a cryptographic PRNG.
-    void MakeNewKey(bool fCompressed);
+    void MakeNewKey();
 
     /**
      * Convert the private key to a CPrivKey (serialized OpenSSL private key

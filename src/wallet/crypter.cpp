@@ -163,7 +163,7 @@ static bool DecryptKey(const CKeyingMaterial &vMasterKey,
         return false;
     }
 
-    key.Set(vchSecret.begin(), vchSecret.end(), vchPubKey.IsCompressed());
+    key.Set(vchSecret.begin(), vchSecret.end());
     return key.VerifyPubKey(vchPubKey);
 }
 

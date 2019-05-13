@@ -296,7 +296,7 @@ CKey DecodeSecret(const std::string &addr) {
 
     // Pop the version.
     data.erase(data.begin());
-    key.Set(data.begin(), data.end(), true);
+    key.Set(data.begin(), data.end());
     return key;
 }
 
