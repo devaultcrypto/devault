@@ -90,11 +90,8 @@ BOOST_AUTO_TEST_CASE(key_test1) {
     // Secret Keys give Keys always compressed
   
     CKey key1 = DecodeSecret(strSecret1);
-    BOOST_CHECK(key1.IsCompressed() == true);
     CKey key2 = DecodeSecret(strSecret2);
-    BOOST_CHECK(key2.IsCompressed() == true);
     CKey key3 = DecodeSecret(strSecret3);
-    BOOST_CHECK(key3.IsCompressed() == true);
 
     CPubKey pubkey1 = key1.GetPubKey();
     CPubKey pubkey2 = key2.GetPubKey();

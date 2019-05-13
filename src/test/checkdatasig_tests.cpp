@@ -25,14 +25,11 @@ const uint8_t vchPrivkey[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 struct KeyData {
-    CKey privkey, privkeyC;
-    CPubKey pubkey, pubkeyC, pubkeyH;
+    CKey privkeyC;
+    CPubKey pubkeyC, pubkeyH;
 
     KeyData() {
-        privkey.Set(vchPrivkey, vchPrivkey + 32, false);
-        privkeyC.Set(vchPrivkey, vchPrivkey + 32, true);
-        pubkey = privkey.GetPubKey();
-        pubkeyH = privkey.GetPubKey();
+        privkeyC.Set(vchPrivkey, vchPrivkey + 32);
         pubkeyC = privkeyC.GetPubKey();
         *const_cast<uint8_t *>(&pubkeyH[0]) = 0x06 | (pubkeyH[64] & 1);
     }
@@ -111,17 +108,11 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
     uint256 messageHash(vchHash);
 
     KeyData kd;
-    valtype pubkey = ToByteVector(kd.pubkey);
     valtype pubkeyC = ToByteVector(kd.pubkeyC);
     valtype pubkeyH = ToByteVector(kd.pubkeyH);
 
-    CheckTestResultForAllFlags({{}, message, pubkey},
-                               CScript() << OP_CHECKDATASIG, {{}});
     CheckTestResultForAllFlags({{}, message, pubkeyC},
                                CScript() << OP_CHECKDATASIG, {{}});
-    CheckErrorForAllFlags({{}, message, pubkey},
-                          CScript() << OP_CHECKDATASIGVERIFY,
-                          SCRIPT_ERR_CHECKDATASIGVERIFY);
     CheckErrorForAllFlags({{}, message, pubkeyC},
                           CScript() << OP_CHECKDATASIGVERIFY,
                           SCRIPT_ERR_CHECKDATASIGVERIFY);
@@ -132,12 +123,6 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
 
     // Check valid signatures (as in the signature format is valid).
     valtype validsig;
-    kd.privkey.SignECDSA(messageHash, validsig);
-
-    CheckTestResultForAllFlags({validsig, message, pubkey},
-                               CScript() << OP_CHECKDATASIG, {{0x01}});
-    CheckTestResultForAllFlags({validsig, message, pubkey},
-                               CScript() << OP_CHECKDATASIGVERIFY, {});
 
     const valtype minimalsig{0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x01};
     const valtype nondersig{0x30, 0x80, 0x06, 0x02, 0x01,
@@ -175,15 +160,8 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
 
         if (flags & SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE) {
             // When compressed-only is enforced, uncompressed keys are invalid.
-            CheckError(flags, {{}, message, pubkey}, script,
-                       SCRIPT_ERR_NONCOMPRESSED_PUBKEY);
-            CheckError(flags, {{}, message, pubkey}, scriptverify,
-                       SCRIPT_ERR_NONCOMPRESSED_PUBKEY);
         } else {
             // Otherwise, uncompressed keys are valid.
-            CheckPass(flags, {{}, message, pubkey}, script, {});
-            CheckError(flags, {{}, message, pubkey}, scriptverify,
-                       SCRIPT_ERR_CHECKDATASIGVERIFY);
         }
 
         if (flags & SCRIPT_VERIFY_NULLFAIL) {

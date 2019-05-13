@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(multisig_verify) {
     CKey key[4];
     Amount amount = Amount::zero();
     for (int i = 0; i < 4; i++) {
-        key[i].MakeNewKey(true);
+        key[i].MakeNewKey();
     }
 
     CScript a_and_b;
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(multisig_verify) {
 BOOST_AUTO_TEST_CASE(multisig_IsStandard) {
     CKey key[4];
     for (int i = 0; i < 4; i++)
-        key[i].MakeNewKey(true);
+        key[i].MakeNewKey();
 
     txnouttype whichType;
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(multisig_Solver1) {
     CKey key[3];
     CTxDestination keyaddr[3];
     for (int i = 0; i < 3; i++) {
-        key[i].MakeNewKey(true);
+        key[i].MakeNewKey();
         keystore.AddKey(key[i]);
         keyaddr[i] = key[i].GetPubKey().GetID();
     }
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE(multisig_Sign) {
     CBasicKeyStore keystore;
     CKey key[4];
     for (int i = 0; i < 4; i++) {
-        key[i].MakeNewKey(true);
+        key[i].MakeNewKey();
         keystore.AddKey(key[i]);
     }
 

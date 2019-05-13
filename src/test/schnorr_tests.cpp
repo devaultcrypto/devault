@@ -30,7 +30,7 @@ struct KeyData {
     CPubKey pubkeyC;
 
     KeyData() {
-        privkeyC.Set(vchPrivkey, vchPrivkey + 32, true);
+        privkeyC.Set(vchPrivkey, vchPrivkey + 32);
         pubkeyC = privkeyC.GetPubKey();
     }
 };
