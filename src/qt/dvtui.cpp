@@ -16,9 +16,9 @@ bool DVTUI::customThemeIsSet() {
     return (settings.value("theme").toString() != "default");
 }
 
-    const QString DVTUI::s_LBlue = "rgb(46,144,255)"; // #00AEFF
+    const QString DVTUI::s_LBlue = "rgb(35,136,237)"; // #2388ed
     const QString DVTUI::s_green = "rgb(94,245,158)";
-    const QString DVTUI::s_DVTBlue = "rgb(0,174,255)"; // #1B83EE
+    const QString DVTUI::s_DVTBlue = "rgb(0,174,255)"; // 
 
     const QString DVTUI::s_Darker = "rgb(22,22,22)"; // #161616
     const QString DVTUI::s_Dark = "rgb(50,50,50)"; // #323232
@@ -36,7 +36,7 @@ bool DVTUI::customThemeIsSet() {
 
     const QString DVTUI::s_placeHolderText = "rgba(211,211,211,50%)";
     
-    const QColor DVTUI::c_LBlue = QColor(46,144,255); 
+    const QColor DVTUI::c_LBlue = QColor(35,136,237); 
     const QColor DVTUI::c_DVTBlue = QColor(0,174,255); 
     const QColor DVTUI::c_green = QColor(94,245,158);
 
