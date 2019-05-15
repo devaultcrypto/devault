@@ -44,13 +44,12 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle)
     QString font            = QApplication::font().toString();
 
     // create a bitmap according to device pixelratio
-    QSize splashSize(480*devicePixelRatio,320*devicePixelRatio);
+    QSize splashSize(873*devicePixelRatio,480*devicePixelRatio);
     pixmap = QPixmap(splashSize);
 
     // set reference point, paddings relative to size
     int vSpace                  = 10;
-    int paddingTop              = 320*0.65 - vSpace;
-    //float iconHeight              = 86;
+    int paddingTop              = 480*0.85 - vSpace;
 
 #if QT_VERSION > 0x050100
     // change to HiDPI if it makes sense
@@ -63,12 +62,12 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle)
     pixPaint.setPen(QColor(211,211,211));
 
     // draw the devault header.
-    QRect rectHeader(QPoint(0,0), QSize(480,320));
+    QRect rectHeader(QPoint(0,0), QSize(873,480));
     QPixmap header(":/icons/dvt_header");  
     pixPaint.drawPixmap(rectHeader, header);
 
     // check font size and drawing with
-    pixPaint.setFont(QFont(font, 33*fontFactor));
+    pixPaint.setFont(QFont(font, 28*fontFactor));
     QFontMetrics fm = pixPaint.fontMetrics();
     int titleTextWidth = fm.width(titleText);
     if (titleTextWidth > 176) {
@@ -88,14 +87,14 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle)
     pixPaint.drawText(pixmap.width()/2/devicePixelRatio-fm.width(versionText)/2,paddingTop+textHeight+vSpace,versionText);
 
     // draw copyright stuff
-    {
+   /* {
         pixPaint.setFont(QFont(font, 10*fontFactor));
         textHeight += fm.height();
         const int x = pixmap.width() / 2 / devicePixelRatio - fm.width(copyrightText);
         const int y = paddingTop + textHeight + vSpace;  //paddingTop;
         QRect copyrightRect(x, y, pixmap.width() - x, pixmap.height() - y);
         pixPaint.drawText(copyrightRect, Qt::AlignHCenter | Qt::AlignTop | Qt::TextWordWrap, copyrightText);
-    }
+    } */
 
     // draw additional text if special network
     if(!titleAddText.isEmpty()) {
