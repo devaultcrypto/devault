@@ -1,32 +1,26 @@
 ![DeVault](./share/pixmaps/dvt-logo.png)
 
-This is the working repository for [DeVault](https://devault.cc)
+This is the working repository for [DeVault](https://devault.cc).
 
+[![Build Status](https://travis-ci.com/devaultcrypto/devault.svg?branch=master)](https://travis-ci.com/devaultcrypto/devault) [![GitHub version](https://badge.fury.io/gh/devaultcrypto%2Fdevault.svg)](https://badge.fury.io/gh/devaultcrypto%2Fdevault)  
+=====
 
-[![Build Status](https://travis-ci.com/devaultcrypto/devault.svg?branch=master)](https://travis-ci.com/devaultcrypto/devault)
-
-
-===========
-
-The goal of DeVault is to create sound money that is usable by everyone in
-the world. We believe this is a civilization-changing technology which will
-dramatically increase human flourishing, freedom, and prosperity. The project
-aims to achieve this goal by implementing a series of optimizations and
-protocol upgrades that will enable peer-to-peer digital cash to scale many
-orders of magnitude beyond current limits.
+The goal of DeVault is to create a decentralized economy that is usable by everyone 
+in the world. We believe this is a civilization-changing technology which can
+dramatically improve the lives of all. 
 
 What is DeVault?
 ---------------------
 
-[DeVault](https://www.devault.cc/) is an experimental digital
-currency that enables instant payments to anyone, anywhere in the world. It
-uses peer-to-peer technology to operate with no central authority: managing
-transactions and issuing money are carried out collectively by the network.
+[DeVault](https://www.devault.cc/) is a peer-to-peer digital payment platform built 
+with the goal of harnessing the collective knowledge and intrinsic value of the p2p economy. 
+Creating an ever growing Multi-DAO system geared towards educating, on-boarding 
+and supporting the crypto-currency adopters of today and tomorrow.
 
-What is DeVault?
+What is DeVault Core?
 --------------------
 
-DeVault is the name of open-source software which enables the use of
+DeVault Core is the name of open-source software which enables the use of
 DeVault. It is a fork of the [Bitcoin ABC](https://bitcoinabc.org)
 software project.
 
@@ -67,3 +61,24 @@ Upgrades/Changes in this code fork
 - Prompt user for Password on 1st run so that wallet will always be encrypted
 - Exclusive use of Bech32 style addresses
 - Replace OpenSSL dependency with Libsodium
+
+## Specifications
+
+| Specification         | Descriptor                              |
+|-----------------------|-----------------------------------------|
+| Ticker                | DVT                                     |
+| Algorithm             | SHA256d                                 |
+| RPC Port              | 3339                                    |
+| P2P Port              | 33039                                   |
+| Block Spacing         | 120 Seconds                             |
+| Difficulty Algorithm  | LWMA                                    |
+| Block Size            | 32MB                                    |
+| Protocol Support      | IPV4, IPV6 & TOR                        |
+
+## ColdReward Requirements
+
+| Requirement   | Details              |
+|---------------|----------------------|
+| Confirmations | 21915 Blocks         |
+| Amount        | 1000+ DVT (Per Input)|
+
