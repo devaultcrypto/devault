@@ -975,8 +975,7 @@ std::string LicenseInfo() {
                      "COPYING", "<https://opensource.org/licenses/MIT>") +
            "\n" + "\n" +
            strprintf(_("This product includes cryptographic software written by Eric Young and UPnP "
-                       "software written by Thomas Bernard."),
-                     "") +
+                       "software written by Thomas Bernard.")) +
            "\n";
 }
 
