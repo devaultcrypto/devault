@@ -6,6 +6,7 @@
 #include "rpc/mining.h"
 #include "amount.h"
 #include "blockvalidity.h"
+#include "cashaddrenc.h" // GetAddrFromTxOut for getblocktemplate
 #include "chain.h"
 #include "chainparams.h"
 #include "config.h"
@@ -671,6 +672,20 @@ static UniValue getblocktemplate(const Config &config,
     result.pushKV("curtime", pblock->GetBlockTime());
     result.pushKV("bits", strprintf("%08x", pblock->nBits));
     result.pushKV("height", int64_t(pindexPrev->nHeight) + 1);
+
+    /// Handles Rewards and Budget items
+    UniValue extraCoinBaseArray(UniValue::VARR);
+    int index=0;
+    for (const auto& txout : pblock->vtx[0]->vout) {
+      if (index++ > 0) {
+        UniValue entry(UniValue::VOBJ);
+        entry.push_back(std::pair("payee", GetAddrFromTxOut(txout)));
+        entry.push_back(std::pair("script", HexStr(txout.scriptPubKey)));
+        entry.push_back(std::pair("amount", int64_t(txout.nValue/SATOSHI)));
+        extraCoinBaseArray.push_back(entry);
+      }
+    }
+    result.push_back(std::pair("coinbase_payload",extraCoinBaseArray));
 
     return result;
 }
