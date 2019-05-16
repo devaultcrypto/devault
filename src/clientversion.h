@@ -3,10 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_CLIENTVERSION_H
-#define BITCOIN_CLIENTVERSION_H
+#pragma once
 
 #include "config/bitcoin-config.h"
+#include <config/version.h>
 
 /**
  * Converts the parameter X to a string after macro replacement on X has been
@@ -43,5 +43,3 @@ std::string FormatSubVersion(const std::string &name, int nClientVersion,
                              const std::vector<std::string> &comments);
 
 #endif // WINDRES_PREPROC
-
-#endif // BITCOIN_CLIENTVERSION_H
