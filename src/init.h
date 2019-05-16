@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <util.h>
+
 #include <memory>
 #include <string>
 #include "support/allocators/secure.h"
@@ -78,11 +80,11 @@ bool AppInitMain(Config &config,
                  const SecureString& walletPassphrase,
                  const std::vector<std::string>& words);
 
-/** The help message mode determines what help message to show */
-enum class HelpMessageMode { BITCOIND, BITCOIN_QT };
+/**
+ * Setup the arguments for gArgs.
+ */
+void SetupServerArgs();
 
-/** Help for options shared between UI and daemon (for -help) */
-std::string HelpMessage(HelpMessageMode mode);
 /** Returns licensing information (for -version) */
 std::string LicenseInfo();
 
