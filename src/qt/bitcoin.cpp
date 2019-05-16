@@ -575,6 +575,44 @@ WId BitcoinApplication::getMainWinId() const {
     return window->winId();
 }
 
+static void SetupUIArgs() {
+    gArgs.AddArg(
+        "-choosedatadir",
+        strprintf(QObject::tr("Choose data directory on startup (default: %d)")
+                      .toStdString(),
+                  DEFAULT_CHOOSE_DATADIR),
+        false, OptionsCategory::GUI);
+    gArgs.AddArg(
+        "-lang=<lang>",
+        QObject::tr(
+            "Set language, for example \"de_DE\" (default: system locale)")
+            .toStdString(),
+        false, OptionsCategory::GUI);
+    gArgs.AddArg("-min", QObject::tr("Start minimized").toStdString(), false,
+                 OptionsCategory::GUI);
+    gArgs.AddArg(
+        "-rootcertificates=<file>",
+        QObject::tr(
+            "Set SSL root certificates for payment request (default: -system-)")
+            .toStdString(),
+        false, OptionsCategory::GUI);
+    gArgs.AddArg(
+        "-splash",
+        strprintf(QObject::tr("Show splash screen on startup (default: %d)")
+                      .toStdString(),
+                  DEFAULT_SPLASHSCREEN),
+        false, OptionsCategory::GUI);
+    gArgs.AddArg(
+        "-resetguisettings",
+        QObject::tr("Reset all settings changed in the GUI").toStdString(),
+        false, OptionsCategory::GUI);
+    gArgs.AddArg("-uiplatform",
+                 strprintf("Select platform to customize UI for (one of "
+                           "windows, macosx, other; default: %s)",
+                           BitcoinGUI::DEFAULT_UIPLATFORM),
+                 true, OptionsCategory::GUI);
+}
+
 #ifndef BITCOIN_QT_TEST
 
 static void MigrateSettings() {
@@ -621,6 +659,8 @@ int main(int argc, char *argv[]) {
 
     /// 1. Parse command-line options. These take precedence over anything else.
     // Command-line options take precedence:
+    node->setupServerArgs();
+    SetupUIArgs();
     node->parseParameters(argc, argv);
 
     // Do not refer to data directory yet, this can be overridden by
