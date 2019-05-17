@@ -679,13 +679,13 @@ static UniValue getblocktemplate(const Config &config,
     for (const auto& txout : pblock->vtx[0]->vout) {
       if (index++ > 0) {
         UniValue entry(UniValue::VOBJ);
-        entry.push_back(std::pair("payee", GetAddrFromTxOut(txout)));
-        entry.push_back(std::pair("script", HexStr(txout.scriptPubKey)));
-        entry.push_back(std::pair("amount", int64_t(txout.nValue/SATOSHI)));
+        entry.push_back(Pair("payee", GetAddrFromTxOut(txout)));
+        entry.push_back(Pair("script", HexStr(txout.scriptPubKey)));
+        entry.push_back(Pair("amount", int64_t(txout.nValue/SATOSHI)));
         extraCoinBaseArray.push_back(entry);
       }
     }
-    result.push_back(std::pair("coinbase_payload",extraCoinBaseArray));
+    result.push_back(Pair("coinbase_payload",extraCoinBaseArray));
 
     return result;
 }
