@@ -1482,7 +1482,7 @@ UniValue getblockchaininfo(const Config &config,
     obj.pushKV("verificationprogress",
                GuessVerificationProgress(Params().TxData(), tip));
     obj.pushKV("chainwork", tip->nChainWork.GetHex());
-    obj.pushKV("size_on_disk", CalculateCurrentUsage());
+    //    obj.pushKV("size_on_disk", CalculateCurrentUsage());
 
     CCoinsStats stats;
     FlushStateToDisk();
