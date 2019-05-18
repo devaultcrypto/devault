@@ -34,6 +34,8 @@ CScript ParseScript(const std::string &s) {
             }
 
             std::string strName(name);
+            // Since those with OP_ recognized too, do this before removing OP_
+            mapOpNames[strName] = static_cast<opcodetype>(op);
             // Convenience: OP_ADD and just ADD are both recognized:
             std::size_t found = strName.find("OP_");
             if (found!=std::string::npos) {

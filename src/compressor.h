@@ -95,8 +95,8 @@ private:
     CTxOut &txout;
 
 public:
-    static uint64_t CompressAmount(Amount nAmount);
-    static Amount DecompressAmount(uint64_t nAmount);
+    static uint64_t CompressAmount(uint64_t nAmount);
+    static  int64_t DecompressAmount(uint64_t nAmount);
 
     explicit CTxOutCompressor(CTxOut &txoutIn) : txout(txoutIn) {}
 
@@ -105,12 +105,12 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream &s, Operation ser_action) {
         if (!ser_action.ForRead()) {
-            uint64_t nVal = CompressAmount(txout.nValue);
+            uint64_t nVal = CompressAmount(txout.nValue / SATOSHI);
             READWRITE(VARINT(nVal));
         } else {
             uint64_t nVal = 0;
             READWRITE(VARINT(nVal));
-            txout.nValue = DecompressAmount(nVal);
+            txout.nValue = int64_t(DecompressAmount(nVal)) * SATOSHI;
         }
         CScriptCompressor cscript(REF(txout.scriptPubKey));
         READWRITE(cscript);
