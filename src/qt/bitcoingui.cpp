@@ -28,6 +28,10 @@
 #include "walletframe.h"
 #include "walletmodel.h"
 #include "walletview.h"
+#include "mnemonicwidget.h"
+#include "mnemonicdialog.h"
+#include "mnemonicdisplay.h"
+#include <wallet/wallet.h> // For DEFAULT_DISABLE_WALLET
 #endif // ENABLE_WALLET
 
 #ifdef Q_OS_MAC
@@ -1007,6 +1011,89 @@ void BitcoinGUI::message(const QString &title, const QString &message,
                             strTitle, message);
 }
 
+#ifdef ENABLE_WALLET
+void BitcoinGUI::initWalletMenu(std::string& mnemonic, unsigned int& flag, bool& ret)
+{
+    if(!enableWallet)
+        return;
+
+    switch(flag) {
+        //Note: Devault new GUI only responds to SELECT_LANGUAGE and does everything in that one signal
+        // This might be used once mnemonic supports more languages in the code but right now it is hard coded for only english words.
+        case MnemonicWalletInitFlags::SELECT_LANGUAGE:
+        {
+            std::cout << "mnemonic: " << mnemonic << std::endl;
+            MnemonicWidget *mnemonicwidget = new MnemonicWidget();
+            mnemonicwidget->exec();
+
+            while (mnemonicwidget->isVisible()) {
+                MilliSleep(500);
+            }
+
+            ret = !mnemonicwidget->ShutdownRequested();
+            mnemonic = mnemonicwidget->GetMnemonic();
+            flag = MnemonicWalletInitFlags::IMPORT_MNEMONIC;
+            delete mnemonicwidget;
+
+            break;
+        }
+        case MnemonicWalletInitFlags::PROMPT_MNEMONIC:
+        {
+            MnemonicDialog *mDiag = new MnemonicDialog();
+            mDiag->exec();
+
+            while (mDiag->isVisible()) {
+                MilliSleep(500);
+            }
+
+            ret = !mDiag->ShutdownRequested();
+            flag = mDiag->GetSelection();
+            delete mDiag;
+            break;
+        }
+        case MnemonicWalletInitFlags::NEW_MNEMONIC:
+        {
+            MnemonicDisplay *mDisp = new MnemonicDisplay(QString::fromStdString(mnemonic));
+            mDisp->exec();
+
+            while (mDisp->isVisible())
+                MilliSleep(500);
+
+            ret = !mDisp->ShutdownRequested();
+            delete mDisp;
+            break;
+        }
+        case MnemonicWalletInitFlags::IMPORT_MNEMONIC:
+        {
+            MnemonicDisplay *mDisp = new MnemonicDisplay();
+            mDisp->exec();
+
+            while (mDisp->isVisible())
+                MilliSleep(500);
+
+            ret = !mDisp->ShutdownRequested();
+            mnemonic = mDisp->GetImportSeed().toStdString();
+            delete mDisp;
+            break;
+        }
+        case MnemonicWalletInitFlags::INVALID_MNEMONIC:
+        {
+            bool fRetry = true;
+            MnemonicDisplay *mDisp = new MnemonicDisplay(fRetry);
+            mDisp->exec();
+
+            while (mDisp->isVisible())
+                MilliSleep(500);
+
+            ret = !mDisp->ShutdownRequested();
+            mnemonic = mDisp->GetImportSeed().toStdString();
+            delete mDisp;
+        }
+
+}
+}
+#endif
+
 void BitcoinGUI::changeEvent(QEvent *e) {
     QMainWindow::changeEvent(e);
 #ifndef Q_OS_MAC // Ignored on Mac
@@ -1249,12 +1336,34 @@ static bool ThreadSafeMessageBox(BitcoinGUI *gui, const std::string &message,
     return ret;
 }
 
+#ifdef ENABLE_WALLET
+static bool InitNewWallet(BitcoinGUI *gui, std::string& mnemonic, unsigned int& flag)
+{
+    if(gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET))
+        return false;
+
+    bool ret = false;
+    // TODO: A este metodo se le pasa el mnemonic para ser cargado.. debo retornarlo en caso de ser restaurado asi..
+    QMetaObject::invokeMethod(gui, "initWalletMenu",
+                              GUIUtil::blockingGUIThreadConnection(),
+                              Q_ARG(std::string&, mnemonic),
+                              Q_ARG(unsigned int&, flag),
+                              Q_ARG(bool&, ret));
+    return ret;
+}
+#endif
+
 void BitcoinGUI::subscribeToCoreSignals() {
     // Connect signals to client
     uiInterface.ThreadSafeMessageBox.connect(
         boost::bind(ThreadSafeMessageBox, this, _1, _2, _3));
     uiInterface.ThreadSafeQuestion.connect(
         boost::bind(ThreadSafeMessageBox, this, _1, _3, _4));
+
+#ifdef ENABLE_WALLET
+    if(enableWallet)
+        uiInterface.InitWallet.connect(boost::bind(InitNewWallet, this, _1, _2));
+#endif
 }
 
 void BitcoinGUI::unsubscribeFromCoreSignals() {

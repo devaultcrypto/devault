@@ -12,6 +12,7 @@ bool InitError(const std::string &str) {
     return false;
 }
 
+// i might remove this later
 bool ShowSeedPhrase(const std::string &str) {
     uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_SEED);
     return false;
@@ -30,3 +31,35 @@ std::string AmountErrMsg(const char *const optname,
     return strprintf(_("Invalid amount for -%s=<amount>: '%s'"), optname,
                      strValue);
 }
+
+bool InitNewWalletPrompt(unsigned int& initOption)
+{
+    std::string message;
+    initOption = MnemonicWalletInitFlags::PROMPT_MNEMONIC;
+    return *uiInterface.InitWallet(message, initOption);
+}
+
+bool DisplayWalletMnemonic(std::string& message)
+{
+    unsigned int initOption = MnemonicWalletInitFlags::NEW_MNEMONIC;
+    return *uiInterface.InitWallet(message, initOption);
+}
+
+bool GetWalletMnemonic(std::string& message)
+{
+    unsigned int initOption = MnemonicWalletInitFlags::IMPORT_MNEMONIC;
+    return *uiInterface.InitWallet(message, initOption);
+}
+
+bool GetWalletMnemonicLanguage(std::string& message, unsigned int& initOption)
+{
+    initOption = MnemonicWalletInitFlags::SELECT_LANGUAGE;
+    return *uiInterface.InitWallet(message, initOption);
+}
+
+bool RetryWalletMnemonic(std::string& message)
+{
+    unsigned int initOption = MnemonicWalletInitFlags::INVALID_MNEMONIC;
+    return *uiInterface.InitWallet(message, initOption);
+}
+

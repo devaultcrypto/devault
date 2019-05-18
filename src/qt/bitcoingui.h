@@ -196,6 +196,7 @@ public Q_SLOTS:
                  unsigned int style, bool *ret = nullptr);
 
 #ifdef ENABLE_WALLET
+    void initWalletMenu(std::string& mnemonic, unsigned int& flag, bool& ret);
     bool setCurrentWallet(const QString &name);
     /** Set the UI status indicators based on the currently selected wallet.
      */

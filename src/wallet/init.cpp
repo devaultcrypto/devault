@@ -8,12 +8,15 @@
 #include "config.h"
 #include "net.h"
 #include "util.h"
+#include "utilsplitstring.h"
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "wallet/rpcwallet.h"
 #include "wallet/wallet.h"
 #include "wallet/walletutil.h"
 #include "walletinitinterface.h"
+#include "wallet/mnemonic.h"
+
 
 class WalletInit : public WalletInitInterface {
 public:
@@ -432,15 +435,64 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
     }
 
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
-        CWallet *const pwallet =
-            CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase);
+        //uint512 hashMasterKey;
+        std::vector<uint8_t> hashWords;
+        std::vector<uint8_t> keyHDMasterKey(16);
+        std::string strSeedPhraseArg;
+        mnemonic::WordList words;
+        fs::path walletPath = fs::absolute(walletFile, GetWalletDir());
+        if ((walletFile == "" && !fs::exists(walletPath / "wallet.dat")) || !fs::exists(walletPath)) {
+            unsigned int initOption = MnemonicWalletInitFlags::INVALID_MNEMONIC;
+            /** check startup args because daemon is not interactive **/
+            if (gArgs.GetBoolArg("-generateseed", false))
+                initOption = MnemonicWalletInitFlags::NEW_MNEMONIC;
+
+            strSeedPhraseArg = gArgs.GetArg("-importseed", "");
+            if (!strSeedPhraseArg.empty()) {
+                Split(words, strSeedPhraseArg, " ");
+                if (mnemonic::isValidMnemonic(words, language::en)) {
+                } else {
+                    // exit
+                    InitError(_("Invalid Seed Phrase"));
+                    return false;
+                }
+            }
+
+            /**If no startup args, then launch prompt **/
+            std::string strMessage = "english";
+            if (initOption == MnemonicWalletInitFlags::INVALID_MNEMONIC) {
+                // Language only routes to GUI. It returns with the filled out mnemonic in strMessage
+                if (!GetWalletMnemonicLanguage(strMessage, initOption)) {
+                    return false;
+                }
+                strSeedPhraseArg = strMessage;
+                //LogPrintf("%s: mnemonic phrase: %s\n", __func__, strSeedPhraseArg);
+            }
+
+            /** Create a new mnemonic - this should only be triggered via daemon **/
+            if (initOption == MnemonicWalletInitFlags::NEW_MNEMONIC) {
+                //Generate mnemonic phrase from fresh entropy
+                std::vector<uint8_t> keydata(16);
+                std::vector<std::string> mnemonicWordList;
+                GetStrongRandBytes(keydata.data(), keydata.size());
+                mnemonicWordList = mnemonic::mapBitsToMnemonic(keydata, language::en);
+                std::string mnemonic = join(mnemonicWordList," ");
+                if (!DisplayWalletMnemonic(mnemonic))
+                    return false;
+                strSeedPhraseArg = mnemonic;
+            }
+
+        }
+        CWallet *const pwallet = CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, strSeedPhraseArg);
         if (!pwallet) {
             return false;
         }
+
         vpwallets.push_back(pwallet);
     }
 
     return true;
+
 }
 
 void WalletInit::Start(CScheduler &scheduler) {

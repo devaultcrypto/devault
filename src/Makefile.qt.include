@@ -112,7 +112,14 @@ QT_FORMS_UI = \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/signverifymessagedialog.ui \
-  qt/forms/transactiondescdialog.ui
+  qt/forms/transactiondescdialog.ui \
+  qt/forms/mnemonicdialog.ui \
+  qt/forms/mnemonicdisplay.ui \
+  qt/forms/mnemonicwidget.ui \
+  qt/forms/tutorialmnemonicrevealed.ui \
+  qt/forms/tutorialmnemoniccode.ui \
+  qt/forms/tutorialcreatewalletwidget.ui \
+  qt/forms/tutoriallanguageswidget.ui
 
 QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
@@ -159,7 +166,14 @@ QT_MOC_CPP = \
   qt/moc_utilitydialog.cpp \
   qt/moc_walletframe.cpp \
   qt/moc_walletmodel.cpp \
-  qt/moc_walletview.cpp
+  qt/moc_walletview.cpp\
+  qt/moc_mnemonicdialog.cpp \
+  qt/moc_mnemonicdisplay.cpp \
+  qt/moc_mnemonicwidget.cpp \
+  qt/moc_tutorialmnemonicrevealed.cpp \
+  qt/moc_tutorialmnemoniccode.cpp \
+  qt/moc_tutorialcreatewalletwidget.cpp \
+  qt/moc_tutoriallanguageswidget.cpp
 
 BITCOIN_MM = \
   qt/macdockiconhandler.mm \
@@ -229,7 +243,14 @@ BITCOIN_QT_H = \
   qt/walletmodel.h \
   qt/walletmodeltransaction.h \
   qt/walletview.h \
-  qt/winshutdownmonitor.h
+  qt/winshutdownmonitor.h \
+  qt/mnemonicdialog.h \
+  qt/mnemonicdisplay.h \
+  qt/mnemonicwidget.h \
+  qt/tutorialmnemonicrevealed.h \
+  qt/tutorialmnemoniccode.h \
+  qt/tutorialcreatewalletwidget.h \
+  qt/tutoriallanguageswidget.h
 
 RES_ICONS = \
   qt/res/icons/add.png \
@@ -364,7 +385,14 @@ BITCOIN_QT_WALLET_CPP = \
   qt/walletframe.cpp \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \
-  qt/walletview.cpp
+  qt/walletview.cpp \
+  qt/mnemonicdialog.cpp \
+  qt/mnemonicdisplay.cpp \
+  qt/mnemonicwidget.cpp \
+  qt/tutorialmnemonicrevealed.cpp \
+  qt/tutorialmnemoniccode.cpp \
+  qt/tutorialcreatewalletwidget.cpp \
+  qt/tutoriallanguageswidget.cpp
 
 BITCOIN_QT_CPP = $(BITCOIN_QT_BASE_CPP)
 if TARGET_WINDOWS

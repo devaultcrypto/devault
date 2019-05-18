@@ -34,6 +34,7 @@
 #include "wallet/fees.h"
 #include "wallet/finaltx.h"
 #include "wallet/mnemonic.h"
+#include "wallet/walletinitflags.h"
 
 #include <cassert>
 #include <future>
@@ -1536,43 +1537,31 @@ Amount CWallet::GetChange(const CTransaction &tx) const {
     return nChange;
 }
 
-void CWallet::GenerateHDMasterKey() {
-  // At this point we could have either used keydata or hashRet
-  // for the master key, hashRet just adds mnemonic passphrase, etc
-  std::vector<uint8_t> keydata(16);
-  std::vector<uint8_t> hashWords;
-  mnemonic::WordList words;
-  std::string seedphrase = gArgs.GetArg("-seedphrase","").c_str();
-  if (seedphrase != "") {
-    Split(words, seedphrase, " ");
-    // Ignore CHECKSUM check!
-    if (mnemonic::isValidMnemonic(words, language::en)) {
-      hashWords = mnemonic::decodeMnemonic(words);
-    } else {
-      // exit
-      InitError(_("Invalid Seed Phrase"));
-      return;
-    }
-  } else {
+void CWallet::GenerateHDMasterKey(std::string mnemonicWords) {
+    // At this point we could have either used keydata or hashRet
+    // for the master key, hashRet just adds mnemonic passphrase, etc
+    std::vector <uint8_t> keydata(16);
+    std::vector <uint8_t> hashWords;
+    mnemonic::WordList words;
+
     // 1) Generate Random bytes (strong)
     // 2) Map to 12 words (with checksum word)
     // 3) Map back to 'seed' - 64 bits
     // 4) Use 1st 32 bytes as secret key for Master HD key
     // Using 2) we can re-generate 4) as needed
-    GetStrongRandBytes(keydata.data(), keydata.size());
-    words = mnemonic::mapBitsToMnemonic(keydata, language::en);
+    std::istringstream f(mnemonicWords);
+    std::string s;
+    while (getline(f, s, ' ')) {
+        words.push_back(s);
+    }
     //std::cout << "Words = " << join(words,",") << "\n";
     hashWords = mnemonic::decodeMnemonic(words);
-    std::string notice = "This is your seed phrase, please write it down to recover wallet \n\"" + join(words," ")+"\"\n" +
-        "NEVER SHARE THIS SEQUENCE WITH ANYONE TO PROTECT YOUR FUNDS";
-    ShowSeedPhrase(notice);
-  }
-  
-  LOCK(cs_wallet);
-  
-  hdChain.Setup(words, hashWords);
-  // Store to dB
-  SetHDChain(hdChain);
+
+    LOCK(cs_wallet);
+
+    hdChain.Setup(words, hashWords);
+    // Store to dB
+    SetHDChain(hdChain);
 }
 
 // Need to Review
@@ -4210,7 +4199,8 @@ CWallet::GetDestValues(const std::string &prefix) const {
 
 CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                                        const std::string walletFile,
-                                       const SecureString& walletPassphrase) {
+                                       const SecureString& walletPassphrase,
+                                       std::string mnemonicWords) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
@@ -4291,7 +4281,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       CKeyingMaterial _vMasterKey; // Just new Random Bytes
 
       //
-      walletInstance->GenerateHDMasterKey();
+      walletInstance->GenerateHDMasterKey(mnemonicWords);
       //  throw std::runtime_error(std::string(__func__) + ": Unable to set HD MasterKey");
 
       // Top up the keypool

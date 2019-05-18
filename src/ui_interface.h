@@ -6,6 +6,8 @@
 #ifndef BITCOIN_UI_INTERFACE_H
 #define BITCOIN_UI_INTERFACE_H
 
+#include "wallet/walletinitflags.h"
+
 #include <cstdint>
 #include <string>
 
@@ -81,6 +83,12 @@ public:
                             boost::signals2::last_value<bool>>
         ThreadSafeMessageBox;
 
+    /** This will end up showing the confirm you remembered the passphrase dialog. I will removed this if unused
+    sigs::signal<void(const std::string &message,
+                      const std::string &caption,
+                      unsigned int style, bool *b)>
+            ThreadSafeMessageBox;
+    */
     /**
      * If possible, ask the user a question. If not, falls back to
      * ThreadSafeMessageBox(noninteractive_message, caption, style) and returns
@@ -108,6 +116,9 @@ public:
      * Status bar alerts changed.
      */
     boost::signals2::signal<void()> NotifyAlertChanged;
+
+    /** A wallet has been loaded. */
+    boost::signals2::signal<bool(std::string& message, unsigned int& flag)> InitWallet;
 
     /** A wallet has been loaded. */
     boost::signals2::signal<void(CWallet *wallet)> LoadWallet;
@@ -144,6 +155,16 @@ std::string AmountHighWarn(const std::string &optname);
 
 std::string AmountErrMsg(const char *const optname,
                          const std::string &strValue);
+
+bool InitNewWalletPrompt(unsigned int& initOption);
+
+bool DisplayWalletMnemonic(std::string& message);
+
+bool GetWalletMnemonic(std::string& message);
+
+bool GetWalletMnemonicLanguage(std::string& message, unsigned int& initOption);
+
+bool RetryWalletMnemonic(std::string& message);
 
 extern CClientUIInterface uiInterface;
 

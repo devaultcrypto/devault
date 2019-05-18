@@ -222,6 +222,7 @@ BITCOIN_CORE_H = \
   wallet/rpcdump.h \
   wallet/fees.h \
   wallet/mnemonic.h \
+  wallet/walletinitflags.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
