@@ -19,64 +19,51 @@ BOOST_AUTO_TEST_CASE(GetFeeTest) {
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
     BOOST_CHECK_EQUAL(feeRate.GetFee(1e5), Amount::zero());
 
-    feeRate = CFeeRate(1000 * SATOSHI);
+    feeRate = CFeeRate(MINCOIN);
     // Must always just return the arg
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1), SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(121), 121 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(999), 999 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 1000 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), 9000 * SATOSHI);
+    //BOOST_CHECK_EQUAL(feeRate.GetFee(1), SATOSHI);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(121 * 1000), 121 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(999 * 1000), 999 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000 * 1000), 1000 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(9000* 1000), 9000 * MINCOIN);
 
-    feeRate = CFeeRate(-1000 * SATOSHI);
-    // Must always just return -1 * arg
-    BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1), -SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(121), -121 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(999), -999 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), -1000 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), -9000 * SATOSHI);
-
-    feeRate = CFeeRate(123 * SATOSHI);
+    feeRate = CFeeRate(3 * MINCOIN);
     // Truncates the result, if not integer
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
     // Special case: returns 1 instead of 0
-    BOOST_CHECK_EQUAL(feeRate.GetFee(8), SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9), SATOSHI);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(8), MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(9), MINCOIN);
     BOOST_CHECK_EQUAL(feeRate.GetFee(121), 14 * SATOSHI);
     BOOST_CHECK_EQUAL(feeRate.GetFee(122), 15 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(999), 122 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 123 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), 1107 * SATOSHI);
-
-    feeRate = CFeeRate(-123 * SATOSHI);
-    // Truncates the result, if not integer
-    BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    // Special case: returns -1 instead of 0
-    BOOST_CHECK_EQUAL(feeRate.GetFee(8), -SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9), -SATOSHI);
+  
+    BOOST_CHECK_EQUAL(feeRate.GetFee(999), 3 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 3 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), 27 * MINCOIN);
 
     // Check ceiling results
-    feeRate = CFeeRate(18 * SATOSHI);
+    feeRate = CFeeRate(18 * MINCOIN);
     // Truncates the result, if not integer
     BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(100), 2 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(200), 4 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(1000), 18 * SATOSHI);
+    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(100), 2 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(200), 4 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(1000), 18 * MINCOIN);
 
+  
     // Check full constructor
     // default value
-    BOOST_CHECK(CFeeRate(-SATOSHI, 1000) == CFeeRate(-SATOSHI));
     BOOST_CHECK(CFeeRate(Amount::zero(), 1000) == CFeeRate(Amount::zero()));
-    BOOST_CHECK(CFeeRate(SATOSHI, 1000) == CFeeRate(SATOSHI));
+    BOOST_CHECK(CFeeRate(MINCOIN, 1000) == CFeeRate(MINCOIN));
     // lost precision (can only resolve satoshis per kB)
-    BOOST_CHECK(CFeeRate(SATOSHI, 1001) == CFeeRate(Amount::zero()));
-    BOOST_CHECK(CFeeRate(2 * SATOSHI, 1001) == CFeeRate(SATOSHI));
+    BOOST_CHECK(CFeeRate(MINCOIN, 1001) == CFeeRate(MINCOIN));
+    BOOST_CHECK(CFeeRate(2 * MINCOIN, 1001) == CFeeRate(2*MINCOIN));
+  
     // some more integer checks
-    BOOST_CHECK(CFeeRate(26 * SATOSHI, 789) == CFeeRate(32 * SATOSHI));
-    BOOST_CHECK(CFeeRate(27 * SATOSHI, 789) == CFeeRate(34 * SATOSHI));
+    BOOST_CHECK(CFeeRate(26 * MINCOIN, 789) == CFeeRate(33 * MINCOIN));
+    BOOST_CHECK(CFeeRate(27 * MINCOIN, 789) == CFeeRate(35 * MINCOIN));
     // Maximum size in bytes, should not crash
     CFeeRate(MAX_MONEY, std::numeric_limits<size_t>::max() >> 1).GetFeePerK();
+ 
 }
 
 BOOST_AUTO_TEST_SUITE_END()

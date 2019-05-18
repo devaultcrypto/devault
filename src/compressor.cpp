@@ -138,8 +138,7 @@ bool CScriptCompressor::Decompress(unsigned int nSize,
 // * if e==9, we only know the resulting number is not zero, so output 1 + 10*(n
 // - 1) + 9
 // (this is decodable, as d is in [1-9] and e is in [0-9])
-uint64_t CTxOutCompressor::CompressAmount(Amount amt) {
-    uint64_t n = amt / SATOSHI;
+uint64_t CTxOutCompressor::CompressAmount(uint64_t n) {
     if (n == 0) {
         return 0;
     }
@@ -158,10 +157,10 @@ uint64_t CTxOutCompressor::CompressAmount(Amount amt) {
     }
 }
 
-Amount CTxOutCompressor::DecompressAmount(uint64_t x) {
+int64_t CTxOutCompressor::DecompressAmount(uint64_t x) {
     // x = 0  OR  x = 1+10*(9*n + d - 1) + e  OR  x = 1+10*(n - 1) + 9
     if (x == 0) {
-        return Amount::zero();
+        return 0;
     }
     x--;
     // x = 10*(9*n + d - 1) + e
@@ -181,5 +180,5 @@ Amount CTxOutCompressor::DecompressAmount(uint64_t x) {
         n *= 10;
         e--;
     }
-    return int64_t(n) * SATOSHI;
+    return int64_t(n);
 }

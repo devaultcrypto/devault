@@ -88,13 +88,10 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
     uint32_t flags = 0;
 
     CKey key1 = DecodeSecret(strSecret1);
-    CKey key1C = DecodeSecret(strSecret1C);
 
-    BOOST_CHECK(key1.IsCompressed() == false);
-    BOOST_CHECK(key1C.IsCompressed() == true);
+    BOOST_CHECK(key1.IsCompressed() == true);
 
     CPubKey pubkey1 = key1.GetPubKey();
-    CPubKey pubkey1C = key1C.GetPubKey();
 
     for (int n = 0; n < 16; n++) {
         std::string strMsg = strprintf("Sigcache test1 %i: xx", n);
@@ -122,17 +119,6 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
         // check that it's in
         BOOST_CHECK(testChecker.IsCached(sig, pubkey1, hashMsg, flags));
         BOOST_CHECK(testChecker.IsCached(sig2, pubkey1, hashMsg2, flags));
-        // check that different signature hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig2, pubkey1, hashMsg, flags));
-        // check that compressed pubkey hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig, pubkey1C, hashMsg, flags));
-        // check that different message hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig, pubkey1, hashMsg2, flags));
-
-        // compressed key is for same privkey, so verifying works:
-        BOOST_CHECK(testChecker.VerifyAndStore(sig, pubkey1C, hashMsg, flags));
-        // now we *should* get a hit
-        BOOST_CHECK(testChecker.IsCached(sig, pubkey1C, hashMsg, flags));
     }
 }
 BOOST_AUTO_TEST_CASE(flag_invariants) {

@@ -1121,6 +1121,7 @@ BOOST_AUTO_TEST_CASE(script_build) {
             .PushSigECDSA(keys.key0)
             .PushRedeem());
 
+    /*
     static const Amount TEST_AMOUNT(int64_t(12345000000000) * SATOSHI);
     tests.push_back(
         TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
@@ -1165,7 +1166,7 @@ BOOST_AUTO_TEST_CASE(script_build) {
             .PushSigECDSA(keys.key0, SigHashType().withForkId(), 32, 32,
                           TEST_AMOUNT, SCRIPT_ENABLE_SIGHASH_FORKID)
             .ScriptError(SCRIPT_ERR_EVAL_FALSE));
-
+    */
     // Test OP_CHECKDATASIG
     const uint32_t checkdatasigflags = SCRIPT_VERIFY_STRICTENC |
                                        SCRIPT_VERIFY_NULLFAIL |
