@@ -37,7 +37,7 @@ public:
 
     static constexpr Amount zero() { return Amount(0); }
     static constexpr Amount satoshi() { return Amount(1); }
-    static constexpr Amount min_coin() { return Amount(MIN_COIN+1); }
+    static constexpr Amount min_coin() { return Amount(MIN_COIN); }
 
     /**
      * Implement standard operators
@@ -142,6 +142,7 @@ public:
     }
 
     std::string ToString() const;
+    int64_t toInt() const { return amount; }
 
     // serialization support
     ADD_SERIALIZE_METHODS;

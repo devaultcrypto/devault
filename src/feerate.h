@@ -29,7 +29,9 @@ public:
      */
     constexpr CFeeRate() : nSatoshisPerK() {}
     explicit constexpr CFeeRate(const Amount _nSatoshisPerK)
-        : nSatoshisPerK(_nSatoshisPerK) {}
+        : nSatoshisPerK(_nSatoshisPerK) {
+        if (_nSatoshisPerK.toInt() < 0) nSatoshisPerK = Amount();
+        }
 
     /**
      * Constructor for a fee rate in satoshis per kB. The size in bytes must not

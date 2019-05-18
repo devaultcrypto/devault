@@ -417,9 +417,8 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
   bool controlCheck = control.Wait();
   BOOST_CHECK(controlCheck);
 
-  // for (auto&& thread : threadGroup) thread.interrupt();
-  for (auto &&thread : threadGroup)
-    thread.join();
+  scriptcheckqueue.Interrupt();
+  for (auto &&thread : threadGroup) if (thread.joinable()) thread.join();
 }
 
 BOOST_AUTO_TEST_CASE(test_witness) {

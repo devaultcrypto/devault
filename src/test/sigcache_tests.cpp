@@ -29,7 +29,8 @@ static const uint32_t TEST_INVARIANT_FLAGS =
     SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC | SCRIPT_VERIFY_DERSIG |
     SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_NULLDUMMY | SCRIPT_VERIFY_SIGPUSHONLY |
     SCRIPT_VERIFY_MINIMALDATA | SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS |
-    SCRIPT_VERIFY_CLEANSTACK | SCRIPT_VERIFY_MINIMALIF |
+    SCRIPT_VERIFY_CLEANSTACK | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
+    SCRIPT_VERIFY_CHECKSEQUENCEVERIFY | SCRIPT_VERIFY_MINIMALIF |
     SCRIPT_VERIFY_NULLFAIL | SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE |
     SCRIPT_ENABLE_SIGHASH_FORKID | SCRIPT_ENABLE_REPLAY_PROTECTION |
     SCRIPT_ENABLE_CHECKDATASIG;
@@ -88,13 +89,10 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
     uint32_t flags = 0;
 
     CKey key1 = DecodeSecret(strSecret1);
-    CKey key1C = DecodeSecret(strSecret1C);
 
-    BOOST_CHECK(key1.IsCompressed() == false);
-    BOOST_CHECK(key1C.IsCompressed() == true);
+    BOOST_CHECK(key1.IsCompressed() == true);
 
     CPubKey pubkey1 = key1.GetPubKey();
-    CPubKey pubkey1C = key1C.GetPubKey();
 
     for (int n = 0; n < 16; n++) {
         std::string strMsg = strprintf("Sigcache test1 %i: xx", n);
@@ -122,17 +120,6 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
         // check that it's in
         BOOST_CHECK(testChecker.IsCached(sig, pubkey1, hashMsg, flags));
         BOOST_CHECK(testChecker.IsCached(sig2, pubkey1, hashMsg2, flags));
-        // check that different signature hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig2, pubkey1, hashMsg, flags));
-        // check that compressed pubkey hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig, pubkey1C, hashMsg, flags));
-        // check that different message hits different entry
-        BOOST_CHECK(!testChecker.IsCached(sig, pubkey1, hashMsg2, flags));
-
-        // compressed key is for same privkey, so verifying works:
-        BOOST_CHECK(testChecker.VerifyAndStore(sig, pubkey1C, hashMsg, flags));
-        // now we *should* get a hit
-        BOOST_CHECK(testChecker.IsCached(sig, pubkey1C, hashMsg, flags));
     }
 }
 BOOST_AUTO_TEST_CASE(flag_invariants) {
