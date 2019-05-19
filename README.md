@@ -44,8 +44,8 @@ See [DISCLOSURE_POLICY](DISCLOSURE_POLICY.md)
 Upgrades/Changes in this code fork
 -----------------
 
-- Cold Rewards Code (details here : TBD)
-- Budget Rewards (detail here : TBD)
+- Cold Rewards Code (details here : [COLD REWARDS](ColdRewards.md))
+- Budget Rewards (detail here : [BUDGET](Budget.md))
 - `Shark` block inflation for a fairer initial distribution (details here : TBD)
 - Removed BIP70 & protobuf dependency
 - Updated CMake config
