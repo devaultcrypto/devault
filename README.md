@@ -52,7 +52,7 @@ Upgrades/Changes in this code fork
 - Redesigned QT Wallet GUI
 - Uses C++17 for builds
 - Remove Base58 address support
-- Transition to BIP 32/39/44 HD Wallet support only
+- Transition to BIP 32/39/44 HD Wallet support only - Uses 12 word phrase setup
 - Remove some Boost dependencies
 - Each run of devaultd/devault-qt will create a new debug.log file and rename older files based on last accessed time
   Use -keeplogfiles=<days> to specify how long to keep in days (default is 7)
@@ -61,6 +61,10 @@ Upgrades/Changes in this code fork
 - Prompt user for Password on 1st run so that wallet will always be encrypted
 - Exclusive use of Bech32 style addresses
 - Replace OpenSSL dependency with Libsodium
+- Replace Difficulty with LWMA difficulty calculation
+- Code can be built with either AutoTools or CMake
+- Reorg Depth set at 30 blocks
+- Upgraded or added dependencies, QT 5.9.7, libsodium, libgmp, boost 1.69
 
 ## Specifications
 
