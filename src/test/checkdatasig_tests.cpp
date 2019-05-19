@@ -121,6 +121,10 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
 
     // Check valid signatures (as in the signature format is valid).
     valtype validsig;
+    kd.privkeyC.SignECDSA(messageHash, validsig);
+
+    CheckTestResultForAllFlags({validsig, message, pubkeyC},  CScript() << OP_CHECKDATASIG, {{0x01}});
+    CheckTestResultForAllFlags({validsig, message, pubkeyC},  CScript() << OP_CHECKDATASIGVERIFY, {});
 
     const valtype minimalsig{0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x01};
     const valtype nondersig{0x30, 0x80, 0x06, 0x02, 0x01,
