@@ -973,7 +973,7 @@ void BitcoinGUI::message(const QString &title, const QString &message,
                 break;
         }
     }
-    // Append title to "Bitcoin - "
+    // Append title to "DeVault - "
     if (!msgType.isEmpty()) {
         strTitle += " - " + msgType;
     }

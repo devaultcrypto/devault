@@ -223,7 +223,7 @@ bool CKey::SignSchnorr(const uint256 &hash, std::vector<uint8_t> &vchSig,
 
 bool CKey::VerifyPubKey(const CPubKey &pubkey) const {
     uint8_t rnd[8];
-    std::string str = "Bitcoin key verification\n";
+    std::string str = "DeVault key verification\n";
     GetRandBytes(rnd, sizeof(rnd));
     uint256 hash;
     CHash256()
