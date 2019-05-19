@@ -89,9 +89,6 @@ BOOST_AUTO_TEST_CASE(sig_pubkey_hash_variations) {
     uint32_t flags = 0;
 
     CKey key1 = DecodeSecret(strSecret1);
-
-    BOOST_CHECK(key1.IsCompressed() == true);
-
     CPubKey pubkey1 = key1.GetPubKey();
 
     for (int n = 0; n < 16; n++) {
