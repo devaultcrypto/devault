@@ -53,6 +53,10 @@ enum {
     devaultconsensus_SCRIPT_FLAGS_VERIFY_DERSIG = (1U << 2),
     // enforce NULLDUMMY (BIP147)
     devaultconsensus_SCRIPT_FLAGS_VERIFY_NULLDUMMY = (1U << 4),
+    // enable CHECKLOCKTIMEVERIFY (BIP65)
+    devaultconsensus_SCRIPT_FLAGS_VERIFY_CHECKLOCKTIMEVERIFY = (1U << 9),
+    // enable CHECKSEQUENCEVERIFY (BIP112)
+    devaultconsensus_SCRIPT_FLAGS_VERIFY_CHECKSEQUENCEVERIFY = (1U << 10),
     // enable WITNESS (BIP141)
     devaultconsensus_SCRIPT_FLAGS_VERIFY_WITNESS_DEPRECATED = (1U << 11),
     // enable SIGHASH_FORKID replay protection
