@@ -259,22 +259,6 @@ bool CheckTransactionECDSASignatureEncoding(const valtype &vchSig,
         });
 }
 
-static bool IsCompressedOrUncompressedPubKey(const valtype &vchPubKey) {
-    switch (vchPubKey.size()) {
-        case 33:
-            // Compressed public key: must start with 0x02 or 0x03.
-            return vchPubKey[0] == 0x02 || vchPubKey[0] == 0x03;
-
-        case 65:
-            // Non-compressed public key: must start with 0x04.
-            return vchPubKey[0] == 0x04;
-
-        default:
-            // Non-canonical public key: invalid size.
-            return false;
-    }
-}
-
 static bool IsCompressedPubKey(const valtype &vchPubKey) {
     if (vchPubKey.size() != 33) {
         // Non-canonical public key: invalid length for compressed key
@@ -290,7 +274,7 @@ static bool IsCompressedPubKey(const valtype &vchPubKey) {
 bool CheckPubKeyEncoding(const valtype &vchPubKey, uint32_t flags,
                          ScriptError *serror) {
     if ((flags & SCRIPT_VERIFY_STRICTENC) &&
-        !IsCompressedOrUncompressedPubKey(vchPubKey)) {
+        !IsCompressedPubKey(vchPubKey)) {
         return set_error(serror, SCRIPT_ERR_PUBKEYTYPE);
     }
     // Only compressed keys are accepted when
