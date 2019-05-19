@@ -325,7 +325,7 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup) {
         invalid_with_cltv_tx.vin[0].scriptSig = CScript() << vchSig << 101;
 
         ValidateCheckInputsForAllFlags(invalid_with_cltv_tx,
-                                       true, true,
+                                       SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY, true,
                                        true);
 
         // Make it valid, and check again
@@ -336,7 +336,8 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup) {
         PrecomputedTransactionData txdata(transaction);
 
         BOOST_CHECK(CheckInputs(transaction, state, pcoinsTip.get(), true,
-                                true,
+                                MANDATORY_SCRIPT_VERIFY_FLAGS |
+                                    SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY,
                                 true, true, txdata, nullptr));
     }
 
@@ -361,7 +362,7 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup) {
         invalid_with_csv_tx.vin[0].scriptSig = CScript() << vchSig << 101;
 
         ValidateCheckInputsForAllFlags(
-            invalid_with_csv_tx, true, true, true);
+            invalid_with_csv_tx, SCRIPT_VERIFY_CHECKSEQUENCEVERIFY, true, true);
 
         // Make it valid, and check again
         invalid_with_csv_tx.vin[0].scriptSig = CScript() << vchSig << 100;
@@ -371,7 +372,8 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup) {
         PrecomputedTransactionData txdata(transaction);
 
         BOOST_CHECK(CheckInputs(transaction, state, pcoinsTip.get(), true,
-                                true,
+                                MANDATORY_SCRIPT_VERIFY_FLAGS |
+                                    SCRIPT_VERIFY_CHECKSEQUENCEVERIFY,
                                 true, true, txdata, nullptr));
     }
 
