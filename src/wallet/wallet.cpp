@@ -500,7 +500,7 @@ bool CWallet::ChangeWalletPassphrase(
     return false;
 }
 
-void CWallet::SetBestChain(const CBlockLocator &loc) {
+void CWallet::ChainStateFlushed(const CBlockLocator &loc) {
     CWalletDB walletdb(*dbw);
     walletdb.WriteBestBlock(loc);
 }
@@ -4343,7 +4343,6 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       } else {
         walletInstance->GenerateHDMasterKey();
       }
-      //  throw std::runtime_error(std::string(__func__) + ": Unable to set HD MasterKey");
 
       // Top up the keypool
       if (!walletInstance->TopUpKeyPool()) {
@@ -4356,7 +4355,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       walletInstance->EncryptHDWallet(_vMasterKey);
       walletInstance->FinishEncryptWallet(walletPassphrase);
       
-      walletInstance->SetBestChain(chainActive.GetLocator());
+      walletInstance->ChainStateFlushed(chainActive.GetLocator());
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
@@ -4421,7 +4420,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                                                       reserver, true);
         }
         LogPrintf(" rescan      %15dms\n", GetTimeMillis() - nStart);
-        walletInstance->SetBestChain(chainActive.GetLocator());
+        walletInstance->ChainStateFlushed(chainActive.GetLocator());
         walletInstance->dbw->IncrementUpdateCounter();
 
         // Restore wallet transaction metadata after -zapwallettxes=1
