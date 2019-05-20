@@ -41,11 +41,13 @@ include(TestSuite)
 create_test_suite(devault)
 add_dependencies(check check-devault)
 
+add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
+
 add_test_to_suite(devault test_devault
 	activation_tests.cpp
 	addrman_tests.cpp
 	allocator_tests.cpp
-#	amount_tests.cpp
+	amount_tests.cpp
 	arith_uint256_tests.cpp
 #avalanche_tests.cpp
 	base32_tests.cpp
@@ -91,7 +93,7 @@ add_test_to_suite(devault test_devault
 	netbase_tests.cpp
 	pmt_tests.cpp
 	policyestimator_tests.cpp
-#  pow_tests.cpp
+  pow_tests.cpp
 	prevector_tests.cpp
 	radix_tests.cpp
 	raii_event_tests.cpp
@@ -167,6 +169,7 @@ if(BUILD_BITCOIN_WALLET)
 			../wallet/test/accounting_tests.cpp
 			../wallet/test/wallet_tests.cpp
 			../wallet/test/walletdb_tests.cpp
-			../wallet/test/wallet_crypto_tests.cpp
+#			../wallet/test/wallet_crypto_tests.cpp
+			../wallet/test/bip39_test.cpp
 	)
 endif()
