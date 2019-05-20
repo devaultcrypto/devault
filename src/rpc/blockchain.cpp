@@ -216,8 +216,8 @@ UniValue blockToDeltasJSON(const Config &config, const CBlock& block, const CBlo
 }
 #endif
 
-UniValue blockToJSON(const Config &config, const CBlock &block,
-                     const CBlockIndex *blockindex, bool txDetails) {
+UniValue blockToJSON(const CBlock &block, const CBlockIndex *blockindex,
+                     bool txDetails) {
     AssertLockHeld(cs_main);
     UniValue result(UniValue::VOBJ);
     result.pushKV("hash", blockindex->GetBlockHash().GetHex());
@@ -1126,7 +1126,7 @@ static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
         return strHex;
     }
 
-    return blockToJSON(config, block, pblockindex, verbosity >= 2);
+    return blockToJSON(block, pblockindex, verbosity >= 2);
 }
 
 struct CCoinsStats {
