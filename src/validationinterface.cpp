@@ -31,7 +31,7 @@ struct MainSignalsInstance {
         BlockDisconnected;
     boost::signals2::signal<void(const CTransactionRef &)>
         TransactionRemovedFromMempool;
-    boost::signals2::signal<void(const CBlockLocator &)> SetBestChain;
+    boost::signals2::signal<void(const CBlockLocator &)> ChainStateFlushed;
     boost::signals2::signal<void(const uint256 &)> Inventory;
     boost::signals2::signal<void(int64_t nBestBlockTime, CConnman *connman)>
         Broadcast;
@@ -99,8 +99,8 @@ void RegisterValidationInterface(CValidationInterface *pwalletIn) {
         boost::bind(&CValidationInterface::BlockDisconnected, pwalletIn, _1));
     g_signals.m_internals->TransactionRemovedFromMempool.connect(boost::bind(
         &CValidationInterface::TransactionRemovedFromMempool, pwalletIn, _1));
-    g_signals.m_internals->SetBestChain.connect(
-        boost::bind(&CValidationInterface::SetBestChain, pwalletIn, _1));
+    g_signals.m_internals->ChainStateFlushed.connect(
+        boost::bind(&CValidationInterface::ChainStateFlushed, pwalletIn, _1));
     g_signals.m_internals->Inventory.connect(
         boost::bind(&CValidationInterface::Inventory, pwalletIn, _1));
     g_signals.m_internals->Broadcast.connect(boost::bind(
@@ -118,8 +118,8 @@ void UnregisterValidationInterface(CValidationInterface *pwalletIn) {
         &CValidationInterface::ResendWalletTransactions, pwalletIn, _1, _2));
     g_signals.m_internals->Inventory.disconnect(
         boost::bind(&CValidationInterface::Inventory, pwalletIn, _1));
-    g_signals.m_internals->SetBestChain.disconnect(
-        boost::bind(&CValidationInterface::SetBestChain, pwalletIn, _1));
+    g_signals.m_internals->ChainStateFlushed.disconnect(
+        boost::bind(&CValidationInterface::ChainStateFlushed, pwalletIn, _1));
     g_signals.m_internals->TransactionAddedToMempool.disconnect(boost::bind(
         &CValidationInterface::TransactionAddedToMempool, pwalletIn, _1));
     g_signals.m_internals->BlockConnected.disconnect(boost::bind(
@@ -141,7 +141,7 @@ void UnregisterAllValidationInterfaces() {
     g_signals.m_internals->BlockChecked.disconnect_all_slots();
     g_signals.m_internals->Broadcast.disconnect_all_slots();
     g_signals.m_internals->Inventory.disconnect_all_slots();
-    g_signals.m_internals->SetBestChain.disconnect_all_slots();
+    g_signals.m_internals->ChainStateFlushed.disconnect_all_slots();
     g_signals.m_internals->TransactionAddedToMempool.disconnect_all_slots();
     g_signals.m_internals->BlockConnected.disconnect_all_slots();
     g_signals.m_internals->BlockDisconnected.disconnect_all_slots();
@@ -192,8 +192,8 @@ void CMainSignals::BlockDisconnected(
     m_internals->BlockDisconnected(pblock);
 }
 
-void CMainSignals::SetBestChain(const CBlockLocator &locator) {
-    m_internals->SetBestChain(locator);
+void CMainSignals::ChainStateFlushed(const CBlockLocator &locator) {
+    m_internals->ChainStateFlushed(locator);
 }
 
 void CMainSignals::Inventory(const uint256 &hash) {
