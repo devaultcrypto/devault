@@ -685,8 +685,7 @@ static UniValue getblocktemplate(const Config &config,
         extraCoinBaseArray.push_back(entry);
       }
     }
-    result.push_back(Pair("coinbase_payload",extraCoinBaseArray));
-
+    if (index > 1) result.push_back(Pair("coinbase_payload",extraCoinBaseArray));
     return result;
 }
 
