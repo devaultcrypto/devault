@@ -132,7 +132,7 @@ static inline void ReadOrderPos(int64_t &nOrderPos, mapValue_t &mapValue) {
         return;
     }
 
-    nOrderPos = std::atoi(mapValue["n"].c_str());
+    nOrderPos = std::atoll(mapValue["n"].c_str());
 }
 
 static inline void WriteOrderPos(const int64_t &nOrderPos,
