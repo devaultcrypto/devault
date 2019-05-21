@@ -210,7 +210,7 @@ const uint8_t vchKey2[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 struct KeyData {
     CKey key0, key0C, key1, key1C, key2, key2C;
-    CPubKey pubkey0, pubkey0C, pubkey0H;
+    CPubKey pubkey0, pubkey0C;
     CPubKey pubkey1, pubkey1C;
     CPubKey pubkey2, pubkey2C;
 
@@ -218,9 +218,7 @@ struct KeyData {
         key0.Set(vchKey0, vchKey0 + 32);
         key0C.Set(vchKey0, vchKey0 + 32);
         pubkey0 = key0.GetPubKey();
-        pubkey0H = key0.GetPubKey();
         pubkey0C = key0C.GetPubKey();
-        *const_cast<uint8_t *>(&pubkey0H[0]) = 0x06 | (pubkey0H[64] & 1);
 
         key1.Set(vchKey1, vchKey1 + 32);
         key1C.Set(vchKey1, vchKey1 + 32);
@@ -469,17 +467,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
 
     std::vector<TestBuilder> tests;
 
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                    "P2PK", 0)
-            .PushSigECDSA(keys.key0));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                    "P2PK, bad sig", 0)
-            .PushSigECDSA(keys.key0)
-            .DamagePush(10)
-            .ScriptError(SCRIPT_ERR_EVAL_FALSE));
-
     tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160
                                           << ToByteVector(keys.pubkey1C.GetID())
                                           << OP_EQUALVERIFY << OP_CHECKSIG,
@@ -494,17 +481,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                         .Push(keys.pubkey2C)
                         .DamagePush(5)
                         .ScriptError(SCRIPT_ERR_EQUALVERIFY));
-
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
-                    "P2PK anyonecanpay", 0)
-            .PushSigECDSA(keys.key1, SigHashType().withAnyoneCanPay()));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
-                    "P2PK anyonecanpay marked with normal hashtype", 0)
-            .PushSigECDSA(keys.key1, SigHashType().withAnyoneCanPay())
-            .EditPush(70, "81", "01")
-            .ScriptError(SCRIPT_ERR_EVAL_FALSE));
 
     tests.push_back(
         TestBuilder(CScript() << ToByteVector(keys.pubkey0C) << OP_CHECKSIG,
@@ -583,71 +559,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                         .Num(0)
                         .PushRedeem()
                         .ScriptError(SCRIPT_ERR_EVAL_FALSE));
-
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too much R padding but no DERSIG", 0)
-            .PushSigECDSA(keys.key1, SigHashType(), 31, 32)
-            .EditPush(1, "43021F", "44022000"));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too much R padding", SCRIPT_VERIFY_DERSIG)
-            .PushSigECDSA(keys.key1, SigHashType(), 31, 32)
-            .EditPush(1, "43021F", "44022000")
-            .ScriptError(SCRIPT_ERR_SIG_DER));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too much S padding but no DERSIG", 0)
-            .PushSigECDSA(keys.key1)
-            .EditPush(1, "44", "45")
-            .EditPush(37, "20", "2100"));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too much S padding", SCRIPT_VERIFY_DERSIG)
-            .PushSigECDSA(keys.key1)
-            .EditPush(1, "44", "45")
-            .EditPush(37, "20", "2100")
-            .ScriptError(SCRIPT_ERR_SIG_DER));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too little R padding but no DERSIG", 0)
-            .PushSigECDSA(keys.key1, SigHashType(), 33, 32)
-            .EditPush(1, "45022100", "440220"));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
-                    "P2PK with too little R padding", SCRIPT_VERIFY_DERSIG)
-            .PushSigECDSA(keys.key1, SigHashType(), 33, 32)
-            .EditPush(1, "45022100", "440220")
-            .ScriptError(SCRIPT_ERR_SIG_DER));
-    tests.push_back(
-        TestBuilder(
-            CScript() << ToByteVector(keys.pubkey2C) << OP_CHECKSIG << OP_NOT,
-            "P2PK NOT with bad sig with too much R padding but no DERSIG", 0)
-            .PushSigECDSA(keys.key2, SigHashType(), 31, 32)
-            .EditPush(1, "43021F", "44022000")
-            .DamagePush(10));
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey2C)
-                                          << OP_CHECKSIG << OP_NOT,
-                                "P2PK NOT with bad sig with too much R padding",
-                                SCRIPT_VERIFY_DERSIG)
-                        .PushSigECDSA(keys.key2, SigHashType(), 31, 32)
-                        .EditPush(1, "43021F", "44022000")
-                        .DamagePush(10)
-                        .ScriptError(SCRIPT_ERR_SIG_DER));
-    tests.push_back(
-        TestBuilder(CScript()
-                        << ToByteVector(keys.pubkey2C) << OP_CHECKSIG << OP_NOT,
-                    "P2PK NOT with too much R padding but no DERSIG", 0)
-            .PushSigECDSA(keys.key2, SigHashType(), 31, 32)
-            .EditPush(1, "43021F", "44022000")
-            .ScriptError(SCRIPT_ERR_EVAL_FALSE));
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey2C)
-                                          << OP_CHECKSIG << OP_NOT,
-                                "P2PK NOT with too much R padding",
-                                SCRIPT_VERIFY_DERSIG)
-                        .PushSigECDSA(keys.key2, SigHashType(), 31, 32)
-                        .EditPush(1, "43021F", "44022000")
-                        .ScriptError(SCRIPT_ERR_SIG_DER));
 
     tests.push_back(
         TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKSIG,
@@ -863,70 +774,7 @@ BOOST_AUTO_TEST_CASE(script_build) {
             .PushSigECDSA(keys.key2, SigHashType(), 32, 33)
             .ScriptError(SCRIPT_ERR_SIG_HIGH_S));
 
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG,
-                    "P2PK with hybrid pubkey but no STRICTENC", 0)
-            .PushSigECDSA(keys.key0));
-    */
     
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG,
-                    "P2PK with hybrid pubkey", SCRIPT_VERIFY_STRICTENC)
-            .PushSigECDSA(keys.key0, SigHashType())
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    /*
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKSIG << OP_NOT,
-                                "P2PK NOT with hybrid pubkey but no STRICTENC",
-                                0)
-                        .PushSigECDSA(keys.key0)
-                        .ScriptError(SCRIPT_ERR_EVAL_FALSE));
-    */
-    
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKSIG << OP_NOT,
-                                "P2PK NOT with hybrid pubkey",
-                                SCRIPT_VERIFY_STRICTENC)
-                        .PushSigECDSA(keys.key0)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    tests.push_back(
-        TestBuilder(CScript()
-                        << ToByteVector(keys.pubkey0H) << OP_CHECKSIG << OP_NOT,
-                    "P2PK NOT with invalid hybrid pubkey but no STRICTENC", 0)
-            .PushSigECDSA(keys.key0)
-            .DamagePush(10));
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKSIG << OP_NOT,
-                                "P2PK NOT with invalid hybrid pubkey",
-                                SCRIPT_VERIFY_STRICTENC)
-                        .PushSigECDSA(keys.key0)
-                        .DamagePush(10)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    tests.push_back(
-        TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0H)
-                              << ToByteVector(keys.pubkey1C) << OP_2
-                              << OP_CHECKMULTISIG,
-                    "1-of-2 with the second 1 hybrid pubkey and no STRICTENC",
-                    0)
-            .Num(0)
-            .PushSigECDSA(keys.key1));
-    tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0H)
-                                          << ToByteVector(keys.pubkey1C) << OP_2
-                                          << OP_CHECKMULTISIG,
-                                "1-of-2 with the second 1 hybrid pubkey",
-                                SCRIPT_VERIFY_STRICTENC)
-                        .Num(0)
-                        .PushSigECDSA(keys.key1));
-    tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey1C)
-                                          << ToByteVector(keys.pubkey0H) << OP_2
-                                          << OP_CHECKMULTISIG,
-                                "1-of-2 with the first 1 hybrid pubkey",
-                                SCRIPT_VERIFY_STRICTENC)
-                        .Num(0)
-                        .PushSigECDSA(keys.key1)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-
     tests.push_back(
         TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
                     "P2PK with undefined hashtype but no STRICTENC", 0)
@@ -1228,38 +1076,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
             .EditPush(1, "45022100", "440220")
             .Num(0)
             .ScriptError(SCRIPT_ERR_SIG_DER));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with hybrid pubkey but no STRICTENC",
-                    checkdatasigflags & ~SCRIPT_VERIFY_STRICTENC)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0));
-    */
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with hybrid pubkey", checkdatasigflags)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG
-                              << OP_NOT,
-                    "CHECKDATASIG with invalid hybrid pubkey but no STRICTENC",
-                    SCRIPT_ENABLE_CHECKDATASIG)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0));
-    */
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with invalid hybrid pubkey",
-                    checkdatasigflags)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
 
     // Test OP_CHECKDATASIGVERIFY
     tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1C)
@@ -1319,40 +1135,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                         .EditPush(1, "45022100", "440220")
                         .Num(0)
                         .ScriptError(SCRIPT_ERR_SIG_DER));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                              << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                    "CHECKDATASIGVERIFY with hybrid pubkey but no STRICTENC",
-                    checkdatasigflags & ~SCRIPT_VERIFY_STRICTENC)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0));
-    */
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                                "CHECKDATASIGVERIFY with hybrid pubkey",
-                                checkdatasigflags)
-                        .PushDataSigECDSA(keys.key0, {})
-                        .Num(0)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    tests.push_back(
-        TestBuilder(
-            CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIGVERIFY
-                      << OP_TRUE,
-            "CHECKDATASIGVERIFY with invalid hybrid pubkey but no STRICTENC",
-            SCRIPT_ENABLE_CHECKDATASIG)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_CHECKDATASIGVERIFY));
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                                "CHECKDATASIGVERIFY with invalid hybrid pubkey",
-                                checkdatasigflags)
-                        .PushDataSigECDSA(keys.key0, {})
-                        .DamagePush(10)
-                        .Num(0)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
 
     // Misc ECDSA tests duplicated with Schnorr flag on
     tests.push_back(
@@ -1393,13 +1175,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                     SCRIPT_VERIFY_LOW_S | SCRIPT_ENABLE_SCHNORR)
             .PushSigECDSA(keys.key2, SigHashType(), 32, 33)
             .ScriptError(SCRIPT_ERR_SIG_HIGH_S));
-
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG,
-                    "STRICTENC-violating hybrid pubkey with Schnorr flag on",
-                    SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
-            .PushSigECDSA(keys.key0, SigHashType())
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
 
     // Duplicated test OP_CHECKDATASIG with Schnorr flag on
     const uint32_t checkdatasigschnorrflags =
@@ -1459,36 +1234,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
             .EditPush(1, "45022100", "440220")
             .Num(0)
             .ScriptError(SCRIPT_ERR_SIG_DER));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with hybrid pubkey but no STRICTENC",
-                    checkdatasigschnorrflags & ~SCRIPT_VERIFY_STRICTENC)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0));
-    */
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with hybrid pubkey", checkdatasigschnorrflags)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG
-                              << OP_NOT,
-                    "CHECKDATASIG with invalid hybrid pubkey but no STRICTENC",
-                    SCRIPT_ENABLE_CHECKDATASIG)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIG,
-                    "CHECKDATASIG with invalid hybrid pubkey",
-                    checkdatasigschnorrflags)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
 
     // Duplicated test OP_CHECKDATASIGVERIFY with Schnorr flag on
     tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1C)
@@ -1549,40 +1294,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                         .EditPush(1, "45022100", "440220")
                         .Num(0)
                         .ScriptError(SCRIPT_ERR_SIG_DER));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                              << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                    "CHECKDATASIGVERIFY with hybrid pubkey but no STRICTENC",
-                    checkdatasigschnorrflags & ~SCRIPT_VERIFY_STRICTENC)
-            .PushDataSigECDSA(keys.key0, {})
-            .Num(0));
-    */
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                                "CHECKDATASIGVERIFY with hybrid pubkey",
-                                checkdatasigschnorrflags)
-                        .PushDataSigECDSA(keys.key0, {})
-                        .Num(0)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    tests.push_back(
-        TestBuilder(
-            CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKDATASIGVERIFY
-                      << OP_TRUE,
-            "CHECKDATASIGVERIFY with invalid hybrid pubkey but no STRICTENC",
-            SCRIPT_ENABLE_CHECKDATASIG)
-            .PushDataSigECDSA(keys.key0, {})
-            .DamagePush(10)
-            .Num(0)
-            .ScriptError(SCRIPT_ERR_CHECKDATASIGVERIFY));
-    tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0H)
-                                          << OP_CHECKDATASIGVERIFY << OP_TRUE,
-                                "CHECKDATASIGVERIFY with invalid hybrid pubkey",
-                                checkdatasigschnorrflags)
-                        .PushDataSigECDSA(keys.key0, {})
-                        .DamagePush(10)
-                        .Num(0)
-                        .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
 
     // Test all six CHECK*SIG* opcodes with Schnorr signatures.
     // - Schnorr/ECDSA signatures with varying flags SCHNORR / STRICTENC.
@@ -2042,41 +1753,6 @@ BOOST_AUTO_TEST_CASE(script_build) {
                     "Schnorr P2PK with compressed pubkey",
                     SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
             .PushSigSchnorr(keys.key0, SigHashType()));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                    "Schnorr P2PK with uncompressed pubkey",
-                    SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
-            .PushSigSchnorr(keys.key0, SigHashType()));
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                    "Schnorr P2PK with uncompressed pubkey but "
-                    "COMPRESSED_PUBKEYTYPE set",
-                    SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR |
-                        SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE)
-            .PushSigSchnorr(keys.key0, SigHashType())
-            .ScriptError(SCRIPT_ERR_NONCOMPRESSED_PUBKEY));
-    */
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG,
-                    "Schnorr P2PK with hybrid pubkey",
-                    SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
-            .PushSigSchnorr(keys.key0, SigHashType())
-            .ScriptError(SCRIPT_ERR_PUBKEYTYPE));
-    /*
-    tests.push_back(
-        TestBuilder(CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG,
-                    "Schnorr P2PK with hybrid pubkey but no STRICTENC",
-                    SCRIPT_ENABLE_SCHNORR)
-            .PushSigSchnorr(keys.key0));
-    */
-    tests.push_back(
-        TestBuilder(
-            CScript() << ToByteVector(keys.pubkey0H) << OP_CHECKSIG << OP_NOT,
-            "Schnorr P2PK NOT with damaged hybrid pubkey but no STRICTENC",
-            SCRIPT_ENABLE_SCHNORR)
-            .PushSigSchnorr(keys.key0)
-            .DamagePush(10));
 
     // Ensure sighash types still get checked with schnorr
     tests.push_back(
