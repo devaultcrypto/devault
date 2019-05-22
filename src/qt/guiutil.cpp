@@ -725,9 +725,9 @@ static fs::path GetAutostartDir() {
 static fs::path GetAutostartFilePath() {
     std::string chain = gArgs.GetChainName();
     if (chain == CBaseChainParams::MAIN) {
-        return GetAutostartDir() / "bitcoin.desktop";
+        return GetAutostartDir() / "devault.desktop";
     }
-    return GetAutostartDir() / strprintf("bitcoin-%s.lnk", chain);
+    return GetAutostartDir() / strprintf("devault-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup() {
