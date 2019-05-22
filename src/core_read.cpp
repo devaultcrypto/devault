@@ -71,7 +71,7 @@ CScript ParseScript(const std::string &s) {
         if (std::all_of(w.begin(), w.end(), ::IsDigit) ||
             (w.front() == '-' && w.size() > 1 && std::all_of(w.begin()+1, w.end(), ::IsDigit))) {
             // Number
-            int64_t n = std::atoi(w.c_str());
+            int64_t n = std::atoll(w.c_str());
             result << n;
             goto next;
         }

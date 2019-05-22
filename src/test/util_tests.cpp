@@ -505,9 +505,7 @@ BOOST_AUTO_TEST_CASE(util_GetArg) {
     BOOST_CHECK_EQUAL(testArgs.GetArg("strtest1", "default"), "string...");
     BOOST_CHECK_EQUAL(testArgs.GetArg("strtest2", "default"), "default");
     BOOST_CHECK_EQUAL(testArgs.GetArg("inttest1", -1), 12345);
-#ifdef DEBUG_THIS
     BOOST_CHECK_EQUAL(testArgs.GetArg("inttest2", -1), 81985529216486895LL);
-#endif
     BOOST_CHECK_EQUAL(testArgs.GetArg("inttest3", -1), -1);
     BOOST_CHECK_EQUAL(testArgs.GetBoolArg("booltest1", false), true);
     BOOST_CHECK_EQUAL(testArgs.GetBoolArg("booltest2", false), false);

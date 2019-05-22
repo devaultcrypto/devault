@@ -210,7 +210,7 @@ static Amount ExtractAndValidateValue(const std::string &strValue) {
 
 static void MutateTxVersion(CMutableTransaction &tx,
                             const std::string &cmdVal) {
-    int64_t newVersion = std::atoi(cmdVal.c_str());
+    int64_t newVersion = std::atoll(cmdVal.c_str());
     if (newVersion < 1 || newVersion > CTransaction::MAX_STANDARD_VERSION) {
         throw std::runtime_error("Invalid TX version requested");
     }
@@ -220,7 +220,7 @@ static void MutateTxVersion(CMutableTransaction &tx,
 
 static void MutateTxLocktime(CMutableTransaction &tx,
                              const std::string &cmdVal) {
-    int64_t newLocktime = std::atoi(cmdVal.c_str());
+    int64_t newLocktime = std::atoll(cmdVal.c_str());
     if (newLocktime < 0LL || newLocktime > 0xffffffffLL) {
         throw std::runtime_error("Invalid TX locktime requested");
     }

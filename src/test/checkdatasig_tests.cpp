@@ -26,12 +26,11 @@ const uint8_t vchPrivkey[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 struct KeyData {
     CKey privkeyC;
-    CPubKey pubkeyC, pubkeyH;
+    CPubKey pubkeyC;
 
     KeyData() {
         privkeyC.Set(vchPrivkey, vchPrivkey + 32);
         pubkeyC = privkeyC.GetPubKey();
-        *const_cast<uint8_t *>(&pubkeyH[0]) = 0x06 | (pubkeyH[64] & 1);
     }
 };
 
@@ -109,7 +108,6 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
 
     KeyData kd;
     valtype pubkeyC = ToByteVector(kd.pubkeyC);
-    valtype pubkeyH = ToByteVector(kd.pubkeyH);
 
     CheckTestResultForAllFlags({{}, message, pubkeyC},
                                CScript() << OP_CHECKDATASIG, {{}});
@@ -123,6 +121,10 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
 
     // Check valid signatures (as in the signature format is valid).
     valtype validsig;
+    kd.privkeyC.SignECDSA(messageHash, validsig);
+
+    CheckTestResultForAllFlags({validsig, message, pubkeyC},  CScript() << OP_CHECKDATASIG, {{0x01}});
+    CheckTestResultForAllFlags({validsig, message, pubkeyC},  CScript() << OP_CHECKDATASIGVERIFY, {});
 
     const valtype minimalsig{0x30, 0x06, 0x02, 0x01, 0x01, 0x02, 0x01, 0x01};
     const valtype nondersig{0x30, 0x80, 0x06, 0x02, 0x01,
@@ -139,30 +141,9 @@ BOOST_AUTO_TEST_CASE(checkdatasig_test) {
     for (int i = 0; i < 4096; i++) {
         uint32_t flags = lcg.next() | SCRIPT_ENABLE_CHECKDATASIG;
 
-        if (flags & SCRIPT_VERIFY_STRICTENC) {
-            // When strict encoding is enforced, hybrid keys are invalid.
-            CheckError(flags, {{}, message, pubkeyH}, script,
-                       SCRIPT_ERR_PUBKEYTYPE);
-            CheckError(flags, {{}, message, pubkeyH}, scriptverify,
-                       SCRIPT_ERR_PUBKEYTYPE);
-        } else if (flags & SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE) {
-            // When compressed-only is enforced, hybrid keys are invalid.
-            CheckError(flags, {{}, message, pubkeyH}, script,
-                       SCRIPT_ERR_NONCOMPRESSED_PUBKEY);
-            CheckError(flags, {{}, message, pubkeyH}, scriptverify,
-                       SCRIPT_ERR_NONCOMPRESSED_PUBKEY);
-        } else {
-            // Otherwise, hybrid keys are valid.
-            CheckPass(flags, {{}, message, pubkeyH}, script, {});
-            CheckError(flags, {{}, message, pubkeyH}, scriptverify,
-                       SCRIPT_ERR_CHECKDATASIGVERIFY);
-        }
-
-        if (flags & SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE) {
-            // When compressed-only is enforced, uncompressed keys are invalid.
-        } else {
-            // Otherwise, uncompressed keys are valid.
-        }
+        // When strict encoding is enforced, hybrid keys are invalid.
+        // When compressed-only is enforced, hybrid keys are invalid.
+        // When compressed-only is enforced, uncompressed keys are invalid.
 
         if (flags & SCRIPT_VERIFY_NULLFAIL) {
             // Invalid signature causes checkdatasig to fail.
