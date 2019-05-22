@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_is_commitment) {
     BOOST_CHECK(!s.IsCommitment(data));
 
     // Commitment to a larger value.
-    std::string str = "Bitcoin: A peer-to-peer Electronic Cash System";
+    std::string str = "DeVault: A peer-to-peer Electronic Cash System";
     data = std::vector<uint8_t>(str.begin(), str.end());
     BOOST_CHECK(!s.IsCommitment(data));
 

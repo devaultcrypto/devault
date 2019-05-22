@@ -440,7 +440,7 @@ int64_t ArgsManager::GetArg(const std::string &strArg, int64_t nDefault) const {
     std::pair<bool, std::string> found_res =
         ArgsManagerHelper::GetArg(*this, strArg);
     if (found_res.first) {
-      return std::atoi(found_res.second.c_str());
+      return std::atoll(found_res.second.c_str());
     }
     return nDefault;
 }

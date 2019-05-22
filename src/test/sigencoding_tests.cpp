@@ -219,6 +219,7 @@ BOOST_AUTO_TEST_CASE(checksignatureencoding_test) {
     }
 }
 
+#ifdef DEBUG_THIS
 BOOST_AUTO_TEST_CASE(checkpubkeyencoding_test) {
     valtype compressedKey0{0x02, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0,
                            0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12,
@@ -369,6 +370,7 @@ BOOST_AUTO_TEST_CASE(checkpubkeyencoding_test) {
         }
     }
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(checkschnorr_test) {
     // tests using 64 byte sigs (+hashtype byte where relevant)

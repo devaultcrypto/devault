@@ -228,7 +228,7 @@ bool RPCConsole::RPCParseCommandLine(std::string &strResult,
                                         }
                                     }
                                     subelement =
-                                        lastResult[atoi(curarg.c_str())];
+                                        lastResult[atoll(curarg.c_str())];
                                 } else if (lastResult.isObject()) {
                                     subelement = find_value(lastResult, curarg);
                                 } else {

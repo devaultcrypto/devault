@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(AmountTests) {
 
     for (int64_t i : values) {
         for (int64_t j : values) {
-            CheckAmounts(i, j);
+            CheckAmounts(i*MIN_COIN, j*MIN_COIN);
         }
     }
 
