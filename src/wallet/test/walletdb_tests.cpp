@@ -3,26 +3,14 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chainparams.h>
-#include <test/test_bitcoin.h>
-
 #include <wallet/wallet.h>
-#include <wallet/walletdb.h>
+
+#include <test/test_bitcoin.h>
+#include <wallet/test/wallet_test_fixture.h>
 
 #include <boost/test/unit_test.hpp>
 
 namespace {
-struct WalletDBTestingSetup : public TestingSetup {
-    WalletDBTestingSetup(
-        const std::string &chainName = CBaseChainParams::MAIN) {
-        bitdb.MakeMock();
-    }
-
-    ~WalletDBTestingSetup() {
-        bitdb.Flush(true);
-        bitdb.Reset();
-    }
-};
-
 static std::unique_ptr<CWalletDBWrapper> TmpDB(const fs::path &pathTemp,
                                                const std::string &testname) {
     fs::path dir = pathTemp / testname;
@@ -42,7 +30,7 @@ static std::unique_ptr<CWallet> LoadWallet(CWalletDB *db) {
 }
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(walletdb_tests, WalletDBTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(walletdb_tests, WalletTestingSetup)
 
 BOOST_AUTO_TEST_CASE(write_erase_name) {
     auto walletdbwrapper = TmpDB(pathTemp, "write_erase_name");
