@@ -2376,7 +2376,8 @@ public:
     }
 
     ~ConnectTrace() {
-        pool.NotifyEntryRemoved.disconnect_all(true);
+      pool.NotifyEntryRemoved.disconnect(
+                                         boost::bind(&ConnectTrace::NotifyEntryRemoved, this, _1, _2));
     }
 
     void BlockConnected(CBlockIndex *pindex,
@@ -3898,7 +3899,7 @@ static bool AcceptBlock(const Config &config,
                         CValidationState &state, bool fRequested,
                         const CDiskBlockPos *dbp, bool *fNewBlock) {
     AssertLockHeld(cs_main);
-
+  
     const CBlock &block = *pblock;
     if (fNewBlock) {
         *fNewBlock = false;
