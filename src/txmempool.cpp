@@ -432,7 +432,7 @@ void CTxMemPool::AddTransactionsUpdated(unsigned int n) {
 
 bool CTxMemPool::addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
                               setEntries &setAncestors) {
-    NotifyEntryAdded.fire(entry.GetSharedTx());
+    NotifyEntryAdded(entry.GetSharedTx());
     // Add to memory pool without checking anything.
     // Used by AcceptToMemoryPool(), which DOES do all the appropriate checks.
     LOCK(cs);
@@ -543,7 +543,7 @@ bool CTxMemPool::getAddrIndex(std::vector<std::string> &addresses,
 }
 
 void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason) {
-    NotifyEntryRemoved.fire(it->GetSharedTx(), reason);
+    NotifyEntryRemoved(it->GetSharedTx(), reason);
     const uint256 hash = it->GetTx().GetHash();
     for (const CTxIn &txin : it->GetTx().vin) {
         mapNextTx.erase(txin.prevout);
