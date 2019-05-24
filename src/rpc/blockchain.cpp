@@ -1457,6 +1457,8 @@ UniValue getblockchaininfo(const Config &config,
             "current best block\n"
             "  \"verificationprogress\": xxxx, (numeric) estimate of "
             "verification progress [0..1]\n"
+            "  \"initialblockdownload\": xxxx, (bool) (debug information) "
+            "estimate of whether this node is in Initial Block Download mode.\n"
             "  \"chainwork\": \"xxxx\"     (string) total amount of work in "
             "active chain, in hexadecimal\n"
             "  \"pruned\": xx,             (boolean) if the blocks are subject "
@@ -1481,6 +1483,7 @@ UniValue getblockchaininfo(const Config &config,
     obj.pushKV("mediantime", int64_t(tip->GetMedianTimePast()));
     obj.pushKV("verificationprogress",
                GuessVerificationProgress(Params().TxData(), tip));
+    obj.pushKV("initialblockdownload", IsInitialBlockDownload());
     obj.pushKV("chainwork", tip->nChainWork.GetHex());
     //    obj.pushKV("size_on_disk", CalculateCurrentUsage());
 
