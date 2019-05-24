@@ -359,11 +359,10 @@ static bool InitRPCAuthentication(Config &config) {
         std::string generatedUserAndPassword;
         if (!GenerateAuthCookie(&generatedUserAndPassword)) {
             // Same message as AbortNode.
-            bool fRet;
-            uiInterface.ThreadSafeMessageBox.fire(
+            uiInterface.ThreadSafeMessageBox(
                 _("Error: A fatal internal error occurred, see debug.log for "
                   "details"),
-                "", CClientUIInterface::MSG_ERROR, &fRet);
+                "", CClientUIInterface::MSG_ERROR);
             return false;
         }
         config.SetRPCUserAndPassword(generatedUserAndPassword);

@@ -201,7 +201,7 @@ bool CCryptoKeyStore::Lock() {
         vMasterKey.clear();
     }
 
-    NotifyStatusChanged.fire(this);
+    NotifyStatusChanged(this);
     return true;
 }
 
@@ -252,7 +252,7 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial &vMasterKeyIn) {
         }
         fDecryptionThoroughlyChecked = true;
     }
-    NotifyStatusChanged.fire(this);
+    NotifyStatusChanged(this);
     return true;
 }
 

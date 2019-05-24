@@ -8,20 +8,17 @@
 CClientUIInterface uiInterface;
 
 bool InitError(const std::string &str) {
-    bool fRet;
-    uiInterface.ThreadSafeMessageBox.fire(str, "", CClientUIInterface::MSG_ERROR, &fRet);
+    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_ERROR);
     return false;
 }
 
 bool ShowSeedPhrase(const std::string &str) {
-    bool fRet;
-    uiInterface.ThreadSafeMessageBox.fire(str, "", CClientUIInterface::MSG_SEED, &fRet);
+    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_SEED);
     return false;
 }
 
 void InitWarning(const std::string &str) {
-    bool fRet;
-    uiInterface.ThreadSafeMessageBox.fire(str, "", CClientUIInterface::MSG_WARNING, &fRet);
+    uiInterface.ThreadSafeMessageBox(str, "", CClientUIInterface::MSG_WARNING);
 }
 
 std::string AmountHighWarn(const std::string &optname) {

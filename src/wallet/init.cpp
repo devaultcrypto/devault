@@ -314,7 +314,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) {
 
     LogPrintf("Using wallet directory %s\n", GetWalletDir().string());
 
-    uiInterface.InitMessage.fire(_("Verifying wallet(s)..."));
+    uiInterface.InitMessage(_("Verifying wallet(s)..."));
 
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;

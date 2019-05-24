@@ -368,7 +368,7 @@ bool CWallet::AddWatchOnly(const CScript &dest) {
 
     const CKeyMetadata &meta = m_script_metadata[CScriptID(dest)];
     UpdateTimeFirstKey(meta.nCreateTime);
-    NotifyWatchonlyChanged.fire(true);
+    NotifyWatchonlyChanged(true);
     return CWalletDB(*dbw).WriteWatchOnly(dest, meta);
 }
 
@@ -384,7 +384,7 @@ bool CWallet::RemoveWatchOnly(const CScript &dest) {
     }
 
     if (!HaveWatchOnly()) {
-        NotifyWatchonlyChanged.fire(false);
+        NotifyWatchonlyChanged(false);
     }
 
     return CWalletDB(*dbw).EraseWatchOnly(dest);
@@ -728,7 +728,7 @@ bool CWallet::FinishEncryptWallet(const SecureString &strWalletPassphrase) {
         //dbw->Rewrite();
     }
 
-    NotifyStatusChanged.fire(this);
+    NotifyStatusChanged(this);
     return true;
 }
 
@@ -1022,7 +1022,7 @@ bool CWallet::AddToWallet(const CWalletTx &wtxIn, bool fFlushOnClose) {
     wtx.MarkDirty();
 
     // Notify UI of new or updated transaction.
-    NotifyTransactionChanged.fire(this, txid, fInsertedNew ? CT_NEW : CT_UPDATED);
+    NotifyTransactionChanged(this, txid, fInsertedNew ? CT_NEW : CT_UPDATED);
 
     // Notify an external script when a wallet transaction comes in or is
     // updated.
@@ -1190,7 +1190,7 @@ bool CWallet::AbandonTransaction(const TxId &txid) {
             wtx.setAbandoned();
             wtx.MarkDirty();
             walletdb.WriteTx(wtx);
-            NotifyTransactionChanged.fire(this, wtx.GetId(), CT_UPDATED);
+            NotifyTransactionChanged(this, wtx.GetId(), CT_UPDATED);
             // Iterate over all its outputs, and mark transactions in the wallet
             // that spend them abandoned too.
             TxSpends::const_iterator iter =
@@ -1750,14 +1750,14 @@ CBlockIndex *CWallet::ScanForWalletTransactions(CBlockIndex *pindexStart,
 
     // Show rescan progress in GUI as dialog or on splashscreen, if -rescan on
     // startup.
-    ShowProgress.fire(_("Rescanning..."), 0);
+    ShowProgress(_("Rescanning..."), 0);
     double dProgressStart =
         GuessVerificationProgress(chainParams.TxData(), pindex);
     double dProgressTip =
         GuessVerificationProgress(chainParams.TxData(), chainActive.Tip());
     while (pindex && !fAbortRescan) {
         if (pindex->nHeight % 100 == 0 && dProgressTip - dProgressStart > 0.0) {
-            ShowProgress.fire(
+            ShowProgress(
                 _("Rescanning..."),
                 std::max(1,
                          std::min<int>(99, (GuessVerificationProgress(
@@ -1796,7 +1796,7 @@ CBlockIndex *CWallet::ScanForWalletTransactions(CBlockIndex *pindexStart,
     }
 
     // Hide progress dialog in GUI.
-    ShowProgress.fire(_("Rescanning..."), 100);
+    ShowProgress(_("Rescanning..."), 100);
     fScanningWallet = false;
 
     return ret;
@@ -3294,7 +3294,7 @@ bool CWallet::CommitTransaction(
     for (const CTxIn &txin : wtxNew.tx->vin) {
         CWalletTx &coin = mapWallet.at(txin.prevout.GetTxId());
         coin.BindWallet(this);
-        NotifyTransactionChanged.fire(this, coin.GetId(), CT_UPDATED);
+        NotifyTransactionChanged(this, coin.GetId(), CT_UPDATED);
     }
 
     // Track how many getdata requests our transaction gets.
@@ -3369,7 +3369,7 @@ DBErrors CWallet::LoadWallet(bool &fFirstRunRet) {
         return nLoadWalletRet;
     }
 
-    uiInterface.LoadWallet.fire(this);
+    uiInterface.LoadWallet(this);
 
     return DBErrors::LOAD_OK;
 }
@@ -3440,7 +3440,7 @@ bool CWallet::SetAddressBook(const CTxDestination &address,
         }
     }
 
-    NotifyAddressBookChanged.fire(this, address, strName,
+    NotifyAddressBookChanged(this, address, strName,
                              ::IsMine(*this, address) != ISMINE_NO, strPurpose,
                              (fUpdated ? CT_UPDATED : CT_NEW));
 
@@ -3465,7 +3465,7 @@ bool CWallet::DelAddressBook(const CTxDestination &address) {
         mapAddressBook.erase(address);
     }
 
-    NotifyAddressBookChanged.fire(this, address, "",
+    NotifyAddressBookChanged(this, address, "",
                              ::IsMine(*this, address) != ISMINE_NO, "",
                              CT_DELETED);
 
@@ -4215,7 +4215,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     std::vector<CWalletTx> vWtx;
 
     if (gArgs.GetBoolArg("-zapwallettxes", false)) {
-        uiInterface.InitMessage.fire(_("Zapping all transactions from wallet..."));
+        uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
 
         std::unique_ptr<CWalletDBWrapper> dbw(
             new CWalletDBWrapper(&bitdb, walletFile));
@@ -4229,7 +4229,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
         }
     }
 
-    uiInterface.InitMessage.fire(_("Loading wallet..."));
+    uiInterface.InitMessage(_("Loading wallet..."));
 
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
@@ -4345,7 +4345,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             }
         }
 
-        uiInterface.InitMessage.fire(_("Rescanning..."));
+        uiInterface.InitMessage(_("Rescanning..."));
         LogPrintf("Rescanning last %i blocks (from block %i)...\n",
                   chainActive.Height() - pindexRescan->nHeight,
                   pindexRescan->nHeight);
