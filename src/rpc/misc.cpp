@@ -880,7 +880,7 @@ static UniValue getrewards(const Config &config, const JSONRPCRequest &request) 
 static UniValue getorderedrewards(const Config &config, const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-                                 "getrewards \"filename\"\n"
+                                 "getorderedrewards \"filename\"\n"
                                  "\nReturns all of the valid reward UTXO values.\n"
                                  "{\nArguments"
                                  "1. \"filename\"    (string, required) The filename with path (either absolute or relative to devaultd)\n"

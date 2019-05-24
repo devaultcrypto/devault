@@ -42,7 +42,7 @@ static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
 static const Amount DEFAULT_TRANSACTION_FEE = Amount::zero();
 //! -fallbackfee default
-static const Amount DEFAULT_FALLBACK_FEE(20000 * SATOSHI);
+static const Amount DEFAULT_FALLBACK_FEE(2*MINCOIN);
 //! minimum recommended increment for BIP 125 replacement txs
 static const Amount WALLET_INCREMENTAL_RELAY_FEE(MINCOIN);
 //! target minimum change amount
