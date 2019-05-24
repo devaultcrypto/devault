@@ -83,13 +83,10 @@
                               <property name="text">
                                 <string/>
                               </property>
-                              <property name="styleSheet">
-                                <string notr="true">{ border: none; background: transparent; }</string>
-                              </property>
                               <property name="icon">
                                 <iconset>
                                   <normaloff>:/icons/warning</normaloff>
-                                  <disabledoff>:/icons/warning</disabledoff>:/icons/warning
+                                  <disabledoff>:/icons/warning</disabledoff>
                                 </iconset>
                               </property>
                               <property name="iconSize">
