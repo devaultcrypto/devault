@@ -8,7 +8,7 @@
 #endif
 
 #include "utiltime.h"
-
+#include <cassert>
 #include <atomic>
 #include <sstream>
 #include <iomanip> // for put_time
