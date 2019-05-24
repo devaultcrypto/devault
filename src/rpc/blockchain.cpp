@@ -66,24 +66,28 @@ static double GetDifficultyFromBits(uint32_t nBits) {
 }
 
 double GetDifficulty(const CBlockIndex *blockindex) {
-    // Floating point number that is a multiple of the minimum difficulty,
-    // minimum difficulty = 1.0.
-    if (blockindex == nullptr) {
-        return 1.0;
-    }
+    assert(blockindex);
 
     return GetDifficultyFromBits(blockindex->nBits);
 }
 
-UniValue blockheaderToJSON(const CBlockIndex *blockindex) {
-    AssertLockHeld(cs_main);
+static int ComputeNextBlockAndDepth(const CBlockIndex *tip,
+                                    const CBlockIndex *blockindex,
+                                    const CBlockIndex *&next) {
+    next = tip->GetAncestor(blockindex->nHeight + 1);
+    if (next && next->pprev == blockindex) {
+        return tip->nHeight - blockindex->nHeight + 1;
+    }
+    next = nullptr;
+    return blockindex == tip ? 1 : -1;
+}
+
+UniValue blockheaderToJSON(const CBlockIndex *tip,
+                           const CBlockIndex *blockindex) {
     UniValue result(UniValue::VOBJ);
     result.pushKV("hash", blockindex->GetBlockHash().GetHex());
-    int confirmations = -1;
-    // Only report confirmations if the block is on the main chain
-    if (chainActive.Contains(blockindex)) {
-        confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    }
+    const CBlockIndex *pnext;
+    int confirmations = ComputeNextBlockAndDepth(tip, blockindex, pnext);
     result.pushKV("confirmations", confirmations);
     result.pushKV("height", blockindex->nHeight);
     result.pushKV("version", blockindex->nVersion);
@@ -100,7 +104,6 @@ UniValue blockheaderToJSON(const CBlockIndex *blockindex) {
         result.pushKV("previousblockhash",
                       blockindex->pprev->GetBlockHash().GetHex());
     }
-    CBlockIndex *pnext = chainActive.Next(blockindex);
     if (pnext) {
         result.pushKV("nextblockhash", pnext->GetBlockHash().GetHex());
     }
@@ -216,16 +219,12 @@ UniValue blockToDeltasJSON(const Config &config, const CBlock& block, const CBlo
 }
 #endif
 
-UniValue blockToJSON(const CBlock &block, const CBlockIndex *blockindex,
-                     bool txDetails) {
-    AssertLockHeld(cs_main);
+UniValue blockToJSON(const CBlock &block, const CBlockIndex *tip,
+                     const CBlockIndex *blockindex, bool txDetails) {
     UniValue result(UniValue::VOBJ);
     result.pushKV("hash", blockindex->GetBlockHash().GetHex());
-    int confirmations = -1;
-    // Only report confirmations if the block is on the main chain
-    if (chainActive.Contains(blockindex)) {
-        confirmations = chainActive.Height() - blockindex->nHeight + 1;
-    }
+    const CBlockIndex *pnext;
+    int confirmations = ComputeNextBlockAndDepth(tip, blockindex, pnext);
     result.pushKV("confirmations", confirmations);
     result.pushKV(
         "size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION));
@@ -255,7 +254,6 @@ UniValue blockToJSON(const CBlock &block, const CBlockIndex *blockindex,
         result.pushKV("previousblockhash",
                       blockindex->pprev->GetBlockHash().GetHex());
     }
-    CBlockIndex *pnext = chainActive.Next(blockindex);
     if (pnext) {
         result.pushKV("nextblockhash", pnext->GetBlockHash().GetHex());
     }
@@ -1015,7 +1013,7 @@ static UniValue getblockheader(const Config &config,
         return strHex;
     }
 
-    return blockheaderToJSON(pblockindex);
+    return blockheaderToJSON(chainActive.Tip(), pblockindex);
 }
 
 static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
@@ -1126,7 +1124,7 @@ static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
         return strHex;
     }
 
-    return blockToJSON(block, pblockindex, verbosity >= 2);
+    return blockToJSON(block, chainActive.Tip(), pblockindex, verbosity >= 2);
 }
 
 struct CCoinsStats {
@@ -1437,7 +1435,6 @@ static UniValue verifychain(const Config &config,
                                 nCheckDepth);
 }
 
-
 UniValue getblockchaininfo(const Config &config,
                            const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 0) {
@@ -1474,29 +1471,32 @@ UniValue getblockchaininfo(const Config &config,
 
     LOCK(cs_main);
 
+    const CBlockIndex *tip = chainActive.Tip();
     UniValue obj(UniValue::VOBJ);
     obj.pushKV("chain", config.GetChainParams().NetworkIDString());
     obj.pushKV("blocks", int(chainActive.Height()));
     obj.pushKV("headers", pindexBestHeader ? pindexBestHeader->nHeight : -1);
-    obj.pushKV("bestblockhash", chainActive.Tip()->GetBlockHash().GetHex());
-    obj.pushKV("difficulty", double(GetDifficulty(chainActive.Tip())));
-    obj.pushKV("mediantime", int64_t(chainActive.Tip()->GetMedianTimePast()));
+    obj.pushKV("bestblockhash", tip->GetBlockHash().GetHex());
+    obj.pushKV("difficulty", double(GetDifficulty(tip)));
+    obj.pushKV("mediantime", int64_t(tip->GetMedianTimePast()));
     obj.pushKV("verificationprogress",
-               GuessVerificationProgress(config.GetChainParams().TxData(),
-                                         chainActive.Tip()));
-    obj.pushKV("chainwork", chainActive.Tip()->nChainWork.GetHex());
-  
+               GuessVerificationProgress(Params().TxData(), tip));
+    obj.pushKV("chainwork", tip->nChainWork.GetHex());
+    obj.pushKV("size_on_disk", CalculateCurrentUsage());
+
     CCoinsStats stats;
     FlushStateToDisk();
     if (GetUTXOStats(pcoinsdbview.get(), stats)) {
       obj.pushKV("coinsupply", ValueFromAmount(stats.nTotalAmount));
     }
  
+    
     obj.pushKV("pruned", fPruneMode);
 
     if (fPruneMode) {
-        CBlockIndex *block = chainActive.Tip();
-        while (block && block->pprev && block->pprev->nStatus.hasData()) {
+        const CBlockIndex *block = tip;
+        assert(block);
+        while (block->pprev && (block->pprev->nStatus.hasData())) {
             block = block->pprev;
         }
         if (block) 
