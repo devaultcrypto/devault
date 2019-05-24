@@ -205,7 +205,7 @@ public:
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 6 * 60 * 60; // 6 hours
         consensus.nPowTargetSpacing = 2 * 60; // 120 seconds
-        consensus.nBlocksPerYear = 30 * 6 * 365; // 65.7k block years & 5,475 block rewards
+        consensus.nBlocksPerYear = 2400;  // 30 * 6 * 365; // 65.7k block years & 5,475 block rewards
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
