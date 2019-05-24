@@ -8,7 +8,7 @@
 
 #include "test/test_bitcoin.h"
 
-#include "signals-cpp/signal.h"
+#include <boost/signals2/signal.hpp>
 #include <boost/test/unit_test.hpp>
 
 BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)

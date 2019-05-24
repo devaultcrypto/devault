@@ -495,7 +495,7 @@ bool CCoinsViewDB::Upgrade() {
     int64_t count = 0;
     LogPrintf("Upgrading utxo-set database...\n");
     LogPrintf("[0%%]...");
-    uiInterface.ShowProgress.fire(_("Upgrading UTXO database"), 0, true);
+    uiInterface.ShowProgress(_("Upgrading UTXO database"), 0, true);
     size_t batch_size = 1 << 24;
     CDBBatch batch(db);
     int reportDone = 0;
@@ -512,7 +512,7 @@ bool CCoinsViewDB::Upgrade() {
             uint32_t high =
                 0x100 * *key.second.begin() + *(key.second.begin() + 1);
             int percentageDone = (int)(high * 100.0 / 65536.0 + 0.5);
-            uiInterface.ShowProgress.fire(_("Upgrading UTXO database"),
+            uiInterface.ShowProgress(_("Upgrading UTXO database"),
                                      percentageDone, true);
             if (reportDone < percentageDone / 10) {
                 // report max. every 10% step
@@ -551,7 +551,7 @@ bool CCoinsViewDB::Upgrade() {
 
     db.WriteBatch(batch);
     db.CompactRange({DB_COINS, uint256()}, key);
-    uiInterface.ShowProgress.fire("", 100, false);
+    uiInterface.ShowProgress("", 100, false);
     LogPrintf("[%s].\n", ShutdownRequested() ? "CANCELLED" : "DONE");
     return !ShutdownRequested();
 }

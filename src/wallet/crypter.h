@@ -8,7 +8,7 @@
 #include "keystore.h"
 #include "serialize.h"
 #include "support/allocators/secure.h"
-#include "signals-cpp/signal.h"
+#include <boost/signals2/signal.hpp>
 
 #include <atomic>
 
@@ -165,7 +165,7 @@ public:
      * Wallet status (encrypted, locked) changed.
      * Note: Called without locks held.
      */
-    sigs::signal<void(CCryptoKeyStore *wallet)> NotifyStatusChanged;
+    boost::signals2::signal<void(CCryptoKeyStore *wallet)> NotifyStatusChanged;
 };
 
 

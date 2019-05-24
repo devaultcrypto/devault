@@ -29,8 +29,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "signals-cpp/signals.h"
 #include <condition_variable>
+#include <boost/signals2/signal.hpp>
 
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
@@ -39,7 +39,7 @@ int64_t GetStartupTime();
 class CTranslationInterface {
 public:
     /** Translate a message to the native language of the user. */
-  sigs::signal<void(const char *psz, std::string& s)> Translate;
+    boost::signals2::signal<std::string(const char *psz)> Translate;
 };
 
 extern CTranslationInterface translationInterface;
@@ -61,9 +61,8 @@ inline void interruption_point(bool interrupt) {
  * returned, and simply return the input.
  */
 inline std::string _(const char *psz) {
-  std::string rv = "";
-  translationInterface.Translate.fire(psz, rv);
-  return (rv != "") ? rv : psz;
+    boost::optional<std::string> rv = translationInterface.Translate(psz);
+    return rv ? (*rv) : psz;
 }
 
 bool SetupNetworking();

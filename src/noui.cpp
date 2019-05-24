@@ -12,9 +12,9 @@
 #include <cstdio>
 #include <string>
 
-static void noui_ThreadSafeMessageBox(const std::string &message,
+static bool noui_ThreadSafeMessageBox(const std::string &message,
                                       const std::string &caption,
-                                      unsigned int style, bool* b) {
+                                      unsigned int style) {
     bool fSecure = style & CClientUIInterface::SECURE;
     style &= ~CClientUIInterface::SECURE;
 
@@ -37,13 +37,14 @@ static void noui_ThreadSafeMessageBox(const std::string &message,
 
     if (!fSecure) LogPrintf("%s: %s\n", strCaption, message);
     fprintf(stderr, "%s: %s\n", strCaption.c_str(), message.c_str());
-    *b = false;
+    return false;
 }
 
-static void noui_ThreadSafeQuestion(const std::string & /* ignored interactive message */,
-                                    const std::string &message, const std::string &caption,
-                                    unsigned int style, bool* b) {
-    noui_ThreadSafeMessageBox(message, caption, style, b);
+static bool
+noui_ThreadSafeQuestion(const std::string & /* ignored interactive message */,
+                        const std::string &message, const std::string &caption,
+                        unsigned int style) {
+    return noui_ThreadSafeMessageBox(message, caption, style);
 }
 
 static void noui_InitMessage(const std::string &message) {

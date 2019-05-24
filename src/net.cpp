@@ -512,7 +512,7 @@ void CConnman::ClearBanned() {
     // Store banlist to disk.
     DumpBanlist();
     if (clientInterface) {
-        clientInterface->BannedListChanged.fire();
+        clientInterface->BannedListChanged();
     }
 }
 
@@ -571,7 +571,7 @@ void CConnman::Ban(const CSubNet &subNet, const BanReason &banReason,
     }
 
     if (clientInterface) {
-        clientInterface->BannedListChanged.fire();
+        clientInterface->BannedListChanged();
     }
 
     {
@@ -604,7 +604,7 @@ bool CConnman::Unban(const CSubNet &subNet) {
     }
 
     if (clientInterface) {
-        clientInterface->BannedListChanged.fire();
+        clientInterface->BannedListChanged();
     }
 
     // Store banlist to disk immediately.
@@ -651,7 +651,7 @@ void CConnman::SweepBanned() {
 
     // update UI
     if (notifyUI && clientInterface) {
-        clientInterface->BannedListChanged.fire();
+        clientInterface->BannedListChanged();
     }
 }
 
@@ -1305,7 +1305,7 @@ void CConnman::ThreadSocketHandler() {
         if (vNodesSize != nPrevNodeCount) {
             nPrevNodeCount = vNodesSize;
             if (clientInterface) {
-                clientInterface->NotifyNumConnectionsChanged.fire(nPrevNodeCount);
+                clientInterface->NotifyNumConnectionsChanged(nPrevNodeCount);
             }
         }
 
@@ -2340,7 +2340,7 @@ void CConnman::SetNetworkActive(bool active) {
     }
 
     fNetworkActive = active;
-    uiInterface.NotifyNetworkActiveChanged.fire(fNetworkActive);
+    uiInterface.NotifyNetworkActiveChanged(fNetworkActive);
 }
 
 CConnman::CConnman(const Config &configIn, uint64_t nSeed0In, uint64_t nSeed1In)
@@ -2369,9 +2369,8 @@ bool CConnman::Bind(const CService &addr, unsigned int flags) {
     std::string strError;
     if (!BindListenPort(addr, strError, (flags & BF_WHITELIST) != 0)) {
         if ((flags & BF_REPORT_ERROR) && clientInterface) {
-            bool fRet;
-            clientInterface->ThreadSafeMessageBox.fire(
-                                                       strError, "", CClientUIInterface::MSG_ERROR, &fRet);
+            clientInterface->ThreadSafeMessageBox(
+                strError, "", CClientUIInterface::MSG_ERROR);
         }
         return false;
     }
@@ -2409,11 +2408,10 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
 
     if (fListen && !InitBinds(connOptions.vBinds, connOptions.vWhiteBinds)) {
         if (clientInterface) {
-            bool fRet;
-            clientInterface->ThreadSafeMessageBox.fire(
+            clientInterface->ThreadSafeMessageBox(
                 _("Failed to listen on any port. Use -listen=0 if you want "
                   "this."),
-                "", CClientUIInterface::MSG_ERROR, &fRet);
+                "", CClientUIInterface::MSG_ERROR);
         }
         return false;
     }
@@ -2423,7 +2421,7 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
     }
 
     if (clientInterface) {
-        clientInterface->InitMessage.fire(_("Loading P2P addresses..."));
+        clientInterface->InitMessage(_("Loading P2P addresses..."));
     }
     // Load addresses from peers.dat
     int64_t nStart = GetTimeMillis();
@@ -2440,7 +2438,7 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
         }
     }
     if (clientInterface) {
-        clientInterface->InitMessage.fire(_("Loading banlist..."));
+        clientInterface->InitMessage(_("Loading banlist..."));
     }
     // Load addresses from banlist.dat
     nStart = GetTimeMillis();
@@ -2464,7 +2462,7 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
         DumpBanlist();
     }
 
-    uiInterface.InitMessage.fire(_("Starting network threads..."));
+    uiInterface.InitMessage(_("Starting network threads..."));
 
     fAddressesInitialized = true;
 
@@ -2514,11 +2512,10 @@ bool CConnman::Start(CScheduler &scheduler, const Options &connOptions) {
     if (connOptions.m_use_addrman_outgoing &&
         !connOptions.m_specified_outgoing.empty()) {
         if (clientInterface) {
-            bool fRet;
-            clientInterface->ThreadSafeMessageBox.fire(
+            clientInterface->ThreadSafeMessageBox(
                 _("Cannot provide specific connections and have addrman find "
                   "outgoing connections at the same."),
-                "", CClientUIInterface::MSG_ERROR, &fRet);
+                "", CClientUIInterface::MSG_ERROR);
         }
         return false;
     }
