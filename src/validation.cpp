@@ -630,12 +630,11 @@ static bool AcceptToMemoryPoolWorker(
             extraFlags |= SCRIPT_ENABLE_REPLAY_PROTECTION;
         }
 
-        //if (IsMagneticAnomalyEnabledForCurrentBlock(config)) {
-        //}
+        extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
 
         if (IsGreatWallEnabledForCurrentBlock(config)) {
             extraFlags |= SCRIPT_ENABLE_SCHNORR;
-            extraFlags |= SCRIPT_ENABLE_CHECKDATASIG;
+            extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
         }
 
         // Make sure whatever we need to activate is actually activated.
@@ -1588,7 +1587,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // alternative. We also start enforcing push only signatures and
     // clean stack.
     if (IsGreatWallEnabled(config, pChainTip)) {
-      flags |= SCRIPT_ENABLE_CHECKDATASIG;
+      flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
       flags |= SCRIPT_VERIFY_SIGPUSHONLY;
       flags |= SCRIPT_VERIFY_CLEANSTACK;
     }
