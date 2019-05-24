@@ -204,8 +204,8 @@ public:
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 6 * 60 * 60; // 6 hours
-        consensus.nPowTargetSpacing = 2 * 8; // 16 seconds
-        consensus.nBlocksPerYear = 2400; // 30 * 24 * 365.25;
+        consensus.nPowTargetSpacing = 2 * 60; // 120 seconds
+        consensus.nBlocksPerYear = 30 * 6 * 365; // 65.7k block years & 5,475 block rewards
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -289,7 +289,7 @@ public:
         // Data as of block
         // 000000000005b07ecf85563034d13efd81c1a29e47e22b20f4fc6919d5b09cd6
         // (height 1223263)
-        chainTxData = ChainTxData{1556765775, 100, 1};
+        chainTxData = ChainTxData{1558726071, 100, 1};
     }
 };
 
