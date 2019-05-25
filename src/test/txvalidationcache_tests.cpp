@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(checkinputs_test, TestChain100Setup) {
         mutableFunding_tx.vout[0].nValue = 50 * COIN;
 
         CKey dummyKey;
-        dummyKey.MakeNewKey(true);
+        dummyKey.MakeNewKey();
         nulldummyPubKeyScript << OP_1 << ToByteVector(coinbaseKey.GetPubKey())
                               << ToByteVector(dummyKey.GetPubKey()) << OP_2
                               << OP_CHECKMULTISIG;
