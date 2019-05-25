@@ -196,7 +196,7 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
     coinbaseTx.vout[0].nValue = nFees + nMiningReward;
-    coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+    coinbaseTx.vin[0].scriptSig = CScript() << CScriptNum::serialize(nHeight) << OP_0;
   
     // if Budget Superblock, skip Cold Rewards
     if (!pbudget->FillPayments(coinbaseTx, nHeight, nMiningReward)) {
@@ -702,7 +702,7 @@ void IncrementExtraNonce(const Config &config, CBlock *pblock,
     unsigned int nHeight = pindexPrev->nHeight + 1;
     CMutableTransaction txCoinbase(*pblock->vtx[0]);
     txCoinbase.vin[0].scriptSig =
-        (CScript() << nHeight << CScriptNum(nExtraNonce)
+        (CScript() <<  CScriptNum::serialize(nHeight) << CScriptNum(nExtraNonce)
                    << getExcessiveBlockSizeSig(config)) +
         COINBASE_FLAGS;
 
