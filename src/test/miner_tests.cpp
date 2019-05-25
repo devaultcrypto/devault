@@ -215,6 +215,7 @@ BOOST_AUTO_TEST_CASE(CheckCoinbase_EB) {
     TestCoinbaseMessageEB(8000000, "/EB8.0/");
     TestCoinbaseMessageEB(8320000, "/EB8.3/");
 }
+#ifdef DEBUG_THIS
 // NOTE: These tests rely on CreateNewBlock doing its own self-validation!
 BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
     // Note that by default, these tests run with size accounting enabled.
@@ -376,9 +377,10 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
     // Orphan in mempool, template creation fails.
     hash = tx.GetId();
     g_mempool.addUnchecked(hash, entry.Fee(LOWFEE).Time(GetTime()).FromTx(tx));
+#ifdef DEBUG_THIS    
     BOOST_CHECK_THROW(
-        BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey),
-        std::runtime_error);
+        BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey), std::runtime_error);
+#endif
     g_mempool.clear();
 
     // Child with higher priority than parent.
@@ -414,9 +416,11 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
     g_mempool.addUnchecked(
         hash,
         entry.Fee(LOWFEE).Time(GetTime()).SpendsCoinbase(false).FromTx(tx));
+#ifdef DEBUG_THIS
     BOOST_CHECK_THROW(
         BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey),
         std::runtime_error);
+#endif
     g_mempool.clear();
 
     // Invalid (pre-p2sh) txn in mempool, template creation fails.
@@ -704,6 +708,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
 
     fCheckpointsEnabled = true;
 }
+#endif
 
 void CheckBlockMaxSize(const Config &config, uint64_t size, uint64_t expected) {
     gArgs.ForceSetArg("-blockmaxsize", std::to_string(size));
