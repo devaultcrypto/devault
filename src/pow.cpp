@@ -26,11 +26,13 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
     // Special difficulty rule for testnet:
     // If the new block's timestamp is more than 2* 10 minutes then allow
     // mining of a min-difficulty block.
+#ifdef USE_MIN_DIFFICULTY_TESTNET_RULE
     if (params.fPowAllowMinDifficultyBlocks &&
         (pblock->GetBlockTime() >
          pindexPrev->GetBlockTime() + 2 * params.nPowTargetSpacing)) {
         return UintToArith256(params.powLimit).GetCompact();
     }
+#endif
   
     const int nHeight = pindexPrev->nHeight + 1;
   
