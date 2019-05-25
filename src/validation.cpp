@@ -3749,7 +3749,7 @@ static bool ContextualCheckBlock(const Config &config, const CBlock &block,
     }
 
     // Enforce rule that the coinbase starts with serialized block height
-    CScript expect = CScript() << nHeight;
+    CScript expect = CScript() << CScriptNum::serialize(nHeight);
     if (block.vtx[0]->vin[0].scriptSig.size() < expect.size() ||
         !std::equal(expect.begin(), expect.end(),
                     block.vtx[0]->vin[0].scriptSig.begin())) {
