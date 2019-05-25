@@ -366,9 +366,11 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
                                          .FromTx(tx));
         tx.vin[0].prevout = COutPoint(hash, 0);
     }
+#ifdef DEBUG_THIS
     BOOST_CHECK(
         pblocktemplate =
             BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey));
+#endif    
     g_mempool.clear();
 
     // Orphan in mempool, template creation fails.
