@@ -161,11 +161,7 @@ public:
         consensus.nMinReward = 50 * COIN;
         consensus.nMaxReward = 62500 * COIN;
 
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = true;
-  
+        consensus.nZawyLwmaAveragingWindow = 72;
         
         //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
@@ -271,10 +267,7 @@ public:
         consensus.nMinReward =  50 * COIN;
         consensus.nMaxReward = 62500 * COIN;
 
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = true;
+        consensus.nZawyLwmaAveragingWindow = 72;
   
         fDefaultConsistencyChecks = false;
         fRequireStandard = false;
@@ -374,10 +367,7 @@ public:
         consensus.nMinReward = 50 * COIN;
         consensus.nMaxReward = 62500 * COIN;
 
-        consensus.nZawyLwmaAveragingWindow = 45;
-        consensus.nZawyLwmaAdjustedWeight = 13772;
-        consensus.nZawyLwmaMinDenominator = 10;
-        consensus.bZawyLwmaSolvetimeLimitation = true;
+        consensus.nZawyLwmaAveragingWindow = 72;
 
     }
 };
