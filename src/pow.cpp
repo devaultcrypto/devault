@@ -45,9 +45,8 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
   
     const int64_t T = params.nPowTargetSpacing;
     const int N = params.nZawyLwmaAveragingWindow;
-    const int k = params.nZawyLwmaAdjustedWeight;
-    const int dnorm = params.nZawyLwmaMinDenominator;
-    const bool limit_st = params.bZawyLwmaSolvetimeLimitation;
+    const int k = (N+1) * T / 2;  // ignore adjust 0.9989^(500/N) from python code
+    const int dnorm = 10;
 
     arith_uint256 sum_target;
     int t = 0, j = 0;
@@ -58,9 +57,7 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
         const CBlockIndex* block_Prev = block->GetAncestor(i - 1);
         int64_t solvetime = block->GetBlockTime() - block_Prev->GetBlockTime();
 
-        if (limit_st && solvetime > 6 * T) {
-            solvetime = 6 * T;
-        }
+        solvetime = std::min(6*T, solvetime);
 
         j++;
         t += solvetime * j;  // Weighted solvetime sum.
