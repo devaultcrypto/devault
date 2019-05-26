@@ -128,7 +128,8 @@ add_test_to_suite(devault test_devault
 	test_bitcoin_main.cpp
 	timedata_tests.cpp
 	transaction_tests.cpp
-  txvalidationcache_tests.cpp
+	txindex_tests.cpp
+	txvalidationcache_tests.cpp
 	uint256_tests.cpp
   undo_tests.cpp
 	univalue_tests.cpp

@@ -110,6 +110,8 @@ public:
  *  * B should be rejected for forking prior to an accepted checkpoint
  *  * AB should be rejected for forking at an accepted checkpoint
  */
+
+#ifdef DEBUG_THIS
 BOOST_AUTO_TEST_CASE(ban_fork_prior_to_and_at_checkpoints) {
     MainnetConfigWithTestCheckpoints config;
 
@@ -228,5 +230,6 @@ BOOST_AUTO_TEST_CASE(ban_fork_prior_to_and_at_checkpoints) {
         BOOST_CHECK(LookupBlockIndex(headerAB.GetHash()) == nullptr);
     }
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
