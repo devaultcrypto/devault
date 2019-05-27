@@ -849,50 +849,6 @@ static UniValue getrewards(const Config &config, const JSONRPCRequest &request) 
                                  + HelpExampleRpc("getrewards",""));
     
 
-    std::map<COutPoint, CRewardValue> rewards = prewards->GetRewards();
-    UniValue result(UniValue::VOBJ);
-
-    fs::path filepath = request.params[0].get_str();
-    filepath = fs::absolute(filepath);
-    
-    std::ofstream file;
-    file.open(filepath.string().c_str());
-    if (!file.is_open()) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER,
-                           "Cannot open wallet dump file");
-    }
-
-    for (auto& [key,val] : rewards) {
-        file << "Value " << val.GetValue()/COIN << " ";
-        file << "active "<<  val.IsActive() << " ";
-        file << "OldHeight " << val.GetOldHeight() << " ";
-        file << "Height " << val.GetHeight() << " ";
-        file << "payCount " << val.GetPayCount() << "\n";
-    }   
-    file.close();
-
-    UniValue reply(UniValue::VOBJ);
-    reply.pushKV("filename", filepath.string());
-
-    return reply;
-}
-
-static UniValue getorderedrewards(const Config &config, const JSONRPCRequest &request) {
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-                                 "getorderedrewards \"filename\"\n"
-                                 "\nReturns all of the valid reward UTXO values.\n"
-                                 "{\nArguments"
-                                 "1. \"filename\"    (string, required) The filename with path (either absolute or relative to devaultd)\n"
-                                 "\nResult:\n"
-                                 "{\n"
-                                 "  \"utxo\"  (string) The current balance in satoshis\n"
-                                 "}\n"
-                                 "\nExamples:\n"
-                                 + HelpExampleCli("getrewards","")
-                                 + HelpExampleRpc("getrewards",""));
-    
-
     std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
     UniValue result(UniValue::VOBJ);
 
@@ -912,6 +868,7 @@ static UniValue getorderedrewards(const Config &config, const JSONRPCRequest &re
         file << "creationHeight " << val.GetCreationHeight() << " ";
         file << "OldHeight " << val.GetOldHeight() << " ";
         file << "Height " << val.GetHeight() << " ";
+        file << "addr " << GetAddrFromTxOut(val.GetTxOut()) << " ";
         file << "payCount " << val.GetPayCount() << "\n";
     }   
     file.close();
@@ -932,7 +889,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "util",               "verifymessage",          verifymessage,          {"address","signature","message"} },
     { "util",               "signmessagewithprivkey", signmessagewithprivkey, {"privkey","message"} },
     { "util",       "getrewards",      getrewards,      {} },
-    { "util",       "getorderedrewards",      getorderedrewards,      {} },
     /* Address index */
     { "addressindex",       "getaddressbalance",      getaddressbalance,      {} },
 

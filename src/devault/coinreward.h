@@ -45,6 +45,7 @@ struct CRewardValue {
   uint32_t OldHeight;
   uint32_t height;
   uint32_t payCount;
+  uint32_t deactivationHeight;
   bool active;
 
   CScript scriptPubKey() { return txout.scriptPubKey; }
@@ -52,22 +53,24 @@ struct CRewardValue {
   Amount GetValue() { return txout.nValue; }
   uint32_t GetCreationHeight() { return creationHeight; }
   uint32_t GetOldHeight() { return OldHeight; }
+  uint32_t GetDeactivationHeight() { return deactivationHeight; }
   uint32_t GetHeight() { return height; }
   uint32_t GetPayCount() { return payCount; }
   void SetHeight(uint32_t h) { height = h; }
   void SetOldHeight(uint32_t h) { OldHeight = h; }
   bool was_paid() { return (GetHeight() != GetOldHeight()); }
   bool IsActive() { return active; }
-  void SetActive(bool a) { active = a; }
+  void SetActive(bool a, int H=0) { active = a; deactivationHeight = H; }
   CRewardValue() : creationHeight(0), OldHeight(0), height(0), payCount(0), active(false) {}
   explicit CRewardValue(const CTxOut &ptr, uint32_t cH, uint32_t OldH, uint32_t NewH)
-      : txout(ptr), creationHeight(cH), OldHeight(OldH), height(NewH), payCount(0), active(true) {}
+      : txout(ptr), creationHeight(cH), OldHeight(OldH), height(NewH), payCount(0), deactivationHeight(0), active(true) {}
 
   template <typename Stream> void Serialize(Stream &s) const {
     s << txout;
     s << creationHeight;
     s << OldHeight;
     s << height;
+    s << deactivationHeight;
     s << active;
     s << payCount;
   }
@@ -77,6 +80,7 @@ struct CRewardValue {
     s >> creationHeight;
     s >> OldHeight;
     s >> height;
+    s >> deactivationHeight;
     s >> active;
     s >> payCount;
   }

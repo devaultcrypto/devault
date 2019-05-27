@@ -113,14 +113,14 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
   
   // Batch Write/Erase
   if (rewardAdditions.size() > 0) pdb->Add(rewardAdditions);
-  if (rewardErasures.size() > 0) pdb->InActivate(rewardErasures);
+  if (rewardErasures.size() > 0) pdb->InActivate(rewardErasures, nHeight);
 
   return true;
 }
 
 bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, bool undoReward) {
 
-  int nHeight = pindex->nHeight;
+  uint32_t nHeight = pindex->nHeight;
 
   // Loop through block
   std::vector<std::pair<COutPoint, CRewardValue>> rewardUpdates;
@@ -145,6 +145,11 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
             // if active, restore height
             val.SetHeight(val.GetOldHeight());
           }
+          // if also paid out on this block or later, revert height old value
+          if (val.GetHeight() >= nHeight) {
+            val.SetHeight(val.GetOldHeight());
+          }
+          LogPrint(BCLog::COLD, "CR: %s : Add to rewardUpdates %s\n", __func__, val.ToString());
           rewardUpdates.emplace_back(out,val);
         }
       }
@@ -167,6 +172,11 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
 
         // 2. means possibly new candidates that should be removed by DB
         if (prewardsdb->HaveReward(outpoint)) {
+          {
+            CRewardValue val;
+            prewardsdb->GetReward(outpoint, val);
+            LogPrint(BCLog::COLD, "CR: %s : Add to rewardRemovals %s\n", __func__, val.ToString());
+          }
           rewardRemovals.push_back(outpoint);
         }            
         n++;
@@ -270,7 +280,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
     } else {
       // Not Active and Sufficiently old not to be re-org back,
       // therefore delete from dB
-      if ((Height - nHeight) > maxreorgdepth) {
+      int nDeactivationHeight = the_reward.GetDeactivationHeight();
+      if ((Height - nDeactivationHeight) > 2*maxreorgdepth) {
         pdb->EraseReward(key);
       }
     }
@@ -302,6 +313,7 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
       the_reward.SetHeight(the_reward.GetOldHeight());
       the_reward.payCount--;
       pdb->PutReward(key, the_reward);
+      LogPrint(BCLog::COLD, "CR: %s : Restore Reward At %s Height %d\n", __func__, the_reward.ToString(), Height);
       return true;
     }
     //
