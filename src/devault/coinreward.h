@@ -58,7 +58,7 @@ struct CRewardValue {
   void SetOldHeight(uint32_t h) { OldHeight = h; }
   bool was_paid() { return (GetHeight() != GetOldHeight()); }
   bool IsActive() { return active; }
-  void SetActive(bool a) { active = a; }
+  void SetActive(bool a) { active = a;}
   CRewardValue() : creationHeight(0), OldHeight(0), height(0), payCount(0), active(false) {}
   explicit CRewardValue(const CTxOut &ptr, uint32_t cH, uint32_t OldH, uint32_t NewH)
       : txout(ptr), creationHeight(cH), OldHeight(OldH), height(NewH), payCount(0), active(true) {}
