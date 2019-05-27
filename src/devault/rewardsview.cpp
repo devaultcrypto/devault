@@ -35,10 +35,10 @@ bool CRewardsViewDB::Erase(const std::vector<COutPoint>& vect) {
     return db.WriteBatch(batch);
 }
 
-bool CRewardsViewDB::InActivate(std::vector<std::pair<COutPoint, CRewardValue> >& vect, int nHeight) {
+bool CRewardsViewDB::InActivate(std::vector<std::pair<COutPoint, CRewardValue> >& vect) {
     CDBBatch batch(db);
     for (auto& it : vect) {
-      it.second.SetActive(false, nHeight);
+      it.second.SetActive(false);
       batch.Write(std::make_pair(DB_REWARD, it.first), it.second);
     }
     return db.WriteBatch(batch);

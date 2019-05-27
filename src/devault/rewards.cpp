@@ -113,7 +113,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
   
   // Batch Write/Erase
   if (rewardAdditions.size() > 0) pdb->Add(rewardAdditions);
-  if (rewardErasures.size() > 0) pdb->InActivate(rewardErasures, nHeight);
+  if (rewardErasures.size() > 0) pdb->InActivate(rewardErasures);
 
   return true;
 }
@@ -221,7 +221,6 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   Amount selAmount;
   Amount minHReward;
   bool found = false;
-  const int32_t maxreorgdepth = gArgs.GetArg("-maxreorgdepth", DEFAULT_MAX_REORG_DEPTH);
   
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
@@ -278,12 +277,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
         }
       }
     } else {
-      // Not Active and Sufficiently old not to be re-org back,
-      // therefore delete from dB
-      int nDeactivationHeight = the_reward.GetDeactivationHeight();
-      if ((Height - nDeactivationHeight) > 2*maxreorgdepth) {
-        pdb->EraseReward(key);
-      }
+      // For very old in-active entires we should remove from the db,
+      // but re-orgs are very infrequent so bloat should be tiny
     }
     //
     pcursor->Next();

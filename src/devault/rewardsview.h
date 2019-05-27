@@ -44,7 +44,7 @@ class CRewardsViewDB {
 
   // Batch ops
   bool Add(const std::vector<std::pair<COutPoint, CRewardValue> >& vect);
-  bool InActivate(std::vector<std::pair<COutPoint, CRewardValue> >& vect, int nHeight);
+  bool InActivate(std::vector<std::pair<COutPoint, CRewardValue> >& vect);
   bool Erase(const std::vector<COutPoint>& vect);
 
   // Extra parameter Height
