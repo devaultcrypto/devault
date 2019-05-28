@@ -196,7 +196,7 @@ public:
         consensus.fPowNoRetargeting = false;
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S(
-            "000000000000000000000000000000000000000000000043cb761ba833f844c5");
+            "00");
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
