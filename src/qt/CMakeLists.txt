@@ -170,6 +170,13 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/sendcoinsentry.ui
 	forms/signverifymessagedialog.ui
 	forms/transactiondescdialog.ui
+  forms/mnemonicdialog.ui 
+  forms/mnemonicdisplay.ui 
+  forms/mnemonicwidget.ui 
+  forms/tutorialmnemonicrevealed.ui 
+  forms/tutorialmnemoniccode.ui 
+  forms/tutorialcreatewalletwidget.ui 
+  forms/tutoriallanguageswidget.ui
 )
 
 # Qt MOC
@@ -289,6 +296,13 @@ if(BUILD_WALLET)
 			walletmodel.cpp
 			walletmodeltransaction.cpp
 			walletview.cpp
+      mnemonicdialog.cpp
+      mnemonicdisplay.cpp
+      mnemonicwidget.cpp
+      tutorialmnemonicrevealed.cpp
+      tutorialmnemoniccode.cpp
+      tutorialcreatewalletwidget.cpp
+      tutoriallanguageswidget.cpp
 	)
 
 	target_link_libraries(bitcoin-qt-base wallet)
