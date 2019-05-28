@@ -65,6 +65,7 @@ Upgrades/Changes in this code fork
 - Code can be built with either AutoTools or CMake
 - Reorg Depth set at 30 blocks
 - Upgraded or added dependencies, QT 5.9.7, libsodium, libgmp, boost 1.69
+- Default # of keys generated is 200 in total, miners may want to use -keypool at 1st startup for additional keys
 
 ## Specifications
 
