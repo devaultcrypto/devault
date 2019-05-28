@@ -33,12 +33,15 @@ ui(new Ui::MnemonicWidget)
     }
 
     tutorialMnemonicRevealed = new TutorialMnemonicRevealed(wordList, this);
-
-    tutorialLanguageWidget = new TutorialLanguagesWidget(this);
+    tutorialCreateWallet = new TutorialCreateWalletWidget(this);
+    ui->QStackTutorialContainer->addWidget(tutorialCreateWallet);
+//    tutorialLanguageWidget = new TutorialLanguagesWidget(this);
 
     ui->QStackTutorialContainer->addWidget(tutorialMnemonicRevealed);
-    ui->QStackTutorialContainer->addWidget(tutorialLanguageWidget);
-    ui->QStackTutorialContainer->setCurrentWidget(tutorialLanguageWidget);
+//    ui->QStackTutorialContainer->addWidget(tutorialLanguageWidget);
+    ui->QStackTutorialContainer->setCurrentWidget(tutorialCreateWallet);
+
+    // ^ just check the commit to change that back
 
     loadLeftContainer(":/icons/img-start-logo", "Welcome to DeVault", "");
     ui->btnBack->setVisible(false);
@@ -83,6 +86,9 @@ void MnemonicWidget::on_next_triggered(){
         }
         case 1:
         {
+            // remove this later
+            ui->btnLineSeparator->setVisible(true);
+            ui->btnBack->setVisible(true);
             if (tutorialCreateWallet && tutorialCreateWallet->GetButtonClicked()) {
                 switch (tutorialCreateWallet->GetButtonClicked()) {
                     case 1:
@@ -192,7 +198,8 @@ void MnemonicWidget::on_next_triggered(){
 }
 
 void MnemonicWidget::on_back_triggered(){
-    if(position != 0){
+    // change back to 0 letter
+    if(position != 1){
         QWidget *qWidget = nullptr;
         position--;
         switch (position) {

@@ -43,7 +43,7 @@ private Q_SLOTS:
 private:
     Ui::MnemonicWidget *ui;
     QWidget* parent;
-    int position = 0;
+    int position = 1;
 
     QStringList wordList;
 
