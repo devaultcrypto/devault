@@ -13,6 +13,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+//BOOST_FIXTURE_TEST_SUITE(bip39_tests)
+
 std::vector<uint8_t> from_hex(const std::string &str) {
   size_t bias = (str.size() % 2) == 0 ? 0 : 1;
   assert((str.size() + bias) % 2 == 0);
