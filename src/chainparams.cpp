@@ -196,7 +196,7 @@ public:
         consensus.fPowNoRetargeting = false;
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S(
-            "0x00");
+            "000000000000000000000000000000000000000000000043cb761ba833f844c5");
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
@@ -238,7 +238,7 @@ public:
         //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
 
         // Rewards
-        consensus.nPerCentPerYear = {1500,12,9,7,5};
+        consensus.nPerCentPerYear = {1500,1200,900,7,5};
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward =  50 * COIN;
@@ -259,7 +259,7 @@ public:
         // Data as of block
         // 000000000005b07ecf85563034d13efd81c1a29e47e22b20f4fc6919d5b09cd6
         // (height 1223263)
-        chainTxData = ChainTxData{1558726071, 100, 1};
+        chainTxData = ChainTxData{1559013363, 100, 1};
     }
 };
 
