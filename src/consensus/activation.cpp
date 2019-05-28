@@ -9,19 +9,6 @@
 #include "config.h"
 #include "util.h"
 
-static bool IsUAHFenabled(const Config &config, int nHeight) {
-    return true;
-}
-
-bool IsUAHFenabled(const Config &config, const CBlockIndex *pindexPrev) {
-    if (pindexPrev == nullptr) {
-        return false;
-    }
-
-    return IsUAHFenabled(config, pindexPrev->nHeight);
-}
-
-
 bool IsGreatWallEnabled(const Config &config, const CBlockIndex *pindexPrev) {
   if (pindexPrev == nullptr) {
     return false;
