@@ -137,10 +137,10 @@ BOOST_AUTO_TEST_CASE(retargeting_test) {
 
     // Now we expect the difficulty to decrease.
     blocks[100] = GetBlockIndex(&blocks[99], long_interval, initialBits);
-    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[100], &blkHeaderDummy, config), 0x1c1f3a83);
+    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[100], &blkHeaderDummy, config), 0x1D009188);
 
     blocks[101] =  GetBlockIndex(&blocks[100], long_interval, currentPow.GetCompact());
-    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[101], &blkHeaderDummy, config), 0x1C24AE62);
+    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[101], &blkHeaderDummy, config), 0x1D00A2D3);
 
     // Drop down to minimum difficulty
     for (int i=0; i<33; i++) {
