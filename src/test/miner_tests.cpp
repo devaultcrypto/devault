@@ -203,7 +203,7 @@ void TestCoinbaseMessageEB(uint64_t eb, std::string cbmsg) {
     unsigned int nHeight = chainActive.Tip()->nHeight + 1;
     std::vector<uint8_t> vec(cbmsg.begin(), cbmsg.end());
     BOOST_CHECK(pblock->vtx[0]->vin[0].scriptSig ==
-                ((CScript() << nHeight << CScriptNum(extraNonce) << vec) +
+                ((CScript() << CScriptNum::serialize(nHeight) << CScriptNum(extraNonce) << vec) +
                  COINBASE_FLAGS));
 }
 
