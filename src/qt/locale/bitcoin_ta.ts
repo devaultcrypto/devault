@@ -52,7 +52,7 @@
     </message>
     </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DeVaultGUI</name>
     <message>
         <source>&amp;Overview</source>
         <translation>&amp;கண்ணோட்டம்</translation>
@@ -90,8 +90,8 @@
         <translation>&amp;செய்தியை சரிசெய்...</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation>Bitcoin</translation>
+        <source>DeVault</source>
+        <translation>DeVault</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -709,7 +709,7 @@
     <name>devault-core</name>
     <message>
         <source>DeVault</source>
-        <translation>Bitcoin மையம்</translation>
+        <translation>DeVault மையம்</translation>
     </message>
     <message>
         <source>(default: %u)</source>

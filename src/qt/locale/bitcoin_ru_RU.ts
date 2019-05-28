@@ -56,9 +56,9 @@
     <name>BanTableModel</name>
     </context>
 <context>
-    <name>BitcoinGUI</name>
+    <name>DeVaultGUI</name>
     <message>
-        <source>Bitcoin</source>
+        <source>DeVault</source>
         <translation>DeVault</translation>
     </message>
     <message>
