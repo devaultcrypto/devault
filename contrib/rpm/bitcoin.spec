@@ -243,7 +243,7 @@ done
 
 %if %{_buildqt}
 # qt icons
-install -D -p share/pixmaps/bitcoin-abc.ico %{buildroot}%{_datadir}/pixmaps/bitcoin-abc.ico
+install -D -p share/pixmaps/devault.ico %{buildroot}%{_datadir}/pixmaps/devault.ico
 install -p share/pixmaps/nsis-header.bmp %{buildroot}%{_datadir}/pixmaps/
 install -p share/pixmaps/nsis-wizard.bmp %{buildroot}%{_datadir}/pixmaps/
 install -p %{SOURCE100} %{buildroot}%{_datadir}/pixmaps/bitcoin.svg
