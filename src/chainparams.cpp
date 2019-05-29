@@ -13,8 +13,6 @@
 
 #include <cassert>
 
-#include "chainparamsseeds.h"
-
 static CBlock CreateGenesisBlock(const char *pszTimestamp,
                                  const CScript &genesisOutputScript,
                                  uint32_t nTime, uint32_t nNonce,
@@ -152,8 +150,6 @@ public:
 
         consensus.nZawyLwmaAveragingWindow = 72;
         
-        //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
-
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
@@ -235,7 +231,6 @@ public:
         nExtCoinType = 1;
         cashaddrPrefix = "dvtest";
         cashaddrSecretPrefix = "testpriv"; // Shouldn't matter that "dv" isn't indicated
-        //vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
 
         // Rewards
         consensus.nPerCentPerYear = {1500,1200,900,7,5};

@@ -300,7 +300,7 @@ static UniValue stop(const Config &config, const JSONRPCRequest &jsonRequest) {
     // Accept the deprecated and ignored 'detach' boolean argument
     if (jsonRequest.fHelp || jsonRequest.params.size() > 1) {
         throw std::runtime_error("stop\n"
-                                 "\nStop Bitcoin server.");
+                                 "\nStop DeVault server.");
     }
 
     // Event loop will exit after current HTTP requests have been handled, so

@@ -47,7 +47,6 @@ void CColdRewards::Setup(const Consensus::Params &consensusParams) {
 bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew) {
 
   const Consensus::Params consensusParams = config.GetChainParams().GetConsensus();
-  bool db_change = false;
   CBlock block;
   int nHeight = pindexNew->nHeight;
   ReadBlockFromDisk(block, pindexNew, config);
@@ -72,7 +71,6 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
                    GetAddrFromTxOut(out), balance / COIN, nHeight);
           CRewardValue e(out, nHeight, nHeight, nHeight);
           rewardAdditions.emplace_back(outpoint, e);
-          db_change = true;
         }
         n++;
       }
@@ -95,7 +93,6 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
                        nHeight, coinr.GetValue() / COIN);
           }
           rewardErasures.emplace_back(outpoint, coinr);
-          db_change = true;
           // viable_utxos--;
         }
         
@@ -166,8 +163,6 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
       
       for (const CTxOut &out : tx->vout) {
         // Add a new entry for each output into database with current height, etc if value > min
-        Amount balance = out.nValue;
-        // LogPrintf("Found spendcOINS at height %d\n", balance/COIN, nHeight);
         COutPoint outpoint(TxId, n); // Unique
 
         // 2. means possibly new candidates that should be removed by DB
