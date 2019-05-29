@@ -162,6 +162,7 @@ bool CColdRewards::UndoBlock(const CBlock &block, const CBlockIndex *pindex, boo
       // Loop through outputs
       
       for (const CTxOut &out : tx->vout) {
+        (void)out; // just need to loop and increment n, out not needed
         // Add a new entry for each output into database with current height, etc if value > min
         COutPoint outpoint(TxId, n); // Unique
 
