@@ -2,10 +2,12 @@
 
 =============
 
-- Copyright (c) 2019 The DeVault developers
-- Copyright (c) 2019 Jon Spock
-- Distributed under the MIT software license, see http://www.opensource.org/licenses/mit-license.php.
+Copyright (c) 2019 The DeVault developers/Copyright (c) 2019 Jon Spock
+Distributed under the MIT software license, see http://www.opensource.org/licenses/mit-license.php.
 
+
+# NOTE
+*Cold Rewards are not generated for Coinbase transactions - which means that mining rewards, generated budget payments and cold rewards themselves will not generate Cold Rewards. You must move these to either another address or create a transaction to the same address to get rewards.*
 
 
 # Constants
