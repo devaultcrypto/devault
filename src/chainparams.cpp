@@ -112,10 +112,10 @@ public:
         diskMagic[1] = 0xd2;
         diskMagic[2] = 0xe0;
         diskMagic[3] = 0xd1;
-        netMagic[0] = 0xe3;
-        netMagic[1] = 0xe1;
-        netMagic[2] = 0xf3;
-        netMagic[3] = 0xe8;
+        netMagic[0] = 0xde;
+        netMagic[1] = 0x3a;
+        netMagic[2] = 0x9c;
+        netMagic[3] = 0x3l;
         nDefaultPort = 33039;
         nPruneAfterHeight = 100000;
 
@@ -135,7 +135,10 @@ public:
         // service bits we want, but we should get them updated to support all
         // service bits wanted by any release ASAP to avoid it where possible.
         // DeVault seeder
-        vSeeds.emplace_back("seed.devault.com");
+        vSeeds.emplace_back("seed.devault.cc");
+        vSeeds.emplace_back("seed.exploredvt.com");
+        vSeeds.emplace_back("dvtapi.com");
+        vSeeds.emplace_back("seed.minedvt.com");
 
         nExtCoinType = 339;
         cashaddrPrefix = "devault";
