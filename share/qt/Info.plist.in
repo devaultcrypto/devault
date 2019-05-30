@@ -29,16 +29,16 @@
   <string>????</string>
 
   <key>CFBundleExecutable</key>
-  <string>BitcoinABC-Qt</string>
+  <string>DeVault-Core</string>
   
   <key>CFBundleName</key>
-  <string>BitcoinABC-Qt</string>
+  <string>DeVault-Core</string>
 
   <key>LSHasLocalizedDisplayName</key>
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>org.bitcoinabc.BitcoinABC-Qt</string>
+  <string>org.bitcoinabc.DeVault-Core</string>
 
   <key>CFBundleURLTypes</key>
   <array>
