@@ -90,7 +90,7 @@
          <string notr="true">color:#105aef;</string>
         </property>
         <property name="text">
-         <string>Enter your 24-word recovery seed phrase in the correct 
+         <string>Enter your 12-word recovery seed phrase in the correct
 order to confirm your backup is accurate</string>
         </property>
         <property name="alignment">

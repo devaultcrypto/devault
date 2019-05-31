@@ -84,7 +84,7 @@
          <string notr="true">color:#105aef;</string>
         </property>
         <property name="text">
-         <string>Write the 24-word seed phrase in the correct order
+         <string>Write the 12-word seed phrase in the correct order
 and keep them safe and secret
 </string>
         </property>
@@ -209,55 +209,6 @@ or recorded before continuing
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item alignment="Qt::AlignHCenter">
-       <widget class="QPushButton" name="btnReveal">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>200</width>
-          <height>40</height>
-         </size>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">#btnReveal {
-border-radius: 6px;
-color: #FFFFFF;
-font-size: 16px;
-background-color:#105aef;
-line-height:10px;
-padding:8 20 8 20;
-}
-
-#btnReveal:hover {
-  background-color:#0e45b4;
-}
-
-#btnReveal:disabled {
-color: #bababa;
-background-color:#ffffff;
-border-color:#105aef;
-border:1px solid #bababa;
-}</string>
-        </property>
-        <property name="text">
-         <string>Reveal seed phrase</string>
-        </property>
-        <property name="autoRepeat">
-         <bool>false</bool>
         </property>
        </widget>
       </item>

@@ -54,7 +54,13 @@ bool DVTUI::customThemeIsSet() {
             //General
             "QFrame "
             "{ background-color: " + s_Darker + "; border: none; font-size: 14px;}"
-            
+
+            "QDialog "
+            "{ background-color: " + s_Darker + "; border: none;}"
+
+            "QStackedWidget "
+             "{ background-color: " + s_Darker + "; border: none;}"
+
             "QWidget "
             "{ background: " + s_Darker + "; color: " + s_Light + "; font-size: 14px;}"
 

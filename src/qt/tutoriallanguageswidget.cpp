@@ -1,12 +1,14 @@
 #include "tutoriallanguageswidget.h"
 #include "ui_tutoriallanguageswidget.h"
 #include <string>
+#include "dvtui.h"
 #include "mnemonicwidget.h"
 
 TutorialLanguagesWidget::TutorialLanguagesWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TutorialLanguagesWidget)
 {
+
     ui->setupUi(this);
 
     this->parent = parent;

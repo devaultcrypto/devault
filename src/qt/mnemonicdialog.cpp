@@ -1,5 +1,6 @@
 #include "mnemonicdialog.h"
 #include "ui_mnemonicdialog.h"
+#include "dvtui.h"
 
 MnemonicDialog::MnemonicDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MnemonicDialog)
 {

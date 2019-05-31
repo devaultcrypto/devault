@@ -1,11 +1,13 @@
 #include "mnemonicdisplay.h"
 #include "ui_mnemonicdisplay.h"
+#include "dvtui.h"
 
 #include <sstream>
 
 MnemonicDisplay::MnemonicDisplay(bool fRetry, QWidget *parent) : QDialog(parent), ui(new Ui::MnemonicDisplay)
 {
     shutdown = true;
+
     ui->setupUi(this);
     if (fRetry) {
         ui->lblExplanation->setText("INVALID SEED: Please try again.");

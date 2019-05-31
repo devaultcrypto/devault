@@ -1,6 +1,7 @@
 #include "tutorialmnemonicrevealed.h"
 #include "ui_tutorialmnemonicrevealed.h"
 
+#include "dvtui.h"
 #include "wallet/mnemonic.h"
 #include <QCompleter>
 #include <QAbstractItemView>
@@ -16,6 +17,7 @@ TutorialMnemonicRevealed::TutorialMnemonicRevealed(QStringList _wordList, QWidge
     wordList(_wordList),
     ui(new Ui::TutorialMnemonicRevealed)
 {
+
     ui->setupUi(this);
 
     for(int i=0; i<3; i++){

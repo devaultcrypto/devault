@@ -2,6 +2,7 @@
 #include "ui_tutorialmnemoniccode.h"
 #include <QLineEdit>
 #include <QDebug>
+#include "dvtui.h"
 
 TutorialMnemonicCode::TutorialMnemonicCode(std::vector<std::string> vWords, QWidget *parent) :
     QWidget(parent),
@@ -26,13 +27,7 @@ TutorialMnemonicCode::TutorialMnemonicCode(std::vector<std::string> vWords, QWid
             ui->gridLayoutMnemonic->addWidget(label, i, j, Qt::AlignCenter);
         }
     }
-
-
-    connect(ui->btnReveal, SIGNAL(clicked()), this, SLOT(onRevealClicked()));
-}
-
-void TutorialMnemonicCode::onRevealClicked(){
-    ui->btnReveal->setDisabled(true);
+    
     int i = 0;
     for (QLabel* label : labelsList) {
         label->setStyleSheet("QLabel{background-color:#e3e3e3;padding-left:8px;padding-right:8px;padding-top:2px;padding-bottom:2px;border-radius:4px;}");
@@ -41,8 +36,6 @@ void TutorialMnemonicCode::onRevealClicked(){
         i++;
     }
 }
-
-
 
 TutorialMnemonicCode::~TutorialMnemonicCode()
 {

@@ -1,5 +1,6 @@
 #include "tutorialcreatewalletwidget.h"
 #include "ui_tutorialcreatewalletwidget.h"
+#include "dvtui.h"
 
 TutorialCreateWalletWidget::TutorialCreateWalletWidget(QWidget *parent) :
     QWidget(parent),

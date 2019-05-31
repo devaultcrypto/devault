@@ -17,8 +17,6 @@ public:
     explicit TutorialMnemonicCode(std::vector<std::string> vWords, QWidget *parent = nullptr);
     ~TutorialMnemonicCode();
 
-private Q_SLOTS:
-    void onRevealClicked();
 private:
     Ui::TutorialMnemonicCode *ui;
 

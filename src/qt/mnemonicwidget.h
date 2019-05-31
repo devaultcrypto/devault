@@ -1,7 +1,3 @@
-//
-// Created by Kolby on 5/18/2019.
-//
-
 #ifndef DEVAULT_MNEMONICWIDGET_H
 #define DEVAULT_MNEMONICWIDGET_H
 

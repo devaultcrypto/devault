@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <iostream>
 #include "random.h"
+#include "dvtui.h"
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
 #include "wallet/mnemonic.h"
@@ -13,7 +14,9 @@ MnemonicWidget::MnemonicWidget(QWidget *parent) :
 QDialog(parent),
 ui(new Ui::MnemonicWidget)
 {
+    
     ui->setupUi(this);
+
     this->parent = parent;
 
     //this->setStyleSheet(GUIUtil::loadStyleSheet());
@@ -215,8 +218,8 @@ void MnemonicWidget::on_back_triggered(){
             {
                 qWidget = tutorialCreateWallet;
                 loadLeftContainer(":/icons/img-start-wallet","Setup your\nDeVault wallet","");
-                ui->btnLineSeparator->setVisible(true);
-                ui->btnBack->setVisible(true);
+                ui->btnLineSeparator->setVisible(false);
+                ui->btnBack->setVisible(false);
                 break;
             }
             case 2:
