@@ -39,8 +39,8 @@ public:
     CScheduler();
     ~CScheduler();
 
-    typedef std::function<void(void)> Function;
-    typedef std::function<bool(void)> Predicate;
+    typedef std::function<void()> Function;
+    typedef std::function<bool()> Predicate;
 
     // Call func at/after time t
     void schedule(Function f, std::chrono::system_clock::time_point t =
@@ -49,10 +49,11 @@ public:
     // Convenience method: call f once deltaMilliSeconds from now
     void scheduleFromNow(Function f, int64_t deltaMilliSeconds);
 
-    // Another convenience method: call f approximately every deltaMilliSeconds
-    // forever, starting deltaMilliSeconds from now. To be more precise: every
-    // time f is finished, it is rescheduled to run deltaMilliSeconds later. If
-    // you need more accurate scheduling, don't use this method.
+    // Another convenience method: call p approximately every deltaMilliSeconds
+    // forever, starting deltaMilliSeconds from now untill p returns false. To
+    // be more precise: every time p is finished, it is rescheduled to run
+    // deltaMilliSeconds later. If you need more accurate scheduling, don't use
+    // this method.
     void scheduleEvery(Predicate p, int64_t deltaMilliSeconds);
 
     // To keep things as simple as possible, there is no unschedule.
@@ -98,7 +99,7 @@ private:
     CScheduler *m_pscheduler;
 
     CCriticalSection m_cs_callbacks_pending;
-    std::list<std::function<void(void)>>
+    std::list<std::function<void()>>
         m_callbacks_pending GUARDED_BY(m_cs_callbacks_pending);
     bool m_are_callbacks_running GUARDED_BY(m_cs_callbacks_pending) = false;
 
@@ -108,11 +109,11 @@ private:
 public:
     explicit SingleThreadedSchedulerClient(CScheduler *pschedulerIn)
         : m_pscheduler(pschedulerIn) {}
-    void AddToProcessQueue(std::function<void(void)> func);
+    void AddToProcessQueue(std::function<void()> func);
 
     // Processes all remaining queue members on the calling thread, blocking
-    // until queue is empty
-    // Must be called after the CScheduler has no remaining processing threads!
+    // until queue is empty. Must be called after the CScheduler has no
+    // remaining processing threads!
     void EmptyQueue();
 
     size_t CallbacksPending();
