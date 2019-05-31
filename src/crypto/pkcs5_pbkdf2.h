@@ -14,16 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBBITCOIN_PKCS5PBKDF2_H
-#define LIBBITCOIN_PKCS5PBKDF2_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 /* Password-Based Key Derivation Function 2 (PKCS #5 v2.0). */
 /* Code based on IEEE Std 802.11-2007, Annex H.4.2. */
@@ -32,8 +26,3 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     size_t iterations);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif

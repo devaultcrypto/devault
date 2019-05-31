@@ -22,13 +22,13 @@
 #include <string.h>
 #include "hmac_sha512.h"
 #include "zeroize.h"
-#include <stdio.h>
+#include <memory>
 
 int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     size_t iterations)
 {
-    uint8_t* asalt;
+    std::unique_ptr<uint8_t []> asalt;
     size_t asalt_size;
     size_t count, index, iteration, length;
     uint8_t buffer[64];
@@ -42,11 +42,11 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     if (salt_length > SIZE_MAX - 4)
         return -1;
     asalt_size = salt_length + 4;
-    asalt = new uint8_t[asalt_size];
-    if (asalt == NULL)
+    asalt.reset(new uint8_t[asalt_size]);
+    if (asalt == nullptr)
         return -1;
 
-    memcpy(asalt, salt, salt_length);
+    memcpy(asalt.get(), salt, salt_length);
     for (count = 1; key_length > 0; count++)
     {
         asalt[salt_length + 0] = (count >> 24) & 0xff;
@@ -54,7 +54,7 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
         asalt[salt_length + 2] = (count >> 8) & 0xff;
         asalt[salt_length + 3] = (count >> 0) & 0xff;
         CHMAC_SHA512 sh1(passphrase, passphrase_length);
-        sh1.Write(asalt, asalt_size);
+        sh1.Write(asalt.get(), asalt_size);
         sh1.Finalize(digest1);
         memcpy(buffer, digest1, sizeof(buffer));
         
@@ -77,8 +77,7 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     zeroize(digest1, sizeof(digest1));
     zeroize(digest2, sizeof(digest2));
     zeroize(buffer, sizeof(buffer));
-    zeroize(asalt, asalt_size);
-    delete [] asalt;
+    zeroize(asalt.get(), asalt_size);
 
     return 0;
 }
