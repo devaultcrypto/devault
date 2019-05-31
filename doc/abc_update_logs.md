@@ -245,7 +245,7 @@
       [rpc] Move DescribeAddressVisitor to rpc/util
       [rpc] split wallet and non-wallet parts of DescribeAddressVisitor
       (finally) remove getinfo in favor of more module-specific infos
-      [mining] Add a test for TestCBlockTemplateEntry
+#      [mining] Add a test for TestCBlockTemplateEntry
       Bump version number to 0.19.8
 #      Fix wallet RPC race by waiting for callbacks in sendrawtransaction
 #      Also call other wallet notify callbacks in scheduler thread
