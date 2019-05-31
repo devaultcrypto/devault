@@ -253,8 +253,8 @@
       Add tests to SingleThreadedSchedulerClient() and document the memory model
       Various improvements to the scheduler
       scheduler: Add Clang thread safety annotations for variables guarded by m_cs_callbacks_pending
-      unsigned char => uint8_t
-      [nit] do not capture unused `this` in wallet interface
+#      unsigned char => uint8_t
+#      [nit] do not capture unused `this` in wallet interface
 
 GIT SHA e1029deba1b8 [CMAKE] update miniupnpc build (#173) - corresponds to this point
 
