@@ -7,7 +7,12 @@ Distributed under the MIT software license, see http://www.opensource.org/licens
 
 
 # NOTE
-*Cold Rewards are not generated for Coinbase transactions - which means that mining rewards, generated budget payments and cold rewards themselves will not generate Cold Rewards. You must move these to either another address or create a transaction to the same address to get rewards.*
+**Cold Rewards are not generated for Coinbase transactions - which means that mining rewards, generated budget payments and cold rewards themselves will not generate Cold Rewards. You must move these to either another address or create a transaction to the same address to get rewards.**
+
+# Overview
+---------------------
+
+Cold Rewards are a way for Coin holders to get rewarded for merely holding coins for approximately more than one month. The ROI is based on a scale that changes yearly and starts at 15% annualized. The wallet doesn't need to be kept open to get these rewards and action is generally not required (except by miners). There is also a minimum balance of 1000 DeVault needed at an unspent transaction output (UTXO). A transaction from an exchange or another person of greater than 1000 DeVault will achieve this. Please read below for more details. 
 
 
 # Constants
