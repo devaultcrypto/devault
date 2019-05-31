@@ -98,18 +98,32 @@ BerkeleyDB 5.3 or later is required for the wallet. This can be installed with:
 -----------------------------------------
 You will also need to install a C++17 compatible compiler to build devault.
 
-For Ubuntu Xenial only - 
+For Ubuntu Xenial (16.04), Trusty (14.04) & Debian jessie (8) - 
 
         sudo apt-get install software-properties-common -y
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
         sudo apt-get update
 
-Now for both Ubuntu Xenial & Debian Stretch
+On Debian 8 we will need to change the distro to trusty from the sources.list.d file
+
+        cd /etc/apt/sources.list.d/
+        sudo nano ubuntu-toolchain-r-ubuntu-test-jessie.list
+
+> Now change
+
+        deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu jessie main
+> to
+
+        deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu trusty main
+
+        ctrl+x then Y  (to save the file)
+
+Now for both Ubuntu versions Xenial (16.04) & below + Debian versions Stretch (9) & below
 
         sudo apt-get install g++-7 -y
 
 Now you will need to either update your default gcc compiler to gcc-7/g++-7 or
-specify it in your configure like below -
+specify it in your configure like below (when you reach the configure step after running autogen.sh) -
 
         ./configure CC=gcc-7 CXX=g++-7
 
@@ -286,4 +300,3 @@ To build executables for ARM:
 
 
 For further documentation on the depends system see [README.md](../depends/README.md) in the depends directory.
-
