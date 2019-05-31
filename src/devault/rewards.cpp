@@ -92,6 +92,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
               LogPrint(BCLog::COLD, "CR: %s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
                        nHeight, coinr.GetValue() / COIN);
           }
+          cachedInactives.insert(std::make_pair(outpoint, nHeight));
           rewardErasures.emplace_back(outpoint, coinr);
           // viable_utxos--;
         }
@@ -208,7 +209,6 @@ void CColdRewards::FillPayments(const Consensus::Params &consensusParams, CMutab
 bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Height, CTxOut &rewardPayment) {
   CRewardValue the_reward;
   CRewardValue sel_reward;
-  // int64_t count = 0;
   COutPoint key;
   COutPoint minKey;
   int minHeight = Height;
@@ -217,7 +217,10 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   Amount selAmount;
   Amount minHReward;
   bool found = false;
-  
+  int64_t count = 0;
+  const int32_t maxreorgdepth = gArgs.GetArg("-maxreorgdepth", DEFAULT_MAX_REORG_DEPTH);
+  std::vector<COutPoint> cacheRemovals;
+    
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
@@ -228,6 +231,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
 
     // get Height (last reward)
     if (the_reward.IsActive()) {
+      count++; // just count active ones
       if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
         HeightDiff = Height - nHeight;
         if (HeightDiff > nMinBlocks) { 
@@ -274,7 +278,15 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
       }
     } else {
       // For very old in-active entires we should remove from the db,
-      // but re-orgs are very infrequent so bloat should be tiny
+      auto el = cachedInactives.find(key);
+      if (el != cachedInactives.end()) {
+          nHeight = cachedInactives[key];
+          HeightDiff = Height - nHeight;
+          if (HeightDiff > maxreorgdepth) {
+              cachedInactives.erase(el);
+              cacheRemovals.push_back(key);
+          }
+      }
     }
     //
     pcursor->Next();
@@ -285,7 +297,31 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
     rewardPayment = GetPayment(sel_reward, selAmount);
     rewardKey = minKey;
   }
+
+  if (cacheRemovals.size() > 0) pdb->Erase(cacheRemovals);
+  
+  nNumCandidates = count;
   return found;
+}
+
+// Should run at startup, gets inactive rewards (only)
+// from DB and marks at current Height
+void CColdRewards::GetInActivesFromDB(int Height) {
+  CRewardValue the_reward;
+  COutPoint key;
+  
+  std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
+  while (pcursor->Valid()) {
+    interruption_point(ShutdownRequested());
+    if (!pcursor->GetKey(key)) { break; }
+    if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
+
+    // Mark as inactive at current height since unknown when it became inactive
+    if (!the_reward.IsActive()) cachedInactives.insert(std::make_pair(key, Height));
+    //
+    pcursor->Next();
+  }
+
 }
 
 bool CColdRewards::RestoreRewardAtHeight(int Height) {
@@ -334,7 +370,6 @@ void CColdRewards::UpdateRewardsDB(int nNewHeight) {
 //
 CTxOut CColdRewards::GetPayment(const CRewardValue &coinreward, Amount reward) {
     CTxOut out = CTxOut(reward, coinreward.txout.scriptPubKey);
-    //CTxOut out = CTxOut(reward, coinreward.scriptPubKey());
     return out;
 }
 
@@ -388,6 +423,7 @@ std::vector<CRewardValue> CColdRewards::GetOrderedRewards() {
   std::vector<CRewardValue> vals;
   CRewardValue the_reward;
   COutPoint key;
+  int32_t count = 0;
   
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
@@ -396,8 +432,10 @@ std::vector<CRewardValue> CColdRewards::GetOrderedRewards() {
       if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
       vals.push_back(the_reward);
       pcursor->Next();
+      if (the_reward.IsActive()) count++;
   }
-  
+
+  nNumCandidates = count;
   return vals;
 }
 

@@ -859,7 +859,7 @@ static UniValue getrewards(const Config &config, const JSONRPCRequest &request) 
     file.open(filepath.string().c_str());
     if (!file.is_open()) {
         throw JSONRPCError(RPC_INVALID_PARAMETER,
-                           "Cannot open wallet dump file");
+                           "Cannot open getrewards dump file");
     }
 
     for (auto& val : rewards) {
@@ -877,7 +877,69 @@ static UniValue getrewards(const Config &config, const JSONRPCRequest &request) 
     reply.pushKV("filename", filepath.string());
 
     return reply;
-} 
+}
+
+
+static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+                                 "getmyrewardinfo \"filename\"\n"
+                                 "\nReturns status for all of my valid reward UTXOs.\n"
+                                 "\nExamples:\n"
+                                 + HelpExampleCli("getmyrewardinfo","")
+                                 + HelpExampleRpc("getmyrewardinfo",""));
+    
+
+#ifdef ENABLE_WALLET
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+#else
+    CWallet *const pwallet = nullptr;
+#endif
+
+    UniValue result(UniValue::VARR);
+    std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
+  
+    UniValue total(UniValue::VOBJ);
+    total.push_back(Pair("Total Number of Rewards", (int)prewards->GetNumberOfCandidates()));
+    result.push_back(total);
+
+    std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    
+    for (auto& val : rewards) {
+        isminetype mine = ::IsMine(*pwallet, val.scriptPubKey());
+        if (mine == ISMINE_SPENDABLE && val.IsActive()) {
+            uint32_t nMyHeight = val.GetCreationHeight();
+            UniValue delta(UniValue::VOBJ);
+            delta.push_back(Pair("Addr",GetAddrFromTxOut(val.GetTxOut())));
+            delta.push_back(Pair("Value",ValueFromAmount(val.GetValue())));
+            delta.push_back(Pair("created at Height",(int)val.GetCreationHeight()));
+            if (val.GetPayCount() > 0) {
+                delta.push_back(Pair("Last paid at Height",(int)val.GetHeight()));
+                nMyHeight = val.GetHeight();
+            }
+            delta.push_back(Pair("paid times",(int)val.GetPayCount()));
+
+            int nNumOlder = 0;
+            for (auto& inner_val : rewards) {
+                if (inner_val.GetHeight() < nMyHeight) nNumOlder++;
+            }
+
+            delta.push_back(Pair("reward candidates older than this one",nNumOlder));
+            std::time_t nexttime = cftime + 120*nNumOlder;
+            delta.push_back(Pair("estimated next reward date", FormatISO8601Date(nexttime)));
+            
+            result.push_back(delta);
+        }
+    }
+
+    return result;
+}
+
+
+
 // clang-format off
 static const ContextFreeRPCCommand commands[] = {
     //  category            name                      actor (function)        argNames
@@ -888,7 +950,8 @@ static const ContextFreeRPCCommand commands[] = {
     { "util",               "createmultisig",         createmultisig,         {"nrequired","keys"} },
     { "util",               "verifymessage",          verifymessage,          {"address","signature","message"} },
     { "util",               "signmessagewithprivkey", signmessagewithprivkey, {"privkey","message"} },
-    { "util",       "getrewards",      getrewards,      {} },
+    { "util",               "getrewards",             getrewards,             {} },
+    { "util",               "getmyrewardinfo",        getmyrewardinfo,        {} },
     /* Address index */
     { "addressindex",       "getaddressbalance",      getaddressbalance,      {} },
 

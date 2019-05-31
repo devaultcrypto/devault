@@ -175,7 +175,6 @@ public:
 };
 
 static std::unique_ptr<CCoinsViewErrorCatcher> pcoinscatcher;
-////static std::unique_ptr<CCoinsViewErrorCatcher> prewardscatcher;
 static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 
@@ -278,8 +277,6 @@ void Shutdown() {
         prewardsdb.reset();
         prewards.reset();
         pbudget.reset();
-        ////prewardscatcher.reset();
-        ////prewardsTip.reset();
     }
     g_wallet_init_interface->Stop();
 
@@ -2054,9 +2051,7 @@ bool AppInitMain(Config &config,
                 pcoinscatcher.reset();
                 prewardsdb.reset();
                 pbudget.reset();
-                /////prewardsTip.reset();
-                /////prewardscatcher.reset();
-
+ 
                 pblocktree = std::make_unique<CBlockTreeDB>(
                     nBlockTreeDBCache, false, fReset);
 
@@ -2134,9 +2129,6 @@ bool AppInitMain(Config &config,
                 prewardsdb = std::make_unique<CRewardsViewDB>("rewards",
                                                   nCoinDBCache, false, fReset || fReindexChainState);
               
-                ////prewardscatcher.reset(new CCoinsViewErrorCatcher(prewardsdb.get()));
-                /////prewardsTip.reset(new CCoinsViewCache(prewardscatcher.get()));
-                
                 prewards = std::make_unique<CColdRewards>(chainparams.GetConsensus(), prewardsdb.get());
 
                 pbudget = std::make_unique<CBudget>(config);
@@ -2312,8 +2304,6 @@ bool AppInitMain(Config &config,
 
     auto import_bind = std::bind(ThreadImport, std::ref(config), vImportFiles);
     import_thread = std::thread(&TraceThread<decltype(import_bind)>, "devault-import", std::move(import_bind));
-    
-    //threadGroup.create_thread(std::bind(&ThreadImport, std::ref(config), vImportFiles));
 
     // Wait for genesis block to be processed
     {
@@ -2338,6 +2328,9 @@ bool AppInitMain(Config &config,
         chain_active_height = chainActive.Height();
     }
     LogPrintf("nBestHeight = %d\n", chain_active_height);
+  
+    // Setup cache on Inactive rewards from database for purging later
+    prewards->GetInActivesFromDB(chain_active_height);
 
     if (gArgs.GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION)) {
         StartTorControl();
