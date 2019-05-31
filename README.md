@@ -44,9 +44,9 @@ See [DISCLOSURE_POLICY](DISCLOSURE_POLICY.md)
 Upgrades/Changes in this code fork
 -----------------
 
-- Cold Rewards Code (details here : [COLD REWARDS](ColdRewards.md))
-- Budget Rewards (detail here : [BUDGET](Budget.md))
-- `Shark` block inflation for a fairer initial distribution - details here : [INFLATION](Inflation.md) ![Shark](./share/pixmaps/Shark.png)
+- Cold Rewards Code (details here : [Cold Reward](COLDREWARDS.md))
+- Budget Rewards (detail here : [Budget](BUDGET.md))
+- `Shark` block inflation for a fairer initial distribution - details here : [Inflation](INFLATION.md) ![Shark](./share/pixmaps/Shark.png)
 - Removed BIP70 & protobuf dependency
 - Updated CMake config
 - Redesigned QT Wallet GUI
