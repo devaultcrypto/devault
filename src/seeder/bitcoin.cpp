@@ -97,7 +97,7 @@ class CSeederNode {
         uint64_t nLocalNonce = BITCOIN_SEED_NONCE;
         int64_t nLocalServices = 0;
         CService myService;
-        CAddress me(myService, ServiceFlags(NODE_NETWORK | NODE_BITCOIN_CASH));
+        CAddress me(myService, ServiceFlags(NODE_NETWORK));
         BeginMessage("version");
         int nBestHeight = GetRequireHeight();
         std::string ver = "/devault-seeder:0.15/";
@@ -248,7 +248,7 @@ public:
         : sock(INVALID_SOCKET), vSend(SER_NETWORK, 0), vRecv(SER_NETWORK, 0),
           nHeaderStart(-1), nMessageStart(-1), nVersion(0), vAddr(vAddrIn),
           ban(0), doneAfter(0),
-          you(ip, ServiceFlags(NODE_NETWORK | NODE_BITCOIN_CASH)) {
+          you(ip, ServiceFlags(NODE_NETWORK)) {
         if (time(nullptr) > 1329696000) {
             vSend.SetVersion(209);
             vRecv.SetVersion(209);
