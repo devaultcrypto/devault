@@ -93,7 +93,7 @@ public:
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S(
-            "000000000000000000000000000000000000000000def4345931d03e6e4faf78");
+            "0x00000000000000000000000000000000000000000000000000000000000000f");
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
