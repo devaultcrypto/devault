@@ -23,6 +23,7 @@ option(BUILD_QT "Build devault-qt" ON)
 option(BUILD_BENCH "Build benchmark code" OFF)
 option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" ON)
 option(ENABLE_HARDENING "Harden the executables" OFF)
+option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -34,6 +35,7 @@ add_feature_info(WITH_ROCKSDB BUILD_ROCKSDB "Build with RocksDB (blockchain rest
 add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
 add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
 add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
+add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
 
 set(CMAKE_REQUIRED_QUIET true)
 

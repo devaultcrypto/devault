@@ -319,11 +319,7 @@ endif()
 set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
 
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(DO_PACKAGING true)
-endif()
-
-if (DO_PACKAGING)
+if (BUILD_BUNDLE)
   #############################################################
   # Enable packaging
   INCLUDE(InstallRequiredSystemLibraries)
