@@ -924,7 +924,7 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
 
             int nNumOlder = 0;
             for (auto& inner_val : rewards) {
-                if (inner_val.GetHeight() < nMyHeight) && inner_val.IsActive()) nNumOlder++;
+                if ((inner_val.GetHeight() < nMyHeight) && inner_val.IsActive()) nNumOlder++;
             }
 
             delta.push_back(Pair("reward candidates older than this one",nNumOlder));
