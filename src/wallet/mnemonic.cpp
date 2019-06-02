@@ -19,6 +19,8 @@
 #include "crypto/pkcs5_pbkdf2.h"
 #include "crypto/sha256.h"
 #include "utilstrencodings.h"
+#include "utilsplitstring.h"
+#include "random.h"
 #include <iostream>
 #include <random>
 #include <cassert>
@@ -37,6 +39,41 @@ const size_t sizeHash = 512 >> 3;
 
 uint8_t shiftBits(size_t bit) { return (1 << (byteBits - (bit % byteBits) - 1)); }
 }
+
+std::tuple<WordList, std::vector<uint8_t> > GenerateSeedPhrase() {
+  // 1) Generate Random bytes (strong)
+  // 2) Map to 12 words (with checksum word)
+  // 3) Map back to 'seed' - 64 bits
+  // 4) Use 1st 32 bytes as secret key for Master HD key
+  // Using 2) we can re-generate 4) as needed
+  std::vector<uint8_t> keydata(16);
+  GetStrongRandBytes(keydata.data(), keydata.size());
+  mnemonic::WordList words = mapBitsToMnemonic(keydata, language::en);
+  //std::cout << "Words = " << join(words,",") << "\n";
+  std::vector<uint8_t> hashWords = decodeMnemonic(words);
+  return std::tuple(words, hashWords);
+}
+
+bool isValidSeedPhrase(const std::string& seedphrase) {
+  mnemonic::WordList words;
+  Split(words, seedphrase, " ");
+  return isValidMnemonic(words, language::en);
+} 
+
+// std::variant may work better here in the future
+std::tuple<bool, WordList, std::vector<uint8_t> > CheckSeedPhrase(const std::string& seedphrase) {
+  // At this point we could have either used keydata or hashRet
+  // for the master key, hashRet just adds mnemonic passphrase, etc
+  std::vector<uint8_t> hashWords;
+  mnemonic::WordList words;
+  Split(words, seedphrase, " ");
+  // Ignore CHECKSUM check!
+  if (isValidMnemonic(words, language::en)) {
+    hashWords = decodeMnemonic(words);
+    return std::tuple(true, words, hashWords);
+  }  
+  return std::tuple(false, words, hashWords);
+} 
 
 WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
   // entropy should be 16 bytes or 128 bits for 12 words

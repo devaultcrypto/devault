@@ -10,7 +10,6 @@
 #include <string>
 #include "support/allocators/secure.h"
 
-
 class Config;
 class CScheduler;
 class CWallet;
@@ -75,7 +74,8 @@ bool AppInitLockDataDirectory();
  */
 bool AppInitMain(Config &config,
                  HTTPRPCRequestProcessor &httpRPCRequestProcessor,
-                 const SecureString& walletPassphrase);
+                 const SecureString& walletPassphrase,
+                 const std::vector<std::string>& words);
 
 /** The help message mode determines what help message to show */
 enum class HelpMessageMode { BITCOIND, BITCOIN_QT };

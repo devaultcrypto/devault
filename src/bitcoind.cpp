@@ -218,7 +218,8 @@ bool AppInit(int argc, char *argv[]) {
             // If locking the data directory failed, exit immediately
             exit(EXIT_FAILURE);
         }
-        fRet = AppInitMain(config, httpRPCRequestProcessor, walletPassphrase);
+        std::vector<std::string> words;
+        fRet = AppInitMain(config, httpRPCRequestProcessor, walletPassphrase, words);
     } catch (const std::exception &e) {
         PrintExceptionContinue(&e, "AppInit()");
     } catch (...) {

@@ -17,6 +17,7 @@
 #include "dictionary.h"
 #include <string>
 #include <vector>
+#include <tuple>
 
 namespace mnemonic {
 class MnemonicException : public std::runtime_error {
@@ -34,4 +35,9 @@ std::vector<uint8_t> decodeMnemonic(const WordList &words);
 
 bool isAllowedWord(const std::string &word, const Dictionary &dict);
 bool isValidMnemonic(const WordList &words, const Dictionary &dict);
+bool isValidSeedPhrase(const std::string& seedphrase);
+
+std::tuple<mnemonic::WordList, std::vector<uint8_t> > GenerateSeedPhrase();
+std::tuple<bool, mnemonic::WordList, std::vector<uint8_t> > CheckSeedPhrase(const std::string& phrase);
+
 }

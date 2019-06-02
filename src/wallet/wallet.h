@@ -1135,7 +1135,9 @@ public:
      */
     static CWallet *CreateWalletFromFile(const CChainParams &chainParams,
                                          const std::string walletFile,
-                                         const SecureString& walletPassphrase);
+                                         const SecureString& walletPassphrase,
+                                         const std::vector<std::string>& words
+                                         );
 
     /**
      * Wallet post-init setup
@@ -1149,9 +1151,11 @@ public:
     /* Set the HD chain model (chain child index counters) */
     bool SetHDChain(const CHDChain &chain);
 
-   /* Generates a new HD master key (will not be activated) */
+    /* Generates a new HD master key (will not be activated) */
     void GenerateHDMasterKey();
     CPubKey GenerateNewHDMasterKey();
+    void SetupHDMasterKey(const mnemonic::WordList& words);
+  
 
     /**
      * Blocks until the wallet state is up-to-date to /at least/ the current

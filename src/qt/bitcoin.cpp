@@ -174,7 +174,8 @@ void DebugMessageHandler(QtMsgType type, const QMessageLogContext &context,
 class DeVault : public QObject {
     Q_OBJECT
 public:
-    explicit DeVault(SecureString& strWalletPassphrase);
+    explicit DeVault(SecureString& strWalletPassphrase,
+                     std::vector<std::string>& wordlist);
 
     /**
      * Basic initialization, before starting initialization/shutdown thread.
@@ -196,6 +197,8 @@ private:
     /// Pass fatal exception message to UI thread
     void handleRunawayException(const std::exception *e);
     SecureString walletPassphrase;
+    // TODO: Set this for it for be used
+    std::vector<std::string> words;
 };
 
 /** Main Bitcoin application object */
@@ -253,6 +256,7 @@ private:
     std::vector<WalletModel *> m_wallet_models;
 #endif
     SecureString pss;
+    std::vector<std::string> wordlist;
     int returnValue;
     const PlatformStyle *platformStyle;
     std::unique_ptr<QWidget> shutdownWindow;
@@ -262,7 +266,8 @@ private:
 
 #include "bitcoin.moc"
 
-DeVault::DeVault(SecureString& strWalletPassphrase) : QObject(), walletPassphrase(strWalletPassphrase) {}
+DeVault::DeVault(SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
+  : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist) {}
 
 void DeVault::handleRunawayException(const std::exception *e) {
     PrintExceptionContinue(e, "Runaway exception");
@@ -290,7 +295,7 @@ void DeVault::initialize(Config *cfg,
     Config &config(*cfg);
     try {
         qDebug() << __func__ << ": Running initialization in thread";
-        bool rv = AppInitMain(config, *httpRPCRequestProcessor, walletPassphrase);
+        bool rv = AppInitMain(config, *httpRPCRequestProcessor, walletPassphrase, words);
         walletPassphrase.clear();
         Q_EMIT initializeResult(rv);
     } catch (const std::exception &e) {
@@ -410,7 +415,7 @@ void BitcoinApplication::startThread() {
         return;
     }
     coreThread = new QThread(this);
-    DeVault *executor = new DeVault(pss);
+    DeVault *executor = new DeVault(pss, wordlist);
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
