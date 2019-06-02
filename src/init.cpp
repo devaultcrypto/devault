@@ -1763,7 +1763,8 @@ bool AppInitLockDataDirectory() {
 }
 
 bool AppInitMain(Config &config,
-                 HTTPRPCRequestProcessor &httpRPCRequestProcessor, const SecureString& walletPassphrase) {
+                 HTTPRPCRequestProcessor &httpRPCRequestProcessor, const SecureString& walletPassphrase,
+                 const std::vector<std::string>& words) {
     // Step 4a: application initialization
     const CChainParams &chainparams = config.GetChainParams();
 
@@ -2262,7 +2263,7 @@ bool AppInitMain(Config &config,
 
 
     // Step 8: load wallet
-    if (!g_wallet_init_interface->Open(chainparams, walletPassphrase)) {
+    if (!g_wallet_init_interface->Open(chainparams, walletPassphrase, words)) {
         return false;
     }
 
