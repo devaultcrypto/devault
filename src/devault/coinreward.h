@@ -45,6 +45,7 @@ struct CRewardValue {
   uint32_t OldHeight;
   uint32_t height;
   uint32_t payCount;
+  uint8_t verison = 1;
   bool active;
 
   CScript scriptPubKey() { return txout.scriptPubKey; }
@@ -54,6 +55,8 @@ struct CRewardValue {
   uint32_t GetOldHeight() { return OldHeight; }
   uint32_t GetHeight() { return height; }
   uint32_t GetPayCount() { return payCount; }
+  uint8_t GetVersion() const { return version; }
+  void SetVersion(const uint8_t nVersion) { version = nVersion; }
   void SetHeight(uint32_t h) { height = h; }
   void SetOldHeight(uint32_t h) { OldHeight = h; }
   bool was_paid() { return (GetHeight() != GetOldHeight()); }
@@ -64,6 +67,7 @@ struct CRewardValue {
       : txout(ptr), creationHeight(cH), OldHeight(OldH), height(NewH), payCount(0), active(true) {}
 
   template <typename Stream> void Serialize(Stream &s) const {
+    s << version;
     s << txout;
     s << creationHeight;
     s << OldHeight;
@@ -73,6 +77,7 @@ struct CRewardValue {
   }
 
   template <typename Stream> void Unserialize(Stream &s) {
+    s >> version;
     s >> txout;
     s >> creationHeight;
     s >> OldHeight;
