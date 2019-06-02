@@ -45,7 +45,7 @@ struct CRewardValue {
   uint32_t OldHeight;
   uint32_t height;
   uint32_t payCount;
-  uint8_t verison = 1;
+  uint8_t version = 1;
   bool active;
 
   CScript scriptPubKey() { return txout.scriptPubKey; }
