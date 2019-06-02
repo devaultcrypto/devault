@@ -7,6 +7,10 @@ Copyright (c) 2019 The DeVault Developers
 pkcs5_pbdf2.cpp is OpenBSD License
 Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
 
+Some code is under Apache License
+Copyright 2018 The Beam Team
+
+
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
