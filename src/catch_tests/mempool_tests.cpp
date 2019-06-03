@@ -41,7 +41,6 @@ TEST_CASE("TestPackageAccounting") {
 
   Amount totalFee = Amount::zero();
   size_t totalSize = CTransaction(parentOfAll).GetTotalSize();
-  size_t totalBillableSize = CTransaction(parentOfAll).GetBillableSize();
 
   // Generate 100 transactions
   for (size_t totalTransactions = 0; totalTransactions < 100; totalTransactions++) {
@@ -53,8 +52,6 @@ TEST_CASE("TestPackageAccounting") {
     Amount maxFees = Amount::zero();
     uint64_t minSize = std::numeric_limits<size_t>::max();
     uint64_t maxSize = 0;
-    uint64_t minBillableSize = std::numeric_limits<size_t>::max();
-    uint64_t maxBillableSize = 0;
     // Consume random inputs, but make sure we don't consume more than
     // available
     for (size_t input = std::min(InsecureRandRange(maxOutputs) + 1, uint64_t(outpoints.size())); input > 0; input--) {
@@ -74,8 +71,6 @@ TEST_CASE("TestPackageAccounting") {
       maxFees += parent.GetModFeesWithAncestors();
       minSize = std::min(minSize, parent.GetSizeWithAncestors());
       maxSize += parent.GetSizeWithAncestors();
-      minBillableSize = std::min(minBillableSize, parent.GetBillableSizeWithAncestors());
-      maxBillableSize += parent.GetBillableSizeWithAncestors();
     }
 
     // Produce random number of outputs
@@ -83,104 +78,15 @@ TEST_CASE("TestPackageAccounting") {
       mtx.vout.emplace_back(10 * Amount::min_amount(), CScript() << OP_TRUE);
     }
 
-    Amount totalFee = Amount::zero();
-    size_t totalSize = CTransaction(parentOfAll).GetTotalSize();
-    size_t totalBillableSize = CTransaction(parentOfAll).GetBillableSize();
-
-    // Generate 100 transactions
-    for (size_t totalTransactions = 0; totalTransactions < 100;
-         totalTransactions++) {
-        CMutableTransaction mtx;
-
-        uint64_t minAncestors = std::numeric_limits<size_t>::max();
-        uint64_t maxAncestors = 0;
-        Amount minFees = MAX_MONEY;
-        Amount maxFees = Amount::zero();
-        uint64_t minSize = std::numeric_limits<size_t>::max();
-        uint64_t maxSize = 0;
-        // Consume random inputs, but make sure we don't consume more than
-        // available
-        for (size_t input = std::min(InsecureRandRange(maxOutputs) + 1,
-                                     uint64_t(outpoints.size()));
-             input > 0; input--) {
-            std::swap(outpoints[InsecureRandRange(outpoints.size())],
-                      outpoints.back());
-            mtx.vin.emplace_back(outpoints.back());
-            outpoints.pop_back();
-
-            // We don't know exactly how many ancestors this transaction has
-            // due to possible duplicates.  Calculate a valid range based on
-            // parents.
-
-            CTxMemPoolEntry parent =
-                *testPool.mapTx.find(mtx.vin.back().prevout.GetTxId());
-
-            minAncestors =
-                std::min(minAncestors, parent.GetCountWithAncestors());
-            maxAncestors += parent.GetCountWithAncestors();
-            minFees = std::min(minFees, parent.GetModFeesWithAncestors());
-            maxFees += parent.GetModFeesWithAncestors();
-            minSize = std::min(minSize, parent.GetSizeWithAncestors());
-            maxSize += parent.GetSizeWithAncestors();
-        }
-
-        // Produce random number of outputs
-        for (size_t output = InsecureRandRange(maxOutputs) + 1; output > 0;
-             output--) {
-            mtx.vout.emplace_back(10 * SATOSHI, CScript() << OP_TRUE);
-        }
-
-        CTransaction tx(mtx);
-        TxId curId = tx.GetId();
-
-        // Record the outputs
-        for (size_t output = tx.vout.size(); output > 0; output--) {
-            outpoints.emplace_back(COutPoint(curId, output));
-        }
-
-        Amount randFee = int64_t(InsecureRandRange(300)) * SATOSHI;
-
-        testPool.addUnchecked(curId, entry.Fee(randFee).FromTx(tx));
-
-        // Add this transaction to the totals.
-        minAncestors += 1;
-        maxAncestors += 1;
-        minFees += randFee;
-        maxFees += randFee;
-        minSize += CTransaction(tx).GetTotalSize();
-        maxSize += CTransaction(tx).GetTotalSize();
-
-        // Calculate overall values
-        totalFee += randFee;
-        totalSize += CTransaction(tx).GetTotalSize();
-        totalBillableSize += CTransaction(tx).GetBillableSize();
-        CTxMemPoolEntry parentEntry = *testPool.mapTx.find(parentOfAllId);
-        CTxMemPoolEntry latestEntry = *testPool.mapTx.find(curId);
-
-        // Ensure values are within the expected ranges
-        BOOST_CHECK(latestEntry.GetCountWithAncestors() >= minAncestors);
-        BOOST_CHECK(latestEntry.GetCountWithAncestors() <= maxAncestors);
-
-        BOOST_CHECK(latestEntry.GetSizeWithAncestors() >= minSize);
-        BOOST_CHECK(latestEntry.GetSizeWithAncestors() <= maxSize);
-
-        BOOST_CHECK(latestEntry.GetModFeesWithAncestors() >= minFees);
-        BOOST_CHECK(latestEntry.GetModFeesWithAncestors() <= maxFees);
-
-        BOOST_CHECK_EQUAL(parentEntry.GetCountWithDescendants(),
-                          testPool.mapTx.size());
-        BOOST_CHECK_EQUAL(parentEntry.GetSizeWithDescendants(), totalSize);
-        BOOST_CHECK_EQUAL(parentEntry.GetBillableSizeWithDescendants(),
-                          totalBillableSize);
-        BOOST_CHECK_EQUAL(parentEntry.GetModFeesWithDescendants(), totalFee);
-    }
+    CTransaction tx(mtx);
+    TxId curId = tx.GetId();
 
     // Record the outputs
     for (size_t output = tx.vout.size(); output > 0; output--) {
       outpoints.emplace_back(COutPoint(curId, output));
     }
 
-    Amount randFee = int64_t(InsecureRandRange(300)) * Amount::min_amount();
+    Amount randFee = Amount(int64_t(InsecureRandRange(300)));
 
     testPool.addUnchecked(curId, entry.Fee(randFee).FromTx(tx));
 
@@ -191,32 +97,26 @@ TEST_CASE("TestPackageAccounting") {
     maxFees += randFee;
     minSize += CTransaction(tx).GetTotalSize();
     maxSize += CTransaction(tx).GetTotalSize();
-    minBillableSize += CTransaction(tx).GetBillableSize();
-    maxBillableSize += CTransaction(tx).GetBillableSize();
-
+    
     // Calculate overall values
     totalFee += randFee;
     totalSize += CTransaction(tx).GetTotalSize();
-    totalBillableSize += CTransaction(tx).GetBillableSize();
     CTxMemPoolEntry parentEntry = *testPool.mapTx.find(parentOfAllId);
     CTxMemPoolEntry latestEntry = *testPool.mapTx.find(curId);
-
+    
     // Ensure values are within the expected ranges
     BOOST_CHECK(latestEntry.GetCountWithAncestors() >= minAncestors);
     BOOST_CHECK(latestEntry.GetCountWithAncestors() <= maxAncestors);
 
     BOOST_CHECK(latestEntry.GetSizeWithAncestors() >= minSize);
     BOOST_CHECK(latestEntry.GetSizeWithAncestors() <= maxSize);
-
-    BOOST_CHECK(latestEntry.GetBillableSizeWithAncestors() >= minBillableSize);
-    BOOST_CHECK(latestEntry.GetBillableSizeWithAncestors() <= maxBillableSize);
-
+    
     BOOST_CHECK(latestEntry.GetModFeesWithAncestors() >= minFees);
     BOOST_CHECK(latestEntry.GetModFeesWithAncestors() <= maxFees);
-
-    BOOST_CHECK_EQUAL(parentEntry.GetCountWithDescendants(), testPool.mapTx.size());
+    
+    BOOST_CHECK_EQUAL(parentEntry.GetCountWithDescendants(),
+                      testPool.mapTx.size());
     BOOST_CHECK_EQUAL(parentEntry.GetSizeWithDescendants(), totalSize);
-    BOOST_CHECK_EQUAL(parentEntry.GetBillableSizeWithDescendants(), totalBillableSize);
     BOOST_CHECK_EQUAL(parentEntry.GetModFeesWithDescendants(), totalFee);
   }
 }

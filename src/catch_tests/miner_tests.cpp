@@ -98,7 +98,7 @@ void TestPackageSelection(Config &config, CScript scriptPubKey, std::vector<CTra
   tx.vout[0].nValue = Amount(5000000000LL - 1000 - 50000);
   TxId freeTxId = tx.GetId();
   g_mempool.addUnchecked(freeTxId, entry.Fee(Amount::zero()).FromTx(tx));
-  size_t freeTxSize = CTransaction(tx).GetBillableSize();
+  size_t freeTxSize = GetVirtualTransactionSize(CTransaction(tx));
 
   // Calculate a fee on child transaction that will put the package just
   // below the block min tx fee (assuming 1 child tx of the same size).
@@ -661,9 +661,9 @@ TEST_CASE("TestCBlockTemplateEntry") {
   TestingSetup setup;
   const CTransaction tx;
   CTransactionRef txRef = MakeTransactionRef(tx);
-  CBlockTemplateEntry txEntry(txRef, 1 * SATOSHI, 200, 10);
+  CBlockTemplateEntry txEntry(txRef, Amount(1), 200, 10);
   BOOST_CHECK_MESSAGE(txEntry.tx == txRef, "Transactions did not match");
-  BOOST_CHECK_EQUAL(txEntry.txFee, 1 * SATOSHI);
+  BOOST_CHECK_EQUAL(txEntry.txFee, Amount(1));
   BOOST_CHECK_EQUAL(txEntry.txSize, 200);
   BOOST_CHECK_EQUAL(txEntry.txSigOps, 10);
 }
