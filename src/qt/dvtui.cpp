@@ -126,6 +126,14 @@ bool DVTUI::customThemeIsSet() {
             "QRadioButton::indicator:unchecked:hover { image: url(:icons/radio_empty_hover) }"
             "QRadioButton::indicator:checked:hover { image: url(:icons/radio_filled_hover) }"
 
+            // Coin Control tree widget
+            "QTreeView {spacing: 5px; color " + s_placeHolderText + "}"
+            "QTreeView::indicator { width: 14px; height: 14px } "
+            "QTreeView::indicator:unchecked { image: url(:icons/checkbox_empty) }"
+            "QTreeView::indicator:checked { image: url(:icons/checkbox_filled) }"
+            "QTreeView::indicator:unchecked:hover {image: url(:icons/checkbox_empty_hover)}"
+            "QTreeView::indicator:checked:hover {image: url(:icons/checkbox_filled_hover)}"
+
             //Spinbox
             "QAbstractSpinBox { background: " + s_Darker + "; maximum-width: 500px; color: " +  s_LBlue +"; border-style: solid; border-width: 1px;  border-color: " + s_LBlue + "; border-top: none; border-left: none; border-right: none}"
             "QAbstractSpinBox::up-button {min-height: 7px; border: none; }"
