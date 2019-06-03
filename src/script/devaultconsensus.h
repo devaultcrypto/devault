@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-#if defined(BUILD_BITCOIN_INTERNAL) && defined(HAVE_CONFIG_H)
+#if defined(BUILD_BITCOIN_INTERNAL)
 #include "config/bitcoin-config.h"
 #if defined(_WIN32)
 #if defined(DLL_EXPORT)

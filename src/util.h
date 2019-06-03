@@ -10,9 +10,7 @@
 #ifndef BITCOIN_UTIL_H
 #define BITCOIN_UTIL_H
 
-#if defined(HAVE_CONFIG_H)
 #include "config/bitcoin-config.h"
-#endif
 
 #include "compat.h"
 #include "logging.h"
