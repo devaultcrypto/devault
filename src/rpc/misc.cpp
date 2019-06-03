@@ -898,6 +898,8 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
 #else
     CWallet *const pwallet = nullptr;
 #endif
+    int nMinBlocks = config.GetChainParams().GetConsensus().nMinRewardBlocks;
+    int nPowTargetSpacing = config.GetChainParams().GetConsensus().nPowTargetSpacing;
 
     UniValue result(UniValue::VARR);
     std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
@@ -928,7 +930,9 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
             }
 
             delta.push_back(Pair("reward candidates older than this one",nNumOlder));
-            std::time_t nexttime = cftime + 120*nNumOlder;
+            // Use minBlocks unless there are more older candidates than that
+            nNumOlder = std::max(nNumOlder,nMinBlocks);
+            std::time_t nexttime = cftime + nNumOlder*nPowTargetSpacing; // 
             delta.push_back(Pair("estimated next reward date", FormatISO8601Date(nexttime)));
             
             result.push_back(delta);
