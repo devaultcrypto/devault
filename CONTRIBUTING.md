@@ -10,9 +10,9 @@ Communicating with Developers
 
 To get in contact with developers, we monitor a DeVault Discord group. 
 
-Details : TBD
+Details :  https://discord.gg/JnRZ7BB
 
-We don't discuss:
+Devs don't discuss:
 
 * Market discussion
 * Non-constructive criticism
@@ -48,6 +48,7 @@ quickly, it should be reverted, and re-applied later when it no longer breaks th
 - As soon as you see a bug, you fix it. Do not continue on. Fixing the bug becomes the 
 top priority, more important than completing other tasks.
 - Automate as much as possible, and spend time on things only humans can do.
+- Use clang-format on any new files (to this project) with the .clang-format file in src directory
 
 Here are some handy links for development practices aligned with Bitcoin ABC:
 
@@ -59,7 +60,6 @@ Here are some handy links for development practices aligned with Bitcoin ABC:
 - [The Pragmatic Programmer: From Journeyman to Master](https://www.amazon.com/Pragmatic-Programmer-Journeyman-Master/dp/020161622X)
 - [Advantages of monolithic version control](https://danluu.com/monorepo/)
 - [The importance of fixing bugs immediately](https://youtu.be/E2MIpi8pIvY?t=16m0s)
-
 
 
 Copyright
