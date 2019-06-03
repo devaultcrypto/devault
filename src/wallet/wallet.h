@@ -81,6 +81,16 @@ enum WalletFeature {
     FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
 };
 
+enum class OutputType {
+    NONE,
+    LEGACY,
+
+    DEFAULT = LEGACY,
+};
+
+extern OutputType g_address_type;
+extern OutputType g_change_type;
+
 /** A key pool entry */
 class CKeyPool {
 public:
@@ -99,6 +109,7 @@ public:
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(nVersion);
         }
+
         READWRITE(nTime);
         READWRITE(vchPubKey);
         READWRITE(fInternal);
@@ -1282,6 +1293,21 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew,
 
     return true;
 }
+
+OutputType ParseOutputType(const std::string &str,
+                           OutputType default_type = OutputType::DEFAULT);
+const std::string &FormatOutputType(OutputType type);
+
+/**
+ * Get a destination of the requested type (if possible) to the specified key.
+ * The caller must make sure LearnRelatedScripts has been called beforehand.
+ */
+CTxDestination GetDestinationForKey(const CPubKey &key, OutputType);
+
+/**
+ * Get all destinations (potentially) supported by the wallet for the given key.
+ */
+std::vector<CTxDestination> GetAllDestinationsForKey(const CPubKey &key);
 
 /** RAII object to check and reserve a wallet rescan */
 class WalletRescanReserver {
