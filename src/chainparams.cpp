@@ -216,15 +216,31 @@ public:
         nDefaultPort = 39039;
         nPruneAfterHeight = 1000;
 
-        genesis =
-            CreateGenesisBlock(1556739176, 2318908127, 0x1d00ffff, 1, 50 * COIN);
+        uint32_t nTimestamp = 1556739176;
+        uint32_t nNonce = 2318908127;
+        uint256 hashGenesisBlock = uint256S("00000000afe7906457b6aaf8ffd84934746a07769fb12e45436ee6064efdc85e");
+        uint256 hashMerkleRoot =   uint256S("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+
+        genesis = CreateGenesisBlock(nTimestamp, nNonce, 0x1d00ffff, 1, 50*COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock ==
-               uint256S("00000000afe7906457b6aaf8ffd84934746a07769fb12e45436ee6"
-                        "064efdc85e"));
-        assert(genesis.hashMerkleRoot ==
-               uint256S("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b"
-                        "7afdeda33b"));
+
+        //---------------------------------------------------------------------------------------------------
+        // Automatically calculate values if you change nTimestamp or nNonce above
+        //---------------------------------------------------------------------------------------------------
+        if (genesis.GetHash() != hashGenesisBlock || genesis.hashMerkleRoot != hashMerkleRoot)
+        {
+            std::cout << "recalculating params for testnet.\n";
+            std::cout << "old testnet genesis nonce: " <<  genesis.nNonce << "\n";
+            std::cout << "old testnet genesis hash: " <<  hashGenesisBlock.ToString() << "\n";
+            // deliberately empty for loop finds nonce value.
+            for(; genesis.GetHash() > consensus.powLimit; genesis.nNonce++){ }
+            std::cout << "new testnet genesis merkle root: " << genesis.hashMerkleRoot.ToString() << "\n";
+            std::cout << "new testnet genesis nonce: " <<  genesis.nNonce << "\n";
+            std::cout << "new testnet genesis hash: " <<  genesis.GetHash().ToString() << "\n";
+            std::cout << "please update code with new values and re-run\n";
+            exit(0);
+        }
+        //---------------------------------------------------------------------------------------------------
 
         vFixedSeeds.clear();
         vSeeds.clear();
