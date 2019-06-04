@@ -12,6 +12,7 @@
 #include "ui_setpassphrasedialog.h"
 
 #include "guiconstants.h"
+#include "dvtui.h"
 
 #include "support/allocators/secure.h"
 
@@ -24,7 +25,11 @@ SetPassphraseDialog::SetPassphraseDialog(QWidget* parent)
       fCapsLock(false) {
     password = "";
     ui->setupUi(this);
-    
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
     ui->passEdit1->setMinimumSize(ui->passEdit1->sizeHint());
     ui->passEdit2->setMinimumSize(ui->passEdit2->sizeHint());
