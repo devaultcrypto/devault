@@ -313,6 +313,8 @@ if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
   find_package(Boost 1.58)
   target_link_libraries(util univalue crypto sodium std::filesystem)
+  # can probably be more selective than this, but needed for now
+  include_directories($include_directories "${Boost_INCLUDE_DIR}")
 else()
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
   find_package(Boost 1.58 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
