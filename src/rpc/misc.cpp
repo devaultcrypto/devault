@@ -895,9 +895,7 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
     }
-#else
-    CWallet *const pwallet = nullptr;
-#endif
+
     int nMinBlocks = config.GetChainParams().GetConsensus().nMinRewardBlocks;
     int nPowTargetSpacing = config.GetChainParams().GetConsensus().nPowTargetSpacing;
 
@@ -940,6 +938,7 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
     }
 
     return result;
+#endif
 }
 
 

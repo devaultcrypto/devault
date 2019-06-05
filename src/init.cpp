@@ -85,7 +85,8 @@ public:
     bool ParameterInteraction() override { return true; }
     void RegisterRPC(CRPCTable &) override {}
     bool Verify(const CChainParams &chainParams) override { return true; }
-    bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase) override { return true; }
+    bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+	      const std::vector<std::string>& words) override { return true; }
     bool CheckIfWalletExists(const CChainParams &chainParams) override { return false; }
     void Start(CScheduler &scheduler) override {}
     void Flush() override {}

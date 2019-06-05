@@ -443,7 +443,7 @@ extern "C" void *ThreadStats(void *) {
 }
 
 static const std::string mainnet_seeds[] = {
-    "seed.exploredvt.cp,", "seed.minedvt.com,
+    "seed.exploredvt.com", "seed.minedvt.com",
     "dvtapi.com",   "seed.devault.cc",    ""};
 static const std::string testnet_seeds[] = {
     "69.172.229.236", ""};
