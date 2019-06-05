@@ -20,7 +20,7 @@
 #define REQUIRE_VERSION 70001
 
 static inline int GetRequireHeight(const bool testnet = fTestNet) {
-    return testnet ? 500000 : 350000;
+    return testnet ? 50 : 35;
 }
 
 static inline std::string ToString(const CService &ip) {
