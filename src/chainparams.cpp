@@ -115,7 +115,7 @@ public:
         netMagic[0] = 0xde;
         netMagic[1] = 0x3a;
         netMagic[2] = 0x9c;
-        netMagic[3] = 0x3l;
+        netMagic[3] = 0x03;
         nDefaultPort = 33039;
         nPruneAfterHeight = 100000;
 
