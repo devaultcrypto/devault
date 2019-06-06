@@ -19,7 +19,6 @@
 #include <policy/policy.h>
 #include <validation.h> // For mempool
 #include <wallet/coincontrol.h>
-#include <wallet/fees.h>
 #include <wallet/wallet.h>
 
 #include <dstencode.h>
@@ -652,7 +651,7 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
            "than the current dust threshold.");
 
     // how many satoshis the estimated fee can vary per byte we guess wrong
-    double dFeeVary = GetMinimumFee(1000, g_mempool).toInt() / 1000;
+    double dFeeVary = (nBytes != 0) ? double(nPayFee.toInt()) / nBytes : 0;
 
     QString toolTip4 =
         tr("Can vary +/- %1 satoshi(s) per input.").arg(dFeeVary);
