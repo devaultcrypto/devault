@@ -34,9 +34,9 @@ Cold Rewards pays out coins to unspent transactions (UTXOs) that are greater tha
 
 These unspent transaction must come from regular transactions. Either miner rewards or previous cold rewards will not counted - as coinbase outputs are ignored.
 
-At each block all of the valid UTXOs will be evaluated for possible reward payout. We use a concept of "differential" height to determine viability. The "differential" height is the different between the current block number and either 1) the block number when this UTXO was created or 2) the block number when this UTXO last got a rewards payout. That is, for the 1st payout, we will use 1) and afterwards 2). The coin address that will be rewarded will be the one with the biggest differential height, provided that the calculated reward is greater than (**nMinReward**).
+At each block all of the valid UTXOs will be evaluated for possible reward payout. We use a concept of "differential" height to determine viability. The "differential" height is the difference between the current block number and either 1) the block number when this UTXO was created or 2) the block number when this UTXO last got a rewards payout. That is, for the 1st payout, we will use 1) and afterwards 2). The coin address that will be rewarded will be the one with the biggest differential height, provided that the calculated reward is greater than (**nMinReward**).
 
-If multiple UTXOs have the same differential height, the largest one will get paid out. If several UTXO have the same differential height and payout amount, then payout will be based on sorting the COutpoints
+If multiple UTXOs have the same differential height, the largest one will get paid out. If several UTXO have the same differential height and payout amount, then payout will be based on sorting the `COutpoints` (hex strings)
 
 In addition there is a limit of **nMaxReward** on the payout, to avoid people putting too much at one address (may help against exchange cold wallets accumulating) and also causing huge amounts of coins to be created in any one block. If people hit this limit they can simply move coins to another addresses/UTXO.
 
