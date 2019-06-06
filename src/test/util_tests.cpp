@@ -690,10 +690,10 @@ BOOST_AUTO_TEST_CASE(util_GetChainName) {
     test_args.ReadConfigString(testnetconf);
     BOOST_CHECK_THROW(test_args.GetChainName(), std::runtime_error);
 }
-/*
+
 BOOST_AUTO_TEST_CASE(util_FormatMoney) {
     BOOST_CHECK_EQUAL(FormatMoney(Amount::zero()), "0.00");
-    BOOST_CHECK_EQUAL(FormatMoney(123456789 * (COIN / 10000)), "12345.6789");
+    BOOST_CHECK_EQUAL(FormatMoney(123456789 * (COIN / 1000)), "123456.789");
     BOOST_CHECK_EQUAL(FormatMoney(-1 * COIN), "-1.00");
 
     BOOST_CHECK_EQUAL(FormatMoney(100000000 * COIN), "100000000.00");
@@ -707,15 +707,16 @@ BOOST_AUTO_TEST_CASE(util_FormatMoney) {
     BOOST_CHECK_EQUAL(FormatMoney(COIN), "1.00");
     BOOST_CHECK_EQUAL(FormatMoney(COIN / 10), "0.10");
     BOOST_CHECK_EQUAL(FormatMoney(COIN / 100), "0.01");
+    // Since these would be below Min_coin they are rounded up
     BOOST_CHECK_EQUAL(FormatMoney(COIN / 1000), "0.001");
-    BOOST_CHECK_EQUAL(FormatMoney(COIN / 10000), "0.0001");
-    BOOST_CHECK_EQUAL(FormatMoney(COIN / 100000), "0.00001");
-    BOOST_CHECK_EQUAL(FormatMoney(COIN / 1000000), "0.000001");
-    BOOST_CHECK_EQUAL(FormatMoney(COIN / 10000000), "0.0000001");
-    BOOST_CHECK_EQUAL(FormatMoney(COIN / 100000000), "0.00000001");
+    BOOST_CHECK_EQUAL(FormatMoney(COIN / 10000), "0.001");
+    BOOST_CHECK_EQUAL(FormatMoney(COIN / 100000), "0.001");
+    BOOST_CHECK_EQUAL(FormatMoney(COIN / 1000000), "0.001");
+    BOOST_CHECK_EQUAL(FormatMoney(COIN / 10000000), "0.001");
+    //BOOST_CHECK_EQUAL(FormatMoney(COIN / 100000000), "0.0");
 }
 
-
+/*
 BOOST_AUTO_TEST_CASE(util_ParseMoney) {
     Amount ret = Amount::zero();
     BOOST_CHECK(ParseMoney("0.0", ret));
