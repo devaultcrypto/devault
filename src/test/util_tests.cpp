@@ -716,14 +716,13 @@ BOOST_AUTO_TEST_CASE(util_FormatMoney) {
     //BOOST_CHECK_EQUAL(FormatMoney(COIN / 100000000), "0.0");
 }
 
-/*
 BOOST_AUTO_TEST_CASE(util_ParseMoney) {
     Amount ret = Amount::zero();
     BOOST_CHECK(ParseMoney("0.0", ret));
     BOOST_CHECK_EQUAL(ret, Amount::zero());
 
-    BOOST_CHECK(ParseMoney("12345.6789", ret));
-    BOOST_CHECK_EQUAL(ret, 123456789 * (COIN / 10000));
+    BOOST_CHECK(ParseMoney("123456.789", ret));
+    BOOST_CHECK_EQUAL(ret, 123456789 * (COIN / 1000));
 
     BOOST_CHECK(ParseMoney("100000000.00", ret));
     BOOST_CHECK_EQUAL(ret, 100000000 * COIN);
@@ -768,7 +767,6 @@ BOOST_AUTO_TEST_CASE(util_ParseMoney) {
     // Parsing negative amounts must fail
     BOOST_CHECK(!ParseMoney("-1", ret));
 }
-*/
 
 BOOST_AUTO_TEST_CASE(util_IsHex) {
     BOOST_CHECK(IsHex("00"));
