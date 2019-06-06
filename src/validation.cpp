@@ -2208,7 +2208,6 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    static bool fWarned = false;
     std::vector<std::string> warningMessages;
     if (!IsInitialBlockDownload()) {
         int nUpgraded = 0;
@@ -2228,18 +2227,6 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         if (nUpgraded > 0) {
             warningMessages.push_back(strprintf(
                 "%d of last 100 blocks have unexpected version", nUpgraded));
-        }
-        if (nUpgraded > 100 / 2) {
-            std::string strWarning =
-                _("Warning: Unknown block versions being mined! It's possible "
-                  "unknown rules are in effect");
-            // notify GetWarnings(), called by Qt and the JSON-RPC code to warn
-            // the user:
-            SetMiscWarning(strWarning);
-            if (!fWarned) {
-                AlertNotify(strWarning);
-                fWarned = true;
-            }
         }
     }
     LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu "
