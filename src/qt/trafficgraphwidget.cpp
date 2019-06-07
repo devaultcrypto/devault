@@ -51,6 +51,7 @@ void TrafficGraphWidget::paintPath(QPainterPath &path, QQueue<float> &samples) {
 
 void TrafficGraphWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), Qt::black);
 
     if (fMax <= 0.0f) return;
