@@ -2204,7 +2204,7 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
 
     {
         LOCK(g_best_block_mutex);
-        g_best_block = pindexNew->GetBlockHash();
+        g_best_block = (pindexNew) ? pindexNew->GetBlockHash() : uint256();
         g_best_block_cv.notify_all();
     }
 

@@ -663,7 +663,9 @@ static UniValue getblocktemplate(const Config &config,
     result.pushKV("longpollid", chainActive.Tip()->GetBlockHash().GetHex() +
                                     i64tostr(nTransactionsUpdatedLast));
     result.pushKV("target", hashTarget.GetHex());
-    result.pushKV("mintime", int64_t(pindexPrev->GetMedianTimePast()) + 1);
+    if (pindexPrev) {
+      result.pushKV("mintime", int64_t(pindexPrev->GetMedianTimePast()) + 1);
+    }
     result.pushKV("mutable", aMutable);
     result.pushKV("noncerange", "00000000ffffffff");
     // FIXME: Allow for mining block greater than 1M.

@@ -3915,14 +3915,16 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
                 bool fGotBlockFromCache = false;
                 {
                     LOCK(cs_most_recent_block);
-                    if (most_recent_block_hash == pBestIndex->GetBlockHash()) {
-                        CBlockHeaderAndShortTxIDs cmpctblock(
-                            *most_recent_block);
-                        connman->PushMessage(
-                            pto,
-                            msgMaker.Make(nSendFlags, NetMsgType::CMPCTBLOCK,
-                                          cmpctblock));
-                        fGotBlockFromCache = true;
+                    if (pBestIndex) {
+                        if (most_recent_block_hash == pBestIndex->GetBlockHash()) {
+                            CBlockHeaderAndShortTxIDs cmpctblock(
+                                                                 *most_recent_block);
+                            connman->PushMessage(
+                                                 pto,
+                                                 msgMaker.Make(nSendFlags, NetMsgType::CMPCTBLOCK,
+                                                               cmpctblock));
+                            fGotBlockFromCache = true;
+                        }
                     }
                 }
                 if (!fGotBlockFromCache) {

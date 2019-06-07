@@ -1469,8 +1469,8 @@ UniValue getblockchaininfo(const Config &config,
         while (block && block->pprev && block->pprev->nStatus.hasData()) {
             block = block->pprev;
         }
-
-        obj.pushKV("pruneheight", block->nHeight);
+        if (block) 
+            obj.pushKV("pruneheight", block->nHeight);
     }
     obj.pushKV("warnings", GetWarnings("statusbar"));
     return obj;
