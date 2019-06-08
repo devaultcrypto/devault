@@ -530,7 +530,7 @@ static Amount AmountFromValue(const UniValue &value) {
     if (!ParseFixedPoint(value.getValStr(), 8, &n)) {
         throw std::runtime_error("Invalid amount");
     }
-    Amount amount = n * SATOSHI;
+    Amount amount(n);
 
     if (!MoneyRange(amount)) {
         throw std::runtime_error("Amount out of range");

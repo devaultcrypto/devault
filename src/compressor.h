@@ -105,12 +105,12 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream &s, Operation ser_action) {
         if (!ser_action.ForRead()) {
-            uint64_t nVal = CompressAmount(txout.nValue / SATOSHI);
+            uint64_t nVal = CompressAmount(txout.nValue.toInt());
             READWRITE(VARINT(nVal));
         } else {
             uint64_t nVal = 0;
             READWRITE(VARINT(nVal));
-            txout.nValue = int64_t(DecompressAmount(nVal)) * SATOSHI;
+            txout.nValue = Amount(int64_t(DecompressAmount(nVal)));
         }
         CScriptCompressor cscript(REF(txout.scriptPubKey));
         READWRITE(cscript);
