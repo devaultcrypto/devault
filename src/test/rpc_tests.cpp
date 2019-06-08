@@ -231,14 +231,14 @@ BOOST_AUTO_TEST_CASE(rpc_createraw_op_return) {
 
 BOOST_AUTO_TEST_CASE(rpc_format_monetary_values) {
     BOOST_CHECK(ValueFromAmount(Amount::zero()).write() == "0.00000000");
-    BOOST_CHECK(ValueFromAmount(SATOSHI).write() == "0.00000001");
-    BOOST_CHECK(ValueFromAmount(17622195 * SATOSHI).write() == "0.17622195");
-    BOOST_CHECK(ValueFromAmount(50000000 * SATOSHI).write() == "0.50000000");
-    BOOST_CHECK(ValueFromAmount(89898989 * SATOSHI).write() == "0.89898989");
-    BOOST_CHECK(ValueFromAmount(100000000 * SATOSHI).write() == "1.00000000");
-    BOOST_CHECK(ValueFromAmount(int64_t(2099999999999990) * SATOSHI).write() ==
+    BOOST_CHECK(ValueFromAmount(Amount(1)).write() == "0.00000001");
+    BOOST_CHECK(ValueFromAmount(Amount(17622195)).write() == "0.17622195");
+    BOOST_CHECK(ValueFromAmount(Amount(50000000)).write() == "0.50000000");
+    BOOST_CHECK(ValueFromAmount(Amount(89898989)).write() == "0.89898989");
+    BOOST_CHECK(ValueFromAmount(Amount(100000000)).write() == "1.00000000");
+    BOOST_CHECK(ValueFromAmount(Amount(2099999999999990)).write() ==
                 "20999999.99999990");
-    BOOST_CHECK(ValueFromAmount(int64_t(2099999999999999) * SATOSHI).write() ==
+    BOOST_CHECK(ValueFromAmount(Amount(2099999999999999)).write() ==
                 "20999999.99999999");
 
     BOOST_CHECK_EQUAL(ValueFromAmount(Amount::zero()).write(), "0.00000000");
@@ -282,21 +282,15 @@ BOOST_AUTO_TEST_CASE(rpc_parse_monetary_values) {
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0")), Amount::zero());
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.00000000")),
                       Amount::zero());
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.00000001")), SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.17622195")),
-                      17622195 * SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5")),
-                      50000000 * SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.50000000")),
-                      50000000 * SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.89898989")),
-                      89898989 * SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1.00000000")),
-                      100000000 * SATOSHI);
-    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.9999999")),
-                      int64_t(2099999999999990) * SATOSHI);
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.00000001")), Amount(1));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.17622195")), Amount(17622195));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.5")), Amount( 50000000));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.50000000")), Amount(50000000));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.89898989")), Amount(89898989));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1.00000000")), Amount(100000000));
+    BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.9999999")), Amount(2099999999999990);
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("20999999.99999999")),
-                      int64_t(2099999999999999) * SATOSHI);
+                      Amount(2099999999999999));
 
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("1e-8")),
                       COIN / 100000000);
@@ -327,12 +321,12 @@ BOOST_AUTO_TEST_CASE(rpc_parse_monetary_values) {
                       UniValue);
     // should pass, cut trailing 0
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.00000001000000")),
-                      SATOSHI);
+                      Amount(1)));
     // should fail
     BOOST_CHECK_THROW(AmountFromValue(ValueFromString("19e-9")), UniValue);
     // should pass, leading 0 is present
     BOOST_CHECK_EQUAL(AmountFromValue(ValueFromString("0.19e-6")),
-                      19 * SATOSHI);
+                      Amount(19));
 
     // overflow error
     BOOST_CHECK_THROW(AmountFromValue(ValueFromString("92233720368.54775808")),
@@ -357,7 +351,7 @@ BOOST_AUTO_TEST_CASE(json_parse_errors) {
                       std::runtime_error);
     BOOST_CHECK_EQUAL(AmountFromValue(ParseNonRFCJSONValue(
                           "0.00000000000000000000000000000000000001e+30 ")),
-                      SATOSHI);
+                      Amount(1));
     // Invalid, initial garbage
     BOOST_CHECK_THROW(ParseNonRFCJSONValue("[1.0"), std::runtime_error);
     BOOST_CHECK_THROW(ParseNonRFCJSONValue("a1.0"), std::runtime_error);

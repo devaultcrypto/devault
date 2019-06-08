@@ -145,7 +145,7 @@ Amount AmountFromValue(const UniValue &value) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
     }
 
-    Amount amt = n * SATOSHI;
+    Amount amt(n);
     if (!MoneyRange(amt)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Amount out of range");
     }
@@ -157,7 +157,7 @@ UniValue ValueFromAmount(const Amount amount) {
     bool sign = amount < Amount::zero();
     Amount n_abs(sign ? -amount : amount);
     int64_t quotient = n_abs / COIN;
-    int64_t remainder = (n_abs % COIN) / SATOSHI;
+    int64_t remainder = (n_abs % COIN).toInt();
     // Now since we are using less decimal places
     // divide the remainder to appropriate precision
     remainder /= MIN_COIN;

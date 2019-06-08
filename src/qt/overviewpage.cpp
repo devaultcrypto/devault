@@ -58,8 +58,7 @@ public:
         QString address = index.data(Qt::DisplayRole).toString();
         Amount amount(
             int64_t(
-                index.data(TransactionTableModel::AmountRole).toLongLong()) *
-            SATOSHI);
+                index.data(TransactionTableModel::AmountRole).toLongLong()));
         bool confirmed =
             index.data(TransactionTableModel::ConfirmedRole).toBool();
         QVariant value = index.data(Qt::ForegroundRole);
@@ -119,10 +118,10 @@ public:
 
 OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent)
     : QWidget(parent), ui(new Ui::OverviewPage), clientModel(nullptr), walletModel(nullptr),
-      currentBalance(-SATOSHI), currentUnconfirmedBalance(-SATOSHI),
-      currentImmatureBalance(-SATOSHI), currentWatchOnlyBalance(-SATOSHI),
-      currentWatchUnconfBalance(-SATOSHI),
-      currentWatchImmatureBalance(-SATOSHI),
+      currentBalance(0), currentUnconfirmedBalance(0),
+      currentImmatureBalance(0), currentWatchOnlyBalance(0),
+      currentWatchUnconfBalance(0),
+      currentWatchImmatureBalance(0),
       txdelegate(new TxViewDelegate(platformStyle, this)) {
     ui->setupUi(this);
 
@@ -185,6 +184,7 @@ void OverviewPage::setBalance(const Amount balance,
                               const Amount watchUnconfBalance,
                               const Amount watchImmatureBalance) {
     int unit = walletModel->getOptionsModel()->getDisplayUnit();
+    currentBalanceOptional = balance;
     currentBalance = balance;
     currentUnconfirmedBalance = unconfirmedBalance;
     currentImmatureBalance = immatureBalance;
@@ -279,7 +279,7 @@ void OverviewPage::setWalletModel(WalletModel *model) {
 
 void OverviewPage::updateDisplayUnit() {
     if (walletModel && walletModel->getOptionsModel()) {
-        if (currentBalance != -SATOSHI) {
+        if (currentBalanceOptional != std::nullopt) {
             setBalance(currentBalance, currentUnconfirmedBalance,
                        currentImmatureBalance, currentWatchOnlyBalance,
                        currentWatchUnconfBalance, currentWatchImmatureBalance);

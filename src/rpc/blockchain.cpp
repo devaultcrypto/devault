@@ -543,10 +543,10 @@ void entryToJSON(UniValue &info, const CTxMemPoolEntry &e) {
     info.pushKV("currentpriority", e.GetPriority(chainActive.Height()));
     info.pushKV("descendantcount", e.GetCountWithDescendants());
     info.pushKV("descendantsize", e.GetSizeWithDescendants());
-    info.pushKV("descendantfees", e.GetModFeesWithDescendants() / SATOSHI);
+    info.pushKV("descendantfees", e.GetModFeesWithDescendants().toInt());
     info.pushKV("ancestorcount", e.GetCountWithAncestors());
     info.pushKV("ancestorsize", e.GetSizeWithAncestors());
-    info.pushKV("ancestorfees", e.GetModFeesWithAncestors() / SATOSHI);
+    info.pushKV("ancestorfees", e.GetModFeesWithAncestors().toInt());
     const CTransaction &tx = e.GetTx();
     std::set<std::string> setDepends;
     for (const CTxIn &txin : tx.vin) {
@@ -1127,7 +1127,7 @@ static void ApplyStats(CCoinsStats &stats, CHashWriter &ss, const uint256 &hash,
     for (const auto& output : outputs) {
         ss << VARINT(output.first + 1);
         ss << output.second.GetTxOut().scriptPubKey;
-        ss << VARINT(output.second.GetTxOut().nValue / SATOSHI);
+        ss << VARINT(output.second.GetTxOut().nValue.toInt());
         stats.nTransactionOutputs++;
         stats.nTotalAmount += output.second.GetTxOut().nValue;
         stats.nBogoSize +=

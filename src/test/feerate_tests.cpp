@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE(GetFeeTest) {
     // Special case: returns 1 instead of 0
     BOOST_CHECK_EQUAL(feeRate.GetFee(8), MINCOIN);
     BOOST_CHECK_EQUAL(feeRate.GetFee(9), MINCOIN);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(121), 14 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(122), 15 * SATOSHI);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(121), Amount(14));
+    BOOST_CHECK_EQUAL(feeRate.GetFee(122), Amount(15));
   
     BOOST_CHECK_EQUAL(feeRate.GetFee(999), 3 * MINCOIN);
     BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 3 * MINCOIN);
@@ -44,10 +44,10 @@ BOOST_AUTO_TEST_CASE(GetFeeTest) {
     // Check ceiling results
     feeRate = CFeeRate(18 * MINCOIN);
     // Truncates the result, if not integer
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(100), 2 * MINCOIN);
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(200), 4 * MINCOIN);
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(1000), 18 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
+    BOOST_CHECK_EQUAL(feeRate.GetFee(100), 2 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(200), 4 * MINCOIN);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 18 * MINCOIN);
 
   
     // Check full constructor

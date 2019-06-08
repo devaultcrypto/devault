@@ -12,7 +12,7 @@
 BOOST_FIXTURE_TEST_SUITE(amount_tests, BasicTestingSetup)
 
 static void CheckAmounts(int64_t aval, int64_t bval) {
-    Amount a(aval * SATOSHI), b(bval * SATOSHI);
+    Amount a(aval), b(bval);
 
     // Equality
     BOOST_CHECK_EQUAL(a == b, aval == bval);
@@ -35,40 +35,40 @@ static void CheckAmounts(int64_t aval, int64_t bval) {
     BOOST_CHECK_EQUAL(b >= a, bval >= aval);
 
     // Unary minus
-    BOOST_CHECK_EQUAL(-a, -aval * SATOSHI);
-    BOOST_CHECK_EQUAL(-b, -bval * SATOSHI);
+    BOOST_CHECK_EQUAL(-a, Amount(-aval));
+    BOOST_CHECK_EQUAL(-b, Amount(-bval));
 
     // Addition and subtraction.
     BOOST_CHECK_EQUAL(a + b, b + a);
-    BOOST_CHECK_EQUAL(a + b, (aval + bval) * SATOSHI);
+    BOOST_CHECK_EQUAL(a + b, Amount(aval + bval));
 
     BOOST_CHECK_EQUAL(a - b, -(b - a));
-    BOOST_CHECK_EQUAL(a - b, (aval - bval) * SATOSHI);
+    BOOST_CHECK_EQUAL(a - b, Amount(aval - bval));
 
     // Multiplication
     BOOST_CHECK_EQUAL(aval * b, bval * a);
-    BOOST_CHECK_EQUAL(aval * b, (aval * bval) * SATOSHI);
+    BOOST_CHECK_EQUAL(aval * b, Amount(aval * bval));
 
     // Division
     if (b != Amount::zero()) {
         BOOST_CHECK_EQUAL(a / b, aval / bval);
-        BOOST_CHECK_EQUAL(a / bval, (a / b) * SATOSHI);
+        BOOST_CHECK_EQUAL(a / bval, Amount(a / b));
     }
 
     if (a != Amount::zero()) {
         BOOST_CHECK_EQUAL(b / a, bval / aval);
-        BOOST_CHECK_EQUAL(b / aval, (b / a) * SATOSHI);
+        BOOST_CHECK_EQUAL(b / aval, Amount(b / a));
     }
 
     // Modulus
     if (b != Amount::zero()) {
         BOOST_CHECK_EQUAL(a % b, a % bval);
-        BOOST_CHECK_EQUAL(a % b, (aval % bval) * SATOSHI);
+        BOOST_CHECK_EQUAL(a % b, Amount(aval % bval));
     }
 
     if (a != Amount::zero()) {
         BOOST_CHECK_EQUAL(b % a, b % aval);
-        BOOST_CHECK_EQUAL(b % a, (bval % aval) * SATOSHI);
+        BOOST_CHECK_EQUAL(b % a, Amount(bval % aval));
     }
 
     // OpAssign

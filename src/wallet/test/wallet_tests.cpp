@@ -65,7 +65,7 @@ static void add_coin(const CWallet &wallet, const Amount nValue,
         new CWalletTx(&wallet, MakeTransactionRef(std::move(tx))));
     if (fIsFromMe) {
         wtx->fDebitCached = true;
-        wtx->nDebitCached = SATOSHI;
+        wtx->nDebitCached = Amount(1);
     }
     COutput output(wtx.get(), nInput, nAge, true /* spendable */,
                    true /* solvable */, true /* safe */);
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests) {
         BOOST_CHECK_EQUAL(setCoinsRet.size(), 2U);
 
         // test with many inputs
-        for (Amount amt = 1500 * SATOSHI; amt < COIN; amt = 10 * amt) {
+        for (Amount amt = Amount(1500); amt < COIN; amt = 10 * amt) {
             empty_wallet();
             // Create 676 inputs (=  (old MAX_STANDARD_TX_SIZE == 100000)  / 148
             // bytes per input)
@@ -360,11 +360,11 @@ BOOST_AUTO_TEST_CASE(coin_selection_tests) {
                 add_coin(wallet, amt);
             }
             BOOST_CHECK(wallet.SelectCoinsMinConf(
-                2000 * SATOSHI, 1, 1, 0, vCoins, setCoinsRet, nValueRet));
-            if (amt - 2000 * SATOSHI < MIN_CHANGE) {
+                                                  Amount(2000), 1, 1, 0, vCoins, setCoinsRet, nValueRet));
+            if (amt - Amount(2000) < MIN_CHANGE) {
                 // needs more than one input:
                 uint16_t returnSize = std::ceil(
-                    double(2000 + (MIN_CHANGE / SATOSHI)) / (amt / SATOSHI));
+                                                double(2000 + (MIN_CHANGE.toInt())) / (amt.toInt()));
                 Amount returnValue = returnSize * amt;
                 BOOST_CHECK_EQUAL(nValueRet, returnValue);
                 BOOST_CHECK_EQUAL(setCoinsRet.size(), returnSize);

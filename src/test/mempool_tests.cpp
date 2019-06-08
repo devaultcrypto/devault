@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestorIndexingTest) {
   uint64_t tx7Size = CTransaction(tx7).GetTotalSize();
 
   /* set the fee to just below tx2's feerate when including ancestor */
-  Amount fee = int64_t((20000 / tx2Size) * (tx7Size + tx6Size) - 1) * SATOSHI;
+  Amount fee = Amount(int64_t((20000 / tx2Size) * (tx7Size + tx6Size) - 1));
 
   // CTxMemPoolEntry entry7(tx7, fee, 2, 10.0, 1, true);
   pool.addUnchecked(tx7.GetId(), entry.Fee(Amount(fee)).FromTx(tx7));
@@ -734,7 +734,7 @@ BOOST_AUTO_TEST_CASE(MempoolSizeLimitTest) {
 
 #ifdef DEBUG_THIS
   BOOST_CHECK_EQUAL(pool.GetMinFee(pool.DynamicMemoryUsage() * 9 / 2).GetFeePerK(),
-                    (maxFeeRateRemoved.GetFeePerK() + feeIncrement) / 8 + SATOSHI);
+                    (maxFeeRateRemoved.GetFeePerK() + feeIncrement) / 8 + Amount(1));
 #endif
   // ... with a 1/4 halflife when mempool is < 1/4 its target size
 

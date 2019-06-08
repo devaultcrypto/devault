@@ -54,6 +54,7 @@ private:
     Ui::OverviewPage *ui;
     ClientModel *clientModel;
     WalletModel *walletModel;
+    std::optional<Amount> currentBalanceOptional;
     Amount currentBalance;
     Amount currentUnconfirmedBalance;
     Amount currentImmatureBalance;

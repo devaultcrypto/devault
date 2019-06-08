@@ -204,7 +204,7 @@ void WalletView::processNewTransaction(const QModelIndex &parent, int start,
 
     Q_EMIT incomingTransaction(date,
                                walletModel->getOptionsModel()->getDisplayUnit(),
-                               int64_t(amount) * SATOSHI, type, address, label,
+                               Amount(int64_t(amount)), type, address, label,
                                walletModel->getWalletName());
 }
 

@@ -143,7 +143,7 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
     pblock = &pblocktemplate->block;
 
     // Add dummy coinbase tx as first transaction.  It is updated at the end.
-    pblocktemplate->entries.emplace_back(CTransactionRef(), -SATOSHI, -1);
+    pblocktemplate->entries.emplace_back(CTransactionRef(), Amount(), -1);
 
     LOCK2(cs_main, mempool->cs);
     CBlockIndex *pindexPrev = chainActive.Tip();

@@ -9,12 +9,12 @@
 #include "feerate.h"
 
 FeeFilterRounder::FeeFilterRounder(const CFeeRate &minIncrementalFee) {
-    Amount minFeeLimit = std::max(SATOSHI, minIncrementalFee.GetFeePerK() / 2);
+    Amount minFeeLimit = std::max(Amount(1), minIncrementalFee.GetFeePerK() / 2);
     feeset.insert(Amount::zero());
-    for (double bucketBoundary = minFeeLimit / SATOSHI;
-         bucketBoundary <= double(MAX_FEERATE / SATOSHI);
+    for (double bucketBoundary = minFeeLimit.toInt();
+         bucketBoundary <= double(MAX_FEERATE.toInt());
          bucketBoundary *= FEE_SPACING) {
-        feeset.insert(int64_t(bucketBoundary) * SATOSHI);
+        feeset.insert(Amount(int64_t(bucketBoundary)));
     }
 }
 
