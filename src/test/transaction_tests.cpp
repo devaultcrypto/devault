@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(tx_valid) {
         }
         COutPoint outpoint(uint256S(vinput[0].get_str()), vinput[1].get_int());
         mapprevOutScriptPubKeys[outpoint] = ParseScript(vinput[2].get_str());
-        if (vinput.size() >= 4) { mapprevOutValues[outpoint] = vinput[3].get_int64() * SATOSHI; }
+        if (vinput.size() >= 4) { mapprevOutValues[outpoint] = Amount(vinput[3].get_int64()); }
       }
       if (!fValid) {
         BOOST_ERROR("Bad test: " << strTest);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(tx_invalid) {
         }
         COutPoint outpoint(uint256S(vinput[0].get_str()), vinput[1].get_int());
         mapprevOutScriptPubKeys[outpoint] = ParseScript(vinput[2].get_str());
-        if (vinput.size() >= 4) { mapprevOutValues[outpoint] = vinput[3].get_int64() * SATOSHI; }
+        if (vinput.size() >= 4) { mapprevOutValues[outpoint] = Amount(vinput[3].get_int64()); }
       }
       if (!fValid) {
         BOOST_ERROR("Bad test: " << strTest);
@@ -287,7 +287,7 @@ void CreateCreditAndSpend(const CKeyStore &keystore, const CScript &outscript, C
   outputm.vin[0].prevout = COutPoint();
   outputm.vin[0].scriptSig = CScript();
   outputm.vout.resize(1);
-  outputm.vout[0].nValue = SATOSHI;
+  outputm.vout[0].nValue = Amount(MIN_COIN);
   outputm.vout[0].scriptPubKey = outscript;
   CDataStream ssout(SER_NETWORK, PROTOCOL_VERSION);
   ssout << outputm;
@@ -302,7 +302,7 @@ void CreateCreditAndSpend(const CKeyStore &keystore, const CScript &outscript, C
   inputm.vin.resize(1);
   inputm.vin[0].prevout = COutPoint(output->GetId(), 0);
   inputm.vout.resize(1);
-  inputm.vout[0].nValue = SATOSHI;
+  inputm.vout[0].nValue = Amount(MIN_COIN);
   inputm.vout[0].scriptPubKey = CScript();
   bool ret = SignSignature(keystore, *output, inputm, 0, SigHashType().withForkId());
   BOOST_CHECK_EQUAL(ret, success);
@@ -376,12 +376,12 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
     mtx.vin[i].prevout = outpoint;
     mtx.vin[i].scriptSig = CScript();
 
-    mtx.vout.emplace_back(1000 * SATOSHI, CScript() << OP_1);
+    mtx.vout.emplace_back(Amount(1000 * MIN_COIN), CScript() << OP_1);
   }
 
   // sign all inputs
   for (size_t i = 0; i < mtx.vin.size(); i++) {
-    bool hashSigned = SignSignature(keystore, scriptPubKey, mtx, i, 1000 * SATOSHI, sigHashes.at(i % sigHashes.size()));
+    bool hashSigned = SignSignature(keystore, scriptPubKey, mtx, i, Amount(1000 * MIN_COIN), sigHashes.at(i % sigHashes.size()));
     BOOST_CHECK_MESSAGE(hashSigned, "Failed to sign test transaction");
   }
 
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
   std::vector<Coin> coins;
   for (size_t i = 0; i < mtx.vin.size(); i++) {
     CTxOut out;
-    out.nValue = 1000 * SATOSHI;
+    out.nValue = Amount(1000 * MIN_COIN);
     out.scriptPubKey = scriptPubKey;
     coins.emplace_back(std::move(out), 1, false);
   }
@@ -552,9 +552,9 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
 
   // Check dust with default relay fee:
   Amount nDustThreshold = 3 * 182 * dustRelayFee.GetFeePerK() / 1000;
-  BOOST_CHECK_EQUAL(nDustThreshold, 546 * SATOSHI);
+  BOOST_CHECK_EQUAL(nDustThreshold, Amount(546));
   // dust:
-  t.vout[0].nValue = nDustThreshold - SATOSHI;
+  t.vout[0].nValue = nDustThreshold - Amount(1);
   BOOST_CHECK(!IsStandardTx(CTransaction(t), reason));
   // not dust:
   t.vout[0].nValue = nDustThreshold;
@@ -562,12 +562,12 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
 
   // Check dust with odd relay fee to verify rounding:
   // nDustThreshold = 182 * 1234 / 1000 * 3
-  dustRelayFee = CFeeRate(1234 * SATOSHI);
+  dustRelayFee = CFeeRate(Amount(1234));
   // dust:
-  t.vout[0].nValue = (672 - 1) * SATOSHI;
+  t.vout[0].nValue = Amount(672 - 1);
   BOOST_CHECK(!IsStandardTx(CTransaction(t), reason));
   // not dust:
-  t.vout[0].nValue = 672 * SATOSHI;
+  t.vout[0].nValue = Amount(672);
   //  BOOST_CHECK(IsStandardTx(CTransaction(t), reason));
   dustRelayFee = CFeeRate(DUST_RELAY_TX_FEE);
 

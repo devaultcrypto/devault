@@ -5497,7 +5497,7 @@ bool LoadMempool(const Config &config) {
             file >> nTime;
             file >> nFeeDelta;
 
-            Amount amountdelta = nFeeDelta * SATOSHI;
+            Amount amountdelta(nFeeDelta);
             if (amountdelta != Amount::zero()) {
                 g_mempool.PrioritiseTransaction(tx->GetId(),
                                                 tx->GetId().ToString(),

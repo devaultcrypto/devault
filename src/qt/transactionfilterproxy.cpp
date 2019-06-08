@@ -35,8 +35,7 @@ bool TransactionFilterProxy::filterAcceptsRow(
     QString label = index.data(TransactionTableModel::LabelRole).toString();
     Amount amount(
         int64_t(
-            llabs(index.data(TransactionTableModel::AmountRole).toLongLong())) *
-        SATOSHI);
+            llabs(index.data(TransactionTableModel::AmountRole).toLongLong())));
     int status = index.data(TransactionTableModel::StatusRole).toInt();
 
     if (!showInactive && status == TransactionStatus::Conflicted) {

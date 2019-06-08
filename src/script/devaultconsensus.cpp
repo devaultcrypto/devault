@@ -114,7 +114,7 @@ int devaultconsensus_verify_script_with_amount(
     const uint8_t *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
     const uint8_t *txTo, unsigned int txToLen, unsigned int nIn,
     unsigned int flags, devaultconsensus_error *err) {
-    Amount am(amount * SATOSHI);
+    Amount am(amount);
     return ::verify_script(scriptPubKey, scriptPubKeyLen, am, txTo, txToLen,
                            nIn, flags, err);
 }

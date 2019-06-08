@@ -129,7 +129,7 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle,
     }
     if (!settings.contains("nTransactionFee")) {
         settings.setValue("nTransactionFee",
-                          qint64(DEFAULT_TRANSACTION_FEE / SATOSHI));
+                          qint64(DEFAULT_TRANSACTION_FEE.toInt()));
     }
     if (!settings.contains("fPayOnlyMinFee")) {
         settings.setValue("fPayOnlyMinFee", false);
@@ -143,7 +143,7 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle,
     ui->groupCustomFee->setId(ui->radioCustomPerKilobyte, 0);
     ui->groupCustomFee->button(0)->setChecked(true);
     ui->customFee->setValue(
-        int64_t(settings.value("nTransactionFee").toLongLong()) * SATOSHI);
+        Amount(int64_t(settings.value("nTransactionFee").toLongLong())));
  //   ui->checkBoxMinimumFee->setChecked(
  //       settings.value("fPayOnlyMinFee").toBool());
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
@@ -236,7 +236,7 @@ SendCoinsDialog::~SendCoinsDialog() {
     settings.setValue("nFeeRadio", ui->groupFee->checkedId());
     settings.setValue("nCustomFeeRadio", ui->groupCustomFee->checkedId());
     settings.setValue("nTransactionFee",
-                      qint64(ui->customFee->value() / SATOSHI));
+                      qint64(ui->customFee->value().toInt()));
  //   settings.setValue("fPayOnlyMinFee", ui->checkBoxMinimumFee->isChecked());
 
     delete ui;

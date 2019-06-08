@@ -305,7 +305,7 @@ static UniValue prioritisetransaction(const Config &config,
     LOCK(cs_main);
 
     uint256 hash = ParseHashStr(request.params[0].get_str(), "txid");
-    Amount nAmount = request.params[2].get_int64() * SATOSHI;
+    Amount nAmount(request.params[2].get_int64());
 
     g_mempool.PrioritiseTransaction(hash, request.params[0].get_str(),
                                     request.params[1].get_real(), nAmount);
@@ -631,7 +631,7 @@ static UniValue getblocktemplate(const Config &config,
         entry.pushKV("txid", txId.GetHex());
         entry.pushKV("hash", tx.GetHash().GetHex());
         entry.pushKV("fee",
-                     pblocktemplate->entries[index_in_template].fees / SATOSHI);
+                     pblocktemplate->entries[index_in_template].fees.toInt());
         int64_t nTxSigOps =
             pblocktemplate->entries[index_in_template].sigOpCount;
         entry.pushKV("sigops", nTxSigOps);
@@ -659,7 +659,7 @@ static UniValue getblocktemplate(const Config &config,
     result.pushKV("transactions", transactions);
     result.pushKV("coinbaseaux", aux);
     result.pushKV("coinbasevalue",
-                  int64_t(pblock->vtx[0]->vout[0].nValue / SATOSHI));
+                  int64_t(pblock->vtx[0]->vout[0].nValue.toInt()));
     result.pushKV("longpollid", chainActive.Tip()->GetBlockHash().GetHex() +
                                     i64tostr(nTransactionsUpdatedLast));
     result.pushKV("target", hashTarget.GetHex());
@@ -683,7 +683,7 @@ static UniValue getblocktemplate(const Config &config,
         UniValue entry(UniValue::VOBJ);
         entry.push_back(Pair("payee", GetAddrFromTxOut(txout)));
         entry.push_back(Pair("script", HexStr(txout.scriptPubKey)));
-        entry.push_back(Pair("amount", int64_t(txout.nValue/SATOSHI)));
+        entry.push_back(Pair("amount", int64_t(txout.nValue.toInt())));
         extraCoinBaseArray.push_back(entry);
       }
     }

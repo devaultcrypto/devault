@@ -58,7 +58,7 @@ CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef &_tx, const Amount _nFee,
 
 double CTxMemPoolEntry::GetPriority(unsigned int currentHeight) const {
     double deltaPriority =
-        double((currentHeight - entryHeight) * (inChainInputValue / SATOSHI)) /
+        double((currentHeight - entryHeight) * (inChainInputValue.toInt())) /
         nModSize;
     double dResult = entryPriority + deltaPriority;
     // This should only happen if it was called with a height below entry height
@@ -1211,7 +1211,7 @@ CTxMemPool::GetMemPoolChildren(txiter entry) const {
 CFeeRate CTxMemPool::GetMinFee(size_t sizelimit) const {
     LOCK(cs);
     if (!blockSinceLastRollingFeeBump || rollingMinimumFeeRate == 0) {
-        return CFeeRate(int64_t(ceill(rollingMinimumFeeRate)) * SATOSHI);
+        return CFeeRate(Amount(int64_t(ceill(rollingMinimumFeeRate))));
     }
 
     int64_t time = GetTime();
@@ -1228,13 +1228,13 @@ CFeeRate CTxMemPool::GetMinFee(size_t sizelimit) const {
             pow(2.0, (time - lastRollingFeeUpdate) / halflife);
         lastRollingFeeUpdate = time;
     }
-    return CFeeRate(int64_t(ceill(rollingMinimumFeeRate)) * SATOSHI);
+    return CFeeRate(Amount(int64_t(ceill(rollingMinimumFeeRate))));
 }
 
 void CTxMemPool::trackPackageRemoved(const CFeeRate &rate) {
     AssertLockHeld(cs);
-    if ((rate.GetFeePerK() / SATOSHI) > rollingMinimumFeeRate) {
-        rollingMinimumFeeRate = rate.GetFeePerK() / SATOSHI;
+    if ((rate.GetFeePerK().toInt()) > rollingMinimumFeeRate) {
+        rollingMinimumFeeRate = rate.GetFeePerK().toInt();
         blockSinceLastRollingFeeBump = false;
     }
 }
