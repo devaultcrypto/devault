@@ -12,62 +12,63 @@
 
 #include <boost/test/unit_test.hpp>
 
+static CBlockIndex GetBlockIndex(CBlockIndex *pindexPrev, int64_t nTimeInterval,
+                                 uint32_t nBits) {
+    CBlockIndex block;
+    block.pprev = pindexPrev;
+    block.nHeight = pindexPrev->nHeight + 1;
+    block.nTime = pindexPrev->nTime + nTimeInterval;
+    block.nBits = nBits;
+
+    block.nChainWork = pindexPrev->nChainWork + GetBlockProof(block);
+    return block;
+}
+
+static void make_blocks(std::vector<CBlockIndex>& blocks, DummyConfig& config) {
+
+  blocks.resize(100);
+  const int interval = 2 * 60; // 2 minutes
+  const Consensus::Params &params = config.GetChainParams().GetConsensus();
+  const arith_uint256 powLimit = UintToArith256(params.powLimit);
+  arith_uint256 currentPow = powLimit >> 1;
+  uint32_t initialBits = currentPow.GetCompact();
+  
+  // Genesis block.
+  const uint256 zeroHash = uint256();
+  blocks[0] = CBlockIndex();
+  blocks[0].nHeight = 0;
+  blocks[0].nTime = 1269211443;
+  blocks[0].nBits = initialBits;
+  blocks[0].nChainWork = GetBlockProof(blocks[0]);
+  blocks[0].phashBlock = &zeroHash;
+
+  // Pile up some blocks.
+  for (size_t i = 1; i < 100; i++) {
+    blocks[i] = GetBlockIndex(&blocks[i - 1], interval, initialBits);
+    blocks[i].phashBlock = &zeroHash;
+  }
+}
+
+
 BOOST_FIXTURE_TEST_SUITE(pow_tests, BasicTestingSetup)
 
 /* Test calculation of next difficulty target with no constraints applying */
 BOOST_AUTO_TEST_CASE(get_next_work) {
     DummyConfig config(CBaseChainParams::MAIN);
-
-    int64_t nLastRetargetTime = 1261130161; // Block #30240
-    CBlockIndex pindexLast;
-    pindexLast.nHeight = 32255;
-    pindexLast.nTime =  1261210161;
-    pindexLast.nBits = 0x1d00ffff;
-    BOOST_CHECK_EQUAL(
-        CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, config), 0x1d00ed08);
+    std::vector<CBlockIndex> blocks;
+    make_blocks(blocks,config);
+    CBlockHeader blkHeader = blocks[99].GetBlockHeader();
+    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[99], &blkHeader, config), 0x1c7ffffe);
 }
+
+// TBD
 
 /* Test the constraint on the upper bound for next work */
-BOOST_AUTO_TEST_CASE(get_next_work_pow_limit) {
-    DummyConfig config(CBaseChainParams::MAIN);
-
-    int64_t nLastRetargetTime = 1231006505; // Block #0
-    CBlockIndex pindexLast;
-    pindexLast.nHeight = 2015;
-    pindexLast.nTime = 1233061996; // Block #2015
-    pindexLast.nBits = 0x1d00ffff;
-    BOOST_CHECK_EQUAL(
-        CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, config),
-        0x1d00ffff);
-}
-
+// BOOST_AUTO_TEST_CASE(get_next_work_pow_limit) {
 /* Test the constraint on the lower bound for actual time taken */
-BOOST_AUTO_TEST_CASE(get_next_work_lower_limit_actual) {
-    DummyConfig config(CBaseChainParams::MAIN);
-
-    int64_t nLastRetargetTime = 1279008237; // Block #66528
-    CBlockIndex pindexLast;
-    pindexLast.nHeight = 68543;
-    pindexLast.nTime = 1279009767; // Block #68543
-    pindexLast.nBits = 0x1c05a3f4;
-    BOOST_CHECK_EQUAL(
-        CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, config),
-        0x1c0168fd);
-}
-
+// BOOST_AUTO_TEST_CASE(get_next_work_lower_limit_actual) {
 /* Test the constraint on the upper bound for actual time taken */
-BOOST_AUTO_TEST_CASE(get_next_work_upper_limit_actual) {
-    DummyConfig config(CBaseChainParams::MAIN);
-
-    int64_t nLastRetargetTime = 1263163443; // NOTE: Not an actual block time
-    CBlockIndex pindexLast;
-    pindexLast.nHeight = 46367;
-    pindexLast.nTime = 1269211443; // Block #46367
-    pindexLast.nBits = 0x1c387f6f;
-    BOOST_CHECK_EQUAL(
-        CalculateNextWorkRequired(&pindexLast, nLastRetargetTime, config),
-        0x1d00e1fd);
-}
+// BOOST_AUTO_TEST_CASE(get_next_work_upper_limit_actual) {
 
 BOOST_AUTO_TEST_CASE(GetBlockProofEquivalentTime_test) {
     DummyConfig config(CBaseChainParams::MAIN);
@@ -96,17 +97,7 @@ BOOST_AUTO_TEST_CASE(GetBlockProofEquivalentTime_test) {
     }
 }
 
-static CBlockIndex GetBlockIndex(CBlockIndex *pindexPrev, int64_t nTimeInterval,
-                                 uint32_t nBits) {
-    CBlockIndex block;
-    block.pprev = pindexPrev;
-    block.nHeight = pindexPrev->nHeight + 1;
-    block.nTime = pindexPrev->nTime + nTimeInterval;
-    block.nBits = nBits;
 
-    block.nChainWork = pindexPrev->nChainWork + GetBlockProof(block);
-    return block;
-}
 
 BOOST_AUTO_TEST_CASE(retargeting_test) {
     DummyConfig config(CBaseChainParams::MAIN);

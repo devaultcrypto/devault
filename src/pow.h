@@ -15,21 +15,11 @@ class uint256;
 
 uint32_t GetNextWorkRequired(const CBlockIndex *pindexPrev,
                              const CBlockHeader *pblock, const Config &config);
-uint32_t CalculateNextWorkRequired(const CBlockIndex *pindexPrev,
-                                   int64_t nFirstBlockTime,
-                                   const Config &config);
 
 /**
  * Check whether a block hash satisfies the proof-of-work requirement specified
  * by nBits
  */
 bool CheckProofOfWork(uint256 hash, uint32_t nBits, const Config &config);
-
-/**
- * Bitcoin cash's difficulty adjustment mechanism.
- */
-uint32_t GetNextCashWorkRequired(const CBlockIndex *pindexPrev,
-                                 const CBlockHeader *pblock,
-                                 const Config &config);
 
 #endif // BITCOIN_POW_H
