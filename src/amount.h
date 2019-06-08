@@ -17,8 +17,6 @@ const int64_t MIN_COIN = 100000;
 const int64_t COIN_PRECISION = 100000000;
 
 constexpr int64_t QuantizeAmount(int64_t am) {
-  if (am <= 0) return am; // Don't mess with -SATOSHI
-  if (am == 1) return am; // Also special case
   int64_t residual = (am % MIN_COIN);
   int64_t amount = (am - residual);
   if (residual > 0) amount += MIN_COIN;
@@ -28,10 +26,10 @@ constexpr int64_t QuantizeAmount(int64_t am) {
 struct Amount {
 private:
     int64_t amount;
-    explicit constexpr Amount(int64_t _amount) : amount(QuantizeAmount(_amount)) {}
   
 
 public:
+    explicit constexpr Amount(int64_t _amount) : amount(QuantizeAmount(_amount)) {}
     constexpr Amount() : amount(0) {}
     constexpr Amount(const Amount &_camount) : amount(QuantizeAmount(_camount.amount)) {}
 
@@ -155,8 +153,8 @@ public:
 
 static constexpr Amount SATOSHI = Amount::satoshi();
 static constexpr Amount MINCOIN = Amount::min_coin();
-static constexpr Amount COIN = COIN_PRECISION * SATOSHI;
-static constexpr Amount CENT = COIN / 100;
+static constexpr Amount COIN(COIN_PRECISION);
+static constexpr Amount CENT(COIN_PRECISION/100);
 
 extern const std::string CURRENCY_UNIT;
 

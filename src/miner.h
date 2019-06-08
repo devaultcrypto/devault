@@ -83,8 +83,8 @@ struct modifiedentry_iter {
 struct CompareModifiedEntry {
     bool operator()(const CTxMemPoolModifiedEntry &a,
                     const CTxMemPoolModifiedEntry &b) const {
-        double f1 = b.nSizeWithAncestors * (a.nModFeesWithAncestors / SATOSHI);
-        double f2 = a.nSizeWithAncestors * (b.nModFeesWithAncestors / SATOSHI);
+        double f1 = b.nSizeWithAncestors * (a.nModFeesWithAncestors.toInt());
+        double f2 = a.nSizeWithAncestors * (b.nModFeesWithAncestors.toInt());
         if (f1 == f2) {
             return CTxMemPool::CompareIteratorByHash()(a.iter, b.iter);
         }

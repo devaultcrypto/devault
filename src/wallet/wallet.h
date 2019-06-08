@@ -784,7 +784,7 @@ public:
      */
     void AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe = true,
                         const CCoinControl *coinControl = nullptr,
-                        const Amount nMinimumAmount = SATOSHI,
+                        const Amount nMinimumAmount = MINCOIN,
                         const Amount nMaximumAmount = MAX_MONEY,
                         const Amount nMinimumSumAmount = MAX_MONEY,
                         const uint64_t nMaximumCount = 0,

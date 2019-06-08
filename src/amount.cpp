@@ -11,6 +11,6 @@
 const std::string CURRENCY_UNIT = "DVT";
 
 std::string Amount::ToString() const {
-    return strprintf("%d.%08d %s", *this / COIN, (*this % COIN) / SATOSHI,
+    return strprintf("%d.%08d %s", *this / COIN, (*this % COIN).toInt(),
                      CURRENCY_UNIT);
 }
