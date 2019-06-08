@@ -36,8 +36,8 @@
 
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,
- * or from the last difficulty change if 'lookup' is nonpositive. If 'height' is
- * nonnegative, compute the estimate at the time when a given block was found.
+ * or zero if 'lookup' is nonpositive. If 'height' is nonnegative, 
+ * compute the estimate at the time when a given block was found.
  */
 static UniValue GetNetworkHashPS(int lookup, int height) {
     CBlockIndex *pb = chainActive.Tip();
@@ -50,12 +50,8 @@ static UniValue GetNetworkHashPS(int lookup, int height) {
         return 0;
     }
 
-    // If lookup is -1, then use blocks since last difficulty change.
-    if (lookup <= 0) {
-        lookup = pb->nHeight %
-                     Params().GetConsensus().DifficultyAdjustmentInterval() +
-                 1;
-    }
+    // If lookup is < 0, then return 0
+    if (lookup <= 0) return 0;
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight) {

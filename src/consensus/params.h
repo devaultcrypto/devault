@@ -27,7 +27,6 @@ struct Params {
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
-    int64_t nPowTargetTimespan;
     int64_t nBlocksPerYear;
     int64_t nInitialMiningRewardInCoins;
     int64_t minerCapSystemChangeHeight;
@@ -39,9 +38,6 @@ struct Params {
     Amount nMinReward;
     Amount nMaxReward;
   
-    int64_t DifficultyAdjustmentInterval() const {
-        return nPowTargetTimespan / nPowTargetSpacing;
-    }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
 

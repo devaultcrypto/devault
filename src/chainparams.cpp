@@ -84,7 +84,6 @@ public:
         strNetworkID = "main";
         consensus.powLimit = uint256S(
             "00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // 1 day
         consensus.nPowTargetSpacing = 2 * 60; // 2 minute block time
         consensus.nBlocksPerYear = 30 * 24 * 365.25;
         consensus.nInitialMiningRewardInCoins = 500;
@@ -185,7 +184,6 @@ public:
         // Reduce this difficult a lot to get started
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 6 * 60 * 60; // 6 hours
         consensus.nPowTargetSpacing = 2 * 60; // 120 seconds
         consensus.nBlocksPerYear = 2400;  // 30 * 6 * 365; // 65.7k block years & 5,475 block rewards
         consensus.nInitialMiningRewardInCoins = 500;
@@ -268,7 +266,6 @@ public:
         strNetworkID = "regtest";
         consensus.powLimit = uint256S(
             "7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // 1 day
         consensus.nPowTargetSpacing = 2* 60;
         consensus.nBlocksPerYear = 30 * 24 * 365.25;
         consensus.nInitialMiningRewardInCoins = 500;
