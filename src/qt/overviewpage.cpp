@@ -279,7 +279,11 @@ void OverviewPage::setWalletModel(WalletModel *model) {
 
 void OverviewPage::updateDisplayUnit() {
     if (walletModel && walletModel->getOptionsModel()) {
+#ifdef HAVE_VARIANT
         if (currentBalanceOptional != std::nullopt) {
+#else
+        if (currentBalanceOptional.is_initialized()) {
+#endif
             setBalance(currentBalance, currentUnconfirmedBalance,
                        currentImmatureBalance, currentWatchOnlyBalance,
                        currentWatchUnconfBalance, currentWatchImmatureBalance);

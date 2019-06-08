@@ -8,6 +8,14 @@
 #include "amount.h"
 #include "transactionview.h"
 
+
+#ifdef HAVE_VARIANT
+#include <optional>
+#else
+#include <boost/optional.hpp>
+#endif
+
+
 #include <QWidget>
 #include <memory>
 
@@ -54,7 +62,11 @@ private:
     Ui::OverviewPage *ui;
     ClientModel *clientModel;
     WalletModel *walletModel;
+#ifdef HAVE_VARIANT  
     std::optional<Amount> currentBalanceOptional;
+#else
+    boost::optional<Amount> currentBalanceOptional;
+#endif
     Amount currentBalance;
     Amount currentUnconfirmedBalance;
     Amount currentImmatureBalance;
