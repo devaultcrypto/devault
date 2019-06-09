@@ -1,9 +1,9 @@
 // Copyright (c) 2017 The Bitcoin Core developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef WALLETINITINTERFACE_H
-#define WALLETINITINTERFACE_H
+#pragma once
 
 #include "chainparams.h"
 #include "support/allocators/secure.h"
@@ -14,6 +14,8 @@ class CRPCTable;
 
 class WalletInitInterface {
 public:
+     /** Is the wallet component enabled */
+    virtual bool HasWalletSupport() const = 0;
     /** Get wallet help string */
     virtual std::string GetHelpString(bool showDebug) = 0;
     /** Check wallet parameter interaction */
@@ -39,4 +41,4 @@ public:
     virtual ~WalletInitInterface() = default;
 };
 
-#endif // WALLETINITINTERFACE_H
+extern WalletInitInterface& g_wallet_init_interface;

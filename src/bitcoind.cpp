@@ -183,11 +183,11 @@ bool AppInit(int argc, char *argv[]) {
             return false;
         }
 
-#ifdef ENABLE_WALLET        
-      if (!g_wallet_init_interface->CheckIfWalletExists(config.GetChainParams())) {
-        getPassphrase(walletPassphrase);
-      }
-#endif
+        if (g_wallet_init_interface.HasWalletSupport()) {
+          if (!g_wallet_init_interface.CheckIfWalletExists(config.GetChainParams())) {
+            getPassphrase(walletPassphrase);
+          }
+        }
 
         if (!AppInitSanityChecks()) {
             // InitError will have been called with detailed error, which ends

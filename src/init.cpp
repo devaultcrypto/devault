@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -43,11 +44,7 @@
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "validationinterface.h"
-#ifdef ENABLE_WALLET
 #include "wallet/rpcdump.h"
-// for vpwallets/GenerateBitcoin
-#include "wallet/wallet.h"
-#endif
 #include "walletinitinterface.h"
 #include "warnings.h"
 
@@ -78,25 +75,6 @@ static const bool DEFAULT_STOPAFTERBLOCKIMPORT = false;
 std::unique_ptr<CConnman> g_connman;
 std::unique_ptr<PeerLogicValidation> peerLogic;
 
-#if !(ENABLE_WALLET)
-class DummyWalletInit : public WalletInitInterface {
-public:
-    std::string GetHelpString(bool showDebug) override { return std::string{}; }
-    bool ParameterInteraction() override { return true; }
-    void RegisterRPC(CRPCTable &) override {}
-    bool Verify(const CChainParams &chainParams) override { return true; }
-    bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase,
-	      const std::vector<std::string>& words) override { return true; }
-    bool CheckIfWalletExists(const CChainParams &chainParams) override { return false; }
-    void Start(CScheduler &scheduler) override {}
-    void Flush() override {}
-    void Stop() override {}
-    void Close() override {}
-};
-
-static DummyWalletInit g_dummy_wallet_init;
-WalletInitInterface *const g_wallet_init_interface = &g_dummy_wallet_init;
-#endif
 
 #if ENABLE_ZMQ
 static CZMQNotificationInterface *pzmqNotificationInterface = nullptr;
@@ -221,7 +199,7 @@ void Shutdown() {
     StopREST();
     StopRPC();
     StopHTTPServer();
-    g_wallet_init_interface->Flush();
+    g_wallet_init_interface.Flush();
     StopMapPort();
 
     // Because these depend on each-other, we make sure that neither can be
@@ -279,7 +257,7 @@ void Shutdown() {
         prewards.reset();
         pbudget.reset();
     }
-    g_wallet_init_interface->Stop();
+    g_wallet_init_interface.Stop();
 
 #if ENABLE_ZMQ
     if (pzmqNotificationInterface) {
@@ -299,7 +277,7 @@ void Shutdown() {
     UnregisterAllValidationInterfaces();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     GetMainSignals().UnregisterWithMempoolSignals(g_mempool);
-    g_wallet_init_interface->Close();
+    g_wallet_init_interface.Close();
     globalVerifyHandle.reset();
     ECC_Stop();
     LogPrintf("%s: done\n", __func__);
@@ -659,7 +637,7 @@ std::string HelpMessage(HelpMessageMode mode) {
                     "MiB per 24h), 0 = no limit (default: %d)"),
                   DEFAULT_MAX_UPLOAD_TARGET));
 
-    strUsage += g_wallet_init_interface->GetHelpString(showDebug);
+    strUsage += g_wallet_init_interface.GetHelpString(showDebug);
 
 #if ENABLE_ZMQ
     strUsage += HelpMessageGroup(_("ZeroMQ notification options:"));
@@ -1634,10 +1612,7 @@ bool AppInitParameterInteraction(Config &config, RPCServer &rpcServer) {
     }
 
     RegisterAllRPCCommands(config, rpcServer, tableRPC);
-    g_wallet_init_interface->RegisterRPC(tableRPC);
-#ifdef ENABLE_WALLET
-    RegisterDumpRPCCommands(tableRPC);
-#endif
+    g_wallet_init_interface.RegisterRPC(tableRPC);
 
     nConnectTimeout = gArgs.GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
     if (nConnectTimeout <= 0) {
@@ -1706,7 +1681,7 @@ bool AppInitParameterInteraction(Config &config, RPCServer &rpcServer) {
     }
     nBytesPerSigOp = gArgs.GetArg("-bytespersigop", nBytesPerSigOp);
 
-    if (!g_wallet_init_interface->ParameterInteraction()) {
+    if (!g_wallet_init_interface.ParameterInteraction()) {
         return false;
     }
 
@@ -1854,7 +1829,7 @@ bool AppInitMain(Config &config,
     }
 
     // Step 5: verify wallet database integrity
-    if (!g_wallet_init_interface->Verify(chainparams)) {
+    if (!g_wallet_init_interface.Verify(chainparams)) {
         return false;
     }
 
@@ -2268,7 +2243,7 @@ bool AppInitMain(Config &config,
 
 
     // Step 8: load wallet
-    if (!g_wallet_init_interface->Open(chainparams, walletPassphrase, words)) {
+    if (!g_wallet_init_interface.Open(chainparams, walletPassphrase, words)) {
         return false;
     }
 
@@ -2426,7 +2401,7 @@ bool AppInitMain(Config &config,
     SetRPCWarmupFinished();
     uiInterface.InitMessage(_("Done loading"));
 
-    g_wallet_init_interface->Start(scheduler);
+    g_wallet_init_interface.Start(scheduler);
 
     return true;
 }
