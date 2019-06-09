@@ -31,6 +31,8 @@
 #include <db_cxx.h>
 #endif
 
+#include "walletinitinterface.h"
+
 #include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QMenu>
@@ -329,17 +331,17 @@ bool RPCConsole::RPCParseCommandLine(std::string &strResult,
                                         stack.back().end()));
                                 req.strMethod = stack.back()[0];
 
-#ifdef ENABLE_WALLET
-                                if (walletID && !walletID->empty()) {
+                                if (g_wallet_init_interface.HasWalletSupport()) {
+                                  if (walletID && !walletID->empty()) {
                                     QByteArray encodedName =
-                                        QUrl::toPercentEncoding(
-                                            QString::fromStdString(*walletID));
+                                      QUrl::toPercentEncoding(
+                                                              QString::fromStdString(*walletID));
                                     req.URI =
-                                        "/wallet/" +
-                                        std::string(encodedName.constData(),
-                                                    encodedName.length());
+                                      "/wallet/" +
+                                      std::string(encodedName.constData(),
+                                                  encodedName.length());
+                                  }
                                 }
-#endif
 
                                 GlobalConfig config;
                                 lastResult = tableRPC.execute(config, req);
@@ -549,7 +551,7 @@ RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
     ui->WalletSelector->setVisible(false);
     ui->WalletSelectorLabel->setVisible(false);
 
-// set library version labels
+    // set library version labels
 #ifdef ENABLE_WALLET
     ui->berkeleyDBVersion->setText(DbEnv::version(0, 0, 0));
 #else
@@ -1033,25 +1035,25 @@ void RPCConsole::on_lineEdit_returnPressed() {
         cmdBeforeBrowsing = QString();
 
         QString walletID;
-#ifdef ENABLE_WALLET
-        const int wallet_index = ui->WalletSelector->currentIndex();
-        if (wallet_index > 0) {
+        if (g_wallet_init_interface.HasWalletSupport()) {
+          const int wallet_index = ui->WalletSelector->currentIndex();
+          if (wallet_index > 0) {
             walletID = (QString)ui->WalletSelector->itemData(wallet_index)
-                           .value<QString>();
-        }
+              .value<QString>();
+          }
 
-        if (m_last_wallet_id != walletID) {
+          if (m_last_wallet_id != walletID) {
             if (walletID.isEmpty()) {
-                message(CMD_REQUEST,
-                        tr("Executing command without any wallet"));
+              message(CMD_REQUEST,
+                      tr("Executing command without any wallet"));
             } else {
-                message(
-                    CMD_REQUEST,
+              message(
+                      CMD_REQUEST,
                     tr("Executing command using \"%1\" wallet").arg(walletID));
             }
             m_last_wallet_id = walletID;
+          }
         }
-#endif
 
         message(CMD_REQUEST, QString::fromStdString(strFilteredCmd));
         Q_EMIT cmdRequest(cmd, walletID);

@@ -11,12 +11,16 @@
 #include "utilmoneystr.h"
 #include "validation.h"
 #include "wallet/rpcwallet.h"
+#include "wallet/rpcdump.h"
 #include "wallet/wallet.h"
 #include "wallet/walletutil.h"
 #include "walletinitinterface.h"
 
 class WalletInit : public WalletInitInterface {
 public:
+    //! Was the wallet component compiled in.
+    bool HasWalletSupport() const override {return true;}
+
     //! Return the wallets help message.
     std::string GetHelpString(bool showDebug) override;
 
@@ -53,7 +57,7 @@ public:
 };
 
 static WalletInit g_wallet_init;
-WalletInitInterface *const g_wallet_init_interface = &g_wallet_init;
+WalletInitInterface& g_wallet_init_interface = g_wallet_init;
 
 std::string WalletInit::GetHelpString(bool showDebug) {
     std::string strUsage = HelpMessageGroup(_("Wallet options:"));
@@ -289,6 +293,7 @@ void WalletInit::RegisterRPC(CRPCTable &t) {
     }
 
     RegisterWalletRPCCommands(t);
+    RegisterDumpRPCCommands(t);
 }
 
 bool WalletInit::Verify(const CChainParams &chainParams) {

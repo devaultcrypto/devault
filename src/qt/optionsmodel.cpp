@@ -19,10 +19,7 @@
 #include "txdb.h"       // for -dbcache defaults
 #include "validation.h" // For DEFAULT_SCRIPTCHECK_THREADS
 
-#ifdef ENABLE_WALLET
-#include "wallet/wallet.h"
-#include "wallet/walletdb.h"
-#endif
+#include "walletinitinterface.h"
 
 #include <QNetworkProxy>
 #include <QSettings>
@@ -123,17 +120,17 @@ void OptionsModel::Init(bool resetSettings) {
         settings.setValue("strDataDir", Intro::getDefaultDataDirectory());
     }
 
-// Wallet
-#ifdef ENABLE_WALLET
-    if (!settings.contains("bSpendZeroConfChange")) {
+    // Wallet
+    if (g_wallet_init_interface.HasWalletSupport()) {
+      if (!settings.contains("bSpendZeroConfChange")) {
         settings.setValue("bSpendZeroConfChange", true);
-    }
-    if (!gArgs.SoftSetBoolArg(
-            "-spendzeroconfchange",
-            settings.value("bSpendZeroConfChange").toBool())) {
+      }
+      if (!gArgs.SoftSetBoolArg(
+                                "-spendzeroconfchange",
+                                settings.value("bSpendZeroConfChange").toBool())) {
         addOverriddenOption("-spendzeroconfchange");
+      }
     }
-#endif
 
     // Network
     if (!settings.contains("fUseUPnP")) {
@@ -296,10 +293,10 @@ QVariant OptionsModel::data(const QModelIndex &index, int role) const {
             case ProxyPortTor:
                 return GetProxySetting(settings, "addrSeparateProxyTor").port;
 
-#ifdef ENABLE_WALLET
             case SpendZeroConfChange:
+              if (g_wallet_init_interface.HasWalletSupport()) {
                 return settings.value("bSpendZeroConfChange");
-#endif
+              }
             case DisplayUnit:
                 return nDisplayUnit;
             case ThirdPartyTxUrls:
@@ -406,14 +403,14 @@ bool OptionsModel::setData(const QModelIndex &index, const QVariant &value,
                 }
             } break;
 
-#ifdef ENABLE_WALLET
             case SpendZeroConfChange:
+              if (g_wallet_init_interface.HasWalletSupport()) {
                 if (settings.value("bSpendZeroConfChange") != value) {
-                    settings.setValue("bSpendZeroConfChange", value);
-                    setRestartRequired(true);
+                  settings.setValue("bSpendZeroConfChange", value);
+                  setRestartRequired(true);
                 }
-                break;
-#endif
+              }
+              break;
             case DisplayUnit:
                 setDisplayUnit(value);
                 break;

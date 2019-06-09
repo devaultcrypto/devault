@@ -13,6 +13,7 @@
 #include "rpc/server.h"
 #include "sync.h"
 #include "ui_interface.h"
+#include "walletinitinterface.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #include "utilsplitstring.h"
@@ -391,11 +392,11 @@ bool StartHTTPRPC(Config &config,
             std::bind(&HTTPRPCRequestProcessor::DelegateHTTPRequest,
                       &httpRPCRequestProcessor, std::placeholders::_2);
     RegisterHTTPHandler("/", true, rpcFunction);
-#ifdef ENABLE_WALLET
     // ifdef can be removed once we switch to better endpoint support and API
     // versioning
-    RegisterHTTPHandler("/wallet/", false, rpcFunction);
-#endif
+    if (g_wallet_init_interface.HasWalletSupport()) {
+      RegisterHTTPHandler("/wallet/", false, rpcFunction);
+    }
     assert(EventBase());
     httpRPCTimerInterface =
         std::make_unique<HTTPRPCTimerInterface>(EventBase());
@@ -410,9 +411,9 @@ void InterruptHTTPRPC() {
 void StopHTTPRPC() {
     LogPrint(BCLog::RPC, "Stopping HTTP RPC server\n");
     UnregisterHTTPHandler("/", true);
-#ifdef ENABLE_WALLET
-    UnregisterHTTPHandler("/wallet/", false);
-#endif
+    if (g_wallet_init_interface.HasWalletSupport()) {
+      UnregisterHTTPHandler("/wallet/", false);
+    }
     if (httpRPCTimerInterface) {
         RPCUnsetTimerInterface(httpRPCTimerInterface.get());
         httpRPCTimerInterface.reset();

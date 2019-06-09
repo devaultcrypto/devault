@@ -22,10 +22,8 @@
 #include "utilitydialog.h"
 #include "winshutdownmonitor.h"
 
-#ifdef ENABLE_WALLET
 #include "setpassphrasedialog.h"
 #include "walletmodel.h"
-#endif
 
 #include "init.h"
 #include "rpc/server.h"
@@ -35,9 +33,7 @@
 #include "util.h"
 #include "warnings.h"
 
-#ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
-#endif
 #include "walletinitinterface.h"
 
 #include <cstdint>
@@ -366,12 +362,11 @@ void BitcoinApplication::createOptionsModel(bool resetSettings) {
 
 
 bool BitcoinApplication::setupPassword(SecureString& password) {
-#ifdef ENABLE_WALLET    
   if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
     LogPrintf("Wallet disabled!\n");
   } else {
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
-        if (fs::exists(walletFile)) return true;
+      if (fs::exists(walletFile)) return true;
     }
   }
   if (CheckIfWalletDatExists()) return true;
@@ -379,24 +374,23 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
   SetPassphraseDialog dlg(nullptr);
   dlg.exec();
   password = dlg.getPassword();
-#endif
   return false;
 }
 
 bool BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
 
-#ifdef ENABLE_WALLET    
+  if (g_wallet_init_interface.HasWalletSupport()) {
     if (!setupPassword(pss)) {
         if (pss.empty()) return false;
     }
-#endif
-    window = new BitcoinGUI(config, platformStyle, networkStyle, nullptr);
+  }
+  window = new BitcoinGUI(config, platformStyle, networkStyle, nullptr);
 
-    pollShutdownTimer = new QTimer(window);
-    connect(pollShutdownTimer, SIGNAL(timeout()), window,
-            SLOT(detectShutdown()));
-    return true;
+  pollShutdownTimer = new QTimer(window);
+  connect(pollShutdownTimer, SIGNAL(timeout()), window,
+          SLOT(detectShutdown()));
+  return true;
 }
 
 void BitcoinApplication::createSplashScreen(const NetworkStyle *networkStyle) {

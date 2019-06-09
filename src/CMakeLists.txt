@@ -455,6 +455,10 @@ endif()
 if(BUILD_WALLET)
 	add_subdirectory(wallet)
 	target_link_libraries(server wallet)
+else()
+  add_library(nowallet dummywallet.cpp)
+  target_include_directories(nowallet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}	${CMAKE_CURRENT_BINARY_DIR})
+	target_link_libraries(server nowallet)
 endif()
 
 # ZeroMQ

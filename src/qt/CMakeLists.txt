@@ -220,6 +220,7 @@ add_library(bitcoin-qt-base
 	splashscreen.cpp
 	trafficgraphwidget.cpp
 	utilitydialog.cpp
+	setpassphrasedialog.cpp
   dvtui.cpp
 
 	# Handle ui files
@@ -274,7 +275,6 @@ if(BUILD_WALLET)
 			addressbookpage.cpp
 			addresstablemodel.cpp
 			askpassphrasedialog.cpp
-			setpassphrasedialog.cpp
 			coincontroldialog.cpp
 			coincontroltreewidget.cpp
 			editaddressdialog.cpp
