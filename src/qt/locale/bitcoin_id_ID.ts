@@ -1042,11 +1042,11 @@
         <translation>Hapus</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Riwayat pembayaran yang diminta Anda</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Minta pembayaran</translation>
     </message>
     <message>

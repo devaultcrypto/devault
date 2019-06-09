@@ -788,7 +788,7 @@
         <translation>Obriši sva polja</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Zatraži plaćanje</translation>
     </message>
     <message>

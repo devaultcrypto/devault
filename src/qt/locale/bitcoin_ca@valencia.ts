@@ -1476,11 +1476,11 @@
         <translation>Neteja</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Historial de pagaments sol·licitats</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Sol·licitud de pagament</translation>
     </message>
     <message>

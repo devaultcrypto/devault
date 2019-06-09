@@ -1557,11 +1557,11 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Cancella</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Cronologia pagamenti richiesti</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Richiedi pagamento</translation>
     </message>
     <message>

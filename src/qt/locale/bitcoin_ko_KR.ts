@@ -1592,11 +1592,11 @@
         <translation>지우기</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>지출기록 확인</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>지불 요청(&amp;R)</translation>
     </message>
     <message>

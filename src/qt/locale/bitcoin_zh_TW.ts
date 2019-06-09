@@ -1828,11 +1828,11 @@
         <translation>清空</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>先前要求付款的記錄</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>要求付款</translation>
     </message>
     <message>

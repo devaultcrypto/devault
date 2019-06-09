@@ -1170,7 +1170,7 @@
         <translation>مسح</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>سجل طلبات الدفع</translation>
     </message>
     <message>

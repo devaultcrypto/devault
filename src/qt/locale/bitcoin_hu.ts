@@ -1040,11 +1040,11 @@
         <translation>Törlés</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>A kért kifizetések története</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Fizetés kérése</translation>
     </message>
     <message>

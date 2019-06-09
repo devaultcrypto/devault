@@ -1136,11 +1136,11 @@
         <translation>Nettoyer</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Historique des demandes de paiements.</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Demande de paiement</translation>
     </message>
     <message>

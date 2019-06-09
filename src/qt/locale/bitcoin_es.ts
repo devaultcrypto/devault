@@ -1828,11 +1828,11 @@
         <translation>Vaciar</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Historial de pagos solicitados</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Solicitar pago</translation>
     </message>
     <message>

@@ -1376,12 +1376,12 @@
         <translation>Clear</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
-        <translation>Requested payments history</translation>
+        <source>Address / Payment request history</source>
+        <translation>Address / Payment request history</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
-        <translation>&amp;Request payment</translation>
+        <source>&amp;New Address / Request Payment</source>
+        <translation>&amp;New Address / Request Payment</translation>
     </message>
     <message>
         <source>Show the selected request (does the same as double clicking an entry)</source>

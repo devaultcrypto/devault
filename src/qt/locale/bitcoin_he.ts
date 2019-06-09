@@ -1206,11 +1206,11 @@
         <translation>ניקוי</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>היסטוריית בקשות תשלום</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;בקשת תשלום</translation>
     </message>
     <message>

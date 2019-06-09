@@ -1828,11 +1828,11 @@
         <translation>クリア</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>支払リクエスト履歴</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>支払をリクエストする (&amp;R)</translation>
     </message>
     <message>

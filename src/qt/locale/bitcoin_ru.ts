@@ -1828,11 +1828,11 @@
         <translation>Очистить</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>История запрошенных платежей</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Запросить платёж</translation>
     </message>
     <message>

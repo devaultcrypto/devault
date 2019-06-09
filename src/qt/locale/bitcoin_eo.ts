@@ -976,7 +976,7 @@
         <translation>Forigi</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Peti pagon</translation>
     </message>
     <message>

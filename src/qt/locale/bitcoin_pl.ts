@@ -1704,11 +1704,11 @@
         <translation>Wyczyść</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Żądanie historii płatności</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Żądaj płatności</translation>
     </message>
     <message>

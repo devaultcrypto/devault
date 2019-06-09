@@ -930,11 +930,11 @@
         <translation>Тозалаш</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Сўралган тўлов тарихи</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>Тўловни &amp;сўраш</translation>
     </message>
     <message>

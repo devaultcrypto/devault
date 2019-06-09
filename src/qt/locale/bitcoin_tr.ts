@@ -1828,11 +1828,11 @@
         <translation>Temizle</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Talep edilen ödemelerin tarihçesi</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>Ödeme &amp;talep et</translation>
     </message>
     <message>

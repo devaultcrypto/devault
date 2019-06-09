@@ -1412,11 +1412,11 @@
         <translation>Изчистване</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Изискана история на плащанията</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Изискване на плащане</translation>
     </message>
     <message>

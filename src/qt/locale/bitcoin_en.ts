@@ -2410,12 +2410,12 @@
     </message>
     <message>
         <location line="+75"/>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="-95"/>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

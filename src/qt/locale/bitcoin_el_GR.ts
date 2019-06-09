@@ -1061,7 +1061,7 @@
         <translation>Καθαρισμός</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Αίτηση πληρωμής</translation>
     </message>
     <message>

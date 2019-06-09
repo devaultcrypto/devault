@@ -830,11 +830,11 @@
         <translation>წაშლა</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>მოთხოვნილი გადახდების ისტორია</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;გადახდის მოთხოვნა</translation>
     </message>
     <message>

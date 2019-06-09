@@ -1228,11 +1228,11 @@
         <translation>Очистити</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Історія запитів платежу</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>Н&amp;адіслати запит платежу</translation>
     </message>
     <message>

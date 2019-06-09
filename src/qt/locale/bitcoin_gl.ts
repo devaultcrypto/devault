@@ -738,7 +738,7 @@
         <translation>Limpar</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Solicitar pago</translation>
     </message>
     </context>

@@ -1188,11 +1188,11 @@
         <translation>Curăţă</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Istoricul plăţilor cerute</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Cerere plată</translation>
     </message>
     <message>

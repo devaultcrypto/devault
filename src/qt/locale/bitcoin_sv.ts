@@ -1589,11 +1589,11 @@ Var vänlig och försök igen.</translation>
         <translation>Rensa</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Historik för begärda betalningar</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>Begä&amp;r betalning</translation>
     </message>
     <message>

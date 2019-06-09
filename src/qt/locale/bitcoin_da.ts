@@ -1828,11 +1828,11 @@
         <translation>Ryd</translation>
     </message>
     <message>
-        <source>Requested payments history</source>
+        <source>Address / Payment request history</source>
         <translation>Historik over betalingsanmodninger</translation>
     </message>
     <message>
-        <source>&amp;Request payment</source>
+        <source>&amp;New Address / Request Payment</source>
         <translation>&amp;Anmod om betaling</translation>
     </message>
     <message>
