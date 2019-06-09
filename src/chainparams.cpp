@@ -222,7 +222,6 @@ public:
                uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
                         "dda326f35b"));
 
-        vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         // DeVault seeder
@@ -301,8 +300,6 @@ public:
                uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
                         "dda326f35b"));
 
-        //!< Regtest mode doesn't have any fixed seeds.
-        vFixedSeeds.clear();
         //!< Regtest mode doesn't have any DNS seeds.
         vSeeds.clear();
 

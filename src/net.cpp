@@ -129,7 +129,7 @@ bool GetLocal(CService &addr, const CNetAddr *paddrPeer) {
     return nBestScore >= 0;
 }
 
-//! Convert the pnSeeds6 array into usable address objects.
+/* Convert the pnSeeds6 array into usable address objects.
 static std::vector<CAddress>
 convertSeed6(const std::vector<SeedSpec6> &vSeedsIn) {
     // It'll only connect to one or two seed nodes because once it connects,
@@ -148,6 +148,7 @@ convertSeed6(const std::vector<SeedSpec6> &vSeedsIn) {
     }
     return vSeedsOut;
 }
+*/
 
 // Get best local address for a particular peer as a CAddress. Otherwise, return
 // the unroutable 0.0.0.0 but filled in with the normal parameters, since the IP
@@ -1866,8 +1867,8 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect) {
                           "available.\n");
                 CNetAddr local;
                 local.SetInternal("fixedseeds");
-                addrman.Add(convertSeed6(config->GetChainParams().FixedSeeds()),
-                            local);
+                // No fixed seeds, add back if we add some
+                // addrman.Add(convertSeed6(config->GetChainParams().FixedSeeds()), local);
                 done = true;
             }
         }

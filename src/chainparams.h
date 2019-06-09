@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,11 +14,6 @@
 
 #include <memory>
 #include <vector>
-
-struct SeedSpec6 {
-    uint8_t addr[16];
-    uint16_t port;
-};
 
 typedef std::map<int, uint256> MapCheckpoints;
 
@@ -64,7 +60,6 @@ public:
     int ExtCoinType() const { return nExtCoinType; }
     const std::string &CashAddrPrefix() const { return cashaddrPrefix; }
     const std::string &CashAddrSecretPrefix() const { return cashaddrSecretPrefix; }
-    const std::vector<SeedSpec6> &FixedSeeds() const { return vFixedSeeds; }
     const CCheckpointData &Checkpoints() const { return checkpointData; }
     const ChainTxData &TxData() const { return chainTxData; }
 
@@ -82,7 +77,6 @@ protected:
     std::string cashaddrSecretPrefix;
     std::string strNetworkID;
     CBlock genesis;
-    std::vector<SeedSpec6> vFixedSeeds;
     bool fDefaultConsistencyChecks;
     bool fRequireStandard;
     bool fMineBlocksOnDemand;
