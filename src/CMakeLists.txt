@@ -503,9 +503,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_sources(devaultd PRIVATE bitcoind-res.rc)
 endif()
 
-# Bitcoin-qt
-if(BUILD_QT)
-	add_subdirectory(qt)
+# DeVault-Core, only build if both BUILD_WALLET and BUILD_QT are set
+if(BUILD_WALLET)
+  if(BUILD_QT)
+	  add_subdirectory(qt)
+  endif()
 endif()
 
 
