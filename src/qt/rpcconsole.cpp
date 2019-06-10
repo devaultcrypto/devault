@@ -25,11 +25,8 @@
 
 #include <univalue.h>
 
-#ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
-
 #include <db_cxx.h>
-#endif
 
 #include "walletinitinterface.h"
 
@@ -552,12 +549,7 @@ RPCConsole::RPCConsole(const PlatformStyle *_platformStyle, QWidget *parent)
     ui->WalletSelectorLabel->setVisible(false);
 
     // set library version labels
-#ifdef ENABLE_WALLET
     ui->berkeleyDBVersion->setText(DbEnv::version(0, 0, 0));
-#else
-    ui->label_berkeleyDBVersion->hide();
-    ui->berkeleyDBVersion->hide();
-#endif
     // Register RPC timer interface
     rpcTimerInterface = new QtRPCTimerInterface();
     // avoid accidentally overwriting an existing, non QTThread
@@ -807,7 +799,6 @@ void RPCConsole::setClientModel(ClientModel *model) {
     }
 }
 
-#ifdef ENABLE_WALLET
 void RPCConsole::addWallet(WalletModel *const walletModel) {
     const QString name = walletModel->getWalletName();
     // use name for text and internal data object (to allow to move to a wallet
@@ -823,7 +814,6 @@ void RPCConsole::addWallet(WalletModel *const walletModel) {
         ui->WalletSelectorLabel->setVisible(true);
     }
 }
-#endif
 
 static QString categoryClass(int category) {
     switch (category) {
