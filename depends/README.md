@@ -45,6 +45,8 @@ The following can be set when running make: make FOO=bar
 If some packages are not built, for example `make NO_WALLET=1`, the appropriate
 options will be passed to DeVault's configure. In this case, `--disable-wallet`.
 
+> Note: The --disable-wallet option is a daemon only feature not compatible with QT.
+
 Additional targets:
 
     download: run 'make download' to fetch all sources without building them

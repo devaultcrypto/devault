@@ -250,11 +250,15 @@ Disable-wallet mode
 When the intention is to run only a P2P node without a wallet, devault may be compiled in
 disable-wallet mode with:
 
-    ./configure --disable-wallet
+    ./configure --disable-wallet --without-gui
+    
+> Note: The --disable-wallet option is a daemon only feature not compatible with QT.
 
 or if using cmake, then during cmake step
 
-   cmake ../devault -DBUILD_WALLET=0
+   cmake ../devault -DBUILD_WALLET=0 -DBUILD_QT=0
+   
+> Note: The --disable-wallet option is a daemon only feature not compatible with QT.
 
 
 Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
