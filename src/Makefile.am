@@ -652,7 +652,9 @@ include Makefile.bench.include
 endif
 
 if ENABLE_QT
+if ENABLE_WALLET
 include Makefile.qt.include
+endif
 endif
 
 if ENABLE_QT_TESTS
