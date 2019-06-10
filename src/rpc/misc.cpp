@@ -889,7 +889,6 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
                                  + HelpExampleCli("getmyrewardinfo","")
                                  + HelpExampleRpc("getmyrewardinfo",""));
     
-
 #ifdef ENABLE_WALLET
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -936,9 +935,11 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
             result.push_back(delta);
         }
     }
-
-    return result;
+#else
+    UniValue result(UniValue::VARR);
+    throw JSONRPCError(RPC_WALLET_ERROR, "Wallet required for this function to provide information");
 #endif
+    return result;
 }
 
 

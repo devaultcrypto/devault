@@ -69,7 +69,6 @@ public:
      */
     void setClientModel(ClientModel *clientModel);
 
-#ifdef ENABLE_WALLET
     /**
      * Set the wallet model.
      * The wallet model represents a bitcoin wallet, and offers access to the
@@ -77,7 +76,6 @@ public:
      */
     bool addWallet(WalletModel *walletModel);
     void removeAllWallets();
-#endif // ENABLE_WALLET
     bool enableWallet = false;
 
 protected:
@@ -193,7 +191,6 @@ public Q_SLOTS:
     void message(const QString &title, const QString &message,
                  unsigned int style, bool *ret = nullptr);
 
-#ifdef ENABLE_WALLET
     bool setCurrentWallet(const QString &name);
     /** Set the UI status indicators based on the currently selected wallet.
      */
@@ -218,10 +215,8 @@ public Q_SLOTS:
     void incomingTransaction(const QString &date, int unit, const Amount amount,
                              const QString &type, const QString &address,
                              const QString &label, const QString &walletName);
-#endif // ENABLE_WALLET
 
 private Q_SLOTS:
-#ifdef ENABLE_WALLET
     /** Open DeVault website */
     void openDVT_global();
     /** Switch to overview (home) page */
@@ -238,7 +233,6 @@ private Q_SLOTS:
 
     /** Show open dialog */
     void openClicked();
-#endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();
     /** Show about dialog */
