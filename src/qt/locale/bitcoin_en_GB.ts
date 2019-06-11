@@ -1360,8 +1360,8 @@
         <translation>An optional label to associate with the new receiving address.</translation>
     </message>
     <message>
-        <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
-        <translation>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</translation>
+        <source>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</source>
+        <translation>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>An optional amount to request. Leave this empty or zero to not request a specific amount.</source>

@@ -914,7 +914,7 @@
         <translation>Янги қабул қилинаётган манзил билан боғланган танланадиган ёрлиқ.</translation>
     </message>
     <message>
-        <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
+        <source>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</source>
         <translation>Ушбу сўровдан тўловларни сўраш учун фойдаланинг. Барча майдонлар &lt;b&gt;мажбурий эмас&lt;/b&gt;.</translation>
     </message>
     <message>

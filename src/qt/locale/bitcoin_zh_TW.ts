@@ -1812,7 +1812,7 @@
         <translation>跟新收款位址關聯的標記，可以不填。</translation>
     </message>
     <message>
-        <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
+        <source>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</source>
         <translation>請用這份表單來要求付款。所有欄位都&lt;b&gt;可以不填&lt;/b&gt;。</translation>
     </message>
     <message>

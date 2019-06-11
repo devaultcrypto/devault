@@ -74,7 +74,7 @@
         <item row="2" column="0" colspan="3">
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</string>
+           <string>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</string>
           </property>
          </widget>
         </item>

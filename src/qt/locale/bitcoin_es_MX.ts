@@ -422,7 +422,7 @@
         <translation>Mensaje opcional para agregar a la solicitud de pago, el cual será mostrado cuando la solicitud este abierta. Nota: El mensaje no se manda con el pago a travéz de la red de DeVault.</translation>
     </message>
     <message>
-        <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
+        <source>All fields are &lt;b&gt;optional&lt;/b&gt;. If you just want to create a new address, simply click &lt;b&gt;New Address / Request Payment&lt;/b&gt;.</source>
         <translation>Use este formulario para la solicitud de pagos. Todos los campos son &lt;b&gt;opcionales&lt;/b&gt;</translation>
     </message>
     <message>
