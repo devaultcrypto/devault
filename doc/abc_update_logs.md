@@ -195,7 +195,7 @@
       Merge #11099: [RPC][mempool]: Add savemempool RPC
       Merge #10265: [wallet] [moveonly] Check non-null pindex before potentially referencing
       Merge #12681: Fix ComputeTimeSmart test failure with -DDEBUG_LOCKORDER
-#####  Merge #11744: net: Add missing locks in net.{cpp,h}
+##### Merge #11744: net: Add missing locks in net.{cpp,h}
       Revert removal of code block
       Merge #12206: qa: Sync with validationinterface queue in sync_mempools
       test: refactor: Use absolute include paths for test data files
@@ -204,27 +204,27 @@
       Merge #12283: Fix typos
       Sanitize some wallet serialization
       No need to use OpenSSL malloc/free
-#####  Merge #9539: [net] Avoid initialization to a value that is never read
+##### Merge #9539: [net] Avoid initialization to a value that is never read
       [trivial] Fix recently introduced typos in comments
-#####  Merge #12326: net: initialize socket to avoid closing random fd's
-#####  Merge #11252: [P2P] When clearing addrman clear mapInfo and mapAddr.
-#####  Merge #12448: Interrupt block generation on shutdown request
+##### Merge #12326: net: initialize socket to avoid closing random fd's
+##### Merge #11252: [P2P] When clearing addrman clear mapInfo and mapAddr.
+##### Merge #12448: Interrupt block generation on shutdown request
       Merge #11585: addrman: Add missing lock in Clear() (CAddrMan)
-#####  Merge #10914: Add missing lock in CScheduler::AreThreadsServicingQueue()
-#####  Merge #11831: Always return true if AppInitMain got to the end
-#####  Merge #10057: [init] Deduplicated sigaction() boilerplate
+##### Merge #10914: Add missing lock in CScheduler::AreThreadsServicingQueue()
+##### Merge #11831: Always return true if AppInitMain got to the end
+##### Merge #10057: [init] Deduplicated sigaction() boilerplate
       Init: Remove redundant exit(EXIT_FAILURE) instances and replace with return false
-#####  Ignore macOS daemon() depracation warning
+##### Ignore macOS daemon() depracation warning
       [LINTER] Revive the locale dependent functions linter in arcanist
-#####  Merge #9693: Prevent integer overflow in ReadVarInt.
+##### Merge #9693: Prevent integer overflow in ReadVarInt.
       Backport dev notes on RPC
       blockfilter: Use unordered_set instead of set in blockfilter.
       Disallow using addresses in createmultisig
-#####  Merge #10027: Set to nullptr after delete
-#####  Merge #10029: Fix parameter naming inconsistencies between .h and .cpp files
-#####  Merge #12349: shutdown: fix crash on shutdown with reindex-chainstate
-#####  Merge #12367: Fix two fast-shutdown bugs
-#####  Merge #11238: Add assertions before potential null deferences
+##### Merge #10027: Set to nullptr after delete
+##### Merge #10029: Fix parameter naming inconsistencies between .h and .cpp files
+##### Merge #12349: shutdown: fix crash on shutdown with reindex-chainstate
+##### Merge #12367: Fix two fast-shutdown bugs
+##### Merge #11238: Add assertions before potential null deferences
       Add developer notes about blocking GUI code and src/interfaces/README.md
       Incremented version number to 0.19.6.
       test: Plug memory leaks and stack-use-after-scope
@@ -238,38 +238,40 @@
       blockfilter: Refactor and add tests for BlockFilter construction
       blockfilter: add block filters
 #####  Remove obsolete comment from MANDATORY_SCRIPT_VERIFICATION_FLAGS
-      Use angle bracket in include for qt tests
-      Use angle bracket in include for remaining qt files
-      Use angle bracket in include for qt pages, widgets and views
-      Use angle bracket in include for qt model files
-      Use angle bracket in include for qt dialog files
-      Use angle bracket in include for qt/bitcoin* files
+~~    Use angle bracket in include for qt tests~~
+~~    Use angle bracket in include for remaining qt files~~
+~~    Use angle bracket in include for qt pages, widgets and views~~
+~~    Use angle bracket in include for qt model files~~
+~~    Use angle bracket in include for qt dialog files~~
+~~    Use angle bracket in include for qt/bitcoin* files~~
       Fix typos.
+      
 # 19.5
-      Added some notes for the 0.19.5 release
-      Updated mainnet seeds for 0.19.5 release
-#####  Merge #10569: Fix stopatheight
-      Updated manpages for 0.19.5 release
-      Update chainparams for 0.19.5 release
-#####  Merge #11880: Stop special-casing phashBlock handling in validation for TBV
+
+~~    Added some notes for the 0.19.5 release~~
+~~    Updated mainnet seeds for 0.19.5 release~~
+##### Merge #10569: Fix stopatheight
+~~    Updated manpages for 0.19.5 release~~
+~~    Update chainparams for 0.19.5 release~~
+##### Merge #11880: Stop special-casing phashBlock handling in validation for TBV
       Use WalletBalances struct in Qt
-      Remove direct bitcoin calls from qt/sendcoinsdialog.cpp
-#####  Do not allow users to get keys from keypool without reserving them
-      nits in lcg_tests
-#####  Merge #9517: [refactor] Switched httpserver.cpp to use RAII wrapped libevents.
-      [LINTER] Remove the lint-format-strings.sh script
-      [LINTER] Move the string formatting function list to the python script
-      Remove direct bitcoin access from qt/guiutil.cpp
-      Remove direct bitcoin calls from qt transaction table files
-      Remove direct bitcoin calls from qt/paymentserver.cpp
+##### Remove direct bitcoin calls from qt/sendcoinsdialog.cpp
+##### Do not allow users to get keys from keypool without reserving them
+~~    nits in lcg_tests~~
+##### Merge #9517: [refactor] Switched httpserver.cpp to use RAII wrapped libevents.
+~~    [LINTER] Remove the lint-format-strings.sh script~~
+~~    [LINTER] Move the string formatting function list to the python script~~
+##### Remove direct bitcoin access from qt/guiutil.cpp
+##### Remove direct bitcoin calls from qt transaction table files
+~~    Remove direct bitcoin calls from qt/paymentserver.cpp~~
       [CI] Make gitian builds run on multiple cpus
 #####  Merge #11012: Make sure to clean up mapBlockSource if we've already seen the block
-      Remove direct bitcoin calls from qt/addresstablemodel.cpp
+##### Remove direct bitcoin calls from qt/addresstablemodel.cpp
       [LINTER] Improve lint-format-strings.sh performance
-      Remove direct bitcoin calls from qt/coincontroldialog.cpp
-      Remove most direct bitcoin calls from qt/walletmodel.cpp
-      Remove direct bitcoin calls from qt/optionsdialog.cpp
-      Add function 'IsGravitonEnabled'
+##### Remove direct bitcoin calls from qt/coincontroldialog.cpp
+##### Remove most direct bitcoin calls from qt/walletmodel.cpp
+##### Remove direct bitcoin calls from qt/optionsdialog.cpp
+~~    Add function 'IsGravitonEnabled'~~
 #####  e8c680bd5840d7b055cc618b98242ed6f980d393 serialize: Serialization support for big-endian 32-bit ints.
       [DOC] Add headers inclusion guidelines to the developer notes
       Use angle bracket in include for wallet test
@@ -278,12 +280,12 @@
       Use angle bracket in include for seeder
       Use angle bracket in include for wallet
       [nit] Remove redundant parameter from `CTxMemPool::PrioritiseTransaction`
-      Remove direct bitcoin calls from qt/rpcconsole.cpp
-      Remove direct bitcoin calls from qt/bantablemodel.cpp
-      Remove direct bitcoin calls from qt/peertablemodel.cpp
-      Remove direct bitcoin calls from qt/intro.cpp
-      Remove direct bitcoin calls from qt/clientmodel.cpp
-      Remove direct bitcoin calls from qt/splashscreen.cpp
+##### Remove direct bitcoin calls from qt/rpcconsole.cpp
+##### Remove direct bitcoin calls from qt/bantablemodel.cpp
+##### Remove direct bitcoin calls from qt/peertablemodel.cpp
+##### Remove direct bitcoin calls from qt/intro.cpp
+##### Remove direct bitcoin calls from qt/clientmodel.cpp
+##### Remove direct bitcoin calls from qt/splashscreen.cpp
       [qa] [nit] remove extranous variable in mining_prioritisetransaction.py
 
 # 1.0.0 Release
@@ -311,7 +313,7 @@
       Use angle bracket in include for support
       Use angle bracket in include for script
       Use angle bracket in include for rpc
-      Remove direct bitcoin calls from qt/utilitydialog.cpp
+##### Remove direct bitcoin calls from qt/utilitydialog.cpp
       Use angle bracket in include for primitives
       Use angle bracket in include for policy
       Use angle bracket in include for crypto
@@ -328,9 +330,9 @@
       Log warning message when deprecated network name 'tor' is used (e.g. option onlynet=tor)
       Remove Safe mode
       Use angle bracket in include for net and netbase
-      Remove direct bitcoin calls from qt/bitcoingui.cpp
-      Remove direct bitcoin calls from qt/optionsmodel.cpp
-      Remove direct bitcoin calls from qt/bitcoin.cpp
+##### Remove direct bitcoin calls from qt/bitcoingui.cpp
+##### Remove direct bitcoin calls from qt/optionsmodel.cpp
+##### Remove direct bitcoin calls from qt/bitcoin.cpp
       Merge #12630: Provide useful error message if datadir is not writable.
       Merge #12422: util: Make LockDirectory thread-safe, consistent
       Merge #11904: Add a lock to the wallet directory
