@@ -138,6 +138,9 @@ public:
         vSeeds.emplace_back("seed.exploredvt.com");
         vSeeds.emplace_back("dvtapi.com");
         vSeeds.emplace_back("seed.minedvt.com");
+        vSeeds.emplace_back("seed.devault.online");
+        vSeeds.emplace_back("seed.dvtapi.com");
+        vSeeds.emplace_back("seed.proteanx.com");
 
         nExtCoinType = 339;
         cashaddrPrefix = "devault";
@@ -159,18 +162,14 @@ public:
         checkpointData = {
             .mapCheckpoints = {
                 {0, uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f"
-                                 "30357f3a90")}
+                                 "30357f3a90")},
+                {5000, uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988"
+                                 "db13888907")},
+
             }};
 
-        // Data as of block 
-        chainTxData = ChainTxData{
-            // UNIX timestamp of last known number of transactions.
-            1559660420,
-            // Total number of transactions between genesis and that timestamp
-            // (the tx=... number in the SetBestChain debug.log lines)
-            100,
-            // Estimated number of transactions per second after that timestamp.
-            1};
+        // Data as of block 5046
+        chainTxData = ChainTxData{1560217195, 2013, 1};
     }
 };
 
