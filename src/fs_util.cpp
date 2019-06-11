@@ -138,6 +138,20 @@ bool CheckIfWalletDatExists(bool fNetSpecific) {
   return fs::exists(path);
 }
 
+bool DirIsWritable(const fs::path &directory) {
+    fs::path tmpFile = directory / fs::unique_path();
+
+    FILE *file = fsbridge::fopen(tmpFile, "a");
+    if (!file) {
+        return false;
+    }
+
+    fclose(file);
+    remove(tmpFile);
+
+    return true;
+}
+
 const fs::path &GetDataDir(bool fNetSpecific) {
     LOCK(csPathCached);
 
@@ -431,8 +445,16 @@ void ReleaseDirectoryLocks() {
 bool LockDataDirectory(bool probeOnly) {
     std::string strDataDir = GetDataDir().string();
 
-    // Make sure only a single Bitcoin process is using the data directory.
+    // Make sure only a single process is using the data directory.
     fs::path pathLockFile = GetDataDir() / ".lock";
+
+    if (!DirIsWritable(GetDataDir())) {
+        return InitError(strprintf(
+                                   _("Cannot write to data directory '%s'; check permissions."),
+                                   strDataDir));
+    }
+ 
+    
     // empty lock file; created if it doesn't exist.
     FILE *file = fsbridge::fopen(pathLockFile, "a");
     if (file) {

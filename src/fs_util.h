@@ -29,6 +29,7 @@ void SetupEnvironment();
 bool LockDirectory(const fs::path &directory, const std::string lockfile_name, bool probe_only);
 void ReleaseDirectoryLocks();
 bool LockDataDirectory(bool probeOnly);
+bool DirIsWritable(const fs::path &directory);
 
 // in validation.cpp
 /** Translation to a filesystem path. */
