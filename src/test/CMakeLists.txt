@@ -75,6 +75,7 @@ add_test_to_suite(devault test_devault
 	dstencode_tests.cpp
 	excessiveblock_tests.cpp
 	feerate_tests.cpp
+	file_tests.cpp
 	finalization_tests.cpp
 	getarg_tests.cpp
 	hash_tests.cpp

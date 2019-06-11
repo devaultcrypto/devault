@@ -1183,21 +1183,6 @@ BOOST_AUTO_TEST_CASE(test_ParseFixedPoint) {
     BOOST_CHECK(!ParseFixedPoint("1.", 8, &amount));
 }
 
-BOOST_AUTO_TEST_CASE(test_DirIsWritable) {
-    // Should be able to write to the system tmp dir.
-    fs::path tmpdirname = fs::temp_directory_path();
-    BOOST_CHECK_EQUAL(DirIsWritable(tmpdirname), true);
-
-    // Should not be able to write to a non-existent dir.
-    tmpdirname = fs::temp_directory_path() / fs::unique_path();
-    BOOST_CHECK_EQUAL(DirIsWritable(tmpdirname), false);
-
-    fs::create_directory(tmpdirname);
-    // Should be able to write to it now.
-    BOOST_CHECK_EQUAL(DirIsWritable(tmpdirname), true);
-    fs::remove(tmpdirname);
-}
-
 template <int F, int T>
 static void CheckConvertBits(const std::vector<uint8_t> &in,
                              const std::vector<uint8_t> &expected) {
@@ -1254,5 +1239,27 @@ BOOST_AUTO_TEST_CASE(test_ConvertBits) {
                            {0x00, 0x04, 0x11, 0x14, 0x0a, 0x19, 0x1c, 0x09,
                             0x15, 0x0f, 0x06, 0x1e, 0x1e});
 }
+
+BOOST_AUTO_TEST_CASE(test_ToLower) {
+    BOOST_CHECK_EQUAL(ToLower('@'), '@');
+    BOOST_CHECK_EQUAL(ToLower('A'), 'a');
+    BOOST_CHECK_EQUAL(ToLower('Z'), 'z');
+    BOOST_CHECK_EQUAL(ToLower('['), '[');
+    BOOST_CHECK_EQUAL(ToLower(0), 0);
+    BOOST_CHECK_EQUAL(ToLower(255), 255);
+
+    std::string testVector;
+    Downcase(testVector);
+    BOOST_CHECK_EQUAL(testVector, "");
+
+    testVector = "#HODL";
+    Downcase(testVector);
+    BOOST_CHECK_EQUAL(testVector, "#hodl");
+
+    testVector = "\x00\xfe\xff";
+    Downcase(testVector);
+    BOOST_CHECK_EQUAL(testVector, "\x00\xfe\xff");
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
