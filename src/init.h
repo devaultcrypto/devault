@@ -46,7 +46,7 @@ bool AppInitBasicSetup();
  * @pre Parameters should be parsed and config file should be read,
  * AppInitBasicSetup should have been called.
  */
-bool AppInitParameterInteraction(Config &config, RPCServer &rpcServer);
+bool AppInitParameterInteraction(Config &config);
 /**
  * Initialization sanity checks: ecc init, sanity checks, dir lock.
  * @note This can be done before daemonization.
@@ -70,6 +70,7 @@ bool AppInitLockDataDirectory();
  * AppInitLockDataDirectory should have been called.
  */
 bool AppInitMain(Config &config,
+                 RPCServer &rpcServer,
                  HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                  const SecureString& walletPassphrase,
                  const std::vector<std::string>& words);

@@ -190,7 +190,7 @@ public:
     static bool baseInitialize(Config &config, RPCServer &rpcServer);
 
 public Q_SLOTS:
-    void initialize(Config *config,
+    void initialize(Config *config, RPCServer *rpcServer,
                     HTTPRPCRequestProcessor *httpRPCRequestProcessor);
     void shutdown();
 
@@ -228,7 +228,7 @@ public:
     bool setupPassword(SecureString& password);
 
     /// Request core initialization
-    void requestInitialize(Config &config,
+    void requestInitialize(Config &config, RPCServer &rpcServer,
                            HTTPRPCRequestProcessor &httpRPCRequestProcessor);
     /// Request core shutdown
     void requestShutdown(Config &config);
@@ -247,7 +247,7 @@ public Q_SLOTS:
     void handleRunawayException(const QString &message);
 
 Q_SIGNALS:
-    void requestedInitialize(Config *config,
+    void requestedInitialize(Config *config, RPCServer *rpcServer,
                              HTTPRPCRequestProcessor *httpRPCRequestProcessor);
     void requestedShutdown();
     void stopThread();
@@ -286,7 +286,7 @@ bool DeVault::baseInitialize(Config &config, RPCServer &rpcServer) {
     if (!AppInitBasicSetup()) {
         return false;
     }
-    if (!AppInitParameterInteraction(config, rpcServer)) {
+    if (!AppInitParameterInteraction(config)) {
         return false;
     }
     if (!AppInitSanityChecks()) {
@@ -298,12 +298,11 @@ bool DeVault::baseInitialize(Config &config, RPCServer &rpcServer) {
     return true;
 }
 
-void DeVault::initialize(Config *cfg,
+void DeVault::initialize(Config *config, RPCServer *rpcServer,
                             HTTPRPCRequestProcessor *httpRPCRequestProcessor) {
-    Config &config(*cfg);
     try {
         qDebug() << __func__ << ": Running initialization in thread";
-        bool rv = m_node.appInitMain(config, *httpRPCRequestProcessor, walletPassphrase, words);
+        bool rv = m_node.appInitMain(*config, *rpcServer, *httpRPCRequestProcessor, walletPassphrase, words);
         walletPassphrase.clear();
         Q_EMIT initializeResult(rv);
     } catch (const std::exception &e) {
@@ -444,8 +443,8 @@ void BitcoinApplication::startThread() {
     // crash because initialize() gets executed in another thread at some
     // unspecified time (after) requestedInitialize() is emitted!
     connect(this,
-            SIGNAL(requestedInitialize(Config *, HTTPRPCRequestProcessor *)),
-            executor, SLOT(initialize(Config *, HTTPRPCRequestProcessor *)));
+            SIGNAL(requestedInitialize(Config *, RPCServer *, HTTPRPCRequestProcessor *)),
+            executor, SLOT(initialize(Config *, RPCServer *, HTTPRPCRequestProcessor *)));
 
     connect(this, SIGNAL(requestedShutdown()), executor, SLOT(shutdown()));
     /*  make sure executor object is deleted in its own thread */
@@ -461,13 +460,13 @@ void BitcoinApplication::parameterSetup() {
 }
 
 void BitcoinApplication::requestInitialize(
-    Config &config, HTTPRPCRequestProcessor &httpRPCRequestProcessor) {
+                                           Config &config, RPCServer &rpcServer, HTTPRPCRequestProcessor &httpRPCRequestProcessor) {
     qDebug() << __func__ << ": Requesting initialize";
     startThread();
     // IMPORTANT: config must NOT be a reference to a temporary because below
     // signal may be connected to a slot that will be executed as a queued
     // connection in another thread!
-    Q_EMIT requestedInitialize(&config, &httpRPCRequestProcessor);
+    Q_EMIT requestedInitialize(&config, &rpcServer, &httpRPCRequestProcessor);
 }
 
 void BitcoinApplication::requestShutdown(Config &config) {
@@ -784,11 +783,11 @@ int main(int argc, char *argv[]) {
         // initialization/shutdown thread. This is acceptable because this
         // function only contains steps that are quick to execute, so the GUI
         // thread won't be held up.
-        if (!node->baseInitialize(config, rpcServer)) {
+        if (!node->baseInitialize(config)) {
             // A dialog with detailed error will have been shown by InitError()
             return EXIT_FAILURE;
         }
-        app.requestInitialize(config, httpRPCRequestProcessor);
+        app.requestInitialize(config, rpcServer, httpRPCRequestProcessor);
 #if defined(Q_OS_WIN)
         WinShutdownMonitor::registerShutdownBlockReason(
             QObject::tr("%1 didn't yet exit safely...")
