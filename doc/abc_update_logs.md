@@ -304,7 +304,7 @@
       Use angle bracket in include for zmq
       Use angle bracket in include for test (part 4)
       Nits in abc-high_priority_transaction.py
-      [schnorr] Refactor the signature process in reusable component
+##### [schnorr] Refactor the signature process in reusable component
       Use angle bracket in rpcwallet and rpcdump
       Use angle bracket in include for test (part 3)
       build: Move interfaces/* to libbitcoin_server
@@ -328,12 +328,12 @@
       Remove the boost/algorithm/string/case_conv.hpp dependency
       scripted-diff: Replace NET_TOR with NET_ONION
       Log warning message when deprecated network name 'tor' is used (e.g. option onlynet=tor)
-      Remove Safe mode
+##### Remove Safe mode
       Use angle bracket in include for net and netbase
 ##### Remove direct bitcoin calls from qt/bitcoingui.cpp
 ##### Remove direct bitcoin calls from qt/optionsmodel.cpp
 ##### Remove direct bitcoin calls from qt/bitcoin.cpp
-      Merge #12630: Provide useful error message if datadir is not writable.
+##### Merge #12630: Provide useful error message if datadir is not writable.
       Merge #12422: util: Make LockDirectory thread-safe, consistent
       Merge #11904: Add a lock to the wallet directory
 #####  blockfilter: add GCSFilter class
