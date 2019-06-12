@@ -10,7 +10,6 @@
 #include "dstencode.h"
 #include "init.h"
 #include "merkleblock.h"
-#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "rpcwallet.h"
 #include "script/script.h"
@@ -166,7 +165,6 @@ UniValue abortrescan(const Config &config, const JSONRPCRequest &request) {
                                  HelpExampleRpc("abortrescan", ""));
     }
 
-    ObserveSafeMode();
     if (!pwallet->IsScanning() || pwallet->IsAbortingRescan()) {
         return false;
     }

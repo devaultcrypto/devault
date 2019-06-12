@@ -17,7 +17,6 @@
 #include "net.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
-#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "rpc/tojson.h"
 #include "script/script.h"
@@ -1264,7 +1263,6 @@ static UniValue sendrawtransaction(const Config &config,
             HelpExampleRpc("sendrawtransaction", "\"signedhex\""));
     }
 
-    ObserveSafeMode();
     LOCK(cs_main);
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL});
 

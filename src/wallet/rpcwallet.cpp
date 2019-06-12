@@ -16,7 +16,6 @@
 #include "rpc/mining.h"
 #include "rpc/misc.h"
 #include "rpc/rawtransaction.h"
-#include "rpc/safemode.h"
 #include "rpc/server.h"
 #include "timedata.h"
 #include "reverse_iterator.h"
@@ -531,8 +530,6 @@ static UniValue sendtoaddress(const Config &config,
                                             "outpost\""));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -607,8 +604,6 @@ static UniValue listaddressgroupings(const Config &config,
             HelpExampleCli("listaddressgroupings", "") +
             HelpExampleRpc("listaddressgroupings", ""));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -753,8 +748,6 @@ static UniValue getreceivedbyaddress(const Config &config,
                            "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\", 6"));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -836,7 +829,6 @@ UniValue getreceivedbylabel(const Config &config,
             "\nAs a json rpc call\n" +
             HelpExampleRpc("getreceivedbylabel", "\"tabby\", 6"));
     }
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -935,8 +927,6 @@ static UniValue getbalance(const Config &config,
             HelpExampleRpc("getbalance", "\"*\", 6"));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -977,8 +967,6 @@ static UniValue getunconfirmedbalance(const Config &config,
             "getunconfirmedbalance\n"
             "Returns the server's total unconfirmed balance\n");
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -1032,7 +1020,6 @@ static UniValue movecmd(const Config &config, const JSONRPCRequest &request) {
                 R"("timotei", "akiko", 0.01, 6, "happy birthday!")"));
     }
 
-    ObserveSafeMode();
     LOCK2(cs_main, pwallet->cs_wallet);
 
     std::string strFrom = LabelFromValue(request.params[0]);
@@ -1120,8 +1107,6 @@ static UniValue sendfrom(const Config &config, const JSONRPCRequest &request) {
                            "\"tabby\", \"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\", "
                            "0.01, 6, \"donation\", \"seans outpost\""));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -1250,8 +1235,6 @@ static UniValue sendmany(const Config &config, const JSONRPCRequest &request) {
                            "\\\"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\\\":0.02}\","
                            " 6, \"testing\""));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -1642,8 +1625,6 @@ static UniValue listreceivedbyaddress(const Config &config,
                 "6, true, true, \"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\""));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -1693,8 +1674,6 @@ UniValue listreceivedbylabel(const Config &config,
             HelpExampleCli("listreceivedbylabel", "6 true") +
             HelpExampleRpc("listreceivedbylabel", "6, true, true"));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -1925,8 +1904,6 @@ static UniValue listtransactions(const Config &config,
             HelpExampleRpc("listtransactions", "\"*\", 20, 100"));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -2046,8 +2023,6 @@ static UniValue listaccounts(const Config &config,
             HelpExampleCli("listaccounts", "6") + "\nAs json rpc call\n" +
             HelpExampleRpc("listaccounts", "6"));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -2219,8 +2194,6 @@ static UniValue listsinceblock(const Config &config,
                                              "5ef753ee9a7d38571037cdb1a57f663ad"
                                              "\", 6"));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -2408,8 +2381,6 @@ static UniValue gettransaction(const Config &config,
                                              "\""));
     }
 
-    ObserveSafeMode();
-
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
@@ -2485,8 +2456,6 @@ static UniValue abandontransaction(const Config &config,
                                                  "e2115b9345e16c5cf302fc80e9d5f"
                                                  "bf5d48d\""));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -2940,7 +2909,6 @@ static UniValue listlockunspent(const Config &config,
             "\nAs a json rpc call\n" + HelpExampleRpc("listlockunspent", ""));
     }
 
-    ObserveSafeMode();
     LOCK2(cs_main, pwallet->cs_wallet);
 
     std::vector<COutPoint> vOutpts;
@@ -3045,8 +3013,6 @@ static UniValue getwalletinfo(const Config &config,
             HelpExampleCli("getwalletinfo", "") +
             HelpExampleRpc("getwalletinfo", ""));
     }
-
-    ObserveSafeMode();
 
     // Make sure the results are valid at least up to the most recent block
     // the user could have gotten from another RPC command prior to now
@@ -3266,8 +3232,6 @@ static UniValue listunspent(const Config &config,
                 "6, 9999999, [] , true, { \"minimumAmount\": 0.005 } "));
     }
 
-    ObserveSafeMode();
-
     int nMinDepth = 1;
     if (request.params.size() > 0 && !request.params[0].isNull()) {
         RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
@@ -3481,7 +3445,6 @@ static UniValue fundrawtransaction(const Config &config,
             HelpExampleCli("sendrawtransaction", "\"signedtransactionhex\""));
     }
 
-    ObserveSafeMode();
     RPCTypeCheck(request.params, {UniValue::VSTR});
 
     // Make sure the results are valid at least up to the most recent block

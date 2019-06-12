@@ -184,7 +184,6 @@ BITCOIN_CORE_H = \
   rpc/misc.h \
   rpc/protocol.h \
   rpc/rawtransaction.h \
-  rpc/safemode.h \
   rpc/server.h \
   rpc/tojson.h \
   rpc/register.h \
@@ -285,7 +284,6 @@ libbitcoin_server_a_SOURCES = \
   rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
-  rpc/safemode.cpp \
   rpc/server.cpp \
   script/scriptcache.cpp \
   script/sigcache.cpp \
