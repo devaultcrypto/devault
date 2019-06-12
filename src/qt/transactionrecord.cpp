@@ -46,7 +46,7 @@ TransactionRecord::decomposeTransaction(const interfaces::WalletTx &wtx) {
             isminetype mine = wtx.txout_is_mine[i];
             if (mine) {
                 TransactionRecord sub(txid, nTime);
-                CTxDestination address;
+                //CTxDestination address;
                 sub.idx = i; // vout index
                 sub.credit = txout.nValue;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
@@ -60,7 +60,7 @@ TransactionRecord::decomposeTransaction(const interfaces::WalletTx &wtx) {
                     sub.type = TransactionRecord::RecvFromOther;
                     sub.address = mapValue["from"];
                 }
-                if (wtx.IsCoinBase()) {
+                if (wtx.is_coinbase) {
                   // Generated, but will differentiate, budget,
                   // cold reward and mined (generated) based on number of elements present
                   if (wtx.tx->vout.size() > 2) {
@@ -126,8 +126,8 @@ TransactionRecord::decomposeTransaction(const interfaces::WalletTx &wtx) {
                     continue;
                 }
 
-                if (!boost::get<CNoDestination>(&wtx.txout_address[nOut])) {
-                    // Sent to Bitcoin Address
+                if (IsValidDestination(wtx.txout_address[nOut])) {
+                    // Sent to Address
                     sub.type = TransactionRecord::SendToAddress;
                     sub.address = EncodeDestination(wtx.txout_address[nOut]);
                 } else {

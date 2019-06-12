@@ -25,6 +25,9 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
+#include <chainparams.h>
+#include <interfaces/node.h>
+
 // for BoostPathToQString
 #ifdef NO_BOOST_FILESYSTEM
 #include <fstream>
@@ -52,9 +55,9 @@ using fs::ofstream;
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include "shellapi.h"
-#include "shlobj.h"
-#include "shlwapi.h"
+#include <shellapi.h>
+#include <shlobj.h>
+#include <shlwapi.h>
 #endif
 
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
@@ -287,12 +290,12 @@ QString formatBitcoinURI(const Config &config, const SendCoinsRecipient &info) {
     return ret;
 }
 
-bool isDust(const QString &address, const Amount amount,
+bool isDust(interfaces::Node &node, const QString &address, const Amount amount,
             const CChainParams &chainParams) {
     CTxDestination dest = DecodeDestination(address.toStdString(), chainParams);
     CScript script = GetScriptForDestination(dest);
     CTxOut txOut(amount, script);
-    return txOut.IsDust(dustRelayFee);
+    return txOut.IsDust(node.getDustRelayFee());
 }
 
 QString HtmlEscape(const QString &str, bool fMultiLine) {

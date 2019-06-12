@@ -6,6 +6,8 @@
 
 #include "bitcoinunits.h"
 #include "guiutil.h"
+#include <interfaces/node.h>
+#include <interfaces/wallet.h>
 #include "transactionrecord.h"
 
 #include "consensus/consensus.h"
@@ -19,7 +21,6 @@
 #include "wallet/wallet.h"
 
 #include <chain.h>
-#include <interfaces/node.h>
 
 #include <cstdint>
 #include <string>
@@ -313,7 +314,7 @@ QString TransactionDesc::toHTML(interfaces::Node &node,
     }
 
     //
-    if (wtx.IsCoinBase()) {
+    if (wtx.is_coinbase) {
         quint32 numBlocksToMaturity = COINBASE_MATURITY + 1;
         strHTML +=
             "<br>" +
