@@ -73,17 +73,18 @@ namespace {
         std::string getWarnings(const std::string &type) override {
             return GetWarnings(type);
         }
-        bool baseInitialize(Config &config, RPCServer &rpcServer) override {
+        bool baseInitialize(Config &config) override {
             return AppInitBasicSetup() &&
-                   AppInitParameterInteraction(config, rpcServer) &&
+                   AppInitParameterInteraction(config) &&
                    AppInitSanityChecks() && AppInitLockDataDirectory();
         }
         bool
         appInitMain(Config &config,
+                    RPCServer &rpcServer,
                     HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                     const SecureString& walletPassphrase,
                     const std::vector<std::string>& words) override {
-            return AppInitMain(config, httpRPCRequestProcessor, walletPassphrase, words);
+            return AppInitMain(config, rpcServer, httpRPCRequestProcessor, walletPassphrase, words);
         }
         void appShutdown() override {
             Interrupt();

@@ -71,10 +71,11 @@ public:
     virtual std::string getWarnings(const std::string &type) = 0;
 
     //! Initialize app dependencies.
-    virtual bool baseInitialize(Config &config, RPCServer &rpcServer) = 0;
+    virtual bool baseInitialize(Config &config) = 0;
 
     //! Start node.
     virtual bool appInitMain(Config &config,
+                             RPCServer &rpcServer,
                              HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                              const SecureString& walletPassphrase,
                              const std::vector<std::string>& words) = 0;
