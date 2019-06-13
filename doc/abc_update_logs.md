@@ -105,7 +105,7 @@
       Dead code removal
       [LINTER] Set the rules for the phpdoc comments
       Add benchmark for AES
-      Merge #14085: index: Fix for indexers skipping genesis block.
+##### Merge #14085: index: Fix for indexers skipping genesis block.
 ##### Fix lock reference in miner.h
       Merge #14409: utils and libraries: Make 'blocksdir' always net specific
       create net-specific data directory early in init process
@@ -114,7 +114,7 @@
       bitcoin-tx: Remove unused for loop
       Remove redundant code in MutateTxSign(CMutableTransaction&, const std::string&)
       Kill MAX_FREE_TRANSACTION_CREATE_SIZE
-      [txindex] transaction Hash -> TxId
+##### [txindex] transaction Hash -> TxId
       Explicitly call out updating makeseeds.py after major releases
       Directly use CMutableTransaction more often in txvaidationcache_tests.cpp
 ##### mempool: Fix missing locking in CTxMemPool::check(…) and CTxMemPool::setSanityCheck(…)
