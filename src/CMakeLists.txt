@@ -43,6 +43,7 @@ set(CMAKE_REQUIRED_QUIET true)
 
 if (LINK_STATIC_LIBS)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib")
+  add_linker_flag(-static-libstdc++)
 endif()
 
 # Cmake uses the CMAKE_BUILD_TYPE variable to select the build configuration.
