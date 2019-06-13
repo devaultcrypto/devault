@@ -99,12 +99,15 @@ public:
     friend constexpr Amount operator*(const int a, const Amount b) {
         return Amount(a * b.amount);
     }
+    constexpr Amount operator*(const Amount b) const {
+        return Amount(amount * b.amount);
+    }
 
     /**
      * Division
      */
-    constexpr int64_t operator/(const Amount b) const {
-        return amount / b.amount;
+    constexpr Amount operator/(const Amount b) const {
+        return Amount(amount / b.amount);
     }
     constexpr Amount operator/(const int64_t b) const {
         return Amount(amount / b);

@@ -156,7 +156,7 @@ Amount AmountFromValue(const UniValue &value) {
 UniValue ValueFromAmount(const Amount amount) {
     bool sign = amount < Amount::zero();
     Amount n_abs(sign ? -amount : amount);
-    int64_t quotient = n_abs / COIN;
+    int64_t quotient = (n_abs / COIN).toInt();
     int64_t remainder = (n_abs % COIN).toInt();
     // Now since we are using less decimal places
     // divide the remainder to appropriate precision
