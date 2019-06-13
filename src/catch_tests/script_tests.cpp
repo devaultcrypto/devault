@@ -125,7 +125,7 @@ static CMutableTransaction BuildCreditingTransaction(const CScript &scriptPubKey
   return txCredit;
 }
 
-static CMutableTransaction BuildSpendingTransaction(const CScript &scriptSig, const CMutableTransaction &txCredit) {
+static CMutableTransaction BuildSpendingTransaction(const CScript &scriptSig, const CTransaction &txCredit) {
   CMutableTransaction txSpend;
   txSpend.nVersion = 1;
   txSpend.nLockTime = 0;
@@ -146,7 +146,7 @@ static void DoTest(const CScript &scriptPubKey, const CScript &scriptSig, uint32
   if (flags & SCRIPT_VERIFY_CLEANSTACK) { flags |= SCRIPT_VERIFY_P2SH; }
 
   ScriptError err;
-  CMutableTransaction txCredit = BuildCreditingTransaction(scriptPubKey, nValue);
+  const CTransaction txCredit{BuildCreditingTransaction(scriptPubKey, nValue)};
   CMutableTransaction tx = BuildSpendingTransaction(scriptSig, txCredit);
   CMutableTransaction tx2 = tx;
   BOOST_CHECK_MESSAGE(VerifyScript(scriptSig, scriptPubKey, flags,
@@ -1434,7 +1434,6 @@ TEST_CASE("script_build") {
   for (TestBuilder &test : tests) {
     test.Test();
     std::string str = JSONPrettyPrint(test.GetJSON());
-    //      std::cout << "test = " << str << "\n";
 #ifndef UPDATE_JSON_TESTS
     if (tests_set.count(str) == 0) {
       BOOST_CHECK_MESSAGE(false, "Missing auto script_valid test: " + test.GetComment());
@@ -1529,7 +1528,7 @@ TEST_CASE("script_PushData") {
   BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
 }
 
-CScript sign_multisig(CScript scriptPubKey, std::vector<CKey> keys, CTransaction transaction) {
+CScript sign_multisig(const CScript &scriptPubKey, const std::vector<CKey> &keys, const CTransaction &transaction) {
   uint256 hash = SignatureHash(scriptPubKey, transaction, 0, SigHashType(), Amount::zero());
 
   CScript result;
@@ -1550,7 +1549,7 @@ CScript sign_multisig(CScript scriptPubKey, std::vector<CKey> keys, CTransaction
   return result;
 }
 
-CScript sign_multisig(CScript scriptPubKey, const CKey &key, CTransaction transaction) {
+CScript sign_multisig(const CScript &scriptPubKey, const CKey &key, const CTransaction &transaction) {
   std::vector<CKey> keys;
   keys.push_back(key);
   return sign_multisig(scriptPubKey, keys, transaction);
@@ -1568,7 +1567,7 @@ TEST_CASE("script_CHECKMULTISIG12") {
   scriptPubKey12 << OP_1 << ToByteVector(key1.GetPubKey()) << ToByteVector(key2.GetPubKey()) << OP_2
                  << OP_CHECKMULTISIG;
 
-  CMutableTransaction txFrom12 = BuildCreditingTransaction(scriptPubKey12, Amount::zero());
+  const CTransaction txFrom12{BuildCreditingTransaction(scriptPubKey12, Amount::zero())};
   CMutableTransaction txTo12 = BuildSpendingTransaction(CScript(), txFrom12);
 
   CScript goodsig1 = sign_multisig(scriptPubKey12, key1, CTransaction(txTo12));
@@ -1604,14 +1603,12 @@ TEST_CASE("script_CHECKMULTISIG23") {
   scriptPubKey23 << OP_2 << ToByteVector(key1.GetPubKey()) << ToByteVector(key2.GetPubKey())
                  << ToByteVector(key3.GetPubKey()) << OP_3 << OP_CHECKMULTISIG;
 
-  CMutableTransaction txFrom23 = BuildCreditingTransaction(scriptPubKey23, Amount::zero());
+  const CTransaction txFrom23{BuildCreditingTransaction(scriptPubKey23, Amount::zero())};
   CMutableTransaction mutableTxTo23 = BuildSpendingTransaction(CScript(), txFrom23);
 
-  // after it has been set up, mutableTxTo23 does not change in this test,
-  // so we can convert it to readonly transaction and use
-  // TransactionSignatureChecker
-  // instead of MutableTransactionSignatureChecker
-
+  // after it has been set up, mutableTxTo23 does not change in this test, so
+  // we can convert it to readonly transaction and use
+  // TransactionSignatureChecker instead of MutableTransactionSignatureChecker
   const CTransaction txTo23(mutableTxTo23);
 
   std::vector<CKey> keys;
@@ -1702,17 +1699,9 @@ TEST_CASE("script_combineSigs") {
 
   CMutableTransaction txFrom =
       BuildCreditingTransaction(GetScriptForDestination(keys[0].GetPubKey().GetID()), Amount::zero());
-  CMutableTransaction txTo = BuildSpendingTransaction(CScript(), txFrom);
+  CMutableTransaction txTo = BuildSpendingTransaction(CScript(), CTransaction(txFrom));
   CScript &scriptPubKey = txFrom.vout[0].scriptPubKey;
   CScript &scriptSig = txTo.vin[0].scriptSig;
-
-  // Although it looks like CMutableTransaction is not modified after it’s
-  // been set up (it is not passed as parameter to any non-const function),
-  // it is actually modified when new value is assigned to scriptPubKey,
-  // which points to mutableTxFrom.vout[0].scriptPubKey. Therefore we can
-  // not use single instance of CTransaction in this test.
-  // CTransaction creates a copy of CMutableTransaction and is not modified
-  // when scriptPubKey is assigned to.
 
   SignatureData empty;
   SignatureData combined =
