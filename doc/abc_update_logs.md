@@ -141,42 +141,42 @@
       Merge #9980: Fix mem access violation merkleblock
       Update disclosure policy standards
       Added missing release notes
-      [rpc] Move tojson.h into blockchain.h
+##### [rpc] Move tojson.h into blockchain.h
       Updated seed list for 0.19.6 release
       update release notes
-      Merge #9804: Fixes subscript 0 (&var[0]) where should use (var.data()) instead.
+##### Merge #9804: Fixes subscript 0 (&var[0]) where should use (var.data()) instead.
       [tests] Remove unused and duplicate imports
-      [CMAKE] Fix the prl conversion script library path issue
+##### [CMAKE] Fix the prl conversion script library path issue
       Merge #10045: [trivial] Fix typos in comments
       build: Remove -I for everything but project root
       [tests] remove txdb.h dependency from test_bitcoin.h
-      Merge #11351: Refactor: Modernize disallowed copy constructors/assignment
-      Merge #11155: Trivial: Documentation fixes for CVectorWriter ctors
-      Merge #12415: Interrupt loading thread after shutdown request
-      [CMAKE] Fix the prl conversion script linking against lib_NOTFOUND
-      [CMAKE] Determine the Qt library directory from a public variable
+##### Merge #11351: Refactor: Modernize disallowed copy constructors/assignment
+##### Merge #11155: Trivial: Documentation fixes for CVectorWriter ctors
+##### Merge #12415: Interrupt loading thread after shutdown request
+##### [CMAKE] Fix the prl conversion script linking against lib_NOTFOUND
+##### [CMAKE] Determine the Qt library directory from a public variable
       [CMAKE] Add an option to statically link libstdc++
-      [CMAKE] Add an option to reduce exports
-      [backport PR12653] Allow to optional specify the directory for the blocks storage
+##### [CMAKE] Add an option to reduce exports
+##### [backport PR12653] Allow to optional specify the directory for the blocks storage
       Merge #10115: Avoid reading the old hd master key during wallet encryption
       Merge #10258: Fixed typo in documentation for merkleblock.h
       Revert "Merge #10126: Compensate for memory peak at flush time"
       Merge #10126: Compensate for memory peak at flush time
       refactor: Include obj/build.h instead of build.h
-      Merge #11281: Avoid permanent cs_main/cs_wallet lock during RescanFromTime
-      Merge #10489: build: silence gcc7's implicit fallthrough warning
-      Merge #10154: init: Remove redundant logging code
-      Merge #10128: Speed Up CuckooCache tests
-      Merge #12842: Prevent concurrent savemempool
-      Merge #11599: scripted-diff: Small locking rename
-      Merge #10351: removed unused code in INV message
-      Merge #10180: [trivial] Fix typos (tempoarily → temporarily, inadvertantly → inadvertently)
-      Merge #11578: net: Add missing lock in ProcessHeadersMessage(...)
+##### Merge #11281: Avoid permanent cs_main/cs_wallet lock during RescanFromTime
+##### Merge #10489: build: silence gcc7's implicit fallthrough warning
+##### Merge #10154: init: Remove redundant logging code
+##### Merge #10128: Speed Up CuckooCache tests
+##### Merge #12842: Prevent concurrent savemempool
+##### Merge #11599: scripted-diff: Small locking rename
+##### Merge #10351: removed unused code in INV message
+##### Merge #10180: [trivial] Fix typos (tempoarily → temporarily, inadvertantly → inadvertently)
+##### Merge #11578: net: Add missing lock in ProcessHeadersMessage(...)
       Merge #10309: Trivial: remove extra character from comment
-      Merge #9794: Minor update to qrencode package builder
-      Support serialization as another type without casting
-      Support deserializing into temporaries
-      Merge READWRITEMANY into READWRITE
+##### Merge #9794: Minor update to qrencode package builder
+##### Support serialization as another type without casting
+##### Support deserializing into temporaries
+##### Merge READWRITEMANY into READWRITE
 ##### [mining] Rename several CBlockTemplateEntry members for clarity
 ##### Merge #9333: Document CWalletTx::mapValue entries and remove erase of nonexistent "version" entry.
 ## ?      Merge #9724: Qt/Intro: Add explanation of IBD process
