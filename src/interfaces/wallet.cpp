@@ -397,7 +397,7 @@ namespace {
         handleTransactionChanged(TransactionChangedFn fn) override {
             return MakeHandler(m_wallet.NotifyTransactionChanged.connect(
                 [fn, this](CWallet *, const TxId &txid, ChangeType status) {
-                    fn(txid, status);
+                    fn(txid, status); (void)this;
                 }));
         }
         std::unique_ptr<Handler>
