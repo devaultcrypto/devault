@@ -99,28 +99,28 @@
       Simplify semantics of ChainStateFlushed callback
       scripted-diff: Rename SetBestChain callback ChainStateFlushed
       [index] Create new TxIndex class.
-      Remove config argument from blockToJSON
-      Merge #10095: refactor: Move GetDifficulty out of `rpc/server.h`
-      Consensus: Minimal way to move dust out of consensus
-      Merge #12564: [arith_uint256] Avoid unnecessary this-copy using prefix operator
-      Merge #12182: Remove useless string initializations
-      Merge #11877: Improve createrawtransaction functional tests
-      Merge #12278: Add special error for genesis coinbase to getrawtransaction
-      [CMAKE] Add support for libqrencode
+##### Remove config argument from blockToJSON
+##### Merge #10095: refactor: Move GetDifficulty out of `rpc/server.h`
+##### Consensus: Minimal way to move dust out of consensus
+##### Merge #12564: [arith_uint256] Avoid unnecessary this-copy using prefix operator
+##### Merge #12182: Remove useless string initializations
+##### Merge #11877: Improve createrawtransaction functional tests
+##### Merge #12278: Add special error for genesis coinbase to getrawtransaction
+##### [CMAKE] Add support for libqrencode
       [CI] Run functional tests both pre and post graviton
       [CMAKE] Add an option to enable the glibc compatibility features
-      [CMAKE] Add missing files to build bitcoin-qt on OSX
-      [CMAKE] Fix bitcoind cross build for OSX
-      [CMAKE] Cleanup the OSX platform file
+##### [CMAKE] Add missing files to build bitcoin-qt on OSX
+##### [CMAKE] Fix bitcoind cross build for OSX
+##### [CMAKE] Cleanup the OSX platform file
       Use angle brackets in windows resource files
-      Separate version info into bitcoin-version.h from bitcoin-config.h
-      [tests] Remove unused variables
+##### Separate version info into bitcoin-version.h from bitcoin-config.h
+##### [tests] Remove unused variables
       Make release-process.md IBD instruction more precise
-      Clarify comment for SCRIPT_ENABLE_CHECKDATASIG
-      Remove redundant items from STANDARD_SCRIPT_VERIFY_FLAGS
-      Have gArgs handle printing help
-      [docs] Reformat -help output for help2man
-      Fix braces in warnings.cpp
+##### Clarify comment for SCRIPT_ENABLE_CHECKDATASIG
+##### Remove redundant items from STANDARD_SCRIPT_VERIFY_FLAGS
+##### Have gArgs handle printing help
+##### [docs] Reformat -help output for help2man
+##### Fix braces in warnings.cpp
       Bump version number to 0.19.7
       wallet: Refactor g_wallet_init_interface to const reference
       wallet: Make WalletInitInterface members const
