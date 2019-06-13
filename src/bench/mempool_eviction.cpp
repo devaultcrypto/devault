@@ -9,7 +9,7 @@
 #include <list>
 #include <vector>
 
-static void AddTx(const CTransaction &tx, const Amount &nFee,
+static void AddTx(const CTransactionRef &tx, const Amount &nFee,
                   CTxMemPool &pool) {
     int64_t nTime = 0;
     double dPriority = 10.0;
@@ -17,10 +17,10 @@ static void AddTx(const CTransaction &tx, const Amount &nFee,
     bool spendsCoinbase = false;
     unsigned int sigOpCost = 4;
     LockPoints lp;
-    pool.addUnchecked(tx.GetId(),
-                      CTxMemPoolEntry(MakeTransactionRef(tx), nFee, nTime,
-                                      dPriority, nHeight, tx.GetValueOut(),
-                                      spendsCoinbase, sigOpCost, lp));
+    pool.addUnchecked(tx->GetId(),
+                      CTxMemPoolEntry(tx, nFee, nTime, dPriority, nHeight,
+                                      tx->GetValueOut(), spendsCoinbase,
+                                      sigOpCost, lp));
 }
 
 // Right now this is only testing eviction performance in an extremely small
@@ -99,24 +99,25 @@ static void MempoolEviction(benchmark::State &state) {
 
     CTxMemPool pool;
 
-    CTransaction t1(tx1);
-    CTransaction t2(tx2);
-    CTransaction t3(tx3);
-    CTransaction t4(tx4);
-    CTransaction t5(tx5);
-    CTransaction t6(tx6);
-    CTransaction t7(tx1);
+    // Create transaction references outside the "hot loop"
+    const CTransactionRef tx1_r{MakeTransactionRef(tx1)};
+    const CTransactionRef tx2_r{MakeTransactionRef(tx2)};
+    const CTransactionRef tx3_r{MakeTransactionRef(tx3)};
+    const CTransactionRef tx4_r{MakeTransactionRef(tx4)};
+    const CTransactionRef tx5_r{MakeTransactionRef(tx5)};
+    const CTransactionRef tx6_r{MakeTransactionRef(tx6)};
+    const CTransactionRef tx7_r{MakeTransactionRef(tx7)};
 
     while (state.KeepRunning()) {
-        AddTx(t1, 10000 * Amount::min_amount(), pool);
-        AddTx(t2, 5000 * Amount::min_amount(), pool);
-        AddTx(t3, 20000 * Amount::min_amount(), pool);
-        AddTx(t4, 7000 * Amount::min_amount(), pool);
-        AddTx(t5, 1000 * Amount::min_amount(), pool);
-        AddTx(t6, 1100 * Amount::min_amount(), pool);
-        AddTx(t7, 9000 * Amount::min_amount(), pool);
+      AddTx(tx1,r, 10000 * Amount::min_amount(), pool);
+      AddTx(tx2,r, 5000 * Amount::min_amount(), pool);
+      AddTx(tx3,r, 20000 * Amount::min_amount(), pool);
+      AddTx(tx4,r, 7000 * Amount::min_amount(), pool);
+      AddTx(tx5,r, 1000 * Amount::min_amount(), pool);
+      AddTx(tx6,r, 1100 * Amount::min_amount(), pool);
+      AddTx(tx7,r, 9000 * Amount::min_amount(), pool);
         pool.TrimToSize(pool.DynamicMemoryUsage() * 3 / 4);
-        pool.TrimToSize(t1.GetTotalSize());
+        pool.TrimToSize(GetVirtualTransactionSize(*tx1_r));
     }
 }
 
