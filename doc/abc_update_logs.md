@@ -177,13 +177,13 @@
       Support serialization as another type without casting
       Support deserializing into temporaries
       Merge READWRITEMANY into READWRITE
-      [mining] Rename several CBlockTemplateEntry members for clarity
-      Merge #9333: Document CWalletTx::mapValue entries and remove erase of nonexistent "version" entry.
-      Merge #9724: Qt/Intro: Add explanation of IBD process
-      Merge #9916: Fix msvc compiler error C4146 (minus operator applied to unsigned type)
-      Merge #13080: mempool: Add compile time checking for ::mempool.cs runtime locking assertions
-      Make functions in rpc/blockchain.cpp static.
-#####  Merge #9906: Disallow copy constructor CReserveKeys
+##### [mining] Rename several CBlockTemplateEntry members for clarity
+##### Merge #9333: Document CWalletTx::mapValue entries and remove erase of nonexistent "version" entry.
+## ?      Merge #9724: Qt/Intro: Add explanation of IBD process
+##### Merge #9916: Fix msvc compiler error C4146 (minus operator applied to unsigned type)
+##### Merge #13080: mempool: Add compile time checking for ::mempool.cs runtime locking assertions
+##### Make functions in rpc/blockchain.cpp static.
+##### Merge #9906: Disallow copy constructor CReserveKeys
 ##### Merge #9555: [test] Avoid reading a potentially uninitialized variable in tx_invalid-test (transaction_tests.cpp)
       Merge #14511: doc: Remove explicit storage requirement from README.md
 ##### Merge #9962: [trivial] Fix typo in rpc/protocol.h
