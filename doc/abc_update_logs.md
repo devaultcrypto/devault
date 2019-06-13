@@ -225,17 +225,17 @@
 ##### Merge #12349: shutdown: fix crash on shutdown with reindex-chainstate
 ##### Merge #12367: Fix two fast-shutdown bugs
 ##### Merge #11238: Add assertions before potential null deferences
-      Add developer notes about blocking GUI code and src/interfaces/README.md
+##### Add developer notes about blocking GUI code and src/interfaces/README.md
       Incremented version number to 0.19.6.
-      test: Plug memory leaks and stack-use-after-scope
-      Fix a memory leak in DoS_tests
+##### test: Plug memory leaks and stack-use-after-scope
+##### Fix a memory leak in DoS_tests
       [CMAKE] Make RelWithDebInfo the default CMake configuration
 #####  [db] Migration for txindex data to new, separate database.
 #####  [db] Create separate database for txindex.
-      Add additional unit tests for segwit recovery
-      fix out-of-bounds memory write in key_tests
-      blockfilter: Remove sharp edge (uninitialized m_filter_type) when using the compiler-generated constructor for BlockFilter
-      blockfilter: Refactor and add tests for BlockFilter construction
+~~      Add additional unit tests for segwit recovery~~
+##### fix out-of-bounds memory write in key_tests
+##### blockfilter: Remove sharp edge (uninitialized m_filter_type) when using the compiler-generated constructor for BlockFilter
+##### blockfilter: Refactor and add tests for BlockFilter construction
 ##### blockfilter: add block filters
 #####  Remove obsolete comment from MANDATORY_SCRIPT_VERIFICATION_FLAGS
 ~~    Use angle bracket in include for qt tests~~
