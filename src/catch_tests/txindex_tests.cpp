@@ -8,7 +8,9 @@
 #include <util.h>
 #include <utiltime.h>
 #include <validation.h>
-
+#include <chain.h>
+#include <chainparams.h>
+#include <config.h>
 #include "catch_unit.h"
 
 //BOOST_AUTO_TEST_SUITE(txindex_tests)
@@ -22,7 +24,7 @@ TEST_CASE("txindex_initial_sync") {
 
   // Transaction should not be found in the index before it is started.
   for (const auto &txn : setup.coinbaseTxns) {
-    BOOST_CHECK(!txindex.FindTx(txn.GetHash(), block_hash, tx_disk));
+    BOOST_CHECK(!txindex.FindTx(txn.GetId(), block_hash, tx_disk));
   }
 
   // BlockUntilSyncedToCurrentChain should return false before txindex is
@@ -39,9 +41,15 @@ TEST_CASE("txindex_initial_sync") {
     MilliSleep(100);
   }
 
+  // Check that txindex excludes genesis block transactions.
+  const CBlock &genesis_block = GetConfig().GetChainParams().GenesisBlock();
+  for (const auto &txn : genesis_block.vtx) {
+    BOOST_CHECK(!txindex.FindTx(txn->GetId(), block_hash, tx_disk));
+  }
+
   // Check that txindex has all txs that were in the chain before it started.
   for (const auto &txn : setup.coinbaseTxns) {
-    if (!txindex.FindTx(txn.GetHash(), block_hash, tx_disk)) {
+    if (!txindex.FindTx(txn.GetId(), block_hash, tx_disk)) {
       BOOST_ERROR("FindTx failed");
     } else if (tx_disk->GetHash() != txn.GetHash()) {
       BOOST_ERROR("Read incorrect tx");
@@ -56,7 +64,7 @@ TEST_CASE("txindex_initial_sync") {
     const CTransaction &txn = *block.vtx[0];
 
     BOOST_CHECK(txindex.BlockUntilSyncedToCurrentChain());
-    if (!txindex.FindTx(txn.GetHash(), block_hash, tx_disk)) {
+    if (!txindex.FindTx(txn.GetId(), block_hash, tx_disk)) {
       BOOST_ERROR("FindTx failed");
     } else if (tx_disk->GetHash() != txn.GetHash()) {
       BOOST_ERROR("Read incorrect tx");
