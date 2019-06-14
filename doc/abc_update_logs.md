@@ -71,34 +71,34 @@
       Merge #12151: rpc: Remove cs_main lock from blockToJSON and blockheaderToJSON
       Merge #13527: policy: Remove promiscuousmempoolflags
       Merge #11742: rpc: Add testmempoolaccept
-      Refactor walletdb_tests to use the wallet test fixture
+##### Refactor walletdb_tests to use the wallet test fixture
       Fix for mismatched extern definition in wallet test
-      Fix uninitialized atomic variables
+##### Fix uninitialized atomic variables
       [CMAKE] Move-only: refactor qt/CMakeLists.txt
-      Remove BIP9 dead code in util.py
-      Add CHECKDATASIG to standard flags.
-      re-fix feature_cltv.py
-      Remove AcceptToMemoryPoolWithTime default args
-      Merge #11872: [rpc] createrawtransaction: Accept sorted outputs
-      Merge #10503: Use REJECT_DUPLICATE for already known and conflicted txn
-      [tests] bind functional test nodes to 127.0.0.1
-      Avoid calling add_nodes multiple times in functional tests
-      qa: Cache only chain and wallet for regtest datadir
-      [qa] Delete cookie file before starting node
-      Remove sleep in feature_config_args
+##### Remove BIP9 dead code in util.py
+##### Add CHECKDATASIG to standard flags.
+##### re-fix feature_cltv.py
+##### Remove AcceptToMemoryPoolWithTime default args
+##### Merge #11872: [rpc] createrawtransaction: Accept sorted outputs
+##### Merge #10503: Use REJECT_DUPLICATE for already known and conflicted txn
+##### [tests] bind functional test nodes to 127.0.0.1
+##### Avoid calling add_nodes multiple times in functional tests
+##### qa: Cache only chain and wallet for regtest datadir
+##### [qa] Delete cookie file before starting node
+##### Remove sleep in feature_config_args
       Consensus: Minimal way to move dust out of consensus
-      Make tests independent of whether CHECKDATASIG is included in mandatory or standard flags
-      Merge #13522: [tests] Fix p2p_sendheaders race
-      Merge #13350: [tests] Add logging to provide anchor points when debugging p2p_sendheaders
-      Merge #13192: [tests] Fixed intermittent failure in p2p_sendheaders.py.
-      Merge #12849: Tests: Add logging in loops in p2p_sendhears.py
-      Merge #11707: [tests] Fix sendheaders
+##### Make tests independent of whether CHECKDATASIG is included in mandatory or standard flags
+##### Merge #13522: [tests] Fix p2p_sendheaders race
+##### Merge #13350: [tests] Add logging to provide anchor points when debugging p2p_sendheaders
+##### Merge #13192: [tests] Fixed intermittent failure in p2p_sendheaders.py.
+##### Merge #12849: Tests: Add logging in loops in p2p_sendhears.py
+##### Merge #11707: [tests] Fix sendheaders
       Merge #14364: doc: Clarify -blocksdir usage
       New -includeconf argument for including external configuration files
-      Fix undefined behavior in avalanche.cpp
-      Simplify semantics of ChainStateFlushed callback
-      scripted-diff: Rename SetBestChain callback ChainStateFlushed
-      [index] Create new TxIndex class.
+##### Fix undefined behavior in avalanche.cpp
+##### Simplify semantics of ChainStateFlushed callback
+##### scripted-diff: Rename SetBestChain callback ChainStateFlushed
+##### [index] Create new TxIndex class.
 ##### Remove config argument from blockToJSON
 ##### Merge #10095: refactor: Move GetDifficulty out of `rpc/server.h`
 ##### Consensus: Minimal way to move dust out of consensus
