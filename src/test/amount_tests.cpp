@@ -11,7 +11,9 @@
 
 BOOST_FIXTURE_TEST_SUITE(amount_tests, BasicTestingSetup)
 
-static void CheckAmounts(int64_t aval, int64_t bval) {
+static void CheckAmounts(int64_t a_val, int64_t b_val) {
+    int64_t aval = a_val * Amount::min_amount().toInt();
+    int64_t bval = b_val * Amount::min_amount().toInt();
     Amount a(aval), b(bval);
 
     // Equality
@@ -89,7 +91,7 @@ BOOST_AUTO_TEST_CASE(AmountTests) {
 
     for (int64_t i : values) {
         for (int64_t j : values) {
-            CheckAmounts(i*MIN_COIN, j*MIN_COIN);
+            CheckAmounts(i, j);
         }
     }
 
@@ -102,15 +104,15 @@ BOOST_AUTO_TEST_CASE(AmountTests) {
 }
 
 BOOST_AUTO_TEST_CASE(MoneyRangeTest) {
-    BOOST_CHECK_EQUAL(MoneyRange(Amount(-MIN_COIN)), false);
+    BOOST_CHECK_EQUAL(MoneyRange(Amount(-Amount::min_amount())), false);
     BOOST_CHECK_EQUAL(MoneyRange(MAX_MONEY + Amount(1)), false);
     BOOST_CHECK_EQUAL(MoneyRange(Amount(1)), true);
 }
 
 BOOST_AUTO_TEST_CASE(BinaryOperatorTest) {
     CFeeRate a, b;
-    a = CFeeRate(1*MINCOIN);
-    b = CFeeRate(2*MINCOIN);
+    a = CFeeRate(1*Amount::min_amount());
+    b = CFeeRate(2*Amount::min_amount());
     BOOST_CHECK(a < b);
     BOOST_CHECK(b > a);
     BOOST_CHECK(a == a);
@@ -125,7 +127,7 @@ BOOST_AUTO_TEST_CASE(BinaryOperatorTest) {
 
 BOOST_AUTO_TEST_CASE(ToStringTest) {
     CFeeRate feeRate;
-    feeRate = CFeeRate(MINCOIN);
+    feeRate = CFeeRate(Amount::min_amount());
     BOOST_CHECK_EQUAL(feeRate.ToString(), "0.001 DVT/kB");
 }
 

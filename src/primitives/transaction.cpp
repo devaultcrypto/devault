@@ -30,9 +30,7 @@ std::string CTxIn::ToString() const {
 }
 
 std::string CTxOut::ToString() const {
-    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s)", (nValue / COIN).toInt(),
-                     (nValue % COIN).toInt(),
-                     HexStr(scriptPubKey).substr(0, 30));
+    return strprintf("CTxOut(nValue=%s, scriptPubKey=%s)", nValue.ToString(), HexStr(scriptPubKey).substr(0, 30));
 }
 
 CMutableTransaction::CMutableTransaction()

@@ -18,7 +18,7 @@ Amount CalculateReward(const Consensus::Params &consensusParams, int Height, int
   Amount reward_per_block = balance / nRewardRatePerBlockReciprocal;
   Amount reward = HeightDiff * reward_per_block;
   // Quantize reward to 1/100th of a coin
-  reward = (100 * reward / COIN) * (COIN / 100);
+  reward = (100 * reward).toIntCoins() * (COIN / 100);
 
   // double debug_reward_div = OverRewardRatePerBlock * HeightDiff;
   if (reward < nMinReward) reward = Amount();

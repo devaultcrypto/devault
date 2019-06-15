@@ -75,14 +75,14 @@ BOOST_AUTO_TEST_CASE(blockfilter_basic_test) {
     excluded_scripts[1] << std::vector<uint8_t>(5, 33) << OP_CHECKSIG;
 
     CMutableTransaction tx_1;
-    tx_1.vout.emplace_back(100 * SATOSHI, included_scripts[0]);
-    tx_1.vout.emplace_back(200 * SATOSHI, included_scripts[1]);
+    tx_1.vout.emplace_back(100 * Amount::min_amount(), included_scripts[0]);
+    tx_1.vout.emplace_back(200 * Amount::min_amount(), included_scripts[1]);
 
     CMutableTransaction tx_2;
-    tx_2.vout.emplace_back(300 * SATOSHI, included_scripts[2]);
-    tx_2.vout.emplace_back(0 * SATOSHI, excluded_scripts[0]);
+    tx_2.vout.emplace_back(300 * Amount::min_amount(), included_scripts[2]);
+    tx_2.vout.emplace_back(0 * Amount::min_amount(), excluded_scripts[0]);
     // Script is empty
-    tx_2.vout.emplace_back(400 * SATOSHI, excluded_scripts[2]);
+    tx_2.vout.emplace_back(400 * Amount::min_amount(), excluded_scripts[2]);
 
     CBlock block;
     block.vtx.push_back(MakeTransactionRef(tx_1));
@@ -91,11 +91,11 @@ BOOST_AUTO_TEST_CASE(blockfilter_basic_test) {
     CBlockUndo block_undo;
     block_undo.vtxundo.emplace_back();
     block_undo.vtxundo.back().vprevout.emplace_back(
-        CTxOut(500 * SATOSHI, included_scripts[3]), 1000, true);
+        CTxOut(500 * Amount::min_amount(), included_scripts[3]), 1000, true);
     block_undo.vtxundo.back().vprevout.emplace_back(
-        CTxOut(600 * SATOSHI, included_scripts[4]), 10000, false);
+        CTxOut(600 * Amount::min_amount(), included_scripts[4]), 10000, false);
     block_undo.vtxundo.back().vprevout.emplace_back(
-        CTxOut(700 * SATOSHI, excluded_scripts[2]), 100000, false);
+        CTxOut(700 * Amount::min_amount(), excluded_scripts[2]), 100000, false);
 
     BlockFilter block_filter(BlockFilterType::BASIC, block, block_undo);
     const GCSFilter &filter = block_filter.GetFilter();
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(blockfilters_json_test) {
         for (size_t ii = 0; ii < prev_scripts.size(); ii++) {
             std::vector<uint8_t> raw_script =
                 ParseHex(prev_scripts[ii].get_str());
-            CTxOut txout(0 * SATOSHI,
+            CTxOut txout(0 * Amount::min_amount(),
                          CScript(raw_script.begin(), raw_script.end()));
             tx_undo.vprevout.emplace_back(txout, 0, false);
         }
