@@ -287,7 +287,7 @@ void CreateCreditAndSpend(const CKeyStore &keystore, const CScript &outscript, C
   outputm.vin[0].prevout = COutPoint();
   outputm.vin[0].scriptSig = CScript();
   outputm.vout.resize(1);
-  outputm.vout[0].nValue = Amount(MIN_COIN);
+  outputm.vout[0].nValue = Amount::min_amount();
   outputm.vout[0].scriptPubKey = outscript;
   CDataStream ssout(SER_NETWORK, PROTOCOL_VERSION);
   ssout << outputm;
@@ -302,7 +302,7 @@ void CreateCreditAndSpend(const CKeyStore &keystore, const CScript &outscript, C
   inputm.vin.resize(1);
   inputm.vin[0].prevout = COutPoint(output->GetId(), 0);
   inputm.vout.resize(1);
-  inputm.vout[0].nValue = Amount(MIN_COIN);
+  inputm.vout[0].nValue = Amount::min_amount();
   inputm.vout[0].scriptPubKey = CScript();
   bool ret = SignSignature(keystore, *output, inputm, 0, SigHashType().withForkId());
   BOOST_CHECK_EQUAL(ret, success);
@@ -376,12 +376,12 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
     mtx.vin[i].prevout = outpoint;
     mtx.vin[i].scriptSig = CScript();
 
-    mtx.vout.emplace_back(Amount(1000 * MIN_COIN), CScript() << OP_1);
+    mtx.vout.emplace_back(1000 * Amount::min_amount(), CScript() << OP_1);
   }
 
   // sign all inputs
   for (size_t i = 0; i < mtx.vin.size(); i++) {
-    bool hashSigned = SignSignature(keystore, scriptPubKey, mtx, i, Amount(1000 * MIN_COIN), sigHashes.at(i % sigHashes.size()));
+    bool hashSigned = SignSignature(keystore, scriptPubKey, mtx, i, 1000 * Amount::min_amount(), sigHashes.at(i % sigHashes.size()));
     BOOST_CHECK_MESSAGE(hashSigned, "Failed to sign test transaction");
   }
 
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(test_big_transaction) {
   std::vector<Coin> coins;
   for (size_t i = 0; i < mtx.vin.size(); i++) {
     CTxOut out;
-    out.nValue = Amount(1000 * MIN_COIN);
+    out.nValue = (1000 * Amount::min_amount());
     out.scriptPubKey = scriptPubKey;
     coins.emplace_back(std::move(out), 1, false);
   }

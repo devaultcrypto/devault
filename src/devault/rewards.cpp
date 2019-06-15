@@ -68,7 +68,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
         COutPoint outpoint(TxId, n); // Unique
         if (balance >= nMinBalance) {
           LogPrint(BCLog::COLD, "CR: %s : Writing to Rewards db, addr %s, Value of %d at Height %d\n", __func__,
-                   GetAddrFromTxOut(out), balance / COIN, nHeight);
+                   GetAddrFromTxOut(out), balance.toIntCoins(), nHeight);
           CRewardValue e(out, nHeight, nHeight, nHeight);
           rewardAdditions.emplace_back(outpoint, e);
         }
@@ -90,7 +90,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
           CRewardValue coinr; // Don't need this expect for log/checking
           if (!pdb->GetReward(outpoint, coinr)) {
               LogPrint(BCLog::COLD, "CR: %s : Problem getting coin from Rewards db at Height %d, value %d\n", __func__,
-                       nHeight, coinr.GetValue() / COIN);
+                       nHeight, coinr.GetValue().toIntCoins());
           }
           cachedInactives.insert(std::make_pair(outpoint, nHeight));
           rewardErasures.emplace_back(outpoint, coinr);
@@ -390,7 +390,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
       if (!valid) LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n", GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
       return valid;
     } else {
-      LogPrintf("ERROR: Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward/COIN);
+      LogPrintf("ERROR: Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward.ToString());
       // Coinbase has Reward but FindReward can't find it
       return false;
     }
@@ -465,7 +465,7 @@ void CColdRewards::DumpOrderedRewards(const std::string& filename) {
         file << "OldHeight " << val.GetOldHeight() << " ";
         file << "Addr: " << GetAddrFromTxOut(val.GetTxOut()) << " ";
         file << "n " << key.GetN() << " ";
-        file << "Value " << val.GetValue()/COIN << "\n";
+        file << "Value " << val.GetValue().ToString() << "\n";
         pcursor->Next();
     }
   

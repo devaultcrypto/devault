@@ -822,7 +822,7 @@ static UniValue getrewards(const Config &config, const JSONRPCRequest &request) 
     }
 
     for (auto& val : rewards) {
-        file << "Value " << val.GetValue()/COIN << " ";
+        file << "Value " << val.GetValue().ToString() << " ";
         file << "active "<<  val.IsActive() << " ";
         file << "creationHeight " << val.GetCreationHeight() << " ";
         file << "OldHeight " << val.GetOldHeight() << " ";

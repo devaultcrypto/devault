@@ -1,11 +1,13 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017-2018 The Bitcoin developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
 
+#include "tinyformat.h"
 #include "serialize.h"
 
 #include <cstdlib>
@@ -13,29 +15,28 @@
 #include <string>
 #include <type_traits>
 
-const int64_t MIN_COIN = 100000;
-const int64_t COIN_PRECISION = 100000000;
-
-constexpr int64_t QuantizeAmount(int64_t am) {
-  int64_t residual = (am % MIN_COIN);
-  int64_t amount = (am - residual);
-  if (residual > 0) amount += MIN_COIN;
-  return amount;
-}
 
 struct Amount {
 private:
+    static constexpr int64_t MIN_AMOUNT = 100000;
     int64_t amount;
   
+    inline constexpr int64_t QuantizeAmount(int64_t am) {
+        int64_t residual = (am % MIN_AMOUNT);
+        int64_t a = (am - residual);
+        if (residual > 0) a += MIN_AMOUNT;
+        return a;
+    }
 
 public:
+    static constexpr int64_t COIN_PRECISION = 100000000;
     explicit constexpr Amount(int64_t _amount) : amount(QuantizeAmount(_amount)) {}
     constexpr Amount() : amount(0) {}
     constexpr Amount(const Amount &_camount) : amount(QuantizeAmount(_camount.amount)) {}
 
+    static constexpr const int64_t AMOUNT_DECIMALS = 3; // 8 - NUMBER OF ZEROS IN MIN_AMOUNT
     static constexpr Amount zero() { return Amount(0); }
-    static constexpr Amount satoshi() { return Amount(1); }
-    static constexpr Amount min_coin() { return Amount(MIN_COIN); }
+    static constexpr Amount min_amount() { return Amount(MIN_AMOUNT); }
 
     /**
      * Implement standard operators
@@ -106,9 +107,6 @@ public:
     /**
      * Division
      */
-    constexpr Amount operator/(const Amount b) const {
-        return Amount(amount / b.amount);
-    }
     constexpr Amount operator/(const int64_t b) const {
         return Amount(amount / b);
     }
@@ -142,8 +140,14 @@ public:
         return stream << ca.amount;
     }
 
-    std::string ToString() const;
     int64_t toInt() const { return amount; }
+    int64_t toIntCoins() const { return amount/COIN_PRECISION; }
+
+    std::string ToString() const {
+        // Note: not using straight sprintf here because we do NOT want localized number formatting.
+        return strprintf("%d.%03d", toIntCoins(), (amount % COIN_PRECISION)/MIN_AMOUNT);
+    }
+
 
     // serialization support
     ADD_SERIALIZE_METHODS;
@@ -154,12 +158,10 @@ public:
     }
 };
 
-static constexpr Amount SATOSHI = Amount::satoshi();
-static constexpr Amount MINCOIN = Amount::min_coin();
-static constexpr Amount COIN(COIN_PRECISION);
-static constexpr Amount CENT(COIN_PRECISION/100);
+static constexpr Amount COIN(Amount::COIN_PRECISION);
+static constexpr Amount CENT(Amount::COIN_PRECISION/100);
 
-extern const std::string CURRENCY_UNIT;
+static const std::string CURRENCY_UNIT = "DVT";
 
 /**
  * No amount larger than this (in satoshi) is valid.

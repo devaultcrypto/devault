@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity) {
     CScript script;
     uint256 hash;
     TestMemPoolEntryHelper entry;
-    entry.nFee = 11 * MINCOIN;
+    entry.nFee = 11 * Amount::min_amount();
     entry.dPriority = 111.0;
     entry.nHeight = 11;
 

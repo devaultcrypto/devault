@@ -101,6 +101,7 @@ add_test_to_suite(devault test_devault
 	raii_event_tests.cpp
 	random_tests.cpp
 	rcu_tests.cpp
+  reward_tests.cpp
 	reverselock_tests.cpp
 	rpc_tests.cpp
 	rpc_server_tests.cpp

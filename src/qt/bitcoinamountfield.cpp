@@ -24,7 +24,7 @@ class AmountSpinBox : public QAbstractSpinBox {
 public:
     explicit AmountSpinBox(QWidget *parent)
         : QAbstractSpinBox(parent), currentUnit(BitcoinUnits::DVT),
-          singleStep(10*MINCOIN) {
+          singleStep(10*Amount::min_amount()) {
         setAlignment(Qt::AlignRight);
 
         connect(lineEdit(), SIGNAL(textEdited(QString)), this,

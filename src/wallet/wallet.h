@@ -43,9 +43,9 @@ static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
 static const Amount DEFAULT_TRANSACTION_FEE = Amount::zero();
 //! -fallbackfee default
-static const Amount DEFAULT_FALLBACK_FEE(2*MINCOIN);
+static const Amount DEFAULT_FALLBACK_FEE(2*Amount::min_amount());
 //! minimum recommended increment for BIP 125 replacement txs
-static const Amount WALLET_INCREMENTAL_RELAY_FEE(MINCOIN);
+static const Amount WALLET_INCREMENTAL_RELAY_FEE(Amount::min_amount());
 //! target minimum change amount
 static const Amount MIN_CHANGE = CENT;
 //! final minimum change amount after paying for fees
@@ -813,7 +813,7 @@ public:
      */
     void AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe = true,
                         const CCoinControl *coinControl = nullptr,
-                        const Amount nMinimumAmount = MINCOIN,
+                        const Amount nMinimumAmount = Amount::min_amount(),
                         const Amount nMaximumAmount = MAX_MONEY,
                         const Amount nMinimumSumAmount = MAX_MONEY,
                         const uint64_t nMaximumCount = 0,

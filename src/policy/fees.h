@@ -16,7 +16,7 @@
 class CFeeRate;
 
 // Minimum and Maximum values for tracking feerates
-static constexpr Amount MIN_FEERATE(MINCOIN);
+static constexpr Amount MIN_FEERATE(Amount::min_amount());
 static const Amount MAX_FEERATE(int64_t(1e7));
 
 // We have to lump transactions into buckets based on feerate, but we want to be

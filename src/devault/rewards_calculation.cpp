@@ -15,12 +15,12 @@ Amount CalculateReward(const Consensus::Params &consensusParams, int Height, int
   int64_t percent = consensusParams.nPerCentPerYear[year_number];
   int64_t nRewardRatePerBlockReciprocal = (100*consensusParams.nBlocksPerYear)/percent;
   Amount nMinReward = consensusParams.nMinReward;
-  Amount reward_per_block = balance / nRewardRatePerBlockReciprocal;
-  Amount reward = HeightDiff * reward_per_block;
-  // Quantize reward to 1/100th of a coin
-  reward = (100 * reward / COIN) * (COIN / 100);
-
-  // double debug_reward_div = OverRewardRatePerBlock * HeightDiff;
+  int64_t balance_int = balance.toInt();
+  int64_t reward_per_block = (balance_int / nRewardRatePerBlockReciprocal);
+  // multiply by 100 so when quantized by divide here resolution will be down to 1% of COIN
+  int64_t reward_x100 = (int64_t(100) * HeightDiff * reward_per_block) / Amount::COIN_PRECISION;
+  // Now compensate for multiply by 100 and divide by COIN
+  Amount reward = reward_x100 * (COIN / 100);
   if (reward < nMinReward) reward = Amount();
   return reward;
 }
