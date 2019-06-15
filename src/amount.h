@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "tinyformat.h"
 #include "serialize.h"
 
 #include <cstdlib>
@@ -139,9 +140,14 @@ public:
         return stream << ca.amount;
     }
 
-    std::string ToString() const;
     int64_t toInt() const { return amount; }
     int64_t toIntCoins() const { return amount/COIN_PRECISION; }
+
+    std::string Amount::ToString() const {
+        // Note: not using straight sprintf here because we do NOT want localized number formatting.
+        return strprintf("%d.%03d", this->toIntCoins(), (*this % COIN).toInt()/Amount::MIN_AMOUNT);
+    }
+
 
     // serialization support
     ADD_SERIALIZE_METHODS;
