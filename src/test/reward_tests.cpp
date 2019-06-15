@@ -3,7 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 
-#include "chain.h"
 #include "chainparams.h"
 #include "config.h"
 
@@ -18,10 +17,10 @@ BOOST_FIXTURE_TEST_SUITE(reward_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(RewardTests) {
     DummyConfig config(CBaseChainParams::MAIN);
-    std::array<int64_t, 8> months = {{1,2,6,12,18,24,48, 60}};
-    std::array<int64_t, 8> balances = {{4000, 4000, 5000, 1000, 5000, 10000, 50000, 99999999}};
+    std::array<int64_t, 8> months = {{1,2,6,6,6,24,48, 60}};
+    std::array<int64_t, 8> balances = {{4000, 40000, 400000, 4000000, 5000, 10000, 50000, 99999999}};
     std::array<int64_t, 8> min_balances = {{1,1,1,1,1,1,1,1}};
-    std::array<double, 8> ref_amount = {{65.74,0,65.74,0,65.74,65.74,635.53, 624976.32}};
+    std::array<int64_t, 8> ref_amount = {{65,0,65,0,65,65,635, 624976}};
 
     const Consensus::Params &params = config.GetChainParams().GetConsensus();
 
@@ -34,11 +33,8 @@ BOOST_AUTO_TEST_CASE(RewardTests) {
       Amount r(ref_amount[i]*Amount::COIN_PRECISION);
 
       Amount v(CalculateReward(params, height, height_diff, bal));
-      
-      std::cout << " bal = " << bal.ToString() << " for " << months[i] << " : " << v.ToString() << "\n";
-      
-
-     // BOOST_CHECK_EQUAL(CalculateReward(params, height_diff, height_diff, bal), r);
+      std::cout << " bal = " << bal.ToString() << " for " << months[i] << "m : " << v.ToString() << "\n";
+      // BOOST_CHECK_EQUAL(CalculateReward(params, height_diff, height_diff, bal), r);
     }
 }
 
