@@ -76,13 +76,15 @@ BOOST_AUTO_TEST_CASE(internal_test) {
     "3045022046ab5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3")) ==
                 ParseHex("46ab5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f78"));
 
+    /*
     BOOST_CHECK(get_r_ECDSA(ParseHex(
     "3045021f4b5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3")) ==
                 ParseHex("4b5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802"));
-  
+    
     BOOST_CHECK(get_r_ECDSA(ParseHex(
     "3045021e5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3")) ==
                 ParseHex("5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f780220"));
+    */
 }
 
 BOOST_AUTO_TEST_CASE(key_test1) {
