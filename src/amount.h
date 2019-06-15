@@ -143,9 +143,9 @@ public:
     int64_t toInt() const { return amount; }
     int64_t toIntCoins() const { return amount/COIN_PRECISION; }
 
-    std::string Amount::ToString() const {
+    std::string ToString() const {
         // Note: not using straight sprintf here because we do NOT want localized number formatting.
-        return strprintf("%d.%03d", this->toIntCoins(), (*this % COIN).toInt()/Amount::MIN_AMOUNT);
+        return strprintf("%d.%03d", toIntCoins(), (amount % COIN_PRECISION)/MIN_AMOUNT);
     }
 
 
