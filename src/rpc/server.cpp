@@ -141,7 +141,7 @@ Amount AmountFromValue(const UniValue &value) {
     }
 
     int64_t n;
-    if (!ParseFixedPoint(value.getValStr(), 3, &n)) {
+    if (!ParseFixedPoint(value.getValStr(), Amount::AMOUNT_DECIMALS, &n)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
     }
 
@@ -154,15 +154,9 @@ Amount AmountFromValue(const UniValue &value) {
 }
 
 UniValue ValueFromAmount(const Amount amount) {
-    bool sign = amount < Amount::zero();
-    Amount n_abs(sign ? -amount : amount);
-    int64_t quotient = (n_abs / COIN).toInt();
-    int64_t remainder = (n_abs % COIN).toInt();
-    // Now since we are using less decimal places
-    // divide the remainder to appropriate precision
-    remainder /= MIN_COIN;
-    // also change format below manually from 08d to 03d  
-    return UniValue(UniValue::VNUM, strprintf("%s%d.%03d", sign ? "-" : "", quotient, remainder));
+    // also change format below manually from 08d to 03d
+    return UniValue(UniValue::VNUM, amount.ToString());
+//    return UniValue(UniValue::VNUM, strprintf("%s%d.%03d", sign ? "-" : "", quotient, remainder));
 }
 
 uint256 ParseHashV(const UniValue &v, const std::string& strName) {

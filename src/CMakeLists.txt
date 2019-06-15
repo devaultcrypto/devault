@@ -365,7 +365,6 @@ target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_
 # Because nothing says this is different from util than "common"
 add_library(common
   ${HEADERS}
-	amount.cpp
 	cashaddr.cpp
 	cashaddrenc.cpp
 	chainparams.cpp

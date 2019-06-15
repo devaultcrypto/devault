@@ -556,12 +556,12 @@ BOOST_AUTO_TEST_CASE(coin_serialization) {
 }
 
 static const COutPoint OUTPOINT;
-static const Amount PRUNED(-1*MIN_COIN);
-static const Amount ABSENT(-2*MIN_COIN);
-static const Amount FAIL(-3*MIN_COIN);
-static const Amount VALUE1(100*MIN_COIN);
-static const Amount VALUE2(200*MIN_COIN);
-static const Amount VALUE3(300*MIN_COIN);
+static const Amount PRUNED(-1*Amount::min_amount());
+static const Amount ABSENT(-2*Amount::min_amount());
+static const Amount FAIL(-3*Amount::min_amount());
+static const Amount VALUE1(100*Amount::min_amount());
+static const Amount VALUE2(200*Amount::min_amount());
+static const Amount VALUE3(300*Amount::min_amount());
 static const char DIRTY = CCoinsCacheEntry::DIRTY;
 static const char FRESH = CCoinsCacheEntry::FRESH;
 static const char NO_ENTRY = -1;

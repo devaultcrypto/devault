@@ -83,9 +83,9 @@ int BitcoinUnits::display_decimals(int unit) {
 int BitcoinUnits::scale_decimals(int unit) {
   switch (unit) {
     case DVT:
-      return MIN_COIN;
+      return Amount::min_amount().toInt();
     default:
-      return COIN_PRECISION/(1000*MIN_COIN); // 1000 since mDVT
+      return COIN.toInt()/(1000*Amount::min_amount().toInt()); // 1000 since mDVT
   }
 }
 

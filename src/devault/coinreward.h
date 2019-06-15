@@ -88,7 +88,7 @@ struct CRewardValue {
   std::string ToString() {
         return strprintf("CR(Addr : %s, Value %d, Creation : %d, Height : %d, OldHeight %d, PayCount % d, Active : %d)", 
                          GetAddrFromTxOut(GetTxOut()),
-                         GetValue() / COIN,
+                         GetValue().ToString(),
                          GetCreationHeight(),
                          GetHeight(),
                          GetOldHeight(),

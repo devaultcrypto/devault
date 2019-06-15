@@ -1986,7 +1986,7 @@ BOOST_AUTO_TEST_CASE(script_CHECKMULTISIG12) {
         MutableTransactionSignatureChecker(&txTo12, 0, txFrom12.vout[0].nValue),
         &err));
     BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
-    txTo12.vout[0].nValue = Amount(2 * MIN_COIN);
+    txTo12.vout[0].nValue = Amount(2 * Amount::min_amount());
     BOOST_CHECK(!VerifyScript(
         goodsig1, scriptPubKey12, gFlags,
         MutableTransactionSignatureChecker(&txTo12, 0, txFrom12.vout[0].nValue),

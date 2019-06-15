@@ -84,7 +84,7 @@ Amount CBudget::CalculateSuperBlockRewards(int nHeight, const Amount &nOverallRe
   // Overall Reward should be an integer - so divide by COIN and then re-mulitply
   Amount sumRewards;
   for (int i = 0; i < BudgetSize; i++) {
-    nPayment[i] = (((Payouts[i].percent * nBlocksPerPeriod * nOverallReward) / (ScaleFactor *  COIN)) * COIN);
+    nPayment[i] = (((Payouts[i].percent * nBlocksPerPeriod * nOverallReward.toInt()) / (ScaleFactor *  COIN.toInt())) * COIN);
     sumRewards += nPayment[i];
   }
   return sumRewards;

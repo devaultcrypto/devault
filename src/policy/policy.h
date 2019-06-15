@@ -30,7 +30,7 @@ static const uint64_t DEFAULT_BLOCK_PRIORITY_PERCENTAGE = 5;
  * Default for -blockmintxfee, which sets the minimum feerate for a transaction
  * in blocks created by mining code.
  */
-static const Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(MINCOIN);
+static const Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(Amount::min_amount());
 /**
  * The maximum size for transactions we're willing to relay/mine.
  */
@@ -62,7 +62,7 @@ static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 360;
  * Default for -incrementalrelayfee, which sets the minimum feerate increase for
  * mempool limiting or BIP 125 replacement.
  */
-static const CFeeRate MEMPOOL_FULL_FEE_INCREMENT(MINCOIN);
+static const CFeeRate MEMPOOL_FULL_FEE_INCREMENT(Amount::min_amount());
 /**
  * Default for -bytespersigop .
  */
@@ -74,7 +74,7 @@ static const unsigned int DEFAULT_BYTES_PER_SIGOP = 20;
  * only increase the dust limit after prior releases were already not creating
  * outputs below the new threshold.
  */
-static const Amount DUST_RELAY_TX_FEE(MINCOIN);
+static const Amount DUST_RELAY_TX_FEE(Amount::min_amount());
 
 /**
  * Standard script verification flags that standard transactions will comply
