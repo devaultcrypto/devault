@@ -51,15 +51,13 @@ static void CheckAmounts(int64_t a_val, int64_t b_val) {
     BOOST_CHECK_EQUAL(aval * b, bval * a);
     BOOST_CHECK_EQUAL(aval * b, Amount(aval * bval));
 
-    // Division
+    // Division by int
     if (b != Amount::zero()) {
-        BOOST_CHECK_EQUAL(a / b, aval / bval);
-        BOOST_CHECK_EQUAL(a / bval, Amount(a / b));
+        BOOST_CHECK_EQUAL(a / bval, Amount(aval / bval));
     }
 
     if (a != Amount::zero()) {
-        BOOST_CHECK_EQUAL(b / a, bval / aval);
-        BOOST_CHECK_EQUAL(b / aval, Amount(b / a));
+        BOOST_CHECK_EQUAL(b / aval, Amount(bval / aval));
     }
 
     // Modulus
