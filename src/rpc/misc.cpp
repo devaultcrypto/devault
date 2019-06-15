@@ -886,9 +886,13 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
             }
 
             delta.push_back(Pair("reward candidates older than this one",nNumOlder));
-            // Use minBlocks unless there are more older candidates than that
+
+            // Use nMinBlocks unless there are more older candidates that need to get paid out
             nNumOlder = std::max(nNumOlder,nMinBlocks);
-            std::time_t nexttime = cftime + nNumOlder*nPowTargetSpacing; // 
+            int payoutHeight = nMyHeight+nNumOlder;
+            int blocksNeeded = payoutHeight - chainActive.Height();
+            // Use blocksNeeded unless there are more older candidates han that
+            std::time_t nexttime = cftime + blocksNeeded*nPowTargetSpacing; // 
             delta.push_back(Pair("estimated next reward date", FormatISO8601Date(nexttime)));
             
             result.push_back(delta);
