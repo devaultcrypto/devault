@@ -28,6 +28,7 @@
 #include <string.h> // for memcpy
 #include <univalue.h>
 
+#include <cmath>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
