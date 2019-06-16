@@ -854,8 +854,11 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
         return NullUniValue;
     }
 
-    int nMinBlocks = config.GetChainParams().GetConsensus().nMinRewardBlocks;
-    int nPowTargetSpacing = config.GetChainParams().GetConsensus().nPowTargetSpacing;
+    const int nMinRewardInCoins = config.GetChainParams().GetConsensus().nMinReward.toIntCoins();
+    const int nMinBlocks = config.GetChainParams().GetConsensus().nMinRewardBlocks;
+    const int nBlocksPerYear = config.GetChainParams().GetConsensus().nBlocksPerYear;
+    const int nPowTargetSpacing = config.GetChainParams().GetConsensus().nPowTargetSpacing;
+    const int nMaxYearIndex = config.GetChainParams().GetConsensus().nPerCentPerYear.size()-1;
 
     UniValue result(UniValue::VARR);
     std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
@@ -865,18 +868,24 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
     result.push_back(total);
 
     std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    // Minimum balances for 1 month payout given current reward % of 15,12,9,7,5
+    std::vector<double> nMinBalance;
+    for (auto pc :  config.GetChainParams().GetConsensus().nPerCentPerYear) {
+        double val = nMinRewardInCoins * 12 * 100.0 / pc;
+        nMinBalance.push_back(val);
+    }
     
     for (auto& val : rewards) {
         isminetype mine = ::IsMine(*pwallet, val.scriptPubKey());
         if (mine == ISMINE_SPENDABLE && val.IsActive()) {
-            uint32_t nMyHeight = val.GetCreationHeight();
+            const uint32_t nMyHeight = val.GetHeight();
             UniValue delta(UniValue::VOBJ);
             delta.push_back(Pair("Addr",GetAddrFromTxOut(val.GetTxOut())));
             delta.push_back(Pair("Value",ValueFromAmount(val.GetValue())));
             delta.push_back(Pair("created at Height",(int)val.GetCreationHeight()));
             if (val.GetPayCount() > 0) {
                 delta.push_back(Pair("Last paid at Height",(int)val.GetHeight()));
-                nMyHeight = val.GetHeight();
             }
             delta.push_back(Pair("paid times",(int)val.GetPayCount()));
 
@@ -888,11 +897,21 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
             delta.push_back(Pair("reward candidates older than this one",nNumOlder));
 
             // Use nMinBlocks unless there are more older candidates that need to get paid out
-            nNumOlder = std::max(nNumOlder,nMinBlocks);
+            int nYear = nMyHeight/nBlocksPerYear;
+            if (nYear > nMaxYearIndex) nYear = nMaxYearIndex;
+            // Check if balance is below minimum required for 1 month payout,
+            // if it is, then extend the needed number of blocks for payout
+            int neededBlocks = nMinBlocks;
+            if (val.GetValue().toIntCoins() < (int)nMinBalance[nYear]) {
+                neededBlocks *= std::ceil(nMinBalance[nYear]/val.GetValue().toIntCoins());
+            }
+            // In event of very large number of older payouts that need to be made,
+            // extend by even more blocks
+            nNumOlder = std::max(nNumOlder,neededBlocks);
             int payoutHeight = nMyHeight+nNumOlder;
             int blocksNeeded = payoutHeight - chainActive.Height();
-            // Use blocksNeeded unless there are more older candidates han that
-            std::time_t nexttime = cftime + blocksNeeded*nPowTargetSpacing; // 
+            // Use blocksNeeded to estimate date
+            std::time_t nexttime = cftime + blocksNeeded*nPowTargetSpacing;
             delta.push_back(Pair("estimated next reward date", FormatISO8601Date(nexttime)));
             
             result.push_back(delta);
