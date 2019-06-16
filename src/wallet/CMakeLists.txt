@@ -15,6 +15,8 @@ source_group("WalletHeaders" FILES ${WALLET_HEADERS})
 add_library(wallet
   ${WALLET_HEADERS}
 	../interfaces/wallet.cpp
+  ../script/ismine.cpp
+  ../rpc/rpcutil.cpp
 	crypter.cpp
 	db.cpp
 	fees.cpp
