@@ -447,7 +447,6 @@ add_library(server
 	rpc/command.cpp
 	rpc/jsonrpcrequest.cpp
 	rpc/mining.cpp
-	rpc/misc.cpp
 	rpc/net.cpp
 	rpc/rawtransaction.cpp
 	rpc/server.cpp

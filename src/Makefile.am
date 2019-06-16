@@ -181,7 +181,6 @@ BITCOIN_CORE_H = \
   rpc/command.h \
   rpc/jsonrpcrequest.h \
   rpc/mining.h \
-  rpc/misc.h \
   rpc/protocol.h \
   rpc/rawtransaction.h \
   rpc/server.h \
@@ -226,6 +225,7 @@ BITCOIN_CORE_H = \
   wallet/fees.h \
   wallet/mnemonic.h \
   wallet/rpcwallet.h \
+  wallet/misc.h \
   wallet/wallet.h \
   wallet/walletdb.h \
   wallet/walletutil.h \
@@ -282,7 +282,6 @@ libbitcoin_server_a_SOURCES = \
   rpc/command.cpp \
   rpc/jsonrpcrequest.cpp \
   rpc/mining.cpp \
-  rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
   rpc/server.cpp \
@@ -327,6 +326,7 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/mnemonic.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
+  wallet/misc.cpp \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
   wallet/walletutil.cpp \

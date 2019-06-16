@@ -3,7 +3,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "rpc/misc.h"
 #include "rpc/rpcutil.h"
 #include "cashaddrenc.h"
 #include "clientversion.h"
@@ -23,6 +22,7 @@
 #include "devault/coinreward.h"
 #include "devault/rewards.h"
 
+#include "wallet/misc.h"
 #ifdef ENABLE_WALLET
 #include "wallet/rpcwallet.h"
 #include "wallet/wallet.h"
