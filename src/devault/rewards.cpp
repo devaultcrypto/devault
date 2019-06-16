@@ -236,7 +236,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
         HeightDiff = Height - nHeight;
         if (HeightDiff > nMinBlocks) { 
           balance = the_reward.GetValue();
-          Amount reward = CalculateReward(consensusParams, Height, HeightDiff, balance);
+          // change 1.0.2 : use nHeight as basis for % reward instead of current Height
+          Amount reward = CalculateReward(consensusParams, nHeight, HeightDiff, balance);
           //LogPrint(BCLog::COLD, "CR: %s : Candidate : %s, Reward %d\n", __func__, coinreward.ToString(), reward);
           // Check reward amount to make sure it's > min
           if (reward >= nMinReward) {
