@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(key_test1) {
     BOOST_CHECK(key2.VerifyPubKey(pubkey2));
     BOOST_CHECK(!key2.VerifyPubKey(pubkey3));
 
+#ifdef DEBUG_THIS    
     const Config &config = GetConfig();
     const CChainParams &chainParams = config.GetChainParams();
-#ifdef DEBUG_THIS    
 
     BOOST_CHECK(DecodeDestination(addr1, chainParams) ==  CTxDestination(pubkey1.GetID()));
     BOOST_CHECK(DecodeDestination(addr2, chainParams) ==  CTxDestination(pubkey2.GetID()));
