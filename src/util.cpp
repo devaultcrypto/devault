@@ -3,16 +3,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "util.h"
+#include <util.h>
 
-#include "chainparamsbase.h"
-#include "fs_util.h"
-#include "random.h"
-#include "serialize.h"
-#include "utilstrencodings.h"
-#include "utiltime.h"
+#include <chainparamsbase.h>
+#include <fs_util.h>
+#include <random.h>
+#include <serialize.h>
+#include <utilstrencodings.h>
+#include <utiltime.h>
 
 #ifndef NO_BOOST_FILESYSTEM
 #include <boost/filesystem/fstream.hpp>

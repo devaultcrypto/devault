@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "noncopyable.h"
+#include <noncopyable.h>
 #include <boost/range/iterator.hpp>
 
 #ifdef HAVE_STD_SHARED_MUTEX

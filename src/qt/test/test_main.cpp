@@ -2,21 +2,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "compat/setenv.h"
+#include <compat/setenv.h>
 
-#include "bitcoinaddressvalidatortests.h"
-#include "chainparams.h"
-#include "compattests.h"
-#include "guiutiltests.h"
-#include "key.h"
-#include "rpcnestedtests.h"
-#include "uritests.h"
-#include "util.h"
+#include <bitcoinaddressvalidatortests.h>
+#include <chainparams.h>
+#include <compattests.h>
+#include <guiutiltests.h>
+#include <key.h>
+#include <rpcnestedtests.h>
+#include <uritests.h>
+#include <util.h>
 
 #ifdef ENABLE_WALLET
-#include "wallettests.h"
+#include <wallettests.h>
 #endif
 
 #include <QApplication>

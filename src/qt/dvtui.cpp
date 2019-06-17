@@ -1,4 +1,4 @@
-#include "dvtui.h"
+#include <dvtui.h>
 
 qreal DVTUI::getDevicePixelRatio() {
     qreal devicePixelRatio = 1.0;

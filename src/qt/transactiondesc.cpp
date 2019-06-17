@@ -2,23 +2,23 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "transactiondesc.h"
+#include <transactiondesc.h>
 
-#include "bitcoinunits.h"
-#include "guiutil.h"
+#include <bitcoinunits.h>
+#include <guiutil.h>
 #include <interfaces/node.h>
 #include <interfaces/wallet.h>
-#include "transactionrecord.h"
+#include <transactionrecord.h>
 
-#include "consensus/consensus.h"
-#include "dstencode.h"
-#include "script/script.h"
-#include "timedata.h"
-#include "util.h"
-#include "validation.h"
-#include "wallet/db.h"
-#include "wallet/finaltx.h"
-#include "wallet/wallet.h"
+#include <consensus/consensus.h>
+#include <dstencode.h>
+#include <script/script.h>
+#include <timedata.h>
+#include <util.h>
+#include <validation.h>
+#include <wallet/db.h>
+#include <wallet/finaltx.h>
+#include <wallet/wallet.h>
 
 #include <chain.h>
 

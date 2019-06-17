@@ -3,41 +3,41 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 #endif
 
-#include "bitcoingui.h"
+#include <bitcoingui.h>
 
-#include "bitcoinunits.h"
-#include "clientmodel.h"
-#include "clientversion.h"
-#include "guiconstants.h"
-#include "guiutil.h"
-#include "dvtui.h"
-#include "modaloverlay.h"
-#include "networkstyle.h"
-#include "notificator.h"
-#include "openuridialog.h"
-#include "optionsdialog.h"
-#include "optionsmodel.h"
-#include "platformstyle.h"
-#include "rpcconsole.h"
-#include "utilitydialog.h"
+#include <bitcoinunits.h>
+#include <clientmodel.h>
+#include <clientversion.h>
+#include <guiconstants.h>
+#include <guiutil.h>
+#include <dvtui.h>
+#include <modaloverlay.h>
+#include <networkstyle.h>
+#include <notificator.h>
+#include <openuridialog.h>
+#include <optionsdialog.h>
+#include <optionsmodel.h>
+#include <platformstyle.h>
+#include <rpcconsole.h>
+#include <utilitydialog.h>
 
-#include "walletframe.h"
-#include "walletmodel.h"
-#include "walletview.h"
+#include <walletframe.h>
+#include <walletmodel.h>
+#include <walletview.h>
 
 #ifdef Q_OS_MAC
-#include "macdockiconhandler.h"
+#include <macdockiconhandler.h>
 #endif
 
-#include "chainparams.h"
-#include "init.h"
-#include "interfaces/handler.h"
-#include "interfaces/node.h"
-#include "ui_interface.h"
-#include "util.h"
+#include <chainparams.h>
+#include <init.h>
+#include <interfaces/handler.h>
+#include <interfaces/node.h>
+#include <ui_interface.h>
+#include <util.h>
 
 #include <iostream>
 

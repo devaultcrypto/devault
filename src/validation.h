@@ -7,19 +7,19 @@
 #ifndef BITCOIN_VALIDATION_H
 #define BITCOIN_VALIDATION_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "amount.h"
-#include "blockfileinfo.h"
-#include "chain.h"
-#include "coins.h"
-#include "consensus/consensus.h"
-#include "diskblockpos.h"
-#include "protocol.h" // For CMessageHeader::MessageMagic
-#include "script/script_error.h"
-#include "sync.h"
-#include "addrindex.h"
-#include "timestampindex.h"
+#include <amount.h>
+#include <blockfileinfo.h>
+#include <chain.h>
+#include <coins.h>
+#include <consensus/consensus.h>
+#include <diskblockpos.h>
+#include <protocol.h> // For CMessageHeader::MessageMagic
+#include <script/script_error.h>
+#include <sync.h>
+#include <addrindex.h>
+#include <timestampindex.h>
 
 #include <algorithm>
 #include <atomic>

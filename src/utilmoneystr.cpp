@@ -3,12 +3,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "amount.h"
-#include "utilmoneystr.h"
+#include <amount.h>
+#include <utilmoneystr.h>
 
-#include "primitives/transaction.h"
-#include "tinyformat.h"
-#include "utilstrencodings.h"
+#include <primitives/transaction.h>
+#include <tinyformat.h>
+#include <utilstrencodings.h>
 
 std::string FormatMoney(const Amount amt) {
     Amount amt_abs = amt > Amount::zero() ? amt : -amt;

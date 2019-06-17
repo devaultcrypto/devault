@@ -4,12 +4,12 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
-#include "amount.h"
-#include "chain.h"
-#include "config/bitcoin-config.h"
-#include "rewardsview.h"
+#include <amount.h>
+#include <chain.h>
+#include <config/bitcoin-config.h>
+#include <devault/rewardsview.h>
 // for now
-#include "validation.h"
+#include <validation.h>
 
 extern CCriticalSection cs_rewardsdb;
 

@@ -2,12 +2,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "policy/policy.h"
-#include "reverse_iterator.h"
-#include "txmempool.h"
-#include "util.h"
+#include <policy/policy.h>
+#include <reverse_iterator.h>
+#include <txmempool.h>
+#include <util.h>
 
-#include "test/test_bitcoin.h"
+#include <test/test_bitcoin.h>
 
 #include <algorithm>
 #include <boost/test/unit_test.hpp>

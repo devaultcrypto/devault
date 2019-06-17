@@ -5,10 +5,10 @@
 #ifndef BITCOIN_CONFIG_H
 #define BITCOIN_CONFIG_H
 
-#include "amount.h"
-#include "feerate.h"
+#include <amount.h>
+#include <feerate.h>
 
-#include "noncopyable.h"
+#include <noncopyable.h>
 
 #include <cstdint>
 #include <memory>

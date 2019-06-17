@@ -2,9 +2,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "networkstyle.h"
+#include <networkstyle.h>
 
-#include "guiconstants.h"
+#include <guiconstants.h>
 
 #include <QApplication>
 

@@ -5,7 +5,7 @@
 #pragma once
 
 #include <QDialog>
-#include "support/allocators/secure.h"
+#include <support/allocators/secure.h>
 
 class CWallet;
 

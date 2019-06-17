@@ -5,11 +5,11 @@
 #ifndef BITCOIN_QT_BITCOINGUI_H
 #define BITCOIN_QT_BITCOINGUI_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "amount.h"
-#include "support/allocators/secure.h"
-#include "dvtui.h"
+#include <amount.h>
+#include <support/allocators/secure.h>
+#include <dvtui.h>
 
 #include <QLabel>
 #include <QWidgetAction>

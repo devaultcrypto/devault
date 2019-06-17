@@ -1,14 +1,14 @@
 // Copyright (c) 2017 The Bitcoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include "cashaddrenc.h"
-#include "cashaddr.h"
-#include "chainparams.h"
-#include "key.h"
-#include "pubkey.h"
-#include "script/script.h"
-#include "primitives/transaction.h"
-#include "utilstrencodings.h"
+#include <cashaddrenc.h>
+#include <cashaddr.h>
+#include <chainparams.h>
+#include <key.h>
+#include <pubkey.h>
+#include <script/script.h>
+#include <primitives/transaction.h>
+#include <utilstrencodings.h>
 
 #ifdef HAVE_VARIANT
 #include <variant>

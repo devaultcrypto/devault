@@ -2,14 +2,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bench.h"
+#include <bench.h>
 
-#include "crypto/sha256.h"
-#include "key.h"
-#include "random.h"
-#include "util.h"
-#include "fs_util.h"
-#include "validation.h"
+#include <crypto/sha256.h>
+#include <key.h>
+#include <random.h>
+#include <util.h>
+#include <fs_util.h>
+#include <validation.h>
 
 #include <boost/lexical_cast.hpp>
 #include <sodium/core.h>

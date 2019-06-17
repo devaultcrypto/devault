@@ -4,50 +4,50 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "init.h"
+#include <init.h>
 
-#include "addrman.h"
-#include "amount.h"
-#include "chain.h"
-#include "chainparams.h"
-#include "checkpoints.h"
-#include "compat/sanity.h"
-#include "config.h"
-#include "consensus/validation.h"
-#include "diskblockpos.h"
-#include "httprpc.h"
-#include "httpserver.h"
-#include "key.h"
-#include "miner.h"
-#include "net.h"
-#include "net_processing.h"
-#include "netbase.h"
-#include "policy/policy.h"
-#include "rpc/register.h"
-#include "rpc/server.h"
-#include "rpc/blockchain.h"
-#include "scheduler.h"
-#include "script/scriptcache.h"
-#include "script/sigcache.h"
-#include "script/standard.h"
-#include "timedata.h"
-#include "torcontrol.h"
-#include "txdb.h"
-#include "txmempool.h"
-#include "ui_interface.h"
-#include "util.h"
-#include "fs_util.h"
-#include "utilmoneystr.h"
-#include "validation.h"
-#include "validationinterface.h"
-#include "wallet/rpcdump.h"
-#include "walletinitinterface.h"
-#include "warnings.h"
+#include <addrman.h>
+#include <amount.h>
+#include <chain.h>
+#include <chainparams.h>
+#include <checkpoints.h>
+#include <compat/sanity.h>
+#include <config.h>
+#include <consensus/validation.h>
+#include <diskblockpos.h>
+#include <httprpc.h>
+#include <httpserver.h>
+#include <key.h>
+#include <miner.h>
+#include <net.h>
+#include <net_processing.h>
+#include <netbase.h>
+#include <policy/policy.h>
+#include <rpc/register.h>
+#include <rpc/server.h>
+#include <rpc/blockchain.h>
+#include <scheduler.h>
+#include <script/scriptcache.h>
+#include <script/sigcache.h>
+#include <script/standard.h>
+#include <timedata.h>
+#include <torcontrol.h>
+#include <txdb.h>
+#include <txmempool.h>
+#include <ui_interface.h>
+#include <util.h>
+#include <fs_util.h>
+#include <utilmoneystr.h>
+#include <validation.h>
+#include <validationinterface.h>
+#include <wallet/rpcdump.h>
+#include <walletinitinterface.h>
+#include <warnings.h>
 
-#include "devault/rewards.h"
-#include "devault/budget.h"
+#include <devault/rewards.h>
+#include <devault/budget.h>
 
 #include <cstdint>
 #include <cstdio>
@@ -63,7 +63,7 @@
 #include <sodium/core.h>
 
 #if ENABLE_ZMQ
-#include "zmq/zmqnotificationinterface.h"
+#include <zmq/zmqnotificationinterface.h>
 #endif
 
 static const bool DEFAULT_PROXYRANDOMIZE = true;

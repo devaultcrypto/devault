@@ -7,7 +7,7 @@
 #include <string.h>
 #include <cassert>
 #include <string>
-#include "univalue.h"
+#include <univalue.h>
 
 #ifndef JSON_TEST_SRC
 #error JSON_TEST_SRC must point to test source directory

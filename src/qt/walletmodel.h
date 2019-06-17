@@ -5,9 +5,9 @@
 #ifndef BITCOIN_QT_WALLETMODEL_H
 #define BITCOIN_QT_WALLETMODEL_H
 
-#include "chainparams.h"
-#include "walletmodeltransaction.h"
-#include "cashaddrenc.h"
+#include <chainparams.h>
+#include <walletmodeltransaction.h>
+#include <cashaddrenc.h>
 #include <interfaces/wallet.h>
 
 #include <QObject>

@@ -2,11 +2,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "chainparams.h"
-#include "config.h"
+#include <chainparams.h>
+#include <config.h>
 
-#include "devault/rewards_calculation.h"
-#include "test/test_bitcoin.h"
+#include <devault/rewards_calculation.h>
+#include <test/test_bitcoin.h>
 
 #include <boost/test/unit_test.hpp>
 

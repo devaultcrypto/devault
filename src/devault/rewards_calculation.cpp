@@ -4,9 +4,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 // clang-format off
-#include "config/bitcoin-config.h"
-#include "chain.h"
-#include "rewards_calculation.h"
+#include <config/bitcoin-config.h>
+#include <chain.h>
+#include <devault/rewards_calculation.h>
 // clang-format on
 
 Amount CalculateReward(const Consensus::Params &consensusParams, int Height, int HeightDiff, Amount balance) {

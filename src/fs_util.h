@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "fs.h"
+#include <fs.h>
 
 extern const char *const BITCOIN_PID_FILENAME;
 

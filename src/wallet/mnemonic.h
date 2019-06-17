@@ -14,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "dictionary.h"
+#include <wallet/dictionary.h>
 #include <string>
 #include <vector>
 #include <tuple>

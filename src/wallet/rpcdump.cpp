@@ -3,27 +3,27 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "cashaddrenc.h"
-#include "chain.h"
-#include "chainparams.h"
-#include "config.h"
-#include "core_io.h"
-#include "dstencode.h"
-#include "init.h"
-#include "merkleblock.h"
-#include "rpc/server.h"
-#include "rpcwallet.h"
-#include "script/script.h"
-#include "script/standard.h"
-#include "sync.h"
-#include "fs_util.h"
-#include "utiltime.h"
-#include "validation.h"
-#include "wallet.h"
-#include "mnemonic.h"
-#include "utilsplitstring.h"
-#include "devault/coinreward.h"
-#include "devault/rewards.h"
+#include <cashaddrenc.h>
+#include <chain.h>
+#include <chainparams.h>
+#include <config.h>
+#include <core_io.h>
+#include <dstencode.h>
+#include <init.h>
+#include <merkleblock.h>
+#include <rpc/server.h>
+#include <wallet/rpcwallet.h>
+#include <script/script.h>
+#include <script/standard.h>
+#include <sync.h>
+#include <fs_util.h>
+#include <utiltime.h>
+#include <validation.h>
+#include <wallet/wallet.h>
+#include <wallet/mnemonic.h>
+#include <utilsplitstring.h>
+#include <devault/coinreward.h>
+#include <devault/rewards.h>
 
 #include <string.h> // for memcpy
 #include <univalue.h>

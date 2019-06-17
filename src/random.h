@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "crypto/chacha20.h"
-#include "crypto/common.h"
-#include "uint256.h"
+#include <crypto/chacha20.h>
+#include <crypto/common.h>
+#include <uint256.h>
 #include <cstdint>
 
 // Functions to gather random data

@@ -2,18 +2,18 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "signverifymessagedialog.h"
-#include "ui_signverifymessagedialog.h"
+#include <signverifymessagedialog.h>
+#include <ui_signverifymessagedialog.h>
 
-#include "addressbookpage.h"
-#include "guiutil.h"
-#include "platformstyle.h"
-#include "walletmodel.h"
+#include <addressbookpage.h>
+#include <guiutil.h>
+#include <platformstyle.h>
+#include <walletmodel.h>
 
-#include "dstencode.h"
-#include "init.h"
-#include "validation.h" // For strMessageMagic
-#include "wallet/wallet.h"
+#include <dstencode.h>
+#include <init.h>
+#include <validation.h> // For strMessageMagic
+#include <wallet/wallet.h>
 
 #include <string>
 #include <vector>

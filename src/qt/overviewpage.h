@@ -5,8 +5,8 @@
 #ifndef BITCOIN_QT_OVERVIEWPAGE_H
 #define BITCOIN_QT_OVERVIEWPAGE_H
 
-#include "amount.h"
-#include "transactionview.h"
+#include <amount.h>
+#include <transactionview.h>
 
 
 #include <interfaces/wallet.h>

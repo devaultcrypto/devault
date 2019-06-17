@@ -3,13 +3,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "validationinterface.h"
-#include "init.h"
-#include "scheduler.h"
-#include "sync.h"
-#include "txmempool.h"
-#include "util.h"
-#include "validation.h"
+#include <validationinterface.h>
+#include <init.h>
+#include <scheduler.h>
+#include <sync.h>
+#include <txmempool.h>
+#include <util.h>
+#include <validation.h>
 
 #include <atomic>
 #include <future>

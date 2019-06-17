@@ -5,7 +5,7 @@
 #ifndef BITCOIN_QT_MODALOVERLAY_H
 #define BITCOIN_QT_MODALOVERLAY_H
 
-#include "platformstyle.h"
+#include <platformstyle.h>
 
 #include <QDateTime>
 #include <QWidget>

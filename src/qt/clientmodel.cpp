@@ -2,25 +2,25 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "clientmodel.h"
+#include <clientmodel.h>
 
-#include "bantablemodel.h"
-#include "guiconstants.h"
-#include "guiutil.h"
-#include "peertablemodel.h"
+#include <bantablemodel.h>
+#include <guiconstants.h>
+#include <guiutil.h>
+#include <peertablemodel.h>
 
-#include "chainparams.h"
-#include "checkpoints.h"
-#include "clientversion.h"
-#include "config.h"
-#include "interfaces/handler.h"
-#include "interfaces/node.h"
-#include "net.h"
-#include "txmempool.h"
-#include "ui_interface.h"
-#include "fs_util.h"
-#include "validation.h"
-#include "warnings.h"
+#include <chainparams.h>
+#include <checkpoints.h>
+#include <clientversion.h>
+#include <config.h>
+#include <interfaces/handler.h>
+#include <interfaces/node.h>
+#include <net.h>
+#include <txmempool.h>
+#include <ui_interface.h>
+#include <fs_util.h>
+#include <validation.h>
+#include <warnings.h>
 
 #include <cstdint>
 

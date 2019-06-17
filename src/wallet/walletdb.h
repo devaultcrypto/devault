@@ -8,12 +8,12 @@
 #ifndef BITCOIN_WALLET_WALLETDB_H
 #define BITCOIN_WALLET_WALLETDB_H
 
-#include "amount.h"
-#include "key.h"
-#include "primitives/transaction.h"
-#include "script/standard.h" // for CTxDestination
-#include "wallet/db.h"
-#include "hdchain.h"
+#include <amount.h>
+#include <key.h>
+#include <primitives/transaction.h>
+#include <script/standard.h> // for CTxDestination
+#include <wallet/db.h>
+#include <wallet/hdchain.h>
 #include <cstdint>
 #include <list>
 #include <string>

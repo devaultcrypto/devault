@@ -7,7 +7,7 @@
 
 #include <univalue.h>
 
-#include "noncopyable.h"
+#include <noncopyable.h>
 
 #include <string>
 

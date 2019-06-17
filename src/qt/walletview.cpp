@@ -2,25 +2,25 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "walletview.h"
+#include <walletview.h>
 
-#include "addressbookpage.h"
-#include "askpassphrasedialog.h"
-#include "bitcoingui.h"
-#include "clientmodel.h"
-#include "guiutil.h"
-#include "optionsmodel.h"
-#include "overviewpage.h"
-#include "platformstyle.h"
-#include "receivecoinsdialog.h"
-#include "sendcoinsdialog.h"
-#include "signverifymessagedialog.h"
-#include "transactiontablemodel.h"
-#include "transactionview.h"
-#include "walletmodel.h"
+#include <addressbookpage.h>
+#include <askpassphrasedialog.h>
+#include <bitcoingui.h>
+#include <clientmodel.h>
+#include <guiutil.h>
+#include <optionsmodel.h>
+#include <overviewpage.h>
+#include <platformstyle.h>
+#include <receivecoinsdialog.h>
+#include <sendcoinsdialog.h>
+#include <signverifymessagedialog.h>
+#include <transactiontablemodel.h>
+#include <transactionview.h>
+#include <walletmodel.h>
 
-#include "interfaces/node.h"
-#include "ui_interface.h"
+#include <interfaces/node.h>
+#include <ui_interface.h>
 
 #include <QAction>
 #include <QActionGroup>

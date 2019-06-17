@@ -6,7 +6,7 @@
 #include <config/bitcoin-config.h>
 #endif
 
-#include "ui_optionsdialog.h"
+#include <ui_optionsdialog.h>
 #include <qt/optionsdialog.h>
 
 #include <interfaces/node.h>

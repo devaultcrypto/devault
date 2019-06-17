@@ -4,17 +4,17 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "rpc/server.h"
+#include <rpc/server.h>
 
-#include "config.h"
-#include "init.h"
-#include "random.h"
-#include "sync.h"
-#include "ui_interface.h"
-#include "util.h"
-#include "fs_util.h"
-#include "utilstrencodings.h"
-#include "utilsplitstring.h"
+#include <config.h>
+#include <init.h>
+#include <random.h>
+#include <sync.h>
+#include <ui_interface.h>
+#include <util.h>
+#include <fs_util.h>
+#include <utilstrencodings.h>
+#include <utilsplitstring.h>
 #include <univalue.h>
 #include <boost/signals2/signal.hpp>
 #include <memory> // for unique_ptr

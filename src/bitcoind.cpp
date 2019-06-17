@@ -3,21 +3,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "chainparams.h"
-#include "clientversion.h"
-#include "compat.h"
-#include "config.h"
-#include "httprpc.h"
-#include "httpserver.h"
-#include "init.h"
-#include "noui.h"
-#include "rpc/server.h"
-#include "fs_util.h"
-#include "utilstrencodings.h"
-#include "walletinitinterface.h"
-#include "support/allocators/secure.h"
+#include <chainparams.h>
+#include <clientversion.h>
+#include <compat.h>
+#include <config.h>
+#include <httprpc.h>
+#include <httpserver.h>
+#include <init.h>
+#include <noui.h>
+#include <rpc/server.h>
+#include <fs_util.h>
+#include <utilstrencodings.h>
+#include <walletinitinterface.h>
+#include <support/allocators/secure.h>
 
 #include <cstdint>
 #include <thread>

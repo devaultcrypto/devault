@@ -2,13 +2,13 @@
 // Copyright (c) 2019 Jon Spock
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include "budget.h"
-#include "amount.h"
-#include "chainparams.h"
-#include "config.h"
-#include "dstencode.h"
-#include "logging.h"
-#include "primitives/transaction.h"
+#include <devault/budget.h>
+#include <amount.h>
+#include <chainparams.h>
+#include <config.h>
+#include <dstencode.h>
+#include <logging.h>
+#include <primitives/transaction.h>
 #include <consensus/validation.h>
 
 #include <memory>

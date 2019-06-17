@@ -4,6 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #pragma once
-#include "amount.h"
-#include "consensus/consensus.h"
+#include <amount.h>
+#include <consensus/consensus.h>
 Amount CalculateReward(const Consensus::Params &consensusParams, int Height, int HeightDiff, Amount balance);

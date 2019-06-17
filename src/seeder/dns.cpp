@@ -1,4 +1,4 @@
-#include "dns.h"
+#include <dns.h>
 
 #include <cctype>
 #include <cstdbool>

@@ -2,18 +2,18 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "receivecoinsdialog.h"
-#include "ui_receivecoinsdialog.h"
+#include <receivecoinsdialog.h>
+#include <ui_receivecoinsdialog.h>
 
-#include "addressbookpage.h"
-#include "addresstablemodel.h"
-#include "bitcoinunits.h"
-#include "guiutil.h"
-#include "optionsmodel.h"
-#include "platformstyle.h"
-#include "receiverequestdialog.h"
-#include "recentrequeststablemodel.h"
-#include "walletmodel.h"
+#include <addressbookpage.h>
+#include <addresstablemodel.h>
+#include <bitcoinunits.h>
+#include <guiutil.h>
+#include <optionsmodel.h>
+#include <platformstyle.h>
+#include <receiverequestdialog.h>
+#include <recentrequeststablemodel.h>
+#include <walletmodel.h>
 
 #include <QAction>
 #include <QCursor>
