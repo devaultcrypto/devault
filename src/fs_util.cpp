@@ -3,12 +3,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "fs_util.h"
-#include "util.h"
-#include "chainparamsbase.h"
-#include "ui_interface.h"
+#include <fs_util.h>
+#include <util.h>
+#include <chainparamsbase.h>
+#include <ui_interface.h>
 #include <boost/interprocess/sync/file_lock.hpp>
 
 #ifndef WIN32

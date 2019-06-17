@@ -2,13 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "torcontrol.h"
-#include "crypto/hmac_sha256.h"
-#include "net.h"
-#include "netbase.h"
-#include "fs_util.h"
-#include "utilstrencodings.h"
-#include "utilsplitstring.h"
+#include <torcontrol.h>
+#include <crypto/hmac_sha256.h>
+#include <net.h>
+#include <netbase.h>
+#include <fs_util.h>
+#include <utilstrencodings.h>
+#include <utilsplitstring.h>
 
 #include <cstdlib>
 #include <deque>

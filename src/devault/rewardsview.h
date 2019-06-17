@@ -8,11 +8,11 @@
 // No longer dependent on txdb.h, but some stuff copied/used
 
 #pragma once
-#include "coinreward.h"
-#include "chain.h"
-#include "config/bitcoin-config.h"
-#include "dbwrapper.h"
-#include "validation.h"
+#include <devault/coinreward.h>
+#include <chain.h>
+#include <config/bitcoin-config.h>
+#include <dbwrapper.h>
+#include <validation.h>
 
 class CRewardsViewDBCursor {
   public:

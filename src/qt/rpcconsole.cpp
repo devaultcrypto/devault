@@ -3,33 +3,33 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 #endif
 
-#include "rpcconsole.h"
-#include "ui_debugwindow.h"
+#include <rpcconsole.h>
+#include <ui_debugwindow.h>
 
-#include "qt/bantablemodel.h"
-#include "qt/clientmodel.h"
-#include "qt/guiutil.h"
-#include "qt/dvtui.h"
-#include "qt/platformstyle.h"
-#include "qt/walletmodel.h"
+#include <qt/bantablemodel.h>
+#include <qt/clientmodel.h>
+#include <qt/guiutil.h>
+#include <qt/dvtui.h>
+#include <qt/platformstyle.h>
+#include <qt/walletmodel.h>
 
-#include "chainparams.h"
-#include "config.h"
-#include "interfaces/node.h"
-#include "netbase.h"
-#include "rpc/client.h"
-#include "rpc/server.h"
-#include "util.h"
+#include <chainparams.h>
+#include <config.h>
+#include <interfaces/node.h>
+#include <netbase.h>
+#include <rpc/client.h>
+#include <rpc/server.h>
+#include <util.h>
 
 #include <univalue.h>
 
-#include "wallet/wallet.h"
+#include <wallet/wallet.h>
 #include <db_cxx.h>
 
-#include "walletinitinterface.h"
+#include <walletinitinterface.h>
 
 #include <QDesktopWidget>
 #include <QKeyEvent>
@@ -122,7 +122,7 @@ public:
     }
 };
 
-#include "rpcconsole.moc"
+#include <rpcconsole.moc>
 
 /**
  * Split shell command line into a list of arguments and optionally execute the

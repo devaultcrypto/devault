@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "sync.h"
+#include <sync.h>
 
 //
 #include <list>

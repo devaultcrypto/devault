@@ -2,25 +2,25 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "coincontroldialog.h"
-#include "ui_coincontroldialog.h"
+#include <coincontroldialog.h>
+#include <ui_coincontroldialog.h>
 
-#include "addresstablemodel.h"
-#include "bitcoinunits.h"
-#include "guiutil.h"
-#include "optionsmodel.h"
-#include "platformstyle.h"
-#include "txmempool.h"
-#include "walletmodel.h"
-#include "dvtui.h"
+#include <addresstablemodel.h>
+#include <bitcoinunits.h>
+#include <guiutil.h>
+#include <optionsmodel.h>
+#include <platformstyle.h>
+#include <txmempool.h>
+#include <walletmodel.h>
+#include <dvtui.h>
 
-#include "dstencode.h"
-#include "init.h"
-#include "policy/policy.h"
-#include "validation.h" // For mempool
-#include "wallet/coincontrol.h"
-#include "wallet/fees.h"
-#include "wallet/wallet.h"
+#include <dstencode.h>
+#include <init.h>
+#include <policy/policy.h>
+#include <validation.h> // For mempool
+#include <wallet/coincontrol.h>
+#include <wallet/fees.h>
+#include <wallet/wallet.h>
 
 #include <dstencode.h>
 #include <interfaces/node.h>

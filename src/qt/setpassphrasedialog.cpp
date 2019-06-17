@@ -5,16 +5,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 #endif
 
-#include "setpassphrasedialog.h"
-#include "ui_setpassphrasedialog.h"
+#include <setpassphrasedialog.h>
+#include <ui_setpassphrasedialog.h>
 
-#include "guiconstants.h"
-#include "dvtui.h"
+#include <guiconstants.h>
+#include <dvtui.h>
 
-#include "support/allocators/secure.h"
+#include <support/allocators/secure.h>
 
 #include <QKeyEvent>
 #include <QMessageBox>

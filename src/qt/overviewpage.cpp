@@ -2,19 +2,19 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "overviewpage.h"
-#include "ui_overviewpage.h"
+#include <overviewpage.h>
+#include <ui_overviewpage.h>
 
-#include "bitcoinunits.h"
-#include "clientmodel.h"
-#include "guiconstants.h"
-#include "guiutil.h"
-#include "optionsmodel.h"
-#include "platformstyle.h"
-#include "transactionfilterproxy.h"
-#include "transactiontablemodel.h"
-#include "walletmodel.h"
-#include "bitcoingui.h"
+#include <bitcoinunits.h>
+#include <clientmodel.h>
+#include <guiconstants.h>
+#include <guiutil.h>
+#include <optionsmodel.h>
+#include <platformstyle.h>
+#include <transactionfilterproxy.h>
+#include <transactiontablemodel.h>
+#include <walletmodel.h>
+#include <bitcoingui.h>
 
 #include <QAbstractItemDelegate>
 #include <QDesktopServices>

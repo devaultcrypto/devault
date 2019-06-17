@@ -5,7 +5,7 @@
 #ifndef BITCOIN_RCU_H
 #define BITCOIN_RCU_H
 
-#include "noncopyable.h"
+#include <noncopyable.h>
 
 #include <atomic>
 #include <cassert>

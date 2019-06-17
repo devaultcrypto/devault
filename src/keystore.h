@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include "key.h"
-#include "pubkey.h"
-#include "script/script.h"
-#include "script/standard.h"
-#include "sync.h"
+#include <key.h>
+#include <pubkey.h>
+#include <script/script.h>
+#include <script/standard.h>
+#include <sync.h>
 
 /** A virtual base class for key stores */
 class CKeyStore {

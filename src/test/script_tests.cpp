@@ -3,25 +3,25 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "data/script_tests.json.h"
+#include <data/script_tests.json.h>
 
-#include "core_io.h"
-#include "key.h"
-#include "keystore.h"
-#include "rpc/server.h"
-#include "script/script.h"
-#include "script/script_error.h"
-#include "script/sighashtype.h"
-#include "script/sign.h"
-#include "test/jsonutil.h"
-#include "test/scriptflags.h"
-#include "test/sigutil.h"
-#include "test/test_bitcoin.h"
-#include "util.h"
-#include "utilstrencodings.h"
+#include <core_io.h>
+#include <key.h>
+#include <keystore.h>
+#include <rpc/server.h>
+#include <script/script.h>
+#include <script/script_error.h>
+#include <script/sighashtype.h>
+#include <script/sign.h>
+#include <test/jsonutil.h>
+#include <test/scriptflags.h>
+#include <test/sigutil.h>
+#include <test/test_bitcoin.h>
+#include <util.h>
+#include <utilstrencodings.h>
 
 #if defined(HAVE_CONSENSUS_LIB)
-#include "script/devaultconsensus.h"
+#include <script/devaultconsensus.h>
 #endif
 
 #include <cstdint>

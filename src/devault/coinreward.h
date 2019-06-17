@@ -8,11 +8,11 @@
 // No longer dependent on txdb.h, but some stuff copied/used
 
 #pragma once
-#include "primitives/transaction.h"
+#include <primitives/transaction.h>
 
 // For ToString()
-#include "tinyformat.h"
-#include "cashaddrenc.h"
+#include <tinyformat.h>
+#include <cashaddrenc.h>
 
 static const char DB_REWARD = 'R';
 

@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "hdchain.h"
-#include "keystore.h"
-#include "serialize.h"
-#include "support/allocators/secure.h"
+#include <wallet/hdchain.h>
+#include <keystore.h>
+#include <serialize.h>
+#include <support/allocators/secure.h>
 #include <boost/signals2/signal.hpp>
 
 #include <atomic>

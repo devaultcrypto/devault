@@ -3,20 +3,20 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "devault/rewards.h"
-#include "amount.h"
-#include "chain.h"
-#include "cashaddrenc.h" // GetAddrFromTxOut for debug
-#include "chainparams.h"
-#include "config.h"
-#include "consensus/consensus.h"
-#include "devault/rewards_calculation.h"
-#include "init.h" // for Shutdown
-#include "logging.h"
-#include "script/standard.h"
-#include "validation.h"
+#include <devault/rewards.h>
+#include <amount.h>
+#include <chain.h>
+#include <cashaddrenc.h> // GetAddrFromTxOut for debug
+#include <chainparams.h>
+#include <config.h>
+#include <consensus/consensus.h>
+#include <devault/rewards_calculation.h>
+#include <init.h> // for Shutdown
+#include <logging.h>
+#include <script/standard.h>
+#include <validation.h>
 
-#include "fs.h" // for Dump debug stuff
+#include <fs.h> // for Dump debug stuff
 #include <fstream>
 
 using namespace std;

@@ -3,14 +3,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "chainparams.h"
-#include "config.h"
-#include "consensus/consensus.h"
-#include "primitives/transaction.h"
-#include "test/test_bitcoin.h"
-#include "util.h"
-#include "fs_util.h"
-#include "validation.h"
+#include <chainparams.h>
+#include <config.h>
+#include <consensus/consensus.h>
+#include <primitives/transaction.h>
+#include <test/test_bitcoin.h>
+#include <util.h>
+#include <fs_util.h>
+#include <validation.h>
 
 #include <cstdint>
 #include <cstdio>

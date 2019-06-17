@@ -2,28 +2,28 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "guiutil.h"
+#include <guiutil.h>
 
-#include "platformstyle.h"
-#include "dvtui.h"
-#include "bitcoinaddressvalidator.h"
-#include "bitcoinunits.h"
-#include "dstencode.h"
-#include "qvalidatedlineedit.h"
-#include "walletmodel.h"
+#include <platformstyle.h>
+#include <dvtui.h>
+#include <bitcoinaddressvalidator.h>
+#include <bitcoinunits.h>
+#include <dstencode.h>
+#include <qvalidatedlineedit.h>
+#include <walletmodel.h>
 
-#include "cashaddr.h"
-#include "config.h"
-#include "dstencode.h"
-#include "init.h"
-#include "policy/policy.h"
-#include "primitives/transaction.h"
-#include "protocol.h"
-#include "script/script.h"
-#include "script/standard.h"
-#include "fs_util.h"
-#include "util.h"
-#include "utilstrencodings.h"
+#include <cashaddr.h>
+#include <config.h>
+#include <dstencode.h>
+#include <init.h>
+#include <policy/policy.h>
+#include <primitives/transaction.h>
+#include <protocol.h>
+#include <script/script.h>
+#include <script/standard.h>
+#include <fs_util.h>
+#include <util.h>
+#include <utilstrencodings.h>
 
 #include <chainparams.h>
 #include <interfaces/node.h>

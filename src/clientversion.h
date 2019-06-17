@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 #include <config/version.h>
 
 /**

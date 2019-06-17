@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "hash.h"
-#include "test/test_bitcoin.h"
-#include "utilstrencodings.h"
-#include "crypto/siphash.h"
+#include <hash.h>
+#include <test/test_bitcoin.h>
+#include <utilstrencodings.h>
+#include <crypto/siphash.h>
 
 #include <vector>
 

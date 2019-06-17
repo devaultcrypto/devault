@@ -5,11 +5,11 @@
 #ifndef BITCOIN_NETBASE_H
 #define BITCOIN_NETBASE_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "compat.h"
-#include "netaddress.h"
-#include "serialize.h"
+#include <compat.h>
+#include <netaddress.h>
+#include <serialize.h>
 
 #include <cstdint>
 #include <string>

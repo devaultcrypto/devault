@@ -15,12 +15,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "mnemonic.h"
-#include "crypto/pkcs5_pbkdf2.h"
-#include "crypto/sha256.h"
-#include "utilstrencodings.h"
-#include "utilsplitstring.h"
-#include "random.h"
+#include <wallet/mnemonic.h>
+#include <crypto/pkcs5_pbkdf2.h>
+#include <crypto/sha256.h>
+#include <utilstrencodings.h>
+#include <utilsplitstring.h>
+#include <random.h>
 #include <iostream>
 #include <random>
 #include <cassert>

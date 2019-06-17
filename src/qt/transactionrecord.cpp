@@ -4,12 +4,12 @@
 
 #include <qt/transactionrecord.h>
 
-#include "consensus/consensus.h"
-#include "dstencode.h"
-#include "timedata.h"
-#include "validation.h"
-#include "wallet/finaltx.h"
-#include "wallet/wallet.h"
+#include <consensus/consensus.h>
+#include <dstencode.h>
+#include <timedata.h>
+#include <validation.h>
+#include <wallet/finaltx.h>
+#include <wallet/wallet.h>
 #include <chain.h>
 #include <interfaces/wallet.h>
 

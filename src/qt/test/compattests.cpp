@@ -2,9 +2,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "compattests.h"
+#include <compattests.h>
 
-#include "compat/byteswap.h"
+#include <compat/byteswap.h>
 
 void CompatTests::bswapTests() {
     // Sibling in bitcoin/src/test/bswap_tests.cpp

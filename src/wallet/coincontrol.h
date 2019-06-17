@@ -5,7 +5,7 @@
 #ifndef BITCOIN_WALLET_COINCONTROL_H
 #define BITCOIN_WALLET_COINCONTROL_H
 
-#include "primitives/transaction.h"
+#include <primitives/transaction.h>
 
 #ifdef HAVE_VARIANT
 #include <optional>

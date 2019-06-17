@@ -2,16 +2,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "timedata.h"
+#include <timedata.h>
 
-#include "netaddress.h"
-#include "sync.h"
-#include "ui_interface.h"
-#include "util.h"
-#include "utilstrencodings.h"
-#include "warnings.h"
+#include <netaddress.h>
+#include <sync.h>
+#include <ui_interface.h>
+#include <util.h>
+#include <utilstrencodings.h>
+#include <warnings.h>
 
 static CCriticalSection cs_nTimeOffset;
 static int64_t nTimeOffset = 0;

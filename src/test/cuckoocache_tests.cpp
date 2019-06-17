@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "cuckoocache.h"
-#include "random.h"
-#include "script/sigcache.h"
-#include "test/test_bitcoin.h"
+#include <cuckoocache.h>
+#include <random.h>
+#include <script/sigcache.h>
+#include <test/test_bitcoin.h>
 
 #include <shared_mutex>
 

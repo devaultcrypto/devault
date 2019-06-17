@@ -31,21 +31,21 @@
 #include <walletinitinterface.h>
 #include <warnings.h>
 
-#include "setpassphrasedialog.h"
-#include "walletmodel.h"
+#include <setpassphrasedialog.h>
+#include <walletmodel.h>
 
-#include "init.h"
-#include "interfaces/handler.h"
-#include "interfaces/node.h"
-#include "rpc/server.h"
-#include "ui_interface.h"
-#include "uint256.h"
-#include "fs_util.h"
-#include "util.h"
-#include "warnings.h"
+#include <init.h>
+#include <interfaces/handler.h>
+#include <interfaces/node.h>
+#include <rpc/server.h>
+#include <ui_interface.h>
+#include <uint256.h>
+#include <fs_util.h>
+#include <util.h>
+#include <warnings.h>
 
-#include "wallet/wallet.h"
-#include "walletinitinterface.h"
+#include <wallet/wallet.h>
+#include <walletinitinterface.h>
 
 #include <cstdint>
 
@@ -272,7 +272,7 @@ private:
     void startThread();
 };
 
-#include "bitcoin.moc"
+#include <bitcoin.moc>
 
 DeVault::DeVault(interfaces::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
     : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist), m_node(node) {}

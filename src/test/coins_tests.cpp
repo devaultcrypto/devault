@@ -2,14 +2,14 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "coins.h"
-#include "consensus/validation.h"
-#include "script/standard.h"
-#include "test/test_bitcoin.h"
-#include "uint256.h"
-#include "undo.h"
-#include "utilstrencodings.h"
-#include "validation.h"
+#include <coins.h>
+#include <consensus/validation.h>
+#include <script/standard.h>
+#include <test/test_bitcoin.h>
+#include <uint256.h>
+#include <undo.h>
+#include <utilstrencodings.h>
+#include <validation.h>
 
 #include <map>
 #include <vector>

@@ -5,7 +5,7 @@
 #ifndef BITCOIN_COMPAT_BYTESWAP_H
 #define BITCOIN_COMPAT_BYTESWAP_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
 #include <cstdint>
 

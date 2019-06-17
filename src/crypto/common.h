@@ -5,12 +5,12 @@
 #ifndef BITCOIN_CRYPTO_COMMON_H
 #define BITCOIN_CRYPTO_COMMON_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
 #include <cstdint>
 #include <cstring>
 
-#include "compat/endian.h"
+#include <compat/endian.h>
 
 static inline uint16_t ReadLE16(const uint8_t *ptr) {
     uint16_t x;

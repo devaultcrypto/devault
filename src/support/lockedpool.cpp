@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "support/lockedpool.h"
-#include "support/cleanse.h"
+#include <support/lockedpool.h>
+#include <support/cleanse.h>
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT

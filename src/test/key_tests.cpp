@@ -2,17 +2,17 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "key.h"
+#include <key.h>
 
-#include "cashaddrenc.h"
-#include "config.h"
-#include "chainparams.h"
-#include "dstencode.h"
-#include "script/script.h"
-#include "test/test_bitcoin.h"
-#include "uint256.h"
-#include "util.h"
-#include "utilstrencodings.h"
+#include <cashaddrenc.h>
+#include <config.h>
+#include <chainparams.h>
+#include <dstencode.h>
+#include <script/script.h>
+#include <test/test_bitcoin.h>
+#include <uint256.h>
+#include <util.h>
+#include <utilstrencodings.h>
 
 #include <string>
 #include <vector>

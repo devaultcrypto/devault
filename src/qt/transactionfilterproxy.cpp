@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "transactionfilterproxy.h"
+#include <transactionfilterproxy.h>
 
-#include "transactionrecord.h"
-#include "transactiontablemodel.h"
+#include <transactionrecord.h>
+#include <transactiontablemodel.h>
 
 #include <cstdlib>
 

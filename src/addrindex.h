@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "serialize.h"
-#include "amount.h"
-#include "uint256.h"
+#include <serialize.h>
+#include <amount.h>
+#include <uint256.h>
 
 struct CAddrIndexKey {
     std::string addr;

@@ -5,7 +5,7 @@
 #ifndef BITCOIN_ZMQ_ZMQCONFIG_H
 #define BITCOIN_ZMQ_ZMQCONFIG_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
 #include <string>
 
@@ -13,8 +13,8 @@
 #include <zmq.h>
 #endif
 
-#include "primitives/block.h"
-#include "primitives/transaction.h"
+#include <primitives/block.h>
+#include <primitives/transaction.h>
 
 void zmqError(const char *str);
 

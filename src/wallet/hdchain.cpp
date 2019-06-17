@@ -2,10 +2,10 @@
 // Copyright (c) 2019 DeVault developers
 // Distributed under the MIT software license, see the accompanying
 
-#include "hdchain.h"
-#include "chainparams.h"
-#include "util.h"
-#include "utilstrencodings.h"
+#include <wallet/hdchain.h>
+#include <chainparams.h>
+#include <util.h>
+#include <utilstrencodings.h>
 #include <iostream>
 
 void CHDChain::Setup(const mnemonic::WordList& words, const std::vector<uint8_t>& hashWords) {

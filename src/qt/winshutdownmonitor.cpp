@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "winshutdownmonitor.h"
+#include <winshutdownmonitor.h>
 
 #if defined(Q_OS_WIN)
 #include <init.h>

@@ -6,13 +6,13 @@
 #ifndef BITCOIN_TXDB_H
 #define BITCOIN_TXDB_H
 
-#include "blockfileinfo.h"
-#include "chain.h"
-#include "coins.h"
-#include "dbwrapper.h"
-#include "diskblockpos.h"
-#include "addrindex.h"
-#include "timestampindex.h"
+#include <blockfileinfo.h>
+#include <chain.h>
+#include <coins.h>
+#include <dbwrapper.h>
+#include <diskblockpos.h>
+#include <addrindex.h>
+#include <timestampindex.h>
 
 #include <map>
 #include <string>

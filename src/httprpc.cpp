@@ -2,21 +2,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "httprpc.h"
+#include <httprpc.h>
 
-#include "chainparams.h"
-#include "config.h"
-#include "crypto/hmac_sha256.h"
-#include "httpserver.h"
-#include "random.h"
-#include "rpc/protocol.h"
-#include "rpc/server.h"
-#include "sync.h"
-#include "ui_interface.h"
-#include "walletinitinterface.h"
-#include "util.h"
-#include "utilstrencodings.h"
-#include "utilsplitstring.h"
+#include <chainparams.h>
+#include <config.h>
+#include <crypto/hmac_sha256.h>
+#include <httpserver.h>
+#include <random.h>
+#include <rpc/protocol.h>
+#include <rpc/server.h>
+#include <sync.h>
+#include <ui_interface.h>
+#include <walletinitinterface.h>
+#include <util.h>
+#include <utilstrencodings.h>
+#include <utilsplitstring.h>
 
 #include <cstdio>
 

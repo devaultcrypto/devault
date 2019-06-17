@@ -2,11 +2,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bitcoinamountfield.h"
+#include <bitcoinamountfield.h>
 
-#include "bitcoinunits.h"
-#include "guiconstants.h"
-#include "qvaluecombobox.h"
+#include <bitcoinunits.h>
+#include <guiconstants.h>
+#include <qvaluecombobox.h>
 
 #include <QAbstractSpinBox>
 #include <QApplication>
@@ -192,7 +192,7 @@ Q_SIGNALS:
     void valueChanged();
 };
 
-#include "bitcoinamountfield.moc"
+#include <bitcoinamountfield.moc>
 
 BitcoinAmountField::BitcoinAmountField(QWidget *parent)
     : QWidget(parent), amount(nullptr) {

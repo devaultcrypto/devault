@@ -7,13 +7,13 @@
 #ifndef BITCOIN_RPC_SERVER_H
 #define BITCOIN_RPC_SERVER_H
 
-#include "amount.h"
-#include "rpc/command.h"
-#include "rpc/jsonrpcrequest.h"
-#include "rpc/protocol.h"
-#include "rwcollection.h"
-#include "uint256.h"
-#include "util.h"
+#include <amount.h>
+#include <rpc/command.h>
+#include <rpc/jsonrpcrequest.h>
+#include <rpc/protocol.h>
+#include <rwcollection.h>
+#include <uint256.h>
+#include <util.h>
 
 #include <cstdint>
 #include <functional>
@@ -21,7 +21,7 @@
 #include <map>
 #include <string>
 
-#include "noncopyable.h"
+#include <noncopyable.h>
 #include <univalue.h>
 
 static const unsigned int DEFAULT_RPC_SERIALIZE_VERSION = 1;

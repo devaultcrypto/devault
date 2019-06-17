@@ -2,26 +2,26 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "walletmodel.h"
+#include <walletmodel.h>
 
-#include "addresstablemodel.h"
-#include "consensus/validation.h"
-#include "guiconstants.h"
-#include "guiutil.h"
-#include "recentrequeststablemodel.h"
-#include "transactiontablemodel.h"
+#include <addresstablemodel.h>
+#include <consensus/validation.h>
+#include <guiconstants.h>
+#include <guiutil.h>
+#include <recentrequeststablemodel.h>
+#include <transactiontablemodel.h>
 
-#include "config.h"
-#include "dstencode.h"
-#include "keystore.h"
-#include "net.h" // for g_connman
-#include "sync.h"
-#include "ui_interface.h"
-#include "util.h" // for GetBoolArg
-#include "validation.h"
-#include "wallet/coincontrol.h"
-#include "wallet/wallet.h"
-#include "wallet/walletdb.h" // for BackupWallet
+#include <config.h>
+#include <dstencode.h>
+#include <keystore.h>
+#include <net.h> // for g_connman
+#include <sync.h>
+#include <ui_interface.h>
+#include <util.h> // for GetBoolArg
+#include <validation.h>
+#include <wallet/coincontrol.h>
+#include <wallet/wallet.h>
+#include <wallet/walletdb.h> // for BackupWallet
 
 #include <cstdint>
 

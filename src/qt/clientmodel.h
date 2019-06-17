@@ -7,7 +7,7 @@
 
 #include <QDateTime>
 #include <QObject>
-#include "net.h"
+#include <net.h>
 
 #include <atomic>
 #include <memory>

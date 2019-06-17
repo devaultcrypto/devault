@@ -3,10 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 #pragma once
 
-#include "key.h"
-#include "mnemonic.h"
-#include "sync.h"
-#include "support/allocators/secure.h"
+#include <key.h>
+#include <wallet/mnemonic.h>
+#include <sync.h>
+#include <support/allocators/secure.h>
 
 
 /* hd account data model */

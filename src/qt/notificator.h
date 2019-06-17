@@ -5,7 +5,7 @@
 #ifndef BITCOIN_QT_NOTIFICATOR_H
 #define BITCOIN_QT_NOTIFICATOR_H
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
 #include <QIcon>
 #include <QObject>

@@ -7,8 +7,8 @@
 #include <memory>
 
 #include <interfaces/node.h>
-#include "policy/policy.h"
-//#include "wallet/wallet.h"
+#include <policy/policy.h>
+//#include <wallet/wallet.h>
 
 WalletModelTransaction::WalletModelTransaction(
     const QList<SendCoinsRecipient> &_recipients)

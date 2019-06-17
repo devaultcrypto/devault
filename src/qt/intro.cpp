@@ -3,16 +3,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 #endif
 
-#include "fs_util.h"
-#include "dvtui.h"
-#include "guiutil.h"
-#include "interfaces/node.h"
-#include "intro.h"
-#include "ui_intro.h"
-#include "util.h"
+#include <fs_util.h>
+#include <dvtui.h>
+#include <guiutil.h>
+#include <interfaces/node.h>
+#include <intro.h>
+#include <ui_intro.h>
+#include <util.h>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -66,7 +66,7 @@ private:
     Intro *intro;
 };
 
-#include "intro.moc"
+#include <intro.moc>
 
 FreespaceChecker::FreespaceChecker(Intro *_intro) {
     this->intro = _intro;

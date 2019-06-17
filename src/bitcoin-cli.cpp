@@ -3,16 +3,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "chainparamsbase.h"
-#include "clientversion.h"
-#include "rpc/client.h"
-#include "rpc/protocol.h"
-#include "support/events.h"
-#include "util.h"
-#include "fs_util.h"
-#include "utilstrencodings.h"
+#include <chainparamsbase.h>
+#include <clientversion.h>
+#include <rpc/client.h>
+#include <rpc/protocol.h>
+#include <support/events.h>
+#include <util.h>
+#include <fs_util.h>
+#include <utilstrencodings.h>
 
 #include <cstdio>
 

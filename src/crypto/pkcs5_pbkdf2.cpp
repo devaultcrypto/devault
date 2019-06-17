@@ -14,14 +14,14 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "pkcs5_pbkdf2.h"
+#include <crypto/pkcs5_pbkdf2.h>
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hmac_sha512.h"
-#include "zeroize.h"
+#include <crypto/hmac_sha512.h>
+#include <crypto/zeroize.h>
 #include <memory>
 
 int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,

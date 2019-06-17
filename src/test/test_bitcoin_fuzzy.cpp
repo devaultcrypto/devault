@@ -2,21 +2,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "config/bitcoin-config.h"
+#include <config/bitcoin-config.h>
 
-#include "addrman.h"
-#include "chain.h"
-#include "coins.h"
-#include "compressor.h"
-#include "consensus/merkle.h"
-#include "net.h"
-#include "primitives/block.h"
-#include "protocol.h"
-#include "pubkey.h"
-#include "script/script.h"
-#include "streams.h"
-#include "undo.h"
-#include "version.h"
+#include <addrman.h>
+#include <chain.h>
+#include <coins.h>
+#include <compressor.h>
+#include <consensus/merkle.h>
+#include <net.h>
+#include <primitives/block.h>
+#include <protocol.h>
+#include <pubkey.h>
+#include <script/script.h>
+#include <streams.h>
+#include <undo.h>
+#include <version.h>
 
 #include <cstdint>
 #include <unistd.h>

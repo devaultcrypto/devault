@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "serialize.h"
-#include "uint256.h"
+#include <serialize.h>
+#include <uint256.h>
 
 struct CTimestampIndexIteratorKey {
     uint32_t timestamp;
