@@ -41,7 +41,7 @@ add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
 add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
 add_feature_info(WITH_REDUCED_EXPORTS ENABLE_REDUCE_EXPORTS "Reduce amount of exported symbols")
 add_feature_info(WITH_QRCODE ENABLE_QRCODE "Enable QR code display")
-add_feature_info(WITH_STD_FILESYSTEM "Enable trying to use std::filesystem")
+add_feature_info(WITH_STD_FILESYSTEM BUILD_STD_FILESYSTEM "Enable trying to use std::filesystem")
 
 set(CMAKE_REQUIRED_QUIET true)
 

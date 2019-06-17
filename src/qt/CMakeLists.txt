@@ -89,6 +89,7 @@ if (QREncode_FOUND)
   set(QR_LIB ${QREncode_LIBRARY})
 else()
   message(STATUS " QREncode NOT FOUND ")
+  set(ENABLE_QRCODE false)
 endif()
  
 
