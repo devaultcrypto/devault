@@ -26,6 +26,7 @@ option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
 option(ENABLE_REDUCE_EXPORTS "Reduce the amount of exported symbols" OFF)
 option(ENABLE_QRCODE "Enable QR code display" ON)
+option(BUILD_STD_FILESYSTEM "Enable trying to use std::filesystem" OFF)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -40,6 +41,7 @@ add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
 add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
 add_feature_info(WITH_REDUCED_EXPORTS ENABLE_REDUCE_EXPORTS "Reduce amount of exported symbols")
 add_feature_info(WITH_QRCODE ENABLE_QRCODE "Enable QR code display")
+add_feature_info(WITH_STD_FILESYSTEM "Enable trying to use std::filesystem")
 
 set(CMAKE_REQUIRED_QUIET true)
 
@@ -221,14 +223,18 @@ add_subdirectory(crypto)
 
 # Boost packages required (Later check for and replace with std::filesystem
 # but currently not working with any compilers)
-find_package(Filesystem)
-if (Filesystem_FOUND)
-  message(STATUS "Found std::filesystem , adding define NO_BOOST_FILESYSTEM")
-  add_definitions("-DNO_BOOST_FILESYSTEM")
+if (BUILD_STD_FILESYSTEM)
+  find_package(Filesystem)
+  if (Filesystem_FOUND)
+    message(STATUS "Found std::filesystem , adding define NO_BOOST_FILESYSTEM")
+    add_definitions("-DNO_BOOST_FILESYSTEM")
+  else()
+    set(BOOST_PACKAGES_REQUIRED filesystem system)
+  endif()
 else()
-  set(BOOST_PACKAGES_REQUIRED filesystem)
+  set(BOOST_PACKAGES_REQUIRED filesystem system) # system needed if boost < 1.69
 endif()
-
+  
 # Can change to LevelDB if needed
 if (BUILD_ROCKSDB)
   find_package(RocksDB) # REQUIRED)
@@ -347,7 +353,7 @@ endfunction(prepend)
 
 if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
-  find_package(Boost 1.58)
+  find_package(Boost 1.69) # bump up requirement to 1.69 so boost::system is not needed
   target_link_libraries(util univalue crypto sodium std::filesystem)
   # can probably be more selective than this, but needed for now
   include_directories($include_directories "${Boost_INCLUDE_DIR}")
