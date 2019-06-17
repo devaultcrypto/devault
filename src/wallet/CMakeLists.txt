@@ -14,7 +14,7 @@ source_group("WalletHeaders" FILES ${WALLET_HEADERS})
 
 add_library(wallet
   ${WALLET_HEADERS}
-	../interfaces/wallet.cpp
+  ../interfaces/wallet.cpp
   ../script/ismine.cpp
   ../rpc/rpcutil.cpp
 	crypter.cpp
@@ -35,4 +35,11 @@ add_library(wallet
 
 target_link_libraries(wallet util univalue Event ${BDBXX_LIBRARY})
 
-target_include_directories(wallet PUBLIC ${BDBXX_INCLUDE_DIR})
+if (BUILD_ROCKSDB)
+  target_include_directories(wallet  PUBLIC ${BDBXX_INCLUDE_DIR} )
+else()
+  target_include_directories(wallet
+    PUBLIC ${BDBXX_INCLUDE_DIR}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
+    )
+endif()
