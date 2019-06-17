@@ -299,8 +299,11 @@ public:
                                         sock != INVALID_SOCKET) {
             char pchBuf[0x10000];
             fd_set set;
+            fd_set set2;
             FD_ZERO(&set);
+            FD_ZERO(&set2);
             FD_SET(sock, &set);
+            FD_SET(sock, &set2);
             struct timeval wa;
             if (doneAfter) {
                 wa.tv_sec = doneAfter - now;
@@ -309,7 +312,7 @@ public:
                 wa.tv_sec = GetTimeout();
                 wa.tv_usec = 0;
             }
-            int ret = select(sock + 1, &set, nullptr, &set, &wa);
+            int ret = select(sock + 1, &set2, nullptr, &set, &wa);
             if (ret != 1) {
                 if (!doneAfter) res = false;
                 break;
