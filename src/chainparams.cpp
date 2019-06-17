@@ -168,8 +168,8 @@ public:
 
             }};
 
-        // Data as of block 5046
-        chainTxData = ChainTxData{1560217195, 2013, 1};
+        // Data as of block 9825
+        chainTxData = ChainTxData{1560797550, 10997, 0.1};
     }
 };
 
