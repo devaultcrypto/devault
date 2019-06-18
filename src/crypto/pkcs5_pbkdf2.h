@@ -16,8 +16,8 @@
  */
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 /* Password-Based Key Derivation Function 2 (PKCS #5 v2.0). */
 /* Code based on IEEE Std 802.11-2007, Annex H.4.2. */

@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <crypto/hmac_sha512.h>
-#include <crypto/zeroize.h>
+#include <support/cleanse.h>
 #include <memory>
 
 int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
@@ -74,10 +74,10 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
         key_length -= length;
     };
 
-    zeroize(digest1, sizeof(digest1));
-    zeroize(digest2, sizeof(digest2));
-    zeroize(buffer, sizeof(buffer));
-    zeroize(asalt.get(), asalt_size);
+    memory_cleanse(digest1, sizeof(digest1));
+    memory_cleanse(digest2, sizeof(digest2));
+    memory_cleanse(buffer, sizeof(buffer));
+    memory_cleanse(asalt.get(), asalt_size);
 
     return 0;
 }

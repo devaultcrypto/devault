@@ -17,8 +17,6 @@ add_library(crypto
 	sha256.cpp
 	sha256_sse4.cpp
 	sha512.cpp
-  # new
-  zeroize.c
   pkcs5_pbkdf2.cpp
 	siphash.cpp
 )
