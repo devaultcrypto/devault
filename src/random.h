@@ -10,6 +10,7 @@
 #include <crypto/common.h>
 #include <uint256.h>
 #include <cstdint>
+#include <string>
 
 // Functions to gather random data
 void GetRandBytes(uint8_t *buf, int num);
@@ -18,6 +19,7 @@ void GetStrongRandBytes(uint8_t *buf, int num);
 uint64_t GetRand(uint64_t nMax);
 int GetRandInt(int nMax);
 uint256 GetRandHash();
+std::string GetRandString(int len);
 
 /**
  * Fast randomness source. This is seeded once with secure random data, but is

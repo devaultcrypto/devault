@@ -6,6 +6,7 @@
 
 #include <random.h>
 #include <support/cleanse.h>
+#include <utilstrencodings.h>
 #include <cstdlib>
 #include <limits>
 #include <sodium/core.h>
@@ -37,6 +38,12 @@ uint256 GetRandHash() {
   uint256 hash;
   GetRandBytes((uint8_t *)&hash, sizeof(hash));
   return hash;
+}
+
+std::string GetRandString(int len) {
+    std::vector<uint8_t> buf(len);
+    GetRandBytes(buf);
+    return HexStr(buf.begin(), buf.end());
 }
 
 void FastRandomContext::RandomSeed() {

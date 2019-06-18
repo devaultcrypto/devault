@@ -9,6 +9,7 @@
 #include <util.h>
 #include <chainparamsbase.h>
 #include <ui_interface.h>
+#include <random.h>
 #include <boost/interprocess/sync/file_lock.hpp>
 
 #ifndef WIN32
@@ -141,7 +142,8 @@ bool CheckIfWalletDatExists(bool fNetSpecific) {
 }
 
 bool DirIsWritable(const fs::path &directory) {
-    fs::path tmpFile = directory / fs::unique_path();
+    std::string hexrandom = "rand" + GetRandString(16);
+    fs::path tmpFile = directory / hexrandom;
 
     FILE *file = fsbridge::fopen(tmpFile, "a");
     if (!file) {
@@ -499,7 +501,8 @@ const fs::path &GetBlocksDir(bool fNetSpecific) {
     }
 
     if (gArgs.IsArgSet("-blocksdir")) {
-        path = fs::system_complete(gArgs.GetArg("-blocksdir", ""));
+        fs::path p = gArgs.GetArg("-blocksdir", "");
+        path = fs::absolute(p);
         if (!fs::is_directory(path)) {
             path = "";
             return path;
