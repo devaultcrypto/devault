@@ -504,8 +504,11 @@ endif()
 
 # ZeroMQ
 if (BUILD_ZMQ)
-	add_subdirectory(zmq)
-	target_link_libraries(server zmq)
+  find_package(ZeroMQ REQUIRED)
+  if (ZeroMQ_FOUND) 
+	  add_subdirectory(zmq)
+	  target_link_libraries(server zmq)
+  endif()
 endif()
 
 # RPC client support
