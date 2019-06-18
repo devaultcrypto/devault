@@ -202,6 +202,10 @@ if (EXISTS	"${CMAKE_CURRENT_SOURCE_DIR}/config/bitcoin-config.h")
   message(FATAL_ERROR ": Please delete ${CMAKE_CURRENT_SOURCE_DIR}/config/bitcoin-config.h before continuing")
 endif()
 
+if (EXISTS	"${CMAKE_CURRENT_SOURCE_DIR}/config/version.h")
+  message(FATAL_ERROR ": Please delete ${CMAKE_CURRENT_SOURCE_DIR}/config/version.h before continuing")
+endif()
+
 
 include(BrewHelper)
 
@@ -305,6 +309,7 @@ add_library(util
 	rcu.cpp
 	rpc/protocol.cpp
 	rpc/rpcutil.cpp
+	rpc/rpcgeneric.cpp
 	support/cleanse.cpp
 	support/lockedpool.cpp
 	sync.cpp
