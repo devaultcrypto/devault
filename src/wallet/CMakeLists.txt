@@ -35,11 +35,11 @@ add_library(wallet
 
 target_link_libraries(wallet util univalue Event ${BDBXX_LIBRARY})
 
-if (BUILD_ROCKSDB)
+if (RocksDB_FOUND)
   target_include_directories(wallet  PUBLIC ${BDBXX_INCLUDE_DIR} )
 else()
   target_include_directories(wallet
     PUBLIC ${BDBXX_INCLUDE_DIR}
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
     )
 endif()
