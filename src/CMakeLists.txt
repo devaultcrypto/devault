@@ -504,7 +504,7 @@ endif()
 
 # ZeroMQ
 if (BUILD_ZMQ)
-  find_package(ZeroMQ REQUIRED)
+  find_package(ZeroMQ)
   if (ZeroMQ_FOUND) 
 	  add_subdirectory(zmq)
 	  target_link_libraries(server zmq)
