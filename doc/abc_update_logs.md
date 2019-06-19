@@ -49,7 +49,7 @@
       Add -avoidpartialspends and m_avoid_partial_spends
       wallet: Add output grouping
       Fix inconsistencies and grammar in various files
-      fix BIP37 processing for non-topologically ordered blocks
+##### fix BIP37 processing for non-topologically ordered blocks
       unsigned int -> size_t in merkleblock-related code
       Remove unknown version warning from UpdateTip
       Merge #13726: Utils and libraries: Removes the boost/algorithm/string/join dependency
@@ -73,7 +73,7 @@
       Use a unique index for the running jobs in case of duplicated names
       [LINTER] Prevent including a source file
       [consensus] Pin P2SH activation to block 173805 on mainnet
-      Merge #8498: Near-Bugfix: Optimization: Minimize the number of times it is checked that no money...
+##### Merge #8498: Near-Bugfix: Optimization: Minimize the number of times it is checked that no money...
 ##### Merge #10196: Bugfix: PrioritiseTransaction updates the mempool tx counter
 ##### Merge #10228: build: regenerate bitcoin-config.h as necessary
       Remove unecessary include of boost/version
