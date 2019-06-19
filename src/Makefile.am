@@ -341,6 +341,8 @@ libbitcoin_wallet_a_SOURCES = \
 crypto_libbitcoin_crypto_base_a_CPPFLAGS = $(AM_CPPFLAGS)
 crypto_libbitcoin_crypto_base_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libbitcoin_crypto_base_a_SOURCES = \
+  support/cleanse.h \
+  support/cleanse.cpp \
   crypto/pkcs5_pbkdf2.h \
   crypto/pkcs5_pbkdf2.cpp \
   crypto/aes.cpp \
