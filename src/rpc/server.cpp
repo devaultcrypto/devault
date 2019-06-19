@@ -141,10 +141,12 @@ Amount AmountFromValue(const UniValue &value) {
     }
 
     int64_t n;
+    // Just check for Invalid amount
     if (!ParseFixedPoint(value.getValStr(), Amount::AMOUNT_DECIMALS, &n)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
     }
 
+    ParseFixedPoint(value.getValStr(), 8, &n);
     Amount amt(n);
     if (!MoneyRange(amt)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Amount out of range");
