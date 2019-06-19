@@ -1,10 +1,10 @@
-#include <bitcoin.h>
-#include <clientversion.h>
-#include <db.h>
-#include <dns.h>
-#include <logging.h>
-#include <protocol.h>
-#include <streams.h>
+#include "bitcoin.h"
+#include "clientversion.h"
+#include "db.h"
+#include "dns.h"
+#include "logging.h"
+#include "protocol.h"
+#include "streams.h"
 
 #include <algorithm>
 #include <atomic>
