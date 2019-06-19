@@ -32,6 +32,7 @@
 #include <warnings.h>
 
 #include <setpassphrasedialog.h>
+#include <startoptionsmain.h>
 #include <walletmodel.h>
 
 #include <init.h>
@@ -227,6 +228,9 @@ public:
     /// Get wallet password from user for Wallet Encryption or return true if wallet pre-exists
     bool setupPassword(SecureString& password);
 
+    /// Get mnemonic words on first startup
+    bool setupMnemonicWords(std::vector<std::string>& wordlist);
+
     /// Request core initialization
     void requestInitialize(Config &config, RPCServer &rpcServer,
                            HTTPRPCRequestProcessor &httpRPCRequestProcessor);
@@ -394,6 +398,24 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
   return false;
 }
 
+// this will be used to get mnemonic words
+bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& wordlist) {
+    if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
+        LogPrintf("Wallet disabled!\n");
+    } else {
+        for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+            if (fs::exists(walletFile)) return true;
+        }
+    }
+    if (CheckIfWalletDatExists()) return true;
+
+    StartOptionsMain dlg(nullptr);
+    dlg.exec();
+    wordlist = dlg.getWords();
+    return false;
+}
+
+
 bool BitcoinApplication::createWindow(const Config *config,
                                       const NetworkStyle *networkStyle) {
 
@@ -401,7 +423,11 @@ bool BitcoinApplication::createWindow(const Config *config,
     if (!setupPassword(pss)) {
         if (pss.empty()) return false;
     }
+    if (!setupMnemonicWords(wordlist)) {
+        if (wordlist.empty()) return false;
+    }
   }
+  
   window = new BitcoinGUI(m_node, config, platformStyle, networkStyle, nullptr);
 
   pollShutdownTimer = new QTimer(window);
