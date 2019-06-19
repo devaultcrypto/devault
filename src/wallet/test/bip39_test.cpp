@@ -108,19 +108,23 @@ const MnemonicDataList mnemonicTestData = {
       language::en}}};
 }
 
-BOOST_AUTO_TEST_CASE(bip39_test) {
+BOOST_AUTO_TEST_CASE(bip39_tests) {
   for (const auto &testData : mnemonicTestData) {
     auto bits = from_hex(testData.entropy);
     WordList wordList = mapBitsToMnemonic(bits, testData.language);
+    /*
     std::cout << "entropy = " << testData.entropy << "\n";
     std::cout << "Wordlist = " << join(wordList,",") << "\n";
     std::cout << "mnemonic = " << testData.mnemonic << "\n";
+    */
     assert(testData.mnemonic == join(wordList, ","));
 
     std::vector<uint8_t> hash = decodeMnemonic(wordList);
     auto hex_data = HexStr(hash);
+    /*
     std::cout << "hex_data= " << hex_data << "\n";
     std::cout << "ref hex_data= " << testData.seed << "\n";
+    */
     assert(testData.seed == HexStr(hash));
   }
 }

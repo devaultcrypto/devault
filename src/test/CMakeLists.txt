@@ -165,14 +165,13 @@ if(BOOST_TEST_DYN_LINK)
 	target_compile_definitions(test_devault PRIVATE BOOST_TEST_DYN_LINK)
 endif(BOOST_TEST_DYN_LINK)
 
-if(BUILD_WALLET_XXX)
+if(BUILD_WALLET)
 	target_sources(test_devault
 		PRIVATE
 			../wallet/test/wallet_test_fixture.cpp
 			../wallet/test/accounting_tests.cpp
-			../wallet/test/wallet_tests.cpp
-			../wallet/test/walletdb_tests.cpp
-#			../wallet/test/wallet_crypto_tests.cpp
 			../wallet/test/bip39_test.cpp
+			../wallet/test/walletdb_tests.cpp
+			../wallet/test/wallet_tests.cpp
 	)
 endif()
