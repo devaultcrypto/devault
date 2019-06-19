@@ -463,6 +463,7 @@ add_library(server
 	torcontrol.cpp
 	txdb.cpp
 	txmempool.cpp
+  upgrade_check.cpp
 	validation.cpp
 	validationinterface.cpp
 )

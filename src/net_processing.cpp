@@ -30,6 +30,7 @@
 #include <tinyformat.h>
 #include <txmempool.h>
 #include <ui_interface.h>
+#include <upgrade_check.h> 
 #include <util.h>
 #include <utilmoneystr.h>
 #include <utilstrencodings.h>
@@ -37,8 +38,11 @@
 #include <validationinterface.h>
 
 #if defined(NDEBUG)
+// raw asserts have no side effects below
 #error "DeVault cannot be compiled without assertions."
 #endif
+
+
 
 // Used only to inform the wallet of when we last received a block.
 std::atomic<int64_t> nTimeBestReceived(0);
@@ -1993,6 +1997,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             remoteAddr = ", peeraddr=" + pfrom->addr.ToString();
         }
 
+        // cleanSubVer has /DeVault.../ for us
+        ShouldUpgrade(cleanSubVer);
+      
         LogPrint(BCLog::NET,
                  "receive version message: [%s] %s: version %d, blocks=%d, "
                  "us=%s, peer=%d%s\n",
