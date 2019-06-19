@@ -532,9 +532,11 @@ static Amount AmountFromValue(const UniValue &value) {
     }
 
     int64_t n;
-    if (!ParseFixedPoint(value.getValStr(), 8, &n)) {
+    if (!ParseFixedPoint(value.getValStr(), Amount::AMOUNT_DECIMALS, &n)) {
         throw std::runtime_error("Invalid amount");
     }
+  
+    ParseFixedPoint(value.getValStr(),8, &n);
     Amount amount(n);
 
     if (!MoneyRange(amount)) {
