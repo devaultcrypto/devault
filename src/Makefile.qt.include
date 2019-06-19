@@ -98,6 +98,12 @@ QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
   qt/forms/askpassphrasedialog.ui \
   qt/forms/setpassphrasedialog.ui \
+  qt/forms/startoptionsdialog.ui \
+  qt/forms/startoptions.ui \
+  qt/forms/startoptionsrestore.ui \
+  qt/forms/startoptionssort.ui \
+  qt/forms/startoptionsrevealed.ui \
+  qt/forms/startoptionsmain.ui \
   qt/forms/coincontroldialog.ui \
   qt/forms/editaddressdialog.ui \
   qt/forms/helpmessagedialog.ui \
@@ -119,6 +125,12 @@ QT_MOC_CPP = \
   qt/moc_addresstablemodel.cpp \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_setpassphrasedialog.cpp \
+  qt/moc_startoptionsdialog.cpp \
+  qt/moc_startoptions.cpp \
+  qt/moc_startoptionsrestore.cpp \
+  qt/moc_startoptionssort.cpp \
+  qt/moc_startoptionsrevealed.cpp \
+  qt/moc_startoptionsmain.cpp \
   qt/moc_bantablemodel.cpp \
   qt/moc_bitcoinaddressvalidator.cpp \
   qt/moc_bitcoinamountfield.cpp \
@@ -182,6 +194,12 @@ BITCOIN_QT_H = \
   qt/addresstablemodel.h \
   qt/askpassphrasedialog.h \
   qt/setpassphrasedialog.h \
+  qt/startoptionsdialog.h \
+  qt/startoptions.h \
+  qt/startoptionsrestore.h \
+  qt/startoptionssort.h \
+  qt/startoptionsrevealed.h \
+  qt/startoptionsmain.h \
   qt/bantablemodel.h \
   qt/bitcoinaddressvalidator.h \
   qt/bitcoinamountfield.h \
@@ -336,6 +354,12 @@ BITCOIN_QT_BASE_CPP = \
   qt/splashscreen.cpp \
   qt/trafficgraphwidget.cpp \
   qt/setpassphrasedialog.cpp \
+  qt/startoptionsdialog.cpp \
+  qt/startoptions.cpp \
+  qt/startoptionsrestore.cpp \
+  qt/startoptionssort.cpp \
+  qt/startoptionsrevealed.cpp \
+  qt/startoptionsmain.cpp \
   qt/utilitydialog.cpp
 
 BITCOIN_QT_WINDOWS_CPP = qt/winshutdownmonitor.cpp
@@ -381,7 +405,7 @@ RES_MOVIES = $(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
 BITCOIN_RC = qt/res/bitcoin-qt-res.rc
 
 BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
-  -I$(builddir)/qt/forms -DQT_NO_KEYWORDS
+  -I$(builddir)/qt/forms
 
 qt_libbitcoinqt_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
   $(QT_INCLUDES) $(QT_DBUS_INCLUDES) $(QR_CFLAGS)
