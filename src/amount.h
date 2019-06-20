@@ -144,8 +144,12 @@ public:
     int64_t toIntCoins() const { return amount/COIN_PRECISION; }
 
     std::string ToString() const {
-        // Note: not using straight sprintf here because we do NOT want localized number formatting.
+      // Note: not using straight sprintf here because we do NOT want localized number formatting.
+      if (amount < 0) {
+        return strprintf("%d.%03d", toIntCoins(), -(amount % COIN_PRECISION)/MIN_AMOUNT);
+      } else {
         return strprintf("%d.%03d", toIntCoins(), (amount % COIN_PRECISION)/MIN_AMOUNT);
+      }
     }
 
 
