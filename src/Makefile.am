@@ -185,7 +185,7 @@ BITCOIN_CORE_H = \
   rpc/rawtransaction.h \
   rpc/server.h \
   rpc/register.h \
-  rpc/rpcutil.h \
+  rpc/util.h \
   rwcollection.h \
   scheduler.h \
   script/scriptcache.h \
@@ -286,7 +286,7 @@ libbitcoin_server_a_SOURCES = \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
   rpc/server.cpp \
-  wallet/misc.cpp \
+  rpc/misc.cpp \
   script/scriptcache.cpp \
   script/sigcache.cpp \
   script/ismine.cpp \
@@ -319,7 +319,7 @@ libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_wallet_a_SOURCES = \
   script/ismine.cpp \
-  rpc/rpcutil.cpp \
+  rpc/util.cpp \
   interfaces/wallet.cpp \
   wallet/hdchain.cpp \
   wallet/crypter.cpp \
@@ -472,7 +472,7 @@ libbitcoin_util_a_SOURCES = \
   random.cpp \
   rcu.cpp \
   rpc/protocol.cpp \
-  rpc/rpcutil.cpp \
+  rpc/util.cpp \
   support/cleanse.cpp \
   sync.cpp \
   threadinterrupt.cpp \

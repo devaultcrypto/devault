@@ -5,6 +5,7 @@
 #if defined(HAVE_CONFIG_H)
 #include <config/bitcoin-config.h>
 #endif
+#include <config/version.h>
 
 #include <fs_util.h>
 #include <dvtui.h>

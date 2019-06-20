@@ -15,7 +15,7 @@
 #include <policy/policy.h>
 #include <rpc/mining.h>
 #include <wallet/misc.h>
-#include <rpc/rpcutil.h>
+#include <rpc/util.h>
 #include <rpc/rawtransaction.h>
 #include <rpc/server.h>
 #include <timedata.h>

@@ -16,7 +16,7 @@ add_library(wallet
   ${WALLET_HEADERS}
   ../interfaces/wallet.cpp
   ../script/ismine.cpp
-  ../rpc/rpcutil.cpp
+  ../rpc/util.cpp
 	crypter.cpp
 	db.cpp
 	fees.cpp

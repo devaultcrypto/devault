@@ -1,15 +1,7 @@
 // Copyright (c) 2017 The Bitcoin developers
+// Copyright (c) 2019 The DeVault developers
 
-#ifndef BITCOIN_CONFIG_BITCOIN_CONFIG_H
-#define BITCOIN_CONFIG_BITCOIN_CONFIG_H
-
-#define PACKAGE_NAME "${PACKAGE_NAME}"
-
-#define COPYRIGHT_YEAR "${COPYRIGHT_YEAR}"
-#define COPYRIGHT_HOLDERS "${COPYRIGHT_HOLDERS}"
-#define COPYRIGHT_HOLDERS_SUBSTITUTION "${COPYRIGHT_HOLDERS_SUBSTITUTION}"
-#define COPYRIGHT_HOLDERS_FINAL "${COPYRIGHT_HOLDERS_FINAL}"
-#define BUILD_SUFFIX "${BUILD_SUFFIX}"
+#pragma once
 
 #cmakedefine HAVE_ENDIAN_H 1
 #cmakedefine HAVE_SYS_ENDIAN_H 1
@@ -59,4 +51,3 @@
 /* Define if QR support should be compiled in */
 #cmakedefine USE_QRCODE 1
 
-#endif // BITCOIN_BITCOIN_CONFIG_H

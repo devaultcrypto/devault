@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <config/bitcoin-config.h>
+#include <config/version.h>
 
 #include <timedata.h>
 

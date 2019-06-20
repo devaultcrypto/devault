@@ -15,7 +15,11 @@ void RegisterBlockchainRPCCommands(CRPCTable &tableRPC);
 /** Register P2P networking RPC commands */
 void RegisterNetRPCCommands(CRPCTable &tableRPC);
 /** Register miscellaneous RPC commands */
+#ifdef ENABLE_WALLET
 void RegisterMiscRPCCommands(CRPCTable &tableRPC);
+#endif
+/** Register miscellaneous RPC (without wallet required) commands */
+void RegisterGenericRPCCommands(CRPCTable &tableRPC);
 /** Register mining RPC commands */
 void RegisterMiningRPCCommands(CRPCTable &tableRPC);
 /** Register raw transaction RPC commands */
@@ -30,7 +34,10 @@ void RegisterABCRPCCommands(CRPCTable &tableRPC);
 static inline void RegisterAllContextFreeRPCCommands(CRPCTable &t) {
     RegisterBlockchainRPCCommands(t);
     RegisterNetRPCCommands(t);
+#ifdef ENABLE_WALLET
     RegisterMiscRPCCommands(t);
+#endif
+    RegisterGenericRPCCommands(t);
     RegisterMiningRPCCommands(t);
     RegisterRawTransactionRPCCommands(t);
     RegisterABCRPCCommands(t);
