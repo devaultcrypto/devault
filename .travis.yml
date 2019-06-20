@@ -64,23 +64,12 @@ jobs:
     - name: '64-bit Linux (bionic)'
       env: >-
         HOST=x86_64-unknown-linux-gnu
-        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev"
+        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev"
         NO_DEPENDS=1
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false
         GOAL="install"
         BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports CXXFLAGS=\"-g0 -O2\""
-
-    - name: '64-bit Linux - disable-wallet'
-      env: >-
-        HOST=x86_64-unknown-linux-gnu
-        DOCKER_NAME_TAG=ubuntu:18.04
-        PACKAGES="clang llvm python3-zmq qtbase5-dev qttools5-dev-tools libssl-dev libevent-dev bsdmainutils libboost-all-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev"
-        NO_DEPENDS=1
-        RUN_UNIT_TESTS=false
-        RUN_FUNCTIONAL_TESTS=false
-        GOAL="install"
-        BITCOIN_CONFIG="--disable-wallet --without-gui --enable-glibc-back-compat --enable-reduce-exports"
 
     - name: 'Win32'
       env: >-
@@ -110,3 +99,25 @@ jobs:
         RUN_FUNCTIONAL_TESTS=false
         GOAL="deploy"
         BITCOIN_CONFIG="--enable-gui --enable-reduce-exports --enable-werror"
+
+    - name: '64-bit Linux - disable-wallet'
+      env: >-
+        HOST=x86_64-unknown-linux-gnu
+        DOCKER_NAME_TAG=ubuntu:18.04
+        PACKAGES="clang llvm python3-zmq libevent-dev bsdmainutils libboost-all-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev"
+        NO_DEPENDS=1
+        RUN_UNIT_TESTS=false
+        RUN_FUNCTIONAL_TESTS=false
+        GOAL="install"
+        BITCOIN_CONFIG="--disable-wallet --without-gui --enable-glibc-back-compat --enable-reduce-exports"
+
+    - name: 'Testing Build - (cmake)'
+      env: >-
+        HOST=x86_64-linux-gnu
+        DOCKER_NAME_TAG=ubuntu:18.04
+        PACKAGES="clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev cmake"
+        NO_DEPENDS=1
+        RUN_UNIT_TESTS=false
+        RUN_FUNCTIONAL_TESTS=false
+        GOAL="install"
+        BITCOIN_CONFIG="--enable-glibc-back-compat --enable-reduce-exports"
