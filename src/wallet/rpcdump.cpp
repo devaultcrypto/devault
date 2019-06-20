@@ -1500,6 +1500,7 @@ static UniValue getmyrewardinfo(const Config &config, const JSONRPCRequest &requ
             int blocksNeeded = payoutHeight - chainActive.Height();
             // Use blocksNeeded to estimate date
             std::time_t nexttime = cftime + blocksNeeded*nPowTargetSpacing;
+            delta.push_back(Pair("estimated reward block", payoutHeight));
             delta.push_back(Pair("estimated next reward date", FormatISO8601Date(nexttime)));
             
             result.push_back(delta);
