@@ -113,7 +113,7 @@ void TestPackageSelection(Config &config, CScript scriptPubKey,
 
     // Calculate a fee on child transaction that will put the package just
     // below the block min tx fee (assuming 1 child tx of the same size).
-    Amount feeToUse = blockMinFeeRate.GetFee(2 * freeTxSize) - Amount(1);
+    Amount feeToUse = blockMinFeeRate.GetFee(2 * freeTxSize) - Amount::min_amount();
 
     tx.vin[0].prevout = COutPoint(freeTxId, 0);
     tx.vout[0].nValue = Amount(5000000000LL - 1000 - 50000) - feeToUse;
@@ -132,7 +132,7 @@ void TestPackageSelection(Config &config, CScript scriptPubKey,
     // transaction and replace with a higher fee transaction
     g_mempool.removeRecursive(CTransaction(tx));
     // Now we should be just over the min relay fee.
-    tx.vout[0].nValue -= 2 * Amount(1);
+    tx.vout[0].nValue -= 2 * Amount::min_amount();
     lowFeeTxId = tx.GetId();
     g_mempool.addUnchecked(lowFeeTxId,
                            entry.Fee(feeToUse + Amount(2)).FromTx(tx));

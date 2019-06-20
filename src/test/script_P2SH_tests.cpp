@@ -36,7 +36,7 @@ static bool Verify(const CScript &scriptSig, const CScript &scriptPubKey,
     txTo.vout.resize(1);
     txTo.vin[0].prevout = COutPoint(txFrom.GetId(), 0);
     txTo.vin[0].scriptSig = scriptSig;
-    txTo.vout[0].nValue = Amount(1);
+    txTo.vout[0].nValue = Amount::min_amount();
 
     return VerifyScript(
         scriptSig, scriptPubKey,
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(sign) {
         txTo[i].vin.resize(1);
         txTo[i].vout.resize(1);
         txTo[i].vin[0].prevout = COutPoint(txFrom.GetId(), i);
-        txTo[i].vout[0].nValue = Amount(1);
+        txTo[i].vout[0].nValue = Amount::min_amount();
         BOOST_CHECK_MESSAGE(IsMine(keystore, txFrom.vout[i].scriptPubKey),
                             strprintf("IsMine %d", i));
     }

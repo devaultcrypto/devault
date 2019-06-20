@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
   Amount nDustThreshold = 3 * 182 * dustRelayFee.GetFeePerK() / 1000;
   BOOST_CHECK_EQUAL(nDustThreshold, Amount(546));
   // dust:
-  t.vout[0].nValue = nDustThreshold - Amount(1);
+  t.vout[0].nValue = nDustThreshold - Amount::min_amount();
   BOOST_CHECK(!IsStandardTx(CTransaction(t), reason));
   // not dust:
   t.vout[0].nValue = nDustThreshold;
