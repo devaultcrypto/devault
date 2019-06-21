@@ -3721,13 +3721,16 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
     int64_t missingExternal = std::max<int64_t>(std::max<int64_t>(nTargetSize, 1) - setExternalKeyPool.size(), 0);
     int64_t missingInternal = std::max<int64_t>(std::max<int64_t>(nTargetSize, 1) - setInternalKeyPool.size(), 0);
 
+    // Will generate keys and add to these vectors, when done, flush them to the dB in burst mode
     std::vector<CHDPubKey> hdpubkeys;
     std::vector<CKeyPool> pubkeys;
   
     bool internal = false;
     int64_t saved_keypool_index = m_max_keypool_index;
   
+    int count=1;
     for (int64_t i = missingInternal + missingExternal; i--;) {
+        interruption_point(ShutdownRequested());
         if (i < missingInternal) {
             internal = true;
         }
@@ -3749,6 +3752,11 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
             setExternalKeyPool.insert(index);
         }
         m_pool_key_to_index[pubkey.GetID()] = index;
+      
+        double dProgress = (100.f * count)/ (missingExternal + missingInternal);
+        std::string strMsg = strprintf(_("Adding keys... (%3.2f %%)"), dProgress);
+        if (count%10 == 0) uiInterface.InitMessage(strMsg);
+        count++;
     }
     if (missingInternal + missingExternal > 0) {
         LogPrintf(
@@ -3757,11 +3765,12 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
             setInternalKeyPool.size() + setExternalKeyPool.size(),
             setInternalKeyPool.size());
     }
-    
+  
+    LogPrintf("%s : flushing keys to dB\n",__func__);
     CWalletDB walletdb(*dbw);
     walletdb.WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
     walletdb.WritePool(pubkeys, saved_keypool_index);
-  
+    LogPrintf("done\n");
     return true;
 }
 
