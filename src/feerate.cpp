@@ -29,7 +29,7 @@ static Amount GetFee(size_t nBytes_, Amount nSatoshisPerK) {
   
     if (nFee == Amount::zero() && nSize != 0) {
         if (nSatoshisPerK > Amount::zero()) {
-            nFee = Amount(1);
+            nFee = Amount::min_amount();
         }
         else {
             nFee = Amount();

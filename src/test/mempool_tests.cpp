@@ -734,7 +734,7 @@ BOOST_AUTO_TEST_CASE(MempoolSizeLimitTest) {
 
 #ifdef DEBUG_THIS
   BOOST_CHECK_EQUAL(pool.GetMinFee(pool.DynamicMemoryUsage() * 9 / 2).GetFeePerK(),
-                    (maxFeeRateRemoved.GetFeePerK() + feeIncrement) / 8 + Amount(1));
+                    (maxFeeRateRemoved.GetFeePerK() + feeIncrement) / 8 + Amount::min_amount());
 #endif
   // ... with a 1/4 halflife when mempool is < 1/4 its target size
 
