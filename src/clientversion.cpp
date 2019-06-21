@@ -119,9 +119,15 @@ int UnformatSubVersion(const std::string &name) {
     if (split2.size() == 2) Split(ver_str, split2[0], ".");
 
     if (ver_str.size() == 3) {
-        int CLIENT_VER =  1000000 * std::stoi(ver_str[0]) + 10000 * std::stoi(ver_str[1]) + 100 * std::stoi(ver_str[2]);
+      int CLIENT_VER = 0;
+      try {
+        CLIENT_VER =  1000000 * std::stoi(ver_str[0]) + 10000 * std::stoi(ver_str[1]) + 100 * std::stoi(ver_str[2]);
         return CLIENT_VER;
-    } else {
+      }
+      catch (...) {
         return 0;
+      }
+    } else {
+      return 0;
     }
 }
