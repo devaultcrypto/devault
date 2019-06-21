@@ -863,6 +863,7 @@ public:
      * keystore implementation
      * Generate a new key
      */
+    std::pair<CPubKey,CHDPubKey> GenerateNewKeyWithoutDB(bool internal);
     CPubKey GenerateNewKey(CWalletDB &walletdb, bool internal = false);
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
@@ -1184,7 +1185,6 @@ public:
 
     /* Generates a new HD master key (will not be activated) */
     void GenerateHDMasterKey();
-    CPubKey GenerateNewHDMasterKey();
     void SetupHDMasterKey(const mnemonic::WordList& words);
   
 
@@ -1207,6 +1207,7 @@ public:
     bool HaveKey(const CKeyID &address) const override;
     bool LoadHDPubKey(const CHDPubKey &hdPubKey);
     bool AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal);
+    CHDPubKey AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInternal);
     bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
     bool SetCryptedHDChain(const CHDChain& chain);
     bool SetAndStoreCryptedHDChain(const CHDChain& chain);
