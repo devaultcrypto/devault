@@ -5,7 +5,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <wallet/wallet.h>
-
+#include <benchmark.h>
 #include <chain.h>
 #include <checkpoints.h>
 #include <config.h>
@@ -3713,7 +3713,12 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
   
     bool internal = false;
     int64_t saved_keypool_index = m_max_keypool_index;
-  
+
+    Benchmark timer;
+    Benchmark all_timer;
+
+    all_timer.start();
+    
     int count=1;
     for (int64_t i = missingInternal + missingExternal; i--;) {
         interruption_point(ShutdownRequested());
@@ -3724,6 +3729,8 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
         // How in the hell did you use so many keys?
         assert(m_max_keypool_index < std::numeric_limits<int64_t>::max());
         int64_t index = ++m_max_keypool_index;
+
+        timer.start();
 
         auto key_pair = GenerateNewKeyWithoutDB(internal);
       
@@ -3738,12 +3745,18 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
             setExternalKeyPool.insert(index);
         }
         m_pool_key_to_index[pubkey.GetID()] = index;
-      
+
+        timer.stop();
         double dProgress = (100.f * count)/ (missingExternal + missingInternal);
-        std::string strMsg = strprintf(_("Adding keys... (%3.2f %%)"), dProgress);
+        std::string strMsg = strprintf(_("Adding keys... (%3.2f %%, %d us)"), dProgress, timer.uduration());
         if (count%10 == 0) uiInterface.InitMessage(strMsg);
         count++;
     }
+
+    all_timer.stop();
+    LogPrintf("%s : %d usecs to add keys\n",__func__,all_timer.uduration());
+    
+    
     if (missingInternal + missingExternal > 0) {
         LogPrintf(
             "keypool added %d keys (%d internal), size=%u (%u internal)\n",
