@@ -3840,7 +3840,28 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
             return false;
         }
         CWalletDB walletdb(*dbw);
+#ifndef NEW_METHOD
         result = GenerateNewKey(walletdb, internal);
+#else
+        int saved_keypool_index = -1;
+        auto key_pair = GenerateNewKeyWithoutDB(internal);
+        result = key_pair.first;
+        // Will generate keys and add to these vectors, when done, flush them to the dB in burst mode
+        std::vector<CHDPubKey> hdpubkeys;
+        std::vector<CKeyPool> pubkeys;
+      
+        hdpubkeys.push_back(key_pair.second);
+        pubkeys.push_back(CKeyPool(key_pair.first,internal));
+
+        if (pwalletdbEncryption) {
+          pwalletdbEncryption->WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
+          pwalletdbEncryption->WritePool(pubkeys, saved_keypool_index);
+        } else {
+          walletdb.WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
+          walletdb.WritePool(pubkeys, saved_keypool_index);
+        }
+#endif
+  
         return true;
     }
 
