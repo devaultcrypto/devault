@@ -927,7 +927,7 @@ public:
     bool Unlock(const SecureString &strWalletPassphrase);
     bool ChangeWalletPassphrase(const SecureString &strOldWalletPassphrase,
                                 const SecureString &strNewWalletPassphrase);
-    bool EncryptHDWallet(const CKeyingMaterial& _vMasterKey);
+    bool EncryptHDWallet(const CKeyingMaterial& _vMasterKey, const CHDChain& hdc);
     bool FinishEncryptWallet(const SecureString &strWalletPassphrase);
     bool CreateMasteyKey(const SecureString &strWalletPassphrase,
                          CKeyingMaterial& _vMasterKey);
@@ -1183,11 +1183,6 @@ public:
     /* Set the HD chain model (chain child index counters) */
     bool SetHDChain(const CHDChain &chain);
 
-    /* Generates a new HD master key (will not be activated) */
-    void GenerateHDMasterKey();
-    void SetupHDMasterKey(const mnemonic::WordList& words);
-  
-
     /**
      * Blocks until the wallet state is up-to-date to /at least/ the current
      * chain at the time this function is entered.
@@ -1211,6 +1206,7 @@ public:
     bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
     bool SetCryptedHDChain(const CHDChain& chain);
     bool SetAndStoreCryptedHDChain(const CHDChain& chain);
+  //bool EncyptAndStoreHDChain(const CHDChain& chain);
     bool GetDecryptedHDChain(CHDChain& hdChainRet);
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
   

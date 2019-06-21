@@ -382,6 +382,37 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial &vMasterKeyIn) {
     return true;
 }
 
+bool CCryptoKeyStore::EncryptNewHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc)
+{
+  SetCrypted();
+  
+  hdChain = hdc;
+  std::vector<unsigned char> vchCryptedSeed;
+  if (!EncryptSecret(vMasterKeyIn, hdChain.GetSeed(), hdChain.GetID(), vchCryptedSeed))
+    return false;
+  
+  cryptedHDChain = hdChain; // Will preserve the ID
+  cryptedHDChain.SetCrypted(true);
+  
+  SecureString strMnemonic;
+  std::vector<unsigned char> vchCryptedMnemonic;
+  hdChain.GetMnemonic(strMnemonic);
+  SecureVector vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+  
+  if (!vchMnemonic.empty() && !EncryptSecret(vMasterKeyIn, vchMnemonic, hdChain.GetID(), vchCryptedMnemonic))
+    return false;
+  
+  // Convert to SecureVectors for SetupCrypted
+  SecureVector vchSecureCryptedMnemonic(vchCryptedMnemonic.begin(), vchCryptedMnemonic.end());
+  SecureVector vchSecureCryptedSeed(vchCryptedSeed.begin(), vchCryptedSeed.end());
+  
+  cryptedHDChain.SetupCrypted(vchSecureCryptedMnemonic, vchSecureCryptedSeed);
+  
+  if (!hdChain.SetNull())
+    return false;
+  return true;
+}
+
 bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn)
 {
     SetCrypted();

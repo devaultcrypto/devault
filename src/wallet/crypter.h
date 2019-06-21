@@ -137,6 +137,7 @@ protected:
     bool EncryptKeys(CKeyingMaterial &vMasterKeyIn);
     bool SetHDChain(const CHDChain& chain);
     bool EncryptHDChain(const CKeyingMaterial& vMasterKeyIn);
+    bool EncryptNewHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc);
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
