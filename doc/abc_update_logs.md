@@ -58,7 +58,7 @@
       Trivial: spelling fixes
       Merge #10380: [doc] Removing comments about dirty entries on txmempool
       Replumb ibd.sh to prepare for better post-IBD checks
-      Merge #12250: Make CKey::Load references const
+##### Merge #12250: Make CKey::Load references const
       Fix mining_prioritisetransaction
       fix linting bug in script.py
       Speedup coinselector_tests by using a dummy WalletDBWrapper when apropriate
@@ -67,7 +67,7 @@
       wallet: Make fee settings non-static members
       wallet: Add input bytes to CInputCoin
       moveonly: CoinElegibilityFilter into coinselection.h
-      utils: Add insert() convenience templates
+##### utils: Add insert() convenience templates
       add gdb attach process to doc/functional-tests.md
       qa: Warn when specified test is not found
       Use a unique index for the running jobs in case of duplicated names
@@ -75,7 +75,7 @@
       [consensus] Pin P2SH activation to block 173805 on mainnet
       Merge #8498: Near-Bugfix: Optimization: Minimize the number of times it is checked that no money...
       Merge #10196: Bugfix: PrioritiseTransaction updates the mempool tx counter
-      Merge #10228: build: regenerate bitcoin-config.h as necessary
+##### Merge #10228: build: regenerate bitcoin-config.h as necessary
       Remove unecessary include of boost/version
       Merge #10162: [trivial] Log calls to getblocktemplate
       Merge #10088: Trivial: move several relay options into the relay help group
@@ -102,9 +102,9 @@
       Merge #12652: bitcoin-cli: Provide a better error message when bitcoind is not running
       Merge #10577: Add an explanation of quickly hashing onto a non-power of two range.
       Cleanup ibd.sh
-      Dead code removal
+##### Dead code removal
       [LINTER] Set the rules for the phpdoc comments
-      Add benchmark for AES
+##### Add benchmark for AES
 ##### Merge #14085: index: Fix for indexers skipping genesis block.
 ##### Fix lock reference in miner.h
       Merge #14409: utils and libraries: Make 'blocksdir' always net specific
