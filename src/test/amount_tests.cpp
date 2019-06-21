@@ -103,8 +103,8 @@ BOOST_AUTO_TEST_CASE(AmountTests) {
 
 BOOST_AUTO_TEST_CASE(MoneyRangeTest) {
     BOOST_CHECK_EQUAL(MoneyRange(Amount(-Amount::min_amount())), false);
-    BOOST_CHECK_EQUAL(MoneyRange(MAX_MONEY + Amount(1)), false);
-    BOOST_CHECK_EQUAL(MoneyRange(Amount(1)), true);
+    BOOST_CHECK_EQUAL(MoneyRange(MAX_MONEY + Amount::min_amount()), false);
+    BOOST_CHECK_EQUAL(MoneyRange(Amount::min_amount()), true);
 }
 
 BOOST_AUTO_TEST_CASE(BinaryOperatorTest) {
