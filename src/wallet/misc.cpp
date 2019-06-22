@@ -281,7 +281,7 @@ static UniValue validateaddress(const Config &config,
               // inside if
               if (meta) {
                   CHDChain hdChain;
-                  pwallet->GetHDChain(hdChain);
+                  pwallet->GetCryptedHDChain(hdChain);
                   if (!key_id->IsNull() && pwallet->mapHdPubKeys.count(*key_id)) {
                   ret.push_back(Pair("hdkeypath", pwallet->mapHdPubKeys[*key_id].GetKeyPath()));
                   ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));

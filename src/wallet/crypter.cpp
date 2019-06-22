@@ -464,12 +464,24 @@ bool CCryptoKeyStore::SetCryptedHDChain(const CHDChain& chain)
     cryptedHDChain = chain;
     return true;
 }
-bool CCryptoKeyStore::GetHDChain(CHDChain& hdChainRet) const
+bool CCryptoKeyStore::GetCryptedHDChain(CHDChain& hdChainRet) const
 {
-    if(IsCrypted()) {
-        hdChainRet = cryptedHDChain;
-        return !cryptedHDChain.IsNull();
+  if(IsCrypted()) {
+    hdChainRet = cryptedHDChain;
+    return !cryptedHDChain.IsNull();
+  }
+  
+  return false;
+}
+bool CCryptoKeyStore::GetDecryptedHDChain(CHDChain& hdChainRet) const
+{
+  if(IsCrypted()) {
+    hdChainRet = cryptedHDChain;
+    if (!DecryptHDChain(hdChainRet)) {
+        return false;
     }
-
-    return false;
+    return !cryptedHDChain.IsNull();
+  }
+  
+  return false;
 }

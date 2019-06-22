@@ -198,8 +198,8 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKeyWithoutDB(bool internal) {
     CHDChain hdChainEnc; // Could we just use this and skip decryption???
   
     // Get Encrypted hdChain
-    if (!GetHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": GetHDChain failed");
+    if (!GetCryptedHDChain(hdChainEnc)) {
+      throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
     }
   
     // Decrypt
@@ -711,7 +711,7 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey,
       assert(ok);
         
       CHDChain hdChainCrypted;
-      GetHDChain(hdChainCrypted);
+      GetCryptedHDChain(hdChainCrypted);
       assert(!hdChainCrypted.IsNull());
         
       // ids should match, seed hashes should not
@@ -4613,8 +4613,8 @@ bool CWallet::GetKey(const CKeyID &address, CKey& keyOut) const
         // if the key has been found in mapHdPubKeys, derive it on the fly
         const CHDPubKey &hdPubKey = (*mi).second;
         CHDChain hdChainCurrent;
-        if (!GetHDChain(hdChainCurrent))
-          throw std::runtime_error(std::string(__func__) + ": GetHDChain failed");
+        if (!GetCryptedHDChain(hdChainCurrent))
+          throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
         if (!DecryptHDChain(hdChainCurrent))
           throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
         // make sure seed matches this chain
@@ -4664,7 +4664,7 @@ bool CWallet::AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal)
     AssertLockHeld(cs_wallet);
 
     CHDChain hdChainCurrent;
-    GetHDChain(hdChainCurrent);
+    GetCryptedHDChain(hdChainCurrent);
 
     CHDPubKey hdPubKey;
     hdPubKey.extPubKey = extPubKey;
@@ -4689,7 +4689,7 @@ CHDPubKey CWallet::AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInter
     AssertLockHeld(cs_wallet);
     
     CHDChain hdChainCurrent;
-    GetHDChain(hdChainCurrent);
+    GetCryptedHDChain(hdChainCurrent);
     
     CHDPubKey hdPubKey;
     hdPubKey.extPubKey = extPubKey;

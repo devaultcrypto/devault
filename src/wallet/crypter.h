@@ -157,7 +157,8 @@ public:
     bool GetKey(const CKeyID &address, CKey &keyOut) const override;
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
     std::set<CKeyID> GetKeys() const override;
-    bool GetHDChain(CHDChain& hdChainRet) const;
+    bool GetCryptedHDChain(CHDChain& hdChainRet) const;
+    bool GetDecryptedHDChain(CHDChain& hdChainRet) const;
 
 
     /**

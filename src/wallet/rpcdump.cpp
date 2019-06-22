@@ -785,7 +785,7 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     // add the base58check encoded extended master if the wallet uses HD
     CHDChain hdChain;
     SecureString ssMnemonic;
-    pwallet->GetHDChain(hdChain);
+    pwallet->GetCryptedHDChain(hdChain);
      
     if (!pwallet->GetMnemonic(hdChain, ssMnemonic))
         throw std::runtime_error(std::string(__func__) + ": Get Mnemonic failed");
