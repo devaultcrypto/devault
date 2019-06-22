@@ -1204,7 +1204,6 @@ public:
     bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
     bool SetCryptedHDChain(const CHDChain& chain);
     bool SetAndStoreCryptedHDChain(const CHDChain& chain);
-    bool GetDecryptedHDChain(CHDChain& hdChainRet);
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
   
 };

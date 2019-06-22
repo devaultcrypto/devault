@@ -4613,13 +4613,9 @@ bool CWallet::GetKey(const CKeyID &address, CKey& keyOut) const
         // if the key has been found in mapHdPubKeys, derive it on the fly
         const CHDPubKey &hdPubKey = (*mi).second;
         CHDChain hdChainCurrent;
-        if (!GetCryptedHDChain(hdChainCurrent))
-          throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
-        if (!DecryptHDChain(hdChainCurrent))
-          throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
-        // make sure seed matches this chain
-        if (hdChainCurrent.GetID() != hdChainCurrent.GetSeedHash())
-          throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
+        // Get & Decrypt HDchain
+        if (!CCryptoKeyStore::GetDecryptedHDChain(hdChainCurrent))
+          throw std::runtime_error(std::string(__func__) + ": GetDecryptedHDChain failed");
 
         CExtKey extkey;
         hdChainCurrent.DeriveChildExtKey(hdPubKey.nAccountIndex, hdPubKey.nChangeIndex != 0, hdPubKey.extPubKey.nChild, extkey);
