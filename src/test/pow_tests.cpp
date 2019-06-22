@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(retargeting_test) {
 
     const int long_interval = 24 * 60; // 24 minutes
     
-    std::vector<CBlockIndex> blocks(166);
+    std::vector<CBlockIndex> blocks(200);
 
     const Consensus::Params &params = config.GetChainParams().GetConsensus();
     const arith_uint256 powLimit = UintToArith256(params.powLimit);
