@@ -3592,24 +3592,7 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
     bool internal = false;
     int64_t saved_keypool_index = m_max_keypool_index;
 
-    CHDChain hdChainEnc;
-    CHDChain hdChainDec;
-
-    // Get Encrypted hdChain
-    if (!GetCryptedHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
-    }
-  
-    // Decrypt
-    if (hdChainEnc.IsCrypted()) {
-      hdChainDec = hdChainEnc;
-      if (!DecryptHDChain(hdChainDec))
-        throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
-    }
-
-    // make sure seed matches this chain
-    if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
-      throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
+    auto [hdChainDec, hdChainEnc] = GetHDChains();
 
     Benchmark timer;
     
@@ -3647,18 +3630,6 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
         count++;
     }
 
-    CHDAccount acc;
-    int nAccountIndex = 0; // Only using acc 0
-
-    // Get updated Account info and set for Encrypted Chain
-    hdChainDec.GetAccount(nAccountIndex, acc);
-    hdChainEnc.SetAccount(nAccountIndex, acc);
-    
-    // Save to crypter
-    if (!SetCryptedHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
-    }
- 
     if (missingInternal + missingExternal > 0) {
         LogPrintf(
             "keypool added %d keys (%d internal), size=%u (%u internal)\n",
@@ -3669,7 +3640,19 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
   
   
     if (hdpubkeys.size() > 0) {
+
+      CHDAccount acc;
+      int nAccountIndex = 0; // Only using acc 0
+
+      // Get updated Account info and set for Encrypted Chain
+      hdChainDec.GetAccount(nAccountIndex, acc);
+      hdChainEnc.SetAccount(nAccountIndex, acc);
       
+      // Save to crypter
+      if (!SetCryptedHDChain(hdChainEnc)) {
+        throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
+      }
+ 
       // Grab updated hdChain from CCryptoStore and store to dB
       if (!StoreCryptedHDChain()) {
         throw std::runtime_error(std::string(__func__) + ": StoreCryptedHDChain failed");
@@ -3764,25 +3747,11 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         CWalletDB walletdb(*dbw);
         int saved_keypool_index = m_max_keypool_index++;
 
-        CHDChain hdChainEnc;
-        CHDChain hdChainDec;
+        //CHDChain hdChainEnc;
+        //CHDChain hdChainDec;
+        //std::tie(hdChainDec, hdChainEnc) = GetHDChains();
         
-        // Get Encrypted hdChain
-        if (!GetCryptedHDChain(hdChainEnc)) {
-          throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
-        }
-        
-        // Decrypt
-        if (hdChainEnc.IsCrypted()) {
-          hdChainDec = hdChainEnc;
-          if (!DecryptHDChain(hdChainDec))
-            throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
-        }
-        
-        // make sure seed matches this chain
-        if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
-          throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
-
+        auto [hdChainDec, hdChainEnc] = GetHDChains();
         
         auto key_pair = GenerateNewKey(hdChainDec, internal);
         result = key_pair.first;
@@ -3800,7 +3769,7 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         hdChainDec.GetAccount(nAccountIndex, acc);
         hdChainEnc.SetAccount(nAccountIndex, acc);
         
-        // Save to crypter
+        // Save to CCryptoStore
         if (!SetCryptedHDChain(hdChainEnc)) {
           throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
         }
@@ -4814,3 +4783,27 @@ bool CWallet::SetCryptedHDChain(const CHDChain& chain) {
   return true;
 }
 
+// Return Decrypted then Encrypted Chains
+std::tuple<CHDChain,CHDChain> CWallet::GetHDChains() {
+
+  CHDChain hdChainEnc;
+  CHDChain hdChainDec;
+
+  // Get Encrypted hdChain
+  if (!GetCryptedHDChain(hdChainEnc)) {
+    throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
+  }
+  
+  // Decrypt
+  if (hdChainEnc.IsCrypted()) {
+    hdChainDec = hdChainEnc;
+    if (!DecryptHDChain(hdChainDec))
+      throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
+  }
+
+  // make sure seed matches this chain
+  if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
+    throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
+
+  return std::tuple(hdChainDec, hdChainEnc);
+}

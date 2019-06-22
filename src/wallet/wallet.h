@@ -932,6 +932,9 @@ public:
     bool FinishEncryptWallet(const SecureString &strWalletPassphrase);
     bool CreateMasteyKey(const SecureString &strWalletPassphrase,
                          CKeyingMaterial& _vMasterKey);
+    std::tuple<CHDChain,CHDChain> GetHDChains();
+
+  
 
     void GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const;
     unsigned int ComputeTimeSmart(const CWalletTx &wtx) const;
