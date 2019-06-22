@@ -29,18 +29,63 @@ set(COPYRIGHT_HOLDERS "The %s developers")
 set(COPYRIGHT_HOLDERS_SUBSTITUTION Bitcoin)
 string(REPLACE "%s" ${COPYRIGHT_HOLDERS_SUBSTITUTION} COPYRIGHT_HOLDERS_FINAL ${COPYRIGHT_HOLDERS})
 
-# Find Git Version Patch
+# Process info with GIT to determine if this is a tagged release or not
+# If not an annotated tags, then BUILD_SUFFIX with the git sha should be set and used
 FIND_PROGRAM(GIT git)
 IF(GIT)
+   EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} diff --quiet 
+    RESULT_VARIABLE GIT_DIRTY
+    )
+
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} describe --abbrev=0
+    OUTPUT_VARIABLE GIT_TAG OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} rev-parse HEAD
+    OUTPUT_VARIABLE GIT_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} rev-list -1 ${GIT_TAG}
+    OUTPUT_VARIABLE GIT_TAG_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
   EXECUTE_PROCESS(
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND ${GIT} rev-parse --short HEAD 
     OUTPUT_VARIABLE GIT_OUT OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-  SET(BUILD_SUFFIX "${GIT_OUT}")
-ELSE(GIT)
-  SET(BUILD_SUFFIX "")
+
+  if (${GIT_DIRTY})
+    SET(BUILD_SUFFIX_DEFINED true)
+    SET(BUILD_SUFFIX "${GIT_OUT}-dirty")
+    SET(BUILD_DESC "")
+		message(STATUS "Neither a tagged nor checked in release ${BUILD_SUFFIX} ")
+  elseif (${GIT_TAG_SHA} MATCHES ${GIT_SHA})
+		message(STATUS "This is a tagged release ${GIT_TAG}")
+    SET(BUILD_DESC ${GIT_TAG})
+    SET(BUILD_DESC_DEFINED true)
+    SET(BUILD_SUFFIX 0)
+  else()
+    SET(BUILD_SUFFIX_DEFINED true)
+    SET(BUILD_SUFFIX "${GIT_OUT}")
+    SET(BUILD_DESC "")
+		message(STATUS "Not a tagged release ${GIT_OUT}")
+  ENDIF()
+ELSE()
+		message(ERROR "Need git installed for proper tagging")
 ENDIF(GIT)
+
+# For QT
+set(VERSION_DESC ${BUILD_DESC} PARENT_SCOPE)
+set(VERSION_SUFFIX ${BUILD_SUFFIX} PARENT_SCOPE)
 
 
 # Generate the version.h file
