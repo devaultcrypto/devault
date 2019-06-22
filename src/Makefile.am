@@ -107,6 +107,7 @@ BITCOIN_CORE_H = \
   addrman.h \
   avalanche.h \
 	ban.h \
+  benchmark.h \
   bloom.h \
   blockencodings.h \
   blockfileinfo.h \
