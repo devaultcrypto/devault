@@ -382,11 +382,11 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial &vMasterKeyIn) {
     return true;
 }
 
-bool CCryptoKeyStore::EncryptNewHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc)
+bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc)
 {
   SetCrypted();
   
-  hdChain = hdc;
+  CHDChain hdChain = hdc;
   std::vector<unsigned char> vchCryptedSeed;
   if (!EncryptSecret(vMasterKeyIn, hdChain.GetSeed(), hdChain.GetID(), vchCryptedSeed))
     return false;
@@ -452,18 +452,6 @@ bool CCryptoKeyStore::DecryptHDChain(CHDChain& hdChainRet) const
     return true;
 }
 
-bool CCryptoKeyStore::SetHDChain(const CHDChain& chain)
-{
-    if (IsCrypted())
-        return false;
-
-    if (chain.IsCrypted())
-        return false;
-
-    hdChain = chain;
-    return true;
-}
-
 
 bool CCryptoKeyStore::SetCryptedHDChain(const CHDChain& chain)
 {
@@ -483,6 +471,5 @@ bool CCryptoKeyStore::GetHDChain(CHDChain& hdChainRet) const
         return !cryptedHDChain.IsNull();
     }
 
-    hdChainRet = hdChain;
-    return !hdChain.IsNull();
+    return false;
 }
