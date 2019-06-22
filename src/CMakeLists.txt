@@ -255,6 +255,7 @@ if (BUILD_ROCKSDB)
 else()
     add_subdirectory(leveldb)
     set(DB_LIBRARIES leveldb memenv)
+    include_directories(${include_directories} leveldb/include)
 endif()  
 
 add_subdirectory(secp256k1)
