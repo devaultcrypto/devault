@@ -1203,7 +1203,8 @@ public:
     CHDPubKey AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInternal);
     bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
     bool SetCryptedHDChain(const CHDChain& chain);
-    bool SetAndStoreCryptedHDChain(const CHDChain& chain);
+    bool StoreCryptedHDChain(const CHDChain& chain);
+    bool StoreCryptedHDChain();
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
   
 };

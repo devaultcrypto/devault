@@ -243,9 +243,9 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKeyWithoutDB(bool internal) {
     if (!hdChainEnc.SetAccount(nAccountIndex, acc))
       throw std::runtime_error(std::string(__func__) + ": SetAccount failed");
   
-    // Save to DB
-    if (!SetAndStoreCryptedHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": SetAndStoreCryptedHDChain failed");
+    // Save to crypter
+    if (!SetCryptedHDChain(hdChainEnc)) {
+      throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
     }
  
     HDKey = AddHDPubKeyWithoutDB(childKey.Neuter(), internal);
@@ -717,8 +717,8 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey,
       // ids should match, seed hashes should not
       assert(hdc.GetID() == hdChainCrypted.GetID());
       assert(hdc.GetSeedHash() != hdChainCrypted.GetSeedHash());
-        
-      ok = SetAndStoreCryptedHDChain(hdChainCrypted);
+      
+      ok = StoreCryptedHDChain(hdChainCrypted);
       assert(ok);
     }
     
@@ -3667,7 +3667,14 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
             setInternalKeyPool.size());
     }
   
+  
     if (hdpubkeys.size() > 0) {
+      
+      // Grab updated hdChain from CCryptoStore and store to dB
+      if (!StoreCryptedHDChain()) {
+        throw std::runtime_error(std::string(__func__) + ": StoreCryptedHDChain failed");
+      }
+      
       LogPrintf("%s : flushing %d keys to dB\n",__func__,hdpubkeys.size());
       if (pwalletdbEncryption) {
         pwalletdbEncryption->WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
@@ -3765,6 +3772,11 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         hdpubkeys.push_back(key_pair.second);
         pubkeys.push_back(CKeyPool(key_pair.first,internal));
 
+        // Grab updated hdChain from CCryptoStore and store to dB
+        if (!StoreCryptedHDChain()) {
+          throw std::runtime_error(std::string(__func__) + ": StoreCryptedHDChain failed");
+        }
+      
         if (pwalletdbEncryption) {
           pwalletdbEncryption->WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
           pwalletdbEncryption->WritePool(pubkeys, saved_keypool_index);
@@ -4727,12 +4739,10 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
     }
     return true;
 }
-
-bool CWallet::SetAndStoreCryptedHDChain(const CHDChain& chain) {
+  
+bool CWallet::StoreCryptedHDChain(const CHDChain& chain) {
     LOCK(cs_wallet);
-
-    if (!SetCryptedHDChain(chain)) return false;
-    
+        
     if (pwalletdbEncryption) {
       if (!pwalletdbEncryption->WriteCryptedHDChain(chain))
         throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
@@ -4742,6 +4752,25 @@ bool CWallet::SetAndStoreCryptedHDChain(const CHDChain& chain) {
     }
     
     return true;
+}
+
+bool CWallet::StoreCryptedHDChain() {
+
+  LOCK(cs_wallet);
+  CHDChain chain;
+  if (!CCryptoKeyStore::GetCryptedHDChain(chain)) {
+    throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
+  }
+    
+  if (pwalletdbEncryption) {
+    if (!pwalletdbEncryption->WriteCryptedHDChain(chain))
+      throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
+  } else {
+    if (!CWalletDB(*dbw).WriteCryptedHDChain(chain))
+      throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
+  }
+    
+  return true;
 }
 
 bool CWallet::SetCryptedHDChain(const CHDChain& chain) {
