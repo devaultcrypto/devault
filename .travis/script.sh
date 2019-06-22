@@ -26,7 +26,7 @@ cd build || (echo "could not enter build directory"; exit 1)
 
 BEGIN_FOLD configure
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC cmake ..
+  DOCKER_EXEC cmake .. -DBUILD_QT=0
 else
   DOCKER_EXEC ../configure --cache-file=../config.cache $BITCOIN_CONFIG_ALL $BITCOIN_CONFIG || ( cat config.log && false)
 fi
@@ -56,14 +56,14 @@ END_FOLD
 
 BEGIN_FOLD build
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC make $MAKEJOBS
+  DOCKER_EXEC make $MAKEJOBS test_devault
 else
   DOCKER_EXEC make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && DOCKER_EXEC make $GOAL V=1 ; false )
 fi
 END_FOLD
 
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC make $MAKEJOBS check VERBOSE=1
+  DOCKER_EXEC ./test_devault -p --log_level=error
 fi
 
 if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then 
