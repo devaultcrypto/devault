@@ -50,7 +50,7 @@ add_test_to_suite(devault test_devault
 	allocator_tests.cpp
 	amount_tests.cpp
 	arith_uint256_tests.cpp
-  avalanche_tests.cpp
+#  avalanche_tests.cpp
 	base32_tests.cpp
 	base64_tests.cpp
 	blockcheck_tests.cpp
