@@ -679,6 +679,10 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey,
   {
     LOCK(cs_wallet);
     CHDChain hdc;
+
+    assert(words.size() != 0);
+    assert(hashWords.size() != 0);
+    
     hdc.Setup(words, hashWords);
       
     // Should not be Null since just setup 
@@ -4391,7 +4395,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
           std::tie(cwords, hashWords) = GenerateHDMasterKey();
       }
 
-      walletInstance->EncryptHDWallet(_vMasterKey, words, hashWords);
+      walletInstance->EncryptHDWallet(_vMasterKey, cwords, hashWords);
       walletInstance->Unlock(walletPassphrase);
 
       LogPrintf("%s : Generating HD keys, please don't interrupt til' done\n", __func__);
