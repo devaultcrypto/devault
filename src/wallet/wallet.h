@@ -863,7 +863,7 @@ public:
      * keystore implementation
      * Generate a new key
      */
-    std::pair<CPubKey,CHDPubKey> GenerateNewKeyWithoutDB(bool internal);
+    std::pair<CPubKey,CHDPubKey> GenerateNewKey(CHDChain& clearChain, bool internal);
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
     bool AddKeyPubKeyWithDB(CWalletDB &walletdb, const CKey &key,

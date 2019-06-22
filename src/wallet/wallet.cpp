@@ -167,7 +167,7 @@ const CWalletTx *CWallet::GetWalletTx(const TxId &txid) const {
     return &(it->second);
 }
 
-std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKeyWithoutDB(bool internal) {
+std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, bool internal) {
     // mapKeyMetadata
     AssertLockHeld(cs_wallet);
 
@@ -194,28 +194,8 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKeyWithoutDB(bool internal) {
 
     CHDAccount acc;
     int nAccountIndex = 0;
-    CHDChain hdChainDec;
-    CHDChain hdChainEnc; // Could we just use this and skip decryption???
-  
-    // Get Encrypted hdChain
-    if (!GetCryptedHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
-    }
-  
-    // Decrypt
-    if (hdChainEnc.IsCrypted()) {
-      hdChainDec = hdChainEnc;
-      if (!DecryptHDChain(hdChainDec))
-        throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
-    }
-  
-    // make sure seed matches this chain
-    if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
-      throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
-
   
     hdChainDec.GetAccount(nAccountIndex, acc);
-    /// For now assume Account, Decrypt1
   
     // derive child key at next index, skip keys already known to the wallet
     uint32_t nChildIndex = internal ? acc.nInternalChainCounter : acc.nExternalChainCounter;
@@ -240,14 +220,10 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKeyWithoutDB(bool internal) {
       acc.nExternalChainCounter = nChildIndex;
     }
 
-    if (!hdChainEnc.SetAccount(nAccountIndex, acc))
+    if (!hdChainDec.SetAccount(nAccountIndex, acc))
       throw std::runtime_error(std::string(__func__) + ": SetAccount failed");
   
-    // Save to crypter
-    if (!SetCryptedHDChain(hdChainEnc)) {
-      throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
-    }
- 
+
     HDKey = AddHDPubKeyWithoutDB(childKey.Neuter(), internal);
   
     return std::pair(pubkey,HDKey);
@@ -3616,10 +3592,26 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
     bool internal = false;
     int64_t saved_keypool_index = m_max_keypool_index;
 
-    Benchmark timer;
-    Benchmark all_timer;
+    CHDChain hdChainEnc;
+    CHDChain hdChainDec;
 
-    all_timer.start();
+    // Get Encrypted hdChain
+    if (!GetCryptedHDChain(hdChainEnc)) {
+      throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
+    }
+  
+    // Decrypt
+    if (hdChainEnc.IsCrypted()) {
+      hdChainDec = hdChainEnc;
+      if (!DecryptHDChain(hdChainDec))
+        throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
+    }
+
+    // make sure seed matches this chain
+    if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
+      throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
+
+    Benchmark timer;
     
     int count=1;
     for (int64_t i = missingInternal + missingExternal; i--;) {
@@ -3634,7 +3626,7 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
 
         timer.start();
 
-        auto key_pair = GenerateNewKeyWithoutDB(internal);
+        auto key_pair = GenerateNewKey(hdChainDec, internal);
       
         CPubKey pubkey(key_pair.first);
       
@@ -3655,10 +3647,18 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
         count++;
     }
 
-    all_timer.stop();
-    LogPrintf("%s : %d usecs to add keys\n",__func__,all_timer.uduration());
+    CHDAccount acc;
+    int nAccountIndex = 0; // Only using acc 0
+
+    // Get updated Account info and set for Encrypted Chain
+    hdChainDec.GetAccount(nAccountIndex, acc);
+    hdChainEnc.SetAccount(nAccountIndex, acc);
     
-    
+    // Save to crypter
+    if (!SetCryptedHDChain(hdChainEnc)) {
+      throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
+    }
+ 
     if (missingInternal + missingExternal > 0) {
         LogPrintf(
             "keypool added %d keys (%d internal), size=%u (%u internal)\n",
@@ -3763,7 +3763,28 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         }
         CWalletDB walletdb(*dbw);
         int saved_keypool_index = m_max_keypool_index++;
-        auto key_pair = GenerateNewKeyWithoutDB(internal);
+
+        CHDChain hdChainEnc;
+        CHDChain hdChainDec;
+        
+        // Get Encrypted hdChain
+        if (!GetCryptedHDChain(hdChainEnc)) {
+          throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
+        }
+        
+        // Decrypt
+        if (hdChainEnc.IsCrypted()) {
+          hdChainDec = hdChainEnc;
+          if (!DecryptHDChain(hdChainDec))
+            throw std::runtime_error(std::string(__func__) + ": DecryptHDChainSeed failed");
+        }
+        
+        // make sure seed matches this chain
+        if (hdChainDec.GetID() != hdChainDec.GetSeedHash())
+          throw std::runtime_error(std::string(__func__) + ": Wrong HD chain!");
+
+        
+        auto key_pair = GenerateNewKey(hdChainDec, internal);
         result = key_pair.first;
         // Will generate keys and add to these vectors, when done, flush them to the dB in burst mode
         std::vector<CHDPubKey> hdpubkeys;
@@ -3772,6 +3793,18 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         hdpubkeys.push_back(key_pair.second);
         pubkeys.push_back(CKeyPool(key_pair.first,internal));
 
+        CHDAccount acc;
+        int nAccountIndex = 0; // Only using acc 0
+        
+        // Get updated Account info and set for Encrypted Chain
+        hdChainDec.GetAccount(nAccountIndex, acc);
+        hdChainEnc.SetAccount(nAccountIndex, acc);
+        
+        // Save to crypter
+        if (!SetCryptedHDChain(hdChainEnc)) {
+          throw std::runtime_error(std::string(__func__) + ": SetCryptedHDChain failed");
+        }
+ 
         // Grab updated hdChain from CCryptoStore and store to dB
         if (!StoreCryptedHDChain()) {
           throw std::runtime_error(std::string(__func__) + ": StoreCryptedHDChain failed");
