@@ -52,25 +52,25 @@
       Remove the virtual specifier for functions with the override specifier
       db: Remove obsolete methods from CBlockTreeDB.
       Set InitMessage for txindex migration
-      [txindex] Activate new transaction index code that runs in background
+##### [txindex] Activate new transaction index code that runs in background
       Merge #11468: [tests] Make comp test framework more debuggable
-      Comments: More comments on functions/globals in standard.h.
-      [CMAKE] Avoid displaying the console when launching bitcoin-qt.exe
-      [CMAKE] Add cross compiling support for ARM32 and ARM64
-      [CMAKE] Add cross build toolchain files for PC Linux platform
-      [CMAKE] Disable OpenGL in Qt static build for OSX
+##### Comments: More comments on functions/globals in standard.h.
+##### [CMAKE] Avoid displaying the console when launching bitcoin-qt.exe
+##### [CMAKE] Add cross compiling support for ARM32 and ARM64
+##### [CMAKE] Add cross build toolchain files for PC Linux platform
+##### [CMAKE] Disable OpenGL in Qt static build for OSX
       [CMAKE] Add QT plugins according to the target platform
-      [refactor] GetAccount{PubKey, Address} -> GetAccountDestination
-      Merge #12425: Add some script tests
-      Merge #12468: Add missing newline in init.cpp log message
-      [qa] don't pad transactions during make_conform_to_ctor
-      Add a test to ensure memory isn't consumed for blocks pre-checkpoint
-      [rpc] Add initialblockdownload to getblockchaininfo
-      Interpret scripts with CHECKDATASIG opcode always valid.
-      tests: move pwalletMain to wallet test fixture
-      Merge #12151: rpc: Remove cs_main lock from blockToJSON and blockheaderToJSON
-      Merge #13527: policy: Remove promiscuousmempoolflags
-      Merge #11742: rpc: Add testmempoolaccept
+##### [refactor] GetAccount{PubKey, Address} -> GetAccountDestination
+##### Merge #12425: Add some script tests
+##### Merge #12468: Add missing newline in init.cpp log message
+##### [qa] don't pad transactions during make_conform_to_ctor
+##### Add a test to ensure memory isn't consumed for blocks pre-checkpoint
+##### [rpc] Add initialblockdownload to getblockchaininfo
+##### Interpret scripts with CHECKDATASIG opcode always valid.
+##### tests: move pwalletMain to wallet test fixture
+##### Merge #12151: rpc: Remove cs_main lock from blockToJSON and blockheaderToJSON
+##### Merge #13527: policy: Remove promiscuousmempoolflags
+##### Merge #11742: rpc: Add testmempoolaccept
 ##### Refactor walletdb_tests to use the wallet test fixture
       Fix for mismatched extern definition in wallet test
 ##### Fix uninitialized atomic variables
