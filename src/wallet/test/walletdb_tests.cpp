@@ -125,7 +125,6 @@ BOOST_AUTO_TEST_CASE(no_dest_fails) {
     CTxDestination dst = CNoDestination{};
     BOOST_CHECK(!walletdb.WriteName(dst, "name"));
     BOOST_CHECK(!walletdb.WritePurpose(dst, "purpose"));
-    BOOST_CHECK(!walletdb.WriteDestData(dst, "key", "value"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
