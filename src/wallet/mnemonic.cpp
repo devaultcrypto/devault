@@ -30,7 +30,6 @@ using namespace std;
 
 namespace mnemonic {
 namespace {
-const size_t wordCount = 12;
 const size_t bitsPerWord = 11;
 const uint8_t byteBits = 8;
 const string passphrasePrefix = "mnemonic";
@@ -40,13 +39,15 @@ const size_t sizeHash = 512 >> 3;
 uint8_t shiftBits(size_t bit) { return (1 << (byteBits - (bit % byteBits) - 1)); }
 }
 
-std::tuple<WordList, std::vector<uint8_t> > GenerateSeedPhrase() {
+std::tuple<WordList, std::vector<uint8_t> > GenerateSeedPhrase(int nWords) {
+  assert((nWords == 12) || (nWords == 24));
   // 1) Generate Random bytes (strong)
-  // 2) Map to 12 words (with checksum word)
+  // 2) Map to 12 or 24 words (with checksum word)
   // 3) Map back to 'seed' - 64 bits
   // 4) Use 1st 32 bytes as secret key for Master HD key
   // Using 2) we can re-generate 4) as needed
-  std::vector<uint8_t> keydata(16);
+  int size = (nWords == 12) ? 16 : 32;
+  std::vector<uint8_t> keydata(size);
   GetStrongRandBytes(keydata.data(), keydata.size());
   mnemonic::WordList words = mapBitsToMnemonic(keydata, language::en);
   //std::cout << "Words = " << join(words,",") << "\n";
@@ -77,7 +78,8 @@ std::tuple<bool, WordList, std::vector<uint8_t> > CheckSeedPhrase(const std::str
 
 WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
   // entropy should be 16 bytes or 128 bits for 12 words
-  assert(data.size() == 128 >> 3);
+  // or 32 bytes for 24 words
+  assert((data.size() == 16) || (data.size() == 32));
 
   uint8_t checksum[32];
   CSHA256 chasher;
@@ -85,12 +87,12 @@ WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
   chasher.Finalize(checksum);
 
   vector<string> words;
-  assert(data.size() == 128 >> 3); // ???
   size_t bit = 0;
 
   data.push_back(checksum[0]);
+  int wordCount = (data.size() == 16) ? 12 : 24;
 
-  for (size_t word = 0; word < wordCount; word++) {
+  for (int word = 0; word < wordCount; word++) {
     size_t position = 0;
     for (size_t loop = 0; loop < bitsPerWord; loop++) {
       bit = (word * bitsPerWord + loop);
@@ -127,7 +129,7 @@ bool isAllowedWord(const string &word, const Dictionary &dict) {
 }
 
 bool isValidMnemonic(const WordList &words, const Dictionary &dict) {
-  return words.size() == 12 &&
+  return ((words.size() == 12) || (words.size() == 24)) &&
          all_of(words.begin(), words.end(), [&dict](const string &w) { return isAllowedWord(w, dict); });
 }
 }
