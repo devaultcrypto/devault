@@ -75,28 +75,9 @@ bool CWalletDB::EraseTx(uint256 hash) {
     return EraseIC(std::make_pair(std::string("tx"), hash));
 }
 
-bool CWalletDB::WriteKey(const CPubKey &vchPubKey, const CPrivKey &vchPrivKey,
-                         const CKeyMetadata &keyMeta) {
-    if (!WriteIC(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta,
-                 false)) {
-        return false;
-    }
-
-    // hash pubkey/privkey to accelerate wallet load
-    std::vector<uint8_t> vchKey;
-    vchKey.reserve(vchPubKey.size() + vchPrivKey.size());
-    vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
-    vchKey.insert(vchKey.end(), vchPrivKey.begin(), vchPrivKey.end());
-
-    return WriteIC(
-        std::make_pair(std::string("key"), vchPubKey),
-        std::make_pair(vchPrivKey, Hash(vchKey.begin(), vchKey.end())), false);
-}
-
 bool CWalletDB::WriteCryptedKey(const CPubKey &vchPubKey,
                                 const std::vector<uint8_t> &vchCryptedSecret,
                                 const CKeyMetadata &keyMeta) {
-    const bool fEraseUnencryptedKey = true;
 
     if (!WriteIC(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta)) {
         return false;
@@ -105,10 +86,6 @@ bool CWalletDB::WriteCryptedKey(const CPubKey &vchPubKey,
     if (!WriteIC(std::make_pair(std::string("ckey"), vchPubKey),
                  vchCryptedSecret, false)) {
         return false;
-    }
-    if (fEraseUnencryptedKey) {
-        EraseIC(std::make_pair(std::string("key"), vchPubKey));
-        EraseIC(std::make_pair(std::string("wkey"), vchPubKey));
     }
 
     return true;
@@ -339,63 +316,6 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             if (fYes == '1') {
                 pwallet->LoadWatchOnly(script);
             }
-        } else if (strType == "key" || strType == "wkey") {
-            CPubKey vchPubKey;
-            ssKey >> vchPubKey;
-            if (!vchPubKey.IsValid()) {
-                strErr = "Error reading wallet database: CPubKey corrupt";
-                return false;
-            }
-            CKey key;
-            CPrivKey pkey;
-            uint256 hash;
-
-            if (strType == "key") {
-                wss.nKeys++;
-                ssValue >> pkey;
-            } else {
-                CWalletKey wkey;
-                ssValue >> wkey;
-                pkey = wkey.vchPrivKey;
-            }
-
-            // Old wallets store keys as "key" [pubkey] => [privkey]
-            // ... which was slow for wallets with lots of keys, because the
-            // public key is re-derived from the private key using EC operations
-            // as a checksum. Newer wallets store keys as "key"[pubkey] =>
-            // [privkey][hash(pubkey,privkey)], which is much faster while
-            // remaining backwards-compatible.
-            try {
-                ssValue >> hash;
-            } catch (...) {
-            }
-
-            bool fSkipCheck = false;
-
-            if (!hash.IsNull()) {
-                // hash pubkey/privkey to accelerate wallet load
-                std::vector<uint8_t> vchKey;
-                vchKey.reserve(vchPubKey.size() + pkey.size());
-                vchKey.insert(vchKey.end(), vchPubKey.begin(), vchPubKey.end());
-                vchKey.insert(vchKey.end(), pkey.begin(), pkey.end());
-
-                if (Hash(vchKey.begin(), vchKey.end()) != hash) {
-                    strErr = "Error reading wallet database: CPubKey/CPrivKey "
-                             "corrupt";
-                    return false;
-                }
-
-                fSkipCheck = true;
-            }
-
-            if (!key.Load(pkey, vchPubKey, fSkipCheck)) {
-                strErr = "Error reading wallet database: CPrivKey corrupt";
-                return false;
-            }
-            if (!pwallet->LoadKey(key, vchPubKey)) {
-                strErr = "Error reading wallet database: LoadKey failed";
-                return false;
-            }
         } else if (strType == "mkey") {
             unsigned int nID;
             ssKey >> nID;
@@ -518,7 +438,7 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
 }
 
 bool CWalletDB::IsKeyType(const std::string &strType) {
-    return (strType == "key" || strType == "wkey" || strType == "mkey" ||
+    return (strType == "mkey" ||
             strType == "chdchain" ||
             strType == "ckey");
 }
