@@ -911,6 +911,7 @@ bool CWalletDB::WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<
         CKeyID id = k.extPubKey.pubkey.GetID();
         auto keyMeta = mapKeyMeta[id];
         if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
+        if (!batch.Write(std::make_pair(std::string("hdpubkey"), k.extPubKey.pubkey), k, false)) ok = false;
     }
     // Not sure flush is useful here or not
     batch.Flush();
