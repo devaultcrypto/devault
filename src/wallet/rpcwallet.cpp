@@ -3058,7 +3058,7 @@ static UniValue getwalletinfo(const Config &config,
 
     UniValue obj(UniValue::VOBJ);
     CHDChain hdChain;
-    pwallet->GetHDChain(hdChain);
+    pwallet->GetDecryptedHDChain(hdChain);
 
     size_t kpExternalSize = pwallet->KeypoolCountExternalKeys();
     obj.pushKV("walletname", pwallet->GetName());
