@@ -269,9 +269,9 @@ bool CWallet::AddKeyPubKeyWithDB(CWalletDB &walletdb, const CKey &secret,
     if (IsCrypted()) {
         return true;
     }
+  
+    return false;
 
-    return walletdb.WriteKey(pubkey, secret.GetPrivKey(),
-                             mapKeyMetadata[pubkey.GetID()]);
 }
 
 bool CWallet::AddKeyPubKeyX(const CKey &secret, const CPubKey &pubkey) {
@@ -4738,11 +4738,6 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
     if (HaveWatchOnly(script))
         RemoveWatchOnly(script);
 
-     if (!IsCrypted()) {
-        return CWalletDB(*dbw).WriteKey(pubkey,
-                                                 secret.GetPrivKey(),
-                                                 mapKeyMetadata[pubkey.GetID()]);
-    }
     return true;
 }
   
