@@ -132,9 +132,6 @@ public:
 /* Generates a new HD master key (will not be activated) */
 //------------------------------------------------------------------------------------------
 std::tuple<mnemonic::WordList, std::vector<uint8_t> > GenerateHDMasterKey() {
-  // At this point we could have either used keydata or hashRet
-  // for the master key, hashRet just adds mnemonic passphrase, etc
-  std::vector<uint8_t> keydata(16);
   std::vector<uint8_t> hashWords;
   mnemonic::WordList words;
   bool success;
@@ -3751,10 +3748,6 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
         CWalletDB walletdb(*dbw);
         int saved_keypool_index = m_max_keypool_index++;
 
-        //CHDChain hdChainEnc;
-        //CHDChain hdChainDec;
-        //std::tie(hdChainDec, hdChainEnc) = GetHDChains();
-        
         auto [hdChainDec, hdChainEnc] = GetHDChains();
         
         auto key_pair = GenerateNewKey(hdChainDec, internal);

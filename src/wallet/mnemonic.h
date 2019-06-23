@@ -29,7 +29,7 @@ class MnemonicException : public std::runtime_error {
 
 typedef std::vector<std::string> WordList;
 
-// implementation of bip39 for 12 words
+// implementation of bip39
 WordList mapBitsToMnemonic(std::vector<uint8_t> &data, const Dictionary &dict);
 std::vector<uint8_t> decodeMnemonic(const WordList &words);
 
@@ -37,7 +37,8 @@ bool isAllowedWord(const std::string &word, const Dictionary &dict);
 bool isValidMnemonic(const WordList &words, const Dictionary &dict);
 bool isValidSeedPhrase(const std::string& seedphrase);
 
-std::tuple<mnemonic::WordList, std::vector<uint8_t> > GenerateSeedPhrase();
+// Input defaults to 12 words, only other valid setting is 24
+std::tuple<mnemonic::WordList, std::vector<uint8_t> > GenerateSeedPhrase(int nWords=12);
 std::tuple<bool, mnemonic::WordList, std::vector<uint8_t> > CheckSeedPhrase(const std::string& phrase);
 
 }
