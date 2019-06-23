@@ -309,27 +309,6 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 return false;
             }
 
-            // Undo serialize changes in 31600
-            if (31404 <= wtx.fTimeReceivedIsTxTime &&
-                wtx.fTimeReceivedIsTxTime <= 31703) {
-                if (!ssValue.empty()) {
-                    char fTmp;
-                    char fUnused;
-                    ssValue >> fTmp >> fUnused >> wtx.strFromAccount;
-                    strErr =
-                        strprintf("LoadWallet() upgrading tx ver=%d %d '%s' %s",
-                                  wtx.fTimeReceivedIsTxTime, fTmp,
-                                  wtx.strFromAccount, txid.ToString());
-                    wtx.fTimeReceivedIsTxTime = fTmp;
-                } else {
-                    strErr =
-                        strprintf("LoadWallet() repairing tx ver=%d %s",
-                                  wtx.fTimeReceivedIsTxTime, txid.ToString());
-                    wtx.fTimeReceivedIsTxTime = 0;
-                }
-                wss.vWalletUpgrade.push_back(txid);
-            }
-
             if (wtx.nOrderPos == -1) {
                 wss.fAnyUnordered = true;
             }
