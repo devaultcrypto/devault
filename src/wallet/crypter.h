@@ -135,14 +135,12 @@ protected:
 
     //! will encrypt previously unencrypted keys
     bool EncryptKeys(CKeyingMaterial &vMasterKeyIn);
-    bool SetHDChain(const CHDChain& chain);
-    bool EncryptHDChain(const CKeyingMaterial& vMasterKeyIn);
+    bool EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc);
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
 
     CryptedKeyMap mapCryptedKeys;
-    CHDChain hdChain;
     
 public:
     CCryptoKeyStore()
@@ -159,7 +157,8 @@ public:
     bool GetKey(const CKeyID &address, CKey &keyOut) const override;
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
     std::set<CKeyID> GetKeys() const override;
-    bool GetHDChain(CHDChain& hdChainRet) const;
+    bool GetCryptedHDChain(CHDChain& hdChainRet) const;
+    bool GetDecryptedHDChain(CHDChain& hdChainRet) const;
 
 
     /**

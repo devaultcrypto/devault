@@ -125,6 +125,9 @@ public:
     bool WritePool(int64_t nPool, const CKeyPool &keypool);
     bool ErasePool(int64_t nPool);
 
+    bool WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<CKeyID, CKeyMetadata>& mapkeyMeta);
+    bool WritePool(const std::vector<CKeyPool> & keys, int64_t index);
+    
     bool WriteMinVersion(int nVersion);
 
     /// This writes directly to the database, and will not update the CWallet's

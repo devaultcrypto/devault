@@ -105,7 +105,7 @@ public:
   void SetMnemonic(SecureVector &securewords) {  vchMnemonic = securewords;}
   bool SetSeed(const SecureVector &vchSeedIn, bool fUpdateID);
   SecureVector GetSeed() const { return vchSeed; }
-  uint256 GetSeedHash() { return Hash(vchSeed.begin(), vchSeed.end()); }
+  uint256 GetSeedHash() const { return Hash(vchSeed.begin(), vchSeed.end()); }
     
   uint256 GetID() const { return id; }
 

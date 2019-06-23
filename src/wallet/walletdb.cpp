@@ -903,3 +903,28 @@ bool CWalletDB::WriteCryptedHDChain(const CHDChain& chain)
 
     return true;
 }
+
+
+bool CWalletDB::WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<CKeyID, CKeyMetadata>& mapKeyMeta) {
+    bool ok = true;
+    for (const auto& k : hdPubKey) {
+        CKeyID id = k.extPubKey.pubkey.GetID();
+        auto keyMeta = mapKeyMeta[id];
+        if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
+        if (!batch.Write(std::make_pair(std::string("hdpubkey"), k.extPubKey.pubkey), k, false)) ok = false;
+    }
+    // Not sure flush is useful here or not
+    batch.Flush();
+    return ok;
+}
+
+bool CWalletDB::WritePool(const std::vector<CKeyPool> & keys, int64_t index) {
+    bool ok=true;
+    for (const auto& k : keys) {
+        ++index;
+        if (!batch.Write(std::make_pair(std::string("pool"), index), k)) ok = false;
+    }
+    // Not sure flush is useful here or not
+    batch.Flush();
+    return ok;
+}
