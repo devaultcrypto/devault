@@ -117,6 +117,7 @@ BOOST_AUTO_TEST_CASE(bip39_tests) {
     std::cout << "Wordlist = " << join(wordList,",") << "\n";
     std::cout << "mnemonic = " << testData.mnemonic << "\n";
     */
+    //std::cout << testData.mnemonic << " ==  " << join(wordList, ",") << "\n";
     assert(testData.mnemonic == join(wordList, ","));
 
     std::vector<uint8_t> hash = decodeMnemonic(wordList);

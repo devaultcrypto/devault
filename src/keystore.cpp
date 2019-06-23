@@ -176,7 +176,7 @@ CKeyID GetKeyForDestination(const CKeyStore &store,
       return CKeyID();
     }
 #else
-    if (auto id = boost::get<CNoDestination>(&dest)) {
+    if (auto id = boost::get<CKeyID>(&dest)) {
         return *id;
     }
 #endif
