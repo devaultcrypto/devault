@@ -53,7 +53,12 @@ const std::string CLIENT_NAME("DeVault Core");
                            BUILD_SUFFIX)
 #elif BUILD_DESC
 #else
-#error "Either BUILD_SUFFIX or BUILD_DESC must be defined"
+#define BUILD_DESC_FROM_UNKNOWN(maj, min, rev, build)                          \
+    "v" DO_STRINGIZE(maj) "." DO_STRINGIZE(min) "." DO_STRINGIZE(              \
+        rev) "." DO_STRINGIZE(build) "-unk"
+#define BUILD_DESC                                                             \
+    BUILD_DESC_FROM_UNKNOWN(CLIENT_VERSION_MAJOR, CLIENT_VERSION_MINOR,        \
+                            CLIENT_VERSION_REVISION, CLIENT_VERSION_BUILD)
 #endif
 
 #else
