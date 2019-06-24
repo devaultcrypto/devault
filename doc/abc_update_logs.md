@@ -30,28 +30,28 @@
       Allow wallet files in multiple directories
       Bump wallet version to 190700 and remove the `usehd` option
       [CMAKE] Add support for Miniupnpc
-      Implicitly know about P2WPKH redeemscripts
+##### Implicitly know about P2WPKH redeemscripts
       Use GetKeyForDestination in various RPCs
-      Merge #13396: Drop unused arith_uint256 ! operator
-      Add comments indicating "Schnorr" in Schnorr-related script tests.
-      qa: Use node.datadir instead of tmpdir in test framework
-      Don't create another wallet db directory in walletdb_tests
-      Rename SCRIPT_ENABLE_CHECKDATASIG to SCRIPT_VERIFY_CHECKDATASIG_SIGOPS.
+##### Merge #13396: Drop unused arith_uint256 ! operator
+##### Add comments indicating "Schnorr" in Schnorr-related script tests.
+##### qa: Use node.datadir instead of tmpdir in test framework
+##### Don't create another wallet db directory in walletdb_tests
+##### Rename SCRIPT_ENABLE_CHECKDATASIG to SCRIPT_VERIFY_CHECKDATASIG_SIGOPS.
       Fixed multiple typos
-      Merge #14513: Avoid 1 << 31 (UB) in calculation of SEQUENCE_LOCKTIME_DISABLE_FLAG
-      Merge #14510: Avoid triggering undefined behaviour in base_uint<BITS>::bits()
-      Update prevector
-      Merge #13894: shutdown: Stop threads before resetting ptrs
-      Expose method to find key for a single-key destination
-      Abstract out IsSolvable from Witnessifier
-      Merge #10308: [wallet] Securely erase potentially sensitive keys/values
-      Merge #10341: rpc/wallet: Workaround older UniValue which returns a std::string temporary for get_str
-      [script] Unit tests for IsMine
-      [script] Unit tests for script/standard functions
-      Fix code style in keystore.cpp/crypter.cpp
+##### Merge #14513: Avoid 1 << 31 (UB) in calculation of SEQUENCE_LOCKTIME_DISABLE_FLAG
+##### Merge #14510: Avoid triggering undefined behaviour in base_uint<BITS>::bits()
+##### Update prevector
+##### Merge #13894: shutdown: Stop threads before resetting ptrs
+##### Expose method to find key for a single-key destination
+##### Abstract out IsSolvable from Witnessifier
+##### Merge #10308: [wallet] Securely erase potentially sensitive keys/values
+##### Merge #10341: rpc/wallet: Workaround older UniValue which returns a std::string temporary for get_str
+##### [script] Unit tests for IsMine
+##### [script] Unit tests for script/standard functions
+##### Fix code style in keystore.cpp/crypter.cpp
       Remove the virtual specifier for functions with the override specifier
       db: Remove obsolete methods from CBlockTreeDB.
-      Set InitMessage for txindex migration
+##### Set InitMessage for txindex migration
 ##### [txindex] Activate new transaction index code that runs in background
       Merge #11468: [tests] Make comp test framework more debuggable
 ##### Comments: More comments on functions/globals in standard.h.
