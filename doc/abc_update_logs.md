@@ -4,15 +4,15 @@
       Update manpages for the 0.19.7 release
       Update chainparams for 0.19.7 release
       Reoder various argument declarations
-      Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from Schnorr test
+##### Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from Schnorr test
       Add post-upgrade testnet checkpoint
-      [Tests] Require exact match in assert_start_raises_init_eror()
-      Give ZMQ consistent order with UpdatedBlockTip on scheduler thread
-      Don't use the functional test arguments in the tmp directory name
+##### [Tests] Require exact match in assert_start_raises_init_eror()
+##### Give ZMQ consistent order with UpdatedBlockTip on scheduler thread
+##### Don't use the functional test arguments in the tmp directory name
       wallet: Display non-HD error on first run
-      Merge #10056: [zmq] Call va_end() on va_start()ed args.
-      Backport current GetDifficulty logic (& tests) from Core
-      remove chain.h dependency from txdb.h
+##### Merge #10056: [zmq] Call va_end() on va_start()ed args.
+##### Backport current GetDifficulty logic (& tests) from Core
+##### remove chain.h dependency from txdb.h
       Create new wallet databases as directories rather than files
       Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from script tests
 ##### index: Move index DBs into index/ directory.
