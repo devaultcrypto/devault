@@ -110,6 +110,7 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
     obj.pushKV("errors", GetWarnings("statusbar"));
     return obj;
 }
+#endif
 
 static UniValue verifymessage(const Config &config,
                               const JSONRPCRequest &request) {

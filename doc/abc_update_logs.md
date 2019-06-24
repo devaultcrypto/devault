@@ -15,18 +15,18 @@
       remove chain.h dependency from txdb.h
       Create new wallet databases as directories rather than files
       Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from script tests
-      index: Move index DBs into index/ directory.
-      MOVEONLY: Move BaseIndex to its own file.
-      index: Generalize logged statements in BaseIndex.
-      index: Extract logic from TxIndex into reusable base class.
-      db: Make reusable base class for index databases.
+##### index: Move index DBs into index/ directory.
+##### MOVEONLY: Move BaseIndex to its own file.
+##### index: Generalize logged statements in BaseIndex.
+##### index: Extract logic from TxIndex into reusable base class.
+##### db: Make reusable base class for index databases.
       Allow wallet files not in -walletdir directory
       Support downgrading after recovered keypool witness keys
       SegWit wallet support
       [CMAKE] Fix Miniupnpc error message
-      Remove IsSolvable
-      Simplify "bool x = y ? true : false". Remove unused function and trailing semicolon.
-      Extend validateaddress information for P2SH-embedded witness
+##### Remove IsSolvable
+##### Simplify "bool x = y ? true : false". Remove unused function and trailing semicolon.
+##### Extend validateaddress information for P2SH-embedded witness
       Allow wallet files in multiple directories
       Bump wallet version to 190700 and remove the `usehd` option
       [CMAKE] Add support for Miniupnpc

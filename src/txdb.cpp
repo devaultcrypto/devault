@@ -257,17 +257,6 @@ bool CBlockTreeDB::WriteBatchSync(
     return WriteBatch(batch, true);
 }
 
-bool CBlockTreeDB::ReadTxIndex(const uint256 &txid, CDiskTxPos &pos) {
-    return Read(std::make_pair(DB_TXINDEX, txid), pos);
-}
-
-bool CBlockTreeDB::WriteTxIndex(
-    const std::vector<std::pair<uint256, CDiskTxPos>> &vect) {
-    CDBBatch batch(*this);
-    for (const auto& it : vect) batch.Write(std::make_pair(DB_TXINDEX, it.first), it.second);
-    return WriteBatch(batch);
-}
-
 bool CBlockTreeDB::WriteAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount > >&vect) {
     CDBBatch batch(*this);
     for (const auto& it : vect) {

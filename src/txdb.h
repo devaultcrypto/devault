@@ -100,8 +100,6 @@ public:
     bool ReadLastBlockFile(int &nFile);
     bool WriteReindexing(bool fReindexing);
     bool ReadReindexing(bool &fReindexing);
-    bool ReadTxIndex(const uint256 &txid, CDiskTxPos &pos);
-    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos>> &vect);
 
     bool WriteAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);
     bool EraseAddrIndex(const std::vector<std::pair<CAddrIndexKey, Amount> > &vect);

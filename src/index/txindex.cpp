@@ -6,6 +6,7 @@
 #include <init.h>
 #include <ui_interface.h>
 #include <util.h>
+#include <fs_util.h>
 #include <validation.h>
 
 #include <boost/thread.hpp>
@@ -150,11 +151,7 @@ bool TxIndex::DB::MigrateData(CBlockTreeDB &block_tree_db,
     bool interrupted = false;
     std::unique_ptr<CDBIterator> cursor(block_tree_db.NewIterator());
     for (cursor->Seek(begin_key); cursor->Valid(); cursor->Next()) {
-        boost::this_thread::interruption_point();
-        if (ShutdownRequested()) {
-            interrupted = true;
-            break;
-        }
+        interruption_point(ShutdownRequested());
 
         if (!cursor->GetKey(key)) {
             return error("%s: cannot get key from valid cursor", __func__);
