@@ -21,6 +21,7 @@ option(BUILD_CLI "Build devault-cli" ON)
 option(BUILD_TX "Build devault-tx" ON)
 option(BUILD_QT "Build devault-qt" ON)
 option(BUILD_BENCH "Build benchmark code" OFF)
+option(BUILD_CTESTS "Build cmake unit tests" ON)
 option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" ON)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
@@ -38,6 +39,7 @@ add_feature_info(WITH_ROCKSDB BUILD_ROCKSDB "Build with RocksDB (blockchain rest
 add_feature_info(WITH_HARD ENABLE_HARDENING "Harden the executables")
 add_feature_info(WITH_STATIC LINK_STATIC_LIBS "Build with static linking")
 add_feature_info(WITH_BENCH BUILD_BENCH "Build benchmark code")
+add_feature_info(WITH_CTESTS BUILD_CTESTS "Build cmake unit tests")
 add_feature_info(WITH_BUNDLE BUILD_BUNDLE "For MacOS build MacOS Application")
 add_feature_info(WITH_REDUCED_EXPORTS ENABLE_REDUCE_EXPORTS "Reduce amount of exported symbols")
 add_feature_info(WITH_QRCODE ENABLE_QRCODE "Enable QR code display")
@@ -494,7 +496,9 @@ target_link_libraries(server
 )
 
 # Test suite.(can always setup)
-add_subdirectory(test)
+if (BUILD_CTESTS)
+  add_subdirectory(test)
+endif()
   
 # Benchmark suite.
 if (BUILD_BENCH)

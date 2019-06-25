@@ -169,11 +169,8 @@ if(ENABLE_HWCRC32)
 	target_compile_options(leveldb-sse4.2 PRIVATE -msse4.2)
 endif()
 
-if (CMAKE_GENERATOR STREQUAL Xcode)
-  option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" OFF)
-else()
-  option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" ON)
-endif()
+option(LEVELDB_BUILD_TESTS "Build LevelDB's unit tests" OFF)
+add_feature_info(WITH_LEVELDB_BUILD_TESTS LEVELDB_BUILD_TESTS "Build LevelDB's unit tests")
 
 if(LEVELDB_BUILD_TESTS)
 	include(TestSuite)

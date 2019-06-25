@@ -372,4 +372,4 @@ endif()
 
 
 # Test tests
-add_subdirectory(test)
+# add_subdirectory(test)

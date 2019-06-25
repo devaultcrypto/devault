@@ -43,3 +43,8 @@ else()
     ${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
     )
 endif()
+
+# check if using tests here...
+if (BUILD_CTESTS)
+  add_subdirectory(test)
+endif()
