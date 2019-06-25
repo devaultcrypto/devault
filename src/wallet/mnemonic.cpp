@@ -80,6 +80,7 @@ WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
   // entropy should be 16 bytes or 128 bits for 12 words
   // or 32 bytes for 24 words
   assert((data.size() == 16) || (data.size() == 32));
+  int wordCount = (data.size() == 16) ? 12 : 24;
 
   uint8_t checksum[32];
   CSHA256 chasher;
@@ -90,7 +91,6 @@ WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
   size_t bit = 0;
 
   data.push_back(checksum[0]);
-  int wordCount = (data.size() == 16) ? 12 : 24;
 
   for (int word = 0; word < wordCount; word++) {
     size_t position = 0;
