@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+
 #include <wallet/test/wallet_test_fixture.h>
 #include <chainparams.h>
 
@@ -9,6 +10,10 @@
 #include <wallet/db.h>
 #include <wallet/rpcdump.h>
 #include <wallet/wallet.h>
+
+#define BOOST_TEST_MODULE DeVault Wallet Test Suite
+
+#include <boost/test/unit_test.hpp>
 
 std::unique_ptr<CWallet> pwalletMain;
 

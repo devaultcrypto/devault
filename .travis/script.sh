@@ -56,14 +56,14 @@ END_FOLD
 
 BEGIN_FOLD build
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC make $MAKEJOBS test_devault
+  DOCKER_EXEC make $MAKEJOBS
 else
   DOCKER_EXEC make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && DOCKER_EXEC make $GOAL V=1 ; false )
 fi
 END_FOLD
 
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC ./test_devault -p --log_level=error
+  DOCKER_EXEC ctest 
 fi
 
 if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then 
