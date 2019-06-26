@@ -11,7 +11,8 @@
 #include <iterator>
 #include <sstream>
 
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN  
+#include <catch2/catch.hpp>
 
 std::vector<uint8_t> from_hex(const std::string &str) {
   size_t bias = (str.size() % 2) == 0 ? 0 : 1;
@@ -106,7 +107,7 @@ const MnemonicDataList mnemonicTestData = {
       language::en}}};
 }
 
-BOOST_AUTO_TEST_CASE(bip39_tests) {
+TEST_CASE("bip39_tests") {
   for (const auto &testData : mnemonicTestData) {
     auto bits = from_hex(testData.entropy);
     WordList wordList = mapBitsToMnemonic(bits, testData.language);
@@ -115,7 +116,7 @@ BOOST_AUTO_TEST_CASE(bip39_tests) {
     std::cout << "Wordlist = " << join(wordList,",") << "\n";
     std::cout << "mnemonic = " << testData.mnemonic << "\n";
     */
-    assert(testData.mnemonic == join(wordList, ","));
+    REQUIRE(testData.mnemonic == join(wordList, ","));
 
     std::vector<uint8_t> hash = decodeMnemonic(wordList);
     auto hex_data = HexStr(hash);
@@ -123,6 +124,6 @@ BOOST_AUTO_TEST_CASE(bip39_tests) {
     std::cout << "hex_data= " << hex_data << "\n";
     std::cout << "ref hex_data= " << testData.seed << "\n";
     */
-    assert(testData.seed == HexStr(hash));
+    REQUIRE(testData.seed == HexStr(hash));
   }
 }

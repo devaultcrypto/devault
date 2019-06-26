@@ -8,14 +8,16 @@
 #include <test/test_bitcoin.h>
 #include <wallet/test/wallet_test_fixture.h>
 
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 namespace {
 static std::unique_ptr<CWalletDBWrapper> TmpDB(const fs::path &pathTemp,
                                                const std::string &testname) {
     fs::path dir = pathTemp / testname;
-    BOOST_CHECK_MESSAGE(fs::create_directory(dir),
-                        "Unable to create a directory for test " + testname);
+    // fs::create_directory(dir);
+    // FIXTHIS    REQUIRE(fs::create_directory(dir),  "Unable to create a
+    // directory for test " + testname);
     fs::path path =
         dir / strprintf("testwallet%i", static_cast<int>(GetRand(1000000)));
     return std::unique_ptr<CWalletDBWrapper>(
@@ -25,85 +27,86 @@ static std::unique_ptr<CWalletDBWrapper> TmpDB(const fs::path &pathTemp,
 static std::unique_ptr<CWallet> LoadWallet(CWalletDB *db) {
     std::unique_ptr<CWallet> wallet(new CWallet(Params()));
     DBErrors res = db->LoadWallet(wallet.get());
-    BOOST_CHECK(res == DBErrors::LOAD_OK);
+    REQUIRE(res == DBErrors::LOAD_OK);
     return wallet;
 }
 } // namespace
 
-BOOST_FIXTURE_TEST_SUITE(walletdb_tests, WalletTestingSetup)
-
-BOOST_AUTO_TEST_CASE(write_erase_name) {
-    auto walletdbwrapper = TmpDB(pathTemp, "write_erase_name");
+TEST_CASE("write_erase_name") {
+    WalletTestingSetup setup;
+    auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_name");
     CWalletDB walletdb(*walletdbwrapper, "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
 
-    BOOST_CHECK(walletdb.WriteName(dst1, "name1"));
-    BOOST_CHECK(walletdb.WriteName(dst2, "name2"));
+    REQUIRE(walletdb.WriteName(dst1, "name1"));
+    REQUIRE(walletdb.WriteName(dst2, "name2"));
     {
         auto w = LoadWallet(&walletdb);
-        BOOST_CHECK_EQUAL(1, w->mapAddressBook.count(dst1));
-        BOOST_CHECK_EQUAL("name1", w->mapAddressBook[dst1].name);
-        BOOST_CHECK_EQUAL("name2", w->mapAddressBook[dst2].name);
+        REQUIRE(1 == w->mapAddressBook.count(dst1));
+        REQUIRE("name1" == w->mapAddressBook[dst1].name);
+        REQUIRE("name2" == w->mapAddressBook[dst2].name);
     }
 
     walletdb.EraseName(dst1);
 
     {
         auto w = LoadWallet(&walletdb);
-        BOOST_CHECK_EQUAL(0, w->mapAddressBook.count(dst1));
-        BOOST_CHECK_EQUAL(1, w->mapAddressBook.count(dst2));
+        REQUIRE(0 == w->mapAddressBook.count(dst1));
+        REQUIRE(1 == w->mapAddressBook.count(dst2));
     }
 }
 
-BOOST_AUTO_TEST_CASE(write_erase_purpose) {
-    auto walletdbwrapper = TmpDB(pathTemp, "write_erase_purpose");
+TEST_CASE("write_erase_purpose") {
+    WalletTestingSetup setup;
+    auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_purpose");
     CWalletDB walletdb(*walletdbwrapper, "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
 
-    BOOST_CHECK(walletdb.WritePurpose(dst1, "purpose1"));
-    BOOST_CHECK(walletdb.WritePurpose(dst2, "purpose2"));
+    REQUIRE(walletdb.WritePurpose(dst1, "purpose1"));
+    REQUIRE(walletdb.WritePurpose(dst2, "purpose2"));
     {
         auto w = LoadWallet(&walletdb);
-        BOOST_CHECK_EQUAL(1, w->mapAddressBook.count(dst1));
-        BOOST_CHECK_EQUAL("purpose1", w->mapAddressBook[dst1].purpose);
-        BOOST_CHECK_EQUAL("purpose2", w->mapAddressBook[dst2].purpose);
+        REQUIRE(1 == w->mapAddressBook.count(dst1));
+        REQUIRE("purpose1" == w->mapAddressBook[dst1].purpose);
+        REQUIRE("purpose2" == w->mapAddressBook[dst2].purpose);
     }
 
     walletdb.ErasePurpose(dst1);
 
     {
         auto w = LoadWallet(&walletdb);
-        BOOST_CHECK_EQUAL(0, w->mapAddressBook.count(dst1));
-        BOOST_CHECK_EQUAL(1, w->mapAddressBook.count(dst2));
+        REQUIRE(0 == w->mapAddressBook.count(dst1));
+        REQUIRE(1 == w->mapAddressBook.count(dst2));
     }
 }
 
-BOOST_AUTO_TEST_CASE(write_erase_destdata) {
-    auto walletdbwrapper = TmpDB(pathTemp, "write_erase_destdata");
+TEST_CASE("write_erase_destdata") {
+    WalletTestingSetup setup;
+    auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_destdata");
     CWalletDB walletdb(*walletdbwrapper, "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
 
-    BOOST_CHECK(walletdb.WriteDestData(dst1, "key1", "value1"));
-    BOOST_CHECK(walletdb.WriteDestData(dst1, "key2", "value2"));
-    BOOST_CHECK(walletdb.WriteDestData(dst2, "key1", "value3"));
-    BOOST_CHECK(walletdb.WriteDestData(dst2, "key2", "value4"));
+    REQUIRE(walletdb.WriteDestData(dst1, "key1", "value1"));
+    REQUIRE(walletdb.WriteDestData(dst1, "key2", "value2"));
+    REQUIRE(walletdb.WriteDestData(dst2, "key1", "value3"));
+    REQUIRE(walletdb.WriteDestData(dst2, "key2", "value4"));
     {
         auto w = LoadWallet(&walletdb);
         std::string val;
-        BOOST_CHECK(w->GetDestData(dst1, "key1", &val));
-        BOOST_CHECK_EQUAL("value1", val);
-        BOOST_CHECK(w->GetDestData(dst1, "key2", &val));
-        BOOST_CHECK_EQUAL("value2", val);
-        BOOST_CHECK(w->GetDestData(dst2, "key1", &val));
-        BOOST_CHECK_EQUAL("value3", val);
-        BOOST_CHECK(w->GetDestData(dst2, "key2", &val));
-        BOOST_CHECK_EQUAL("value4", val);
+        REQUIRE(w->GetDestData(dst1, "key1", &val));
+        REQUIRE("value1" == val);
+        REQUIRE(w->GetDestData(dst1, "key2", &val));
+        REQUIRE("value2" == val);
+        REQUIRE(w->GetDestData(dst2, "key1", &val));
+        REQUIRE("value3" == val);
+        REQUIRE(w->GetDestData(dst2, "key2", &val));
+        REQUIRE("value4" == val);
     }
 
     walletdb.EraseDestData(dst1, "key2");
@@ -111,20 +114,19 @@ BOOST_AUTO_TEST_CASE(write_erase_destdata) {
     {
         auto w = LoadWallet(&walletdb);
         std::string dummy;
-        BOOST_CHECK(w->GetDestData(dst1, "key1", &dummy));
-        BOOST_CHECK(!w->GetDestData(dst1, "key2", &dummy));
-        BOOST_CHECK(w->GetDestData(dst2, "key1", &dummy));
-        BOOST_CHECK(w->GetDestData(dst2, "key2", &dummy));
+        REQUIRE(w->GetDestData(dst1, "key1", &dummy));
+        REQUIRE(!w->GetDestData(dst1, "key2", &dummy));
+        REQUIRE(w->GetDestData(dst2, "key1", &dummy));
+        REQUIRE(w->GetDestData(dst2, "key2", &dummy));
     }
 }
 
-BOOST_AUTO_TEST_CASE(no_dest_fails) {
-    auto walletdbwrapper = TmpDB(pathTemp, "no_dest_fails");
+TEST_CASE("no_dest_fails") {
+    WalletTestingSetup setup;
+    auto walletdbwrapper = TmpDB(setup.pathTemp, "no_dest_fails");
     CWalletDB walletdb(*walletdbwrapper, "cr+");
 
     CTxDestination dst = CNoDestination{};
-    BOOST_CHECK(!walletdb.WriteName(dst, "name"));
-    BOOST_CHECK(!walletdb.WritePurpose(dst, "purpose"));
+    REQUIRE(!walletdb.WriteName(dst, "name"));
+    REQUIRE(!walletdb.WritePurpose(dst, "purpose"));
 }
-
-BOOST_AUTO_TEST_SUITE_END()

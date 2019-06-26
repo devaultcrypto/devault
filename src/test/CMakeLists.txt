@@ -71,8 +71,8 @@ set(BOOST_TARGETS
 #  activation - nothing currently in here
   addrman
   allocator
-  amount
   arith_uint256
+  amount
 #  avalanche
   base32
   base64
@@ -159,18 +159,6 @@ set(BOOST_TARGETS
 #  ../rpc/test/server
 )
 
-FOREACH(tst ${BOOST_TARGETS})
-  SET(SRC ${tst}_tests.cpp test_bitcoin_main.cpp)
-  ADD_EXECUTABLE(tb_${tst} ${SRC})
-  #To access the generated json headers.
-  target_include_directories(tb_${tst}  PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(tb_${tst} Boost::unit_test_framework rpcclient server devaultconsensus common unit)
-  add_test(NAME test_${tst} COMMAND tb_${tst})
-  #  set_property(TARGET tb_${tst} PROPERTY CXX_STANDARD 11)
-  #  set_property(TARGET tb_${tst} PROPERTY POSITION_INDEPENDENT_CODE TRUE)
-  #  set_target_properties(tb_${tst} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/..")
-ENDFOREACH(tst ${EXTS})
-
 #---------VALGRIND STUFF----------------------------------------------------
 find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --track-origins=yes --show-reachable=yes --leak-check=full" )
@@ -190,9 +178,22 @@ endfunction(set_memcheck_test_properties)
 
 #---------VALGRIND STUFF----------------------------------------------------
 
+
+FOREACH(tst ${BOOST_TARGETS})
+  SET(SRC ${tst}_tests.cpp test_bitcoin_main.cpp)
+  ADD_EXECUTABLE(tb_${tst} ${SRC})
+  #To access the generated json headers.
+  target_include_directories(tb_${tst}  PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(tb_${tst} Boost::unit_test_framework rpcclient server devaultconsensus common unit)
+  add_test(NAME test_${tst} COMMAND tb_${tst})
+ENDFOREACH(tst ${EXTS})
+
+
 if(BOOST_TEST_DYN_LINK)
 FOREACH(tst ${BOOST_TARGETS})
   target_compile_definitions(tb_${tst} PRIVATE BOOST_TEST_DYN_LINK)
 ENDFOREACH()
 endif(BOOST_TEST_DYN_LINK)
+
+
 
