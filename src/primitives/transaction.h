@@ -155,11 +155,11 @@ public:
     }
 
     void SetNull() {
-        nValue = Amount(-1);
+        nValue = Amount::null();
         scriptPubKey.clear();
     }
 
-    bool IsNull() const { return nValue == Amount(-1); }
+    bool IsNull() const { return nValue == Amount::null(); }
 
     friend bool operator==(const CTxOut &a, const CTxOut &b) {
         return (a.nValue == b.nValue && a.scriptPubKey == b.scriptPubKey);
