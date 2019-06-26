@@ -633,7 +633,7 @@ private:
                      std::set<CInputCoin> &setCoinsRet, Amount &nValueRet,
                      const CCoinControl *coinControl = nullptr) const;
 
-    CWalletDB *pwalletdbEncryption;
+    std::unique_ptr<CWalletDB> pwalletdbEncryption;
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
@@ -762,16 +762,12 @@ public:
         SetNull();
     }
 
-    ~CWallet() override {
-        delete pwalletdbEncryption;
-        pwalletdbEncryption = nullptr;
-    }
+    ~CWallet() override {}
 
     void SetNull() {
         nWalletVersion = FEATURE_BASE;
         nWalletMaxVersion = FEATURE_BASE;
         nMasterKeyMaxID = 0;
-        pwalletdbEncryption = nullptr;
         nOrderPosNext = 0;
         nAccountingEntryNumber = 0;
         nNextResend = 0;
@@ -866,8 +862,6 @@ public:
     std::pair<CPubKey,CHDPubKey> GenerateNewKey(CHDChain& clearChain, bool internal);
     //! Adds a key to the store, and saves it to disk.
     bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
-    bool AddKeyPubKeyWithDB(CWalletDB &walletdb, const CKey &key,
-                            const CPubKey &pubkey);
     //! Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey &key, const CPubKey &pubkey) {
         return CCryptoKeyStore::AddKeyPubKey(key, pubkey);
@@ -929,7 +923,7 @@ public:
     bool EncryptHDWallet(const CKeyingMaterial& _vMasterKey,
                          const mnemonic::WordList& words,
                          const std::vector<uint8_t>& hashWords);
-    bool FinishEncryptWallet(const SecureString &strWalletPassphrase);
+    void FinishEncryptWallet();
     bool CreateMasteyKey(const SecureString &strWalletPassphrase,
                          CKeyingMaterial& _vMasterKey);
     std::tuple<CHDChain,CHDChain> GetHDChains();
@@ -1204,7 +1198,6 @@ public:
     bool LoadHDPubKey(const CHDPubKey &hdPubKey);
     bool AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal);
     CHDPubKey AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInternal);
-    bool AddKeyPubKeyX(const CKey& secret, const CPubKey &pubkey);
     bool SetCryptedHDChain(const CHDChain& chain);
     bool StoreCryptedHDChain(const CHDChain& chain);
     bool StoreCryptedHDChain();
