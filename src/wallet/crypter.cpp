@@ -352,36 +352,6 @@ std::set<CKeyID> CCryptoKeyStore::GetKeys() const {
     return set_address;
 }
 
-// Since this only happens during wallet encryption then there
-// will be no MapKeys to encrypt since all keys will be HD keys
-// MapKeys are for imported private keys
-// Now just use SetCrypted instead - keep this for a bit
-bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial &vMasterKeyIn) {
-    {
-        LOCK(cs_KeyStore);
-        if (!mapCryptedKeys.empty() || IsCrypted()) {
-            return false;
-        }
-
-        fUseCrypto = true;
-        for (KeyMap::value_type &mKey : mapKeys) {
-            const CKey &key = mKey.second;
-            CPubKey vchPubKey = key.GetPubKey();
-            CKeyingMaterial vchSecret(key.begin(), key.end());
-            std::vector<uint8_t> vchCryptedSecret;
-            if (!EncryptSecret(vMasterKeyIn, vchSecret, vchPubKey.GetHash(),
-                               vchCryptedSecret)) {
-                return false;
-            }
-            if (!AddCryptedKey(vchPubKey, vchCryptedSecret)) {
-                return false;
-            }
-        }
-        mapKeys.clear();
-    }
-    return true;
-}
-
 bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc)
 {
   SetCrypted();
@@ -408,8 +378,6 @@ bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const 
   
   cryptedHDChain.SetupCrypted(vchSecureCryptedMnemonic, vchSecureCryptedSeed);
   
-  if (!hdChain.SetNull())
-    return false;
   return true;
 }
 
