@@ -36,6 +36,8 @@ public:
 
     static constexpr const int64_t AMOUNT_DECIMALS = 3; // 8 - NUMBER OF ZEROS IN MIN_AMOUNT
     static constexpr Amount zero() { return Amount(0); }
+    // Special "magic" value used in transactions.h to indicate value has not been set yet
+    static constexpr Amount null() { return Amount(-1); }
     static constexpr Amount min_amount() { return Amount(MIN_AMOUNT); }
 
     /**
