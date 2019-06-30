@@ -1468,42 +1468,6 @@ int64_t CWalletTx::GetTxTime() const {
     return n ? n : nTimeReceived;
 }
 
-int CWalletTx::GetRequestCount() const {
-    LOCK(pwallet->cs_wallet);
-
-    // Returns -1 if it wasn't being tracked.
-    int nRequests = -1;
-
-    if (IsCoinBase()) {
-        // Generated block.
-        if (!hashUnset()) {
-            auto mi = pwallet->mapRequestCount.find(hashBlock);
-            if (mi != pwallet->mapRequestCount.end()) {
-                nRequests = (*mi).second;
-            }
-        }
-    } else {
-        // Did anyone request this transaction?
-        auto mi =  pwallet->mapRequestCount.find(GetId());
-        if (mi != pwallet->mapRequestCount.end()) {
-            nRequests = (*mi).second;
-
-            // How about the block it's in?
-            if (nRequests == 0 && !hashUnset()) {
-                auto _mi = pwallet->mapRequestCount.find(hashBlock);
-                if (_mi != pwallet->mapRequestCount.end()) {
-                    nRequests = (*_mi).second;
-                } else {
-                    // If it's in someone else's block it must have got out.
-                    nRequests = 1;
-                }
-            }
-        }
-    }
-
-    return nRequests;
-}
-
 // Helper for producing a max-sized low-S signature (eg 72 bytes)
 bool CWallet::DummySignInput(CTxIn &tx_in, const CTxOut &txout) const {
     // Fill in dummy signatures for fee calculation.
@@ -3243,9 +3207,6 @@ bool CWallet::CommitTransaction(
         NotifyTransactionChanged(this, coin.GetId(), CT_UPDATED);
     }
 
-    // Track how many getdata requests our transaction gets.
-    mapRequestCount[wtxNew.GetId()] = 0;
-
     // Get the inserted-CWalletTx from mapWallet so that the
     // fInMempool flag is cached properly
     CWalletTx &wtx = mapWallet.at(wtxNew.GetId());
@@ -3286,9 +3247,6 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
         coin.BindWallet(this);
         NotifyTransactionChanged(this, coin.GetId(), CT_UPDATED);
     }
-
-    // Track how many getdata requests our transaction gets.
-    mapRequestCount[wtxNew.GetId()] = 0;
 
     // Get the inserted-CWalletTx from mapWallet so that the fInMempool flag is cached properly
     CWalletTx &wtx = mapWallet.at(wtxNew.GetId());
