@@ -30,13 +30,6 @@ set(DEVTOOLS_TESTS_PYTHON
 )
 
 foreach(TEST ${DEVTOOLS_TESTS_PYTHON})
-  get_filename_component(TESTNAME ${TEST} NAME)
-  get_filename_component(TESTPATH ${TEST} ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR})
-  get_filename_component(WORKDIR ${TESTPATH} DIRECTORY)
-  add_custom_target("check-devtools-${TESTNAME}"
-    WORKING_DIRECTORY
-      ${WORKDIR}
-    COMMAND
       "${PYTHON_EXECUTABLE}"
       "./${TESTNAME}"
   )

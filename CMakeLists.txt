@@ -72,6 +72,7 @@ add_subdirectory(src)
 add_subdirectory(test)
 
 #add_subdirectory(contrib)
+#add_subdirectory(contrib/devtools)
 add_subdirectory(doc)
 
 include(PackageOptions)
