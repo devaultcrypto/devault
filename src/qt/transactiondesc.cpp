@@ -12,6 +12,8 @@
 
 #include <consensus/consensus.h>
 #include <dstencode.h>
+
+#include <policy/policy.h>
 #include <script/script.h>
 #include <timedata.h>
 #include <util.h>
@@ -291,6 +293,9 @@ QString TransactionDesc::toHTML(interfaces::Node &node,
         "<b>" + tr("Transaction ID") + ":</b> " + rec->getTxID() + "<br>";
     strHTML += "<b>" + tr("Transaction total size") + ":</b> " +
                QString::number(wtx.tx->GetTotalSize()) + " bytes<br>";
+    strHTML += "<b>" + tr("Transaction virtual size") + ":</b> " +
+               QString::number(GetVirtualTransactionSize(*wtx.tx)) +
+               " bytes<br>";
     strHTML += "<b>" + tr("Output index") + ":</b> " +
                QString::number(rec->getOutputIndex()) + "<br>";
 
