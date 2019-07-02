@@ -7,6 +7,7 @@
 #include <crypto/common.h>
 
 #include <cstring>
+const size_t CRIPEMD160::OUTPUT_SIZE; // for linkage
 
 // Internal implementation code.
 namespace {

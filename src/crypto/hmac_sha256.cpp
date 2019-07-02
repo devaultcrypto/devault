@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+const size_t CHMAC_SHA256::OUTPUT_SIZE; // for linkage
+
 CHMAC_SHA256::CHMAC_SHA256(const uint8_t *key, size_t keylen) {
     uint8_t rkey[64];
     if (keylen <= 64) {

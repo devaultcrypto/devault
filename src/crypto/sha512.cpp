@@ -8,6 +8,8 @@
 
 #include <cstring>
 
+const size_t CSHA512::OUTPUT_SIZE; // for linkage
+
 // Internal implementation code.
 namespace {
 /// Internal SHA-512 implementation.

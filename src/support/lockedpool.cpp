@@ -245,6 +245,8 @@ size_t PosixLockedPageAllocator::GetLimit() {
 }
 #endif
 
+const size_t LockedPool::ARENA_SIZE; // for linkage of this symbol
+
 /*******************************************************************************/
 // Implementation: LockedPool
 

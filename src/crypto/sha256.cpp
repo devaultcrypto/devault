@@ -9,6 +9,9 @@
 #include <cassert>
 #include <cstring>
 
+
+const size_t CSHA256::OUTPUT_SIZE; // for linkage
+
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
 #if defined(USE_ASM)
 #include <cpuid.h>
