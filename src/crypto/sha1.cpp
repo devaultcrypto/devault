@@ -8,6 +8,8 @@
 
 #include <cstring>
 
+const size_t CSHA1::OUTPUT_SIZE; // for linkage
+
 // Internal implementation code.
 namespace {
 /// Internal SHA-1 implementation.

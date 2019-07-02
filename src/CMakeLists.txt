@@ -495,11 +495,6 @@ target_link_libraries(server
 	      Threads::Threads
 )
 
-# Test suite.(can always setup)
-if (BUILD_CTESTS)
-  add_subdirectory(test)
-endif()
-  
 # Benchmark suite.
 if (BUILD_BENCH)
   add_subdirectory(bench)
@@ -567,6 +562,9 @@ if(BUILD_WALLET)
   endif()
 endif()
 
+if (BUILD_CTESTS)
+  add_subdirectory(catch_tests)
+endif()
 
 
 message(STATUS "-----------------------------------------")

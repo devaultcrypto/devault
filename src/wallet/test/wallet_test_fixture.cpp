@@ -11,10 +11,6 @@
 #include <wallet/rpcdump.h>
 #include <wallet/wallet.h>
 
-#define BOOST_TEST_MODULE DeVault Wallet Test Suite
-
-#include <boost/test/unit_test.hpp>
-
 std::unique_ptr<CWallet> pwalletMain;
 
 WalletTestingSetup::WalletTestingSetup(const std::string &chainName)
