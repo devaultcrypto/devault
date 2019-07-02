@@ -840,8 +840,8 @@ bool CWallet::AccountMove(std::string strFrom, std::string strTo,
     return walletdb.TxnCommit();
 }
 
-bool CWallet::GetLabelAddress(CPubKey &pubKey, const std::string &label,
-                              bool bForceNew) {
+bool CWallet::GetLabelDestination(CTxDestination &dest,
+                                  const std::string &label, bool bForceNew) {
     CWalletDB walletdb(*dbw);
 
     CAccount account;
@@ -872,11 +872,12 @@ bool CWallet::GetLabelAddress(CPubKey &pubKey, const std::string &label,
             return false;
         }
 
-        SetAddressBook(account.vchPubKey.GetID(), label, "receive");
+        dest = account.vchPubKey.GetID();
+        SetAddressBook(dest, label, "receive");
         walletdb.WriteAccount(label, account);
+    } else {
+        dest = account.vchPubKey.GetID();
     }
-
-    pubKey = account.vchPubKey;
 
     return true;
 }

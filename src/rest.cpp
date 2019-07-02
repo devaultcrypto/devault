@@ -8,6 +8,7 @@
 #include <config.h>
 #include <core_io.h>
 #include <httpserver.h>
+#include <index/txindex.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <rpc/blockchain.h>
@@ -405,6 +406,10 @@ static bool rest_tx(Config &config, HTTPRequest *req,
     }
 
     const TxId txid(hash);
+
+    if (g_txindex) {
+        g_txindex->BlockUntilSyncedToCurrentChain();
+    }
 
     CTransactionRef tx;
     uint256 hashBlock = uint256();

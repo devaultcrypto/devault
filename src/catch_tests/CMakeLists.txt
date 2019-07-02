@@ -64,7 +64,7 @@ set(UNIT_CTESTS
 #  avalanche
   base32
   base64
-###  blockchain
+  blockchain
   blockcheck
   blockencodings
   blockfilter
@@ -122,7 +122,7 @@ set(UNIT_CTESTS
   schnorr
   script_commitment
   script_P2SH
-###  script_standard
+  script_standard
   script
   scriptnum
   serialize
@@ -136,7 +136,7 @@ set(UNIT_CTESTS
   sync
   timedata
   transaction
-###  txindex
+  txindex
   txvalidationcache
   uint256
   undo

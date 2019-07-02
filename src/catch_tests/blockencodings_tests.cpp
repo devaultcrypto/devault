@@ -7,6 +7,7 @@
 #include <config.h>
 #include <consensus/merkle.h>
 #include <random.h>
+#include <pow.h>
 
 #include <test/test_bitcoin.h>
 
