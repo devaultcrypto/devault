@@ -276,7 +276,7 @@ TEST_CASE("CreateNewBlock_validity") {
     tx.vout[0].nValue -= LOWFEE;
     hash = tx.GetId();
     // Only first tx spends coinbase.
-    bool spendsCoinbase = (i == 0) ? true : false;
+    bool spendsCoinbase = i == 0;
     // If we don't set the # of sig ops in the CTxMemPoolEntry, template
     // creation fails.
     g_mempool.addUnchecked(hash, entry.Fee(LOWFEE).Time(GetTime()).SpendsCoinbase(spendsCoinbase).FromTx(tx));
@@ -295,7 +295,7 @@ TEST_CASE("CreateNewBlock_validity") {
     tx.vout[0].nValue -= LOWFEE;
     hash = tx.GetId();
     // Only first tx spends coinbase.
-    bool spendsCoinbase = (i == 0) ? true : false;
+    bool spendsCoinbase = i == 0;
     // If we do set the # of sig ops in the CTxMemPoolEntry, template
     // creation passes.
     g_mempool.addUnchecked(hash,
@@ -320,7 +320,7 @@ TEST_CASE("CreateNewBlock_validity") {
     tx.vout[0].nValue -= LOWFEE;
     hash = tx.GetId();
     // Only first tx spends coinbase.
-    bool spendsCoinbase = (i == 0) ? true : false;
+    bool spendsCoinbase = i == 0;
     g_mempool.addUnchecked(hash, entry.Fee(LOWFEE).Time(GetTime()).SpendsCoinbase(spendsCoinbase).FromTx(tx));
     tx.vin[0].prevout = COutPoint(hash, 0);
   }
