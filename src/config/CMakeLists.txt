@@ -240,7 +240,7 @@ endif()
 
 # Try to find miniupnpc
 if(ENABLE_UPNP)
-	find_package(MiniUPnPc REQUIRED)
+	find_package(Miniupnpc REQUIRED)
 
 	# The expected behavior is as follow:
 	#  - If UPnP is enabled USE_UPNP must be defined
