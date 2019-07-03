@@ -655,7 +655,11 @@ void CWallet::FinishEncryptWallet() {
         pwalletdbEncryption->TxnCommit();
         Lock();
   }
-  
+}
+
+void CWallet::SetEncryptWallet() {
+  assert(!pwalletdbEncryption);
+  pwalletdbEncryption = std::make_unique<CWalletDB>(*dbw);
 }
 
 
@@ -4315,6 +4319,8 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       LogPrintf("%s : Encrypted HDChain & keys written to wallet\n", __func__);
       
       walletInstance->ChainStateFlushed(chainActive.GetLocator());
+    } else {
+      walletInstance->SetEncryptWallet();
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
