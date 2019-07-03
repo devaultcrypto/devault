@@ -7,10 +7,14 @@
 Verify that a bitcoind node can load multiple wallet files
 """
 import os
+import re
 import shutil
 
 from test_framework.test_framework import BitcoinTestFramework
-from test_framework.util import assert_equal, assert_raises_rpc_error
+from test_framework.util import (
+    assert_equal,
+    assert_raises_rpc_error,
+)
 
 
 class MultiWalletTest(BitcoinTestFramework):
@@ -32,17 +36,28 @@ class MultiWalletTest(BitcoinTestFramework):
         assert_equal(set(node.listwallets()), {"w1", "w2", "w3", "w"})
 
         self.stop_node(0)
+        for wallet_name in wallet_names:
+            if os.path.isdir(wallet_dir(wallet_name)):
+                assert_equal(os.path.isfile(
+                    wallet_dir(wallet_name, "wallet.dat")), True)
+            else:
+                assert_equal(os.path.isfile(wallet_dir(wallet_name)), True)
 
-        self.assert_start_raises_init_error(
-            0, ['-walletdir=wallets'], 'Error: Specified -walletdir "wallets" does not exist')
-        self.assert_start_raises_init_error(
-            0, ['-walletdir=wallets'], 'Error: Specified -walletdir "wallets" is a relative path', cwd=data_dir())
-        self.assert_start_raises_init_error(
-            0, ['-walletdir=debug.log'], 'Error: Specified -walletdir "debug.log" is not a directory', cwd=data_dir())
+        # should not initialize if wallet path can't be created
+        exp_stderr = "boost::filesystem::create_directory: (The system cannot find the path specified|Not a directory):"
+        self.nodes[0].assert_start_raises_init_error(
+            ['-wallet=wallet.dat/bad'], exp_stderr, partial_match=True)
+
+        self.nodes[0].assert_start_raises_init_error(
+            ['-walletdir=wallets'], 'Error: Specified -walletdir "wallets" does not exist')
+        self.nodes[0].assert_start_raises_init_error(
+            ['-walletdir=wallets'], 'Error: Specified -walletdir "wallets" is a relative path', cwd=data_dir())
+        self.nodes[0].assert_start_raises_init_error(
+            ['-walletdir=debug.log'], 'Error: Specified -walletdir "debug.log" is not a directory', cwd=data_dir())
 
         # should not initialize if there are duplicate wallets
-        self.assert_start_raises_init_error(
-            0, ['-wallet=w1', '-wallet=w1'], 'Error loading wallet w1. Duplicate -wallet filename specified.')
+        self.nodes[0].assert_start_raises_init_error(
+            ['-wallet=w1', '-wallet=w1'], 'Error: Error loading wallet w1. Duplicate -wallet filename specified.')
 
         # should not initialize if wallet file is a directory
         os.mkdir(wallet_dir('w11'))
@@ -60,13 +75,13 @@ class MultiWalletTest(BitcoinTestFramework):
             0, ['-wallet=w12'], 'Error loading wallet w12. -wallet filename must be a regular file.')
 
         # should not initialize if the specified walletdir does not exist
-        self.assert_start_raises_init_error(
-            0, ['-walletdir=bad'], 'Error: Specified -walletdir "bad" does not exist')
+        self.nodes[0].assert_start_raises_init_error(
+            ['-walletdir=bad'], 'Error: Specified -walletdir "bad" does not exist')
         # should not initialize if the specified walletdir is not a directory
         not_a_dir = wallet_dir('notadir')
         open(not_a_dir, 'a').close()
-        self.assert_start_raises_init_error(
-            0, ['-walletdir='+not_a_dir], 'Error: Specified -walletdir "' + not_a_dir + '" is not a directory')
+        self.nodes[0].assert_start_raises_init_error(
+            ['-walletdir=' + not_a_dir], 'Error: Specified -walletdir "' + re.escape(not_a_dir) + '" is not a directory')
 
         # if wallets/ doesn't exist, datadir should be the default wallet dir
         wallet_dir2 = data_dir('walletdir')

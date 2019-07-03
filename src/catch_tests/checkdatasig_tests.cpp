@@ -60,18 +60,18 @@ static void CheckTestResultForAllFlags(const stacktype &original_stack, const CS
                                        const stacktype &expected) {
   for (uint32_t flags : flagset) {
     // The script executes as expected regardless of whether or not
-    // SCRIPT_ENABLE_CHECKDATASIG flag is passed.
-    CheckPass(flags & ~SCRIPT_ENABLE_CHECKDATASIG, original_stack, script, expected);
-    CheckPass(flags | SCRIPT_ENABLE_CHECKDATASIG, original_stack, script, expected);
+    // SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag is passed.
+    CheckPass(flags & ~SCRIPT_VERIFY_CHECKDATASIG_SIGOPS, original_stack, script, expected);
+    CheckPass(flags | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS, original_stack, script, expected);
   }
 }
 
 static void CheckErrorForAllFlags(const stacktype &original_stack, const CScript &script, ScriptError expected) {
   for (uint32_t flags : flagset) {
     // The script generates the proper error regardless of whether or not
-    // SCRIPT_ENABLE_CHECKDATASIG flag is passed.
-    CheckError(flags & ~SCRIPT_ENABLE_CHECKDATASIG, original_stack, script, expected);
-    CheckError(flags | SCRIPT_ENABLE_CHECKDATASIG, original_stack, script, expected);
+    // SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag is passed.
+    CheckError(flags & ~SCRIPT_VERIFY_CHECKDATASIG_SIGOPS, original_stack, script, expected);
+    CheckError(flags | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS, original_stack, script, expected);
   }
 }
 
@@ -118,7 +118,7 @@ TEST_CASE("checkdatasig_test") {
 
   MMIXLinearCongruentialGenerator lcg;
   for (int i = 0; i < 4096; i++) {
-    uint32_t flags = lcg.next() | SCRIPT_ENABLE_CHECKDATASIG;
+    uint32_t flags = lcg.next() | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
 
     // When strict encoding is enforced, hybrid keys are invalid.
     // When compressed-only is enforced, hybrid keys are invalid.
@@ -175,8 +175,8 @@ TEST_CASE("checkdatasig_test") {
 
 TEST_CASE("checkdatasig_inclusion_in_standard_and_mandatory_flags") {
   BasicTestingSetup setup;
-  BOOST_CHECK((STANDARD_SCRIPT_VERIFY_FLAGS & SCRIPT_ENABLE_CHECKDATASIG));
-  BOOST_CHECK(!(MANDATORY_SCRIPT_VERIFY_FLAGS & SCRIPT_ENABLE_CHECKDATASIG));
+  BOOST_CHECK((STANDARD_SCRIPT_VERIFY_FLAGS & SCRIPT_VERIFY_CHECKDATASIG_SIGOPS));
+  BOOST_CHECK(!(MANDATORY_SCRIPT_VERIFY_FLAGS & SCRIPT_VERIFY_CHECKDATASIG_SIGOPS));
 }
 
 // BOOST_AUTO_TEST_SUITE_END()

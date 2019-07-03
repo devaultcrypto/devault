@@ -4,73 +4,73 @@
       Update manpages for the 0.19.7 release
       Update chainparams for 0.19.7 release
       Reoder various argument declarations
-      Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from Schnorr test
+##### Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from Schnorr test
       Add post-upgrade testnet checkpoint
-      [Tests] Require exact match in assert_start_raises_init_eror()
-      Give ZMQ consistent order with UpdatedBlockTip on scheduler thread
-      Don't use the functional test arguments in the tmp directory name
+##### [Tests] Require exact match in assert_start_raises_init_eror()
+##### Give ZMQ consistent order with UpdatedBlockTip on scheduler thread
+##### Don't use the functional test arguments in the tmp directory name
       wallet: Display non-HD error on first run
-      Merge #10056: [zmq] Call va_end() on va_start()ed args.
-      Backport current GetDifficulty logic (& tests) from Core
-      remove chain.h dependency from txdb.h
+##### Merge #10056: [zmq] Call va_end() on va_start()ed args.
+##### Backport current GetDifficulty logic (& tests) from Core
+##### remove chain.h dependency from txdb.h
       Create new wallet databases as directories rather than files
       Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from script tests
-      index: Move index DBs into index/ directory.
-      MOVEONLY: Move BaseIndex to its own file.
-      index: Generalize logged statements in BaseIndex.
-      index: Extract logic from TxIndex into reusable base class.
-      db: Make reusable base class for index databases.
+##### index: Move index DBs into index/ directory.
+##### MOVEONLY: Move BaseIndex to its own file.
+##### index: Generalize logged statements in BaseIndex.
+##### index: Extract logic from TxIndex into reusable base class.
+##### db: Make reusable base class for index databases.
       Allow wallet files not in -walletdir directory
       Support downgrading after recovered keypool witness keys
       SegWit wallet support
       [CMAKE] Fix Miniupnpc error message
-      Remove IsSolvable
-      Simplify "bool x = y ? true : false". Remove unused function and trailing semicolon.
-      Extend validateaddress information for P2SH-embedded witness
+##### Remove IsSolvable
+##### Simplify "bool x = y ? true : false". Remove unused function and trailing semicolon.
+##### Extend validateaddress information for P2SH-embedded witness
       Allow wallet files in multiple directories
       Bump wallet version to 190700 and remove the `usehd` option
       [CMAKE] Add support for Miniupnpc
-      Implicitly know about P2WPKH redeemscripts
+##### Implicitly know about P2WPKH redeemscripts
       Use GetKeyForDestination in various RPCs
-      Merge #13396: Drop unused arith_uint256 ! operator
-      Add comments indicating "Schnorr" in Schnorr-related script tests.
-      qa: Use node.datadir instead of tmpdir in test framework
-      Don't create another wallet db directory in walletdb_tests
-      Rename SCRIPT_ENABLE_CHECKDATASIG to SCRIPT_VERIFY_CHECKDATASIG_SIGOPS.
+##### Merge #13396: Drop unused arith_uint256 ! operator
+##### Add comments indicating "Schnorr" in Schnorr-related script tests.
+##### qa: Use node.datadir instead of tmpdir in test framework
+##### Don't create another wallet db directory in walletdb_tests
+##### Rename SCRIPT_ENABLE_CHECKDATASIG to SCRIPT_VERIFY_CHECKDATASIG_SIGOPS.
       Fixed multiple typos
-      Merge #14513: Avoid 1 << 31 (UB) in calculation of SEQUENCE_LOCKTIME_DISABLE_FLAG
-      Merge #14510: Avoid triggering undefined behaviour in base_uint<BITS>::bits()
-      Update prevector
-      Merge #13894: shutdown: Stop threads before resetting ptrs
-      Expose method to find key for a single-key destination
-      Abstract out IsSolvable from Witnessifier
-      Merge #10308: [wallet] Securely erase potentially sensitive keys/values
-      Merge #10341: rpc/wallet: Workaround older UniValue which returns a std::string temporary for get_str
-      [script] Unit tests for IsMine
-      [script] Unit tests for script/standard functions
-      Fix code style in keystore.cpp/crypter.cpp
+##### Merge #14513: Avoid 1 << 31 (UB) in calculation of SEQUENCE_LOCKTIME_DISABLE_FLAG
+##### Merge #14510: Avoid triggering undefined behaviour in base_uint<BITS>::bits()
+##### Update prevector
+##### Merge #13894: shutdown: Stop threads before resetting ptrs
+##### Expose method to find key for a single-key destination
+##### Abstract out IsSolvable from Witnessifier
+##### Merge #10308: [wallet] Securely erase potentially sensitive keys/values
+##### Merge #10341: rpc/wallet: Workaround older UniValue which returns a std::string temporary for get_str
+##### [script] Unit tests for IsMine
+##### [script] Unit tests for script/standard functions
+##### Fix code style in keystore.cpp/crypter.cpp
       Remove the virtual specifier for functions with the override specifier
       db: Remove obsolete methods from CBlockTreeDB.
-      Set InitMessage for txindex migration
-      [txindex] Activate new transaction index code that runs in background
+##### Set InitMessage for txindex migration
+##### [txindex] Activate new transaction index code that runs in background
       Merge #11468: [tests] Make comp test framework more debuggable
-      Comments: More comments on functions/globals in standard.h.
-      [CMAKE] Avoid displaying the console when launching bitcoin-qt.exe
-      [CMAKE] Add cross compiling support for ARM32 and ARM64
-      [CMAKE] Add cross build toolchain files for PC Linux platform
-      [CMAKE] Disable OpenGL in Qt static build for OSX
+##### Comments: More comments on functions/globals in standard.h.
+##### [CMAKE] Avoid displaying the console when launching bitcoin-qt.exe
+##### [CMAKE] Add cross compiling support for ARM32 and ARM64
+##### [CMAKE] Add cross build toolchain files for PC Linux platform
+##### [CMAKE] Disable OpenGL in Qt static build for OSX
       [CMAKE] Add QT plugins according to the target platform
-      [refactor] GetAccount{PubKey, Address} -> GetAccountDestination
-      Merge #12425: Add some script tests
-      Merge #12468: Add missing newline in init.cpp log message
-      [qa] don't pad transactions during make_conform_to_ctor
-      Add a test to ensure memory isn't consumed for blocks pre-checkpoint
-      [rpc] Add initialblockdownload to getblockchaininfo
-      Interpret scripts with CHECKDATASIG opcode always valid.
-      tests: move pwalletMain to wallet test fixture
-      Merge #12151: rpc: Remove cs_main lock from blockToJSON and blockheaderToJSON
-      Merge #13527: policy: Remove promiscuousmempoolflags
-      Merge #11742: rpc: Add testmempoolaccept
+##### [refactor] GetAccount{PubKey, Address} -> GetAccountDestination
+##### Merge #12425: Add some script tests
+##### Merge #12468: Add missing newline in init.cpp log message
+##### [qa] don't pad transactions during make_conform_to_ctor
+##### Add a test to ensure memory isn't consumed for blocks pre-checkpoint
+##### [rpc] Add initialblockdownload to getblockchaininfo
+##### Interpret scripts with CHECKDATASIG opcode always valid.
+##### tests: move pwalletMain to wallet test fixture
+##### Merge #12151: rpc: Remove cs_main lock from blockToJSON and blockheaderToJSON
+##### Merge #13527: policy: Remove promiscuousmempoolflags
+##### Merge #11742: rpc: Add testmempoolaccept
 ##### Refactor walletdb_tests to use the wallet test fixture
       Fix for mismatched extern definition in wallet test
 ##### Fix uninitialized atomic variables

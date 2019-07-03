@@ -35,7 +35,7 @@ static std::unique_ptr<CWallet> LoadWallet(CWalletDB *db) {
 TEST_CASE("write_erase_name") {
     WalletTestingSetup setup;
     auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_name");
-    CWalletDB walletdb(*walletdbwrapper, "cr+");
+    CWalletDB walletdb(setup.pwalletMain->GetDBHandle(), "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
@@ -61,7 +61,7 @@ TEST_CASE("write_erase_name") {
 TEST_CASE("write_erase_purpose") {
     WalletTestingSetup setup;
     auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_purpose");
-    CWalletDB walletdb(*walletdbwrapper, "cr+");
+    CWalletDB walletdb(setup.pwalletMain->GetDBHandle(), "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
@@ -87,7 +87,7 @@ TEST_CASE("write_erase_purpose") {
 TEST_CASE("write_erase_destdata") {
     WalletTestingSetup setup;
     auto walletdbwrapper = TmpDB(setup.pathTemp, "write_erase_destdata");
-    CWalletDB walletdb(*walletdbwrapper, "cr+");
+    CWalletDB walletdb(setup.pwalletMain->GetDBHandle(), "cr+");
 
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
@@ -124,7 +124,7 @@ TEST_CASE("write_erase_destdata") {
 TEST_CASE("no_dest_fails") {
     WalletTestingSetup setup;
     auto walletdbwrapper = TmpDB(setup.pathTemp, "no_dest_fails");
-    CWalletDB walletdb(*walletdbwrapper, "cr+");
+    CWalletDB walletdb(setup.pwalletMain->GetDBHandle(), "cr+");
 
     CTxDestination dst = CNoDestination{};
     REQUIRE(!walletdb.WriteName(dst, "name"));
