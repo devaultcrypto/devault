@@ -481,7 +481,7 @@ add_library(server
 
 # This require libevent
 find_package(Event REQUIRED)
-#find_package(Miniupnpc REQUIRED)
+find_package(Miniupnpc REQUIRED)
 
 if (NOT RocksDB_FOUND)
   target_include_directories(server PRIVATE leveldb/helpers/memenv)
