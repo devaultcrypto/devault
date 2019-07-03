@@ -500,6 +500,12 @@ if (BUILD_BENCH)
   add_subdirectory(bench)
 endif()
 
+if (CMAKE_GENERATOR STREQUAL Xcode)
+  message(STATUS "Disabling BUILD_CTESTS since Xcode")
+  SET(BUILD_CTESTS OFF)
+endif()
+
+
 # Wallet
 if(BUILD_WALLET)
 	add_subdirectory(wallet)
@@ -561,6 +567,7 @@ if(BUILD_WALLET)
 	  add_subdirectory(qt)
   endif()
 endif()
+
 
 if (BUILD_CTESTS)
   add_subdirectory(catch_tests)
