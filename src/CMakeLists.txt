@@ -28,6 +28,8 @@ option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
 option(ENABLE_REDUCE_EXPORTS "Reduce the amount of exported symbols" OFF)
 option(ENABLE_QRCODE "Enable QR code display" ON)
 option(BUILD_STD_FILESYSTEM "Enable trying to use std::filesystem" OFF)
+option(ENABLE_UPNP "Enable UPnP support" ON)
+option(START_WITH_UPNP "Make UPnP the default to map ports" OFF)
 
 add_feature_info(WITH_WALLET BUILD_WALLET "Activate the wallet functionality")
 add_feature_info(WITH_ZMQ BUILD_ZMQ "Activate the ZeroMQ functionalities")
@@ -495,6 +497,24 @@ target_link_libraries(server
         ${MINIUPNP_LIBRARY}
 	      Threads::Threads
 )
+
+if(ENABLE_UPNP)
+	target_include_directories(server PUBLIC ${MINIUPNPC_INCLUDE_DIR})
+	target_link_libraries(server ${MINIUPNPC_LIBRARY})
+
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		find_library(IPHLPAPI_LIBRARY NAMES iphlpapi)
+		if(NOT IPHLPAPI_LIBRARY)
+			message(FATAL_ERROR "Lib iphlpapi is missing")
+		endif()
+		target_link_libraries(server ${IPHLPAPI_LIBRARY})
+
+		target_compile_definitions(server
+			PUBLIC -DSTATICLIB
+			PUBLIC -DMINIUPNP_STATICLIB
+		)
+	endif()
+endif()
 
 # Benchmark suite.
 if (BUILD_BENCH)
