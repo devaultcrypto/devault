@@ -13,6 +13,22 @@ bool CKeyStore::AddKey(const CKey &key) {
     return AddKeyPubKey(key, key.GetPubKey());
 }
 
+void CBasicKeyStore::ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey) {
+    AssertLockHeld(cs_KeyStore);
+    CKeyID key_id = pubkey.GetID();
+    // We must actually know about this key already.
+    assert(HaveKey(key_id) || mapWatchKeys.count(key_id));
+    // This adds the redeemscripts necessary to detect alternative outputs using
+    // the same keys. Also note that having superfluous scripts in the keystore
+    // never hurts. They're only used to guide recursion in signing and IsMine
+    // logic - if a script is present but we can't do anything with it, it has
+    // no effect. "Implicitly" refers to fact that scripts are derived
+    // automatically from existing keys, and are present in memory, even without
+    // being explicitly loaded (e.g. from a file).
+
+    // Right now there are none so do nothing.
+}
+
 bool CBasicKeyStore::GetPubKey(const CKeyID &address,
                                CPubKey &vchPubKeyOut) const {
     CKey key;
@@ -32,6 +48,7 @@ bool CBasicKeyStore::GetPubKey(const CKeyID &address,
 bool CBasicKeyStore::AddKeyPubKey(const CKey &key, const CPubKey &pubkey) {
     LOCK(cs_KeyStore);
     mapKeys[pubkey.GetID()] = key;
+    ImplicitlyLearnRelatedKeyScripts(pubkey);
     return true;
 }
 
@@ -50,13 +67,11 @@ std::set<CKeyID> CBasicKeyStore::GetKeys() const {
 }
 
 bool CBasicKeyStore::GetKey(const CKeyID &address, CKey &keyOut) const {
-    {
-        LOCK(cs_KeyStore);
-        auto mi = mapKeys.find(address);
-        if (mi != mapKeys.end()) {
-            keyOut = mi->second;
-            return true;
-        }
+    LOCK(cs_KeyStore);
+    KeyMap::const_iterator mi = mapKeys.find(address);
+    if (mi != mapKeys.end()) {
+        keyOut = mi->second;
+        return true;
     }
     return false;
 }
@@ -123,6 +138,7 @@ bool CBasicKeyStore::AddWatchOnly(const CScript &dest) {
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
         mapWatchKeys[pubKey.GetID()] = pubKey;
+        ImplicitlyLearnRelatedKeyScripts(pubKey);
     }
     return true;
 }
@@ -134,6 +150,8 @@ bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest) {
     if (ExtractPubKey(dest, pubKey)) {
         mapWatchKeys.erase(pubKey.GetID());
     }
+    // Related CScripts are not removed; having superfluous scripts around is
+    // harmless (see comment in ImplicitlyLearnRelatedKeyScripts).
     return true;
 }
 
@@ -147,3 +165,20 @@ bool CBasicKeyStore::HaveWatchOnly() const {
     return (!setWatchOnly.empty());
 }
 
+CKeyID GetKeyForDestination(const CKeyStore &store,
+                            const CTxDestination &dest) {
+    // Only supports destinations which map to single public keys, i.e. P2PKH.
+#ifdef HAVE_VARIANT
+    try {
+      auto id = std::get<CKeyID>(dest);
+      return id;
+    } catch (std::bad_variant_access&) {
+      return CKeyID();
+    }
+#else
+    if (auto id = boost::get<CKeyID>(&dest)) {
+        return *id;
+    }
+#endif
+    return CKeyID();
+}
