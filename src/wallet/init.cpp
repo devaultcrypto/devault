@@ -145,6 +145,11 @@ bool WalletInit::ParameterInteraction() const {
 
     gArgs.SoftSetArg("-wallet", DEFAULT_WALLET_DAT);
     const bool is_multiwallet = gArgs.GetArgs("-wallet").size() > 1;
+    if (is_multiwallet) {
+      return InitError(
+                       strprintf("%s is only allowed with a single wallet file",
+                                 "-wallet"));
+    }
 
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         return true;
@@ -325,6 +330,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
+    // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
         if (fs::path(walletFile).filename() != walletFile) {
             return InitError(
@@ -384,6 +390,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
             InitError(strError);
             return false;
         }
+        break; // Exit after 1st wallet file
     }
 
     return true;
@@ -408,6 +415,7 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
+    // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
         if (fs::path(walletFile).filename() != walletFile) {
           return false;
@@ -426,6 +434,7 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
         if (fs::exists(wallet_path)) {
           return true;
         }
+        break; // Exit after 1st wallet file
     }
 
   return false;
@@ -439,13 +448,23 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
         return true;
     }
 
+    const bool is_multiwallet = gArgs.GetArgs("-wallet").size() > 1;
+    if (is_multiwallet) {
+      return InitError(
+                       strprintf("%s is only allowed with a single wallet file",
+                                 "-wallet"));
+    }
+
+
+    // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
-        CWallet *const pwallet =
-          CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, words);
-        if (!pwallet) {
-            return false;
-        }
-        vpwallets.push_back(pwallet);
+      CWallet *const pwallet =
+        CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, words);
+      if (!pwallet) {
+        return false;
+      }
+      vpwallets.push_back(pwallet);
+      break; // Exit after 1st wallet file
     }
 
     return true;

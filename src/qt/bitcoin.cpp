@@ -375,6 +375,13 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
   if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
     LogPrintf("Wallet disabled!\n");
   } else {
+    bool is_multiwallet = gArgs.GetArgs("-wallet").size() > 1;
+    if (is_multiwallet) {
+      return InitError(
+                       strprintf("%s is only allowed with a single wallet file",
+                                 "-wallet"));
+    }
+    // If we get here, only single wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
       if (fs::exists(walletFile)) return true;
     }
