@@ -20,6 +20,7 @@
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <hash.h>
+#include <index/txindex.h>
 #include <init.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
@@ -75,7 +76,6 @@ uint256 g_best_block;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 std::atomic_bool fReindex(false);
-bool fTxIndex = false;
 bool fAddressIndex = false;
 bool fTimestampIndex = false;
 bool fHavePruned = false;
@@ -630,12 +630,9 @@ static bool AcceptToMemoryPoolWorker(
             extraFlags |= SCRIPT_ENABLE_REPLAY_PROTECTION;
         }
 
-        //if (IsMagneticAnomalyEnabledForCurrentBlock(config)) {
-        //}
-
         if (IsGreatWallEnabledForCurrentBlock(config)) {
             extraFlags |= SCRIPT_ENABLE_SCHNORR;
-            extraFlags |= SCRIPT_ENABLE_CHECKDATASIG;
+            extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
         }
 
         // Make sure whatever we need to activate is actually activated.
@@ -787,32 +784,8 @@ bool GetTransaction(const Config &config, const TxId &txid,
             return true;
         }
 
-        if (fTxIndex) {
-            CDiskTxPos postx;
-            if (pblocktree->ReadTxIndex(txid, postx)) {
-                CAutoFile file(OpenBlockFile(postx, true), SER_DISK,
-                               CLIENT_VERSION);
-                if (file.IsNull()) {
-                    return error("%s: OpenBlockFile failed", __func__);
-                }
-                CBlockHeader header;
-                try {
-                    file >> header;
-                    fseek(file.Get(), postx.nTxOffset, SEEK_CUR);
-                    file >> txOut;
-                } catch (const std::exception &e) {
-                    return error("%s: Deserialize or I/O error - %s", __func__,
-                                 e.what());
-                }
-                hashBlock = header.GetHash();
-                if (txOut->GetId() != txid) {
-                    return error("%s: txid mismatch", __func__);
-                }
-                return true;
-            }
-
-            // transaction not found in index, nothing more can be done
-            return false;
+        if (g_txindex) {
+            return g_txindex->FindTx(txid, hashBlock, txOut);
         }
 
         // use coin database to locate block that contains transaction, and scan
@@ -1552,27 +1525,6 @@ static bool WriteUndoDataForBlock(const CBlockUndo &blockundo,
     return true;
 }
 
-static bool WriteTxIndexDataForBlock(const CBlock &block,
-                                     CValidationState &state,
-                                     CBlockIndex *pindex) {
-    CDiskTxPos pos(pindex->GetBlockPos(),
-                   GetSizeOfCompactSize(block.vtx.size()));
-    std::vector<std::pair<uint256, CDiskTxPos>> vPos;
-    vPos.reserve(block.vtx.size());
-    for (const CTransactionRef &tx : block.vtx) {
-        vPos.emplace_back(tx->GetHash(), pos);
-        pos.nTxOffset += ::GetSerializeSize(*tx, SER_DISK, CLIENT_VERSION);
-    }
-
-    if (fTxIndex) {
-        if (!pblocktree->WriteTxIndex(vPos)) {
-            return AbortNode(state, "Failed to write transaction index");
-        }
-    }
-
-    return true;
-}
-
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
@@ -1633,7 +1585,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // alternative. We also start enforcing push only signatures and
     // clean stack.
     if (IsGreatWallEnabled(config, pChainTip)) {
-      flags |= SCRIPT_ENABLE_CHECKDATASIG;
+      flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
       flags |= SCRIPT_VERIFY_SIGPUSHONLY;
       flags |= SCRIPT_VERIFY_CLEANSTACK;
     }
@@ -1973,10 +1925,6 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     if (!pindex->IsValid(BlockValidity::SCRIPTS)) {
         pindex->RaiseValidity(BlockValidity::SCRIPTS);
         setDirtyBlockIndex.insert(pindex);
-    }
-
-    if (!WriteTxIndexDataForBlock(block, state, pindex)) {
-        return false;
     }
 
     if (addrIndex.size() > 0) {
@@ -4481,12 +4429,6 @@ static bool LoadBlockIndexDB(const Config &config) {
         fReindex = true;
     }
 
-    // Check whether we have a transaction index
-    pblocktree->ReadFlag("txindex", fTxIndex);
-    LogPrintf("%s: transaction index %s\n", __func__,
-              fTxIndex ? "enabled" : "disabled");
-
-
     // Check whether we have an address index
     pblocktree->ReadFlag("addressindex", fAddressIndex);
     LogPrintf("%s: address index %s\n", __func__, fAddressIndex ? "enabled" : "disabled");
@@ -4913,10 +4855,6 @@ bool LoadBlockIndex(const Config &config) {
         // needs_init.
 
         LogPrintf("Initializing databases...\n");
-        // Use the provided setting for -txindex in the new database
-        fTxIndex = gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX);
-        pblocktree->WriteFlag("txindex", fTxIndex);
-      
         // Use the provided setting for -addressindex in the new database
         fAddressIndex = gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX);
         pblocktree->WriteFlag("addressindex", fAddressIndex);

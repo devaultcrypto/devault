@@ -14,6 +14,8 @@
 
 #include <catch2/catch.hpp>
 
+#define BOOST_ERROR(A) std::cout << (A) << "\n";
+
 static std::map<std::string, uint32_t> mapFlagNames = {
     {"NONE", SCRIPT_VERIFY_NONE},
     {"P2SH", SCRIPT_VERIFY_P2SH},
@@ -32,7 +34,7 @@ static std::map<std::string, uint32_t> mapFlagNames = {
     {"COMPRESSED_PUBKEYTYPE", SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE},
     {"SIGHASH_FORKID", SCRIPT_ENABLE_SIGHASH_FORKID},
     {"REPLAY_PROTECTION", SCRIPT_ENABLE_REPLAY_PROTECTION},
-    {"CHECKDATASIG", SCRIPT_ENABLE_CHECKDATASIG},
+    {"CHECKDATASIG", SCRIPT_VERIFY_CHECKDATASIG_SIGOPS},
     {"SCHNORR", SCRIPT_ENABLE_SCHNORR},
 };
 
@@ -44,7 +46,7 @@ uint32_t ParseScriptFlags(std::string strFlags) {
   boost::algorithm::split(words, strFlags, boost::algorithm::is_any_of(","));
 
   for (std::string &word : words) {
-    if (!mapFlagNames.count(word)) REQUIRE("Bad test: unknown verification flag" == word);
+    if (!mapFlagNames.count(word)) BOOST_ERROR("Bad test: unknown verification flag '" + word + "'");
     flags |= mapFlagNames[word];
   }
 

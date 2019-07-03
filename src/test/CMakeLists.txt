@@ -44,6 +44,115 @@ add_dependencies(check check-devault)
 
 add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
 
+add_test_to_suite(devault test_devault
+	activation_tests.cpp
+	addrman_tests.cpp
+	allocator_tests.cpp
+	amount_tests.cpp
+	arith_uint256_tests.cpp
+#  avalanche_tests.cpp
+	base32_tests.cpp
+	base64_tests.cpp
+	bip32_tests.cpp
+	blockchain_tests.cpp
+	blockcheck_tests.cpp
+	blockencodings_tests.cpp
+	blockfilter_tests.cpp
+	blockindex_tests.cpp
+	blockstatus_tests.cpp
+  bloom_tests.cpp
+	bswap_tests.cpp
+	cashaddr_tests.cpp
+	cashaddrenc_tests.cpp
+	checkdatasig_tests.cpp
+	checkpoints_tests.cpp
+  checkqueue_tests.cpp
+	coins_tests.cpp
+  compress_tests.cpp
+	config_tests.cpp
+	core_io_tests.cpp
+	crypto_tests.cpp
+	cuckoocache_tests.cpp
+	dbwrapper_tests.cpp
+	DoS_tests.cpp
+	dstencode_tests.cpp
+	excessiveblock_tests.cpp
+	feerate_tests.cpp
+	file_tests.cpp
+	finalization_tests.cpp
+	getarg_tests.cpp
+	hash_tests.cpp
+	inv_tests.cpp
+	jsonutil.cpp
+	key_tests.cpp
+	lcg_tests.cpp
+	limitedmap_tests.cpp
+	main_tests.cpp
+  mempool_tests.cpp
+	merkle_tests.cpp
+	miner_tests.cpp
+	monolith_opcodes_tests.cpp
+	multisig_tests.cpp
+	net_tests.cpp
+	netbase_tests.cpp
+	pmt_tests.cpp
+	policyestimator_tests.cpp
+  pow_tests.cpp
+	prevector_tests.cpp
+	radix_tests.cpp
+	raii_event_tests.cpp
+	random_tests.cpp
+	rcu_tests.cpp
+  reward_tests.cpp
+	reverselock_tests.cpp
+	rpc_tests.cpp
+	rpc_server_tests.cpp
+	rwcollection_tests.cpp
+	sanity_tests.cpp
+	scheduler_tests.cpp
+	schnorr_tests.cpp
+	script_commitment_tests.cpp
+	script_P2SH_tests.cpp
+	script_standard_tests.cpp
+	script_tests.cpp
+	scriptflags.cpp
+	scriptnum_tests.cpp
+  serialize_tests.cpp
+  sigcache_tests.cpp
+	sigencoding_tests.cpp
+  sighash_tests.cpp
+	sighashtype_tests.cpp
+	sigopcount_tests.cpp
+	sigutil.cpp
+	skiplist_tests.cpp
+	streams_tests.cpp
+	sync_tests.cpp
+	test_bitcoin.cpp
+	test_bitcoin_main.cpp
+	timedata_tests.cpp
+	transaction_tests.cpp
+	txindex_tests.cpp
+	txvalidationcache_tests.cpp
+	uint256_tests.cpp
+  undo_tests.cpp
+	univalue_tests.cpp
+	util_tests.cpp
+	validation_tests.cpp
+	work_comparator_tests.cpp
+
+#RPC Tests
+	../rpc/test/server_tests.cpp
+
+#Tests generated from JSON
+	${JSON_HEADERS}
+)
+
+target_include_directories(test_devault
+	PUBLIC
+#To access the generated json headers.
+		${CMAKE_CURRENT_BINARY_DIR}
+)
+
 find_package(Boost 1.58 REQUIRED unit_test_framework)
 #We need to detect if the BOOST_TEST_DYN_LINK flag is required.
 set(CMAKE_REQUIRED_LIBRARIES Boost::unit_test_framework)

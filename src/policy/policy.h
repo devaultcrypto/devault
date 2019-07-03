@@ -81,24 +81,24 @@ static const Amount DUST_RELAY_TX_FEE(Amount::min_amount());
  * with. However scripts violating these flags may still be present in valid
  * blocks and we must accept those blocks.
  */
-static const uint32_t STANDARD_SCRIPT_VERIFY_FLAGS =
+static constexpr uint32_t STANDARD_SCRIPT_VERIFY_FLAGS =
     MANDATORY_SCRIPT_VERIFY_FLAGS | SCRIPT_VERIFY_DERSIG |
     SCRIPT_VERIFY_NULLDUMMY | SCRIPT_VERIFY_SIGPUSHONLY |
     SCRIPT_VERIFY_MINIMALDATA | SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_NOPS |
     SCRIPT_VERIFY_CLEANSTACK | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
-    SCRIPT_VERIFY_CHECKSEQUENCEVERIFY | SCRIPT_ENABLE_CHECKDATASIG;
+    SCRIPT_VERIFY_CHECKSEQUENCEVERIFY | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
 
 /**
  * For convenience, standard but not mandatory verify flags.
  */
-static const uint32_t STANDARD_NOT_MANDATORY_VERIFY_FLAGS =
+static constexpr uint32_t STANDARD_NOT_MANDATORY_VERIFY_FLAGS =
     STANDARD_SCRIPT_VERIFY_FLAGS & ~MANDATORY_SCRIPT_VERIFY_FLAGS;
 
 /**
  * Used as the flags parameter to sequence and nLocktime checks in non-consensus
  * code.
  */
-static const uint32_t STANDARD_LOCKTIME_VERIFY_FLAGS =
+static constexpr uint32_t STANDARD_LOCKTIME_VERIFY_FLAGS =
     LOCKTIME_VERIFY_SEQUENCE | LOCKTIME_MEDIAN_TIME_PAST;
 
 Amount GetDustThreshold(const CTxOut &txout, const CFeeRate &dustRelayFee);

@@ -48,27 +48,25 @@ static Mutex cs_blockchange;
 static std::condition_variable cond_blockchange;
 static CUpdatedBlock latestblock;
 
-static double GetDifficultyFromBits(uint32_t nBits) {
-    int nShift = (nBits >> 24) & 0xff;
-    double dDiff = 0x0000ffff / double(nBits & 0x00ffffff);
+/**
+ * Calculate the difficulty for a given block index.
+ */
+double GetDifficulty(const CBlockIndex *blockindex) {
+    assert(blockindex);
+
+    int nShift = (blockindex->nBits >> 24) & 0xff;
+    double dDiff = double(0x0000ffff) / double(blockindex->nBits & 0x00ffffff);
 
     while (nShift < 29) {
         dDiff *= 256.0;
         nShift++;
     }
-
     while (nShift > 29) {
         dDiff /= 256.0;
         nShift--;
     }
 
     return dDiff;
-}
-
-double GetDifficulty(const CBlockIndex *blockindex) {
-    assert(blockindex);
-
-    return GetDifficultyFromBits(blockindex->nBits);
 }
 
 static int ComputeNextBlockAndDepth(const CBlockIndex *tip,
@@ -1457,6 +1455,8 @@ UniValue getblockchaininfo(const Config &config,
             "current best block\n"
             "  \"verificationprogress\": xxxx, (numeric) estimate of "
             "verification progress [0..1]\n"
+            "  \"initialblockdownload\": xxxx, (bool) (debug information) "
+            "estimate of whether this node is in Initial Block Download mode.\n"
             "  \"chainwork\": \"xxxx\"     (string) total amount of work in "
             "active chain, in hexadecimal\n"
             "  \"pruned\": xx,             (boolean) if the blocks are subject "
@@ -1481,6 +1481,7 @@ UniValue getblockchaininfo(const Config &config,
     obj.pushKV("mediantime", int64_t(tip->GetMedianTimePast()));
     obj.pushKV("verificationprogress",
                GuessVerificationProgress(Params().TxData(), tip));
+    obj.pushKV("initialblockdownload", IsInitialBlockDownload());
     obj.pushKV("chainwork", tip->nChainWork.GetHex());
     //    obj.pushKV("size_on_disk", CalculateCurrentUsage());
 
