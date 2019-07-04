@@ -2892,7 +2892,7 @@ bool ActivateBestChain(const Config &config, CValidationState &state,
                  connectTrace.GetBlocksConnected()) {
                 assert(trace.pblock && trace.pindex);
                 GetMainSignals().BlockConnected(trace.pblock, trace.pindex,
-                                                *trace.conflictedTxs);
+                                                trace.conflictedTxs);
             }
         }
 
@@ -4002,7 +4002,8 @@ bool ProcessNewBlock(const Config &config,
         CheckBlockIndex(chainparams.GetConsensus());
         if (!ret) {
             GetMainSignals().BlockChecked(*pblock, state);
-            return error("%s: AcceptBlock FAILED", __func__);
+            return error("%s: AcceptBlock FAILED (%s)", __func__,
+                         state.GetDebugMessage());
         }
     }
 

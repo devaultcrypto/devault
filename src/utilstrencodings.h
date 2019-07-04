@@ -191,7 +191,9 @@ bool ConvertBits(O &out, I it, I end) {
  * @return          the lowercase equivalent of c; or the argument
  *                  if no conversion is possible.
  */
-constexpr unsigned char ToLower(unsigned char c) { return (c >= 'A' && c <= 'Z' ? (c - 'A') + 'a' : c); }
+constexpr uint8_t ToLower(uint8_t c) {
+    return (c >= 'A' && c <= 'Z' ? (c - 'A') + 'a' : c);
+}
 
 /**
  * Converts the given string to its lowercase equivalent.
@@ -208,7 +210,9 @@ void Downcase(std::string& str);
  * @return          the uppercase equivalent of c; or the argument
  *                  if no conversion is possible.
  */
-constexpr unsigned char ToUpper(unsigned char c) { return (c >= 'a' && c <= 'z' ? (c - 'a') + 'A' : c); }
+constexpr uint8_t ToUpper(uint8_t c) {
+    return (c >= 'a' && c <= 'z' ? (c - 'a') + 'A' : c);
+}
 /**
  * Capitalizes the first character of the given string.
  * This function is locale independent. It only capitalizes the

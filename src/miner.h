@@ -18,9 +18,7 @@
 class CBlockIndex;
 class CChainParams;
 class Config;
-class CReserveKey;
 class CScript;
-class CWallet;
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 
@@ -51,14 +49,12 @@ struct CTxMemPoolModifiedEntry {
     explicit CTxMemPoolModifiedEntry(CTxMemPool::txiter entry) {
         iter = entry;
         nSizeWithAncestors = entry->GetSizeWithAncestors();
-        nBillableSizeWithAncestors = entry->GetBillableSizeWithAncestors();
         nModFeesWithAncestors = entry->GetModFeesWithAncestors();
         nSigOpCountWithAncestors = entry->GetSigOpCountWithAncestors();
     }
 
     CTxMemPool::txiter iter;
     uint64_t nSizeWithAncestors;
-    uint64_t nBillableSizeWithAncestors;
     Amount nModFeesWithAncestors;
     int64_t nSigOpCountWithAncestors;
 };
@@ -135,7 +131,6 @@ struct update_for_parent_inclusion {
     void operator()(CTxMemPoolModifiedEntry &e) {
         e.nModFeesWithAncestors -= iter->GetFee();
         e.nSizeWithAncestors -= iter->GetTxSize();
-        e.nBillableSizeWithAncestors -= iter->GetTxBillableSize();
         e.nSigOpCountWithAncestors -= iter->GetSigOpCount();
     }
 
@@ -240,7 +235,5 @@ void IncrementExtraNonce(const Config &config, CBlock *pblock,
                          unsigned int &nExtraNonce);
 int64_t UpdateTime(CBlockHeader *pblock, const Config &config,
                    const CBlockIndex *pindexPrev);
-
-void GenerateBitcoins(bool fGenerate, int nThreads, const Config& config, CWallet *pwallet);
 
 #endif // BITCOIN_MINER_H

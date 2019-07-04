@@ -29,7 +29,6 @@
 #include <utility>
 #include <vector>
 
-class CAutoFile;
 class CBlockIndex;
 class Config;
 
@@ -88,8 +87,6 @@ private:
     Amount nFee;
     //!< ... and avoid recomputing tx size
     size_t nTxSize;
-    //!< ... and billable size for billing
-    size_t nTxBillableSize;
     //!< ... and modified size for priority
     size_t nModSize;
     //!< ... and total memory usage
@@ -121,7 +118,6 @@ private:
     uint64_t nCountWithDescendants;
     //!< ... and size
     uint64_t nSizeWithDescendants;
-    uint64_t nBillableSizeWithDescendants;
 
     //!< ... and total fees (all including us)
     Amount nModFeesWithDescendants;
@@ -129,7 +125,6 @@ private:
     // Analogous statistics for ancestor transactions
     uint64_t nCountWithAncestors;
     uint64_t nSizeWithAncestors;
-    uint64_t nBillableSizeWithAncestors;
     Amount nModFeesWithAncestors;
     int64_t nSigOpCountWithAncestors;
 
@@ -148,7 +143,6 @@ public:
     double GetPriority(unsigned int currentHeight) const;
     const Amount GetFee() const { return nFee; }
     size_t GetTxSize() const { return nTxSize; }
-    size_t GetTxBillableSize() const { return nTxBillableSize; }
 
     int64_t GetTime() const { return nTime; }
     unsigned int GetHeight() const { return entryHeight; }
@@ -158,12 +152,11 @@ public:
     const LockPoints &GetLockPoints() const { return lockPoints; }
 
     // Adjusts the descendant state, if this entry is not dirty.
-    void UpdateDescendantState(int64_t modifySize, int64_t modifyBillableSize,
-                               Amount modifyFee, int64_t modifyCount);
+    void UpdateDescendantState(int64_t modifySize, Amount modifyFee,
+                               int64_t modifyCount);
     // Adjusts the ancestor state
-    void UpdateAncestorState(int64_t modifySize, int64_t modifyBillableSize,
-                             Amount modifyFee, int64_t modifyCount,
-                             int modifySigOps);
+    void UpdateAncestorState(int64_t modifySize, Amount modifyFee,
+                             int64_t modifyCount, int modifySigOps);
     // Updates the fee delta used for mining priority score, and the
     // modified fees with descendants.
     void UpdateFeeDelta(Amount feeDelta);
@@ -172,18 +165,12 @@ public:
 
     uint64_t GetCountWithDescendants() const { return nCountWithDescendants; }
     uint64_t GetSizeWithDescendants() const { return nSizeWithDescendants; }
-    uint64_t GetBillableSizeWithDescendants() const {
-        return nBillableSizeWithDescendants;
-    }
     Amount GetModFeesWithDescendants() const { return nModFeesWithDescendants; }
 
     bool GetSpendsCoinbase() const { return spendsCoinbase; }
 
     uint64_t GetCountWithAncestors() const { return nCountWithAncestors; }
     uint64_t GetSizeWithAncestors() const { return nSizeWithAncestors; }
-    uint64_t GetBillableSizeWithAncestors() const {
-        return nBillableSizeWithAncestors;
-    }
     Amount GetModFeesWithAncestors() const { return nModFeesWithAncestors; }
     int64_t GetSigOpCountWithAncestors() const {
         return nSigOpCountWithAncestors;
@@ -195,39 +182,34 @@ public:
 
 // Helpers for modifying CTxMemPool::mapTx, which is a boost multi_index.
 struct update_descendant_state {
-    update_descendant_state(int64_t _modifySize, int64_t _modifyBillableSize,
-                            Amount _modifyFee, int64_t _modifyCount)
-        : modifySize(_modifySize), modifyBillableSize(_modifyBillableSize),
-          modifyFee(_modifyFee), modifyCount(_modifyCount) {}
+    update_descendant_state(int64_t _modifySize, Amount _modifyFee,
+                            int64_t _modifyCount)
+        : modifySize(_modifySize), modifyFee(_modifyFee),
+          modifyCount(_modifyCount) {}
 
     void operator()(CTxMemPoolEntry &e) {
-        e.UpdateDescendantState(modifySize, modifyBillableSize, modifyFee,
-                                modifyCount);
+        e.UpdateDescendantState(modifySize, modifyFee, modifyCount);
     }
 
 private:
     int64_t modifySize;
-    int64_t modifyBillableSize;
     Amount modifyFee;
     int64_t modifyCount;
 };
 
 struct update_ancestor_state {
-    update_ancestor_state(int64_t _modifySize, int64_t _modifyBillableSize,
-                          Amount _modifyFee, int64_t _modifyCount,
-                          int64_t _modifySigOpsCost)
-        : modifySize(_modifySize), modifyBillableSize(_modifyBillableSize),
-          modifyFee(_modifyFee), modifyCount(_modifyCount),
-          modifySigOpsCost(_modifySigOpsCost) {}
+    update_ancestor_state(int64_t _modifySize, Amount _modifyFee,
+                          int64_t _modifyCount, int64_t _modifySigOpsCost)
+        : modifySize(_modifySize), modifyFee(_modifyFee),
+          modifyCount(_modifyCount), modifySigOpsCost(_modifySigOpsCost) {}
 
     void operator()(CTxMemPoolEntry &e) {
-        e.UpdateAncestorState(modifySize, modifyBillableSize, modifyFee,
-                              modifyCount, modifySigOpsCost);
+        e.UpdateAncestorState(modifySize, modifyFee, modifyCount,
+                              modifySigOpsCost);
     }
 
 private:
     int64_t modifySize;
-    int64_t modifyBillableSize;
     Amount modifyFee;
     int64_t modifyCount;
     int64_t modifySigOpsCost;
