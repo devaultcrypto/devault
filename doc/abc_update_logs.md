@@ -189,72 +189,72 @@
       Rework the wallet fees interface to make it closer to core's
       Merge #9977: QA: getblocktemplate_longpoll.py should always use >0 fee tx
       Merge #10911: [qt] Fix typo and access key in optionsdialog.ui
-      remove four duplicate tests from script_tests.json
-      Merge #10679: Document the non-DER-conformance of one test in tx_valid.json.
-      Merge #11435: build: Make "make clean" remove all files created when running "make check"
-      Merge #12877: doc: Use bitcoind in Tor documentation
-      Merge #11620: [build] .gitignore: add background.tiff
-      Merge #11380: Remove outdated share/certs/ directory
-      Merge #12843: [tests] Test starting bitcoind with -h and -version
+#___  remove four duplicate tests from script_tests.json
+#___  Merge #10679: Document the non-DER-conformance of one test in tx_valid.json.
+#___  Merge #11435: build: Make "make clean" remove all files created when running "make check"
+#___  Merge #12877: doc: Use bitcoind in Tor documentation
+#___  Merge #11620: [build] .gitignore: add background.tiff
+#___  Merge #11380: Remove outdated share/certs/ directory
+#___  Merge #12843: [tests] Test starting bitcoind with -h and -version
       Merge #10961: Improve readability of DecodeBase58Check(...)
       Merge #10464: Introduce static DoWarning (simplify UpdateTip)
       Avoid spurious boost output in scheduler_tests
       Merge #11710: cli: Reject arguments to -getinfo
       Fix a bunch of spelling errors
-      Remove unused function for fees.h exposed interface
+#___  Remove unused function for fees.h exposed interface
       Clean up Segwit Recovery feature
-      Merge #11884: Remove unused include in hash.cpp
+#___  Merge #11884: Remove unused include in hash.cpp
       Merge #12434: [doc] dev-notes: Members should be initialized
       Merge #12501: [qt] Improved "custom fee" explanation in tooltip
       Merge #12584: Fix typos and cleanup documentation
       Merge #12999: qt: Show the Window when double clicking the taskbar icon
       Merge #13052: trivial: Fix relevent typo
       Merge #12616: Set modal overlay hide button as default
-      Merge #12384: [Docs] Add version footnote to tor.md
-      Merge #10714: Avoid printing incorrect block indexing time due to uninitialized variable
-      Replace childs => children in radix.h
+#___  Merge #12384: [Docs] Add version footnote to tor.md
+#___  Merge #10714: Avoid printing incorrect block indexing time due to uninitialized variable
+#___  Replace childs => children in radix.h
       [LINTER] Enforce using C++ headers instead of C compatible headers
-      Replace c compatibility header with native c++ header
-      Merge #11406: Add state message print to AcceptBlock failure message.
-      Remove useless priority calculation in wallet
-      Use constexpr in the RCU code
-      Merge #11683: tests: Remove unused mininode functions {ser,deser}_int_vector(...). Remove unused imports.
-      Merge #11655: net: Assert state.m_chain_sync.m_work_header in ConsiderEviction
-      Remove implicit parameter from GetSerializeSize
-      Merge #11864: Make CWallet::FundTransaction atomic
-      [wallet] Tidy up CWallet::FundTransaction
-      Merge #11337: Fix code constness in CBlockIndex::GetAncestor() overloads
+#___  Replace c compatibility header with native c++ header
+#___  Merge #11406: Add state message print to AcceptBlock failure message.
+#___  Remove useless priority calculation in wallet
+#___  Use constexpr in the RCU code
+#___  Merge #11683: tests: Remove unused mininode functions {ser,deser}_int_vector(...). Remove unused imports.
+#___  Merge #11655: net: Assert state.m_chain_sync.m_work_header in ConsiderEviction
+#___  Remove implicit parameter from GetSerializeSize
+#___  Merge #11864: Make CWallet::FundTransaction atomic
+#___  [wallet] Tidy up CWallet::FundTransaction
+#___  Merge #11337: Fix code constness in CBlockIndex::GetAncestor() overloads
       Remove BIP9 from chain parameters
       Fix Gitian instructions to setup LXC container networking on Debian
-      Move WalletRescanner to match Bitcoin Core codebase
-      Remove billable size from CTransaction
-      Remove billable size from the mempool
-      Do not update billable size in descendents
-#      Do not update billable size in ancestors
-#      Remove billable size from mining
-#      Limit variable scope
-#      Merge #9533: Allow non-power-of-2 signature cache sizes
-#      Merge #10278: [test] Add Unit Test for GetListenPort
-#      Reintroduce the concept of virtual size from core
+#___  Move WalletRescanner to match Bitcoin Core codebase
+#___  Remove billable size from CTransaction
+#___  Remove billable size from the mempool
+#___  Do not update billable size in descendents
+#___  Do not update billable size in ancestors
+#___  Remove billable size from mining
+#___  Limit variable scope
+#___  Merge #9533: Allow non-power-of-2 signature cache sizes
+#___  Merge #10278: [test] Add Unit Test for GetListenPort
+#___  Reintroduce the concept of virtual size from core
       Deprecate parts of validateaddress and introduce getaddressinfo
       Merge #12198: rpc: Add deprecation error for `getinfo`
-#      Merge #12333: Make CWallet::ListCoins atomic
-#      Improve ZMQ functional test
-#      Remove redundant pwallet nullptr check
-#      Add missing locks and locking annotations for CAddrMan
+#___  Merge #12333: Make CWallet::ListCoins atomic
+#___  Improve ZMQ functional test
+#___  Remove redundant pwallet nullptr check
+#___  Add missing locks and locking annotations for CAddrMan
       [rpc] Move DescribeAddressVisitor to rpc/util
       [rpc] split wallet and non-wallet parts of DescribeAddressVisitor
       (finally) remove getinfo in favor of more module-specific infos
-#      [mining] Add a test for TestCBlockTemplateEntry
+#___  [mining] Add a test for TestCBlockTemplateEntry
       Bump version number to 0.19.8
-#      Fix wallet RPC race by waiting for callbacks in sendrawtransaction
-#      Also call other wallet notify callbacks in scheduler thread
+#___  Fix wallet RPC race by waiting for callbacks in sendrawtransaction
+#___  Also call other wallet notify callbacks in scheduler thread
       Merge #14374: qt: Add "Blocksdir" to Debug window
-#      Add tests to SingleThreadedSchedulerClient() and document the memory model
-#      Various improvements to the scheduler
-#      scheduler: Add Clang thread safety annotations for variables guarded by m_cs_callbacks_pending
-#      unsigned char => uint8_t
-#      [nit] do not capture unused `this` in wallet interface
+#___  Add tests to SingleThreadedSchedulerClient() and document the memory model
+#___  Various improvements to the scheduler
+#___  scheduler: Add Clang thread safety annotations for variables guarded by m_cs_callbacks_pending
+#___  unsigned char => uint8_t
+#___  [nit] do not capture unused `this` in wallet interface
 
 GIT SHA e1029deba1b8 [CMAKE] update miniupnpc build (#173) - corresponds to this point
 
