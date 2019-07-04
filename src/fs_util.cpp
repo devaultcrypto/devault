@@ -53,6 +53,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#include <codecvt>
 
 #include <io.h> /* for _commit */
 #include <shlobj.h>
@@ -392,7 +393,11 @@ void SetupEnvironment() {
     // fs::path, which is then used to explicitly imbue the path.
 #ifndef NO_BOOST_FILESYSTEM    
     std::locale loc = fs::path::imbue(std::locale::classic());
+#ifndef WIN32
     fs::path::imbue(loc);
+#else
+    fs::path::imbue(std::locale(loc, new std::codecvt_utf8_utf16<wchar_t>()));
+#endif
 #endif
 }
 

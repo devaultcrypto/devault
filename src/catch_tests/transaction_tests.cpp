@@ -684,25 +684,4 @@ TEST_CASE("test_IsStandard") {
   BOOST_CHECK(!IsStandardTx(CTransaction(t), reason));
 }
 
-TEST_CASE("tx_transaction_fee") {
-  BasicTestingSetup setup;
-  std::vector<size_t> sizes = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512};
-  for (size_t inputs : sizes) {
-    for (size_t outputs : sizes) {
-      CMutableTransaction mtx;
-      mtx.vin.resize(inputs);
-      mtx.vout.resize(outputs);
-      CTransaction tx(mtx);
-      auto txBillableSize = tx.GetBillableSize();
-      auto txSize = tx.GetTotalSize();
-      BOOST_CHECK(txBillableSize > 0);
-      if (inputs > outputs) {
-        BOOST_CHECK(txBillableSize <= txSize);
-      } else {
-        BOOST_CHECK(txBillableSize >= txSize);
-      }
-    }
-  }
-}
-
 // BOOST_AUTO_TEST_SUITE_END()

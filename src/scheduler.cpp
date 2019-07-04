@@ -141,19 +141,27 @@ void SingleThreadedSchedulerClient::MaybeScheduleProcessQueue() {
         // Try to avoid scheduling too many copies here, but if we
         // accidentally have two ProcessQueue's scheduled at once its
         // not a big deal.
-        if (m_are_callbacks_running) return;
-        if (m_callbacks_pending.empty()) return;
+        if (m_are_callbacks_running) {
+            return;
+        }
+        if (m_callbacks_pending.empty()) {
+            return;
+        }
     }
     m_pscheduler->schedule(
         std::bind(&SingleThreadedSchedulerClient::ProcessQueue, this));
 }
 
 void SingleThreadedSchedulerClient::ProcessQueue() {
-    std::function<void(void)> callback;
+    std::function<void()> callback;
     {
         LOCK(m_cs_callbacks_pending);
-        if (m_are_callbacks_running) return;
-        if (m_callbacks_pending.empty()) return;
+        if (m_are_callbacks_running) {
+            return;
+        }
+        if (m_callbacks_pending.empty()) {
+            return;
+        }
         m_are_callbacks_running = true;
 
         callback = std::move(m_callbacks_pending.front());
@@ -161,8 +169,8 @@ void SingleThreadedSchedulerClient::ProcessQueue() {
     }
 
     // RAII the setting of fCallbacksRunning and calling
-    // MaybeScheduleProcessQueue
-    // to ensure both happen safely even if callback() throws.
+    // MaybeScheduleProcessQueue to ensure both happen safely even if callback()
+    // throws.
     struct RAIICallbacksRunning {
         SingleThreadedSchedulerClient *instance;
         explicit RAIICallbacksRunning(SingleThreadedSchedulerClient *_instance)
@@ -180,7 +188,7 @@ void SingleThreadedSchedulerClient::ProcessQueue() {
 }
 
 void SingleThreadedSchedulerClient::AddToProcessQueue(
-    std::function<void(void)> func) {
+    std::function<void()> func) {
     assert(m_pscheduler);
 
     {

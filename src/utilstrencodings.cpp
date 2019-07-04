@@ -709,8 +709,9 @@ bool ParseFixedPoint(const std::string &val, int decimals,
 
     return true;
 }
-void Downcase(std::string& str) {
-  std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return ToLower(c); });
+void Downcase(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(),
+                   [](uint8_t c) { return ToLower(c); });
 }
 
 std::string Capitalize(std::string str) {

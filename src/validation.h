@@ -33,7 +33,6 @@
 
 class CBlockIndex;
 class CBlockTreeDB;
-class CBloomFilter;
 class CChainParams;
 class CCoinsViewDB;
 class CConnman;
@@ -42,7 +41,6 @@ class Config;
 class CScriptCheck;
 class CTxMemPool;
 class CTxUndo;
-class CValidationInterface;
 class CValidationState;
 
 class CBudget;
