@@ -165,6 +165,12 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/sendcoinsentry.ui
 	forms/signverifymessagedialog.ui
 	forms/transactiondescdialog.ui
+	forms/startoptionsdialog.ui
+	forms/startoptions.ui
+	forms/startoptionsrestore.ui
+	forms/startoptionssort.ui
+	forms/startoptionsrevealed.ui
+	forms/startoptionsmain.ui
 )
 
 # Qt MOC
@@ -207,7 +213,14 @@ add_library(bitcoin-qt-base
 	trafficgraphwidget.cpp
 	utilitydialog.cpp
 	setpassphrasedialog.cpp
-  dvtui.cpp
+	dvtui.cpp
+
+	startoptionsdialog.cpp
+	startoptions.cpp
+	startoptionsrestore.cpp
+	startoptionssort.cpp
+	startoptionsrevealed.cpp
+	startoptionsmain.cpp
 
 	# Handle ui files
 	${UI_GENERATED_HEADERS}
