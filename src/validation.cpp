@@ -2133,29 +2133,8 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    std::vector<std::string> warningMessages;
-    if (!IsInitialBlockDownload()) {
-        int nUpgraded = 0;
-        const CBlockIndex *pindex = chainActive.Tip();
-
-        // Check the version of the last 100 blocks to see if we need to
-        // upgrade:
-        for (int i = 0; i < 100 && pindex != nullptr; i++) {
-            int32_t nExpectedVersion =
-                ComputeBlockVersion(pindex->pprev, consensusParams);
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION &&
-                (pindex->nVersion & ~nExpectedVersion) != 0) {
-                ++nUpgraded;
-            }
-            pindex = pindex->pprev;
-        }
-        if (nUpgraded > 0) {
-            warningMessages.push_back(strprintf(
-                "%d of last 100 blocks have unexpected version", nUpgraded));
-        }
-    }
     LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu "
-              "date='%s' progress=%.2f cache=%.1fMiB(%utxo)",
+              "date='%s' progress=%.2f cache=%.1fMiB(%utxo)\n",
               __func__, chainActive.Tip()->GetBlockHash().ToString(),
               chainActive.Height(), chainActive.Tip()->nVersion,
               log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
@@ -2165,12 +2144,6 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
                                         chainActive.Tip()),
               pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)),
               pcoinsTip->GetCacheSize());
-    if (!warningMessages.empty()) {
-      std::string mess = "";
-      for (auto& w : warningMessages) mess += w+",";
-      LogPrintf(" warning='%s'",mess);
-    }
-    LogPrintf("\n");
 }
 
 /**
