@@ -181,13 +181,13 @@
       Merge #11198: [Qt] Fix display of package name on 'open config file' tooltip
       Merge #9890: Add a button to open the config file in a text editor
       Cleanup remaining boost includes
-      Merge #13877: utils: Make fs::path::string() always return utf-8 string on Windows
-      Merge #12904: [qa] Ensure bitcoind processes are cleaned up when tests end
-      Merge #10514: Bugfix: missing == 0 after randrange
-      Merge #10500: Avoid CWalletTx copies in GetAddressBalances and GetAddressGroupings
+#___  Merge #13877: utils: Make fs::path::string() always return utf-8 string on Windows
+#___  Merge #12904: [qa] Ensure bitcoind processes are cleaned up when tests end
+#___  Merge #10514: Bugfix: missing == 0 after randrange
+#___  Merge #10500: Avoid CWalletTx copies in GetAddressBalances and GetAddressGroupings
       Merge #10469: Fixing typo in rpcdump.cpp
-      Rework the wallet fees interface to make it closer to core's
-      Merge #9977: QA: getblocktemplate_longpoll.py should always use >0 fee tx
+#___  Rework the wallet fees interface to make it closer to core's
+#___  Merge #9977: QA: getblocktemplate_longpoll.py should always use >0 fee tx
       Merge #10911: [qt] Fix typo and access key in optionsdialog.ui
 #___  remove four duplicate tests from script_tests.json
 #___  Merge #10679: Document the non-DER-conformance of one test in tx_valid.json.
