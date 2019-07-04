@@ -88,8 +88,6 @@ size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 
-/** What block version to use for new blocks (pre versionbits) */
-static const int32_t VERSIONBITS_LAST_OLD_BLOCK_VERSION = 4;
 /** What bits to set in version for versionbits blocks */
 static const int32_t VERSIONBITS_TOP_BITS = 0x20000000UL;
 /** What bitmask determines whether versionbits is in use */
@@ -2119,8 +2117,6 @@ void PruneAndFlush() {
  * block to the chain tip.
  */
 static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
 
     chainActive.SetTip(pindexNew);
 
