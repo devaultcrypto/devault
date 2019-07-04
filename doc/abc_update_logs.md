@@ -230,18 +230,18 @@
       Remove billable size from CTransaction
       Remove billable size from the mempool
       Do not update billable size in descendents
-      Do not update billable size in ancestors
-      Remove billable size from mining
-      Limit variable scope
-      Merge #9533: Allow non-power-of-2 signature cache sizes
-      Merge #10278: [test] Add Unit Test for GetListenPort
-      Reintroduce the concept of virtual size from core
+#      Do not update billable size in ancestors
+#      Remove billable size from mining
+#      Limit variable scope
+#      Merge #9533: Allow non-power-of-2 signature cache sizes
+#      Merge #10278: [test] Add Unit Test for GetListenPort
+#      Reintroduce the concept of virtual size from core
       Deprecate parts of validateaddress and introduce getaddressinfo
       Merge #12198: rpc: Add deprecation error for `getinfo`
-      Merge #12333: Make CWallet::ListCoins atomic
-      Improve ZMQ functional test
-      Remove redundant pwallet nullptr check
-      Add missing locks and locking annotations for CAddrMan
+#      Merge #12333: Make CWallet::ListCoins atomic
+#      Improve ZMQ functional test
+#      Remove redundant pwallet nullptr check
+#      Add missing locks and locking annotations for CAddrMan
       [rpc] Move DescribeAddressVisitor to rpc/util
       [rpc] split wallet and non-wallet parts of DescribeAddressVisitor
       (finally) remove getinfo in favor of more module-specific infos
