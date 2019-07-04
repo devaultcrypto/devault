@@ -1549,10 +1549,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
 
     uint32_t flags = SCRIPT_VERIFY_NONE;
 
-    // P2SH didn't become active until Apr 1 2012
-    if (pChainTip->GetMedianTimePast() >= P2SH_ACTIVATION_TIME) {
-        flags |= SCRIPT_VERIFY_P2SH;
-    }
+    flags |= SCRIPT_VERIFY_P2SH;
 
     // Start enforcing the DERSIG (BIP66) rule.
     flags |= SCRIPT_VERIFY_DERSIG;
