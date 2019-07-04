@@ -1,6 +1,7 @@
 //
 // Created by Kolby on 6/19/2019.
 //
+#pragma once
 
 #include <QListView>
 #include <QLabel>
