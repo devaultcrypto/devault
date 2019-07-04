@@ -137,7 +137,7 @@
       Move current coin selection algorithm to coinselection.{cpp,h}
       Benchmark BnB in the worst case where it exhausts
       Add tests for the Branch and Bound algorithm
-      Calculate and store the number of bytes required to spend an input
+#___  Calculate and store the number of bytes required to spend an input
       Remove coinselection.h -> wallet.h circular dependency
       Implement Branch and Bound coin selection in a new file
       Fix eligibilty_filter => eligibility_filter
@@ -149,30 +149,30 @@
       Merge #15471: rpc/gui: Remove 'Unknown block versions being mined' warning
       Use a struct for output eligibility
       Store effective value, fee, and long term fee in CInputCoin
-      Move output eligibility to a separate function
-      Add a GetMinimumFeeRate function which is wrapped by GetMinimumFee
+#___  Move output eligibility to a separate function
+#___  Add a GetMinimumFeeRate function which is wrapped by GetMinimumFee
       Fix rounding errors in calculation of minimum change size
-      Don't create change at the dust limit, even if it means paying more than expected
-      Eliminate fee overpaying edge case when subtracting fee from recipients
+#___  Don't create change at the dust limit, even if it means paying more than expected
+#___  Eliminate fee overpaying edge case when subtracting fee from recipients
       [LINTER] Move phpcs ruleset to a test/lint/phpcs directory
       [LINTER] Fix some PHP linter rules
-      Fix make distcheck
+#___  Fix make distcheck
       Merge #9350: [Trivial] Adding label for amount inside of tx_valid/tx_invalid.json
       Merge #10090: Update bitcoin.conf with example for pruning
       Merge #10177: Changed "Send" button default status from true to false
-      Merge #10404: doc: Add logging to FinalizeNode()
+#___  Merge #10404: doc: Add logging to FinalizeNode()
       Merge #10460: Broadcast address every day, not 9 hours
       Merge #10536: Remove unreachable or otherwise redundant code
-      [tests] Better stderr testing
-      qa: Normalize executable location
-      Avoid unintentional unsigned integer wraparounds in tests
+#___  [tests] Better stderr testing
+#___  qa: Normalize executable location
+#___  Avoid unintentional unsigned integer wraparounds in tests
       [tests] Use FastRandomContext instead of boost::random::*
       Don't assert(...) with side effects
       [LINTER] Add a spell checker to arcanist
       Add script tests with valid 64-byte ECDSA signatures.
       utils: run commands using utf-8 string on Windows
-      Merge #10560: Remove unused constants
-      Merge #10524: [tests] Remove printf(...)
+#___  Merge #10560: Remove unused constants
+#___  Merge #10524: [tests] Remove printf(...)
       Update timing.json Segwit Recovery functional test name
       [qa] util: Remove unused sync_chain
       Merge #10568: Remove unnecessary forward class declarations in header files
