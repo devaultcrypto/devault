@@ -77,6 +77,7 @@ src/qt/test/moc*.cpp
 Makefile
 DeVault-qt
 DeVault-Qt.app
+background.tiff*
 
 # Unit-tests
 Makefile.test

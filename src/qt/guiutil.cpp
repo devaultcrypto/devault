@@ -83,10 +83,6 @@ using fs::ofstream;
 #include <QFontDatabase>
 
 
-#ifndef NO_BOOST_FILESYSTEM
-static fs::detail::utf8_codecvt_facet utf8;
-#endif
-
 #if defined(Q_OS_MAC)
 // These Mac includes must be done in the global namespace
 #include <CoreFoundation/CoreFoundation.h>
@@ -894,19 +890,11 @@ void setClipboard(const QString &str) {
 }
 
 fs::path qstringToBoostPath(const QString &path) {
-#ifdef NO_BOOST_FILESYSTEM
     return fs::path(path.toStdString());
-#else
-    return fs::path(path.toStdString(), utf8);
-#endif
 }
 
 QString boostPathToQString(const fs::path &path) {
-#ifdef NO_BOOST_FILESYSTEM
     return QString::fromStdString(path.string());
-#else
-    return QString::fromStdString(path.string(utf8));
-#endif
 }
 
 QString formatDurationStr(int secs) {

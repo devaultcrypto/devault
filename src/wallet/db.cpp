@@ -250,7 +250,6 @@ bool CDB::Recover(const std::string &filename, void *callbackDataIn,
         if (recoverKVcallback) {
             CDataStream ssKey(row.first, SER_DISK, CLIENT_VERSION);
             CDataStream ssValue(row.second, SER_DISK, CLIENT_VERSION);
-            std::string strType, strErr;
             if (!(*recoverKVcallback)(callbackDataIn, ssKey, ssValue)) {
                 continue;
             }
@@ -422,7 +421,6 @@ void CDBEnv::CheckpointLSN(const std::string &strFile) {
 
 CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
     : pdb(nullptr), activeTxn(nullptr) {
-    int ret;
     fReadOnly = (!strchr(pszMode, '+') && !strchr(pszMode, 'w'));
     fFlushOnClose = fFlushOnCloseIn;
     env = dbw.env;
@@ -448,6 +446,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
 
         pdb = env->mapDb[strFilename];
         if (pdb == nullptr) {
+            int ret;
             std::unique_ptr<Db> pdb_temp =
                 std::make_unique<Db>(env->dbenv.get(), 0);
 

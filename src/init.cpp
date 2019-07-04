@@ -2320,7 +2320,9 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
         LogPrintf("Shutdown requested. Exiting.\n");
         return false;
     }
-    LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+    if (fLoaded) {
+        LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+    }
 
 
     // Step 8: load indexers

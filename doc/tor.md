@@ -1,5 +1,5 @@
 TOR SUPPORT IN DEVAULT
-======================
+=======
 
 It is possible to run DeVault as a Tor hidden service, and connect to such services.
 
@@ -31,7 +31,7 @@ outgoing connections be anonymized, but more is possible.
 
 In a typical situation, this suffices to run behind a Tor proxy:
 
-	./devault -proxy=127.0.0.1:9050
+	./devaultd -proxy=127.0.0.1:9050
 
 
 2. Run a devault hidden server
@@ -39,7 +39,8 @@ In a typical situation, this suffices to run behind a Tor proxy:
 
 If you configure your Tor system accordingly, it is possible to make your node also
 reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equivalent
-config file):
+config file): *Needed for Tor version 0.2.7.0 and older versions of Tor only. For newer
+versions of Tor see [Section 3](#3-automatically-listen-on-tor).*
 
 	HiddenServiceDir /var/lib/tor/devault-service/
 	HiddenServicePort 8333 127.0.0.1:8333
@@ -86,10 +87,9 @@ and open port 8333 on your firewall (or use -upnp).
 If you only want to use Tor to reach onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:
 
-	./devault -onion=127.0.0.1:9050 -externalip=57qr3yd1nyntf5k.onion -discover
+	./devaultd -onion=127.0.0.1:9050 -externalip=57qr3yd1nyntf5k.onion -discover
 
-3. Automatically listen on Tor
---------------------------------
+## 3. Automatically listen on Tor
 
 Starting with Tor version 0.2.7.1 it is possible, through Tor's control socket
 API, to create and destroy 'ephemeral' hidden services programmatically.
@@ -115,8 +115,7 @@ which has the appropriate permissions. An alternative authentication method is t
 of the `-torpassword` flag and a `hash-password` which can be enabled and specified in 
 Tor configuration.
 
-4. Privacy recommendations
----------------------------
+## 4. Privacy recommendations
 
 - Do not add anything but devault ports to the hidden service created in section 2.
   If you run a web service too, create a new hidden service for that.
