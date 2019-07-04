@@ -51,3 +51,10 @@
 /* Define if QR support should be compiled in */
 #cmakedefine USE_QRCODE 1
 
+/* UPnP support not compiled if undefined */
+#cmakedefine ENABLE_UPNP
+#ifdef ENABLE_UPNP
+/* Value (0 or 1) determines the UPnP default state at startup. */
+#cmakedefine01 USE_UPNP
+#endif
+
