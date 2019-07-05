@@ -109,13 +109,13 @@ static void MempoolEviction(benchmark::State &state) {
     const CTransactionRef tx7_r{MakeTransactionRef(tx7)};
 
     while (state.KeepRunning()) {
-      AddTx(tx1,r, 10000 * Amount::min_amount(), pool);
-      AddTx(tx2,r, 5000 * Amount::min_amount(), pool);
-      AddTx(tx3,r, 20000 * Amount::min_amount(), pool);
-      AddTx(tx4,r, 7000 * Amount::min_amount(), pool);
-      AddTx(tx5,r, 1000 * Amount::min_amount(), pool);
-      AddTx(tx6,r, 1100 * Amount::min_amount(), pool);
-      AddTx(tx7,r, 9000 * Amount::min_amount(), pool);
+      AddTx(tx1_r, 10000 * Amount::min_amount(), pool);
+      AddTx(tx2_r, 5000 * Amount::min_amount(), pool);
+      AddTx(tx3_r, 20000 * Amount::min_amount(), pool);
+      AddTx(tx4_r, 7000 * Amount::min_amount(), pool);
+      AddTx(tx5_r, 1000 * Amount::min_amount(), pool);
+      AddTx(tx6_r, 1100 * Amount::min_amount(), pool);
+      AddTx(tx7_r, 9000 * Amount::min_amount(), pool);
       pool.TrimToSize(pool.DynamicMemoryUsage() * 3 / 4);
       pool.TrimToSize(GetVirtualTransactionSize(*tx1_r));
     }
