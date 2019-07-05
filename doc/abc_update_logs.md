@@ -106,7 +106,7 @@
       [LINTER] Set the rules for the phpdoc comments
       Add benchmark for AES
       Merge #14085: index: Fix for indexers skipping genesis block.
-      Fix lock reference in miner.h
+##### Fix lock reference in miner.h
       Merge #14409: utils and libraries: Make 'blocksdir' always net specific
       create net-specific data directory early in init process
       [LINTER] Enforce using angle brackets in #include directives
@@ -117,17 +117,17 @@
       [txindex] transaction Hash -> TxId
       Explicitly call out updating makeseeds.py after major releases
       Directly use CMutableTransaction more often in txvaidationcache_tests.cpp
-      mempool: Fix missing locking in CTxMemPool::check(…) and CTxMemPool::setSanityCheck(…)
+##### mempool: Fix missing locking in CTxMemPool::check(…) and CTxMemPool::setSanityCheck(…)
       Take a CTransaction as argument for ValidateCheckInputsForAllFlags
       Avoid creating transaction copies in script_tests.cpp and multisig_tests.cpp
       Use MakeTransactionRef in serialize_tests.cpp
-      Update mempool eviction benchmark
+##### Update mempool eviction benchmark
       Make m_coinbase_txns a vector of CTransactionRef
       coinbaseTxns => m_coinbase_txns
       Relayout comments in validation.cpp
-      Make float <-> int casts explicit outside of test, qt, CFeeRate
+##### Make float <-> int casts explicit outside of test, qt, CFeeRate
       Bump version to 0.19.9
-      Merge #9949: [bench] Avoid function call arguments which are pointers to uninitialized values
+##### Merge #9949: [bench] Avoid function call arguments which are pointers to uninitialized values
 # 19.8
       Add missing release notes for 0.19.8 release
       Update manpages for 0.19.8 release
