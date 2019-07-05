@@ -47,6 +47,7 @@ add_library(unit
 	scriptflags.cpp
 	sigutil.cpp
   test_bitcoin.cpp
+  test_bitcoin_main.cpp
   ${JSON_HEADERS}
   )
 target_include_directories(unit	PRIVATE
@@ -168,7 +169,7 @@ endfunction(set_memcheck_test_properties)
 #---------VALGRIND STUFF----------------------------------------------------
 
 FOREACH(tst ${UNIT_CTESTS})
-	add_executable(tb_${tst} ${tst}_tests.cpp test_bitcoin_main.cpp)
+	add_executable(tb_${tst} ${tst}_tests.cpp)
   target_include_directories(tb_${tst}  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
   target_link_libraries(tb_${tst} rpcclient server devaultconsensus common unit)
   add_test(NAME test_${tst} COMMAND tb_${tst})
