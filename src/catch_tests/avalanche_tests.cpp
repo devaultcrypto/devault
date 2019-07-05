@@ -28,7 +28,7 @@ struct AvalancheTest {
   BOOST_CHECK_EQUAL(vr.hasFinalized(), finalized);                                                                     \
   BOOST_CHECK_EQUAL(vr.getConfidence(), confidence);
 
-TEST_CASE(vote_record) {
+TEST_CASE("vote_record") {
   VoteRecord vraccepted(true);
 
   // Check initial state.
@@ -127,7 +127,7 @@ TEST_CASE(vote_record) {
   }
 }
 
-TEST_CASE(block_update) {
+TEST_CASE("block_update") {
   CBlockIndex index;
   CBlockIndex *pindex = &index;
 
@@ -186,18 +186,19 @@ static AvalancheResponse next(AvalancheResponse &r) {
   return copy;
 }
 
-TEST_CASE(block_register) {
+TEST_CASE("block_register") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
   std::vector<AvalancheBlockUpdate> updates;
 
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   const Config &config = GetConfig();
 
   // Create nodes that supports avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
 
   // Querying for random block returns false.
   BOOST_CHECK(!p.isAccepted(pindex));
@@ -342,7 +343,8 @@ TEST_CASE(block_register) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(multi_block_register) {
+TEST_CASE("multi_block_register") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
   CBlockIndex indexA, indexB;
 
@@ -351,14 +353,14 @@ TEST_CASE(multi_block_register) {
   const Config &config = GetConfig();
 
   // Create several nodes that support avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
 
   // Make sure the block has a hash.
-  CBlock blockA = CreateAndProcessBlock({}, CScript());
+  CBlock blockA = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHashA = blockA.GetHash();
   const CBlockIndex *pindexA = mapBlockIndex[blockHashA];
 
-  CBlock blockB = CreateAndProcessBlock({}, CScript());
+  CBlock blockB = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHashB = blockB.GetHash();
   const CBlockIndex *pindexB = mapBlockIndex[blockHashB];
 
@@ -442,12 +444,13 @@ TEST_CASE(multi_block_register) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(poll_and_response) {
+TEST_CASE("poll_and_response") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
 
   std::vector<AvalancheBlockUpdate> updates;
 
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
@@ -457,8 +460,8 @@ TEST_CASE(poll_and_response) {
   BOOST_CHECK_EQUAL(AvalancheTest::getSuitableNodeToQuery(p), NO_NODE);
 
   // Create a node that supports avalanche and one that doesn't.
-  auto oldnode = ConnectNode(config, NODE_NONE, *peerLogic);
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
+  auto oldnode = ConnectNode(config, NODE_NONE, *setup.peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
   NodeId avanodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(avanodeid, 0));
 
@@ -544,7 +547,7 @@ TEST_CASE(poll_and_response) {
   BOOST_CHECK_EQUAL(AvalancheTest::getSuitableNodeToQuery(p), avanodeid);
 
   // Out of order response are rejected.
-  CBlock block2 = CreateAndProcessBlock({}, CScript());
+  CBlock block2 = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash2 = block2.GetHash();
   CBlockIndex *pindex2 = mapBlockIndex[blockHash2];
   BOOST_CHECK(p.addBlockToReconcile(pindex2));
@@ -573,12 +576,13 @@ TEST_CASE(poll_and_response) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(poll_inflight_timeout) {
+TEST_CASE("poll_inflight_timeout") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
 
   std::vector<AvalancheBlockUpdate> updates;
 
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
@@ -587,7 +591,7 @@ TEST_CASE(poll_inflight_timeout) {
 
   // Create a node that supports avalanche.
   const Config &config = GetConfig();
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
   NodeId avanodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(avanodeid, 0));
 
@@ -614,19 +618,20 @@ TEST_CASE(poll_inflight_timeout) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(poll_inflight_count) {
+TEST_CASE("poll_inflight_count") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
   const Config &config = GetConfig();
 
   // Create enough nodes so that we run into the inflight request limit.
   std::array<std::unique_ptr<CNode>, AVALANCHE_MAX_INFLIGHT_POLL + 1> nodes;
   for (auto &n : nodes) {
-    n = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
+    n = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
     BOOST_CHECK(p.addPeer(n->GetId(), 0));
   }
 
   // Add a block to poll
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
   BOOST_CHECK(p.addBlockToReconcile(pindex));
@@ -668,18 +673,19 @@ TEST_CASE(poll_inflight_count) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(quorum_diversity) {
+TEST_CASE("quorum_diversity") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
   std::vector<AvalancheBlockUpdate> updates;
 
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   const Config &config = GetConfig();
 
   // Create nodes that supports avalanche.
-  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *peerLogic);
+  auto avanodes = ConnectNodes(config, p, NODE_AVALANCHE, *setup.peerLogic);
 
   // Querying for random block returns false.
   BOOST_CHECK(!p.isAccepted(pindex));
@@ -733,11 +739,12 @@ TEST_CASE(quorum_diversity) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(event_loop) {
+TEST_CASE("event_loop") {
+  TestChain100Setup setup;
   AvalancheProcessor p(g_connman.get());
   CScheduler s;
 
-  CBlock block = CreateAndProcessBlock({}, CScript());
+  CBlock block = setup.CreateAndProcessBlock({}, CScript());
   const uint256 blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
@@ -758,7 +765,7 @@ TEST_CASE(event_loop) {
   const Config &config = GetConfig();
 
   // Create a node that supports avalanche.
-  auto avanode = ConnectNode(config, NODE_AVALANCHE, *peerLogic);
+  auto avanode = ConnectNode(config, NODE_AVALANCHE, *setup.peerLogic);
   NodeId nodeid = avanode->GetId();
   BOOST_CHECK(p.addPeer(nodeid, 0));
 
@@ -813,7 +820,7 @@ TEST_CASE(event_loop) {
   CConnmanTest::ClearNodes();
 }
 
-TEST_CASE(destructor) {
+TEST_CASE("destructor") {
   CScheduler s;
   std::chrono::system_clock::time_point start, stop;
 

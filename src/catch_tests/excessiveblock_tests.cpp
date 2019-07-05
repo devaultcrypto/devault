@@ -7,16 +7,16 @@
 #include <test/test_bitcoin.h>
 
 #include "catch_unit.h"
+#include "callrpc.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <limits>
 #include <string>
 
-extern UniValue CallRPC(std::string strMethod);
-
 // BOOST_FIXTURE_TEST_SUITE(excessiveblock_tests, TestingSetup)
 
 TEST_CASE("excessiveblock_rpc") {
+  TestingSetup setup;
   BOOST_CHECK_NO_THROW(CallRPC("getexcessiveblock"));
 
   BOOST_CHECK_THROW(CallRPC("setexcessiveblock"), std::runtime_error);
