@@ -12,25 +12,8 @@
 #include <test/test_bitcoin.h>
 
 #include "catch_unit.h"
+#include "callrpc.h"
 
-#include <univalue.h>
-
-UniValue CallRPC(std::string args) {
-  std::vector<std::string> vArgs;
-  Split(vArgs, args, " \t");
-  std::string strMethod = vArgs[0];
-  vArgs.erase(vArgs.begin());
-  GlobalConfig config;
-  JSONRPCRequest request;
-  request.strMethod = strMethod;
-  request.params = RPCConvertValues(strMethod, vArgs);
-  request.fHelp = false;
-  BOOST_CHECK(tableRPC[strMethod]);
-  try {
-    UniValue result = tableRPC[strMethod]->call(config, request);
-    return result;
-  } catch (const UniValue &objError) { throw std::runtime_error(find_value(objError, "message").get_str()); }
-}
 #ifdef DEBUG_THIS
 
 // BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)

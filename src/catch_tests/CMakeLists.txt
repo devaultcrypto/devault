@@ -42,6 +42,7 @@ gen_json_header(JSON_HEADERS
 #add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
 
 add_library(unit
+  callrpc.cpp
 	jsonutil.cpp
 	scriptflags.cpp
 	sigutil.cpp
@@ -61,7 +62,7 @@ set(UNIT_CTESTS
   allocator
   arith_uint256
   amount
-#  avalanche
+  avalanche
   base32
   base64
   blockchain
@@ -75,7 +76,7 @@ set(UNIT_CTESTS
   cashaddr
   cashaddrenc
   checkdatasig
-#  checkpoints - nothing yet
+  checkpoints 
   checkqueue
   coins
   compress
@@ -86,7 +87,7 @@ set(UNIT_CTESTS
   dbwrapper
   DoS
   dstencode
-#  excessiveblock
+  excessiveblock
   feerate
   file
   finalization
@@ -102,7 +103,7 @@ set(UNIT_CTESTS
   miner
   monolith_opcodes
   multisig
-#  net -- ok on Mac
+#  net  - ok on Mac
   netbase
   pmt
   policyestimator

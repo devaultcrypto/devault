@@ -21,9 +21,8 @@
 #include <test/test_bitcoin.h>
 #include <uint256.h>
 
-#include <boost/test/unit_test.hpp>
+#include "catch_unit.h"
 
-BOOST_FIXTURE_TEST_SUITE(checkpoints_tests, BasicTestingSetup)
 #warning "Checkpoints tests disabled until we have some"
 #ifdef HAVE_CHECKPOINTS
 BOOST_AUTO_TEST_CASE(sanity) {
@@ -44,7 +43,7 @@ BOOST_AUTO_TEST_CASE(sanity) {
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(ban_fork_at_genesis_block) {
+TEST_CASE("ban_fork_at_genesis_block") {
   DummyConfig config;
 
   // Sanity check that a checkpoint exists at the genesis block
@@ -105,7 +104,7 @@ class MainnetConfigWithTestCheckpoints : public DummyConfig {
  */
 
 #ifdef DEBUG_THIS
-BOOST_AUTO_TEST_CASE(ban_fork_prior_to_and_at_checkpoints) {
+TEST_CASE("ban_fork_prior_to_and_at_checkpoints") {
   MainnetConfigWithTestCheckpoints config;
 
   CValidationState state;
@@ -209,4 +208,4 @@ BOOST_AUTO_TEST_CASE(ban_fork_prior_to_and_at_checkpoints) {
 }
 #endif
 
-BOOST_AUTO_TEST_SUITE_END()
+//BOOST_AUTO_TEST_SUITE_END()
