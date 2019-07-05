@@ -116,8 +116,8 @@ static void MempoolEviction(benchmark::State &state) {
       AddTx(tx5,r, 1000 * Amount::min_amount(), pool);
       AddTx(tx6,r, 1100 * Amount::min_amount(), pool);
       AddTx(tx7,r, 9000 * Amount::min_amount(), pool);
-        pool.TrimToSize(pool.DynamicMemoryUsage() * 3 / 4);
-        pool.TrimToSize(GetVirtualTransactionSize(*tx1_r));
+      pool.TrimToSize(pool.DynamicMemoryUsage() * 3 / 4);
+      pool.TrimToSize(GetVirtualTransactionSize(*tx1_r));
     }
 }
 
