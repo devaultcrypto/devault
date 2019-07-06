@@ -30,6 +30,7 @@ private:
 
 public:
     static constexpr int64_t COIN_PRECISION = 100000000;
+    constexpr Amount& operator=(const Amount& a) { amount = a.amount; return *this; }
     explicit constexpr Amount(int64_t _amount) : amount(QuantizeAmount(_amount)) {}
     constexpr Amount() : amount(0) {}
     constexpr Amount(const Amount &_camount) : amount(QuantizeAmount(_camount.amount)) {}
