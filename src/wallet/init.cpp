@@ -330,8 +330,9 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
-    // We loop here as before, but only use the 1st wallet file
-    for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+    // We no longer loop here as before, but only use the 1st wallet file
+    std::string walletFile = gArgs.GetArg("-wallet",DEFAULT_WALLET_DAT);
+    {
         if (fs::path(walletFile).filename() != walletFile) {
             return InitError(
                 strprintf(_("Error loading wallet %s. -wallet parameter must "
@@ -390,7 +391,6 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
             InitError(strError);
             return false;
         }
-        break; // Exit after 1st wallet file
     }
 
     return true;
