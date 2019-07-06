@@ -8,7 +8,6 @@
 #include <memory>
 
 #include <addrman.h>
-#include <arith_uint256.h>
 #include <blockencodings.h>
 #include <blockvalidity.h>
 #include <chainparams.h>

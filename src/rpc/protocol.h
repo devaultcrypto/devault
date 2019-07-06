@@ -7,8 +7,6 @@
 #define BITCOIN_RPCPROTOCOL_H
 
 #include <cstdint>
-#include <list>
-#include <map>
 #include <string>
 
 #include <univalue.h>
