@@ -43,8 +43,6 @@
 #include <boost/thread/thread.hpp>
 #include <univalue.h>
 
-#include <atomic>
-
 class HTTPRPCRequestProcessor;
 
 namespace interfaces {

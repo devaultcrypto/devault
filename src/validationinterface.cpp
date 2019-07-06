@@ -11,9 +11,7 @@
 #include <util.h>
 #include <validation.h>
 
-#include <atomic>
 #include <future>
-#include <list>
 
 #include <boost/signals2/signal.hpp>
 

@@ -8,6 +8,7 @@
 #include <support/cleanse.h>
 #include <utilstrencodings.h>
 #include <cstdlib>
+#include <stdexcept>
 #include <limits>
 #include <sodium/core.h>
 #include <sodium/randombytes.h>
