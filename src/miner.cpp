@@ -262,12 +262,15 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
 }
 
 bool BlockAssembler::isStillDependent(CTxMemPool::txiter iter) {
+  {
+    LOCK(mempool->cs);
     for (CTxMemPool::txiter parent : mempool->GetMemPoolParents(iter)) {
-        if (!inBlock.count(parent)) {
-            return true;
-        }
+      if (!inBlock.count(parent)) {
+        return true;
+      }
     }
-    return false;
+  }
+  return false;
 }
 
 void BlockAssembler::onlyUnconfirmed(CTxMemPool::setEntries &testSet) {
@@ -617,6 +620,8 @@ void BlockAssembler::addPriorityTxs() {
         waitPriMap;
     double actualPriority = -1;
 
+    {
+    LOCK(mempool->cs);
     vecPriority.reserve(mempool->mapTx.size());
     for (CTxMemPool::indexed_transaction_set::iterator mi =
              mempool->mapTx.begin();
@@ -627,7 +632,7 @@ void BlockAssembler::addPriorityTxs() {
         vecPriority.emplace_back(dPriority, mi);
     }
     std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-
+    }
     CTxMemPool::txiter iter;
 
     // Add a tx from priority queue to fill the part of block reserved to
@@ -679,6 +684,8 @@ void BlockAssembler::addPriorityTxs() {
 
         // This tx was successfully added, so add transactions that depend
         // on this one to the priority queue to try again.
+        {
+        LOCK(mempool->cs);
         for (CTxMemPool::txiter child : mempool->GetMemPoolChildren(iter)) {
             auto wpiter = waitPriMap.find(child);
             if (wpiter == waitPriMap.end()) {
@@ -688,6 +695,7 @@ void BlockAssembler::addPriorityTxs() {
             vecPriority.emplace_back(wpiter->second, child);
             std::push_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
             waitPriMap.erase(wpiter);
+        }
         }
     }
 }
