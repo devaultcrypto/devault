@@ -82,10 +82,6 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
             "in " +
             CURRENCY_UNIT +
             "/kB\n"
-            "  \"relayfee\": x.xxxx,         (numeric) minimum relay fee for "
-            "non-free transactions in " +
-            CURRENCY_UNIT +
-            "/kB\n"
             "  \"errors\": \"...\"           (string) any error messages\n"
             "}\n"
             "\nExamples:\n" +
@@ -106,7 +102,6 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
     obj.pushKV("proxy", (proxy.IsValid() ? proxy.proxy.ToStringIPPort() : std::string()));
     obj.pushKV("difficulty", double(GetDifficulty(chainActive.Tip())));
     obj.pushKV("testnet", config.GetChainParams().NetworkIDString() == CBaseChainParams::TESTNET);
-    obj.pushKV("relayfee", ValueFromAmount(config.GetMinFeePerKB().GetFeePerK()));
     obj.pushKV("errors", GetWarnings("statusbar"));
     return obj;
 }
