@@ -1,36 +1,36 @@
 # 19.9
-####  Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
-####  Merge #10408, #13291, and partial #13163
+##### Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
+##### Merge #10408, #13291, and partial #13163
       Update manpages for 0.19.9 release
       Update chainparams for 0.19.9 release
       Update seeds for 0.19.9 release
-####  [RPC] Adding ::minRelayTxFee amount to getmempoolinfo and updating help
+##### [RPC] Adding ::minRelayTxFee amount to getmempoolinfo and updating help
       Fix currency/fee-rate unit string in the help text
       getmempool mempoolminfee is a BCH/kB feerate
       Revert "add flags to VerifySignature and sigcache"
       remove SCRIPT_ENABLE_SCHNORR flag and clean up tests
       clean up script_tests -- move segwit recovery into static json
-      Merge #12287: Optimise lock behaviour for GuessVerificationProgress()
+##### Merge #12287: Optimise lock behaviour for GuessVerificationProgress()
       Merge #10789: Punctuation/grammer fixes in rpcwallet.cpp
       Fix incorrect Markdown link
-      Diagnose unsuitable outputs in lockunspent().
+##### Diagnose unsuitable outputs in lockunspent().
       rename schnorr functional test (rename-only)
       shuffle selected coins before transaction finalization
       Fix string concatenation to os.path.join and add exception case
       [rpc] mempoolinfo should take ::minRelayTxFee into account
-      Don't attempt mempool entry for wallet tx on start if already in mempool
+##### Don't attempt mempool entry for wallet tx on start if already in mempool
       [tests] Combine logs on failure
-      Fix the timestamp format when -logtimemicros is set
+##### Fix the timestamp format when -logtimemicros is set
       [Trivial] BTC => BCH in functional tests comments
-      Fix exit in generate_header.py and some formatting nits
+##### Fix exit in generate_header.py and some formatting nits
       bench: Make CoinSelection output groups pass eligibility filter
       Remove unused .travis.yml file
       Fix struct vs class mismatch for Amount
-      Reject headers building on invalid chains by tracking invalidity
+##### Reject headers building on invalid chains by tracking invalidity
       wallet: shuffle coins before grouping, where warranted
       Make FastRandomContext support standard C++11 RNG interface
       wallet: sum ancestors rather than taking max in output groups
-      [CMAKE] Build checkblock benchmark
+##### [CMAKE] Build checkblock benchmark
       sigencoding_tests: improve test coverage
       Remove unused great wall activation code
       remove effect of SCRIPT_ENABLE_SCHNORR flag
@@ -39,7 +39,7 @@
       Update importprivkey named args documentation
       Improve signmessages functional test
       Add getmininginfo functional test
-      Merge #9750: Bloomfilter: parameter variables made constant
+##### Merge #9750: Bloomfilter: parameter variables made constant
       Merge #10432: [Trivial] Add BITCOIN_FS_H endif footer in fs.h
       doc: Add release notes for -avoidpartialspends
       test: Add basic testing for wallet groups
@@ -50,10 +50,10 @@
       wallet: Add output grouping
       Fix inconsistencies and grammar in various files
 ##### fix BIP37 processing for non-topologically ordered blocks
-      unsigned int -> size_t in merkleblock-related code
+##### unsigned int -> size_t in merkleblock-related code
       Remove unknown version warning from UpdateTip
       Merge #13726: Utils and libraries: Removes the boost/algorithm/string/join dependency
-      Merge #10744: Use method name via __func__ macro
+##### Merge #10744: Use method name via __func__ macro
       [Trivial] Docs: Capitalize bullet points
       Trivial: spelling fixes
       Merge #10380: [doc] Removing comments about dirty entries on txmempool
