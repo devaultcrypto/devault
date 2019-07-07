@@ -33,14 +33,12 @@ testpriv:zp2xqfjlsf46x9ter9r3cnvvj4wena9z5r7p60zwnze3au3sqqypcsn3yt5yw
 
 // 32/33 from HD chain
 static const std::string strSecret1 = "testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k";
-static const std::string strSecret3 = "testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh";
-static const std::string strSecret2 = "testpriv:zzsug4madaqkz8demqh6u7paslstyafwmam2tzuasszl5mlqfq0cjhzpd70rq";
-// static const std::string strSecret2C =  "testpriv:zp2xqfjlsf46x9ter9r3cnvvj4wena9z5r7p60zwnze3au3sqqypcsn3yt5yw";
+static const std::string strSecret2 = "testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh";
+static const std::string strSecret3 = "testpriv:zzsug4madaqkz8demqh6u7paslstyafwmam2tzuasszl5mlqfq0cjhzpd70rq";
 
 static const std::string addr1 = "dvtest:qp8nw8hsxhaza5y50j5q6j3unauss28f9y3l5yx8h0";
 static const std::string addr2 = "dvtest:qp9jzxnyd8n2v2jda9um7sq2wse208sgpykwdc6lzw";
 static const std::string addr3 = "dvtest:qrnekung3wsflx9nklq0rnjlnkhl4j9p4544pl0tgg";
-// static const std::string addr2C = "dvtest:qqklsqvpfyezzqtzvh2rd9eknmlwksph0gfdwdwsx4";
 
 static const std::string strAddressBad = "dvtest:qqklsqvpfyezzqtzvh2rd9eknmlwksph0gfdwdwsx4";
 
@@ -73,24 +71,12 @@ TEST_CASE("internal_test") {
   BOOST_CHECK(get_r_ECDSA(ParseHex("3045022046ab5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df"
                                    "3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3")) ==
               ParseHex("46ab5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f78"));
-
-  /*
-  BOOST_CHECK(get_r_ECDSA(ParseHex(
-  "3045021f4b5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3"))
-  == ParseHex("4b5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802"));
-
-  BOOST_CHECK(get_r_ECDSA(ParseHex(
-  "3045021e5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f7802206ff23df3802e241ee234a8b66c40c82e56a6cc37f9b50463111c9f9229b8f3b3"))
-  == ParseHex("5f8acfccc114da39dd5ad0b1ef4d39df6a721e824c22e00b7bc7944a1f780220"));
-  */
 }
 
 TEST_CASE("key_test1") {
-  BasicTestingSetup setup;
-  //    BOOST_CHECK(!baddress1.SetString(strAddressBad));
+  BasicTestingSetup setup(CBaseChainParams::TESTNET);
 
   // Secret Keys give Keys always compressed
-
   CKey key1 = DecodeSecret(strSecret1);
   CKey key2 = DecodeSecret(strSecret2);
   CKey key3 = DecodeSecret(strSecret3);
@@ -112,14 +98,12 @@ TEST_CASE("key_test1") {
   BOOST_CHECK(key2.VerifyPubKey(pubkey2));
   BOOST_CHECK(!key2.VerifyPubKey(pubkey3));
 
-#ifdef DEBUG_THIS
   const Config &config = GetConfig();
   const CChainParams &chainParams = config.GetChainParams();
 
   BOOST_CHECK(DecodeDestination(addr1, chainParams) == CTxDestination(pubkey1.GetID()));
   BOOST_CHECK(DecodeDestination(addr2, chainParams) == CTxDestination(pubkey2.GetID()));
   BOOST_CHECK(DecodeDestination(addr3, chainParams) == CTxDestination(pubkey3.GetID()));
-#endif
 
   for (int n = 0; n < 16; n++) {
     std::string strMsg = strprintf("Very secret message %i: 11", n);

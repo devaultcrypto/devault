@@ -523,7 +523,7 @@ endif()
 
 if (CMAKE_GENERATOR STREQUAL Xcode)
   message(STATUS "Disabling BUILD_CTESTS since Xcode")
-  SET(BUILD_CTESTS OFF)
+#  SET(BUILD_CTESTS OFF)
 endif()
 
 
