@@ -185,7 +185,6 @@ TEST_CASE("checksignatureencoding_test") {
   }
 }
 
-#ifdef DEBUG_THIS
 TEST_CASE("checkpubkeyencoding_test") {
   valtype compressedKey0{0x02, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12, 0x34,
                          0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12, 0x34, 0x56, 0x78, 0x9a,
@@ -281,25 +280,21 @@ TEST_CASE("checkpubkeyencoding_test") {
     BOOST_CHECK(CheckPubKeyEncoding(compressedKey0, flags, &err));
     BOOST_CHECK(CheckPubKeyEncoding(compressedKey1, flags, &err));
 
-    // If SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE is specified, full key are
-    // disabled.
-    const bool allowFullKey = (flags & SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE) == 0;
-    BOOST_CHECK_EQUAL(CheckPubKeyEncoding(fullKey, flags, &err), allowFullKey);
-    if (!allowFullKey) { BOOST_CHECK_EQUAL(err, SCRIPT_ERR_NONCOMPRESSED_PUBKEY); }
+    // full key are disabled.
+    const bool isStrict = (flags & SCRIPT_VERIFY_STRICTENC);
+    const bool isCompressed = (flags & SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE);
+    const bool isStrictOrCompressed = isStrict || isCompressed;
 
-    // If SCRIPT_VERIFY_STRICTENC or SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE is
-    // specified, we rule out invalid keys.
-    const bool hasStrictEnc = (flags & SCRIPT_VERIFY_STRICTENC) != 0;
-    const bool allowInvalidKeys = allowFullKey && !hasStrictEnc;
+    BOOST_CHECK_EQUAL(CheckPubKeyEncoding(fullKey, flags, &err), !isStrictOrCompressed);
+    if (isStrict) { BOOST_CHECK_EQUAL(err, SCRIPT_ERR_PUBKEYTYPE); }
+    else if (isCompressed) { BOOST_CHECK_EQUAL(err, SCRIPT_ERR_NONCOMPRESSED_PUBKEY); }
+
+    // If SCRIPT_VERIFY_STRICTENC or SCRIPT_VERIFY_COMPRESSED_PUBKEYTYPE is specified, we rule out invalid keys.
     for (const valtype &key : invalidKeys) {
-      BOOST_CHECK_EQUAL(CheckPubKeyEncoding(key, flags, &err), allowInvalidKeys);
-      if (!allowInvalidKeys) {
-        BOOST_CHECK_EQUAL(err, hasStrictEnc ? SCRIPT_ERR_PUBKEYTYPE : SCRIPT_ERR_NONCOMPRESSED_PUBKEY);
-      }
+      BOOST_CHECK_EQUAL(CheckPubKeyEncoding(key, flags, &err), !isStrictOrCompressed);
     }
   }
 }
-#endif
 
 TEST_CASE("checkschnorr_test") {
   // tests using 64 byte sigs (+hashtype byte where relevant)
