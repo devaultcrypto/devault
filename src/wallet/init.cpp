@@ -141,7 +141,7 @@ void WalletInit::AddWalletOptions() const {
 }
 
 bool WalletInit::ParameterInteraction() const {
-    CFeeRate minRelayTxFee = GetConfig().GetMinFeePerKB();
+    ::minRelayTxFee = GetConfig().GetMinFeePerKB();
     gArgs.SoftSetArg("-wallet", DEFAULT_WALLET_DAT);
     const bool is_multiwallet = gArgs.GetArgs("-wallet").size() > 1;
     if (is_multiwallet) {

@@ -1651,8 +1651,8 @@ UniValue mempoolInfoToJSON() {
     ret.pushKV("maxmempool", (int64_t)maxmempool);
     ret.pushKV("mempoolminfee",
                ValueFromAmount(
-                   std::max(g_mempool.GetMinFee(maxmempool), ::minRelayTxFee)
-                       .GetFeePerK()));
+                               std::max(g_mempool.GetMinFee(maxmempool), ::minRelayTxFee)
+                               .GetFeePerK()));
     ret.pushKV("minrelaytxfee", ValueFromAmount(::minRelayTxFee.GetFeePerK()));
     return ret;
 }

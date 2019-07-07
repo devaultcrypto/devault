@@ -98,6 +98,7 @@ static const int32_t VERSIONBITS_TOP_BITS = 0x20000000UL;
 uint256 hashAssumeValid;
 arith_uint256 nMinimumChainWork;
 
+CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE_PER_KB);
 Amount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
 CTxMemPool g_mempool;
@@ -565,7 +566,7 @@ static bool AcceptToMemoryPoolWorker(
                              strprintf("%d", nSigOpsCount));
         }
 
-        CFeeRate minRelayTxFee = config.GetMinFeePerKB();
+        ::minRelayTxFee = config.GetMinFeePerKB();
         Amount mempoolRejectFee =
             pool.GetMinFee(
                     gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) *
