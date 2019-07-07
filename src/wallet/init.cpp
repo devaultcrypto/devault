@@ -142,7 +142,6 @@ void WalletInit::AddWalletOptions() const {
 
 bool WalletInit::ParameterInteraction() const {
     CFeeRate minRelayTxFee = GetConfig().GetMinFeePerKB();
-
     gArgs.SoftSetArg("-wallet", DEFAULT_WALLET_DAT);
     const bool is_multiwallet = gArgs.GetArgs("-wallet").size() > 1;
     if (is_multiwallet) {
@@ -415,8 +414,9 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
-    // We loop here as before, but only use the 1st wallet file
-    for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
+    // We no longer loop here as before, but only use the 1st wallet file
+    std::string walletFile = gArgs.GetArg("-wallet",DEFAULT_WALLET_DAT);
+    {
         if (fs::path(walletFile).filename() != walletFile) {
           return false;
         }
@@ -434,7 +434,6 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
         if (fs::exists(wallet_path)) {
           return true;
         }
-        break; // Exit after 1st wallet file
     }
 
   return false;
