@@ -1944,20 +1944,22 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     Amount nBudgetReward;
   
     if (!pbudget->Validate(block,pindex->nHeight, nBlockSubsidy, nBudgetReward)) {
-      return error("ConnectBlock(): Budget Invalid with %s",FormatStateMessage(state));
+      return state.DoS(100,
+                       error("ConnectBlock(): Budget Invalid with %s",FormatStateMessage(state)),
+                       REJECT_INVALID, "bad-cb-amount");
     }
   
     if (!pbudget->IsSuperBlock(pindex->nHeight)) {
       // Only check Cold Rewards, if not a Superblock
       if (!prewards->Validate(consensusParams, block, pindex->nHeight, nColdReward)) {
-        return error("ConnectBlock(): Cold Reward Invalid with %s",FormatStateMessage(state));
+        return state.DoS(100,
+                         error("ConnectBlock(): Cold Reward Invalid with %s",FormatStateMessage(state)),
+                         REJECT_INVALID, "bad-cb-amount");
       }
     }
   
     Amount blockReward = nFees + nBlockSubsidy + nColdReward + nBudgetReward;
-    
   
-   // Need to take account of Cold Rewards here, for now  bypass check
     if (block.vtx[0]->GetValueOut() > blockReward) {
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much "
