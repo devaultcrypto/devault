@@ -251,8 +251,8 @@ static void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder, c
                             << " != " << sortedOrder[count] << " in test " << testcase << ":" << count);
   }
 }
-#ifdef DEBUG_THIS
 TEST_CASE("MempoolIndexingTest") {
+  
   CTxMemPool pool;
   TestMemPoolEntryHelper entry;
 
@@ -297,10 +297,10 @@ TEST_CASE("MempoolIndexingTest") {
   std::vector<std::string> sortedOrder;
   sortedOrder.resize(5);
   sortedOrder[0] = tx3.GetId().ToString(); // 0
-  sortedOrder[1] = tx5.GetId().ToString(); // 10000
-  sortedOrder[2] = tx1.GetId().ToString(); // 10000
-  sortedOrder[3] = tx4.GetId().ToString(); // 15000
-  sortedOrder[4] = tx2.GetId().ToString(); // 20000
+  sortedOrder[1] = tx5.GetId().ToString(); // 10
+  sortedOrder[2] = tx1.GetId().ToString(); // 10
+  sortedOrder[3] = tx4.GetId().ToString(); // 15
+  sortedOrder[4] = tx2.GetId().ToString(); // 20
   LOCK(pool.cs);
   CheckSort<descendant_score>(pool, sortedOrder, "MempoolIndexingTest1");
 
@@ -330,7 +330,7 @@ TEST_CASE("MempoolIndexingTest") {
 
   CTxMemPool::setEntries setAncestorsCalculated;
   std::string dummy;
-  BOOST_CHECK_EQUAL(pool.CalculateMemPoolAncestors(entry.Fee(200 * Amount::min_amount()).FromTx(tx7),
+  BOOST_CHECK_EQUAL(pool.CalculateMemPoolAncestors(entry.Fee(2000 * Amount::min_amount()).FromTx(tx7),
                                                    setAncestorsCalculated, 100, 1000000, 1000, 1000000, dummy),
                     true);
   BOOST_CHECK(setAncestorsCalculated == setAncestors);
@@ -390,7 +390,7 @@ TEST_CASE("MempoolIndexingTest") {
   tx10.vout[0].nValue = 10 * COIN;
 
   setAncestorsCalculated.clear();
-  BOOST_CHECK_EQUAL(pool.CalculateMemPoolAncestors(entry.Fee(20 * Amount::min_amount()).Time(4).FromTx(tx10),
+  BOOST_CHECK_EQUAL(pool.CalculateMemPoolAncestors(entry.Fee(200 * Amount::min_amount()).Time(4).FromTx(tx10),
                                                    setAncestorsCalculated, 100, 1000000, 1000, 1000000, dummy),
                     true);
   BOOST_CHECK(setAncestorsCalculated == setAncestors);
@@ -503,8 +503,8 @@ TEST_CASE("MempoolAncestorIndexingTest") {
 
   std::vector<std::string> sortedOrder;
   sortedOrder.resize(5);
-  sortedOrder[0] = tx2.GetId().ToString(); // 20000
-  sortedOrder[1] = tx4.GetId().ToString(); // 15000
+  sortedOrder[0] = tx2.GetId().ToString(); // 20
+  sortedOrder[1] = tx4.GetId().ToString(); // 15
   // tx1 and tx5 are both 10000
   // Ties are broken by hash, not timestamp, so determine which hash comes
   // first.
@@ -549,12 +549,13 @@ TEST_CASE("MempoolAncestorIndexingTest") {
   uint64_t tx7Size = CTransaction(tx7).GetTotalSize();
 
   /* set the fee to just below tx2's feerate when including ancestor */
-  Amount fee = Amount(int64_t((20000 / tx2Size) * (tx7Size + tx6Size) - 1));
+  Amount fee = Amount( (int(((tx7Size + tx6Size)*20.0)/tx2Size) - 1)*Amount::min_amount()); //Amount(int64_t((20 / tx2Size) * (tx7Size + tx6Size) - 1));
 
   // CTxMemPoolEntry entry7(tx7, fee, 2, 10.0, 1, true);
   pool.addUnchecked(tx7.GetId(), entry.Fee(Amount(fee)).FromTx(tx7));
   BOOST_CHECK_EQUAL(pool.size(), 7UL);
   sortedOrder.insert(sortedOrder.begin() + 1, tx7.GetId().ToString());
+  
   CheckSort<ancestor_score>(pool, sortedOrder, "MempoolAncestorIndexingTest3");
 
   /* after tx6 is mined, tx7 should move up in the sort */
@@ -572,7 +573,6 @@ TEST_CASE("MempoolAncestorIndexingTest") {
   sortedOrder.insert(sortedOrder.begin(), tx7.GetId().ToString());
   CheckSort<ancestor_score>(pool, sortedOrder, "MempoolAncestorIndexingTest4");
 }
-#endif
 
 TEST_CASE("MempoolSizeLimitTest") {
   CTxMemPool pool;
