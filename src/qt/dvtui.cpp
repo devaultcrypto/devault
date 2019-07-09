@@ -85,6 +85,10 @@ bool DVTUI::customThemeIsSet() {
             "#promptIcon "
             "{ border: 1px solid " + s_LBlue + "}"
             
+	    // Sign / Verify Message
+            "#addressIn_SM, #addressIn_VM, #messageIn_SM, #messageIn_VM, #signatureIn_VM "
+            "{ border: 1px solid " + s_LBlue + "}"
+
             //Table view
             "QHeaderView "
             "{ background: " + s_Darker + ";} "
