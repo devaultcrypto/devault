@@ -26,11 +26,11 @@ bool DVTUI::customThemeIsSet() {
     const QString DVTUI::s_white = "rgb(255,255,255)";
     const QString DVTUI::s_grey = "rgb(111,111,111)";
 
-    const QString DVTUI::s_hightlight_dark = "rgba(30,30,30)";
-    const QString DVTUI::s_hightlight_darkest = "rgba(15,15,15)";
+    const QString DVTUI::s_hightlight_dark = "rgb(30,30,30)";
+    const QString DVTUI::s_hightlight_darkest = "rgb(15,15,15)";
 
-    const QString DVTUI::s_highlight_light_midgrey = "rgba(60,60,60)"; // #3C3C3C
-    const QString DVTUI::s_highlight_dark_midgrey = "rgba(47,47,47)";
+    const QString DVTUI::s_highlight_light_midgrey = "rgb(60,60,60)"; // #3C3C3C
+    const QString DVTUI::s_highlight_dark_midgrey = "rgb(47,47,47)";
     const QString DVTUI::s_highlight_light_blue = "rgb(22,185,255)"; // #16B9FF
     const QString DVTUI::s_highlight_dark_blue = "rgb(2,90,155)"; // #025A9B
 
