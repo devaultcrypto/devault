@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(schedule_every) {
 
     scheduler.scheduleEvery(
         [&keepRunning, &cvar, &counter, &scheduler]() {
-            BOOST_CHECK(counter > 0);
+            assert(counter > 0);
             cvar.notify_all();
             if (--counter > 0) {
                 return true;
