@@ -13,6 +13,7 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QtGlobal>
 
 /**
  * QSpinBox that uses fixed-point numbers internally and uses our own
@@ -88,9 +89,15 @@ public:
 
             const QFontMetrics fm(fontMetrics());
             int h = lineEdit()->minimumSizeHint().height();
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+            int w = fm.horizontalAdvance(BitcoinUnits::format(
+                BitcoinUnits::DVT, BitcoinUnits::maxMoney(), false,
+                BitcoinUnits::separatorAlways));
+#else
             int w = fm.width(BitcoinUnits::format(
                 BitcoinUnits::DVT, BitcoinUnits::maxMoney(), false,
                 BitcoinUnits::separatorAlways));
+#endif
             // Cursor blinking space.
             w += 2;
 

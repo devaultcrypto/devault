@@ -521,9 +521,9 @@ if (BUILD_BENCH)
   add_subdirectory(bench)
 endif()
 
-if (CMAKE_GENERATOR STREQUAL Xcode)
-  message(STATUS "Disabling BUILD_CTESTS since Xcode")
-#  SET(BUILD_CTESTS OFF)
+if (CMAKE_GENERATOR STREQUAL Ninja)
+  message(STATUS "Disabling BUILD_CTESTS since using Ninja")
+  SET(BUILD_CTESTS OFF)
 endif()
 
 

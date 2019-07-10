@@ -65,14 +65,22 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
     // check font size and drawing with
     pixPaint.setFont(QFont(font, 28*fontFactor));
     QFontMetrics fm = pixPaint.fontMetrics();
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+    int titleTextWidth = fm.horizontalAdvance(titleText);
+#else
     int titleTextWidth = fm.width(titleText);
+#endif
     if (titleTextWidth > 176) {
         fontFactor = fontFactor * 176 / titleTextWidth;
     }
 
     pixPaint.setFont(QFont(font, 20*fontFactor));
     fm = pixPaint.fontMetrics();
-    titleTextWidth  = fm.width(titleText);
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+    titleTextWidth = fm.horizontalAdvance(titleText);
+#else
+    titleTextWidth = fm.width(titleText);
+#endif
 
     pixPaint.drawText(pixmap.width()/2/devicePixelRatio-titleTextWidth/2,paddingTop,titleText);
     
@@ -80,8 +88,11 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
     pixPaint.setFont(QFont(font, 15*fontFactor));
     fm = pixPaint.fontMetrics();
     int textHeight = fm.height();    
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+    pixPaint.drawText(pixmap.width()/2/devicePixelRatio-fm.horizontalAdvance(versionText)/2,paddingTop+textHeight+vSpace,versionText);
+#else
     pixPaint.drawText(pixmap.width()/2/devicePixelRatio-fm.width(versionText)/2,paddingTop+textHeight+vSpace,versionText);
-
+#endif
     // draw copyright stuff
    /* {
         pixPaint.setFont(QFont(font, 10*fontFactor));

@@ -86,7 +86,7 @@ public:
         // to be sorted in asc order. Even though the map is already sorted this
         // re-sorting step is needed because the originating map is sorted by
         // binary address, not by base58() address.
-        qSort(cachedAddressTable.begin(), cachedAddressTable.end(),
+        std::sort(cachedAddressTable.begin(), cachedAddressTable.end(),
               AddressTableEntryLessThan());
     }
 
@@ -94,10 +94,10 @@ public:
                      const QString &purpose, int status) {
         // Find address / label in model
         QList<AddressTableEntry>::iterator lower =
-            qLowerBound(cachedAddressTable.begin(), cachedAddressTable.end(),
+            std::lower_bound(cachedAddressTable.begin(), cachedAddressTable.end(),
                         address, AddressTableEntryLessThan());
         QList<AddressTableEntry>::iterator upper =
-            qUpperBound(cachedAddressTable.begin(), cachedAddressTable.end(),
+            std::upper_bound(cachedAddressTable.begin(), cachedAddressTable.end(),
                         address, AddressTableEntryLessThan());
         int lowerIndex = (lower - cachedAddressTable.begin());
         int upperIndex = (upper - cachedAddressTable.begin());
