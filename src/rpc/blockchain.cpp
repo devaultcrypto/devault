@@ -33,6 +33,10 @@
 #include <init.h> // for ShutdownRequested
 #include <validationinterface.h>
 
+#include <devault/coinreward.h>
+#include <devault/rewards.h>
+#include <devault/budget.h>
+
 #include <thread> // boost::thread::interrupt
 
 #include <condition_variable>
@@ -68,6 +72,8 @@ double GetDifficulty(const CBlockIndex *blockindex) {
 
     return dDiff;
 }
+
+double AmountAsPercent(Amount v, Amount ref) {  return 0.1*int(1000.0*double(v.toInt())/ref.toInt());}  
 
 static int ComputeNextBlockAndDepth(const CBlockIndex *tip,
                                     const CBlockIndex *blockindex,
@@ -2023,6 +2029,131 @@ static UniValue getchaintxstats(const Config &config,
     return ret;
 }
 
+
+static UniValue getrewardinfo(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+                                 "getrewardinfo\n"
+                                 "\nReturns a summary of viable rewards.\n"
+                                 "{\n"
+                                 "  \"sum\"  (string) The current sum of reward balances\n"
+                                 "  \"count\"  (string) The total number of viable reward utxos\n"
+                                 "  \"payouts\"  (string) The total number of time that rewards were paid out for current set\n"
+                                 "  \"ratio\"  (string) % of coin supply in reward utxos (truncated to integer)\n"
+                                 "}\n"
+                                 "\nExamples:\n"
+                                 + HelpExampleCli("getrewardinfo","")
+                                 + HelpExampleRpc("getrewardinfo",""));
+    
+
+    std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
+    UniValue result(UniValue::VOBJ);
+
+    Amount sum;
+    int count=0;
+    int total_payouts=0;
+    for (auto& val : rewards) {
+      if (val.IsActive()) {
+        sum = sum + val.GetValue();
+        count++;
+        total_payouts += val.GetPayCount();
+      }
+    }
+
+    UniValue reply(UniValue::VOBJ);
+    reply.pushKV("Current number of viable rewards", count);
+    reply.pushKV("Number of reward payouts to date (for current set of utxos)", total_payouts);
+
+    int nHeight = chainActive.Height();
+
+    Amount nMiningRewards;
+    Amount nSuperBlockRewards;
+
+    CBudget bud(config);
+
+    auto Params = config.GetChainParams().GetConsensus();
+    for (int i=1;i<nHeight;i++) {
+      Amount nBlockSubsidy = GetBlockSubsidy(i, Params);
+      nMiningRewards += nBlockSubsidy;
+      if (bud.IsSuperBlock(i)) {
+        Amount BudgetValue = bud.CalculateSuperBlockRewards(i, nBlockSubsidy);
+        nSuperBlockRewards += BudgetValue;
+      }
+    }
+
+    double ratio=0;
+    Amount nTotalSupply(1); // 1 to avoid divide by 0 if GetUTXOStats fails
+    CCoinsStats stats;
+    FlushStateToDisk();
+    if (GetUTXOStats(pcoinsdbview.get(), stats)) {
+      nTotalSupply = stats.nTotalAmount;
+      reply.pushKV("Total Coin supply", ValueFromAmount(nTotalSupply));
+    }
+    
+
+    Amount nCold = stats.nTotalAmount;
+    nCold -= nMiningRewards;
+    nCold -= nSuperBlockRewards;
+    reply.pushKV("Total Mining Rewards", ValueFromAmount(nMiningRewards));
+    reply.pushKV("Total Budget Rewards", ValueFromAmount(nSuperBlockRewards));
+    reply.pushKV("Total Cold Rewards paid", ValueFromAmount(nCold));
+    reply.pushKV("Coin Amount in cold reward utxos", ValueFromAmount(sum));
+    ratio = int(100.0*double(sum.toInt())/nTotalSupply.toInt());
+    reply.pushKV("% of coins in cold reward utxos", ratio);
+    reply.pushKV("Mining Rewards as % of Total Coins", AmountAsPercent(nMiningRewards,nTotalSupply));
+    reply.pushKV("Budget Rewards as % of Total Coins", AmountAsPercent(nSuperBlockRewards,nTotalSupply));
+    reply.pushKV("Cold Rewards as % of Total Coins", AmountAsPercent(nCold,nTotalSupply));
+    reply.pushKV("Number of Blocks processed", (int)nHeight);
+
+  
+    return reply;
+}
+
+static UniValue getrewards(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+                                 "getrewards \"filename\"\n"
+                                 "\nDump all of the valid reward UTXO values into a server-side file.\n"
+                                 "{\nArguments"
+                                 "1. \"filename\"    (string, required) The filename with path (either absolute or relative to devaultd)\n"
+                                 "\nExamples:\n"
+                                 + HelpExampleCli("getrewards","")
+                                 + HelpExampleRpc("getrewards",""));
+    
+
+    std::vector<CRewardValue> rewards = prewards->GetOrderedRewards();
+    UniValue result(UniValue::VOBJ);
+
+    fs::path filepath = request.params[0].get_str();
+    filepath = fs::absolute(filepath);
+    
+    std::ofstream file;
+    file.open(filepath.string().c_str());
+    if (!file.is_open()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                           "Cannot open getrewards dump file");
+    }
+
+    for (auto& val : rewards) {
+        file << "Value " << val.GetValue().ToString() << " ";
+        file << "active "<<  val.IsActive() << " ";
+        file << "creationHeight " << val.GetCreationHeight() << " ";
+        file << "OldHeight " << val.GetOldHeight() << " ";
+        file << "Height " << val.GetHeight() << " ";
+        file << "addr " << GetAddrFromTxOut(val.GetTxOut()) << " ";
+        file << "payCount " << val.GetPayCount() << "\n";
+    }   
+    file.close();
+
+    UniValue reply(UniValue::VOBJ);
+    reply.pushKV("filename", filepath.string());
+
+    return reply;
+}
+
+
+
+
 static UniValue savemempool(const Config &config,
                             const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 0) {
@@ -2073,6 +2204,10 @@ static const ContextFreeRPCCommand commands[] = {
     { "blockchain",         "savemempool",            savemempool,            {} },
     { "blockchain",         "verifychain",            verifychain,            {"checklevel","nblocks"} },
     { "blockchain",         "preciousblock",          preciousblock,          {"blockhash"} },
+    { "blockchain",         "preciousblock",          preciousblock,          {"blockhash"} },
+    
+    { "rewards",         "getrewards",             getrewards,             {} },
+    { "rewards",         "getrewardinfo",          getrewardinfo,          {} },
 
     /* Not shown in help */
     { "hidden",             "getfinalizedblockhash",            getfinalizedblockhash,            {} },
