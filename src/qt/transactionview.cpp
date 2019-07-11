@@ -30,7 +30,6 @@
 #include <QMenu>
 #include <QPoint>
 #include <QScrollBar>
-#include <QSignalMapper>
 #include <QTableView>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -173,12 +172,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle,
     contextMenu->addAction(abandonAction);
     contextMenu->addAction(editLabelAction);
 
-    mapperThirdPartyTxUrls = new QSignalMapper(this);
-
     // Connect actions
-    connect(mapperThirdPartyTxUrls, SIGNAL(mapped(QString)), this,
-            SLOT(openThirdPartyTxUrl(QString)));
-
     connect(amountWidget, &QLineEdit::textChanged, this,  &TransactionView::changedAmount);
 
     connect(dateWidget,
@@ -260,10 +254,8 @@ void TransactionView::setModel(WalletModel *_model) {
                         contextMenu->addSeparator();
                     }
                     contextMenu->addAction(thirdPartyTxUrlAction);
-                    connect(thirdPartyTxUrlAction, SIGNAL(triggered()),
-                            mapperThirdPartyTxUrls, SLOT(map()));
-                    mapperThirdPartyTxUrls->setMapping(thirdPartyTxUrlAction,
-                                                       listUrls[i].trimmed());
+                    auto l = listUrls[i];
+                    connect(thirdPartyTxUrlAction, &QAction::triggered, [l]() {(void)l.trimmed();});
                 }
             }
         }
