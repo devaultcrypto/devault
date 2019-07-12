@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <fs_util.h>
+#include <random.h>
 
 #include <test/test_bitcoin.h>
 
@@ -19,7 +20,8 @@ TEST_CASE("test_DirIsWritable") {
   BOOST_CHECK_EQUAL(DirIsWritable(tmpdirname), true);
 
   // Should not be able to write to a non-existent dir.
-  tmpdirname = fs::temp_directory_path() / fs::unique_path();
+  std::string hexrandom = "rand" + GetRandString(16);
+  tmpdirname = fs::temp_directory_path() / hexrandom;
   BOOST_CHECK_EQUAL(DirIsWritable(tmpdirname), false);
 
   fs::create_directory(tmpdirname);
