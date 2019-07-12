@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2016 The Bitcoin Core developers
+// Copyright (c) 2011-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -58,11 +58,11 @@ bool WalletFrame::addWallet(WalletModel *walletModel) {
     mapWalletViews[name] = walletView;
 
     // Ensure a walletView is able to show the main window
-    connect(walletView, SIGNAL(showNormalIfMinimized()), gui,
-            SLOT(showNormalIfMinimized()));
+    connect(walletView, &WalletView::showNormalIfMinimized,
+            [this] { gui->showNormalIfMinimized(); });
 
-    connect(walletView, SIGNAL(outOfSyncWarningClicked()), this,
-            SLOT(outOfSyncWarningClicked()));
+    connect(walletView, &WalletView::outOfSyncWarningClicked, this,
+            &WalletFrame::outOfSyncWarningClicked);
 
     return true;
 }
