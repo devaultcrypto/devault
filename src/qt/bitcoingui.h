@@ -226,7 +226,6 @@ public Q_SLOTS:
                              const QString &type, const QString &address,
                              const QString &label, const QString &walletName);
 
-private Q_SLOTS:
     /** Open DeVault website */
     void openDVT_global();
     /** Switch to overview (home) page */

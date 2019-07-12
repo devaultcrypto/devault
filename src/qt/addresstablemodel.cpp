@@ -396,6 +396,7 @@ QString AddressTableModel::labelForAddress(const QString &address) const {
     return QString();
 }
 
+
 int AddressTableModel::lookupAddress(const QString &address) const {
     QModelIndexList lst = match(index(0, Address, QModelIndex()), Qt::EditRole,
                                 address, 1, Qt::MatchExactly);
