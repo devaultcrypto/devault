@@ -188,6 +188,10 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
   message(STATUS "Darwin Version : ${CMAKE_SYSTEM_VERSION} found, major version ${DARWIN_MAJOR_VERSION} ")
   # HAVE_VARIANT means support for std::variant and std::optional
+  if (DARWIN_MAJOR_VERSION GREATER 18) # 18 is Mojave
+    message(STATUS "Will use std c++ filesystem since > Mojave")
+    set(BUILD_STD_FILESYSTEM ON)
+  endif()
   if (DARWIN_MAJOR_VERSION GREATER 17) # 17 is High Sierra
     add_definitions("-DOS_MACOSX -DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
   else()

@@ -24,7 +24,8 @@ bool is_null_key(const std::vector<uint8_t> &key) {
 TEST_CASE("dbwrapper") {
   // Perform tests both obfuscated and non-obfuscated.
   for (bool obfuscate : {false, true}) {
-    fs::path ph = fs::temp_directory_path() / fs::unique_path();
+    std::string hexrandom = "rand" + GetRandString(16);
+    fs::path ph = fs::temp_directory_path() / hexrandom;
     CDBWrapper dbw(ph, (1 << 20), true, false, obfuscate);
     char key = 'k';
     uint256 in = InsecureRand256();
@@ -43,7 +44,8 @@ TEST_CASE("dbwrapper") {
 TEST_CASE("dbwrapper_batch") {
   // Perform tests both obfuscated and non-obfuscated.
   for (bool obfuscate : {false, true}) {
-    fs::path ph = fs::temp_directory_path() / fs::unique_path();
+    std::string hexrandom = "rand" + GetRandString(16);
+    fs::path ph = fs::temp_directory_path() / hexrandom;
     CDBWrapper dbw(ph, (1 << 20), true, false, obfuscate);
 
     char key = 'i';
@@ -78,7 +80,8 @@ TEST_CASE("dbwrapper_batch") {
 TEST_CASE("dbwrapper_iterator") {
   // Perform tests both obfuscated and non-obfuscated.
   for (bool obfuscate : {false, true}) {
-    fs::path ph = fs::temp_directory_path() / fs::unique_path();
+    std::string hexrandom = "rand" + GetRandString(16);
+    fs::path ph = fs::temp_directory_path() / hexrandom;
     CDBWrapper dbw(ph, (1 << 20), true, false, obfuscate);
 
     // The two keys are intentionally chosen for ordering
@@ -117,7 +120,8 @@ TEST_CASE("dbwrapper_iterator") {
 // Test that we do not obfuscation if there is existing data.
 TEST_CASE("existing_data_no_obfuscate") {
   // We're going to share this fs::path between two wrappers
-  fs::path ph = fs::temp_directory_path() / fs::unique_path();
+  std::string hexrandom = "rand" + GetRandString(16);
+  fs::path ph = fs::temp_directory_path() / hexrandom;
   create_directories(ph);
 
   // Set up a non-obfuscated wrapper to write some initial data.
@@ -159,7 +163,8 @@ TEST_CASE("existing_data_no_obfuscate") {
 // Ensure that we start obfuscating during a reindex.
 TEST_CASE("existing_data_reindex") {
   // We're going to share this fs::path between two wrappers
-  fs::path ph = fs::temp_directory_path() / fs::unique_path();
+  std::string hexrandom = "rand" + GetRandString(16);
+  fs::path ph = fs::temp_directory_path() / hexrandom;
   create_directories(ph);
 
   // Set up a non-obfuscated wrapper to write some initial data.
@@ -193,7 +198,8 @@ TEST_CASE("existing_data_reindex") {
 }
 
 TEST_CASE("iterator_ordering") {
-  fs::path ph = fs::temp_directory_path() / fs::unique_path();
+  std::string hexrandom = "rand" + GetRandString(16);
+  fs::path ph = fs::temp_directory_path() / hexrandom;
   CDBWrapper dbw(ph, (1 << 20), true, false, false);
   for (int x = 0x00; x < 256; ++x) {
     uint8_t key = x;
@@ -256,7 +262,8 @@ struct StringContentsSerializer {
 TEST_CASE("iterator_string_ordering") {
   char buf[10];
 
-  fs::path ph = fs::temp_directory_path() / fs::unique_path();
+  std::string hexrandom = "rand" + GetRandString(16);
+  fs::path ph = fs::temp_directory_path() / hexrandom;
   CDBWrapper dbw(ph, (1 << 20), true, false, false);
   for (int x = 0x00; x < 10; ++x) {
     for (int y = 0; y < 10; y++) {

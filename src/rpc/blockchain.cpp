@@ -42,6 +42,8 @@
 #include <condition_variable>
 #include <cstdint>
 #include <mutex>
+#include <fstream>
+#include <iostream>
 
 struct CUpdatedBlock {
     uint256 hash;
