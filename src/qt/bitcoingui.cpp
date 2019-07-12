@@ -117,7 +117,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
 #endif
     setWindowTitle(windowTitle);
 
-    rpcConsole = new RPCConsole(node, _platformStyle, 0);
+    rpcConsole = new RPCConsole(node, _platformStyle, nullptr);
     helpMessageDialog = new HelpMessageDialog(node, this, false);
     if (enableWallet) {
         /** Create wallet frame and make it the central widget */
@@ -160,14 +160,17 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
     connect(connectionsControl, SIGNAL(clicked(QPoint)), this,
             SLOT(toggleNetworkActive()));
 
+    // connect(connectionsControl, &QAction::clicked, this,
+    //       &BitcoinGUI::toggleNetworkActive);
+  
     modalOverlay = new ModalOverlay(platformStyle, this->centralWidget());
     if (enableWallet) {
-        connect(walletFrame, SIGNAL(requestedSyncWarningInfo()), this,
-                SLOT(showModalOverlay()));
-        connect(labelBlocksIcon, SIGNAL(clicked(QPoint)), this,
-                SLOT(showModalOverlay()));
-        connect(progressBar, SIGNAL(clicked(QPoint)), this,
-                SLOT(showModalOverlay()));
+      connect(walletFrame, &WalletFrame::requestedSyncWarningInfo, this,
+              &BitcoinGUI::showModalOverlay);
+      connect(labelBlocksIcon, SIGNAL(clicked(QPoint)), this,
+              SLOT(showModalOverlay()));
+      connect(progressBar, SIGNAL(clicked(QPoint)), this,
+              SLOT(showModalOverlay()));
     }
 }
 
@@ -231,15 +234,17 @@ void BitcoinGUI::createActions() {
     // These showNormalIfMinimized are needed because Send Coins and Receive
     // Coins can be triggered from the tray menu, and need to show the GUI to be
     // useful.
-    connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
+    connect(overviewAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
+    connect(overviewAction, &QAction::triggered, this,  &BitcoinGUI::gotoOverviewPage);
+    connect(sendCoinsAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
+    connect(sendCoinsAction, &QAction::triggered, [this] { gotoSendCoinsPage(); });
+    connect(sendCoinsMenuAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
+    connect(sendCoinsMenuAction, &QAction::triggered, [this] { gotoSendCoinsPage(); });
+    connect(receiveCoinsAction, &QAction::triggered,  [this] { showNormalIfMinimized(); });
+    connect(receiveCoinsAction, &QAction::triggered, this, &BitcoinGUI::gotoReceiveCoinsPage);
+    connect(receiveCoinsMenuAction, &QAction::triggered,  [this] { showNormalIfMinimized(); });
+    connect(receiveCoinsMenuAction, &QAction::triggered, this, &BitcoinGUI::gotoReceiveCoinsPage);
     connect(dvtLogoAction, SIGNAL(triggered()), this,  SLOT(openDVT_global()));
-    connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
-    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
-    connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
 
     quitAction = new QAction(platformStyle->TextColorIcon(":/icons/quit"),
                              tr("E&xit"), this);
@@ -322,33 +327,34 @@ void BitcoinGUI::createActions() {
            "command-line options")
             .arg(tr(PACKAGE_NAME)));
 
-    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
-    connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
-    connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
-    connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
-    connect(showHelpMessageAction, SIGNAL(triggered()), this,
-            SLOT(showHelpMessageClicked()));
-    connect(openRPCConsoleAction, SIGNAL(triggered()), this,
-            SLOT(showDebugWindow()));
+    connect(quitAction, &QAction::triggered, qApp, QApplication::quit);
+    connect(aboutAction, &QAction::triggered, this, &BitcoinGUI::aboutClicked);
+    connect(aboutQtAction, &QAction::triggered, qApp, QApplication::aboutQt);
+    connect(optionsAction, &QAction::triggered, this, &BitcoinGUI::optionsClicked);
+    connect(toggleHideAction, &QAction::triggered, this, &BitcoinGUI::toggleHidden);
+    connect(showHelpMessageAction, &QAction::triggered, this, &BitcoinGUI::showHelpMessageClicked);
+    connect(openRPCConsoleAction, &QAction::triggered, this, &BitcoinGUI::showDebugWindow);
     // prevents an open debug window from becoming stuck/unusable on client
     // shutdown
-    connect(quitAction, SIGNAL(triggered()), rpcConsole, SLOT(hide()));
+    connect(quitAction, &QAction::triggered, rpcConsole, &QWidget::hide);
 
     if (walletFrame) {
-         connect(backupWalletAction, SIGNAL(triggered()), walletFrame,
-                SLOT(backupWallet()));
-        connect(changePassphraseAction, SIGNAL(triggered()), walletFrame,
-                SLOT(changePassphrase()));
-        connect(signMessageAction, SIGNAL(triggered()), this,
-                SLOT(gotoSignMessageTab()));
-        connect(verifyMessageAction, SIGNAL(triggered()), this,
-                SLOT(gotoVerifyMessageTab()));
-        connect(usedSendingAddressesAction, SIGNAL(triggered()), walletFrame,
-                SLOT(usedSendingAddresses()));
-        connect(usedReceivingAddressesAction, SIGNAL(triggered()), walletFrame,
-                SLOT(usedReceivingAddresses()));
-        connect(openAction, SIGNAL(triggered()), this, SLOT(openClicked()));
+      connect(backupWalletAction, &QAction::triggered, walletFrame,
+              &WalletFrame::backupWallet);
+      connect(changePassphraseAction, &QAction::triggered, walletFrame,
+              &WalletFrame::changePassphrase);
+      //        connect(signMessageAction, &QAction::triggered,                [this] { showNormalIfMinimized(); });
+      connect(signMessageAction, &QAction::triggered,
+              [this] { gotoSignMessageTab(); });
+      //connect(verifyMessageAction, &QAction::triggered,                [this] { showNormalIfMinimized(); });
+      connect(verifyMessageAction, &QAction::triggered,
+              [this] { gotoVerifyMessageTab(); });
+      connect(usedSendingAddressesAction, &QAction::triggered, walletFrame,
+              &WalletFrame::usedSendingAddresses);
+      connect(usedReceivingAddressesAction, &QAction::triggered, walletFrame,
+              &WalletFrame::usedReceivingAddresses);
+      connect(openAction, &QAction::triggered, this,
+              &BitcoinGUI::openClicked);
     }
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_C), this,
@@ -503,10 +509,10 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel) {
 
         // Keep up to date with client
         updateNetworkState();
-        connect(_clientModel, SIGNAL(numConnectionsChanged(int)), this,
-                SLOT(setNumConnections(int)));
-        connect(_clientModel, SIGNAL(networkActiveChanged(bool)), this,
-                SLOT(setNetworkActive(bool)));
+        connect(_clientModel, &ClientModel::numConnectionsChanged, this,
+                &BitcoinGUI::setNumConnections);
+        connect(_clientModel, &ClientModel::networkActiveChanged, this,
+                &BitcoinGUI::setNetworkActive);
 
         modalOverlay->setKnownBestHeight(
             _clientModel->getHeaderTipHeight(),
@@ -536,8 +542,8 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel) {
         if (optionsModel) {
             // be aware of the tray icon disable state change reported by the
             // OptionsModel object.
-            connect(optionsModel, SIGNAL(hideTrayIconChanged(bool)), this,
-                    SLOT(setTrayIconVisible(bool)));
+            connect(optionsModel, &OptionsModel::hideTrayIconChanged, this,
+                    &BitcoinGUI::setTrayIconVisible);
 
             // initialize the disable state of the tray icon with the current
             // value in the model.
