@@ -42,6 +42,7 @@
 #include <QThread>
 #include <QTime>
 #include <QTimer>
+#include <QScreen>
 
 // TODO: add a scrollback limit, as there is currently none
 // TODO: make it possible to filter out categories (esp debug messages when
@@ -521,8 +522,7 @@ RPCConsole::RPCConsole(interfaces::Node &node,
     if (!restoreGeometry(
             settings.value("RPCConsoleWindowGeometry").toByteArray())) {
         // Restore failed (perhaps missing setting), center the window
-        move(QApplication::desktop()->availableGeometry().center() -
-             frameGeometry().center());
+        move(QGuiApplication::primaryScreen()->availableGeometry().center() - frameGeometry().center());
     }
     if(DVTUI::customThemeIsSet()) {
         QString appstyle = "fusion";
@@ -705,18 +705,11 @@ void RPCConsole::setClientModel(ClientModel *model) {
         // to use int (instead of int64_t), because signal mapper only supports
         // int or objects, which is okay because max bantime (1 year) is <
         // int_max.
-        QSignalMapper *signalMapper = new QSignalMapper(this);
-        signalMapper->setMapping(banAction1h, 60 * 60);
-        signalMapper->setMapping(banAction24h, 60 * 60 * 24);
-        signalMapper->setMapping(banAction7d, 60 * 60 * 24 * 7);
-        signalMapper->setMapping(banAction365d, 60 * 60 * 24 * 365);
-        connect(banAction1h, SIGNAL(triggered()), signalMapper, SLOT(map()));
-        connect(banAction24h, SIGNAL(triggered()), signalMapper, SLOT(map()));
-        connect(banAction7d, SIGNAL(triggered()), signalMapper, SLOT(map()));
-        connect(banAction365d, SIGNAL(triggered()), signalMapper, SLOT(map()));
-        connect(signalMapper, SIGNAL(mapped(int)), this,
-                SLOT(banSelectedNode(int)));
-
+        connect(banAction1h, &QAction::triggered, [this]() { banSelectedNode(60*60); });
+        connect(banAction24h, &QAction::triggered, [this]() { banSelectedNode(24*60*60); });
+        connect(banAction7d, &QAction::triggered, [this]() { banSelectedNode(7*24*60*60); });
+        connect(banAction365d, &QAction::triggered, [this]() { banSelectedNode(365*24*60*60); });
+ 
         // peer table context menu signals
         connect(ui->peerWidget,
                 SIGNAL(customContextMenuRequested(const QPoint &)), this,

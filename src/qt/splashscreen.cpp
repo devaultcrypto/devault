@@ -24,6 +24,7 @@
 #include <QDesktopWidget>
 #include <QPainter>
 #include <QRadialGradient>
+#include <QScreen>
 
 SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
                            const NetworkStyle *networkStyle)
@@ -123,7 +124,7 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
                             pixmap.size().height() / devicePixelRatio));
     resize(r.size());
     setFixedSize(r.size());
-    move(QApplication::desktop()->screenGeometry().center() - r.center());
+    move(QGuiApplication::primaryScreen()->availableGeometry().center() - frameGeometry().center());
 
     subscribeToCoreSignals();
     installEventFilter(this);

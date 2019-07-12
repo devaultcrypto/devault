@@ -63,6 +63,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QtGlobal>
+#include <QScreen>
 
 const std::string BitcoinGUI::DEFAULT_UIPLATFORM =
 #if defined(Q_OS_MAC)
@@ -86,8 +87,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
     QSettings settings;
     if (!restoreGeometry(settings.value("MainWindowGeometry").toByteArray())) {
         // Restore failed (perhaps missing setting), center the window
-        move(QApplication::desktop()->availableGeometry().center() -
-             frameGeometry().center());
+      move(QGuiApplication::primaryScreen()->availableGeometry().center() - frameGeometry().center());
     }
 
     if (DVTUI::customThemeIsSet()) {
