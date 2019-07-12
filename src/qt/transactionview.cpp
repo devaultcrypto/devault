@@ -255,7 +255,7 @@ void TransactionView::setModel(WalletModel *_model) {
                     }
                     contextMenu->addAction(thirdPartyTxUrlAction);
                     auto l = listUrls[i];
-                    connect(thirdPartyTxUrlAction, &QAction::triggered, [l]() {(void)l.trimmed();});
+                    connect(thirdPartyTxUrlAction, &QAction::triggered, [this,l]() {openThirdPartyTxUrl(l.trimmed());});
                 }
             }
         }
