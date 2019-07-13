@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+struct Amount;
 class CBlock;
 class CMutableTransaction;
 class CScript;
@@ -16,6 +17,7 @@ class uint256;
 class UniValue;
 
 // core_read.cpp
+UniValue ValueFromAmount(const Amount amount);
 CScript ParseScript(const std::string &s);
 std::string ScriptToAsmStr(const CScript &script,
                            const bool fAttemptSighashDecode = false);

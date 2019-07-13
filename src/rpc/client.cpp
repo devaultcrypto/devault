@@ -52,6 +52,7 @@ static const CRPCConvertParam vRPCConvertParams[] = {
     {"getbalance", 1, "minconf"},
     {"getbalance", 2, "include_watchonly"},
     {"getblockhash", 0, "height"},
+    {"getdifficulties", 1, "height"},
     {"getaddressbalance", 1, "address"},
 #ifdef EXTRA_INDEXES    
     {"getblockhashes", 0 , "high"},

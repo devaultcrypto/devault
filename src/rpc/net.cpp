@@ -4,6 +4,7 @@
 
 #include <rpc/server.h>
 
+#include <core_io.h>
 #include <chainparams.h>
 #include <clientversion.h>
 #include <config.h>

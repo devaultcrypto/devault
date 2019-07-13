@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <rpc/util.h>
+#include <core_io.h>
 #include <cashaddrenc.h>
 #include <clientversion.h>
 #include <config.h>
