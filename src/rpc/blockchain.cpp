@@ -1022,6 +1022,101 @@ static UniValue getblockheader(const Config &config,
     return blockheaderToJSON(chainActive.Tip(), pblockindex);
 }
 
+static UniValue getdifficulties(const Config &config, const JSONRPCRequest &request) {
+  if (request.fHelp || request.params.size() < 1)
+    throw std::runtime_error(
+                             "getdifficulties \"filename\" \"blocks\" \n"
+                             "\nWrite the last \"blocks\" difficulty values to a file for analysis.\n"
+                             "\nArguments:\n"
+                             "1. \"filename\"       (string, required) The filename where results are written to\n"
+                             "2. \"blocks\"         (int, optional, default=720) amount of blocks processed\n"
+                             "\nExamples:\n" +
+                             HelpExampleCli("getdifficulties", "\"diff.txt") +
+                             HelpExampleRpc("getdifficulties", "\"diff200.txt\" 200"));
+
+    LOCK(cs_main);
+    fs::path filepath = request.params[0].get_str();
+    int nLastHeight = chainActive.Height();
+    int nHeight=1;
+
+    if (!request.params[1].isNull()) {
+      nHeight = nLastHeight - request.params[1].get_int();
+    } else {
+      nHeight = std::max(nLastHeight - 720,1);
+    }
+    if (nHeight < 0 || nHeight > chainActive.Height()) {
+      throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+    }
+  
+    filepath = fs::absolute(filepath);
+    
+    std::ofstream file;
+    file.open(filepath.string().c_str());
+    if (!file.is_open()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                           "Cannot open getdifficulties dump file");
+    }
+
+    UniValue reply(UniValue::VOBJ);
+    reply.pushKV("filename", filepath.string());
+
+    int start_time = 0;
+    int sum_time_diff = 0;
+    int sq_time = 0;
+    int prev_time;
+    double av_diff=0;
+    double diff=0;
+    for (int i=nHeight;i<=nLastHeight;i++) {
+      CBlockIndex *pblockindex = chainActive[i];
+      if (fHavePruned && !pblockindex->nStatus.hasData() &&
+          pblockindex->nTx > 0) {
+        throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
+      }
+      CBlock block;
+      if (!ReadBlockFromDisk(block, pblockindex, config)) {
+        // Block not found on disk. This could be because we have the block
+        // header in our index but don't have the block (for example if a
+        // non-whitelisted node sends us an unrequested long chain of valid
+        // blocks, we add the headers to our index, but don't accept the block).
+        throw JSONRPCError(RPC_MISC_ERROR, "Block not found on disk");
+      }
+
+      // We grab Height + double precision Difficulty from the block
+      // and save in a file
+      
+      if (i==nHeight) {
+        prev_time = start_time = block.GetBlockTime();
+      }
+      int time_diff = block.GetBlockTime() - prev_time;
+
+      sum_time_diff += time_diff;
+      sq_time += (time_diff*time_diff);
+      // Put points ~10 seconds apart for granularity and
+      // store time as minutes
+      for (int j=0;j<time_diff;j += 10) {
+        file << (prev_time - start_time + j)/60.0 << " " << diff << "\n";
+      }
+      diff = GetDifficulty(pblockindex);
+      av_diff += diff;
+      prev_time = block.GetBlockTime();
+    }
+    file.close();
+
+    int blocks = nLastHeight - nHeight;
+    double exsq = (double)sq_time/blocks;
+    double av = (double)sum_time_diff/blocks;
+    double sqex = av*av;
+    double rms = sqrt(exsq - sqex);
+    
+    reply.pushKV("average block time (seconds)", int(av+0.5));
+    reply.pushKV("std. deviation of block time (seconds)", int(rms+0.5));
+    reply.pushKV("average difficulty", (int)(av_diff/blocks));
+    reply.pushKV("last difficulty", (int)diff);
+    reply.pushKV("blocks used", blocks);
+
+    return reply;
+}
+
 static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() < 1 ||
         request.params.size() > 2) {
@@ -2192,6 +2287,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "blockchain",         "getblockhashes",         getblockhashes,         {} },
 #endif
     { "blockchain",         "getblockhash",           getblockhash,           {"height"} },
+    { "blockchain",         "getdifficulties",        getdifficulties,        {"height"} },
     { "blockchain",         "getblockheader",         getblockheader,         {"blockhash","verbose"} },
     { "blockchain",         "getchaintips",           getchaintips,           {} },
     { "blockchain",         "getdifficulty",          getdifficulty,          {} },

@@ -7,6 +7,7 @@
 #include <rpc/server.h>
 
 #include <config.h>
+#include <core_io.h>
 #include <init.h>
 #include <random.h>
 #include <sync.h>
@@ -155,12 +156,6 @@ Amount AmountFromValue(const UniValue &value) {
     }
 
     return amt;
-}
-
-UniValue ValueFromAmount(const Amount amount) {
-    // also change format below manually from 08d to 03d
-    return UniValue(UniValue::VNUM, amount.ToString());
-//    return UniValue(UniValue::VNUM, strprintf("%s%d.%03d", sign ? "-" : "", quotient, remainder));
 }
 
 uint256 ParseHashV(const UniValue &v, const std::string& strName) {

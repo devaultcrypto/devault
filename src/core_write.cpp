@@ -17,6 +17,9 @@
 
 #include <univalue.h>
 
+UniValue ValueFromAmount(const Amount amount) { return UniValue(UniValue::VNUM, amount.ToString()); }
+
+
 std::string FormatScript(const CScript &script) {
     std::string ret;
     CScript::const_iterator it = script.begin();
@@ -222,6 +225,7 @@ void TxToUniv(const CTransaction &tx, const uint256 &hashBlock, UniValue &entry,
 
         UniValue out(UniValue::VOBJ);
 
+        // change to this later : out.pushKV("value", ValueFromAmount(txout.nValue));
         UniValue outValue(UniValue::VNUM, FormatMoney(txout.nValue));
         out.pushKV("value", outValue);
         out.pushKV("n", int64_t(i));
