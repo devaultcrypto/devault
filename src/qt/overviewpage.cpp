@@ -261,9 +261,6 @@ void OverviewPage::setWalletModel(WalletModel *model) {
         connect(model, &WalletModel::notifyWatchonlyChanged,
                 [this](bool showWatchOnly) { updateWatchOnlyLabels(showWatchOnly); });
     }
-
-    }
-
     // update the display unit, to not use the default ("DVT")
     updateDisplayUnit();
 }
