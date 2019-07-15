@@ -390,7 +390,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(
 
         CDiskBlockIndex diskindex;
         if (!pcursor->GetValue(diskindex)) {
-            return error("LoadBlockIndex() : failed to read value");
+            return error("%s : failed to read value", __func__);
         }
 
         // Construct block index object
@@ -410,7 +410,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(
 
         if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits,
                               config)) {
-            return error("LoadBlockIndex(): CheckProofOfWork failed: %s",
+            return error("%s: CheckProofOfWork failed: %s", __func__,
                          pindexNew->ToString());
         }
 
