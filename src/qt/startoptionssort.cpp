@@ -53,7 +53,7 @@ void CustomRectItem::dropEvent(QGraphicsSceneDragDropEvent *event){
 static QLabel *createDragLabel(const QString &text, QWidget *parent)
 {
     QLabel *label = new QLabel(text, parent);
-    label->setStyleSheet("QLabel{background-color:#e3e3e3;color : black;}");
+ //   label->setStyleSheet("QLabel{background-color: " + DVTUI::s_Dark + "; border: 1px solid " + DVTUI::s_LBlue + ";  width: 100px; height: 60px; font-size: 20px; font-weight: thin; color: " + DVTUI::s_white + ";}");
     return label;
 }
 
@@ -67,6 +67,9 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
         QApplication::setStyle(appstyle);
         setStyleSheet(DVTUI::styleSheetString);
     } 
+
+    ui->dragdropLabel->setText(
+        tr("Please drag and drop your seed words into the correct order to confirm your recovery phrase. "));
 
     scene = new QGraphicsScene(this);
     if(rows == 4) {
@@ -135,9 +138,9 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
             itemListWidget->setFixedWidth(80);
             if(rows == 4){
                 itemListWidget->setMinimumSize(QSize(80,80));
-                itemListWidget->setMaximumSize(QSize(80,80));
+                itemListWidget->setMaximumSize(QSize(80,100));
             } else {
-                itemListWidget->setMaximumSize(QSize(80,40));
+                itemListWidget->setMaximumSize(QSize(80,200));
             }
             itemListWidget->setDragEnabled(true);
             labelsList.push_back(itemListWidget);

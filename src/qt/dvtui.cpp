@@ -193,8 +193,48 @@ bool DVTUI::customThemeIsSet() {
             "QPushButton:disabled { color: " + s_grey + "}"
 
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
-            "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"                   
-            
+            "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"
+
+            "QPushButton "
+            "{ background-color: " + s_hightlight_dark + "; color: " + s_white + "; border: 1px outset rgb(33,33,33); padding: 6px; border-radius: 0px;}"
+            "QPushButton:hover {border: 1px solid "+ s_LBlue + "}"
+            "QPushButton:pressed {background-color: " + s_LBlue + "}"
+            "QPushButton:disabled { color: " + s_grey + "}"
+
+            // Seed Phrase + SetPassword First Run Setup
+            "QListWidget, #words_mnemonic, #seedphrase"
+            "{ min-width: 100px; min-height: 140px; border-right: 1px solid " + s_Dark + "; border-left: 1px solid " + s_Dark + "; selection-background-color: " + s_highlight_dark_midgrey + "; selection-color: "+ s_LBlue + "; alternate-background-color: " + s_hightlight_dark + "; font-size: 20px; font-weight: thin; color: " + s_white + "; padding: 6px; position: center;}"
+            " #words_mnemonic:hover  { width: 100px; height: 80px; border: 1px solid "+ s_LBlue + ";}"
+            "QGraphicsScene "
+            "{ background-color: " + s_Dark + "; border: 1px solid " + s_highlight_light_midgrey + "; font-size: 18px; font-weight: thin; color: " + s_LBlue + ";}"
+            "QStackTutorialContainer, #QStackTutorialContainer "
+            "{ background-color: " + s_Darker + "; font-size: 20px; font-weight: thin; color: " + s_LBlue + ";}"
+       //     "QStackedWidget "
+       //     "{ background-color: " + s_Dark + "; border: 1px solid " + s_LBlue + "; font-size: 18px; font-weight: thin; color: " + s_LBlue + ";}"
+       //     "QGridLayout "
+       //     "{ width: 100px; height: 60px; border: 1px solid " + s_Dark + "; selection-background-color: " + s_highlight_dark_midgrey + "; selection-color: "+ s_LBlue + "; alternate-background-color: " + s_hightlight_dark + "; font-size: 18px; font-weight: thin; color: " + s_white + "; padding: 1px;}"
+
+            "#Words12, #Words24 "
+            "{ font-size: 22px; position: center; font-weight: thin; color: " + s_Light + ";}"
+            "#welcomeLogo "
+            "{ background: transparent; border: none; padding: 10px;}"
+    //        "#gridLayoutRevealed "
+    //        "{ background: transparent; border: 1px solid " + s_Dark + "; position: center;}"
+            "#label, #gridLayoutRevealed, #itemListWidget, #StartOptionsSort, #itemList, #graphicsList, #m_text, #scene, #view, #list, #CustomRectItem "
+            "{ background-color: " + s_Darker + "; border: 1px solid " + s_Dark + "; font-size: 20px; font-weight: thin; color: " + s_LBlue + ";}"
+
+            "#warningLabel, #welcomeLabel, #welcomeLabel2, #passLabel1, #passLabel2, #passLabel3, #ErrorLable "
+            "{ font-size: 17px; font-weight: thin; color: " + s_Light + ";}"
+            "#restoreLabel, #dragdropLabel "
+            "{ font-size: 15px; font-weight: thin; color: " + s_Light + ";}"
+            "#welcomeLabel3 "
+            "{ font-size: 13px; font-weight: thin; color: " + s_white + ";}"
+            "#welcomeTitle "
+            "{ font-size: 24px; font-weight: thin; color: " + s_Light + ";}"
+            "#passEdit1, #passEdit2, #passEdit3, #Words "
+            "{ background-color: " + s_Dark + "; font-size: 18px; font-weight: thin; color: " + s_Light + ";}"
+            "#NewWallet, #RestoreWallet, #Back, #Next "
+            "{ font-size: 24px; color: " + s_Light + ";}"
 
             //Disturbing borders
             "#labelWalletStatus { border: none; background: transparent}"
