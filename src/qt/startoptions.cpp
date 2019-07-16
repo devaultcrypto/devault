@@ -13,7 +13,11 @@ StartOptions::StartOptions(QWidget *parent)
         : QWidget(parent), ui(new Ui::StartOptions)
         {
     ui->setupUi(this);
-
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
 }
 

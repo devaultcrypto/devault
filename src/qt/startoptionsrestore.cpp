@@ -13,6 +13,11 @@ StartOptionsRestore::StartOptionsRestore(int rows, QWidget *parent)
         : QWidget(parent), ui(new Ui::StartOptionsRestore)
         {
     ui->setupUi(this);
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
             for(int i=0; i<rows; i++){
                 for(int k=0; k<6; k++){

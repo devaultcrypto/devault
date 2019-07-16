@@ -13,6 +13,11 @@ StartOptionsRevealed::StartOptionsRevealed(std::vector<std::string> Words, int r
         : QWidget(parent), ui(new Ui::StartOptionsRevealed)
         {
     ui->setupUi(this);
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
             for(int i=0; i<rows; i++){
                 for(int k=0; k<6; k++){

@@ -62,6 +62,11 @@ static QString hotSpotMimeDataKey() { return QStringLiteral("application/x-hotsp
 StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWidget *parent)
         : QWidget(parent), ui(new Ui::StartOptionsSort) {
     ui->setupUi(this);
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
     scene = new QGraphicsScene(this);
     if(rows == 4) {
