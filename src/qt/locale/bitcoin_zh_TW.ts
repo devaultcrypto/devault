@@ -160,7 +160,7 @@
         <translation>改變密碼</translation>
     </message>
     <message>
-        <source>Enter the old passphrase and new passphrase to the wallet.</source>
+        <source>Please verify your current/old passphrase before entering your new wallet passphrase. Don't forget to overwrite/update your back-up .dat files as well.</source>
         <translation>請輸入錢包的舊密碼和新密碼。</translation>
     </message>
     <message>

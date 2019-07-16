@@ -52,7 +52,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode _mode, QWidget *parent)
         case ChangePass: // Ask old passphrase + new passphrase x2
             setWindowTitle(tr("Change passphrase"));
             ui->warningLabel->setText(tr(
-                "Enter the old passphrase and new passphrase to the wallet."));
+                "Please verify your current/old passphrase before entering your new wallet passphrase. Don't forget to overwrite/update your back-up .dat files as well."));
             break;
     }
     textChanged();

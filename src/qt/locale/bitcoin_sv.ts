@@ -161,7 +161,7 @@ Var vänlig och försök igen.</translation>
         <translation>Ändra lösenord</translation>
     </message>
     <message>
-        <source>Enter the old passphrase and new passphrase to the wallet.</source>
+        <source>Please verify your current/old passphrase before entering your new wallet passphrase. Don't forget to overwrite/update your back-up .dat files as well.</source>
         <translation>Ge det gamla lösenordet och det nya lösenordet för plånboken.</translation>
     </message>
     <message>
