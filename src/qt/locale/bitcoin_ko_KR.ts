@@ -160,7 +160,7 @@
         <translation>암호 변경</translation>
     </message>
     <message>
-        <source>Enter the old passphrase and new passphrase to the wallet.</source>
+        <source>Please verify your current/old passphrase before entering your new wallet passphrase. Don't forget to overwrite/update your back-up .dat files as well.</source>
         <translation>지갑의 기존 암호와 새로운 암호를 입력해주세요.</translation>
     </message>
     <message>
