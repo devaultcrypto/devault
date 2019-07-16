@@ -160,7 +160,7 @@
         <translation>Сменить пароль</translation>
     </message>
     <message>
-        <source>Enter the old passphrase and new passphrase to the wallet.</source>
+        <source>Please verify your current/old passphrase before entering your new wallet passphrase. Don't forget to overwrite/update your back-up .dat files as well.</source>
         <translation>Введите старый и новый пароль для бумажника.</translation>
     </message>
     <message>
