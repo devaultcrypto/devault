@@ -53,7 +53,6 @@ void CustomRectItem::dropEvent(QGraphicsSceneDragDropEvent *event){
 static QLabel *createDragLabel(const QString &text, QWidget *parent)
 {
     QLabel *label = new QLabel(text, parent);
- //   label->setStyleSheet("QLabel{background-color: " + DVTUI::s_Dark + "; border: 1px solid " + DVTUI::s_LBlue + ";  width: 100px; height: 60px; font-size: 20px; font-weight: thin; color: " + DVTUI::s_white + ";}");
     return label;
 }
 

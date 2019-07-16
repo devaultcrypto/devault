@@ -30,8 +30,8 @@ StartOptions::StartOptions(QWidget *parent)
     ui->welcomeLabel3->setText(
         tr("Remember that the DeVault team has <b>no way to restore lost passwords or seeds!</b> "
            "It's very important that you store these safely yourself."
-           "<br/>Note: Your passphrase will always be able to unlock your wallet (without the seed) & Your Seed "
-           "will always be able to restore the wallet from scratch (without the passphrase or wallet file)."));
+           "Note: Your passphrase can always unlock uncorrupted wallet files, but in the event of corruption only a seed phrase can restore the wallet. "
+           "Your Seed will always be able to restore the wallet from scratch (without the passphrase or wallet file)."));
 
 
 }

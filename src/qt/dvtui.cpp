@@ -209,17 +209,11 @@ bool DVTUI::customThemeIsSet() {
             "{ background-color: " + s_Dark + "; border: 1px solid " + s_highlight_light_midgrey + "; font-size: 18px; font-weight: thin; color: " + s_LBlue + ";}"
             "QStackTutorialContainer, #QStackTutorialContainer "
             "{ background-color: " + s_Darker + "; font-size: 20px; font-weight: thin; color: " + s_LBlue + ";}"
-       //     "QStackedWidget "
-       //     "{ background-color: " + s_Dark + "; border: 1px solid " + s_LBlue + "; font-size: 18px; font-weight: thin; color: " + s_LBlue + ";}"
-       //     "QGridLayout "
-       //     "{ width: 100px; height: 60px; border: 1px solid " + s_Dark + "; selection-background-color: " + s_highlight_dark_midgrey + "; selection-color: "+ s_LBlue + "; alternate-background-color: " + s_hightlight_dark + "; font-size: 18px; font-weight: thin; color: " + s_white + "; padding: 1px;}"
 
             "#Words12, #Words24 "
             "{ font-size: 22px; position: center; font-weight: thin; color: " + s_Light + ";}"
             "#welcomeLogo "
             "{ background: transparent; border: none; padding: 10px;}"
-    //        "#gridLayoutRevealed "
-    //        "{ background: transparent; border: 1px solid " + s_Dark + "; position: center;}"
             "#label, #gridLayoutRevealed, #itemListWidget, #StartOptionsSort, #itemList, #graphicsList, #m_text, #scene, #view, #list, #CustomRectItem "
             "{ background-color: " + s_Darker + "; border: 1px solid " + s_Dark + "; font-size: 20px; font-weight: thin; color: " + s_LBlue + ";}"
 

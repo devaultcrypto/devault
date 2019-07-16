@@ -37,7 +37,6 @@ StartOptionsRevealed::StartOptionsRevealed(std::vector<std::string> Words, int r
             }
             int i = 0;
             for (QLabel* label : labelsList) {
-           //     label->setStyleSheet("QLabel{background-color: " + DVTUI::s_highlight_light_midgrey + "; border: 1px solid " + DVTUI::s_Dark + "; font-size: 18px; font-weight: thin; color: " + DVTUI::s_white + ";}");
                 label->setContentsMargins(8,12,8,12);
                 label->setText(QString::fromStdString(Words[i]));
                 i++;

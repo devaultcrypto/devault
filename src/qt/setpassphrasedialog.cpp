@@ -50,11 +50,6 @@ SetPassphraseDialog::SetPassphraseDialog(QWidget* parent)
     ui->welcomeLabel->setText(
         tr("First we're going to set a secure <b>passphrase</b> for your new wallet."
            "Then we will move on to creating your wallets unique <b>memnomic seed phrase!</b> "));
-  /*  ui->welcomeLabel2->setText(
-        tr("Remember that the DeVault team has <b>no way to restore lost passwords or seeds!</b> "
-           "<br/>It's very important that you store these safely yourself."
-           "Note: Your passphrase will always be able to unlock your wallet (without the seed) & Your Seed "
-           "<br/>will always be able to restore the wallet from scratch (without the passphrase).")); */
     ui->warningLabel->setText(
         tr("Please enter a strong passphrase for encrypting your wallet. We suggest using a "
            "passphrase of <b>ten or more random characters</b>, or even <b>eight or more words</b>. "));
