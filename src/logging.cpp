@@ -226,7 +226,8 @@ std::string BCLog::Logger::RenameLastDebugFile(){
   if (fs::exists(pathLog)) {
     auto last_write_time = fs::last_write_time(pathLog);
 #ifdef NO_BOOST_FILESYSTEM
-    auto last_write_int = last_write_time.time_since_epoch().count();
+    // This may be implementation dependent but need to divide for Mac OS Catalina's use of filesystem
+    auto last_write_int = last_write_time.time_since_epoch().count()/1000000000;
 #else
     auto last_write_int = last_write_time; // no change
 #endif
