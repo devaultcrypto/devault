@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>598</width>
-    <height>222</height>
+    <width>650</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -31,14 +31,29 @@
    </property>
    <item>
     <widget class="QStackedWidget" name="QStackTutorialContainer">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet">
       <string notr="true">#frame2{
        background-color: #161616;
        border: none;
-       padding: 0em 0em;
+       padding: 0;
        }</string>
      </property>
-     <widget class="QWidget" name="page_3"/>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page_3">
+      <property name="font">
+       <font>
+        <italic>false</italic>
+       </font>
+      </property>
+     </widget>
      <widget class="QWidget" name="page_4"/>
     </widget>
    </item>
@@ -81,4 +96,5 @@
   </layout>
  </widget>
  <resources/>
+ <connections/>
 </ui>

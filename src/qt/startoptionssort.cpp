@@ -53,7 +53,6 @@ void CustomRectItem::dropEvent(QGraphicsSceneDragDropEvent *event){
 static QLabel *createDragLabel(const QString &text, QWidget *parent)
 {
     QLabel *label = new QLabel(text, parent);
-    label->setStyleSheet("QLabel{background-color:#e3e3e3;color : black;}");
     return label;
 }
 
@@ -65,24 +64,30 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
 
     scene = new QGraphicsScene(this);
     if(rows == 4) {
-        scene->setSceneRect(0,0,500,189);
+        scene->setSceneRect(0,0,620,229);
         view = new QGraphicsView;
         view->setScene(scene);
-        view->setMinimumSize(QSize(1,190));
+        view->setMinimumSize(QSize(1,230));
     } else {
-        scene->setSceneRect(0,0,500,94);
+        scene->setSceneRect(0,0,620,154);
         view = new QGraphicsView;
         view->setScene(scene);
-        view->setMinimumSize(QSize(1,95));
+        view->setMinimumSize(QSize(1,155));
     }
-    QRectF rect(0,0,70,40);
+    
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QRectF rect(0,0,90,70);
+    QRectF rect2(0,0,90,2);
+    
     for(int i=0; i<4; i++){
         for(int k=0; k<6; k++){
             int ki;
             if (k < 1){
-                ki = 20;
+                ki = 10;
             } else {
-                ki = 20 + 80 * k;
+                ki = 10 + 100 * k;
             }
             int ii;
             if (i < 1){
@@ -90,12 +95,25 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
             } else {
                 ii = 1 + 50 * i;
             }
+
             CustomRectItem *listView = new CustomRectItem;
             scene->addItem(listView);
             listView->setRect(rect);
+            
+            CustomRectItem *listViewBorder = new CustomRectItem;
+            scene->addItem(listViewBorder);
+            listViewBorder->setRect(rect2);
+            listViewBorder->setBrush(QColor(35,136,237));
+            listViewBorder->setPos(ki,ii + 50);
+            listViewBorder->setPen(Qt::NoPen);
+
             listView->setPos(ki,ii);
-            listView->setBrush(QColor("#e3e3e3"));
+            QPen myPen(QColor(255,255,255), 2, Qt::MPenStyle);
+            listView->setPen(myPen);
+            
             graphicsList.push_back(listView);
+            graphicsList.push_back(listViewBorder);
+            
         }
     }
     ui->gridLayoutRevealed->addWidget(view, 0, 0, 1, 6, Qt::AlignCenter);
@@ -129,12 +147,13 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
             itemListWidget->addItems(itemList);
             itemListWidget->setFixedWidth(80);
             if(rows == 4){
-                itemListWidget->setMinimumSize(QSize(80,80));
-                itemListWidget->setMaximumSize(QSize(80,80));
+                itemListWidget->setMinimumSize(QSize(80,180));
+                itemListWidget->setMaximumSize(QSize(80,180));
             } else {
-                itemListWidget->setMaximumSize(QSize(80,40));
+                itemListWidget->setMaximumSize(QSize(80,140));
             }
             itemListWidget->setDragEnabled(true);
+            itemListWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             labelsList.push_back(itemListWidget);
             ui->gridLayoutRevealed->addWidget(itemListWidget, 2, k, Qt::AlignCenter);
         }
