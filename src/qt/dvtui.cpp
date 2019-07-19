@@ -79,6 +79,8 @@ bool DVTUI::customThemeIsSet() {
             "QPlainTextEdit "
             "{ background: " + s_hightlight_dark + "; border: 1px solid " + s_LBlue + "; border-left: none; border-right: none; border-top: none}"
 
+            "*{outline: none;}"
+
 	    //Debug window
             "#lineEdit "
             "{ background: " + s_Dark + "; border: 1px solid " + s_LBlue + "}"
@@ -191,6 +193,8 @@ bool DVTUI::customThemeIsSet() {
             "QPushButton:hover {border: 1px solid "+ s_LBlue + "}"
             "QPushButton:pressed {background-color: " + s_LBlue + "}"
             "QPushButton:disabled { color: " + s_grey + "}"
+            //Experimental Button Styling Override
+            "QPushButton {border-style:solid; border-color: #fff; border-width:2px; border-radius: 16px; background:#fff; color:#000; padding-left:20px; padding-right:20px;}"  
 
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
             "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"                   
@@ -213,5 +217,20 @@ bool DVTUI::customThemeIsSet() {
             "#scrollArea {border: none; }"
 
             "QToolTip { background: " + s_Dark + "; color: "+  s_Light + "; border: none }"
+
+           
+            //Seed Words Generator
+            "QListView::item {color: white; height:36px;}"
+        
+            "QRadioButton {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
+            "QRadioButton:focus {background-color:#000;}"
+            "QRadioButton::indicator {display:none; opacity:0;width:0px; height:0px;}"
+            "QRadioButton:checked{background-color:transparent; border: 2px solid #2388ed;}"
+            "QRadioButton:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
+            "QRadioButton:unchecked:hover{background-color: #1f1f1f;}"
+
+            "QListWidget::item {border-radius:8px;border:none;color:#fff;}"
+            "QListWidget::item:selected{border:2px solid #2388ed;border-radius:8px;padding-left:4px;background:transparent;}"
+            "QListWidget::item:focus{border:1px solid #1f1f1f;background:#1f1f1f;;border-radius:8px;padding-left:4px;}"
 
         );

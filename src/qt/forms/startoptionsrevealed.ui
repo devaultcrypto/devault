@@ -22,6 +22,12 @@
     <height>0</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+    <italic>true</italic>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>StartOptionsRevealed Dialog</string>
   </property>
@@ -32,45 +38,12 @@
    <item>
     <layout class="QGridLayout" name="gridLayoutRevealed">
      <property name="rightMargin">
-      <number>30</number>
+      <number>0</number>
      </property>
     </layout>
    </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>StartOptionsRevealed</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>StartOptionsRevealed</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
