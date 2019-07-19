@@ -2149,16 +2149,19 @@ static UniValue getrewardinfo(const Config &config, const JSONRPCRequest &reques
     Amount sum;
     int count=0;
     int total_payouts=0;
+    std::set<std::string> addresses;
     for (auto& val : rewards) {
       if (val.IsActive()) {
         sum = sum + val.GetValue();
         count++;
         total_payouts += val.GetPayCount();
+        addresses.insert(GetAddrFromTxOut(val.GetTxOut()));
       }
     }
 
     UniValue reply(UniValue::VOBJ);
     reply.pushKV("Current number of viable rewards", count);
+    reply.pushKV("Current number of unique addresses with viable rewards", int(addresses.size()));
     reply.pushKV("Number of reward payouts to date (for current set of utxos)", total_payouts);
 
     int nHeight = chainActive.Height();
