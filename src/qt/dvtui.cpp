@@ -195,12 +195,6 @@ bool DVTUI::customThemeIsSet() {
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
             "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"
 
-            "QPushButton "
-            "{ background-color: " + s_hightlight_dark + "; color: " + s_white + "; border: 1px outset rgb(33,33,33); padding: 6px; border-radius: 0px;}"
-            "QPushButton:hover {border: 1px solid "+ s_LBlue + "}"
-            "QPushButton:pressed {background-color: " + s_LBlue + "}"
-            "QPushButton:disabled { color: " + s_grey + "}"
-
             // Seed Phrase + SetPassword First Run Setup
             "QListWidget, #words_mnemonic, #seedphrase"
             "{ min-width: 100px; min-height: 140px; border-right: 1px solid " + s_Dark + "; border-left: 1px solid " + s_Dark + "; selection-background-color: " + s_highlight_dark_midgrey + "; selection-color: "+ s_LBlue + "; alternate-background-color: " + s_hightlight_dark + "; font-size: 20px; font-weight: thin; color: " + s_white + "; padding: 6px; position: center;}"
