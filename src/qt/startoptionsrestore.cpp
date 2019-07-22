@@ -25,7 +25,7 @@ StartOptionsRestore::StartOptionsRestore(int rows, QWidget *parent)
                     label->setAlignment(Qt::AlignCenter);
                     editList.push_back(label);
 		    ui->restoreLabel->setText(
-			tr("Restore your wallet using a recovery seed phrase below. Make sure your words are entered in the correct order (left to right)."
+			tr("Restore your wallet using a recovery seed phrase below. "
 			   ""));
                     ui->gridLayoutRevealed->addWidget(label, i, k, Qt::AlignCenter);
                 }
