@@ -216,10 +216,13 @@ bool DVTUI::customThemeIsSet() {
             "QToolTip { background: " + s_Dark + "; color: "+  s_Light + "; border: none }"
 
             // Start-Up / Seed Words
-            "QListView::item {color: white; height:36px; text-align:center; font-size:18px; }"
-            "QListWidget::item {border-radius:8px; border:none; color:#fff; text-align:center; font-size:18px;}"
-            "QListWidget::item:selected{border:1px solid #2388ed;border-radius:8px;padding-left:4px;background:transparent;}"
-            "QListWidget::item:focus{border:1px solid #1f1f1f; background:#1f1f1f; border-radius:8px; padding-left:4px;}"
+            "QListView::item {color: white; height:36px; text-align:center; font-size:22px; }"
+            "QListWidget::item {text-align:center; border-radius: 12px; color:#fff; padding-left:20px; padding-right:5px;}"
+            "QListWidget::item:hover{border:1px solid #2388ed;background:transparent;}"
+            "QListWidget::item:selected{background:transparent;}"
+            "QListWidget::item:focus{background:transparent;}"
+            "QGraphicsView {width:140px; text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff; padding-left:10px; padding-right:10px;}"
+            "QGraphicsView::item {text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff;}"
            
 	    "#Words12 {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
             "#Words12:focus {background-color:#000;}"
@@ -242,12 +245,11 @@ bool DVTUI::customThemeIsSet() {
             "{ font-size: 13px; font-weight: thin; color: " + s_white + ";}"
             "#welcomeTitle "
             "{ font-size: 24px; font-weight: thin; color: " + s_Light + ";}"
-            "{ background-color: " + s_Dark + "; font-size: 18px; font-weight: thin; color: " + s_Light + ";}"
-            "#NewWallet, #RestoreWallet, #Back, #Next "
-            "{ font-size: 24px;}"
-            "#NewWallet, #RestoreWallet, #Back, #Next "
-            "{ font-size: 24px; }"
+            "#NewWallet, #RestoreWallet, #Back, #Next, #buttonBox "
+            "{ font-size: 22px;}"
             "#welcomeLogo "
             "{ background: transparent; border: none; padding: 10px;}"
+            "#gridLayoutRevealed "	
+            "{ background: transparent; position: center; font-size:22px;}"
 
         );
