@@ -40,9 +40,17 @@ void CustomRectItem::dropEvent(QGraphicsSceneDragDropEvent *event){
         int row, col;
         QMap<int, QVariant> valueMap;
         stream >> row >> col >> valueMap;
+        QString origText = m_text;
         if(!valueMap.isEmpty())
             setText(valueMap.value(0).toString());
+
+        event->setDropAction(Qt::MoveAction);
         event->accept();
+
+        if(!origText.isEmpty()){
+            if(QListWidget* lWidget = qobject_cast<QListWidget*> (event->source()))
+                lWidget->addItem(origText);
+        }
     }
     else
         event->ignore();
