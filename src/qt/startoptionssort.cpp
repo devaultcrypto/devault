@@ -81,7 +81,7 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
     QRectF rect(0,0,90,70);
     QRectF rect2(0,0,90,2);
     
-    for(int i=0; i<4; i++){
+    for(int i=0; i<rows; i++){
         for(int k=0; k<6; k++){
             int ki;
             if (k < 1){
