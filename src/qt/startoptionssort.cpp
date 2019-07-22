@@ -69,9 +69,14 @@ static QString hotSpotMimeDataKey() { return QStringLiteral("application/x-hotsp
 StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWidget *parent)
         : QWidget(parent), ui(new Ui::StartOptionsSort) {
     ui->setupUi(this);
+    if(DVTUI::customThemeIsSet()) {
+        QString appstyle = "fusion";
+        QApplication::setStyle(appstyle);
+        setStyleSheet(DVTUI::styleSheetString);
+    } 
 
     ui->dragdropLabel->setText(
-        tr("Please drag and drop your seed words into the correct order to confirm your recovery phrase. "));
+        tr("Please <b>drag</b> and <b>drop</b> your seed words into the correct order to confirm your recovery phrase. "));
 
     scene = new QGraphicsScene(this);
     if(rows == 4) {
@@ -156,14 +161,12 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
             }
 
             itemListWidget->addItems(itemList);
-            itemListWidget->setFixedWidth(80);
-            if(rows == 4){
-                itemListWidget->setMinimumSize(QSize(80,180));
-                itemListWidget->setMaximumSize(QSize(80,180));
-            } else {
-                itemListWidget->setMaximumSize(QSize(80,140));
-            }
+            itemListWidget->setFixedWidth(120);
+            itemListWidget->setMinimumSize(QSize(120,180));
+            itemListWidget->setMaximumSize(QSize(120,180));
             itemListWidget->setDragEnabled(true);
+            itemListWidget->setFocusPolicy(Qt::NoFocus);
+            itemListWidget->setStyleSheet("QWidget{font-size:18px; font-style:bold; color:#fff;}");
             itemListWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             labelsList.push_back(itemListWidget);
             ui->gridLayoutRevealed->addWidget(itemListWidget, 2, k, Qt::AlignCenter);
