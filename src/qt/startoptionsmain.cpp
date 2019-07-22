@@ -1,19 +1,19 @@
 //
 // Created by Kolby on 6/19/2019.
 //
-#include "startoptionsmain.h"
-#include "ui_startoptionsmain.h"
+#include <startoptionsmain.h>
+#include <ui_startoptionsmain.h>
 #include <startoptionsdialog.h>
 
 #include <qt/guiutil.h>
 #include <QDebug>
 #include <QFileDialog>
 #include <iostream>
-#include "random.h"
-#include "dvtui.h"
+#include <random.h>
+#include <dvtui.h>
 
 #include <ui_interface.h>
-#include "wallet/mnemonic.h"
+#include <wallet/mnemonic.h>
 
 #include <boost/algorithm/string.hpp>
 
