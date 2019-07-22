@@ -253,22 +253,14 @@ struct mempoolentry_txid {
 class CompareTxMemPoolEntryByDescendantScore {
 public:
     bool operator()(const CTxMemPoolEntry &a, const CTxMemPoolEntry &b) const {
-        bool fUseADescendants = UseDescendantScore(a);
-        bool fUseBDescendants = UseDescendantScore(b);
+        double a_mod_fee, a_size, b_mod_fee, b_size;
 
-        double aModFee = (fUseADescendants ? a.GetModFeesWithDescendants()
-                          : a.GetModifiedFee()).toInt();
-        double aSize =
-            fUseADescendants ? a.GetSizeWithDescendants() : a.GetTxSize();
-
-        double bModFee = (fUseBDescendants ? b.GetModFeesWithDescendants()
-                          : b.GetModifiedFee()).toInt();
-        double bSize =
-            fUseBDescendants ? b.GetSizeWithDescendants() : b.GetTxSize();
+        GetModFeeAndSize(a, a_mod_fee, a_size);
+        GetModFeeAndSize(b, b_mod_fee, b_size);
 
         // Avoid division by rewriting (a/b > c/d) as (a*d > c*b).
-        double f1 = aModFee * bSize;
-        double f2 = aSize * bModFee;
+        double f1 = a_mod_fee * b_size;
+        double f2 = a_size * b_mod_fee;
 
         if (f1 == f2) {
             return a.GetTime() >= b.GetTime();
@@ -276,11 +268,21 @@ public:
         return f1 < f2;
     }
 
-    // Calculate which score to use for an entry (avoiding division).
-    bool UseDescendantScore(const CTxMemPoolEntry &a) const {
+    // Return the fee/size we're using for sorting this entry.
+    void GetModFeeAndSize(const CTxMemPoolEntry &a, double &mod_fee,
+                          double &size) const {
+        // Compare feerate with descendants to feerate of the transaction, and
+        // return the fee/size for the max.
         double f1 = a.GetSizeWithDescendants() * (a.GetModifiedFee().toInt());
         double f2 = a.GetTxSize() * (a.GetModFeesWithDescendants().toInt());
-        return f2 > f1;
+
+        if (f2 > f1) {
+            mod_fee = a.GetModFeesWithDescendants().toInt();
+            size = a.GetSizeWithDescendants();
+        } else {
+            mod_fee = a.GetModifiedFee().toInt();
+            size = a.GetTxSize();
+        }
     }
 };
 
@@ -307,24 +309,44 @@ public:
     }
 };
 
+/** \class CompareTxMemPoolEntryByAncestorScore
+ *
+ *  Sort an entry by min(score/size of entry's tx, score/size with all
+ * ancestors).
+ */
 class CompareTxMemPoolEntryByAncestorFee {
 public:
-    bool operator()(const CTxMemPoolEntry &a, const CTxMemPoolEntry &b) const {
-        double aFees = a.GetModFeesWithAncestors().toInt();
-        double aSize = a.GetSizeWithAncestors();
+    template <typename T> bool operator()(const T &a, const T &b) const {
+        double a_mod_fee, a_size, b_mod_fee, b_size;
 
-        double bFees = b.GetModFeesWithAncestors().toInt();
-        double bSize = b.GetSizeWithAncestors();
+        GetModFeeAndSize(a, a_mod_fee, a_size);
+        GetModFeeAndSize(b, b_mod_fee, b_size);
 
         // Avoid division by rewriting (a/b > c/d) as (a*d > c*b).
-        double f1 = aFees * bSize;
-        double f2 = aSize * bFees;
+        double f1 = a_mod_fee * b_size;
+        double f2 = a_size * b_mod_fee;
 
         if (f1 == f2) {
             return a.GetTx().GetId() < b.GetTx().GetId();
         }
-
         return f1 > f2;
+    }
+
+    // Return the fee/size we're using for sorting this entry.
+    template <typename T>
+    void GetModFeeAndSize(const T &a, double &mod_fee, double &size) const {
+        // Compare feerate with ancestors to feerate of the transaction, and
+        // return the fee/size for the min.
+        double f1 = a.GetSizeWithAncestors() * (a.GetModifiedFee().toInt());
+        double f2 = a.GetTxSize() * (a.GetModFeesWithAncestors().toInt());
+
+        if (f1 > f2) {
+            mod_fee = a.GetModFeesWithAncestors().toInt();
+            size = a.GetSizeWithAncestors();
+        } else {
+            mod_fee = a.GetModifiedFee().toInt();
+            size = a.GetTxSize();
+        }
     }
 };
 
