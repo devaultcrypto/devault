@@ -171,7 +171,7 @@ void StartOptionsMain::on_Next_clicked()
             boost::trim_right(words_empty_str);
             boost::trim_right(words_mnemonic);
             if(words_empty_str != words_mnemonic) {
-                QString error = "Your words are in the wrong order Please try again";
+                QString error = "Unfortunately, your words are in the wrong order. Please try again.";
                 StartOptionsDialog dlg(error, this);
                 dlg.exec();
             } else {
@@ -195,7 +195,7 @@ void StartOptionsMain::on_Next_clicked()
                 wordsDone = word_str;
                 QApplication::quit();
             } else {
-                QString error = "Your words are invalid. This could be because, you are using non real words or that they may be misspelt";
+                QString error = "Unfortunately, your words seem to be invalid. This is most likely because one or more are misspelled. Please double check your spelling and word order. If you continue to have issue your words may not currently be in our dictionary.";
                 StartOptionsDialog dlg(error, this);
                 dlg.exec();
             }

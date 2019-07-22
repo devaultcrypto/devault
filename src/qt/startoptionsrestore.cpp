@@ -18,12 +18,15 @@ StartOptionsRestore::StartOptionsRestore(int rows, QWidget *parent)
                 for(int k=0; k<6; k++){
 
                     QLineEdit* label = new QLineEdit(this);
-                    label->setStyleSheet("QLabel{background-color:#e3e3e3;padding-left:8px;padding-right:8px;padding-top:2px;padding-bottom:2px;border-radius:4px;}");
+                    label->setStyleSheet("QLabel{background-color: " + DVTUI::s_highlight_light_midgrey + "; border: 1px solid " + DVTUI::s_Dark + "; font-size: 18px; font-weight: thin; color: " + DVTUI::s_LBlue + ";}");
                     label->setMinimumSize(80,36);
                     label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
                     label->setContentsMargins(8,12,8,12);
                     label->setAlignment(Qt::AlignCenter);
                     editList.push_back(label);
+		    ui->restoreLabel->setText(
+			tr("Restore your wallet using a recovery seed phrase below. Make sure your words are entered in the correct order (left to right)."
+			   ""));
                     ui->gridLayoutRevealed->addWidget(label, i, k, Qt::AlignCenter);
                 }
             }
