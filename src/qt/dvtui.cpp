@@ -188,11 +188,11 @@ bool DVTUI::customThemeIsSet() {
             //Buttons (and Icons)
             "QPushButton "
             "{ background-color: " + s_hightlight_dark + "; color: " + s_white + "; border: 1px outset rgb(33,33,33); padding: 6px; border-radius: 0px;}"
-            "QPushButton:hover {border: 1px solid "+ s_LBlue + "}"
+            "QPushButton:hover {background-color: " + s_LBlue + "; border: 1px solid "+ s_LBlue + ";}"
             "QPushButton:pressed {background-color: " + s_LBlue + "}"
             "QPushButton:disabled { color: " + s_grey + "}"
             //Experimental Button Styling Override
-            "QPushButton {border-style:solid; border-color: #fff; border-width:2px; border-radius: 16px; background:#fff; color:#000; padding-left:20px; padding-right:20px;}"  
+            "QPushButton {border-style:solid; border-color: #2e3436; border-width:1px; text-align:center; font-size:16px; font-style:bold; border-radius: 12px; background:#2e3436; color:#fff; padding-left:15px; padding-right:15px;}"  
 
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
             "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"                   
@@ -215,11 +215,36 @@ bool DVTUI::customThemeIsSet() {
             "#scrollArea {border: none; }"
 
             "QToolTip { background: " + s_Dark + "; color: "+  s_Light + "; border: none }"
-           
-            //Seed Words Generator
+
+            // Start-Up / Seed Words
             "QListView::item {color: white; height:36px;}"
             "QListWidget::item {border-radius:8px;border:none;color:#fff;}"
             "QListWidget::item:selected{border:2px solid #2388ed;border-radius:8px;padding-left:4px;background:transparent;}"
             "QListWidget::item:focus{border:1px solid #1f1f1f;background:#1f1f1f;;border-radius:8px;padding-left:4px;}"
+           
+	    "#Words12 {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
+            "#Words12:focus {background-color:#000;}"
+            "#Words12::indicator {display:none; opacity:0;width:0px; height:0px;}"
+            "#Words12:checked{background-color:transparent; border: 2px solid #2388ed;}"
+            "#Words12:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
+            "#Words12:unchecked:hover{background-color: #1f1f1f;}"
+	    "#Words24 {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
+            "#Words24:focus {background-color:#000;}"
+            "#Words24::indicator {display:none; opacity:0;width:0px; height:0px;}"
+            "#Words24:checked{background-color:transparent; border: 2px solid #2388ed;}"
+            "#Words24:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
+            "#Words24:unchecked:hover{background-color: #1f1f1f;}"
+
+            "#warningLabel, #welcomeLabel, #welcomeLabel2, #passLabel1, #passLabel2, #passLabel3, #ErrorLable "
+            "{ font-size: 17px; font-weight: thin; color: " + s_Light + ";}"
+            "#restoreLabel, #dragdropLabel "
+            "{ font-size: 15px; font-weight: thin; color: " + s_Light + ";}"
+            "#welcomeLabel3 "
+            "{ font-size: 13px; font-weight: thin; color: " + s_white + ";}"
+            "#welcomeTitle "
+            "{ font-size: 24px; font-weight: thin; color: " + s_Light + ";}"
+            "{ background-color: " + s_Dark + "; font-size: 18px; font-weight: thin; color: " + s_Light + ";}"
+            "#NewWallet, #RestoreWallet, #Back, #Next "
+            "{ font-size: 24px;}"
 
         );
