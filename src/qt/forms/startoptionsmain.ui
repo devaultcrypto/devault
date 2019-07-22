@@ -37,16 +37,6 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="styleSheet">
-      <string notr="true">#frame2{
-       background-color: #161616;
-       border: none;
-       padding: 0;
-       }</string>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
      <widget class="QWidget" name="page_3">
       <property name="font">
        <font>
