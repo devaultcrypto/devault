@@ -62,6 +62,9 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
         : QWidget(parent), ui(new Ui::StartOptionsSort) {
     ui->setupUi(this);
 
+    ui->dragdropLabel->setText(
+        tr("Please drag and drop your seed words into the correct order to confirm your recovery phrase. "));
+
     scene = new QGraphicsScene(this);
     if(rows == 4) {
         scene->setSceneRect(0,0,620,229);
