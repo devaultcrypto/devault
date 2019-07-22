@@ -195,8 +195,7 @@ bool DVTUI::customThemeIsSet() {
             "QPushButton {border-style:solid; border-color: #2e3436; border-width:1px; text-align:center; font-size:16px; font-style:bold; border-radius: 12px; background:#2e3436; color:#fff; padding-left:15px; padding-right:15px;}"  
 
             "#payTo, #reqLabel, #reqMessage, #reqAmount, #addAsLabel, #label_Label, #label_amount, #label_message "
-            "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"                   
-            
+            "{ font-size: 14px; font-weight: thin; color: " + s_Light + ";}"
 
             //Disturbing borders
             "#labelWalletStatus { border: none; background: transparent}"
@@ -246,5 +245,9 @@ bool DVTUI::customThemeIsSet() {
             "{ background-color: " + s_Dark + "; font-size: 18px; font-weight: thin; color: " + s_Light + ";}"
             "#NewWallet, #RestoreWallet, #Back, #Next "
             "{ font-size: 24px;}"
+            "#NewWallet, #RestoreWallet, #Back, #Next "
+            "{ font-size: 24px; }"
+            "#welcomeLogo "
+            "{ background: transparent; border: none; padding: 10px;}"
 
         );
