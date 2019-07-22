@@ -217,9 +217,9 @@ bool DVTUI::customThemeIsSet() {
 
             // Start-Up / Seed Words
             "QListView::item {color: white; height:36px; text-align:center; font-size:18px; }"
-            "QListWidget::item {border-radius:8px;border:none;color:#fff;}"
-            "QListWidget::item:selected{border:2px solid #2388ed;border-radius:8px;padding-left:4px;background:transparent;}"
-            "QListWidget::item:focus{border:1px solid #1f1f1f;background:#1f1f1f;;border-radius:8px;padding-left:4px;}"
+            "QListWidget::item {border-radius:8px; border:none; color:#fff; text-align:center; font-size:18px;}"
+            "QListWidget::item:selected{border:1px solid #2388ed;border-radius:8px;padding-left:4px;background:transparent;}"
+            "QListWidget::item:focus{border:1px solid #1f1f1f; background:#1f1f1f; border-radius:8px; padding-left:4px;}"
            
 	    "#Words12 {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
             "#Words12:focus {background-color:#000;}"
