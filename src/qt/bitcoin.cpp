@@ -399,7 +399,7 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
 }
 
 // this will be used to get mnemonic words
-bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& wordlist) {
+bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& seedwords) {
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         LogPrintf("Wallet disabled!\n");
     } else {
@@ -411,7 +411,7 @@ bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& wordlist) 
 
     StartOptionsMain dlg(nullptr);
     dlg.exec();
-    wordlist = dlg.getWords();
+    seedwords = dlg.getWords();
     return false;
 }
 

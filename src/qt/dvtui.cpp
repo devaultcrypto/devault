@@ -249,7 +249,8 @@ bool DVTUI::customThemeIsSet() {
             "{ font-size: 22px;}"
             "#welcomeLogo "
             "{ background: transparent; border: none; padding: 10px;}"
-            "#gridLayoutRevealed "	
-            "{ background: transparent; position: center; font-size:22px;}"
+            "#passEdit1, #passEdit2, #passEdit3 "
+            "{ background-color: " + s_Dark + "; font-size: 18px; font-weight: thin; color: " + s_Light + ";}"
+
 
         );
