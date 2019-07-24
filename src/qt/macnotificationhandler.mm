@@ -32,7 +32,7 @@ void MacNotificationHandler::showNotification(const QString &title, const QStrin
     }
 }
 
-bool MacNotificationHandler::hasUserNotificationCenterSupport(void)
+bool MacNotificationHandler::hasUserNotificationCenterSupport()
 {
     Class possibleClass = NSClassFromString(@"NSUserNotificationCenter");
 

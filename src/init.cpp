@@ -1217,7 +1217,7 @@ void ThreadImport(const Config &config, std::vector<fs::path> vImportFiles) {
  *  Ensure that Bitcoin is running in a usable environment with all
  *  necessary library support.
  */
-bool InitSanityCheck(void) {
+static bool InitSanityCheck() {
     if (!ECC_InitSanityCheck()) {
         InitError(
             "Elliptic curve cryptography sanity check failure. Aborting.");
