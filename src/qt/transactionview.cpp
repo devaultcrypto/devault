@@ -99,6 +99,9 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle,
                                                TransactionRecord::SendToSelf));
     typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(
                                          TransactionRecord::Generated));
+    typeWidget->addItem(tr("ColdReward"), TransactionFilterProxy::TYPE(TransactionRecord::Reward));
+    typeWidget->addItem(tr("Budget"), TransactionFilterProxy::TYPE(TransactionRecord::Budget));
+
     typeWidget->addItem(tr("Other"),
                         TransactionFilterProxy::TYPE(TransactionRecord::Other));
 
