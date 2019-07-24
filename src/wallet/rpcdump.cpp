@@ -318,7 +318,7 @@ UniValue importaddress(const Config &config, const JSONRPCRequest &request) {
                          fP2SH);
         } else {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               "Invalid Bitcoin address or script");
+                               "Invalid DeVault address or script");
         }
     }
     if (fRescan) {
