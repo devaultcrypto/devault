@@ -81,21 +81,21 @@ TEST_CASE("multisig_verify") {
   keys.push_back(key[1]);
   s = sign_multisig(a_and_b, keys, txTo[0], 0);
   BOOST_CHECK(VerifyScript(s, a_and_b, flags, MutableTransactionSignatureChecker(&txTo[0], 0, amount), &err));
-  BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
+  BOOST_CHECK_MESSAGE(err == ScriptError::OK, ScriptErrorString(err));
 
   for (int i = 0; i < 4; i++) {
     keys.assign(1, key[i]);
     s = sign_multisig(a_and_b, keys, txTo[0], 0);
     BOOST_CHECK_MESSAGE(!VerifyScript(s, a_and_b, flags, MutableTransactionSignatureChecker(&txTo[0], 0, amount), &err),
                         strprintf("a&b 1: %d", i));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_INVALID_STACK_OPERATION, ScriptErrorString(err));
+    BOOST_CHECK_MESSAGE(err == ScriptError::INVALID_STACK_OPERATION, ScriptErrorString(err));
 
     keys.assign(1, key[1]);
     keys.push_back(key[i]);
     s = sign_multisig(a_and_b, keys, txTo[0], 0);
     BOOST_CHECK_MESSAGE(!VerifyScript(s, a_and_b, flags, MutableTransactionSignatureChecker(&txTo[0], 0, amount), &err),
                         strprintf("a&b 2: %d", i));
-    BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_EVAL_FALSE, ScriptErrorString(err));
+    BOOST_CHECK_MESSAGE(err == ScriptError::EVAL_FALSE, ScriptErrorString(err));
   }
 
   // Test a OR b:
@@ -105,18 +105,18 @@ TEST_CASE("multisig_verify") {
     if (i == 0 || i == 1) {
       BOOST_CHECK_MESSAGE(VerifyScript(s, a_or_b, flags, MutableTransactionSignatureChecker(&txTo[1], 0, amount), &err),
                           strprintf("a|b: %d", i));
-      BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
+      BOOST_CHECK_MESSAGE(err == ScriptError::OK, ScriptErrorString(err));
     } else {
       BOOST_CHECK_MESSAGE(
           !VerifyScript(s, a_or_b, flags, MutableTransactionSignatureChecker(&txTo[1], 0, amount), &err),
           strprintf("a|b: %d", i));
-      BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_EVAL_FALSE, ScriptErrorString(err));
+      BOOST_CHECK_MESSAGE(err == ScriptError::EVAL_FALSE, ScriptErrorString(err));
     }
   }
   s.clear();
   s << OP_0 << OP_1;
   BOOST_CHECK(!VerifyScript(s, a_or_b, flags, MutableTransactionSignatureChecker(&txTo[1], 0, amount), &err));
-  BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_SIG_DER, ScriptErrorString(err));
+  BOOST_CHECK_MESSAGE(err == ScriptError::SIG_DER, ScriptErrorString(err));
 
   for (int i = 0; i < 4; i++)
     for (int j = 0; j < 4; j++) {
@@ -127,12 +127,12 @@ TEST_CASE("multisig_verify") {
         BOOST_CHECK_MESSAGE(
             VerifyScript(s, escrow, flags, MutableTransactionSignatureChecker(&txTo[2], 0, amount), &err),
             strprintf("escrow 1: %d %d", i, j));
-        BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
+        BOOST_CHECK_MESSAGE(err == ScriptError::OK, ScriptErrorString(err));
       } else {
         BOOST_CHECK_MESSAGE(
             !VerifyScript(s, escrow, flags, MutableTransactionSignatureChecker(&txTo[2], 0, amount), &err),
             strprintf("escrow 2: %d %d", i, j));
-        BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_EVAL_FALSE, ScriptErrorString(err));
+        BOOST_CHECK_MESSAGE(err == ScriptError::EVAL_FALSE, ScriptErrorString(err));
       }
     }
 }
