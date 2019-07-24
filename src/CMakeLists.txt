@@ -421,6 +421,7 @@ add_library(devaultconsensus
 	primitives/transaction.cpp
 	pubkey.cpp
 	script/devaultconsensus.cpp
+	script/bitfield.cpp
 	script/interpreter.cpp
 	script/script.cpp
 	script/script_error.cpp
