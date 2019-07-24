@@ -119,7 +119,7 @@ TEST_CASE("tx_valid") {
         BOOST_CHECK_MESSAGE(VerifyScript(tx.vin[i].scriptSig, mapprevOutScriptPubKeys[tx.vin[i].prevout], verify_flags,
                                          TransactionSignatureChecker(&tx, i, amount, txdata), &err),
                             strTest);
-        BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
+        BOOST_CHECK_MESSAGE(err == ScriptError::OK, ScriptErrorString(err));
       }
     }
   }
@@ -139,7 +139,7 @@ TEST_CASE("tx_invalid") {
   UniValue tests =
       read_json(std::string(json_tests::tx_invalid, json_tests::tx_invalid + sizeof(json_tests::tx_invalid)));
 
-  ScriptError err = SCRIPT_ERR_OK; // expects to be changed
+  ScriptError err = ScriptError::OK; // expects to be changed
   for (size_t idx = 0; idx < tests.size(); idx++) {
     UniValue test = tests[idx];
     std::string strTest = test.write();
@@ -195,7 +195,7 @@ TEST_CASE("tx_invalid") {
                               TransactionSignatureChecker(&tx, i, amount, txdata), &err);
       }
       BOOST_CHECK_MESSAGE(!fValid, strTest);
-      BOOST_CHECK_MESSAGE(err != SCRIPT_ERR_OK, ScriptErrorString(err));
+      BOOST_CHECK_MESSAGE(err != ScriptError::OK, ScriptErrorString(err));
     }
   }
 }
