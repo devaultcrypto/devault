@@ -91,6 +91,7 @@ BITCOIN_TESTS =\
   test/schnorr_tests.cpp \
   test/script_commitment_tests.cpp \
   test/script_P2SH_tests.cpp \
+  test/script_bitfield_tests.cpp \
   test/script_standard_tests.cpp \
   test/script_tests.cpp \
   test/scriptflags.cpp \

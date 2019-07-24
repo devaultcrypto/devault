@@ -428,6 +428,8 @@ libbitcoin_consensus_a_SOURCES = \
   pubkey.cpp \
   pubkey.h \
   script/devaultconsensus.cpp \
+  script/bitfield.cpp \
+  script/bitfield.h \
   script/sighashtype.h \
   script/interpreter.cpp \
   script/interpreter.h \

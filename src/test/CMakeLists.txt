@@ -111,6 +111,7 @@ add_test_to_suite(devault test_devault
 	sanity_tests.cpp
 	scheduler_tests.cpp
 	schnorr_tests.cpp
+	script_bitfield_tests.cpp
 	script_commitment_tests.cpp
 	script_P2SH_tests.cpp
 	script_standard_tests.cpp
