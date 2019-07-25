@@ -223,6 +223,7 @@ BITCOIN_CORE_H = \
   util.h \
   utilmoneystr.h \
   utiltime.h \
+  util/bitmanip.h \
   util/bytevectorhash.h \
   validation.h \
   validationinterface.h \

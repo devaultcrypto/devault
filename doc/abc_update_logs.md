@@ -1,26 +1,236 @@
+20.1
+      Update manpages for 0.20.1 release
+      Update chainparams
+      Merge #12923: util: Pass pthread_self() to pthread_setschedparam instead of 0
+      Merge #12618: Set SCHED_BATCH priority on the loadblk thread.
+      Update seeds
+      Add some more release notes for 0.20.1
+      Fix running teamcity builds when multiple configure flags are set
+      Fix shellcheck version >= 0.5.0 errors
+      [LINTER] Enforce using `#!/usr/bin/env bash` for shell scripts
+      Improve formatting of developer notes
+      Merge #12702: [wallet] [rpc] [doc] importprivkey: hint about importmulti
+      Merge #12709: [wallet] shuffle sendmany recipients ordering
+      Increase timeout on avalanche test.
+      [DOC] Fix out of order sections in the developer notes
+      Add shell script linting: Check for shellcheck warnings in shell scripts
+      Remove the unused git-subtree-check.sh script
+      Shell script cleanups
+      Remove unused variables in shell scripts.
+      Delete the contrib/verify-commits subtree
+      Migrate gitian-build.sh to python
+      [docs] Add instructions for lcov coverage report generation
+      Remove script to clean up datadirs
+      Add DynamicMemoryUsage() to LevelDB
+      [contrib] Add Valgrind suppressions file
+      Merge #12747: Fix typos
+      Merge #11193: [Qt] Terminate string *pszExePath after readlink and without using memset
+      use base58 map instead of strchr()
+      Disable wallet and address book Qt tests on macOS minimal platform
+      Merge #12305: [docs] [refactor] Add help messages for datadir path mangling
+      Merge #12770: Use explicit casting in cuckoocache's compute_hashes(...) to clarify integer conversion
+      Merge #12561: Check for block corruption in ConnectBlock()
+      Merge #11131: rpc: Write authcookie atomically
+      Merge #12721: Qt: remove "new" button during receive-mode in addressbook
+      Add python3 script shebang lint
+      Remove the ZMQ example for Python 2
+      Various textual improvements in build docs
+      Docs: Add disable-wallet section to OSX build instructions
+      Remove Qt4 from the OSX build documentation
+      trivial: Improve include comment in src/interfaces/wallet.h
+      Cleanup TODOs leftover from PR14119 backporting
+      Cleanup reject_code in abc-schnorr.py
+      Cleanup reject_code in abc-segwit-recovery
+      trivial: Fixed typos and cleaned up language
+      release: require macOS 10.10+
+      Rename “OS X” to the newer “macOS” convention
+      doc: add qrencode to brew install instructions
+      [docs] initial QT documentation, move Qt Creator instructions
+      Create dependencies.md, and link it from README & build docs
+      Merge #12803: Make BaseSignatureCreator a pure interface
+      [CMAKE] Add missing -DMAC_OSX definition
+      Update timing.json
+      Bump version to 0.20.1
+      [CMAKE] Add the -commit suffix to version number through obj/build.h
+      Merge #12779: Qt: Remove unused method setupAmountWidget(...)
+      Cleanup reject_code in abc-schnorrmultisig-activation
+      Cleanup reject_code in abc-minimaldata-activation
+      docs: Update osx brew install instruction
+      remove brew c++ flag
+      Remove the tested versions from the OSX build guide
+      Add python3 to list of dependencies on some platforms
+      [doc] Minor corrections to osx dependencies
+      Merge #12714: Introduce interface for signing providers
+      Merge #12762: Make CKeyStore an interface
+      Merge #12752: [MOVEONLY] Move compressor utility functions out of class
+      Merge #12811: test: Make summary row bold-red if any test failed and show failed tests at end of table
+      Merge #12787: rpc: Adjust ifdef to avoid unreachable code
+      Migrated abc-replay-protection off of ComparisonTestFramework
+      Migrate abc-mempool-accept-txn.py off of ComparisonTestFramework
+      Migrate abc-invalid-chains off of the ComparisonTestFramework
+      Read more reject messages from debug logs in feature_cltv.py
+      Read more reject messages from debug logs in feature_dersig.py
+      Cleanup reject_code in feature_block.py
+      Merge #11200: Allow for aborting rescans in the GUI
+      Merge #12837: rpc: fix type mistmatch in `listreceivedbyaddress`
+      Merge #12650: gui: Fix issue: "default port not shown correctly in settings dialog"
+      Merge #11353: Small refactor of CCoinsViewCache::BatchWrite()
+      Merge #12621: Avoid querying unnecessary model data when filtering transactions
+20.0
+      Update manpages for 0.20.0 release
+      Update chainparams
+      Cleanup reject_code in p2p_invalid_block.py
+      Cleanup reject_code in feature_csv_activation.py
+      recognize bare multisigs as standard only when using minimal pushes
+      Update seeds
+      Added some more release notes for 0.20.0
+      [5 of 5] Style cleanup.
+      [4 of 5] scripted-diff: Rename CBlockDiskPos to FlatFilePos.
+      Bump automatic replay protection to May 2020 upgrade
+      Merge #11417: Correct typo in comments
+      make CheckMinimalPush available to codebase
+      Add upgrade features to release notes
+      Merge #13188: qa: Remove unused option --srcdir
+      qa: Read reject reasons from debug log, not p2p messages
+      Merge #14101: qa: Use named args in validation acceptance tests
+      [CMAKE] Fix typos in the secp256k1 CMakeLists.txt file
+      Merge #11422: qa: Verify DBWrapper iterators are taking snapshots
+      Merge #12436: [rpc] Adds a functional test to validate the transaction version number in the RPC output
+      Merge #14024: qa: Add TestNode::assert_debug_log
+      Merge #11842: [build] Add missing stuff to clean-local
+      Merge #12489: Bugfix: respect user defined configuration file (-conf) in QT settings
+      Merge #12996: tests: Remove redundant bytes(…) calls
+      Merge #11395: Qt: Enable searching by transaction id
+      Merge #11015: [Qt] Add delay before filtering transactions
+      [teamcity/gitian] Do not remove src tarball from results
+      Merge #10642: Remove obsolete _MSC_VER check
+      Merge #12447: test: Add missing signal.h header
+      Bump version to 0.20.0
+      [CMAKE] Make secp256k1 build standalone
+      Fix missing plural form from commit reversal
+      Merge #9910: Docs: correct and elaborate -rpcbind doc
+      Merge #10085: Docs: remove 'noconnect' option
+      Merge #10036: Fix init README format to render correctly on github
+      Fix incorrect node being checked in segwit recovery test
+      Merge #11617: Avoid lock: Call FlushStateToDisk(...) regardless of fCheckForPruning
+      Merge #12969: Drop dead code CScript::Find
+      Merge #11573: [Util] Update tinyformat.h
+19.12      
+      Revert "macOS: Prevent Xcode 9.3 build warnings"
+      Revert "Bump version to 0.20.0"
+      [CMAKE] Avoid duplicating the compiler/linker flags
+      [CMAKE] Fix -Wunused-command-line-argument when adding linker flag
+      build: avoid getifaddrs when unavailable
+      build: Enable -Wredundant-decls where available
+      Bump version to 0.20.0
+      Merge #12947: Wallet hd functional test speedup and clarification
+      Merge #12942: rpc: Drop redundant testing of signrawtransaction prevtxs args
+      Merge #13162: [net] Don't incorrectly log that REJECT messages are unknown.
+      Merge #13194: Remove template matching and pseudo opcodes
+      Updated manpages for 0.19.12 release
+      Update chainparams
+      Update seeds
+      Added some release notes for 0.19.12 release
+      Merge #12284: Remove assigned but never used local variables. Enable linter checking for unused local variables.
+      Merge #12569: net: Increase signal-to-noise ratio in debug.log by adjusting log level when logging failed non-manual connect():s
+      better error message for mandatory-flag tx rejections
+      Merge #12537: [arith_uint256] Make it safe to use "self" in operators
+      build: add missing leveldb defines
+      Fix leveldb compilation for NetBSD
+      Detect if char equals int8_t
+      Enforce clang-format version 7.x
+      Merge #12925: wallet: Logprint the start of a rescan
+      Merge #12918: test: Assert on correct variable
+      Merge #12797: init: Fix help message for checkblockindex
+      Fix some more copies in loops
+      Merge #12460: Assert CPubKey::ValidLength to the pubkey's header-relevant size
+      [CMAKE] Refactor the AddCompilerFlags facilities
+      Add -ftrapv to DEBUG_CXXFLAGS when --enable-debug is used
+      [CMAKE] Use plural form when multiple arguments are expected
+      [CMAKE] Avoid warning when checking flags
+      [CMAKE] Enable -Wthread-safety-analysis
+      [CMAKE] Refactor warnings for secp256k1
+      Add a message to static_assert
+      [CI] Enable the undefined behaviour sanitizer
+      Merge #12128: Refactor: One CBaseChainParams should be enough
+      Merge #12225: Mempool cleanups
+      Merge #12118: Sort mempool by min(feerate, ancestor_feerate)
+      Merge #12780: Reduce variable scopes
+      Fix a copy in sigencoding_tests
+      Use a regex to determine the list of sources for check-rpc-mappings
+      Avoid copies in range-for loops and add a warning to detect them
+      scripted-diff: Avoid temporary copies when looping over std::map
+      macOS: Prevent Xcode 9.3 build warnings
+      [CMAKE] Improve link flag compiler support detection
+      [CMAKE] Fix OSX native build
+      Fix missing lock in denialofservice_tests
+      rpcauth: Improve by using argparse and getpass modules
+      Properly generate salt in rpcauth.py, update tests
+      rpcauth: Make it possible to provide a custom password
+      Tests: add usage note to check-rpc-mappings.py
+      Add linter: Make sure we explicitly open all text files using UTF-8
+      tests/tools: Enable additional Python flake8 rules for automatic linting
+      [tests] simplify binary and hex response parsing in interface_rest.py
+      [tests] only use 2 nodes in interface_rest.py
+      [tests] refactor interface_rest.py to avoid code repetition
+      [tests] Make json request building more consistent in interface_rest.py
+      [tests] improve logging and documentation in interface_rest.py
+      [tests] fix flake8 warnings in interface_rest.py test
+      [REST] Handle UTXO retrieval when ignoring the mempool
+      [tests] Make rpcauth.py testable and add unit tests
+      Remove dead code in BasicTestingSetup
+      Use the existing config in CreateAndProcessBlock
+      Merge #10825: net: set regtest JSON-RPC port to 18443 to avoid conflict with testnet 18332
+      Fix -Wthread-safety-analysis warnings
+      MINIMALDATA consensus activation
+      New Schnorr multisig activation
+      Implement new checkmultisig trigger logic and execution logic.
+      When build fails due to lib missing, indicate which one
+      build: split warnings out of CXXFLAGS
+      bench: Don't return a bool from main
+      test: Add rpcauth pair that generated by rpcauth
+      RPC: Introduce getblockstats to plot things
+      Refactor: RPC: Separate GetBlockChecked() from getblock()
+      Merge #11889: Drop extra script variable in ProduceSignature
+      Merge #11753: clarify abortrescan rpc use
+      Merge #12556: [Trivial] fix version typo in getpeerinfo RPC call help
+      Merge #10657: Utils: Improvements to ECDSA key-handling code
+      Merge #10682: Trivial: Move the AreInputsStandard documentation next to its implementation
+      Merge #11900: [script] simplify CheckMinimalPush checks, add safety assert
+      Merge #12693: Remove unused variable in SortForBlock
+      Add src/rpc/abc.cpp to the files checked by check-rpc-mappings
+      [LINTER] Integrate check-rpc-mappings to arcanist
+      Fix nits in blockchain.cpp RPC table
+      [tests] rename TestNode to TestP2PConn in tests
+      Merge #12431: Only call NotifyBlockTip when chainActive changes
+      Bump version to 0.19.12
+      [CI] Enable debug for the ASAN build
+      qa: Avoid checking reject code for now
+      Fix undefined behavior in rcu_tests
+      Add phpcs to the code formatting tools in the CONTRIBUTING document
 # 19.11
       Updated seeds
       Update manpages for 0.19.11 release
       Update chainparams
       Merge #12545: test: Use wait_until to ensure ping goes out
-      Make countBits available to the whole codebase
+#     Make countBits available to the whole codebase
       [CI] Run the functional tests when debug is enabled
       Merge #12659: Improve Fatal LevelDB Log Messages
-      Add a facility to parse and validate script bitfields.
+#     Add a facility to parse and validate script bitfields.
       net: Add option `-enablebip61` to configure sending of BIP61 notifications
-      Fix bitcoin-cli --version
+#     Fix bitcoin-cli --version
       Format mm files
-      Make ScriptError a C++11 first class enum
+#     Make ScriptError a C++11 first class enum
       Restrict CTransaction size assertion to x86
       Replace boost program_options
       Move PHPCS config file where it is used
-      convert C-style (void) parameter lists to C++ style ()
-      Add braces in script.h
+#     convert C-style (void) parameter lists to C++ style ()
+#     Add braces in script.h
       Integrate the lint-boost-dependency.sh linter into arcanist
       build: Guard against accidental introduction of new Boost dependencies
       Fix phpcs warnings for unused function parameters
       Don't replay the gitian initial setup at each build
-      Merge #8330: Structure Packing Optimizations in C{,Mutable}Transaction
+#     Merge #8330: Structure Packing Optimizations in C{,Mutable}Transaction
 #     Give an error and exit if there are unknown parameters
       [teamcity/build] Fix a bug where CONFIGURE_FLAGS would not parse multiple flags correctly
       Add circular dependencies script

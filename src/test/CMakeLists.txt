@@ -54,6 +54,7 @@ add_test_to_suite(devault test_devault
 	base32_tests.cpp
 	base64_tests.cpp
 	bip32_tests.cpp
+	bitmanip_tests.cpp
 	blockchain_tests.cpp
 	blockcheck_tests.cpp
 	blockencodings_tests.cpp
