@@ -298,6 +298,7 @@ RES_ICONS = \
   qt/res/icons/reward.png \
   qt/res/icons/send.png \
   qt/res/icons/synced.png \
+  qt/res/icons/terminal.png \
   qt/res/icons/transaction0.png \
   qt/res/icons/transaction2.png \
   qt/res/icons/transaction_abandoned.png \

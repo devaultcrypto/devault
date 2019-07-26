@@ -129,6 +129,7 @@ private:
     QAction *changePassphraseAction = nullptr;
     QAction *aboutQtAction = nullptr;
     QAction *openRPCConsoleAction = nullptr;
+    QAction *openRPCWindowAction = nullptr;
     QAction *openAction = nullptr;
     QAction *showHelpMessageAction = nullptr;
     QWidgetAction *actProgressBar = nullptr;

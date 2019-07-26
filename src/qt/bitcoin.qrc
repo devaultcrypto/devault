@@ -75,6 +75,7 @@
         <file alias="radio_filled_hover">res/icons/radio_filled_hover.png</file>
         <file alias="radio_empty_hover">res/icons/radio_empty_hover.png</file>
         <file alias="devault">res/icons/devault.png</file>
+        <file alias="terminal">res/icons/terminal.png</file>
     </qresource>
     <qresource prefix="/movies">
         <file alias="spinner-000">res/movies/spinner-000.png</file>
