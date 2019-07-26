@@ -13,7 +13,7 @@ QString editLineCorrectCss = "QLineEdit{border-bottom:1px solid #00aeff;}";
 QString editLineInvalidCss = "QLineEdit{border-bottom:1px solid red;}";
 
 StartOptionsRestore::StartOptionsRestore(QStringList _wordList, int rows, QWidget *parent)
-        : QWidget(parent), wordList(_wordList), ui(new Ui::StartOptionsRestore)
+        : QWidget(parent), ui(new Ui::StartOptionsRestore), wordList(_wordList) 
         {
     ui->setupUi(this);
     if(DVTUI::customThemeIsSet()) {
