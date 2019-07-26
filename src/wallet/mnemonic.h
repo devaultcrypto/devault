@@ -31,6 +31,7 @@ typedef std::vector<std::string> WordList;
 
 // implementation of bip39
 WordList mapBitsToMnemonic(std::vector<uint8_t> &data, const Dictionary &dict);
+WordList getListOfAllWordInLanguage(const Dictionary &dict);
 std::vector<uint8_t> decodeMnemonic(const WordList &words);
 
 bool isAllowedWord(const std::string &word, const Dictionary &dict);

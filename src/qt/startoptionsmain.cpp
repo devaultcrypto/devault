@@ -33,6 +33,13 @@ StartOptionsMain::StartOptionsMain(QWidget *parent)
 
     this->setWindowTitle("DeVault Wallet Setup");
 
+
+    wordsList = mnemonic::getListOfAllWordInLanguage(language::en);
+
+    for(unsigned long i=0; i< wordsList.size() ; i++) {
+        qWordList.append(QString::fromStdString(wordsList[i]));
+    }
+
     this->setContentsMargins(0,0,0,0);
     ui->QStackTutorialContainer->setContentsMargins(0,0,0,10);
     ui->Back->setVisible(false);
@@ -81,7 +88,7 @@ void StartOptionsMain::on_RestoreWallet_clicked()
     ui->Next->setVisible(true);
     rows = startOptions->getRows();
 
-    startOptionsRestore = new StartOptionsRestore(rows, this);
+    startOptionsRestore = new StartOptionsRestore(qWordList, rows, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRestore);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRestore);
 }

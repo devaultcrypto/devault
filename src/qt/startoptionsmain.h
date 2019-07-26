@@ -44,6 +44,8 @@ private:
     QWidget* parent;
     int pageNum = 1;
     int rows;
+    QStringList qWordList;
+    mnemonic::WordList wordsList;
     mnemonic::WordList words;
     mnemonic::WordList wordsDone;
 

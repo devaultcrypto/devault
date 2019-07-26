@@ -5,6 +5,8 @@
 
 #include <QLineEdit>
 #include <QWidget>
+#include <list>
+#include <QString>
 
 namespace Ui {
     class StartOptionsRestore;
@@ -16,13 +18,17 @@ class StartOptionsRestore : public QWidget {
     Q_OBJECT
 
 public:
-    explicit StartOptionsRestore(int rows, QWidget *parent = nullptr);
+    explicit StartOptionsRestore(QStringList wordList, int rows, QWidget *parent = nullptr);
     ~StartOptionsRestore();
     std::vector<std::string> getOrderedStrings();
 
+private Q_SLOTS:
+    void textChanged(const QString &text);
 
 private:
     Ui::StartOptionsRestore *ui;
     std::list<QLineEdit*> editList;
+
+    QStringList wordList;
 
 };

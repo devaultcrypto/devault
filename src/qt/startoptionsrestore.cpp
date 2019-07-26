@@ -6,11 +6,14 @@
 #include <startoptionsrestore.h>
 #include <ui_startoptionsrestore.h>
 #include <QLineEdit>
+#include <QLabel>
 #include <dvtui.h>
 
+QString editLineCorrectCss = "QLineEdit{border-bottom:1px solid #00aeff;}";
+QString editLineInvalidCss = "QLineEdit{border-bottom:1px solid red;}";
 
-StartOptionsRestore::StartOptionsRestore(int rows, QWidget *parent)
-        : QWidget(parent), ui(new Ui::StartOptionsRestore)
+StartOptionsRestore::StartOptionsRestore(QStringList _wordList, int rows, QWidget *parent)
+        : QWidget(parent), wordList(_wordList), ui(new Ui::StartOptionsRestore)
         {
     ui->setupUi(this);
     if(DVTUI::customThemeIsSet()) {
@@ -32,10 +35,23 @@ StartOptionsRestore::StartOptionsRestore(int rows, QWidget *parent)
 		    ui->restoreLabel->setText(
 			tr("Restore your wallet using a recovery seed phrase below. "
 			   ""));
+                    connect(label, SIGNAL(textChanged(const QString &)), this, SLOT(textChanged(const QString &)));
                     ui->gridLayoutRevealed->addWidget(label, i, k, Qt::AlignCenter);
                 }
             }
 
+
+}
+
+void StartOptionsRestore::textChanged(const QString &text){
+    
+    QObject *senderObj = sender();
+    QLineEdit* label = static_cast<QLineEdit*>(senderObj);
+    if(wordList.contains(text)){
+        label->setStyleSheet(editLineCorrectCss);
+    }else{
+        label->setStyleSheet(editLineInvalidCss);
+    }
 
 }
 
