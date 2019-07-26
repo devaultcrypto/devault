@@ -295,12 +295,18 @@ void BitcoinGUI::createActions() {
            "addresses"));
 
     openRPCConsoleAction =
-        new QAction(platformStyle->TextColorIcon(":/icons/debugwindow"),
-                    tr("&Debug window"), this);
+        new QAction(platformStyle->TextColorIcon(":/icons/terminal"),
+                    tr("&RPC Console"), this);
     openRPCConsoleAction->setStatusTip(
-        tr("Open debugging and diagnostic console"));
+        tr("Open the console / terminal"));
     // initially disable the debug window menu item
     openRPCConsoleAction->setEnabled(false);
+
+    openRPCWindowAction =
+        new QAction(platformStyle->TextColorIcon(":/icons/debugwindow"),
+                    tr("&Debug window"), this);
+    openRPCWindowAction->setStatusTip(
+        tr("Open debugging and diagnostic console"));
 
     usedSendingAddressesAction =
         new QAction(platformStyle->TextColorIcon(":/icons/address-book"),
@@ -333,7 +339,8 @@ void BitcoinGUI::createActions() {
     connect(optionsAction, &QAction::triggered, this, &BitcoinGUI::optionsClicked);
     connect(toggleHideAction, &QAction::triggered, this, &BitcoinGUI::toggleHidden);
     connect(showHelpMessageAction, &QAction::triggered, this, &BitcoinGUI::showHelpMessageClicked);
-    connect(openRPCConsoleAction, &QAction::triggered, this, &BitcoinGUI::showDebugWindow);
+    connect(openRPCConsoleAction, &QAction::triggered, this, &BitcoinGUI::showDebugWindowActivateConsole);
+    connect(openRPCWindowAction, &QAction::triggered, this, &BitcoinGUI::showDebugWindow);
     // prevents an open debug window from becoming stuck/unusable on client
     // shutdown
     connect(quitAction, &QAction::triggered, rpcConsole, &QWidget::hide);
@@ -343,10 +350,8 @@ void BitcoinGUI::createActions() {
               &WalletFrame::backupWallet);
       connect(changePassphraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::changePassphrase);
-      //        connect(signMessageAction, &QAction::triggered,                [this] { showNormalIfMinimized(); });
       connect(signMessageAction, &QAction::triggered,
               [this] { gotoSignMessageTab(); });
-      //connect(verifyMessageAction, &QAction::triggered,                [this] { showNormalIfMinimized(); });
       connect(verifyMessageAction, &QAction::triggered,
               [this] { gotoVerifyMessageTab(); });
       connect(usedSendingAddressesAction, &QAction::triggered, walletFrame,
@@ -378,11 +383,6 @@ void BitcoinGUI::createMenuBar() {
     if (walletFrame) {
         file->addAction(openAction);
         file->addAction(backupWalletAction);
-        file->addAction(signMessageAction);
-        file->addAction(verifyMessageAction);
-        file->addSeparator();
-        file->addAction(usedSendingAddressesAction);
-        file->addAction(usedReceivingAddressesAction);
         file->addSeparator();
     }
     file->addAction(quitAction);
@@ -394,9 +394,22 @@ void BitcoinGUI::createMenuBar() {
     }
     settings->addAction(optionsAction);
 
+    // Split into Tools section
+    QMenu *tools = appMenuBar->addMenu(tr("&Tools"));
+    if (walletFrame) {
+        tools->addAction(openRPCConsoleAction);
+        tools->addSeparator();
+        tools->addAction(signMessageAction);
+        tools->addAction(verifyMessageAction);
+        tools->addSeparator();
+        tools->addAction(usedSendingAddressesAction);
+        tools->addAction(usedReceivingAddressesAction);
+        tools->addSeparator();
+    }
+
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     if (walletFrame) {
-        help->addAction(openRPCConsoleAction);
+        help->addAction(openRPCWindowAction);
     }
     help->addAction(showHelpMessageAction);
     help->addSeparator();
@@ -650,6 +663,7 @@ void BitcoinGUI::createTrayIconMenu() {
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(openRPCWindowAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
