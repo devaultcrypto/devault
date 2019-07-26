@@ -366,6 +366,10 @@ void BitcoinGUI::createActions() {
                   SLOT(showDebugWindowActivateConsole()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_D), this,
                   SLOT(showDebugWindow()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_V), this,
+                  SLOT(gotoVerifyMessageTab()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_M), this,
+                  SLOT(gotoSignMessageTab()));
 }
 
 void BitcoinGUI::createMenuBar() {
