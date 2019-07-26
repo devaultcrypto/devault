@@ -56,16 +56,6 @@ void CustomRectItem::dropEvent(QGraphicsSceneDragDropEvent *event){
         event->ignore();
 }
 
-
-
-static QLabel *createDragLabel(const QString &text, QWidget *parent)
-{
-    QLabel *label = new QLabel(text, parent);
-    return label;
-}
-
-static QString hotSpotMimeDataKey() { return QStringLiteral("application/x-hotspot"); }
-
 StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWidget *parent)
         : QWidget(parent), ui(new Ui::StartOptionsSort) {
     ui->setupUi(this);
