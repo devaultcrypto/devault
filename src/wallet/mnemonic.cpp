@@ -108,6 +108,17 @@ WordList mapBitsToMnemonic(vector<uint8_t> &data, const Dictionary &dict) {
 
   return words;
 }
+
+WordList getListOfAllWordInLanguage(const Dictionary &dict) {
+
+  vector<string> words;
+
+  for (unsigned long i=0; i< dict.size() ; i++) {
+    words.push_back(dict[i]);
+  }
+  return words;
+}
+
 // Matches bip39 seed on https://iancoleman.io/bip39/
 vector<uint8_t> decodeMnemonic(const WordList &words) {
   const string sentence = join(words, " ");
