@@ -160,8 +160,8 @@ StartOptionsSort::StartOptionsSort(std::vector<std::string> Words, int rows, QWi
 
             itemListWidget->addItems(itemList);
             itemListWidget->setFixedWidth(120);
-            itemListWidget->setMinimumSize(QSize(120,180));
-            itemListWidget->setMaximumSize(QSize(120,180));
+            itemListWidget->setMinimumSize(QSize(118,180));
+            itemListWidget->setMaximumSize(QSize(118,180));
             itemListWidget->setDragEnabled(true);
             itemListWidget->setFocusPolicy(Qt::NoFocus);
             itemListWidget->setStyleSheet("QWidget{font-size:18px; font-style:bold; color:#fff;}");
