@@ -6,7 +6,7 @@
 #include <QWidget>
 
 namespace Ui {
-    class StartOptions;
+class StartOptions;
 }
 
 /** Dialog to ask for passphrases. Used for encryption only
@@ -19,10 +19,7 @@ public:
     ~StartOptions();
     int getRows();
 
-
 private:
     int rows;
     Ui::StartOptions *ui;
-
-
 };

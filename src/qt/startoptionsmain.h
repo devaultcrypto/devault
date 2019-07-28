@@ -3,22 +3,20 @@
 //
 #pragma once
 
-#include <QWidget>
 #include <QDialog>
+#include <QWidget>
 
 #include "startoptions.h"
+#include <startoptionsrestore.h>
 #include <startoptionsrevealed.h>
 #include <startoptionssort.h>
-#include <startoptionsrestore.h>
-
 
 #include "wallet/mnemonic.h"
-
 
 class WalletModel;
 
 namespace Ui {
-    class StartOptionsMain;
+class StartOptionsMain;
 }
 
 /** Dialog to ask for passphrases. Used for encryption only
@@ -32,7 +30,6 @@ public:
 
     std::vector<std::string> getWords() { return wordsDone; }
 
-
 public slots:
     void on_RestoreWallet_clicked();
     void on_Next_clicked();
@@ -41,7 +38,7 @@ public slots:
 
 private:
     Ui::StartOptionsMain *ui;
-    QWidget* parent;
+    QWidget *parent;
     int pageNum = 1;
     int rows;
     QStringList qWordList;
@@ -55,8 +52,4 @@ private:
     StartOptionsRestore *startOptionsRestore;
     std::string words_empty_str;
     std::string words_mnemonic;
-
-
 };
-
-

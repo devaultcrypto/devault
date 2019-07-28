@@ -3,24 +3,24 @@
 //
 #pragma once
 
-#include <QListView>
-#include <QLabel>
-#include <QWidget>
 #include <QGraphicsRectItem>
-#include <QGraphicsSceneDragDropEvent>
-#include <QMimeData>
-#include <QPainter>
-#include <QListWidget>
-#include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QGraphicsSceneDragDropEvent>
+#include <QGraphicsView>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QLabel>
+#include <QListView>
+#include <QListWidget>
+#include <QMimeData>
+#include <QPainter>
+#include <QWidget>
 
 class QDragEnterEvent;
 class QDropEvent;
 
 namespace Ui {
-    class StartOptionsSort;
+class StartOptionsSort;
 }
 
 /** Dialog to ask for passphrases. Used for encryption only
@@ -29,29 +29,29 @@ class StartOptionsSort : public QWidget {
     Q_OBJECT
 
 public:
-    explicit StartOptionsSort(std::vector<std::string> Words, int rows, QWidget *parent = nullptr);
+    explicit StartOptionsSort(std::vector<std::string> Words, int rows,
+                              QWidget *parent = nullptr);
     ~StartOptionsSort();
     std::list<QString> getOrderedStrings();
 
-
 private:
     Ui::StartOptionsSort *ui;
-    std::list<QListWidget*> labelsList;
-    std::list<QGraphicsRectItem*> graphicsList;
+    std::list<QListWidget *> labelsList;
+    std::list<QGraphicsRectItem *> graphicsList;
     QString m_text;
-    QGraphicsView* view;
-    QGraphicsScene* scene;
-
+    QGraphicsView *view;
+    QGraphicsScene *scene;
 };
 
-class CustomRectItem : public QGraphicsRectItem
-{
+class CustomRectItem : public QGraphicsRectItem {
 public:
-    CustomRectItem(QGraphicsItem * parent = 0);
+    CustomRectItem(QGraphicsItem *parent = 0);
     void dropEvent(QGraphicsSceneDragDropEvent *event);
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void setText(const QString& text);
-    QString text() const {return m_text;}
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+               QWidget *widget);
+    void setText(const QString &text);
+    QString text() const { return m_text; }
+
 private:
     QString m_text;
 };

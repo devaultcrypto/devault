@@ -27,4 +27,3 @@ public:
 private:
     Ui::StartOptionsDialog *ui;
 };
-
