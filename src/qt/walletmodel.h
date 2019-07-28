@@ -151,6 +151,8 @@ public:
     bool changePassphrase(const SecureString &oldPass,
                           const SecureString &newPass);
 
+    SecureVector getWords() { return m_wallet->getWords(); }
+
     // RAI object for unlocking wallet, returned by requestUnlock()
     class UnlockContext {
     public:

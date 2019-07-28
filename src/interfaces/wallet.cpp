@@ -116,6 +116,7 @@ namespace {
         WalletImpl(CWallet &wallet) : m_wallet(wallet) {}
 
         bool isCrypted() override { return m_wallet.IsCrypted(); }
+        SecureVector getWords() override { return m_wallet.getWords(); }
         bool lock() override { return m_wallet.Lock(); }
         bool unlock(const SecureString &wallet_passphrase) override {
             return m_wallet.Unlock(wallet_passphrase);

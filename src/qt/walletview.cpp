@@ -15,6 +15,8 @@
 #include <receivecoinsdialog.h>
 #include <sendcoinsdialog.h>
 #include <signverifymessagedialog.h>
+#include <startoptionsrevealed.h>
+#include <revealphrase.h>
 #include <transactiontablemodel.h>
 #include <transactionview.h>
 #include <walletmodel.h>
@@ -298,6 +300,13 @@ void WalletView::changePassphrase() {
     AskPassphraseDialog dlg(AskPassphraseDialog::ChangePass, this);
     dlg.setModel(walletModel);
     dlg.exec();
+}
+
+void WalletView::revealPhrase() {
+  // walletModel
+  SecureVector words = walletModel->getWords();
+  RevealPhrase dlg(words, this);
+  dlg.exec();
 }
 
 void WalletView::unlockWallet() {

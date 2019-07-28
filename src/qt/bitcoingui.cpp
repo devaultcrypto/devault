@@ -280,8 +280,16 @@ void BitcoinGUI::createActions() {
     changePassphraseAction =
         new QAction(platformStyle->TextColorIcon(":/icons/key"),
                     tr("&Change Passphrase..."), this);
+ 
     changePassphraseAction->setStatusTip(
         tr("Change the passphrase used for wallet encryption"));
+
+    unlockWalletAction = new QAction(tr("&Unlock Wallet..."), this);
+    unlockWalletAction->setToolTip(tr("Unlock wallet"));
+
+    revealPhraseAction = new QAction(tr("&Show Word Phrase.."), this);
+    revealPhraseAction->setStatusTip(tr("Reward 12 or 24 word phrase for wallet"));
+
     signMessageAction =
         new QAction(platformStyle->TextColorIcon(":/icons/edit"),
                     tr("Sign &message..."), this);
@@ -350,6 +358,11 @@ void BitcoinGUI::createActions() {
               &WalletFrame::backupWallet);
       connect(changePassphraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::changePassphrase);
+      connect(unlockWalletAction, &QAction::triggered, walletFrame,
+              &WalletFrame::unlockWallet);
+      connect(revealPhraseAction, &QAction::triggered, walletFrame,
+              &WalletFrame::revealPhrase);
+
       connect(signMessageAction, &QAction::triggered,
               [this] { gotoSignMessageTab(); });
       connect(verifyMessageAction, &QAction::triggered,
@@ -394,6 +407,10 @@ void BitcoinGUI::createMenuBar() {
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     if (walletFrame) {
         settings->addAction(changePassphraseAction);
+        settings->addSeparator();
+        settings->addAction(unlockWalletAction);
+        settings->addSeparator();
+        settings->addAction(revealPhraseAction);
         settings->addSeparator();
     }
     settings->addAction(optionsAction);
@@ -618,6 +635,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     receiveCoinsMenuAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
+    revealPhraseAction->setEnabled(enabled);
     signMessageAction->setEnabled(enabled);
     verifyMessageAction->setEnabled(enabled);
     usedSendingAddressesAction->setEnabled(enabled);
@@ -1114,6 +1132,8 @@ void BitcoinGUI::setEncryptionStatus(int status) {
         case WalletModel::Unencrypted:
             labelWalletEncryptionIcon->hide();
             changePassphraseAction->setEnabled(false);
+            revealPhraseAction->setEnabled(false);
+            unlockWalletAction->setEnabled(false);
             break;
         case WalletModel::Unlocked:
             labelWalletEncryptionIcon->show();
@@ -1123,6 +1143,8 @@ void BitcoinGUI::setEncryptionStatus(int status) {
             labelWalletEncryptionIcon->setToolTip(
                 tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
             changePassphraseAction->setEnabled(true);
+            revealPhraseAction->setEnabled(true);
+            unlockWalletAction->setEnabled(false);
             break;
         case WalletModel::Locked:
             labelWalletEncryptionIcon->show();
@@ -1132,6 +1154,8 @@ void BitcoinGUI::setEncryptionStatus(int status) {
             labelWalletEncryptionIcon->setToolTip(
                 tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
             changePassphraseAction->setEnabled(true);
+            revealPhraseAction->setEnabled(false);
+            unlockWalletAction->setEnabled(true);
             break;
     }
 }
