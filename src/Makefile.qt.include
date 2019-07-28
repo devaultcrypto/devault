@@ -280,6 +280,7 @@ RES_ICONS = \
   qt/res/icons/editpaste.png \
   qt/res/icons/export.png \
   qt/res/icons/eye.png \
+  qt/res/icons/eye2.png \
   qt/res/icons/eye_minus.png \
   qt/res/icons/eye_plus.png \
   qt/res/icons/filesave.png \
