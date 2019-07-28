@@ -152,7 +152,10 @@ void WalletFrame::changePassphrase() {
 
 void WalletFrame::revealPhrase() {
     WalletView *walletView = currentWalletView();
-    if (walletView) walletView->revealPhrase();
+    if (walletView) {
+      walletView->unlockWallet();
+      walletView->revealPhrase();
+    }
 }
 
 void WalletFrame::unlockWallet() {
