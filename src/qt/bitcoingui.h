@@ -127,11 +127,13 @@ private:
     QAction *toggleHideAction = nullptr;
     QAction *backupWalletAction = nullptr;
     QAction *changePassphraseAction = nullptr;
+    QAction *unlockWalletAction = nullptr;
     QAction *aboutQtAction = nullptr;
     QAction *openRPCConsoleAction = nullptr;
     QAction *openRPCWindowAction = nullptr;
     QAction *openAction = nullptr;
     QAction *showHelpMessageAction = nullptr;
+    QAction *revealPhraseAction = nullptr;
     QWidgetAction *actProgressBar = nullptr;
     QWidgetAction *actProgressBarLabel = nullptr;
 

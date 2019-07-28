@@ -188,6 +188,9 @@ public:
     //! Get available balance.
     virtual Amount getAvailableBalance(const CCoinControl &coin_control) = 0;
 
+    //! Get words
+    virtual SecureVector getWords() = 0;
+
     //! Return whether transaction input belongs to wallet.
     virtual isminetype txinIsMine(const CTxIn &txin) = 0;
 

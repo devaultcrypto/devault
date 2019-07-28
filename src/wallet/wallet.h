@@ -957,7 +957,7 @@ public:
     void SetEncryptWallet();
     bool CreateMasteyKey(const SecureString &strWalletPassphrase,
                          CKeyingMaterial& _vMasterKey);
-    std::tuple<CHDChain,CHDChain> GetHDChains();
+    std::tuple<CHDChain,CHDChain> GetHDChains() const;
 
   
 
@@ -1239,6 +1239,7 @@ public:
     bool StoreCryptedHDChain(const CHDChain& chain);
     bool StoreCryptedHDChain();
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
+    SecureVector getWords() const;
   
     /** Whether a given output is spendable by this wallet */
     bool OutputEligibleForSpending(const COutput &output, const int nConfMine,

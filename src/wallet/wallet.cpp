@@ -4603,7 +4603,14 @@ bool CWallet::GetMnemonic(CHDChain &chain, SecureString& securewords) const
     chain.GetMnemonic(securewords);
     return true;
 }
-
+SecureVector CWallet::getWords() const
+{
+  SecureVector words;
+  LOCK(cs_wallet);
+  auto [hdChainDec, hdChainEnc] = GetHDChains();
+  hdChainDec.GetMnemonic(words);
+  return words;
+}
 
 bool CWallet::HaveKey(const CKeyID &address) const
 {
@@ -4725,7 +4732,7 @@ bool CWallet::SetCryptedHDChain(const CHDChain& chain) {
 }
 
 // Return Decrypted then Encrypted Chains
-std::tuple<CHDChain,CHDChain> CWallet::GetHDChains() {
+std::tuple<CHDChain,CHDChain> CWallet::GetHDChains() const {
 
   CHDChain hdChainEnc;
   CHDChain hdChainDec;
