@@ -35,7 +35,7 @@ void ShouldUpgrade(const std::string& SubVer) {
         else sPeerVersions.others++;
     }
     double ratio = (double)sPeerVersions.higher/PeersCount;
-    LogPrintf("%s : peer has version %d : , ratio = %g, count = %d\n",__func__,PeerVersion, ratio, PeersCount);
+    //LogPrintf("%s : peer has version %d : , ratio = %g, count = %d\n",__func__,PeerVersion, ratio, PeersCount);
     bool should =  (ratio > requiredRatioForUpgrade && PeersCount > requiredPeersForUpgrade);
     if (should) {
         std::string strWarning = "More than 33% or 2/5 of your peers are reporting a newer software version. "
