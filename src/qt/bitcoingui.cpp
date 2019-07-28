@@ -1156,7 +1156,7 @@ void BitcoinGUI::setEncryptionStatus(int status) {
             labelWalletEncryptionIcon->setToolTip(
                 tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
             changePassphraseAction->setEnabled(true);
-            revealPhraseAction->setEnabled(false);
+            revealPhraseAction->setEnabled(true);
             unlockWalletAction->setEnabled(true);
             break;
     }
