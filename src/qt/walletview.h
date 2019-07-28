@@ -104,6 +104,8 @@ public Q_SLOTS:
     void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+    /** show word phrase to user in a window */
+    void revealPhrase();
 
     /** Show used sending addresses */
     void usedSendingAddresses();
