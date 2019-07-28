@@ -5,8 +5,8 @@
 #include <startoptionsdialog.h>
 #include <ui_startoptionsdialog.h>
 
-#include <guiconstants.h>
 #include <dvtui.h>
+#include <guiconstants.h>
 
 #include <support/allocators/secure.h>
 
@@ -14,14 +14,15 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-StartOptionsDialog::StartOptionsDialog(const QString error_words, QWidget* parent)
+StartOptionsDialog::StartOptionsDialog(const QString error_words,
+                                       QWidget *parent)
     : QDialog(parent), ui(new Ui::StartOptionsDialog) {
     ui->setupUi(this);
-    if(DVTUI::customThemeIsSet()) {
+    if (DVTUI::customThemeIsSet()) {
         QString appstyle = "fusion";
         QApplication::setStyle(appstyle);
         setStyleSheet(DVTUI::styleSheetString);
-    } 
+    }
 
     ui->ErrorLable->setText(error_words);
 }
