@@ -155,6 +155,7 @@ void WalletFrame::revealPhrase() {
     if (walletView) {
       walletView->unlockWallet();
       walletView->revealPhrase();
+      walletView->lockWallet(); // re-lock
     }
 }
 

@@ -321,6 +321,12 @@ void WalletView::unlockWallet() {
         dlg.exec();
     }
 }
+void WalletView::lockWallet() {
+    if (!walletModel) {
+        return;
+    }
+    walletModel->setWalletLocked(true, "");
+}
 
 void WalletView::usedSendingAddresses() {
     if (!walletModel) {
