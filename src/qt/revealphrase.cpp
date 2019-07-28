@@ -40,6 +40,7 @@ RevealPhrase::RevealPhrase(const SecureVector &secure_words, QWidget *parent)
     }
 
     int rows = Words.size() / 6;
+    int j=0;
     for (int i = 0; i < rows; i++) {
         for (int k = 0; k < 6; k++) {
 
@@ -55,17 +56,7 @@ RevealPhrase::RevealPhrase(const SecureVector &secure_words, QWidget *parent)
             label->setAlignment(Qt::AlignCenter);
             labelsList.push_back(label);
             ui->gridLayoutRevealed->addWidget(label, i, k, Qt::AlignCenter);
+            label->setText(QString::fromStdString(Words[j++]));
         }
-    }
-    int i = 0;
-
-    for (QLabel *label : labelsList) {
-        label->setStyleSheet(
-            "QLabel{background-color:transparent;padding-left:8px;padding-"
-            "right:8px;border-radius:0px;color:#fff;border-bottom:2px solid "
-            "rgb(35,136,237); text-align:center; font-size:18px;}");
-        label->setContentsMargins(8, 12, 8, 12);
-        label->setText(QString::fromStdString(Words[i]));
-        i++;
     }
 }
