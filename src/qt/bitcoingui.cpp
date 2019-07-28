@@ -284,10 +284,12 @@ void BitcoinGUI::createActions() {
     changePassphraseAction->setStatusTip(
         tr("Change the passphrase used for wallet encryption"));
 
-    unlockWalletAction = new QAction(tr("&Unlock Wallet..."), this);
+    unlockWalletAction = new QAction(platformStyle->TextColorIcon(":/icons/lock_open"),
+                    tr("&Unlock Wallet..."), this);
     unlockWalletAction->setToolTip(tr("Unlock wallet"));
 
-    revealPhraseAction = new QAction(tr("&Show Word Phrase.."), this);
+    revealPhraseAction = new QAction(platformStyle->TextColorIcon(":/icons/eye2"),
+                    tr("&Show Word Phrase.."), this);
     revealPhraseAction->setStatusTip(tr("Reward 12 or 24 word phrase for wallet"));
 
     signMessageAction =
