@@ -4349,8 +4349,6 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       LogPrintf("%s : Encrypted HDChain & keys written to wallet\n", __func__);
       
       walletInstance->ChainStateFlushed(chainActive.GetLocator());
-    } else {
-      walletInstance->SetEncryptWallet();
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
