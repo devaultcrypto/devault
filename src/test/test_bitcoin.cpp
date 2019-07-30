@@ -69,10 +69,6 @@ BasicTestingSetup::BasicTestingSetup(const std::string &chainName) {
   fCheckBlockIndex = true;
   SelectParams(chainName);
   noui_connect();
-
-  // Set config parameters to default.
-  GlobalConfig config;
-  config.SetMaxBlockSize(DEFAULT_MAX_BLOCK_SIZE);
 }
 
 BasicTestingSetup::~BasicTestingSetup() { ECC_Stop(); }
