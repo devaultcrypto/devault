@@ -742,7 +742,7 @@ bool CWalletDBWrapper::Rewrite(const char *pszSkip) {
 
 bool CWalletDBWrapper::Backup(const std::string &strDest) {
     if (IsDummy()) {
-        return false;
+      return false;
     }
     while (true) {
         {
@@ -783,7 +783,7 @@ bool CWalletDBWrapper::Backup(const std::string &strDest) {
         }
         MilliSleep(100);
     }
-    return false;
+    return true;
 }
 
 void CWalletDBWrapper::Flush(bool shutdown) {

@@ -664,6 +664,7 @@ private:
                      const CCoinControl *coinControl = nullptr) const;
 
     std::unique_ptr<CWalletDB> pwalletdbEncryption;
+    std::unique_ptr<CWalletDBWrapper> dbw;
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
@@ -724,8 +725,6 @@ private:
      * intelligently for more efficient rescans.
      */
     bool AddWatchOnly(const CScript &dest) override;
-
-    std::unique_ptr<CWalletDBWrapper> dbw;
 
     /**
      * The following is used to keep track of how far behind the wallet is

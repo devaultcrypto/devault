@@ -4349,6 +4349,8 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       LogPrintf("%s : Encrypted HDChain & keys written to wallet\n", __func__);
       
       walletInstance->ChainStateFlushed(chainActive.GetLocator());
+    } else {
+      walletInstance->SetEncryptWallet();
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
@@ -4471,7 +4473,17 @@ void CWallet::postInitProcess(CScheduler &scheduler) {
 }
 
 bool CWallet::BackupWallet(const std::string &strDest) {
-    return dbw->Backup(strDest);
+  bool ret;
+  // Backup relies on mapFileUseCount being 0
+  // but with pwalletdBEncryption now used, it now
+  // needs to be cleared to allow backup before
+  // being restored to it's value from *dBW
+  // otherwise Backup would hang
+  // Look for better solution longer term
+  pwalletdbEncryption.reset(nullptr);
+  ret = dbw->Backup(strDest);
+  pwalletdbEncryption = std::make_unique<CWalletDB>(*dbw);
+  return ret;
 }
 
 CKeyPool::CKeyPool() {
