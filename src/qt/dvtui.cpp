@@ -215,15 +215,29 @@ bool DVTUI::customThemeIsSet() {
 
             "QToolTip { background: " + s_Dark + "; color: "+  s_Light + "; border: none }"
 
+	    // CoinControl Override
+	    "#radioListMode {min-width:50px;text-align:center;font-size:16px;padding:8px;border-radius:8px;}"
+            "#radioListMode:focus {background-color:#000;}"
+            "#radioListMode::indicator {display:none; opacity:0;width:0px; height:0px;}"
+            "#radioListMode:checked{background-color:transparent; border: 2px solid #2388ed;}"
+            "#radioListMode:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
+            "#radioListMode:unchecked:hover{background-color: #1f1f1f;}"
+	    "#radioTreeMode {min-width:50px;text-align:center;font-size:16px;padding:8px;border-radius:8px;}"
+            "#radioTreeMode:focus {background-color:#000;}"
+            "#radioTreeMode::indicator {display:none; opacity:0;width:0px; height:0px;}"
+            "#radioTreeMode:checked{background-color:transparent; border: 2px solid #2388ed;}"
+            "#radioTreeMode:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
+            "#radioTreeMode:unchecked:hover{background-color: #1f1f1f;}"
+
             // Start-Up / Seed Words
             "QListView::item {color: white; height:36px; text-align:center; font-size:22px; }"
-            "QListWidget::item {text-align:center; border-radius: 12px; color:#fff; padding-left:20px; padding-right:5px;}"
-            "QListWidget::item:hover{border:1px solid #2388ed;background:transparent;}"
-            "QListWidget::item:selected{background:transparent;}"
-            "QListWidget::item:focus{background:transparent;}"
-            "QGraphicsView {width:140px; text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff; padding-left:10px; padding-right:10px;}"
+            "QListWidget::item {margin-left: 10px;margin-right: 10px;margin-top: 5px;margin-bottom: 5px;background:#2e3436;text-align:center; border-radius: 8px; color:#fff; padding-left:15px;}"
+            "QListWidget::item:hover{border:1px solid #2388ed;background:#2388ed;}"
+            "QListWidget::item:selected{border:1px solid #2388ed;}"
+            "QListWidget::item:focus{border:1px solid #2388ed;background:#000000;}"
+            "QGraphicsView {text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff; padding-left:10px; padding-right:10px;}"
             "QGraphicsView::item {text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff;}"
-           
+
 	    "#Words12 {height:40px;text-align:center;font-size:20px; padding:20px; border-radius:8px;}"
             "#Words12:focus {background-color:#000;}"
             "#Words12::indicator {display:none; opacity:0;width:0px; height:0px;}"

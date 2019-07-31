@@ -348,7 +348,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Tree mode</string>
+           <string>Tree mode </string>
           </property>
          </widget>
         </item>
@@ -361,7 +361,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>List mode</string>
+           <string>List mode </string>
           </property>
           <property name="checked">
            <bool>true</bool>
