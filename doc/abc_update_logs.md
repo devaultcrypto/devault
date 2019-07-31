@@ -1,3 +1,281 @@
+# 19.11
+      Updated seeds
+      Update manpages for 0.19.11 release
+      Update chainparams
+      Merge #12545: test: Use wait_until to ensure ping goes out
+      Make countBits available to the whole codebase
+      [CI] Run the functional tests when debug is enabled
+      Merge #12659: Improve Fatal LevelDB Log Messages
+      Add a facility to parse and validate script bitfields.
+      net: Add option `-enablebip61` to configure sending of BIP61 notifications
+      Fix bitcoin-cli --version
+      Format mm files
+      Make ScriptError a C++11 first class enum
+      Restrict CTransaction size assertion to x86
+      Replace boost program_options
+      Move PHPCS config file where it is used
+      convert C-style (void) parameter lists to C++ style ()
+      Add braces in script.h
+      Integrate the lint-boost-dependency.sh linter into arcanist
+      build: Guard against accidental introduction of new Boost dependencies
+      Fix phpcs warnings for unused function parameters
+      Don't replay the gitian initial setup at each build
+      Merge #8330: Structure Packing Optimizations in C{,Mutable}Transaction
+      Give an error and exit if there are unknown parameters
+      [teamcity/build] Fix a bug where CONFIGURE_FLAGS would not parse multiple flags correctly
+      Add circular dependencies script
+      Use a struct for arguments and nested map for categories
+      Pass WalletModel down to SendCoinsEntry by construct
+      Allow linters to run once
+      Use nullptr instead of 0 in various places in Qt code
+      Merge #11886: Clarify getbalance meaning a tiny bit in response to questions.
+      Merge #10777: [tests] Avoid redundant assignments. Remove unused variables
+      Remove inexistant parameter keypoolmin from integration test
+      Add license blurb to server_tests
+      test: Move linters to test/lint, add readme
+      Nits in Qt test
+      miliseconds => milliseconds
+      Migrate build configs from TeamCity to build-configurations.sh
+      Merge #11997: [tests] util_tests.cpp: actually check ignored args
+      Merge #11879: [tests] remove redundant univalue_tests.cpp
+      scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
+      Merge #11714: [tests] Test that mempool rejects coinbase transactions
+      Merge #11133: Document assumptions that are beoing made to avoid division by zero
+      [Part 5 of 5] Add a CChainState class to clarify internal interfaces
+      QA: Fix race condition in wallet_encryption test
+      [tests] [qt] Add tests for address book manipulation via EditAddressDialog
+      [wallet] [rpc] Add loadwallet RPC
+      [3 of 5] Move CDiskBlockPos from chain to flatfile.
+      [script_tests] improve test coverage of minimal push rules
+      [test_runner] Fix unidash option for junit output to be one character
+      [gitian-build] Fix repo directory to point at bitcoin-abc
+      [gitian-build] Bump default memory setting
+      [gitian-build] Default the number of jobs to the number of CPUs
+      [test_runner] Fix junitoutput typo
+      Fix a bug where the TeamCity build only reports one of the test_runner runs
+      Merge #11495: [trivial] Make namespace explicit for is_regular_file
+      Merge #10845: Remove unreachable code
+      Merge #10793: Changing &var[0] to var.data()
+      [script_tests] improve coverage of minimal number encoding
+      add SCRIPT_ENABLE_SCHNORR_MULTISIG flag for new multisig mode
+      [refactor multisig] remove redundant counters
+      [2 of 5] validation: Extract basic block file logic into FlatFileSeq class.
+      Error messages in LoadBlockIndexGuts() use __func__ instead of hardcoding function name.
+      [qt] Display more helpful message when adding a send address has failed
+      Add purpose arg to Wallet::getAddress
+      [tests] [qt] Introduce qt/test/util with a generalized ConfirmMessage
+      Merge #9544: [trivial] Add end of namespace comments. Improve consistency.
+      Merge #12298: Refactor HaveKeys to early return on false result
+      Add virtual transaction size to the transaction description in Qt
+      wallet: Change output type globals to members
+      Merge #11330: Trivial: Fix comments for DEFAULT_WHITELIST[FORCE]RELAY
+      Merge #11469: fix typo in comment of chain.cpp
+      [wallet] Add change type to CCoinControl
+      [wallet] use P2WPKH change output if any destination is P2WPKH or P2WSH
+      [qt] receive tab: bech32 address opt-in checkbox
+      Bech32 addresses in dumpwallet
+      fix backported comment placement
+      [refactor multisig] separate nullfail from stack cleanup
+      [refactor multisig] move nulldummy check to front
+      [refactor multisig] make const values up front
+      remove ComparisonTestFramework dependency from segwit recovery test
+      CONTRIBUTING.md - update instructions on linting dependencies
+      Use size_t for stack index in OP_MULTISIG
+      Merge #12988: Hold cs_main while calling UpdatedBlockTip() signal
+      Version number bumped to 0.19.11
+# 19.10      
+      Update manpages for 0.19.10 release
+      Update chainparams
+      Enforce the use of TxId when constructing COutPoint
+      Update rpcwallet.cpp to use TxId
+      Factor out outpoint generation in transaction_tests.cpp
+      Use TxId in miner_tests.cpp
+      Update seeds for 0.19.10 release
+      [wallet] Pass error message back from CWallet::Verify()
+      Place sanitizers log into their own directory
+      Avoid std::locale/imbue in DateTimeStrFormat
+      [wallet] Add CWallet::Verify function
+      [wallet] setup wallet background flushing in WalletInit directly
+      Use txid in bloom tests
+      Wrap generation of randomized outpoint in tests
+      Remove criptolayer.net from seeder lists
+      outpt => output
+      use TxId properly in coincontroldialog
+      [wallet] Fix potential memory leak in CreateWalletFromFile
+      Rename wallet database classes
+      wallet: Initialize m_last_block_processed to nullptr. Initialize fields where defined.
+      Merge #10728: fix typo in help text for removeprunedfunds
+      wallet: Make vpwallets usage thread safe
+      Regenerate timing.json
+      Merge #14985: test: Remove thread_local from test_bitcoin
+      Rename wallet_accounts.py test
+      [qt] Add support to search the address book
+      [script_tests] add tests for pubkey encoding with strictenc + nullfail
+      [schnorr functional test] improve tx handling
+      [schnorr functional test] simplify funding logic
+      [schnorr functional test] change block setup logic
+      [schnorr functional test] remove ComparisonTestFramework dependency
+      Merge #10684: Remove no longer used mempool.exists(outpoint)
+      Merge #10581: Simplify return values of GetCoin/HaveCoin(InCache)
+      Merge #10685: Clarify CCoinsViewMemPool documentation.
+      Merge #14571: [tests] Test that nodes respond to getdata with notfound
+      Move CheckBlock() call to critical section
+      Merge #10191: [trivial] Rename unused RPC arguments 'dummy'
+      Update doc/release-process.md
+      Merge #10627: fixed listunspent rpc convert parameter
+      Fix scheduler test race due to BOOST_CHECK in multithreaded context
+      tests: Fix lock-order-inversion (potential deadlock) in DoS_tests.
+      Merge #13039: Add logging and error handling for file syncing
+      Optimize PNG images
+      [1 of 5] util: Move CheckDiskSpace to util.
+      Merge #10559: Change semantics of HaveCoinInCache to match HaveCoin
+      [script_tests] add small NUM2BIN case
+      Various nits in the wallet code
+      Implements a virtual destructor on the BaseRequestHandler class.
+      Add the sanitizers suppression files and use them in teamcity build
+      Fix checkqueue_tests use-after-scope
+      Merge #10626: doc: Remove outdated minrelaytxfee comment
+      Use functional tests timings from the source directory
+      [LINTER] Enforce source code file name conventions
+      doc: Make build system insert version in Doxyfile
+      Make various functions in src/test/ static
+      Merge #10347: Use range-based for loops (C++11) when looping over vector elements
+      Split off key_io_tests from base58_tests
+      Make printchunk() in support/lockedpool.cpp static
+      Merge #10530: Fix invalid instantiation and possibly unsafe accesses of array in class base_uint<BITS>
+      [LINTER] Add a linter to replace `unsigned char` with `uint8_t`
+      Move make check test logs out of tree
+      Partial backport of Core PR11167 to have similar feature in base58_tests.cpp
+      Merge #13145: Use common getPath method to create temp directory in tests.
+      Use cstdint in generated test headers
+      Merge #10248: Rewrite addrdb with less duplication using CHashVerifier
+      Merge #11737: Document partial validation in ConnectBlock()
+      Merge #11747: Fix: Open files read only if requested
+      whitespaces nits in CMakeLists
+      Split key_io (address/key encodings) off from base58
+      Stop using CBase58Data for ext keys
+      Replace CBitcoinSecret with {Encode,Decode}Secret
+      tests: Remove compatibility code not needed now when we're on Python 3
+      Change all python files to use Python3
+      Rename rpcuser.py to rpcauth.py
+      Remove test for legacy address when parsing URL in the GUI
+      [coverage] Remove subtrees and benchmarks from coverage report
+      test: Check RPC argument mapping
+      Add share/rpcuser to dist. source code archive
+      Various nits in the Qt code
+      Remove EncodeDestination's overload relying on global state
+      Default to cashaddr in most of the Qt API
+      Only generate cashaddr URI from the GUI
+      docs: Add a note about the source code filename naming convention
+      Use CashAddr everywhere in the Qt interface
+      Take CChainParams explicitely in PaymentServer
+      Always use cashaddr for dummy addresses in the GUI
+      Only handle cashaddr prefix in OpenURIDialog
+      [teamcity/build.sh] Read CONFIGURE_FLAGS from environment
+      [ibd.sh] Store datadir and debug.log paths in variables
+      Fix memory access violation in tests
+      Fix memory leak in work_comparator_tests.cpp
+      Merge #10313: [Consensus] Add constant for maximum stack size
+      [rpc] fix verbose argument for getblock in bitcoin-cli
+      rpcuser.py: Use 'python' not 'python2'
+      [build] Warn that only libconsensus can be built without boost
+      [build] Don't fail when passed --disable-lcov and lcov isn't available
+      Use AC_ARG_VAR to set ARFLAGS.
+      Make CWallet IsSpent and IsLockedCoin take a COutPoint as parameter
+      [tests] fix flake8 nits in feature_csv_activation.py
+      [tests] Change feature_csv_activation.py to use BitcoinTestFramework
+      Move utility functions in feature_csv_activation.py out of class.
+      [tests] Remove nested loops from feature_csv_activation.py
+      [tests] improve logging in feature_csv_activation.py
+      fix mistake in test framework's schnorr signing module
+      Merge #12926: Run unit tests in parallel
+      Merge #12293: [rpc] Mention that HD is enabled if hdmasterkeyid is present
+      Activate cashaddr by default
+      qa: Fix python TypeError in script.py
+      Merge #11772: [tests] Change invalidblockrequest to use BitcoinTestFramework
+      RPC: Add child transactions to getrawmempool verbose output
+      [LINTER] Fix the python format string when dealing with arrays
+      [test] Round target fee to 8 decimals in assert_fee_amount
+      Merge #13003: qa: Add test for orphan handling
+      Merge #13048: [tests] Fix feature_block flakiness
+      Merge #11773: [tests] Change feature_block.py to use BitcoinTestFramework
+      Revert "Workaround to Travis-CI Wine/Mingw build hanging occasionally"
+      Backport base58 tests from PR11167
+      Merge #12127: Remove unused mempool index
+      Merge #12424: Fix rescan test failure due to unset g_address_type, g_change_type
+      Merge #12150: Fix ListCoins test failure due to unset g_address_type, g_change_type
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (bitcoin-cli.cpp)
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (bitcoind.cpp)
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (rpc/rawtransaction.cpp)
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (init.cpp)
+      Prettify README title
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (validation.cpp)
+      Merge #13163: Make it clear which functions that are intended to be translation unit local (wallet files)
+      Fix typos
+      qa: Move common args to bitcoin.conf
+      Fix 'mempool min fee not met' debug output
+      Merge #12861: [tests] Stop feature_block.py from blowing up memory.
+      Merge #10479: [trivial] Fix comment for ForceSetArg()
+      test: Make g_insecure_rand_ctx thread_local
+      Make unit tests use the insecure_rand_ctx exclusively
+      Handle various leftover from PR10321
+      Various nits in the Qt code
+      Merge #11870: wallet: Remove unnecessary mempool lock in ReacceptWalletTransactions
+      Merge #11516: crypto: Add test cases covering the relevant HMAC-SHA{256,512} key length boundaries
+      Merge #14556: qt: fix confirmed transaction labeled "open"
+      Merge #14305: Tests: enforce critical class instance attributes in functional tests, fix segwit test specificity
+      Merge #11771: [tests] Change invalidtxrequest to use BitcoinTestFramework
+      Merge #9577: Fix docstrings in qa tests
+      Restore and backport missing changes from clientversion.h
+      Merge #10310: [doc] Add hint about getmempoolentry to getrawmempool help.
+      Merge #14554: qt: Remove unused `adjustedTime` parameter
+      Merge #13452: rpc: have verifytxoutproof check the number of txns in proof structure
+      Merge #11024: tests: Remove OldSetKeyFromPassphrase/OldEncrypt/OldDecrypt
+      wallet: Add HasWallets
+      qa: Prepare functional tests for Windows
+      Fix a-vs-an typos
+      wallet: Add AddWallet, RemoveWallet, GetWallet and GetWallets
+      wallet: Disallow abandon of conflicted txes
+      Fix a shadow warning in askpassphrasedialog.cpp
+      Add documentation on how to display python deprecation warnings
+      refactor: Drop CWalletRef typedef
+      Prevent mutex lock fail even if --enable-debug
+      qa: Initialize lockstack to prevent null pointer deref
+      Add braces in sync.{h|cpp}
+      Clamp walletpassphrase timeout to 2^(30) seconds and check its bounds
+      test: Fix dangling wallet pointer in vpwallets
+      Merge #13622: Remove mapRequest tracking that just effects Qt display.
+      Merge #11094: Docs: Hash in ZMQ hash is raw bytes, not hex
+      Merge #11083: Fix combinerawtransaction RPC help result section
+      Merge #11011: [Trivial] Add a comment on the use of prevector in script.
+      Merge #10912: [tests] Fix incorrect memory_cleanse(…) call in crypto_tests.cpp
+      Merge #10655: Properly document target_confirmations in listsinceblock
+      Add unit tests for signals generated by ProcessNewBlock()
+      Fix concurrency-related bugs in ActivateBestChain
+      [LINTER] Enforce flake8 W605 warning
+      Merge #11635: trivial: Fix typo – alreardy → already
+XXXXX Merge #11480: [ui] Add toggle for unblinding password fields
+      Enable flake8 warnings for all currently non-violated rules
+      qa: Add missing syncwithvalidationinterfacequeue to tests
+      qa: Make TestNodeCLI command optional in send_cli
+      qa: Rename cli.args to cli.options
+      test_runner: Readable output if create_cache.py fails
+      Fix a typo in functional tests documentation
+      Trivial: Fix spelling in zapwallettxes test description
+      Merge #10765: Tests: address placement should be deterministic by default
+      Merge #11210: Stop test_bitcoin-qt touching ~/.bitcoin
+      Bump version to 0.19.10
+      add new encoding checker for Schnorr sigs
+      [sigencoding] refactor schnorr size check
+      Do not unlock cs_main in ABC unless we've actually made progress.
+      Do not permit copying FastRandomContexts
+      Simplify testing RNG code
+      Use a local FastRandomContext in a few more places in net
+      Use a FastRandomContext in LimitOrphanTxSize
+      Introduce a Shuffle for FastRandomContext and use it in wallet and coinselection
+      Bugfix: randbytes should seed when needed (non reachable issue)
+      Make addrman use its local RNG exclusively
+
 # 19.9
 ##### Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
 ##### Merge #10408, #13291, and partial #13163
