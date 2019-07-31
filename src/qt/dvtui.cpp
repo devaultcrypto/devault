@@ -233,7 +233,7 @@ bool DVTUI::customThemeIsSet() {
             "QListView::item {color: white; height:36px; text-align:center; font-size:22px; }"
             "QListWidget::item {margin-left: 10px;margin-right: 10px;margin-top: 5px;margin-bottom: 5px;background:#2e3436;text-align:center; border-radius: 8px; color:#fff; padding-left:15px;}"
             "QListWidget::item:hover{border:1px solid #2388ed;background:#2388ed;}"
-            "QListWidget::item:selected{border:1px solid #2388ed;}"
+     //       "QListWidget::item:selected{border:1px solid #2388ed;}"
             "QListWidget::item:focus{border:1px solid #2388ed;background:#000000;}"
             "QGraphicsView {text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff; padding-left:10px; padding-right:10px;}"
             "QGraphicsView::item {text-align:center; font-size:19px; font-style:bold; border-radius: 12px; color:#fff;}"
