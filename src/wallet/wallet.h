@@ -663,7 +663,6 @@ private:
                      std::set<CInputCoin> &setCoinsRet, Amount &nValueRet,
                      const CCoinControl *coinControl = nullptr) const;
 
-    std::unique_ptr<CWalletDB> pwalletdbEncryption;
     std::unique_ptr<CWalletDBWrapper> dbw;
 
     //! the current wallet version: clients below this version are not able to
@@ -953,7 +952,6 @@ public:
                          const mnemonic::WordList& words,
                          const std::vector<uint8_t>& hashWords);
     void FinishEncryptWallet();
-    void SetEncryptWallet();
     bool CreateMasteyKey(const SecureString &strWalletPassphrase,
                          CKeyingMaterial& _vMasterKey);
     std::tuple<CHDChain,CHDChain> GetHDChains() const;

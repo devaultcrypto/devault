@@ -736,14 +736,12 @@ bool CDB::PeriodicFlush(CWalletDBWrapper &dbw) {
     return ret;
 }
 
-bool CWalletDBWrapper::Rewrite(const char *pszSkip) {
-    return CDB::Rewrite(*this, pszSkip);
-}
-
-bool CWalletDBWrapper::Backup(const std::string &strDest) {
-    if (IsDummy()) {
+bool CDB::Backup(CWalletDBWrapper &dbw, const std::string &strDest) {
+    if (dbw.IsDummy()) {
       return false;
     }
+    CDBEnv *env = dbw.env;
+    const std::string &strFile = dbw.strFile;
     while (true) {
         {
             LOCK(env->cs_db);
@@ -784,6 +782,14 @@ bool CWalletDBWrapper::Backup(const std::string &strDest) {
         MilliSleep(100);
     }
     return true;
+}
+
+bool CWalletDBWrapper::Rewrite(const char *pszSkip) {
+    return CDB::Rewrite(*this, pszSkip);
+}
+
+bool CWalletDBWrapper::Backup(const std::string &strDest) {
+    return CDB::Backup(*this, strDest);
 }
 
 void CWalletDBWrapper::Flush(bool shutdown) {

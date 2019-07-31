@@ -386,6 +386,7 @@ public:
     }
 
     static bool Rewrite(CWalletDBWrapper &dbw, const char *pszSkip = nullptr);
+    static bool Backup(CWalletDBWrapper &dbw, const std::string& strDest);
 };
 
 #endif // BITCOIN_WALLET_DB_H

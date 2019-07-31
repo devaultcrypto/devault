@@ -234,8 +234,7 @@ bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
     }
 
     LOCK(cs_wallet);
-    assert(pwalletdbEncryption);
-    return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
+    return CWalletDB(*dbw).WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
 }
 
 bool CWallet::LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &meta) {
@@ -653,16 +652,10 @@ bool CWallet::EncryptHDWallet(const CKeyingMaterial& _vMasterKey,
 void CWallet::FinishEncryptWallet() {
   {
         LOCK(cs_wallet);
-        pwalletdbEncryption->TxnCommit();
+        CWalletDB(*dbw).TxnCommit();
         Lock();
   }
 }
-
-void CWallet::SetEncryptWallet() {
-  assert(!pwalletdbEncryption);
-  pwalletdbEncryption = std::make_unique<CWalletDB>(*dbw);
-}
-
 
 bool CWallet::CreateMasteyKey(const SecureString &strWalletPassphrase,
                               CKeyingMaterial& _vMasterKey) {
@@ -714,14 +707,11 @@ bool CWallet::CreateMasteyKey(const SecureString &strWalletPassphrase,
     {
         LOCK(cs_wallet);
         mapMasterKeys[++nMasterKeyMaxID] = kMasterKey;
-        assert(!pwalletdbEncryption);
-        pwalletdbEncryption = std::make_unique<CWalletDB>(*dbw);
-        if (!pwalletdbEncryption->TxnBegin()) {
-            pwalletdbEncryption.reset(nullptr);
+        CWalletDB walletdb(*dbw);
+        if (!walletdb.TxnBegin()) {
             return false;
         }
-        pwalletdbEncryption->WriteMasterKey(nMasterKeyMaxID, kMasterKey);
-
+        walletdb.WriteMasterKey(nMasterKeyMaxID, kMasterKey);
     }
     return true;
 }
@@ -3618,9 +3608,9 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
       }
       
       LogPrintf("%s : flushing %d keys to dB\n",__func__,hdpubkeys.size());
-      assert(pwalletdbEncryption);
-      pwalletdbEncryption->WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
-      pwalletdbEncryption->WritePool(pubkeys, saved_keypool_index);
+      CWalletDB walletdb(*dbw);
+      walletdb.WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
+      walletdb.WritePool(pubkeys, saved_keypool_index);
     }
     return true;
 }
@@ -3728,9 +3718,8 @@ bool CWallet::GetKeyFromPool(CPubKey &result, bool internal) {
           throw std::runtime_error(std::string(__func__) + ": StoreCryptedHDChain failed");
         }
       
-        assert(pwalletdbEncryption);
-        pwalletdbEncryption->WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
-        pwalletdbEncryption->WritePool(pubkeys, saved_keypool_index);
+        walletdb.WriteHDPubKeys(hdpubkeys, mapKeyMetadata);
+        walletdb.WritePool(pubkeys, saved_keypool_index);
         return true;
     }
 
@@ -4349,8 +4338,6 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       LogPrintf("%s : Encrypted HDChain & keys written to wallet\n", __func__);
       
       walletInstance->ChainStateFlushed(chainActive.GetLocator());
-    } else {
-      walletInstance->SetEncryptWallet();
     }
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
@@ -4473,17 +4460,7 @@ void CWallet::postInitProcess(CScheduler &scheduler) {
 }
 
 bool CWallet::BackupWallet(const std::string &strDest) {
-  bool ret;
-  // Backup relies on mapFileUseCount being 0
-  // but with pwalletdBEncryption now used, it now
-  // needs to be cleared to allow backup before
-  // being restored to it's value from *dBW
-  // otherwise Backup would hang
-  // Look for better solution longer term
-  pwalletdbEncryption.reset(nullptr);
-  ret = dbw->Backup(strDest);
-  pwalletdbEncryption = std::make_unique<CWalletDB>(*dbw);
-  return ret;
+  return dbw->Backup(strDest);
 }
 
 CKeyPool::CKeyPool() {
@@ -4708,12 +4685,9 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
   
 bool CWallet::StoreCryptedHDChain(const CHDChain& chain) {
     LOCK(cs_wallet);
-        
-    assert(pwalletdbEncryption);
-    if (!pwalletdbEncryption->WriteCryptedHDChain(chain)) {
+    if (!CWalletDB(*dbw).WriteCryptedHDChain(chain)) {
       throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
     }
-    
     return true;
 }
 
@@ -4725,11 +4699,9 @@ bool CWallet::StoreCryptedHDChain() {
     throw std::runtime_error(std::string(__func__) + ": GetCryptedHDChain failed");
   }
     
-  assert(pwalletdbEncryption);
-  if (!pwalletdbEncryption->WriteCryptedHDChain(chain)) {
+  if (!CWalletDB(*dbw).WriteCryptedHDChain(chain)) {
     throw std::runtime_error(std::string(__func__) + ": WriteCryptedHDChain failed");
   }
-    
   return true;
 }
 
