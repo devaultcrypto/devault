@@ -225,7 +225,7 @@ namespace {
                                             fail_reason, coin_control, sign)) {
                 return {};
             }
-            return std::move(pending);
+            return pending;
         }
         bool transactionCanBeAbandoned(const TxId &txid) override {
             return m_wallet.TransactionCanBeAbandoned(txid);

@@ -38,7 +38,6 @@ public slots:
 
 private:
     Ui::StartOptionsMain *ui;
-    QWidget *parent;
     int pageNum = 1;
     int rows;
     QStringList qWordList;
