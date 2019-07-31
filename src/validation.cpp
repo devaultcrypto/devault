@@ -2154,10 +2154,10 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu "
+    LogPrintf("%s: new best=%s height=%d version=0x%0x log2_work=%.8g tx=%lu "
               "date='%s' progress=%.2f cache=%.1fMiB(%utxo)\n",
               __func__, chainActive.Tip()->GetBlockHash().ToString(),
-              chainActive.Height(), chainActive.Tip()->nVersion,
+              chainActive.Height(), (chainActive.Tip()->nVersion >> 28),
               log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
               (unsigned long)chainActive.Tip()->nChainTx,
               FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()),
