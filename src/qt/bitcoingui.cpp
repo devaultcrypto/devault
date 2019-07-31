@@ -403,6 +403,9 @@ void BitcoinGUI::createMenuBar() {
         file->addAction(openAction);
         file->addAction(backupWalletAction);
         file->addSeparator();
+        file->addAction(usedSendingAddressesAction);
+        file->addAction(usedReceivingAddressesAction);
+        file->addSeparator();
     }
     file->addAction(quitAction);
 
@@ -424,9 +427,6 @@ void BitcoinGUI::createMenuBar() {
         tools->addSeparator();
         tools->addAction(signMessageAction);
         tools->addAction(verifyMessageAction);
-        tools->addSeparator();
-        tools->addAction(usedSendingAddressesAction);
-        tools->addAction(usedReceivingAddressesAction);
         tools->addSeparator();
     }
 
@@ -496,6 +496,7 @@ void BitcoinGUI::createToolBars() {
 
         actProgressBarLabel = new QWidgetAction(this);
         actProgressBarLabel->setDefaultWidget(progressBarLabel);
+        progressBar->setAlignment(Qt::AlignBottom);
 
         toolbar->addWidget(frameBlocks);
 
