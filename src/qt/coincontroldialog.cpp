@@ -1,4 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,6 +14,7 @@
 #include <txmempool.h>
 #include <walletmodel.h>
 #include <dvtui.h>
+#include <devault/rewards.h>
 
 #include <dstencode.h>
 #include <init.h>
@@ -64,6 +66,8 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     QAction *copyAddressAction = new QAction(tr("Copy address"), this);
     QAction *copyLabelAction = new QAction(tr("Copy label"), this);
     QAction *copyAmountAction = new QAction(tr("Copy amount"), this);
+    QAction *copyNumRewardsAction = new QAction(tr("Copy number of paid rewards"), this);
+    QAction *copyRewardAgeAction = new QAction(tr("Copy reward age"), this);
     // we need to enable/disable this
     copyTransactionHashAction = new QAction(tr("Copy transaction ID"), this);
     // we need to enable/disable this
@@ -76,6 +80,8 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     contextMenu->addAction(copyAddressAction);
     contextMenu->addAction(copyLabelAction);
     contextMenu->addAction(copyAmountAction);
+    contextMenu->addAction(copyNumRewardsAction);
+    contextMenu->addAction(copyRewardAgeAction);
     contextMenu->addAction(copyTransactionHashAction);
     contextMenu->addSeparator();
     contextMenu->addAction(lockAction);
@@ -88,8 +94,9 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
             &CoinControlDialog::copyAddress);
     connect(copyLabelAction, &QAction::triggered, this,
             &CoinControlDialog::copyLabel);
-    connect(copyAmountAction, &QAction::triggered, this,
-            &CoinControlDialog::copyAmount);
+    connect(copyAmountAction, &QAction::triggered, this,   &CoinControlDialog::copyAmount);
+    connect(copyRewardAgeAction, &QAction::triggered, this,   &CoinControlDialog::copyRewardAge);
+    connect(copyNumRewardsAction, &QAction::triggered, this,   &CoinControlDialog::copyNumRewards);
     connect(copyTransactionHashAction, &QAction::triggered, this,
             &CoinControlDialog::copyTransactionHash);
     connect(lockAction, &QAction::triggered, this,
@@ -162,6 +169,8 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 320);
     ui->treeWidget->setColumnWidth(COLUMN_DATE, 130);
     ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 110);
+    ui->treeWidget->setColumnWidth(COLUMN_NUMREWARDS, 110);
+    ui->treeWidget->setColumnWidth(COLUMN_REWARDAGE, 110);
     // store transaction hash in this column, but don't show it
     ui->treeWidget->setColumnHidden(COLUMN_TXHASH, true);
     // store vout index in this column, but don't show it
@@ -273,6 +282,14 @@ void CoinControlDialog::showMenu(const QPoint &point) {
 void CoinControlDialog::copyAmount() {
     GUIUtil::setClipboard(
         BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_AMOUNT)));
+}
+void CoinControlDialog::copyRewardAge() {
+    GUIUtil::setClipboard(
+        BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_REWARDAGE)));
+}
+void CoinControlDialog::copyNumRewards() {
+    GUIUtil::setClipboard(
+        BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_NUMREWARDS)));
 }
 
 // context menu action: copy label
@@ -443,17 +460,6 @@ void CoinControlDialog::viewItemChanged(QTreeWidgetItem *item, int column) {
             CoinControlDialog::updateLabels(model, this);
         }
     }
-
-    // TODO: Remove this temporary qt5 fix after Qt5.3 and Qt5.4 are no longer
-    // used.
-    // Fixed in Qt5.5 and above: https://bugreports.qt.io/browse/QTBUG-43473
-    else if (column == COLUMN_CHECKBOX && item->childCount() > 0) {
-        if (item->checkState(COLUMN_CHECKBOX) == Qt::PartiallyChecked &&
-            item->child(0)->checkState(COLUMN_CHECKBOX) ==
-                Qt::PartiallyChecked) {
-            item->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
-        }
-    }
 }
 
 // shows count of locked unspent outputs
@@ -514,6 +520,7 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
             continue;
         }
 
+         
         // Quantity
         nQuantity++;
 
@@ -739,6 +746,7 @@ void CoinControlDialog::updateView() {
             nSum += out.txout.nValue;
             nChildren++;
 
+
             CCoinControlWidgetItem *itemOutput;
             if (treeMode) {
                 itemOutput = new CCoinControlWidgetItem(itemWalletAddress);
@@ -806,6 +814,20 @@ void CoinControlDialog::updateView() {
             itemOutput->setText(COLUMN_VOUT_INDEX,
                                 QString::number(output.GetN()));
 
+
+            CRewardValue rewardval;
+            if (prewardsdb->GetReward(output, rewardval)) {
+              ///
+              auto Height = chainActive.Tip()->nHeight;
+              auto payAge = Height - rewardval.GetHeight();
+              auto payCount = rewardval.GetPayCount();
+              itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge));
+              itemOutput->setText(COLUMN_NUMREWARDS, QString::number(payCount));
+            } else {
+              itemOutput->setText(COLUMN_REWARDAGE, tr("N.A."));
+              itemOutput->setText(COLUMN_NUMREWARDS, tr("N.A."));
+            }
+            
             // disable locked coins
             if (model->wallet().isLockedCoin(output)) {
                 // just to be sure
