@@ -45,7 +45,7 @@ WalletModel::WalletModel(std::unique_ptr<interfaces::Wallet> wallet,
     : QObject(parent), m_wallet(std::move(wallet)), m_node(node), 
       optionsModel(_optionsModel), addressTableModel(nullptr),
       transactionTableModel(nullptr), recentRequestsTableModel(nullptr), 
-      cachedEncryptionStatus(Unencrypted), cachedNumBlocks(0) {
+      cachedWalletStatus(Unlocked), cachedNumBlocks(0) {
     fHaveWatchOnly = m_wallet->haveWatchOnly();
     fForceCheckBalanceChanged = false;
 
@@ -67,10 +67,10 @@ WalletModel::~WalletModel() {
 }
 
 void WalletModel::updateStatus() {
-    EncryptionStatus newEncryptionStatus = getEncryptionStatus();
+    WalletStatus newWalletStatus = getWalletStatus();
 
-    if (cachedEncryptionStatus != newEncryptionStatus) {
-        Q_EMIT encryptionStatusChanged();
+    if (cachedWalletStatus != newWalletStatus) {
+        Q_EMIT walletStatusChanged();
     }
 }
 
@@ -281,14 +281,12 @@ RecentRequestsTableModel *WalletModel::getRecentRequestsTableModel() {
     return recentRequestsTableModel;
 }
 
-WalletModel::EncryptionStatus WalletModel::getEncryptionStatus() const {
-    if (!m_wallet->isCrypted()) {
-        return Unencrypted;
-    } else if (m_wallet->isLocked()) {
-        return Locked;
-    } else {
-        return Unlocked;
-    }
+WalletModel::WalletStatus WalletModel::getWalletStatus() const {
+  if (m_wallet->isLocked()) {
+    return Locked;
+  } else {
+    return Unlocked;
+  }
 }
 
 bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase) {
@@ -382,14 +380,14 @@ void WalletModel::unsubscribeFromCoreSignals() {
 
 // WalletModel::UnlockContext implementation
 WalletModel::UnlockContext WalletModel::requestUnlock() {
-    bool was_locked = getEncryptionStatus() == Locked;
+    bool was_locked = getWalletStatus() == Locked;
     if (was_locked) {
         // Request UI to unlock wallet
         Q_EMIT requireUnlock();
     }
     // If wallet is still locked, unlock was failed or cancelled, mark context
     // as invalid
-    bool valid = getEncryptionStatus() != Locked;
+    bool valid = getWalletStatus() != Locked;
 
     return UnlockContext(this, valid, was_locked);
 }

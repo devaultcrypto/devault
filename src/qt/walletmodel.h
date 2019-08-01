@@ -110,9 +110,7 @@ public:
         AbsurdFee
     };
 
-    enum EncryptionStatus {
-        // !wallet->IsCrypted()
-        Unencrypted,
+    enum WalletStatus {
         // wallet->IsCrypted() && wallet->IsLocked()
         Locked,
         // wallet->IsCrypted() && !wallet->IsLocked()
@@ -124,7 +122,7 @@ public:
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
 
-    EncryptionStatus getEncryptionStatus() const;
+    WalletStatus getWalletStatus() const;
 
     // Check address for validity
     bool validateAddress(const QString &address);
@@ -216,7 +214,7 @@ private:
 
     // Cache some values to be able to detect changes
     interfaces::WalletBalances m_cached_balances;
-    EncryptionStatus cachedEncryptionStatus;
+    WalletStatus cachedWalletStatus;
     int cachedNumBlocks;
 
     QTimer *pollTimer;
@@ -229,8 +227,8 @@ Q_SIGNALS:
     // Signal that balance in wallet changed
     void balanceChanged(const interfaces::WalletBalances &balances);
 
-    // Encryption status of wallet changed
-    void encryptionStatusChanged();
+    // lock status of wallet changed
+    void walletStatusChanged();
 
     // Signal emitted when wallet needs to be unlocked
     // It is valid behaviour for listeners to keep the wallet locked after this

@@ -1130,14 +1130,8 @@ void BitcoinGUI::setHDStatus() {
     labelWalletHDStatusIcon->setEnabled(true);
 }
 
-void BitcoinGUI::setEncryptionStatus(int status) {
+void BitcoinGUI::setWalletStatus(int status) {
     switch (status) {
-        case WalletModel::Unencrypted:
-            labelWalletEncryptionIcon->hide();
-            changePassphraseAction->setEnabled(false);
-            revealPhraseAction->setEnabled(false);
-            unlockWalletAction->setEnabled(false);
-            break;
         case WalletModel::Unlocked:
             labelWalletEncryptionIcon->show();
             labelWalletEncryptionIcon->setPixmap(
@@ -1172,7 +1166,7 @@ void BitcoinGUI::updateWalletStatus() {
         return;
     }
     WalletModel *const walletModel = walletView->getWalletModel();
-    setEncryptionStatus(walletModel->getEncryptionStatus());
+    setWalletStatus(walletModel->getWalletStatus());
     setHDStatus();
 }
 

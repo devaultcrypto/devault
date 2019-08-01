@@ -210,11 +210,11 @@ public Q_SLOTS:
     void updateWalletStatus();
 
 private:
-    /** Set the encryption status as shown in the UI.
-       @param[in] status            current encryption status
-       @see WalletModel::EncryptionStatus
+    /** Set the lock status as shown in the UI.
+       @param[in] status            current lock status
+       @see WalletModel::WalletStatus
      */
-    void setEncryptionStatus(int status);
+    void setWalletStatus(int status);
 
     /** Set the hd-enabled status as shown in the UI.
      @see WalletModel::EncryptionStatus

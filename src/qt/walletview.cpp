@@ -114,8 +114,8 @@ void WalletView::setBitcoinGUI(BitcoinGUI *gui) {
         connect(this, SIGNAL(message(QString, QString, unsigned int)), gui,
                 SLOT(message(QString, QString, unsigned int)));
 
-        // Pass through encryption status changed signals
-        connect(this, &WalletView::encryptionStatusChanged, gui,
+        // Pass through wallet status changed signals
+        connect(this, &WalletView::walletStatusChanged, gui,
                 &BitcoinGUI::updateWalletStatus);
 
         // Pass through transaction notifications
@@ -157,10 +157,10 @@ void WalletView::setWalletModel(WalletModel *_walletModel) {
         connect(_walletModel, &WalletModel::message, this,
                 &WalletView::message);
 
-        // Handle changes in encryption status
-        connect(_walletModel, &WalletModel::encryptionStatusChanged, this,
-                &WalletView::encryptionStatusChanged);
-        updateEncryptionStatus();
+        // Handle changes in wallet status
+        connect(_walletModel, &WalletModel::walletStatusChanged, this,
+                &WalletView::walletStatusChanged);
+        updateWalletStatus();
 
         // update HD status
         Q_EMIT hdEnabledStatusChanged();
@@ -269,8 +269,8 @@ void WalletView::showOutOfSyncWarning(bool fShow) {
     overviewPage->showOutOfSyncWarning(fShow);
 }
 
-void WalletView::updateEncryptionStatus() {
-    Q_EMIT encryptionStatusChanged();
+void WalletView::updateWalletStatus() {
+    Q_EMIT walletStatusChanged();
 }
 
 void WalletView::backupWallet() {
@@ -322,7 +322,7 @@ void WalletView::unlockWallet() {
     }
 
     // Unlock wallet when requested by wallet model
-    if (walletModel->getEncryptionStatus() == WalletModel::Locked) {
+    if (walletModel->getWalletStatus() == WalletModel::Locked) {
         AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
         dlg.setModel(walletModel);
         dlg.exec();

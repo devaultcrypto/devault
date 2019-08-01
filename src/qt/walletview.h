@@ -114,8 +114,8 @@ public Q_SLOTS:
     /** Show used receiving addresses */
     void usedReceivingAddresses();
 
-    /** Re-emit encryption status signal */
-    void updateEncryptionStatus();
+    /** Re-emit wallet status signal */
+    void updateWalletStatus();
 
     /** Show progress dialog e.g. for rescan */
     void showProgress(const QString &title, int nProgress);
@@ -129,8 +129,8 @@ Q_SIGNALS:
     /**  Fired when a message should be reported to the user */
     void message(const QString &title, const QString &message,
                  unsigned int style);
-    /** Encryption status of wallet changed */
-    void encryptionStatusChanged();
+    /** Lock status of wallet changed */
+    void walletStatusChanged();
     /** HD-Enabled status of wallet changed (only possible during startup) */
     void hdEnabledStatusChanged();
     /** Notify that a new transaction appeared */

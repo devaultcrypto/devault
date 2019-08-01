@@ -73,7 +73,7 @@ bool WalletFrame::setCurrentWallet(const QString &name) {
     WalletView *walletView = mapWalletViews.value(name);
     walletStack->setCurrentWidget(walletView);
     assert(walletView);
-    walletView->updateEncryptionStatus();
+    walletView->updateWalletStatus();
     return true;
 }
 
