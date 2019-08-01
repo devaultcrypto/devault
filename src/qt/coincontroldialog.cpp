@@ -169,8 +169,8 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 320);
     ui->treeWidget->setColumnWidth(COLUMN_DATE, 110);
     ui->treeWidget->setColumnWidth(COLUMN_CONFIRMATIONS, 110);
-    ui->treeWidget->setColumnWidth(COLUMN_NUMREWARDS, 110);
     ui->treeWidget->setColumnWidth(COLUMN_REWARDAGE, 110);
+    ui->treeWidget->setColumnWidth(COLUMN_NUMREWARDS, 110);
     // store transaction hash in this column, but don't show it
     ui->treeWidget->setColumnHidden(COLUMN_TXHASH, true);
     // store vout index in this column, but don't show it
@@ -819,9 +819,10 @@ void CoinControlDialog::updateView() {
             if (prewardsdb->GetReward(output, rewardval)) {
               ///
               auto Height = chainActive.Tip()->nHeight;
-              auto payAge = Height - rewardval.GetHeight();
+              auto nMinBlock = Params().GetConsensus().nMinRewardBlocks;
+              auto payAge = 0.1*int((1000.0*(Height - rewardval.GetHeight()))/nMinBlock);
               auto payCount = rewardval.GetPayCount();
-              itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge));
+              itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge) + QString("%"));
               itemOutput->setText(COLUMN_NUMREWARDS, QString::number(payCount));
             } else {
               itemOutput->setText(COLUMN_REWARDAGE, tr("N.A."));

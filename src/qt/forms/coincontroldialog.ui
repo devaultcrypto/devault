@@ -467,12 +467,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Number of Rewards</string>
+       <string>Reward Maturity</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Reward Age</string>
+       <string>Times Paid</string>
       </property>
      </column>
     </widget>

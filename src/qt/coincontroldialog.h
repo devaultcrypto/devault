@@ -81,8 +81,8 @@ private:
         COLUMN_CONFIRMATIONS,
         COLUMN_TXHASH,
         COLUMN_VOUT_INDEX,
-        COLUMN_NUMREWARDS,
         COLUMN_REWARDAGE,
+        COLUMN_NUMREWARDS,
     };
     friend class CCoinControlWidgetItem;
 
