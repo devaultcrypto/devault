@@ -402,7 +402,7 @@
       <bool>false</bool>
      </property>
      <property name="columnCount">
-      <number>10</number>
+      <number>12</number>
      </property>
      <attribute name="headerShowSortIndicator" stdset="0">
       <bool>true</bool>
@@ -441,6 +441,16 @@
       </property>
       <property name="toolTip">
        <string>Confirmed</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Number of Rewards</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Reward Age</string>
       </property>
      </column>
      <column>

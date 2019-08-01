@@ -1,9 +1,9 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
+// Copyright (c) 2019 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_QT_COINCONTROLDIALOG_H
-#define BITCOIN_QT_COINCONTROLDIALOG_H
+#pragma once
 
 #include <amount.h>
 
@@ -81,6 +81,8 @@ private:
         COLUMN_CONFIRMATIONS,
         COLUMN_TXHASH,
         COLUMN_VOUT_INDEX,
+        COLUMN_NUMREWARDS,
+        COLUMN_REWARDAGE,
     };
     friend class CCoinControlWidgetItem;
 
@@ -90,6 +92,8 @@ private Q_SLOTS:
     void copyLabel();
     void copyAddress();
     void copyTransactionHash();
+    void copyNumRewards();
+    void copyRewardAge();
     void lockCoin();
     void unlockCoin();
     void clipboardQuantity();
@@ -108,4 +112,3 @@ private Q_SLOTS:
     void updateLabelLocked();
 };
 
-#endif // BITCOIN_QT_COINCONTROLDIALOG_H
