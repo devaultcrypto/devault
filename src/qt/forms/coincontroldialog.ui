@@ -402,7 +402,7 @@
       <bool>false</bool>
      </property>
      <property name="columnCount">
-      <number>12</number>
+      <number>10</number>
      </property>
      <attribute name="headerShowSortIndicator" stdset="0">
       <bool>true</bool>
@@ -445,32 +445,20 @@
      </column>
      <column>
       <property name="text">
+      </property>
+     </column>
+     <column>
+      <property name="text">
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Number of Rewards</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Reward Age</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string/>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string/>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string/>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string/>
       </property>
      </column>
     </widget>
