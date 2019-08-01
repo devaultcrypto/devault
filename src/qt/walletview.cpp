@@ -303,16 +303,16 @@ void WalletView::changePassphrase() {
 }
 
 void WalletView::revealPhrase() {
-    if (walletModel->getEncryptionStatus() == WalletModel::Locked) {
+    if (walletModel->getWalletStatus() == WalletModel::Locked) {
         AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
         dlg.setModel(walletModel);
         dlg.exec();
     }
-    if (walletModel->getEncryptionStatus() == WalletModel::Unlocked) {
-    SecureVector words = walletModel->getWords();
-    RevealPhrase dlg(words, this);
-    dlg.exec();
-    walletModel->setWalletLocked(true, "");
+    if (walletModel->getWalletStatus() == WalletModel::Unlocked) {
+        SecureVector words = walletModel->getWords();
+        RevealPhrase dlg(words, this);
+        dlg.exec();
+        walletModel->setWalletLocked(true, "");
     }
 }
 
