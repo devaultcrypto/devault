@@ -2150,19 +2150,30 @@ static UniValue getrewardinfo(const Config &config, const JSONRPCRequest &reques
     int count=0;
     int total_payouts=0;
     std::set<std::string> addresses;
+    std::vector<Amount> all_rewards_amounts;
     for (auto& val : rewards) {
       if (val.IsActive()) {
         sum = sum + val.GetValue();
+        all_rewards_amounts.push_back(val.GetValue());
         count++;
         total_payouts += val.GetPayCount();
         addresses.insert(GetAddrFromTxOut(val.GetTxOut()));
       }
     }
+    Amount median;
+    sort(all_rewards_amounts.begin(),all_rewards_amounts.end());
+    int mid_point = (all_rewards_amounts.size()/2);
+    if (all_rewards_amounts.size() % 2 == 1) {
+      median = all_rewards_amounts[mid_point];
+    } else  {
+      median = (all_rewards_amounts[mid_point] + all_rewards_amounts[mid_point+1])/2;
+    }      
 
     UniValue reply(UniValue::VOBJ);
     reply.pushKV("Current number of viable rewards", count);
     reply.pushKV("Current number of unique addresses with viable rewards", int(addresses.size()));
     reply.pushKV("Number of reward payouts to date (for current set of utxos)", total_payouts);
+    reply.pushKV("Median value of viable utxo rewards", ValueFromAmount(median));
 
     int nHeight = chainActive.Height();
 
