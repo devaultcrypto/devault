@@ -98,7 +98,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	list(APPEND CMAKE_RC_FLAGS "-DWINDRES_PREPROC")
 
 	# Build all static so there is no dll file to distribute.
-	add_compiler_flag(-static)
+	add_compiler_flags(-static)
 endif()
 
 if(ENABLE_REDUCE_EXPORTS)
@@ -112,43 +112,44 @@ if(ENABLE_REDUCE_EXPORTS)
 	endif()
 
 	# Also hide symbols from static libraries
-	add_linker_flag(-Wl,--exclude-libs,ALL)
+	add_linker_flags(-Wl,--exclude-libs,ALL)
+endif()
+
+# Enable statically linking libstdc++
+if(ENABLE_STATIC_LIBSTDCXX)
+	add_linker_flags(-static-libstdc++)
 endif()
 
 # All windows code is PIC, forcing it on just adds useless compile warnings
 if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for all targets
-	#add_compiler_flag(-fPIC)
 endif()
 	
 if(ENABLE_HARDENING)
 	# Enable stack protection
-	add_cxx_compiler_flag(-fstack-protector-all -Wstack-protector)
-	
-	# Enable some buffer overflow checking
-	add_compiler_flag(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
-	
-	# Enable ASLR (these flags are primarily targeting MinGw)
-	add_linker_flag(-Wl,--dynamicbase -Wl,--nxcompat -Wl,--high-entropy-va)
-	
-	# Make the relocated sections read-only
-	add_linker_flag(-Wl,-z,relro -Wl,-z,now)
+	add_cxx_compiler_flags(-fstack-protector-all -Wstack-protector)
 
-	# CMake provides the POSITION_INDEPENDENT_CODE property to set PIC/PIE.
-	# Unfortunately setting the -pie linker flag this way require CMake >= 3.14,
-	# which is not widely distributed at the time of writing.
-	# FIXME: use the POSITION_INDEPENDENT_CODE property instead
-	if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON) # for all targets
-	else()
+	# Enable some buffer overflow checking
+	add_compiler_flags(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
+
+	# Enable ASLR (these flags are primarily targeting MinGw)
+	add_linker_flags(-Wl,--dynamicbase -Wl,--nxcompat -Wl,--high-entropy-va)
+
+	# Make the relocated sections read-only
+	add_linker_flags(-Wl,-z,relro -Wl,-z,now)
+
+	#add_compiler_flags(-fPIE)
+	#add_linker_flags(-pie)
+
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		# MinGw provides its own libssp for stack smashing protection
 		link_libraries(ssp)
 	endif()
 endif()
 
 # Enable warning
-add_c_compiler_flag(-Wnested-externs -Wstrict-prototypes)
-add_compiler_flag(
+add_c_compiler_flags(-Wnested-externs -Wstrict-prototypes)
+add_compiler_flags(
 	-Wall
 	-Wextra
 	-Wformat
@@ -165,10 +166,10 @@ add_compiler_flag(
 
 option(EXTRA_WARNINGS "Enable extra warnings" OFF)
 if(EXTRA_WARNINGS)
-	add_cxx_compiler_flag(-Wsuggest-override)
+	add_cxx_compiler_flags(-Wsuggest-override)
 else()
-	add_compiler_flag(-Wno-unused-parameter)
-	add_compiler_flag(-Wno-implicit-fallthrough)
+	add_compiler_flags(-Wno-unused-parameter)
+	add_compiler_flags(-Wno-implicit-fallthrough)
 endif()
 
 add_feature_info(WITH_WARNINGS EXTRA_WARNINGS "Enable extra warnings")
@@ -184,7 +185,7 @@ else()
 endif()
 
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  add_compiler_flag(-Wrange-loop-analysis)
+  add_compiler_flags(-Wrange-loop-analysis)
   # For 17 we need BOOST_NO_AUTO_PTR defined for boost
   string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
   message(STATUS "Darwin Version : ${CMAKE_SYSTEM_VERSION} found, major version ${DARWIN_MAJOR_VERSION} ")
@@ -200,10 +201,10 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   add_definitions("-DBOOST_NO_AUTO_PTR -DHAVE_STD_SHARED_MUTEX -DHAVE_VARIANT")
-  add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
+  add_compiler_flags(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
 else()
   # secp256k1 Linux gcc
-  add_compiler_flag(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
+  add_compiler_flags(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
 endif()
 
 

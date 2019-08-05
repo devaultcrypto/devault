@@ -39,7 +39,7 @@ gen_json_header(JSON_HEADERS
 )
 
 #include(TestSuite)
-add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
+add_compiler_flags(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
 
 add_library(unit
   callrpc.cpp

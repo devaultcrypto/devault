@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 project(secp256k1)
 
 # libsecp256k1 use a different set of flags.
-add_compiler_flag(
+add_compiler_flags(
 	-pedantic
 	-Wshadow
 	-Wno-unused-function
@@ -12,7 +12,7 @@ add_compiler_flag(
 	-Wno-overlength-strings
 )
 
-add_c_compiler_flag(
+add_c_compiler_flags(
 	-std=c89
 	-Wno-long-long
 )
