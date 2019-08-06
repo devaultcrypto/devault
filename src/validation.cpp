@@ -1191,6 +1191,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
         if (pvChecks) {
             pvChecks->push_back(std::move(check));
         } else if (!check()) {
+            ScriptError scriptError = check.GetScriptError();
             // Compute flags without the optional standardness flags.
             // This differs from MANDATORY_SCRIPT_VERIFY_FLAGS as it contains
             // additional upgrade flags (see AcceptToMemoryPoolWorker variable
@@ -1208,18 +1209,15 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
                     return state.Invalid(
                         false, REJECT_NONSTANDARD,
                         strprintf("non-mandatory-script-verify-flag (%s)",
-                                  ScriptErrorString(check.GetScriptError())));
+                                  ScriptErrorString(scriptError)));
                 }
+                // update the error message to reflect the mandatory violation.
+                scriptError = check2.GetScriptError();
             }
 
             // We also, regardless, need to check whether the transaction would
             // be valid on the other side of the upgrade, so as to avoid
             // splitting the network between upgraded and non-upgraded nodes.
-            // Note that this will create strange error messages like
-            // "upgrade-conditional-script-failure (Non-canonical DER ...)"
-            // -- the tx was refused entry due to STRICTENC, a mandatory flag,
-            // but after the upgrade the signature would have been interpreted
-            // as valid Schnorr and thus STRICTENC would not happen.
             CScriptCheck check3(scriptPubKey, amount, tx, i,
                                 mandatoryFlags ^ SCRIPT_ENABLE_SCHNORR,
                                 sigCacheStore, txdata);
@@ -1227,7 +1225,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
                 return state.Invalid(
                     false, REJECT_INVALID,
                     strprintf("upgrade-conditional-script-failure (%s)",
-                              ScriptErrorString(check.GetScriptError())));
+                              ScriptErrorString(scriptError)));
             }
 
             // Failures of other flags indicate a transaction that is invalid in
@@ -1239,7 +1237,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
             return state.DoS(
                 100, false, REJECT_INVALID,
                 strprintf("mandatory-script-verify-flag-failed (%s)",
-                          ScriptErrorString(check.GetScriptError())));
+                          ScriptErrorString(scriptError)));
         }
     }
 
