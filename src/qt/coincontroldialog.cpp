@@ -66,8 +66,6 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     QAction *copyAddressAction = new QAction(tr("Copy address"), this);
     QAction *copyLabelAction = new QAction(tr("Copy label"), this);
     QAction *copyAmountAction = new QAction(tr("Copy amount"), this);
-    QAction *copyNumRewardsAction = new QAction(tr("Copy number of paid rewards"), this);
-    QAction *copyRewardAgeAction = new QAction(tr("Copy reward age"), this);
     // we need to enable/disable this
     copyTransactionHashAction = new QAction(tr("Copy transaction ID"), this);
     // we need to enable/disable this
@@ -80,8 +78,6 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     contextMenu->addAction(copyAddressAction);
     contextMenu->addAction(copyLabelAction);
     contextMenu->addAction(copyAmountAction);
-    contextMenu->addAction(copyNumRewardsAction);
-    contextMenu->addAction(copyRewardAgeAction);
     contextMenu->addAction(copyTransactionHashAction);
     contextMenu->addSeparator();
     contextMenu->addAction(lockAction);
@@ -95,8 +91,6 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     connect(copyLabelAction, &QAction::triggered, this,
             &CoinControlDialog::copyLabel);
     connect(copyAmountAction, &QAction::triggered, this,   &CoinControlDialog::copyAmount);
-    connect(copyRewardAgeAction, &QAction::triggered, this,   &CoinControlDialog::copyRewardAge);
-    connect(copyNumRewardsAction, &QAction::triggered, this,   &CoinControlDialog::copyNumRewards);
     connect(copyTransactionHashAction, &QAction::triggered, this,
             &CoinControlDialog::copyTransactionHash);
     connect(lockAction, &QAction::triggered, this,
@@ -283,15 +277,6 @@ void CoinControlDialog::copyAmount() {
     GUIUtil::setClipboard(
         BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_AMOUNT)));
 }
-void CoinControlDialog::copyRewardAge() {
-    GUIUtil::setClipboard(
-        BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_REWARDAGE)));
-}
-void CoinControlDialog::copyNumRewards() {
-    GUIUtil::setClipboard(
-        BitcoinUnits::removeSpaces(contextMenuItem->text(COLUMN_NUMREWARDS)));
-}
-
 // context menu action: copy label
 void CoinControlDialog::copyLabel() {
     if (ui->radioTreeMode->isChecked() &&

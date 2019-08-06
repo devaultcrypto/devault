@@ -92,8 +92,6 @@ private Q_SLOTS:
     void copyLabel();
     void copyAddress();
     void copyTransactionHash();
-    void copyNumRewards();
-    void copyRewardAge();
     void lockCoin();
     void unlockCoin();
     void clipboardQuantity();
