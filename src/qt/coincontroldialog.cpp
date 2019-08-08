@@ -856,6 +856,6 @@ void CoinControlDialog::updateView() {
     sortView(sortColumn, sortOrder);
     ui->treeWidget->setEnabled(true);
 
-    std::string s = checkcoins(model->wallet().listCoins());
-    QMessageBox::warning(this, tr("OK"), QString::fromStdString(s));
+    //std::string s = checkcoins(model->wallet().listCoins());
+    //QMessageBox::warning(this, tr("OK"), QString::fromStdString(s));
 }
