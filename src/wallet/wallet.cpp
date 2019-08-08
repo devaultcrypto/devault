@@ -4,6 +4,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <wallet/analyzecoins.h>
 #include <wallet/wallet.h>
 #include <benchmark.h>
 #include <chain.h>
@@ -3262,6 +3263,127 @@ bool CWallet::CommitTransaction(
     return true;
 }
 
+bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPercent, Amount minAmount, std::string &message) {
+
+    CTransactionRef tx;
+    std::vector<CInputCoin> coins_to_use = analyzecoins(ListCoins(), minPercent);
+    Amount nAmount(0);
+    for (const auto &coin : coins_to_use) { nAmount += coin.txout.nValue; }
+    // Bail out if amount is too small
+    if (nAmount < minAmount) {
+        message = nAmount.ToString() + " coins to move are less than minimum of " + minAmount.ToString();
+        return false;
+    }
+
+    if (!ConsolidateCoins(recipient, coins_to_use, tx, message)) {
+        message = strprintf("Error: ConsolidateCoins failed! Reason given: %s", message);
+        return false;
+    }
+    CValidationState state;
+    mapValue_t mapValue; // not used
+    CReserveKey keyChange(this); // not used
+    if (!CommitTransaction(tx, std::move(mapValue), {} /* orderForm */,
+                           {} /* fromAccount */, keyChange,
+                           g_connman.get(), state)) {
+        message = strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason());
+        return false;
+    }
+
+    message = tx->GetId().GetHex();
+    
+    return true;
+}
+ 
+bool CWallet::ConsolidateCoins(const CTxDestination &recipient, double minPercent,
+                               CTransactionRef &tx, std::string &strFailReason) {
+
+    std::vector<CInputCoin> coins_to_use = analyzecoins(ListCoins(), minPercent);
+    return ConsolidateCoins(recipient, coins_to_use, tx, strFailReason);
+}
+ 
+
+bool CWallet::ConsolidateCoins(const CTxDestination &recipient,
+                               const std::vector<CInputCoin> &coins_to_use,
+                               CTransactionRef &tx, std::string &strFailReason) {
+
+    Amount nAmount(0);
+    for (const auto &coin : coins_to_use) { nAmount += coin.txout.nValue; }
+  
+    CMutableTransaction txNew;
+
+    txNew.nLockTime = chainActive.Height();
+    if (GetRandInt(10) == 0) {
+        txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
+    }
+
+    assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
+    assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
+
+    LOCK2(cs_main, cs_wallet);
+
+    // no change ....
+    txNew.vin.clear();
+    txNew.vout.clear();
+
+    // vouts to the payees
+    CScript scriptPub = GetScriptForDestination(recipient);
+    CTxOut txout(nAmount, scriptPub);
+    // add for sizing, replace later after fee subtracted
+    txNew.vout.push_back(txout);
+
+    // Note how the sequence number is set to non-maxint so that the nLockTime set above actually works.
+    for (const auto &coin : coins_to_use) {
+      txNew.vin.emplace_back(coin.outpoint, CScript(),
+                             std::numeric_limits<uint32_t>::max() - 1);
+    }
+
+    CTransaction txNewConst(txNew);
+    int nBytes = CalculateMaximumSignedTxSize(txNewConst, this);
+    if (nBytes < 0) {
+        strFailReason = _("Signing transaction failed");
+        return false;
+    }
+
+    // for now
+    Amount nFee = GetConfig().GetMinFeePerKB().GetFee(nBytes);
+
+    txNew.vout.clear();
+    txout.nValue -= nFee;
+    txNew.vout.push_back(txout);
+    CTransaction txRedoNewConst(txNew);
+
+    SigHashType sigHashType = SigHashType().withForkId();
+    int nIn = 0;
+    for (const auto &coin : coins_to_use) {
+      const CScript &scriptPubKey = coin.txout.scriptPubKey;
+      SignatureData sigdata;
+
+      if (!ProduceSignature(
+                            TransactionSignatureCreator(this, &txRedoNewConst, nIn,
+                                                        coin.txout.nValue, sigHashType),
+                            scriptPubKey, sigdata)) {
+        strFailReason = _("Signing transaction failed");
+        return false;
+      }
+            
+      UpdateTransaction(txNew, nIn, sigdata);
+      nIn++;
+    }
+    
+    // Return the constructed transaction data.
+    tx = MakeTransactionRef(std::move(txNew));
+
+    // Limit size.
+    if (tx->GetTotalSize() >= MAX_STANDARD_TX_SIZE) {
+        strFailReason = _("Transaction too large");
+        return false;
+    }
+
+    return true;
+}
+ 
+
+ 
 void CWallet::ListAccountCreditDebit(const std::string &strAccount,
                                      std::list<CAccountingEntry> &entries) {
     CWalletDB walletdb(*dbw);
