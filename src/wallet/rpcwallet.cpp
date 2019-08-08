@@ -581,7 +581,7 @@ static UniValue consolidaterewards(const Config &config,
         return NullUniValue;
     }
     
-    if (request.fHelp || request.params.size() > 3) {
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3) {
         throw std::runtime_error(
                                  "consolidaterewards \"address\" )\n" + 
                                  HelpRequiringPassphrase(pwallet) +
@@ -610,7 +610,7 @@ static UniValue consolidaterewards(const Config &config,
     }
 
     int days = 3;
-    if (request.params.size() > 1) {
+    if (!request.params[1].isNull()) {
         days = request.params[1].get_int();
         days = std::min(std::max(1,days), 30); // Keep between 1 days and 30
     }
@@ -619,7 +619,7 @@ static UniValue consolidaterewards(const Config &config,
     std::string message;
 
     Amount minAmount = Params().GetConsensus().nMinRewardBalance;
-    if (request.params.size() > 2) {
+    if (!request.params[2].isNull()) {
         Amount coinMin(0);
         coinMin = Amount(request.params[2].get_int() * COIN);
         if (coinMin < Params().GetConsensus().nMinRewardBalance) coinMin = Params().GetConsensus().nMinRewardBalance;
@@ -4007,7 +4007,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "sendfrom",                     sendfrom,                     {"fromaccount","toaddress","amount","minconf","comment","comment_to"} },
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
     { "wallet",             "sendtoaddress",                sendtoaddress,                {"address","amount","comment","comment_to","subtractfeefromamount"} },
-    { "wallet",             "consolidaterewards",           consolidaterewards,           {"address"} },
+    { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
     { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
