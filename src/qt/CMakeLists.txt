@@ -196,6 +196,7 @@ add_library(bitcoin-qt-base
 	bitcoingui.cpp
 	bitcoinunits.cpp
 	clientmodel.cpp
+	checkcoins.cpp
 	csvmodelwriter.cpp
   dvtui.cpp
 	guiutil.cpp
