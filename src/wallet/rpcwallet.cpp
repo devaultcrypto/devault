@@ -574,6 +574,66 @@ static UniValue sendtoaddress(const Config &config,
     return tx->GetId().GetHex();
 }
 
+static UniValue consolidaterewards(const Config &config,
+                                   const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+    
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 3) {
+        throw std::runtime_error(
+                                 "consolidaterewards \"address\" )\n" + 
+                                 HelpRequiringPassphrase(pwallet) +
+                                 "\nArguments:\n"
+                                 "1. \"address\"            (string, required) The DeVault address to send to."
+                                 "2. \"days\"               (int, optional, default=3, min=1,max=30). The number of days back to use coins from (this is based on assuming 720 blocks per day, adjust accordingly) "
+                                 "3. \"minimum amount\"     (int, optional, default=nMinRewardBalance). The transaction will be skipped unless at least this amount and also greater than nMinRewardBalance"
+                                 "\nResult:\n"
+                                 "\"txid\"                  (string) The transaction id.\n"
+                                 "\nExamples:\n" +
+                                 HelpExampleCli("consolidaterewards", "\"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\" 3, 10000)") +
+                                 HelpExampleRpc("consolidaterewards", "\"devault:qp4au0wyh9zj2jchy96glxj9fsng8ru87ugcfylpc9\" 3, 10000)"));
+    }
+    
+    // Make sure the results are valid at least up to the most recent block
+    // the user could have gotten from another RPC command prior to now
+    pwallet->BlockUntilSyncedToCurrentChain();
+    
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+    
+    CTxDestination dest = DecodeDestination(request.params[0].get_str(), config.GetChainParams());
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
+
+    int days = 3;
+    if (!request.params[1].isNull()) {
+        days = request.params[1].get_int();
+        days = std::min(std::max(1,days), 30); // Keep between 1 days and 30
+    }
+    double minPercent = 100.0*days/30.0;
+
+    std::string message;
+
+    Amount minAmount = Params().GetConsensus().nMinRewardBalance;
+    if (!request.params[2].isNull()) {
+        Amount coinMin(0);
+        coinMin = Amount(request.params[2].get_int() * COIN);
+        if (coinMin < Params().GetConsensus().nMinRewardBalance) coinMin = Params().GetConsensus().nMinRewardBalance;
+        minAmount = coinMin;
+    }
+    
+    if (!pwallet->ConsolidateRewards(dest, minPercent, minAmount, message)) {
+        std::string strError = strprintf("Error: ConsolidateRewards failed! Reason given: %s", message);
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    // message is tx hash if successful
+    return message;
+}
+
 static UniValue listaddressgroupings(const Config &config,
                                      const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
@@ -3947,6 +4007,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "sendfrom",                     sendfrom,                     {"fromaccount","toaddress","amount","minconf","comment","comment_to"} },
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
     { "wallet",             "sendtoaddress",                sendtoaddress,                {"address","amount","comment","comment_to","subtractfeefromamount"} },
+    { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
     { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
