@@ -15,7 +15,6 @@
 #include <walletmodel.h>
 #include <dvtui.h>
 #include <devault/rewards.h>
-#include <checkcoins.h>
 
 #include <dstencode.h>
 #include <init.h>
@@ -38,7 +37,6 @@
 #include <QString>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QMessageBox>
 
 QList<Amount> CoinControlDialog::payAmounts;
 bool CoinControlDialog::fSubtractFeeFromAmount = false;
@@ -855,7 +853,4 @@ void CoinControlDialog::updateView() {
     // sort view
     sortView(sortColumn, sortOrder);
     ui->treeWidget->setEnabled(true);
-
-    //std::string s = checkcoins(model->wallet().listCoins());
-    //QMessageBox::warning(this, tr("OK"), QString::fromStdString(s));
 }

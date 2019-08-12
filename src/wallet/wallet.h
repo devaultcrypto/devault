@@ -1031,18 +1031,6 @@ public:
                            Amount &nFeeRet, int &nChangePosInOut,
                            std::string &strFailReason,
                            const CCoinControl &coinControl, bool sign = true);
-    bool ConsolidateRewards(const CTxDestination &recipient,
-                            double minPercent, Amount minAmount,
-                            std::string &strFailReason);
-    bool ConsolidateCoins(const CTxDestination& recipient,
-                          const std::vector<CInputCoin>& coins_to_use,
-                          CTransactionRef &tx, 
-                          std::string &strFailReason);
-    bool ConsolidateCoins(const CTxDestination& recipient,
-                          double minPercent,
-                          CTransactionRef &tx, 
-                          std::string &strFailReason);
-    CValidationState CommitConsolidate(CTransactionRef tx, CConnman *connman);
     bool CommitTransaction(
         CTransactionRef tx, mapValue_t mapValue,
         std::vector<std::pair<std::string, std::string>> orderForm,

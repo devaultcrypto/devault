@@ -220,7 +220,6 @@ BITCOIN_CORE_H = \
   validation.h \
   validationinterface.h \
   walletinitinterface.h \
-  wallet/analyzecoins.h \
   wallet/coincontrol.h \
   wallet/crypter.h \
   wallet/hdchain.h \
@@ -328,7 +327,6 @@ libbitcoin_wallet_a_SOURCES = \
   script/ismine.cpp \
   rpc/util.cpp \
   interfaces/wallet.cpp \
-  wallet/analyzecoins.cpp \
   wallet/hdchain.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
