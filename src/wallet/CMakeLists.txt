@@ -18,20 +18,21 @@ add_library(wallet
   ../script/ismine.cpp
   ../rpc/util.cpp
   analyzecoins.cpp
-	crypter.cpp
-	db.cpp
-	fees.cpp
-	finaltx.cpp
-	init.cpp
-	rpcdump.cpp
-	rpcwallet.cpp
-	wallet.cpp
-	walletdb.cpp
-	walletutil.cpp
+  crypter.cpp
+  db.cpp
+  fees.cpp
+  finaltx.cpp
+  init.cpp
+  rpcdump.cpp
+  rpcwallet.cpp
+  wallet.cpp
+  walletdb.cpp
+  walletutil.cpp
   dictionary.cpp
   mnemonic.cpp
   hdchain.cpp
   misc.cpp
+  wallettool.cpp
 )
 
 target_link_libraries(wallet util univalue Event ${BDBXX_LIBRARY})
@@ -44,6 +45,18 @@ else()
     ${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
     )
 endif()
+
+
+# bitcoin-tx
+if(BUILD_WALLET)
+	add_executable(bdb-check bdb-check.cpp)
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		target_sources(bdb-check PRIVATE bdb-check-res.rc)
+	endif()
+
+	target_link_libraries(bdb-check devaultconsensus server wallet)
+endif()
+
 
 # check if using tests here...
 if (BUILD_CTESTS)
