@@ -77,11 +77,22 @@ static void WalletShowInfo(CWallet* wallet_instance)
     }
     i=0;
     for (const auto& m : wallet_instance->mapHdPubKeys) {
-        tfm::format(std::cout, "[%d] % s, account index = %d, change index = %d, path = %s, id = %s\n", i++,
+        auto time = wallet_instance->mapKeyMetadata[m.first].nCreateTime;
+        tfm::format(std::cout, "[%d] % s, account index = %d, change index = %d, creation time = %d, path = %s\n", i++,
                     EncodeDestination(m.first),
                     m.second.nAccountIndex,
                     m.second.nChangeIndex,
-                    m.second.GetKeyPath(), m.second.hdchainID.ToString());
+                    time,
+                    m.second.GetKeyPath());
+        //m.second.hdchainID.ToString());
+    }
+    i = 0;
+    for (const auto& m : wallet_instance->mapMasterKeys) {
+        tfm::format(std::cout, "[%d] CMasterKey: Crypted = %s, Salt = %s, Method = %d, Iterations = %d\n", i++,
+                    HexStr(m.second.vchCryptedKey),
+                    HexStr(m.second.vchSalt),
+                    m.second.nDerivationMethod,
+                    m.second.nDeriveIterations);
     }
 
     tfm::format(std::cout, "encrypted words as Hex String: %s\n", HexStr(words));
@@ -89,6 +100,8 @@ static void WalletShowInfo(CWallet* wallet_instance)
     tfm::format(std::cout, "Keypool Size: %u\n", wallet_instance->GetKeyPoolSize());
     tfm::format(std::cout, "Transactions: %zu\n", wallet_instance->mapWallet.size());
     tfm::format(std::cout, "Address Book: %zu\n", wallet_instance->mapAddressBook.size());
+    tfm::format(std::cout, "Name: %s\n", wallet_instance->GetName());
+    tfm::format(std::cout, "Wallet Version: %s\n", wallet_instance->GetVersion());
 
 }
 
@@ -100,10 +113,10 @@ bool GetWalletInfo(const std::string& wallet_path)
     }
     std::string error;
     /*
-      if (!WalletBatch::VerifyEnvironment(path, error)) {
-      tfm::format(std::cerr, "Error loading %s. Is wallet being used by other process?\n", name.c_str());
-      return false;
-      }
+    if (!WalletBatch::VerifyEnvironment(walletFile, walletDirx, error)) {
+        tfm::format(std::cerr, "Error loading %s. Is wallet being used by other process?\n", name.c_str());
+        return false;
+    }
     */
     std::shared_ptr<CWallet> wallet_instance = LoadWallet(wallet_path);
     if (!wallet_instance) return false;

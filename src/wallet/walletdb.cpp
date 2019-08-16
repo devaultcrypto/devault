@@ -502,10 +502,6 @@ DBErrors CWalletDB::LoadWallet(CWallet *pwallet) {
             }
         }
         pcursor->close();
-
-        //pwallet->nKeysLeftSinceAutoBackup = pwallet->KeypoolCountExternalKeys();
-        //LogPrintf("nKeysLeftSinceAutoBackup: %d\n", pwallet->nKeysLeftSinceAutoBackup);
-
         
     } catch (const thread_interrupted &) {
         throw;
