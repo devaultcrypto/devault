@@ -17,6 +17,7 @@ add_library(wallet
   ../interfaces/wallet.cpp
   ../script/ismine.cpp
   ../rpc/util.cpp
+  analyzecoins.cpp
 	crypter.cpp
 	db.cpp
 	fees.cpp
