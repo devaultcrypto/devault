@@ -8,6 +8,7 @@
 #include <dstencode.h>
 #include <fs.h>
 #include <utiltime.h>
+#include <utilsplitstring.h>
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
 
@@ -100,14 +101,29 @@ static void WalletShowInfo(CWallet *wallet_instance) {
       tfm::format(std::cout, "[%d] Address: %s, purpose: %s, name: %s\n", i++, EncodeDestination(m.first),
                   m.second.purpose, m.second.name);
     }
+
+    // Put in a sorted KeyPath order for easier comparison
     i = 0;
+    std::map<uint64_t,std::string> sortedKeys;
     for (const auto &m : wallet_instance->mapHdPubKeys) {
-      std::string stime = FormatISO8601DateTime(wallet_instance->mapKeyMetadata[m.first].nCreateTime);
-      tfm::format(
-          std::cout, "[%d] HDPubKey % s, account index = %d, change index = %d, creation time = %s, path = %s\n", i++,
-          EncodeDestination(m.first), m.second.nAccountIndex, m.second.nChangeIndex, stime, m.second.GetKeyPath());
-      // m.second.hdchainID.ToString());
+      std::string fullstr = EncodeDestination(m.first);
+
+      // std::string stime = FormatISO8601DateTime(wallet_instance->mapKeyMetadata[m.first].nCreateTime);
+      
+      // This is to make the output keys sorted by path
+      // Put into a std::map based on numeric path that will be stored in sorted order
+      std::vector<std::string> vParts;
+      Split(vParts, m.second.GetKeyPath(), "/");
+      uint64_t keynum = std::stoi(vParts.back());
+      vParts.pop_back();
+      uint64_t ext = std::stoi(vParts.back());
+      uint64_t order = ext*100000+keynum;
+      fullstr += strprintf(" # hdkeypath=%s", m.second.GetKeyPath());
+      sortedKeys.insert(make_pair(order,fullstr));
     }
+
+    for (const auto &m : sortedKeys) tfm::format(std::cout, "HDPubKey % s\n",m.second);
+
     i = 0;
     for (const auto &m : wallet_instance->mapMasterKeys) {
       tfm::format(std::cout, "[%d] CMasterKey: Crypted = %s, Salt = %s, Method = %d, Iterations = %d\n", i++,
