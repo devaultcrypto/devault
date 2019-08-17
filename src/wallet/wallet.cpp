@@ -428,7 +428,10 @@ bool CWallet::ChangeWalletPassphrase(
                 return false;
             }
 
-            CWalletDB(*dbw).WriteMasterKey(pMasterKey.first, pMasterKey.second);
+            CWalletDB walletdb(*dbw);
+            walletdb.WriteMasterKey(pMasterKey.first, pMasterKey.second);
+            walletdb.TxnCommit();
+
             if (fWasLocked) {
                 Lock();
             }
@@ -713,6 +716,7 @@ bool CWallet::CreateMasteyKey(const SecureString &strWalletPassphrase,
             return false;
         }
         walletdb.WriteMasterKey(nMasterKeyMaxID, kMasterKey);
+        walletdb.TxnCommit();
     }
     return true;
 }

@@ -93,10 +93,20 @@ static void WalletShowInfo(CWallet *wallet_instance) {
   tfm::format(std::cout, "Wallet info\n===========\n");
   tfm::format(std::cout, "Encrypted: %s\n", wallet_instance->IsCrypted() ? "yes" : "no");
 
+  assert(wallet_instance->mapMasterKeys.size() > 0);
+  
+  int i = 0;
+  for (const auto &m : wallet_instance->mapMasterKeys) {
+    tfm::format(std::cout, "[%d] CMasterKey: Crypted = %s, Salt = %s, Method = %d, Iterations = %d\n", i++,
+                HexStr(m.second.vchCryptedKey), HexStr(m.second.vchSalt), m.second.nDerivationMethod,
+                m.second.nDeriveIterations);
+  }
+  
+
   bool decrypt = unlockWallet(wallet_instance);
 
   if (!decrypt) {
-    int i = 0;
+    i = 0;
     for (const auto &m : wallet_instance->mapAddressBook) {
       tfm::format(std::cout, "[%d] Address: %s, purpose: %s, name: %s\n", i++, EncodeDestination(m.first),
                   m.second.purpose, m.second.name);
