@@ -7,9 +7,5 @@
 #include <wallet/wallet.h>
 
 namespace WalletTool {
-
-std::shared_ptr<CWallet> LoadWallet(const std::string& name, const fs::path& path);
-void WalletShowInfo(CWallet* wallet_instance);
-bool GetWalletInfo(const std::string& file);
-
+bool GetWalletInfo();
 } // namespace WalletTool

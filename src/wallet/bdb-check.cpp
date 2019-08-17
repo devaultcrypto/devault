@@ -19,33 +19,24 @@
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 
-static void SetupWalletToolArgs()
-{
+static bool WalletAppInit(int argc, char* argv[]) {
     SetupChainParamsBaseOptions();
-    gArgs.AddArg("-datadir=<dir>", "Specify data directory",  true, OptionsCategory::OPTIONS);
-    gArgs.AddArg("-wallet=<wallet-name>", "Specify wallet name",  true, OptionsCategory::OPTIONS);
-    gArgs.AddArg("info", "Get wallet info", true, OptionsCategory::COMMANDS);
-}
-
-static bool WalletAppInit(int argc, char* argv[])
-{
-    SetupWalletToolArgs();
-    if (argc < 2 || HelpRequested(gArgs)) {
+    if (HelpRequested(gArgs)) {
         std::string usage = strprintf("%s bdb-check version", PACKAGE_NAME) + " " + FormatFullVersion() + "\n\n" +
-                                      "wallet-tool is an offline tool for examining DeVault wallet files.\n" +
-                                      "By default wallet-tool will act on wallets in the default mainnet wallet directory in the datadir.\n" +
-                                      "To change the target wallet, use the -datadir, -wallet arguments.\n\n" +
-                                      "Usage:\n" +
-                                     "  bdb-check [options] <command>\n\n" +
-                                     gArgs.GetHelpMessage();
+            "bdb-check is an offline tool for examining DeVault wallet files.\n" +
+            "It will act on wallets in the default mainnet wallet directory.\n" +
+            "With some source code modification it could be made to handle non-default options.\n\n" +
+            "Usage:\n" +
+            "  bdb-check\n\n" +
+            gArgs.GetHelpMessage();
 
         tfm::format(std::cout, "%s", usage.c_str());
         return false;
     }
-
+    
     BCLog::Logger &logger = GetLogger();
     logger.m_print_to_console = true; //gArgs.GetBoolArg("-printtoconsole", gArgs.GetBoolArg("-debug", false));
-
+    
     if (!fs::is_directory(GetDataDir(false))) {
         tfm::format(std::cerr, "Error: Specified data directory \"%s\" does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
         return false;
@@ -54,8 +45,7 @@ static bool WalletAppInit(int argc, char* argv[])
     return true;
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 #ifdef WIN32
     util::WinCmdLineArgs winArgs;
     std::tie(argc, argv) = winArgs.get();
@@ -70,12 +60,10 @@ int main(int argc, char* argv[])
         PrintExceptionContinue(nullptr, "WalletAppInit()");
         return EXIT_FAILURE;
     }
-
-    std::string name = gArgs.GetArg("-wallet", "wallet.dat");
-    fs::path wallet_path = GetDataDir() / "wallets" / name;
+    
     ECCVerifyHandle globalVerifyHandle;
     ECC_Start();
-    if (!WalletTool::GetWalletInfo(wallet_path.c_str()))
+    if (!WalletTool::GetWalletInfo())
         return EXIT_FAILURE;
     ECC_Stop();
     return EXIT_SUCCESS;
