@@ -158,8 +158,15 @@ public:
         nValue = Amount::null();
         scriptPubKey.clear();
     }
+  
+    void SetZero() {
+      nValue = Amount(0);
+      scriptPubKey.clear();
+    }
 
+  
     bool IsNull() const { return nValue == Amount::null(); }
+    bool IsZero() const { return nValue == Amount(0); }
 
     friend bool operator==(const CTxOut &a, const CTxOut &b) {
         return (a.nValue == b.nValue && a.scriptPubKey == b.scriptPubKey);

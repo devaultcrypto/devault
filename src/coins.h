@@ -44,13 +44,14 @@ public:
 
     uint32_t GetHeight() const { return nHeightAndIsCoinBase >> 1; }
     bool IsCoinBase() const { return nHeightAndIsCoinBase & 0x01; }
-    bool IsSpent() const { return out.IsNull(); }
+    bool IsSpent() const { return out.IsZero(); }
+    bool IsNull() const { return out.IsNull(); }
 
     CTxOut &GetTxOut() { return out; }
     const CTxOut &GetTxOut() const { return out; }
 
     void Clear() {
-        out.SetNull();
+        out.SetZero();
         nHeightAndIsCoinBase = 0;
     }
 
