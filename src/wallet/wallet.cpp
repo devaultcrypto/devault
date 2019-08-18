@@ -4502,7 +4502,14 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       walletInstance->ChainStateFlushed(chainActive.GetLocator());
     }
 
-    LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
+
+    
+    if (gArgs.GetBoolArg("-bypasspassword",false)) {
+        walletInstance->Unlock(BypassPassword);
+        LogPrintf("unlocking wallet with bypass password\n");
+    }
+
+    LogPrintf(" wallet %15dms\n", GetTimeMillis() - nStart);
 
     // Try to top up keypool. No-op if the wallet is locked.
     walletInstance->TopUpKeyPool();

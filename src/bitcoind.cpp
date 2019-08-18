@@ -186,9 +186,13 @@ bool AppInit(int argc, char *argv[]) {
         }
 
         if (g_wallet_init_interface.HasWalletSupport()) {
-          if (!g_wallet_init_interface.CheckIfWalletExists(config.GetChainParams())) {
-            getPassphrase(walletPassphrase);
-          }
+            if (!g_wallet_init_interface.CheckIfWalletExists(config.GetChainParams())) {
+                if (!gArgs.GetBoolArg("-bypasspassword",false)) {
+                    getPassphrase(walletPassphrase);
+                } else {
+                    walletPassphrase = BypassPassword;
+                }
+            }
         }
 
         if (!AppInitSanityChecks()) {
