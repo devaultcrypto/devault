@@ -90,4 +90,4 @@ std::string LicenseInfo();
 
 // This is a convenience for miners who don't want to use wallet passwords explicitly
 // For devaultd add the option -bypasspassword for this to be used
-const SecureString BypassPassword("devaultwallet");
+const SecureString BypassPassword("");
