@@ -4505,8 +4505,11 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
     
     if (gArgs.GetBoolArg("-bypasspassword",false)) {
-        walletInstance->Unlock(BypassPassword);
-        LogPrintf("unlocking wallet with bypass password\n");
+      if (walletInstance->Unlock(BypassPassword)) {
+          LogPrintf("Wallet successfully unlocked with bypass password\n");
+      } else {
+          throw std::runtime_error(std::string(__func__) + ": Unable to unlock wallet with \" \" bypass password\n");
+      }
     }
 
     LogPrintf(" wallet %15dms\n", GetTimeMillis() - nStart);
