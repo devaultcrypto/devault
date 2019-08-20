@@ -164,11 +164,12 @@ public:
                                  "30357f3a90")},
                 {5000, uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988"
                                  "db13888907")},
-
+                {50000, uint256S("00000000000000600f43cf743ca452b38d4cf175d588089c3c73ca"
+                                 "afbc0364cd")},
             }};
 
         // Data as of block 9825
-        chainTxData = ChainTxData{1562814205, 27210, 0.1};
+        chainTxData = ChainTxData{1566331646, 55339, 0.01};
     }
 };
 
