@@ -1,26 +1,12 @@
-This release includes the following features and fixes since 1.0.5 release:
+This release includes the following features and fixes since 1.0.6 release:
 
-  * Add Menu items for Unlocking Wallet and Revealing Word phrase
-  * Seed Words / Start-Up UI Overhaul
-  * Enable menu item to reveal word phrase even if wallet is locked. If used when locked, ask for password first.
-  * Relock wallet after revealing word phrase
-  * Shrink height for reveal phrase window
-  * Run clang-format on newer qt start files
-  * Fix warnings on MacOS compile
-  * added cmake stuff and pragma
-  * Added mnemonic check with drag and drop stuff
-  * Add filtering options for transactions to show Rewards/Budget separately
-  * Upgrade MacOS version stuff for depends builds
-  * Show number of unique addresses with viable rewards in getrewardinfo
-  * Fix time calc for std::filesystem debug log renaming
-  * more QT connect usage modernization (#179)
-  * Move ValueFromAmount function, add new rpc command getdifficulties
-  * Update more deprecated code for QT (#177)
-  * Use std::filesystem on Catalina
-  * Add new QT shortcuts for Sign / Verify Message (Ctrl+Shift+M & Ctrl+Shift+V)
-  * Add direct RPC Console menu options in new sub-menu "Tools"
-  * Re-design of buttons & radio widgets
+  * Separate null value (coin not used yet) from 0 value (spent)
+  * Commit to db after writing MasterKey, make sure bdb-check checks for MasterKey
+  * Add exec bdb-check with ability to decrypt wallet file
+  * Add `consolidaterewards` RPC function. 
+  * For Mac depends build, update clang version to 8.0.1 and remove some boost m4 files
+  * Remove unnecessary copy Rewards functions in coincontrol
+  * Calculate and show median reward amount
+  * Improve Reward info in coincontrol
+  * remove Unencryption state from EncryptionStatus and rename EncryptionStatus to WalletStatus
 
-Upstream Bitcoin-ABC/Bitcoin updates
-
-* Merge #11480: [ui] Add toggle for unblinding password fields

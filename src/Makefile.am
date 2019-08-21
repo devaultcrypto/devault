@@ -47,6 +47,7 @@ LIBBITCOIN_SEEDER=libdevault_seeder.a
 endif
 if ENABLE_WALLET
 LIBBITCOIN_WALLET=libbitcoin_wallet.a
+LIBBITCOIN_WALLET_TOOL=libbitcoin_wallet_tool.a
 endif
 
 LIBBITCOIN_CRYPTO= $(LIBBITCOIN_CRYPTO_BASE)
@@ -77,6 +78,7 @@ EXTRA_LIBRARIES += \
   $(LIBBITCOIN_CLI) \
   $(LIBBITCOIN_SEEDER) \
   $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_ZMQ)
 
 lib_LTLIBRARIES = $(LIBBITCOINCONSENSUS)
@@ -97,6 +99,11 @@ endif
 if BUILD_BITCOIN_UTILS
   bin_PROGRAMS += devault-cli devault-tx
 endif
+
+if ENABLE_WALLET
+  bin_PROGRAMS += bdb-check
+endif
+
 
 .PHONY: FORCE check-symbols check-security
 # bitcoin core #
@@ -234,6 +241,7 @@ BITCOIN_CORE_H = \
   wallet/misc.h \
   wallet/wallet.h \
   wallet/walletdb.h \
+  wallet/wallettool.h \
   wallet/walletutil.h \
   warnings.h \
   zmq/zmqabstractnotifier.h \
@@ -305,6 +313,14 @@ libbitcoin_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   $(BITCOIN_CORE_H)
+
+
+libbitcoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+libbitcoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_wallet_tool_a_SOURCES = \
+  wallet/wallettool.cpp \
+  $(BITCOIN_CORE_H)
+
 
 if !ENABLE_WALLET
 libbitcoin_server_a_SOURCES += dummywallet.cpp
@@ -597,6 +613,35 @@ devault_tx_LDADD = \
 
 devault_tx_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS)
 #
+
+
+# bitcoin-wallet binary #
+bdb_check_SOURCES = wallet/bdb-check.cpp
+bdb_check_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bdb_check_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bdb_check_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+
+if TARGET_WINDOWS
+bdb_check_SOURCES += bitcoin-wallet-res.rc
+endif
+
+bdb_check_LDADD = \
+  $(LIBBITCOIN_WALLET_TOOL) \
+  $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_SERVER) \
+  $(LIBBITCOIN_COMMON) \
+  $(LIBDEVAULT_CONSENSUS) \
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_CRYPTO) \
+  $(LIBUNIVALUE) \
+  $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
+  $(LIBMEMENV) \
+  $(LIBSECP256K1)
+
+bdb_check_LDADD += $(BOOST_THREAD_LIB) $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) 
+#
+
 
 # devaultconsensus library #
 if BUILD_BITCOIN_LIBS
