@@ -61,8 +61,8 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
 }
 
 static bool unlockWallet(CWallet *wallet_instance) {
-  std::cout << "Enter the Wallet Encryption password to decrypt or return to skip decrypt\n";
-  SecureString pass1;
+  std::cout << "\n\nEnter the Wallet Encryption password to decrypt. Enter return if you've used blank password or you don't have blank but want to skip decrypt. Failed password will not decrypt seed phrase/seed\n";
+  SecureString pass1 = "";
   int char_count = 0; // This is used to handle Ctrl-C which would create
   // an infinite loop and crash below otherwise
   char c = '0';
@@ -79,8 +79,13 @@ static bool unlockWallet(CWallet *wallet_instance) {
       if (c != '\n') pass1.push_back(c);
     } while (c != '\n');
     if (char_count < min_char_count) {
-      std::cout << "Password too short, don't decrypt\n";
-      return false;
+        if (wallet_instance->Unlock(pass1)) {
+            std::cout << "Blank password works, will decrypt\n";
+            return true;
+        } else {
+            std::cout << "Password too short, don't decrypt\n";
+            return false;
+        }
     }
   } while (char_count < min_char_count);
   wallet_instance->Unlock(pass1);
