@@ -47,7 +47,6 @@ LIBBITCOIN_SEEDER=libdevault_seeder.a
 endif
 if ENABLE_WALLET
 LIBBITCOIN_WALLET=libbitcoin_wallet.a
-LIBBITCOIN_WALLET_TOOL=libbitcoin_wallet_tool.a
 endif
 
 LIBBITCOIN_CRYPTO= $(LIBBITCOIN_CRYPTO_BASE)
@@ -78,7 +77,6 @@ EXTRA_LIBRARIES += \
   $(LIBBITCOIN_CLI) \
   $(LIBBITCOIN_SEEDER) \
   $(LIBBITCOIN_WALLET) \
-  $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_ZMQ)
 
 lib_LTLIBRARIES = $(LIBBITCOINCONSENSUS)
@@ -101,7 +99,7 @@ if BUILD_BITCOIN_UTILS
 endif
 
 if ENABLE_WALLET
-  bin_PROGRAMS += bdb-check
+#  bin_PROGRAMS += bdb-check
 endif
 
 
@@ -315,13 +313,6 @@ libbitcoin_server_a_SOURCES = \
   $(BITCOIN_CORE_H)
 
 
-libbitcoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-libbitcoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libbitcoin_wallet_tool_a_SOURCES = \
-  wallet/wallettool.cpp \
-  $(BITCOIN_CORE_H)
-
-
 if !ENABLE_WALLET
 libbitcoin_server_a_SOURCES += dummywallet.cpp
 endif
@@ -358,6 +349,7 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/misc.cpp \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
+  wallet/wallettool.cpp \
   wallet/walletutil.cpp \
   $(BITCOIN_CORE_H)
 
@@ -626,20 +618,20 @@ bdb_check_SOURCES += wallet/bdb-check-res.rc
 endif
 
 bdb_check_LDADD = \
-  $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
-  $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBDEVAULT_CONSENSUS) \
+  $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO) \
+  $(LIBBITCOIN_ZMQ) \
   $(LIBUNIVALUE) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-bdb_check_LDADD += $(BOOST_THREAD_LIB) $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) 
+bdb_check_LDADD += $(BOOST_THREAD_LIB) $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 #
 
 
