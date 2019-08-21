@@ -622,7 +622,7 @@ bdb_check_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 bdb_check_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-bdb_check_SOURCES += bitcoin-wallet-res.rc
+bdb_check_SOURCES += wallet/bdb-check-res.rc
 endif
 
 bdb_check_LDADD = \
