@@ -44,6 +44,7 @@
 #include <validation.h>
 #include <validationinterface.h>
 #include <wallet/rpcdump.h>
+#include <wallet/rpcwallet.h> // for StopGenerateThread 
 #include <walletinitinterface.h>
 #include <warnings.h>
 
@@ -211,6 +212,7 @@ void Shutdown() {
     }
 
     StopTorControl();
+    StopGenerateThread();
 
     // After everything has been shut down, but before things get flushed, stop
     // the CScheduler/checkqueue threadGroup

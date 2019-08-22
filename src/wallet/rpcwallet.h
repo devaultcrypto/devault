@@ -30,4 +30,5 @@ bool EnsureWalletIsAvailable(CWallet *, bool avoidException);
 
 UniValue signrawtransactionwithwallet(const Config &config,
                                       const JSONRPCRequest &request);
+void StopGenerateThread();
 #endif // BITCOIN_WALLET_RPCWALLET_H

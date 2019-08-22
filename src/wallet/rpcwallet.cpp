@@ -27,12 +27,21 @@
 #include <wallet/wallet.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
+#include <miner.h> // for CBlockTemplate GenerateUntilShutdown
 // Input src/init.h (not wallet/init.h) for StartShutdown
 #include <init.h>
 
 #include <univalue.h>
 
 #include <event2/http.h>
+
+#include <thread>
+
+static std::thread generate_thread;
+static std::atomic<bool> stop_generate = false;
+
+// Used for auto threaded generate
+void StopGenerateThread() { stop_generate = true;}
 
 static const std::string WALLET_ENDPOINT_BASE = "/wallet/";
 
@@ -142,6 +151,64 @@ std::string LabelFromValue(const UniValue &value) {
     }
     return label;
 }
+
+
+std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
+    {
+        // Don't keep cs_main locked.
+        LOCK(cs_main);
+    }
+
+    unsigned int nExtraNonce = 0;
+    std::unique_ptr<CBlockTemplate> pblocktemplate(
+                                                   BlockAssembler(config, g_mempool)
+                                                   .CreateNewBlock(coinbaseScript->reserveScript));
+    
+    if (!pblocktemplate.get()) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
+    }
+    
+    CBlock *pblock = &pblocktemplate->block;
+    
+    {
+        LOCK(cs_main);
+        IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
+    }
+    
+    while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, config)) {
+        ++pblock->nNonce;
+    }
+
+    std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
+    if (!ProcessNewBlock(config, shared_pblock, true, nullptr)) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
+    }
+
+    return pblock->GetHash().GetHex();
+}
+
+UniValue generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
+    {
+        // Don't keep cs_main locked.
+        LOCK(cs_main);
+    }
+
+    unsigned blockCount=0;
+    UniValue blockHashes(UniValue::VARR);
+    stop_generate = false;
+    
+    while (!ShutdownRequested() && !stop_generate) {
+        std::string hex = generateOneBlock(config, coinbaseScript);
+        blockHashes.push_back(hex);
+      
+        // Sleep for 10 seconds between blocks to prevent too many
+        LogPrintf("Block [%d], hash = %s\n",blockCount++, hex);
+        MilliSleep(10000);
+    }
+
+    return blockHashes;
+}
+
 
 static UniValue getnewaddress(const Config &config,
                               const JSONRPCRequest &request) {
@@ -586,9 +653,9 @@ static UniValue consolidaterewards(const Config &config,
                                  "consolidaterewards \"address\" )\n" + 
                                  HelpRequiringPassphrase(pwallet) +
                                  "\nArguments:\n"
-                                 "1. \"address\"            (string, required) The DeVault address to send to."
-                                 "2. \"days\"               (int, optional, default=3, min=1,max=30). The number of days back to use coins from (this is based on assuming 720 blocks per day, adjust accordingly) "
-                                 "3. \"minimum amount\"     (int, optional, default=nMinRewardBalance). The transaction will be skipped unless at least this amount and also greater than nMinRewardBalance"
+                                 "1. \"address\"            (string, required) The DeVault address to send to.\n"
+                                 "2. \"days\"               (int, optional, default=3, min=1,max=30). The number of days back to use coins from (this is based on assuming 720 blocks per day, adjust accordingly)\n"
+                                 "3. \"minimum amount\"     (int, optional, default=nMinRewardBalance). The transaction will be skipped unless at least this amount and also greater than nMinRewardBalance\n"
                                  "\nResult:\n"
                                  "\"txid\"                  (string) The transaction id.\n"
                                  "\nExamples:\n" +
@@ -3870,6 +3937,56 @@ static UniValue generate(const Config &config, const JSONRPCRequest &request) {
                           true);
 }
 
+static UniValue generateuntilshutdown(const Config &config, const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (config.GetChainParams().NetworkIDString() != CBaseChainParams::TESTNET) {
+        return "Function only available on Testnet";
+    }
+    
+    if (request.fHelp || request.params.size() > 1) {
+        throw std::runtime_error(
+            "generateuntilshutdown\n"
+            "\nMine blocks to address in wallet until shutdown is called.\n"
+            "\nResult:\n"
+            "[ blockhashes ]     (array) hashes of blocks generated\n"
+            "\nExamples:\n"
+            "\nGenerateuntilshutdown\n" +
+            HelpExampleCli("generateuntilshutdown", ""));
+    }
+
+    std::shared_ptr<CReserveScript> coinbase_script;
+    pwallet->GetScriptForMining(coinbase_script);
+
+    // If the keypool is exhausted, no script is returned at all.  Catch this.
+    if (!coinbase_script) {
+        throw JSONRPCError(
+            RPC_WALLET_KEYPOOL_RAN_OUT,
+            "Error: Keypool ran out, please call keypoolrefill first");
+    }
+
+    // throw an error if no script was provided
+    if (coinbase_script->reserveScript.empty()) {
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "No coinbase script available");
+    }
+
+    try {
+        auto gen_bind = std::bind(generateBlocksUntilShutdown, std::ref(config), coinbase_script);
+        generate_thread = std::thread(&TraceThread<decltype(gen_bind)>, "devault-genrepeat", std::move(gen_bind));
+        generate_thread.detach();
+    } catch (...) {
+        return "failed to spawn process, please retry";
+    }
+    
+    return "thread spawned, shutdown will be required to stop";
+}
+
+
+
 UniValue rescanblockchain(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -4017,6 +4134,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "walletpassphrasechange",       walletpassphrasechange,       {"oldpassphrase","newpassphrase"} },
     { "wallet",             "walletpassphrase",             walletpassphrase,             {"passphrase","timeout"} },
     { "generating",         "generate",                     generate,                     {"nblocks","maxtries"} },
+    { "generating",         "generateuntilshutdown",        generateuntilshutdown,        {} },
 };
 // clang-format on
 
