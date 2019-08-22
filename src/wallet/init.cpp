@@ -62,7 +62,7 @@ void WalletInit::AddWalletOptions() const {
                  _("Do not load the wallet and disable wallet RPC calls"),
                  false, OptionsCategory::WALLET);
     gArgs.AddArg("-bypasspassword",
-               _("Set a default password of devaultpassword to bypass interactively setting it)"),
+               _("Set a default password of \"\" to bypass interactively setting it)"),
                  false, OptionsCategory::WALLET);
     gArgs.AddArg("-keypool=<n>",
                  strprintf(_("Set key pool size to <n> (default: %u)"),
