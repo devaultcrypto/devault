@@ -807,9 +807,11 @@ void CoinControlDialog::updateView() {
               ///
               auto Height = chainActive.Tip()->nHeight;
               auto nMinBlock = Params().GetConsensus().nMinRewardBlocks;
-              auto payAge = 0.1*int((1000.0*(Height - rewardval.GetHeight()))/nMinBlock);
+              // Quantize to integer % and limit to 99% so that sorting will work better
+              auto payAge = int((100.0*(Height - rewardval.GetHeight()))/nMinBlock);
+              if (payAge > 99) payAge = 99;
               auto payCount = rewardval.GetPayCount();
-              itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge) + QString("%"));
+              itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge).rightJustified(2,'0') + QString("%"));
               itemOutput->setText(COLUMN_NUMREWARDS, QString::number(payCount));
             } else {
               itemOutput->setText(COLUMN_REWARDAGE, tr("N.A."));
