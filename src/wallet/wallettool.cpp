@@ -118,7 +118,6 @@ static void WalletShowInfo(CWallet *wallet_instance) {
     }
 
     // Put in a sorted KeyPath order for easier comparison
-    i = 0;
     std::map<uint64_t,std::string> sortedKeys;
     for (const auto &m : wallet_instance->mapHdPubKeys) {
       std::string fullstr = EncodeDestination(m.first);

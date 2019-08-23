@@ -154,11 +154,10 @@ std::string LabelFromValue(const UniValue &value) {
 
 
 std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
-    {
-        // Don't keep cs_main locked.
-        LOCK(cs_main);
-    }
-
+  {
+    // keep cs_main locked.
+    LOCK(cs_main);
+    
     unsigned int nExtraNonce = 0;
     std::unique_ptr<CBlockTemplate> pblocktemplate(
                                                    BlockAssembler(config, g_mempool)
@@ -170,10 +169,7 @@ std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScrip
     
     CBlock *pblock = &pblocktemplate->block;
     
-    {
-        LOCK(cs_main);
-        IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
-    }
+    IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
     
     while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, config)) {
         ++pblock->nNonce;
@@ -183,30 +179,21 @@ std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScrip
     if (!ProcessNewBlock(config, shared_pblock, true, nullptr)) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
     }
-
     return pblock->GetHash().GetHex();
+  }
 }
 
-UniValue generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
-    {
-        // Don't keep cs_main locked.
-        LOCK(cs_main);
-    }
+void generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
 
     unsigned blockCount=0;
-    UniValue blockHashes(UniValue::VARR);
     stop_generate = false;
     
     while (!ShutdownRequested() && !stop_generate) {
         std::string hex = generateOneBlock(config, coinbaseScript);
-        blockHashes.push_back(hex);
-      
         // Sleep for 10 seconds between blocks to prevent too many
         LogPrintf("Block [%d], hash = %s\n",blockCount++, hex);
         MilliSleep(10000);
     }
-
-    return blockHashes;
 }
 
 
