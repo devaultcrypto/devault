@@ -23,3 +23,5 @@ public:
 };
 
 const WalletInitInterface &g_wallet_init_interface = DummyWalletInit();
+
+void StopGenerateThread() {}
