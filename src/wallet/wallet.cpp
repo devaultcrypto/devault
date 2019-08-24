@@ -2546,9 +2546,7 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
 #if __cplusplus < 201703L
   std::random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
 #else
-  std::random_device rd;
-  std::mt19937 g(rd());
-  std::shuffle(vCoins.begin(), vCoins.end(), g);
+  Shuffle(vCoins.begin(), vCoins.end(), FastRandomContext());
 #endif
 
     for (const COutput &output : vCoins) {
@@ -2703,6 +2701,7 @@ bool CWallet::SelectCoins(const std::vector<COutput> &vAvailableCoins,
     size_t nMaxChainLength = std::min(
         gArgs.GetArg("-limitancestorcount", DEFAULT_ANCESTOR_LIMIT),
         gArgs.GetArg("-limitdescendantcount", DEFAULT_DESCENDANT_LIMIT));
+
     bool fRejectLongChains = gArgs.GetBoolArg(
         "-walletrejectlongchains", DEFAULT_WALLET_REJECT_LONG_CHAINS);
 

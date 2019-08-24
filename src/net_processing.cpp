@@ -880,9 +880,10 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans) {
                      nErased);
         }
     }
+    FastRandomContext rng;
     while (mapOrphanTransactions.size() > nMaxOrphans) {
         // Evict a random orphan:
-        uint256 randomhash = GetRandHash();
+        uint256 randomhash = rng.rand256();
         auto it = mapOrphanTransactions.lower_bound(randomhash);
         if (it == mapOrphanTransactions.end()) {
             it = mapOrphanTransactions.begin();
