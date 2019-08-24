@@ -98,6 +98,41 @@ class FastRandomContext {
   /** generate a random uint256. */
   uint256 rand256();
 
+  // Do not permit copying a FastRandomContext (move it, or create a new one
+  // to get reseeded).
+    FastRandomContext(const FastRandomContext &) = delete;
+    FastRandomContext(FastRandomContext &&) = delete;
+    FastRandomContext &operator=(const FastRandomContext &) = delete;
+
+    /**
+     * Move a FastRandomContext. If the original one is used again, it will be
+     * reseeded.
+     */
+    FastRandomContext &operator=(FastRandomContext &&from) noexcept;
+
   /** Generate a random boolean. */
   bool randbool() { return randbits(1); }
 };
+
+/**
+ * More efficient than using std::shuffle on a FastRandomContext.
+ *
+ * This is more efficient as std::shuffle will consume entropy in groups of
+ * 64 bits at the time and throw away most.
+ *
+ * This also works around a bug in libstdc++ std::shuffle that may cause
+ * type::operator=(type&&) to be invoked on itself, which the library's
+ * debug mode detects and panics on. This is a known issue, see
+ * https://stackoverflow.com/questions/22915325/avoiding-self-assignment-in-stdshuffle
+ */
+template <typename I, typename R> void Shuffle(I first, I last, R &&rng) {
+    while (first != last) {
+        size_t j = rng.randrange(last - first);
+        if (j) {
+            using std::swap;
+            swap(*first, *(first + j));
+        }
+        ++first;
+    }
+}
+

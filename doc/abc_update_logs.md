@@ -268,13 +268,13 @@ XXXXX Merge #11480: [ui] Add toggle for unblinding password fields
       add new encoding checker for Schnorr sigs
       [sigencoding] refactor schnorr size check
       Do not unlock cs_main in ABC unless we've actually made progress.
-      Do not permit copying FastRandomContexts
-      Simplify testing RNG code
-      Use a local FastRandomContext in a few more places in net
-      Use a FastRandomContext in LimitOrphanTxSize
-      Introduce a Shuffle for FastRandomContext and use it in wallet and coinselection
-      Bugfix: randbytes should seed when needed (non reachable issue)
-      Make addrman use its local RNG exclusively
+#     Do not permit copying FastRandomContexts
+#     Simplify testing RNG code
+#     Use a local FastRandomContext in a few more places in net
+#     Use a FastRandomContext in LimitOrphanTxSize
+#     Introduce a Shuffle for FastRandomContext and use it in wallet and coinselection
+#     Bugfix: randbytes should seed when needed (non reachable issue)
+#     Make addrman use its local RNG exclusively
 
 # 19.9
 ##### Merge #10587: Net: Fix resource leak in ReadBinaryFile(...)
