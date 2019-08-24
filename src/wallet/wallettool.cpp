@@ -30,29 +30,29 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
     bool first_run;
     load_wallet_ret = wallet_instance->LoadWallet(first_run);
   } catch (const std::runtime_error &) {
-    tfm::format(std::cerr, "Error loading %s. Is wallet being used by another process?\n", wallet_path.c_str());
+    tfm::format(std::cerr, "Error loading %s. Is wallet being used by another process?\n", wallet_path.string());
     return nullptr;
   }
 
   if (load_wallet_ret != DBErrors::LOAD_OK) {
     wallet_instance = nullptr;
     if (load_wallet_ret == DBErrors::CORRUPT) {
-      tfm::format(std::cerr, "Error loading %s: Wallet corrupted", wallet_path.c_str());
+      tfm::format(std::cerr, "Error loading %s: Wallet corrupted", wallet_path.string());
       return nullptr;
     } else if (load_wallet_ret == DBErrors::NONCRITICAL_ERROR) {
       tfm::format(std::cerr,
                   "Error reading %s! All keys read correctly, but transaction data"
                   " or address book entries might be missing or incorrect.",
-                  wallet_path.c_str());
+                  wallet_path.string());
     } else if (load_wallet_ret == DBErrors::TOO_NEW) {
-      tfm::format(std::cerr, "Error loading %s: Wallet requires newer version of %s", wallet_path.c_str(),
+      tfm::format(std::cerr, "Error loading %s: Wallet requires newer version of %s", wallet_path.string(),
                   PACKAGE_NAME);
       return nullptr;
     } else if (load_wallet_ret == DBErrors::NEED_REWRITE) {
       tfm::format(std::cerr, "Wallet needed to be rewritten: restart %s to complete", PACKAGE_NAME);
       return nullptr;
     } else {
-      tfm::format(std::cerr, "Error loading %s", wallet_path.c_str());
+      tfm::format(std::cerr, "Error loading %s", wallet_path.string());
       return nullptr;
     }
   }
@@ -179,12 +179,12 @@ bool GetWalletInfo() {
   fs::path wallet_path = wallet_dir / walletFile;
   
   if (!fs::exists(wallet_path)) {
-    tfm::format(std::cerr, "Error: no wallet file at %s\n", wallet_path.c_str());
+    tfm::format(std::cerr, "Error: no wallet file at %s\n", wallet_path.string());
     return false;
   }
   std::string error;
   if (!CDB::VerifyEnvironment(walletFile, wallet_dir, error)) {
-      tfm::format(std::cerr, "Error loading %s. Is wallet being used by other process?\n", wallet_path.c_str());
+      tfm::format(std::cerr, "Error loading %s. Is wallet being used by other process?\n", wallet_path.string());
       return false;
   }
   std::shared_ptr<CWallet> wallet_instance = LoadWallet(wallet_path);

@@ -99,7 +99,9 @@ if BUILD_BITCOIN_UTILS
 endif
 
 if ENABLE_WALLET
-#  bin_PROGRAMS += bdb-check
+if !TARGET_WINDOWS
+  bin_PROGRAMS += bdb-check
+endif
 endif
 
 
