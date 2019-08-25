@@ -2442,7 +2442,7 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Merge #13534: Don't assert(foo()) where foo() has side effects
      Merge #13662: Explain when reindex-chainstate can be used instead of reindex
      Fixes AES benchmarks
-     qt: Replace objc_msgSend with native syntax
+##   qt: Replace objc_msgSend with native syntax
      [CMAKE] Fix wrong Openssl include directory variable name
      add SCHNORR_MULTISIG to mandatory flags
      Make more script validation flags backward compatible
@@ -2461,8 +2461,8 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [CMAKE] SYS_getrandom is expected to be linux only
      [CMAKE] Fix FindBerkeleyDB for FreeBSD
 #    [CMAKE] Enable SSE4.1, SHA-NI and AVX2 for the crypto library
-     reduce code duplication in UpdateFlags
-     Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
+##   reduce code duplication in UpdateFlags
+##   Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
 ##   [wallet] Add wallet name to log messages
      [tests] Fix race in rpc_deprecated.py
      add SCRIPT_VERIFY_MINIMALDATA to mandatory flags
