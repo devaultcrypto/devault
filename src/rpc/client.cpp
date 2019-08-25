@@ -95,6 +95,7 @@ static const CRPCConvertParam vRPCConvertParams[] = {
     {"listunspent", 1, "maxconf"},
     {"listunspent", 2, "addresses"},
     {"listunspent", 4, "query_options"},
+    {"multisigsignraw", 1, "prevtxs"},
     {"getblock", 1, "verbosity"},
     {"getblockheader", 1, "verbose"},
     {"getchaintxstats", 0, "nblocks"},

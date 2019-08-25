@@ -1037,7 +1037,7 @@ static UniValue signrawtransactionwithkey(const Config &config,
             "[{\"txid\":\"id\",\"vout\":n,\"scriptPubKey\":\"hex\","
             "\"redeemScript\":\"hex\"},...] sighashtype )\n"
             "\nSign inputs for raw transaction (serialized, hex-encoded).\n"
-            "The second argument is an array of base58-encoded private\n"
+            "The second argument is an array of bech32-encoded private\n"
             "keys that will be the only keys used to sign the transaction.\n"
             "The third optional argument (may be null) is an array of previous "
             "transaction outputs that\n"
@@ -1048,10 +1048,10 @@ static UniValue signrawtransactionwithkey(const Config &config,
             "1. \"hexstring\"                      (string, required) The "
             "transaction hex string\n"
             "2. \"privkeys\"                       (string, required) A json "
-            "array of base58-encoded private keys for signing\n"
+            "array of bech32-encoded private keys for signing\n"
             "    [                               (json array of strings)\n"
             "      \"privatekey\"                  (string) private key in "
-            "base58-encoding\n"
+            "bech32-encoding\n"
             "      ,...\n"
             "    ]\n"
             "3. \"prevtxs\"                        (string, optional) An json "
@@ -1135,6 +1135,92 @@ static UniValue signrawtransactionwithkey(const Config &config,
                            request.params[3]);
 }
 
+static UniValue multisigsignraw(const Config &config,
+                                const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() < 2 ||
+        request.params.size() > 3) {
+        throw std::runtime_error(
+            "multisigsign \"hexstring\" "
+            "[{\"txid\":\"id\",\"vout\":n,\"scriptPubKey\":\"hex\","
+            "\"redeemScript\":\"hex\"},...] \"privatekey1\"\n"
+            "\nSign inputs for raw transaction (serialized, hex-encoded).\n"
+            "The last argument is a bech32-encoded private key\n"
+            "that will be used to sign the transaction.\n"
+            "The second argument is an array of previous transaction outputs that\n"
+            "this transaction depends on but may not yet be in the block "
+            "chain.\n"
+
+            "\nArguments:\n"
+            "1. \"hexstring\"                      (string, required) The "
+            "transaction hex string\n"
+            "2. \"prevtxs\"                        (string, required) An json "
+            "array of previous dependent transaction outputs\n"
+            "     [                              (json array of json objects, "
+            "or 'null' if none provided)\n"
+            "       {\n"
+            "         \"txid\":\"id\",               (string, required) The "
+            "transaction id\n"
+            "         \"vout\":n,                  (numeric, required) The "
+            "output number\n"
+            "         \"scriptPubKey\": \"hex\",     (string, required) script "
+            "key\n"
+            "         \"redeemScript\": \"hex\",     (string, required for "
+            "P2SH) redeem script\n"
+            "         \"amount\": value            (numeric, required) The "
+            "amount spent\n"
+            "       }\n"
+            "       ,...\n"
+            "    ]\n"
+            "3. \"privatekey\"                       (string, required) A "
+            " bech32-encoded private key for signing\n"
+            "    \n"
+            "\nResult:\n"
+            "{\n"
+            "  \"hex\" : \"value\",                  (string) The hex-encoded "
+            "raw transaction with signature(s)\n"
+            "  \"complete\" : true|false,          (boolean) If the "
+            "transaction has a complete set of signatures\n"
+            "  \"errors\" : [                      (json array of objects) "
+            "Script verification errors (if there are any)\n"
+            "    {\n"
+            "      \"txid\" : \"hash\",              (string) The hash of the "
+            "referenced, previous transaction\n"
+            "      \"vout\" : n,                   (numeric) The index of the "
+            "output to spent and used as input\n"
+            "      \"scriptSig\" : \"hex\",          (string) The hex-encoded "
+            "signature script\n"
+            "      \"sequence\" : n,               (numeric) Script sequence "
+            "number\n"
+            "      \"error\" : \"text\"              (string) Verification or "
+            "signing error related to the input\n"
+            "    }\n"
+            "    ,...\n"
+            "  ]\n"
+            "}\n"
+
+            "\nExamples:\n" +
+            HelpExampleCli("multsigsignraw", "\"myhex\" \"prevtxs\" \"dvtpriv:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\"")  +
+            HelpExampleRpc("multsigsignraw", "\"myhex\" \"prevtxs\" \"dvtpriv:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\""));
+    }
+
+    RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VARR, UniValue::VSTR}, true);
+
+    CMutableTransaction mtx;
+    if (!DecodeHexTx(mtx, request.params[0].get_str())) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
+    }
+
+    CBasicKeyStore keystore;
+    CKey key = DecodeSecret(request.params[2].get_str());
+    if (!key.IsValid()) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                           "Invalid private key encoding or range");
+    }
+    keystore.AddKey(key);
+    UniValue empty;
+    return SignTransaction(mtx, request.params[1], &keystore, true, empty);
+}
+
 static UniValue signrawtransaction(const Config &config,
                                    const JSONRPCRequest &request) {
 #ifdef ENABLE_WALLET
@@ -1155,7 +1241,7 @@ static UniValue signrawtransaction(const Config &config,
             "this transaction depends on but may not yet be in the block "
             "chain.\n"
             "The third optional argument (may be null) is an array of "
-            "base58-encoded private\n"
+            "bech32-encoded private\n"
             "keys that, if given, will be the only keys used to sign the "
             "transaction.\n"
 #ifdef ENABLE_WALLET
@@ -1184,10 +1270,10 @@ static UniValue signrawtransaction(const Config &config,
             "       ,...\n"
             "    ]\n"
             "3. \"privkeys\"     (string, optional) A json array of "
-            "base58-encoded private keys for signing\n"
+            "bech32-encoded private keys for signing\n"
             "    [                  (json array of strings, or 'null' if none "
             "provided)\n"
-            "      \"privatekey\"   (string) private key in base58-encoding\n"
+            "      \"privatekey\"   (string) private key in bech32-encoding\n"
             "      ,...\n"
             "    ]\n"
             "4. \"sighashtype\"     (string, optional, default=ALL) The "
@@ -1485,6 +1571,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "rawtransactions",    "combinerawtransaction",     combinerawtransaction,     {"txs"} },
     { "rawtransactions",    "signrawtransaction",        signrawtransaction,        {"hexstring","prevtxs","privkeys","sighashtype"} }, /* uses wallet if enabled */
     { "rawtransactions",    "signrawtransactionwithkey", signrawtransactionwithkey, {"hexstring","privkeys","prevtxs","sighashtype"} },
+    { "rawtransactions",    "multisigsignraw",           multisigsignraw,           {"hexstring", "prevtxs","privatekey"} },
     { "rawtransactions",    "testmempoolaccept",         testmempoolaccept,         {"rawtxs","allowhighfees"} },
 
     { "blockchain",         "gettxoutproof",             gettxoutproof,             {"txids", "blockhash"} },
