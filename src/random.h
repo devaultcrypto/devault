@@ -56,6 +56,18 @@ class FastRandomContext {
   /** Initialize with explicit seed (only for testing) */
   explicit FastRandomContext(const uint256 &seed);
 
+  // Do not permit copying a FastRandomContext (move it, or create a new one
+  // to get reseeded).
+  FastRandomContext(const FastRandomContext &) = delete;
+  FastRandomContext(FastRandomContext &&) = delete;
+  FastRandomContext &operator=(const FastRandomContext &) = delete;
+  /**
+   * Move a FastRandomContext. If the original one is used again, it will be
+   * reseeded.
+   */
+  FastRandomContext &operator=(FastRandomContext &&from) noexcept;
+ 
+
   /** Generate a random 64-bit integer. */
   uint64_t rand64() {
     if (bytebuf_size < 8) { FillByteBuffer(); }
@@ -98,20 +110,16 @@ class FastRandomContext {
   /** generate a random uint256. */
   uint256 rand256();
 
-  // Do not permit copying a FastRandomContext (move it, or create a new one
-  // to get reseeded).
-    FastRandomContext(const FastRandomContext &) = delete;
-    FastRandomContext(FastRandomContext &&) = delete;
-    FastRandomContext &operator=(const FastRandomContext &) = delete;
-
-    /**
-     * Move a FastRandomContext. If the original one is used again, it will be
-     * reseeded.
-     */
-    FastRandomContext &operator=(FastRandomContext &&from) noexcept;
-
   /** Generate a random boolean. */
   bool randbool() { return randbits(1); }
+
+  // Compatibility with the C++11 UniformRandomBitGenerator concept
+  typedef uint64_t result_type;
+  static constexpr uint64_t min() { return 0; }
+  static constexpr uint64_t max() {
+      return std::numeric_limits<uint64_t>::max();
+  }
+  inline uint64_t operator()() { return rand64(); }
 };
 
 /**
