@@ -40,6 +40,8 @@
 #include <memory>
 #include <thread>
 
+FastRandomContext g_insecure_rand_ctx;
+
 void CConnmanTest::AddNode(CNode &node) {
   LOCK(g_connman->cs_vNodes);
   g_connman->vNodes.push_back(&node);

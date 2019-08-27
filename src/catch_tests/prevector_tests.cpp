@@ -182,27 +182,27 @@ TEST_CASE("PrevectorTestInt") {
   for (int j = 0; j < 64; j++) {
     prevector_tester<8, int> test;
     for (int i = 0; i < 2048; i++) {
-      if (InsecureRandBits(2) == 0) { test.insert(InsecureRandRange(test.size() + 1), insecure_rand()); }
+      if (InsecureRandBits(2) == 0) { test.insert(InsecureRandRange(test.size() + 1), InsecureRand32()); }
       if (test.size() > 0 && InsecureRandBits(2) == 1) { test.erase(InsecureRandRange(test.size())); }
       if (InsecureRandBits(3) == 2) {
         int new_size = std::max(0, std::min(30, int(test.size()) + int(InsecureRandRange(5)) - 2));
         test.resize(new_size);
       }
       if (InsecureRandBits(3) == 3) {
-        test.insert(InsecureRandRange(test.size() + 1), 1 + InsecureRandBool(), insecure_rand());
+        test.insert(InsecureRandRange(test.size() + 1), 1 + InsecureRandBool(), InsecureRand32());
       }
       if (InsecureRandBits(3) == 4) {
         int del = std::min<int>(test.size(), 1 + (InsecureRandBool()));
         int beg = InsecureRandRange(test.size() + 1 - del);
         test.erase(beg, beg + del);
       }
-      if (InsecureRandBits(4) == 5) { test.push_back(insecure_rand()); }
+      if (InsecureRandBits(4) == 5) { test.push_back(InsecureRand32()); }
       if (test.size() > 0 && InsecureRandBits(4) == 6) { test.pop_back(); }
       if (InsecureRandBits(5) == 7) {
         int values[4];
         int num = 1 + (InsecureRandBits(2));
         for (int k = 0; k < num; k++) {
-          values[k] = insecure_rand();
+          values[k] = InsecureRand32();
         }
         test.insert_range(InsecureRandRange(test.size() + 1), values, values + num);
       }
@@ -213,9 +213,9 @@ TEST_CASE("PrevectorTestInt") {
       }
       if (InsecureRandBits(5) == 9) { test.reserve(InsecureRandBits(5)); }
       if (InsecureRandBits(6) == 10) { test.shrink_to_fit(); }
-      if (test.size() > 0) { test.update(InsecureRandRange(test.size()), insecure_rand()); }
+      if (test.size() > 0) { test.update(InsecureRandRange(test.size()), InsecureRand32()); }
       if (InsecureRandBits(10) == 11) { test.clear(); }
-      if (InsecureRandBits(9) == 12) { test.assign(InsecureRandBits(5), insecure_rand()); }
+      if (InsecureRandBits(9) == 12) { test.assign(InsecureRandBits(5), InsecureRand32()); }
       if (InsecureRandBits(3) == 3) { test.swap(); }
       if (InsecureRandBits(4) == 8) { test.copy(); }
       if (InsecureRandBits(5) == 18) { test.move(); }
