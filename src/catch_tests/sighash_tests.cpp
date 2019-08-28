@@ -11,7 +11,7 @@
 #include <serialize.h>
 #include <streams.h>
 #include <test/jsonutil.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <util.h>
 #include <utilstrencodings.h>
 #include <version.h>

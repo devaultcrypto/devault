@@ -11,7 +11,7 @@
 #include <script/script_error.h>
 #include <script/sighashtype.h>
 #include <script/sign.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 
 #include "catch_unit.h"

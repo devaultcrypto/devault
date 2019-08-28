@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <univalue.h>
 #include <vector>
 

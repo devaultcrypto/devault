@@ -16,7 +16,7 @@
 #include <test/jsonutil.h>
 #include <test/scriptflags.h>
 #include <test/sigutil.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <util.h>
 #include <utilstrencodings.h>
 

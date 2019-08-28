@@ -9,7 +9,7 @@
 #include <config.h>
 #include <dstencode.h>
 #include <script/script.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 #include <util.h>
 #include <utilstrencodings.h>

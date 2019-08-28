@@ -15,7 +15,7 @@
 #include <util.h>
 #include <validation.h>
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include <cstdint>
 

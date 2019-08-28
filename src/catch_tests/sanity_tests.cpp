@@ -4,7 +4,7 @@
 
 #include <compat/sanity.h>
 #include <key.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include "catch_unit.h"
 

@@ -9,7 +9,7 @@
 #include <netbase.h>
 #include <utilsplitstring.h>
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include "catch_unit.h"
 #include "callrpc.h"

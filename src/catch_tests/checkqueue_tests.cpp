@@ -11,7 +11,7 @@
 #include <checkqueue.h>
 #include <condition_variable>
 #include <mutex>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <thread>
 #include <vector>
 

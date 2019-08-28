@@ -7,7 +7,7 @@
 #include <rpc/jsonrpcrequest.h>
 #include <rpc/server.h>
 #include <string>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <util.h>
 
 #include "catch_unit.h"

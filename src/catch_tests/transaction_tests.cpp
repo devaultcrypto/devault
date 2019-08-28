@@ -5,7 +5,7 @@
 
 #include <data/tx_invalid.json.h>
 #include <data/tx_valid.json.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include <chainparams.h> // For CChainParams
 #include <checkqueue.h>

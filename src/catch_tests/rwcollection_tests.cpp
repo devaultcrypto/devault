@@ -5,7 +5,7 @@
 #include <reverse_iterator.h>
 #include <rwcollection.h>
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include "catch_unit.h"
 

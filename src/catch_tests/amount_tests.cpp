@@ -4,7 +4,7 @@
 
 #include <amount.h>
 #include <array>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>

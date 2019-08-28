@@ -8,7 +8,7 @@
 #include <consensus/consensus.h>
 #include <fs_util.h>
 #include <primitives/transaction.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <util.h>
 #include <validation.h>
 

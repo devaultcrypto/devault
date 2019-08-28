@@ -12,7 +12,7 @@
 #include <script/interpreter.h>
 #include <script/script.h>
 #include <script/standard.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 
 #include <limits>

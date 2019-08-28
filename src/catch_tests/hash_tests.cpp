@@ -4,7 +4,7 @@
 
 #include <crypto/siphash.h>
 #include <hash.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <utilstrencodings.h>
 
 #include <vector>

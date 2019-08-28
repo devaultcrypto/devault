@@ -7,7 +7,7 @@
 #include <merkleblock.h>
 #include <serialize.h>
 #include <streams.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 #include <version.h>
 

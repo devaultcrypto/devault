@@ -6,7 +6,7 @@
 #include <config.h>
 #include <net_processing.h> // For PeerLogicValidation
 
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 
 #include "catch_unit.h"
 

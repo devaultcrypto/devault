@@ -10,7 +10,7 @@
 #include <utilstrencodings.h>
 
 #include <catch_tests/data/blockfilters.json.h>
-#include <test/test_bitcoin.h>
+#include <catch_tests/test_bitcoin.h>
 #include <univalue.h>
 
 #include "catch_unit.h"
