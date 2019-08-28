@@ -137,12 +137,12 @@
       Merge #10626: doc: Remove outdated minrelaytxfee comment
       Use functional tests timings from the source directory
       [LINTER] Enforce source code file name conventions
-      doc: Make build system insert version in Doxyfile
+#     doc: Make build system insert version in Doxyfile
       Make various functions in src/test/ static
       Merge #10347: Use range-based for loops (C++11) when looping over vector elements
       Split off key_io_tests from base58_tests
       Make printchunk() in support/lockedpool.cpp static
-      Merge #10530: Fix invalid instantiation and possibly unsafe accesses of array in class base_uint<BITS>
+#     Merge #10530: Fix invalid instantiation and possibly unsafe accesses of array in class base_uint<BITS>
       [LINTER] Add a linter to replace `unsigned char` with `uint8_t`
       Move make check test logs out of tree
       Partial backport of Core PR11167 to have similar feature in base58_tests.cpp
@@ -175,13 +175,13 @@
       [ibd.sh] Store datadir and debug.log paths in variables
       Fix memory access violation in tests
       Fix memory leak in work_comparator_tests.cpp
-      Merge #10313: [Consensus] Add constant for maximum stack size
+#     Merge #10313: [Consensus] Add constant for maximum stack size
       [rpc] fix verbose argument for getblock in bitcoin-cli
       rpcuser.py: Use 'python' not 'python2'
       [build] Warn that only libconsensus can be built without boost
-      [build] Don't fail when passed --disable-lcov and lcov isn't available
-      Use AC_ARG_VAR to set ARFLAGS.
-      Make CWallet IsSpent and IsLockedCoin take a COutPoint as parameter
+#     [build] Don't fail when passed --disable-lcov and lcov isn't available
+#     Use AC_ARG_VAR to set ARFLAGS.
+#     Make CWallet IsSpent and IsLockedCoin take a COutPoint as parameter
       [tests] fix flake8 nits in feature_csv_activation.py
       [tests] Change feature_csv_activation.py to use BitcoinTestFramework
       Move utility functions in feature_csv_activation.py out of class.
@@ -201,7 +201,7 @@
       Merge #11773: [tests] Change feature_block.py to use BitcoinTestFramework
       Revert "Workaround to Travis-CI Wine/Mingw build hanging occasionally"
       Backport base58 tests from PR11167
-      Merge #12127: Remove unused mempool index
+#     Merge #12127: Remove unused mempool index
       Merge #12424: Fix rescan test failure due to unset g_address_type, g_change_type
       Merge #12150: Fix ListCoins test failure due to unset g_address_type, g_change_type
       Merge #13163: Make it clear which functions that are intended to be translation unit local (bitcoin-cli.cpp)
@@ -218,7 +218,7 @@
       Merge #10479: [trivial] Fix comment for ForceSetArg()
       test: Make g_insecure_rand_ctx thread_local
       Make unit tests use the insecure_rand_ctx exclusively
-      Handle various leftover from PR10321
+#     Handle various leftover from PR10321
       Various nits in the Qt code
 #     Merge #11870: wallet: Remove unnecessary mempool lock in ReacceptWalletTransactions
       Merge #11516: crypto: Add test cases covering the relevant HMAC-SHA{256,512} key length boundaries
