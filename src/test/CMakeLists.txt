@@ -74,7 +74,7 @@ add_test_to_suite(devault test_devault
 	crypto_tests.cpp
 	cuckoocache_tests.cpp
 	dbwrapper_tests.cpp
-	DoS_tests.cpp
+	denialofservice_tests.cpp
 	dstencode_tests.cpp
 	excessiveblock_tests.cpp
 	feerate_tests.cpp

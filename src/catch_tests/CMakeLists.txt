@@ -86,7 +86,7 @@ set(UNIT_CTESTS
   crypto
   cuckoocache
   dbwrapper
-  DoS
+  denialofservice
   dstencode
   excessiveblock
   feerate
