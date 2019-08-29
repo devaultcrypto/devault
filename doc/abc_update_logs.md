@@ -86,23 +86,23 @@
 # 19.10      
       Update manpages for 0.19.10 release
       Update chainparams
-      Enforce the use of TxId when constructing COutPoint
+#     Enforce the use of TxId when constructing COutPoint
       Update rpcwallet.cpp to use TxId
       Factor out outpoint generation in transaction_tests.cpp
       Use TxId in miner_tests.cpp
       Update seeds for 0.19.10 release
       [wallet] Pass error message back from CWallet::Verify()
       Place sanitizers log into their own directory
-      Avoid std::locale/imbue in DateTimeStrFormat
+#     Avoid std::locale/imbue in DateTimeStrFormat
       [wallet] Add CWallet::Verify function
       [wallet] setup wallet background flushing in WalletInit directly
       Use txid in bloom tests
-      Wrap generation of randomized outpoint in tests
+#     Wrap generation of randomized outpoint in tests
       Remove criptolayer.net from seeder lists
       outpt => output
-      use TxId properly in coincontroldialog
+#     use TxId properly in coincontroldialog
       [wallet] Fix potential memory leak in CreateWalletFromFile
-      Rename wallet database classes
+#     Rename wallet database classes
 #     wallet: Initialize m_last_block_processed to nullptr. Initialize fields where defined.
 #     Merge #10728: fix typo in help text for removeprunedfunds
       wallet: Make vpwallets usage thread safe
