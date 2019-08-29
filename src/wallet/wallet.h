@@ -662,7 +662,7 @@ private:
                      std::set<CInputCoin> &setCoinsRet, Amount &nValueRet,
                      const CCoinControl *coinControl = nullptr) const;
 
-    std::unique_ptr<CWalletDBWrapper> dbw;
+    std::unique_ptr<WalletDatabase> dbw;
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
@@ -703,7 +703,7 @@ private:
                          int posInBlock = 0);
 
     /* HD derive new child key (on internal or external chain) */
-    void DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata &metadata,
+    void DeriveNewChildKey(WalletBatch &batch, CKeyMetadata &metadata,
                            CKey &secret, bool internal = false);
 
     std::set<int64_t> setInternalKeyPool;
@@ -748,7 +748,7 @@ public:
      * Get database handle used by this wallet. Ideally this function would not
      * be necessary.
      */
-    CWalletDBWrapper &GetDBHandle() { return *dbw; }
+    WalletDatabase &GetDBHandle() { return *dbw; }
 
     /**
      * Get a name for this wallet for logging/debugging purposes.
@@ -778,12 +778,12 @@ public:
 
     // Create wallet with dummy database handle
     explicit CWallet(const CChainParams &chainParamsIn)
-        : dbw(new CWalletDBWrapper()), chainParams(chainParamsIn) {
+        : dbw(new WalletDatabase()), chainParams(chainParamsIn) {
     }
 
     // Create wallet with passed-in database handle
     CWallet(const CChainParams &chainParamsIn,
-            std::unique_ptr<CWalletDBWrapper> dbw_in)
+            std::unique_ptr<WalletDatabase> dbw_in)
         : dbw(std::move(dbw_in)), chainParams(chainParamsIn) {
     }
 
@@ -944,7 +944,7 @@ public:
      * Increment the next transaction order id
      * @return next transaction order id
      */
-    int64_t IncOrderPosNext(CWalletDB *pwalletdb = nullptr);
+    int64_t IncOrderPosNext(WalletBatch *pbatch = nullptr);
     DBErrors ReorderTransactions();
     bool AccountMove(std::string strFrom, std::string strTo,
                      const Amount nAmount, std::string strComment = "");
@@ -1031,7 +1031,7 @@ public:
     void ListAccountCreditDebit(const std::string &strAccount,
                                 std::list<CAccountingEntry> &entries);
     bool AddAccountingEntry(const CAccountingEntry &);
-    bool AddAccountingEntry(const CAccountingEntry &, CWalletDB *pwalletdb);
+    bool AddAccountingEntry(const CAccountingEntry &, WalletBatch *pbatch);
     bool DummySignTx(CMutableTransaction &txNew,
                      const std::set<CTxOut> &txouts) const {
         std::vector<CTxOut> v_txouts(txouts.size());
@@ -1111,7 +1111,7 @@ public:
 
     //! signify that a particular wallet feature is now used. this may change
     //! nWalletVersion and nWalletMaxVersion if those are lower
-    bool SetMinVersion(enum WalletFeature, CWalletDB *pwalletdbIn = nullptr,
+    bool SetMinVersion(enum WalletFeature, WalletBatch *pbatchIn = nullptr,
                        bool fExplicit = false);
 
     //! change which version we're allowed to upgrade to (note that this does

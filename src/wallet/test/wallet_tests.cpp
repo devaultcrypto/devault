@@ -663,8 +663,8 @@ public:
                               GetScriptForRawPubKey(coinbaseKey.GetPubKey()));
         ::bitdb.MakeMock();
         wallet.reset(new CWallet(
-            Params(), std::unique_ptr<CWalletDBWrapper>(
-                          new CWalletDBWrapper(&bitdb, "wallet_test.dat"))));
+            Params(), std::unique_ptr<WalletDatabase>(
+                          new WalletDatabase(&bitdb, "wallet_test.dat"))));
         bool firstRun;
         wallet->LoadWallet(firstRun);
         AddKey(*wallet, coinbaseKey);

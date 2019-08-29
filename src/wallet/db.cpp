@@ -31,7 +31,7 @@ namespace {
 //! (https://docs.oracle.com/cd/E17275_01/html/programmer_reference/program_copy.html),
 //! so bitcoin should never create different databases with the same fileid, but
 //! this error can be triggered if users manually copy database files.
-void CheckUniqueFileid(const CDBEnv &env, const std::string &filename, Db &db) {
+void CheckUniqueFileid(const BerkeleyEnvironment &env, const std::string &filename, Db &db) {
     if (env.IsMock()) {
         return;
     }
@@ -40,7 +40,7 @@ void CheckUniqueFileid(const CDBEnv &env, const std::string &filename, Db &db) {
     int ret = db.get_mpf()->get_fileid(fileid);
     if (ret != 0) {
         throw std::runtime_error(
-            strprintf("CDB: Can't open database %s (get_fileid failed with %d)",
+            strprintf("BerkeleyBatch: Can't open database %s (get_fileid failed with %d)",
                       filename, ret));
     }
 
@@ -52,7 +52,7 @@ void CheckUniqueFileid(const CDBEnv &env, const std::string &filename, Db &db) {
             const char *item_filename = nullptr;
             item.second->get_dbname(&item_filename, nullptr);
             throw std::runtime_error(strprintf(
-                "CDB: Can't open database %s (duplicates fileid %s from %s)",
+                "BerkeleyBatch: Can't open database %s (duplicates fileid %s from %s)",
                 filename,
                 HexStr(std::begin(item_fileid), std::end(item_fileid)),
                 item_filename ? item_filename : "(unknown database)"));
@@ -62,12 +62,12 @@ void CheckUniqueFileid(const CDBEnv &env, const std::string &filename, Db &db) {
 } // namespace
 
 //
-// CDB
+// BerkeleyBatch
 //
 
-CDBEnv bitdb;
+BerkeleyEnvironment bitdb;
 
-void CDBEnv::EnvShutdown() {
+void BerkeleyEnvironment::EnvShutdown() {
     if (!fDbEnvInit) {
         return;
     }
@@ -75,7 +75,7 @@ void CDBEnv::EnvShutdown() {
     fDbEnvInit = false;
     int ret = dbenv->close(0);
     if (ret != 0) {
-        LogPrintf("CDBEnv::EnvShutdown: Error %d shutting down database "
+        LogPrintf("BerkeleyEnvironment::EnvShutdown: Error %d shutting down database "
                   "environment: %s\n",
                   ret, DbEnv::strerror(ret));
     }
@@ -85,25 +85,25 @@ void CDBEnv::EnvShutdown() {
     }
 }
 
-void CDBEnv::Reset() {
+void BerkeleyEnvironment::Reset() {
     dbenv = std::make_unique<DbEnv>(DB_CXX_NO_EXCEPTIONS);
     fDbEnvInit = false;
     fMockDb = false;
 }
 
-CDBEnv::CDBEnv() {
+BerkeleyEnvironment::BerkeleyEnvironment() {
     Reset();
 }
 
-CDBEnv::~CDBEnv() {
+BerkeleyEnvironment::~BerkeleyEnvironment() {
     EnvShutdown();
 }
 
-void CDBEnv::Close() {
+void BerkeleyEnvironment::Close() {
     EnvShutdown();
 }
 
-bool CDBEnv::Open(const fs::path &pathIn) {
+bool BerkeleyEnvironment::Open(const fs::path &pathIn) {
     if (fDbEnvInit) {
         return true;
     }
@@ -114,7 +114,7 @@ bool CDBEnv::Open(const fs::path &pathIn) {
     fs::path pathLogDir = pathIn / "database";
     TryCreateDirectories(pathLogDir);
     fs::path pathErrorFile = pathIn / "db.log";
-    LogPrintf("CDBEnv::Open: LogDir=%s ErrorFile=%s\n", pathLogDir.string(),
+    LogPrintf("BerkeleyEnvironment::Open: LogDir=%s ErrorFile=%s\n", pathLogDir.string(),
               pathErrorFile.string());
 
     unsigned int nEnvFlags = 0;
@@ -142,7 +142,7 @@ bool CDBEnv::Open(const fs::path &pathIn) {
     if (ret != 0) {
         dbenv->close(0);
         return error(
-            "CDBEnv::Open: Error %d opening database environment: %s\n", ret,
+            "BerkeleyEnvironment::Open: Error %d opening database environment: %s\n", ret,
             DbEnv::strerror(ret));
     }
 
@@ -151,14 +151,14 @@ bool CDBEnv::Open(const fs::path &pathIn) {
     return true;
 }
 
-void CDBEnv::MakeMock() {
+void BerkeleyEnvironment::MakeMock() {
     if (fDbEnvInit) {
-        throw std::runtime_error("CDBEnv::MakeMock: Already initialized");
+        throw std::runtime_error("BerkeleyEnvironment::MakeMock: Already initialized");
     }
 
     //interruption_point(interrupt);
 
-    LogPrint(BCLog::DB, "CDBEnv::MakeMock\n");
+    LogPrint(BCLog::DB, "BerkeleyEnvironment::MakeMock\n");
 
     dbenv->set_cachesize(1, 0, 1);
     dbenv->set_lg_bsize(10485760 * 4);
@@ -174,14 +174,14 @@ void CDBEnv::MakeMock() {
                     S_IRUSR | S_IWUSR);
     if (ret > 0) {
         throw std::runtime_error(strprintf(
-            "CDBEnv::MakeMock: Error %d opening database environment.", ret));
+            "BerkeleyEnvironment::MakeMock: Error %d opening database environment.", ret));
     }
 
     fDbEnvInit = true;
     fMockDb = true;
 }
 
-CDBEnv::VerifyResult CDBEnv::Verify(const std::string &strFile,
+BerkeleyEnvironment::VerifyResult BerkeleyEnvironment::Verify(const std::string &strFile,
                                     recoverFunc_type recoverFunc,
                                     std::string &out_backup_filename) {
     LOCK(cs_db);
@@ -200,9 +200,9 @@ CDBEnv::VerifyResult CDBEnv::Verify(const std::string &strFile,
     return (fRecovered ? VerifyResult::RECOVER_OK : VerifyResult::RECOVER_FAIL);
 }
 
-void CDB::Interrupt() { interrupt = true; }
+void BerkeleyBatch::Interrupt() { interrupt = true; }
 
-bool CDB::Recover(const std::string &filename, void *callbackDataIn,
+bool BerkeleyBatch::Recover(const std::string &filename, void *callbackDataIn,
                   bool (*recoverKVcallback)(void *callbackData,
                                             CDataStream ssKey,
                                             CDataStream ssValue),
@@ -224,7 +224,7 @@ bool CDB::Recover(const std::string &filename, void *callbackDataIn,
         return false;
     }
 
-    std::vector<CDBEnv::KeyValPair> salvagedData;
+    std::vector<BerkeleyEnvironment::KeyValPair> salvagedData;
     bool fSuccess = bitdb.Salvage(newFilename, true, salvagedData);
     if (salvagedData.empty()) {
         LogPrintf("Salvage(aggressive) found no records in %s.\n", newFilename);
@@ -246,7 +246,7 @@ bool CDB::Recover(const std::string &filename, void *callbackDataIn,
     }
 
     DbTxn *ptxn = bitdb.TxnBegin();
-    for (CDBEnv::KeyValPair &row : salvagedData) {
+    for (BerkeleyEnvironment::KeyValPair &row : salvagedData) {
         if (recoverKVcallback) {
             CDataStream ssKey(row.first, SER_DISK, CLIENT_VERSION);
             CDataStream ssValue(row.second, SER_DISK, CLIENT_VERSION);
@@ -267,7 +267,7 @@ bool CDB::Recover(const std::string &filename, void *callbackDataIn,
     return fSuccess;
 }
 
-bool CDB::VerifyEnvironment(const std::string &walletFile,
+bool BerkeleyBatch::VerifyEnvironment(const std::string &walletFile,
                             const fs::path &walletDir, std::string &errorStr) {
     LogPrintf("Using BerkeleyDB version %s\n", DbEnv::version(nullptr, nullptr, nullptr));
     LogPrintf("Using wallet %s\n", walletFile);
@@ -312,15 +312,15 @@ bool CDB::VerifyEnvironment(const std::string &walletFile,
     return true;
 }
 
-bool CDB::VerifyDatabaseFile(const std::string &walletFile,
+bool BerkeleyBatch::VerifyDatabaseFile(const std::string &walletFile,
                              const fs::path &walletDir, std::string &warningStr,
                              std::string &errorStr,
-                             CDBEnv::recoverFunc_type recoverFunc) {
+                             BerkeleyEnvironment::recoverFunc_type recoverFunc) {
     if (fs::exists(walletDir / walletFile)) {
         std::string backup_filename;
-        CDBEnv::VerifyResult r =
+        BerkeleyEnvironment::VerifyResult r =
             bitdb.Verify(walletFile, recoverFunc, backup_filename);
-        if (r == CDBEnv::VerifyResult::RECOVER_OK) {
+        if (r == BerkeleyEnvironment::VerifyResult::RECOVER_OK) {
             warningStr = strprintf(
                 _("Warning: Wallet file corrupt, data salvaged!"
                   " Original %s saved as %s in %s; if"
@@ -328,7 +328,7 @@ bool CDB::VerifyDatabaseFile(const std::string &walletFile,
                   " restore from a backup."),
                 walletFile, backup_filename, walletDir);
         }
-        if (r == CDBEnv::VerifyResult::RECOVER_FAIL) {
+        if (r == BerkeleyEnvironment::VerifyResult::RECOVER_FAIL) {
             errorStr = strprintf(_("%s corrupt, salvage failed"), walletFile);
             return false;
         }
@@ -342,8 +342,8 @@ static const char *HEADER_END = "HEADER=END";
 /* End of key/value data */
 static const char *DATA_END = "DATA=END";
 
-bool CDBEnv::Salvage(const std::string &strFile, bool fAggressive,
-                     std::vector<CDBEnv::KeyValPair> &vResult) {
+bool BerkeleyEnvironment::Salvage(const std::string &strFile, bool fAggressive,
+                     std::vector<BerkeleyEnvironment::KeyValPair> &vResult) {
     LOCK(cs_db);
     assert(mapFileUseCount.count(strFile) == 0);
 
@@ -357,16 +357,16 @@ bool CDBEnv::Salvage(const std::string &strFile, bool fAggressive,
     Db db(dbenv.get(), 0);
     int result = db.verify(strFile.c_str(), nullptr, &strDump, flags);
     if (result == DB_VERIFY_BAD) {
-        LogPrintf("CDBEnv::Salvage: Database salvage found errors, all data "
+        LogPrintf("BerkeleyEnvironment::Salvage: Database salvage found errors, all data "
                   "may not be recoverable.\n");
         if (!fAggressive) {
-            LogPrintf("CDBEnv::Salvage: Rerun with aggressive mode to ignore "
+            LogPrintf("BerkeleyEnvironment::Salvage: Rerun with aggressive mode to ignore "
                       "errors and continue.\n");
             return false;
         }
     }
     if (result != 0 && result != DB_VERIFY_BAD) {
-        LogPrintf("CDBEnv::Salvage: Database salvage failed with result %d.\n",
+        LogPrintf("BerkeleyEnvironment::Salvage: Database salvage failed with result %d.\n",
                   result);
         return false;
     }
@@ -394,7 +394,7 @@ bool CDBEnv::Salvage(const std::string &strFile, bool fAggressive,
             }
             getline(strDump, valueHex);
             if (valueHex == DATA_END) {
-                LogPrintf("CDBEnv::Salvage: WARNING: Number of keys in data "
+                LogPrintf("BerkeleyEnvironment::Salvage: WARNING: Number of keys in data "
                           "does not match number of values.\n");
                 break;
             }
@@ -403,7 +403,7 @@ bool CDBEnv::Salvage(const std::string &strFile, bool fAggressive,
     }
 
     if (keyHex != DATA_END) {
-        LogPrintf("CDBEnv::Salvage: WARNING: Unexpected end of file while "
+        LogPrintf("BerkeleyEnvironment::Salvage: WARNING: Unexpected end of file while "
                   "reading salvage output.\n");
         return false;
     }
@@ -411,7 +411,7 @@ bool CDBEnv::Salvage(const std::string &strFile, bool fAggressive,
     return (result == 0);
 }
 
-void CDBEnv::CheckpointLSN(const std::string &strFile) {
+void BerkeleyEnvironment::CheckpointLSN(const std::string &strFile) {
     dbenv->txn_checkpoint(0, 0, 0);
     if (fMockDb) {
         return;
@@ -419,7 +419,7 @@ void CDBEnv::CheckpointLSN(const std::string &strFile) {
     dbenv->lsn_reset(strFile.c_str(), 0);
 }
 
-CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
+BerkeleyBatch::BerkeleyBatch(WalletDatabase &dbw, const char *pszMode, bool fFlushOnCloseIn)
     : pdb(nullptr), activeTxn(nullptr) {
     fReadOnly = (!strchr(pszMode, '+') && !strchr(pszMode, 'w'));
     fFlushOnClose = fFlushOnCloseIn;
@@ -441,7 +441,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
         LOCK(env->cs_db);
         if (!env->Open(GetWalletDir())) {
             throw std::runtime_error(
-                "CDB: Failed to open database environment.");
+                "BerkeleyBatch: Failed to open database environment.");
         }
 
         pdb = env->mapDb[strFilename];
@@ -456,7 +456,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
                 ret = mpf->set_flags(DB_MPOOL_NOFILE, 1);
                 if (ret != 0) {
                     throw std::runtime_error(
-                        strprintf("CDB: Failed to configure for no temp file "
+                        strprintf("BerkeleyBatch: Failed to configure for no temp file "
                                   "backing for database %s",
                                   strFilename));
                 }
@@ -472,7 +472,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
 
             if (ret != 0) {
                 throw std::runtime_error(strprintf(
-                    "CDB: Error %d, can't open database %s", ret, strFilename));
+                    "BerkeleyBatch: Error %d, can't open database %s", ret, strFilename));
             }
             CheckUniqueFileid(*env, strFilename, *pdb_temp);
 
@@ -491,7 +491,7 @@ CDB::CDB(CWalletDBWrapper &dbw, const char *pszMode, bool fFlushOnCloseIn)
     }
 }
 
-void CDB::Flush() {
+void BerkeleyBatch::Flush() {
     if (activeTxn) {
         return;
     }
@@ -508,11 +508,11 @@ void CDB::Flush() {
         nMinutes, 0);
 }
 
-void CWalletDBWrapper::IncrementUpdateCounter() {
+void WalletDatabase::IncrementUpdateCounter() {
     ++nUpdateCounter;
 }
 
-void CDB::Close() {
+void BerkeleyBatch::Close() {
     if (!pdb) {
         return;
     }
@@ -530,7 +530,7 @@ void CDB::Close() {
     --env->mapFileUseCount[strFile];
 }
 
-void CDBEnv::CloseDb(const std::string &strFile) {
+void BerkeleyEnvironment::CloseDb(const std::string &strFile) {
     LOCK(cs_db);
     if (mapDb[strFile] != nullptr) {
         // Close the database handle
@@ -541,11 +541,11 @@ void CDBEnv::CloseDb(const std::string &strFile) {
     }
 }
 
-bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
+bool BerkeleyBatch::Rewrite(WalletDatabase &dbw, const char *pszSkip) {
     if (dbw.IsDummy()) {
         return true;
     }
-    CDBEnv *env = dbw.env;
+    BerkeleyEnvironment *env = dbw.env;
     const std::string &strFile = dbw.strFile;
     while (true) {
         {
@@ -558,11 +558,11 @@ bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
                 env->mapFileUseCount.erase(strFile);
 
                 bool fSuccess = true;
-                LogPrintf("CDB::Rewrite: Rewriting %s...\n", strFile);
+                LogPrintf("BerkeleyBatch::Rewrite: Rewriting %s...\n", strFile);
                 std::string strFileRes = strFile + ".rewrite";
                 {
                     // surround usage of db with extra {}
-                    CDB db(dbw, "r");
+                    BerkeleyBatch db(dbw, "r");
                     std::unique_ptr<Db> pdbCopy =
                         std::make_unique<Db>(env->dbenv.get(), 0);
 
@@ -574,7 +574,7 @@ bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
                                             0);
                     if (ret > 0) {
                         LogPrintf(
-                            "CDB::Rewrite: Can't create database file %s\n",
+                            "BerkeleyBatch::Rewrite: Can't create database file %s\n",
                             strFileRes);
                         fSuccess = false;
                     }
@@ -636,7 +636,7 @@ bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
                 }
                 if (!fSuccess) {
                     LogPrintf(
-                        "CDB::Rewrite: Failed to rewrite database file %s\n",
+                        "BerkeleyBatch::Rewrite: Failed to rewrite database file %s\n",
                         strFileRes);
                 }
                 return fSuccess;
@@ -647,10 +647,10 @@ bool CDB::Rewrite(CWalletDBWrapper &dbw, const char *pszSkip) {
     return false;
 }
 
-void CDBEnv::Flush(bool fShutdown) {
+void BerkeleyEnvironment::Flush(bool fShutdown) {
     int64_t nStart = GetTimeMillis();
     // Flush log data to the actual data file on all files that are not in use
-    LogPrint(BCLog::DB, "CDBEnv::Flush: Flush(%s)%s\n",
+    LogPrint(BCLog::DB, "BerkeleyEnvironment::Flush: Flush(%s)%s\n",
              fShutdown ? "true" : "false",
              fDbEnvInit ? "" : " database not started");
     if (!fDbEnvInit) {
@@ -663,24 +663,24 @@ void CDBEnv::Flush(bool fShutdown) {
             std::string strFile = (*mi).first;
             int nRefCount = (*mi).second;
             LogPrint(BCLog::DB,
-                     "CDBEnv::Flush: Flushing %s (refcount = %d)...\n", strFile,
+                     "BerkeleyEnvironment::Flush: Flushing %s (refcount = %d)...\n", strFile,
                      nRefCount);
             if (nRefCount == 0) {
                 // Move log data to the dat file
                 CloseDb(strFile);
-                LogPrint(BCLog::DB, "CDBEnv::Flush: %s checkpoint\n", strFile);
+                LogPrint(BCLog::DB, "BerkeleyEnvironment::Flush: %s checkpoint\n", strFile);
                 dbenv->txn_checkpoint(0, 0, 0);
-                LogPrint(BCLog::DB, "CDBEnv::Flush: %s detach\n", strFile);
+                LogPrint(BCLog::DB, "BerkeleyEnvironment::Flush: %s detach\n", strFile);
                 if (!fMockDb) {
                     dbenv->lsn_reset(strFile.c_str(), 0);
                 }
-                LogPrint(BCLog::DB, "CDBEnv::Flush: %s closed\n", strFile);
+                LogPrint(BCLog::DB, "BerkeleyEnvironment::Flush: %s closed\n", strFile);
                 mapFileUseCount.erase(mi++);
             } else {
                 mi++;
             }
         }
-        LogPrint(BCLog::DB, "CDBEnv::Flush: Flush(%s)%s took %15dms\n",
+        LogPrint(BCLog::DB, "BerkeleyEnvironment::Flush: Flush(%s)%s took %15dms\n",
                  fShutdown ? "true" : "false",
                  fDbEnvInit ? "" : " database not started",
                  GetTimeMillis() - nStart);
@@ -697,12 +697,12 @@ void CDBEnv::Flush(bool fShutdown) {
     }
 }
 
-bool CDB::PeriodicFlush(CWalletDBWrapper &dbw) {
+bool BerkeleyBatch::PeriodicFlush(WalletDatabase &dbw) {
     if (dbw.IsDummy()) {
         return true;
     }
     bool ret = false;
-    CDBEnv *env = dbw.env;
+    BerkeleyEnvironment *env = dbw.env;
     const std::string &strFile = dbw.strFile;
     TRY_LOCK(bitdb.cs_db, lockDb);
     if (lockDb) {
@@ -736,11 +736,11 @@ bool CDB::PeriodicFlush(CWalletDBWrapper &dbw) {
     return ret;
 }
 
-bool CDB::Backup(CWalletDBWrapper &dbw, const std::string &strDest) {
+bool BerkeleyBatch::Backup(WalletDatabase &dbw, const std::string &strDest) {
     if (dbw.IsDummy()) {
       return false;
     }
-    CDBEnv *env = dbw.env;
+    BerkeleyEnvironment *env = dbw.env;
     const std::string &strFile = dbw.strFile;
     while (true) {
         {
@@ -784,15 +784,15 @@ bool CDB::Backup(CWalletDBWrapper &dbw, const std::string &strDest) {
     return true;
 }
 
-bool CWalletDBWrapper::Rewrite(const char *pszSkip) {
-    return CDB::Rewrite(*this, pszSkip);
+bool WalletDatabase::Rewrite(const char *pszSkip) {
+    return BerkeleyBatch::Rewrite(*this, pszSkip);
 }
 
-bool CWalletDBWrapper::Backup(const std::string &strDest) {
-    return CDB::Backup(*this, strDest);
+bool WalletDatabase::Backup(const std::string &strDest) {
+    return BerkeleyBatch::Backup(*this, strDest);
 }
 
-void CWalletDBWrapper::Flush(bool shutdown) {
+void WalletDatabase::Flush(bool shutdown) {
     if (!IsDummy()) {
         env->Flush(shutdown);
     }

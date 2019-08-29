@@ -23,7 +23,7 @@
 static const unsigned int DEFAULT_WALLET_DBLOGSIZE = 100;
 static const bool DEFAULT_WALLET_PRIVDB = true;
 
-class CDBEnv {
+class BerkeleyEnvironment {
 private:
     bool fDbEnvInit;
     bool fMockDb;
@@ -40,8 +40,8 @@ public:
     std::map<std::string, int> mapFileUseCount;
     std::map<std::string, Db *> mapDb;
 
-    CDBEnv();
-    ~CDBEnv();
+    BerkeleyEnvironment();
+    ~BerkeleyEnvironment();
     void Reset();
 
     void MakeMock();
@@ -87,23 +87,23 @@ public:
     }
 };
 
-extern CDBEnv bitdb;
+extern BerkeleyEnvironment bitdb;
 
 /**
  * An instance of this class represents one database.
  * For BerkeleyDB this is just a (env, strFile) tuple.
  */
-class CWalletDBWrapper {
-    friend class CDB;
+class WalletDatabase {
+    friend class BerkeleyBatch;
 
 public:
     /** Create dummy DB handle */
-    CWalletDBWrapper()
+    WalletDatabase()
         : nUpdateCounter(0), nLastSeen(0), nLastFlushed(0),
           nLastWalletUpdate(0), env(nullptr) {}
 
     /** Create DB handle to real database */
-    CWalletDBWrapper(CDBEnv *env_in, const std::string &strFile_in)
+    WalletDatabase(BerkeleyEnvironment *env_in, const std::string &strFile_in)
         : nUpdateCounter(0), nLastSeen(0), nLastFlushed(0),
           nLastWalletUpdate(0), env(env_in), strFile(strFile_in) {}
 
@@ -133,7 +133,7 @@ public:
 
 private:
     /** BerkeleyDB specific */
-    CDBEnv *env;
+    BerkeleyEnvironment *env;
     std::string strFile;
 
     /**
@@ -145,23 +145,23 @@ private:
 };
 
 /** RAII class that provides access to a Berkeley database */
-class CDB {
+class BerkeleyBatch {
 protected:
     Db *pdb;
     std::string strFile;
     DbTxn *activeTxn;
     bool fReadOnly;
     bool fFlushOnClose;
-    CDBEnv *env;
+    BerkeleyEnvironment *env;
     std::atomic<bool> interrupt;
 
 public:
-    explicit CDB(CWalletDBWrapper &dbw, const char *pszMode = "r+",
+    explicit BerkeleyBatch(WalletDatabase &dbw, const char *pszMode = "r+",
                  bool fFlushOnCloseIn = true);
-    ~CDB() { Close(); }
+    ~BerkeleyBatch() { Close(); }
 
-    CDB(const CDB &) = delete;
-    CDB &operator=(const CDB &) = delete;
+    BerkeleyBatch(const BerkeleyBatch &) = delete;
+    BerkeleyBatch &operator=(const BerkeleyBatch &) = delete;
 
     void Flush();
     void Interrupt();
@@ -174,7 +174,7 @@ public:
 
     /* flush the wallet passively (TRY_LOCK)
        ideal to be called periodically */
-    static bool PeriodicFlush(CWalletDBWrapper &dbw);
+    static bool PeriodicFlush(WalletDatabase &dbw);
     /* verifies the database environment */
     static bool VerifyEnvironment(const std::string &walletFile,
                                   const fs::path &walletDir,
@@ -184,7 +184,7 @@ public:
                                    const fs::path &walletDir,
                                    std::string &warningStr,
                                    std::string &errorStr,
-                                   CDBEnv::recoverFunc_type recoverFunc);
+                                   BerkeleyEnvironment::recoverFunc_type recoverFunc);
 
 public:
     template <typename K, typename T> bool Read(const K &key, T &value) {
@@ -385,8 +385,8 @@ public:
         return Write(std::string("version"), nVersion);
     }
 
-    static bool Rewrite(CWalletDBWrapper &dbw, const char *pszSkip = nullptr);
-    static bool Backup(CWalletDBWrapper &dbw, const std::string& strDest);
+    static bool Rewrite(WalletDatabase &dbw, const char *pszSkip = nullptr);
+    static bool Backup(WalletDatabase &dbw, const std::string& strDest);
 };
 
 #endif // BITCOIN_WALLET_DB_H

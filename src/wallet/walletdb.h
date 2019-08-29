@@ -23,18 +23,18 @@
 /**
  * Overview of wallet database classes:
  *
- * - CDBEnv is an environment in which the database exists (has no analog in
+ * - BerkeleyEnvironment is an environment in which the database exists (has no analog in
  * dbwrapper.h)
- * - CWalletDBWrapper represents a wallet database (similar to CDBWrapper in
+ * - WalletDatabase represents a wallet database (similar to CDBWrapper in
  * dbwrapper.h)
- * - CDB is a low-level database transaction (similar to CDBBatch in
+ * - BerkeleyBatch is a low-level database transaction (similar to CDBBatch in
  * dbwrapper.h)
- * - CWalletDB is a modifier object for the wallet, and encapsulates a database
+ * - WalletBatch is a modifier object for the wallet, and encapsulates a database
  *   transaction as well as methods to act on the database (no analog in
  *   dbwrapper.h)
  *
- * The latter two are named confusingly, in contrast to what the names CDB
- * and CWalletDB suggest they are transient transaction objects and don't
+ * The latter two are named confusingly, in contrast to what the names BerkeleyBatch
+ * and WalletBatch suggest they are transient transaction objects and don't
  * represent the database itself.
  */
 
@@ -63,12 +63,12 @@ enum class DBErrors {
 
 /**
  * Access to the wallet database.
- * This should really be named CWalletDBBatch, as it represents a single
+ * This should really be named WalletBatchBatch, as it represents a single
  * transaction at the database. It will be committed when the object goes out of
  * scope.
  * Optionally (on by default) it will flush to disk as well.
  */
-class CWalletDB {
+class WalletBatch {
 private:
     template <typename K, typename T>
     bool WriteIC(const K &key, const T &value, bool fOverwrite = true) {
@@ -88,11 +88,11 @@ private:
     }
 
 public:
-    explicit CWalletDB(CWalletDBWrapper &dbw, const char *pszMode = "r+",
+    explicit WalletBatch(WalletDatabase &dbw, const char *pszMode = "r+",
                        bool _fFlushOnClose = true)
         : batch(dbw, pszMode, _fFlushOnClose), m_dbw(dbw) {}
-    CWalletDB(const CWalletDB &) = delete;
-    CWalletDB &operator=(const CWalletDB &) = delete;
+    WalletBatch(const WalletBatch &) = delete;
+    WalletBatch &operator=(const WalletBatch &) = delete;
 
     bool WriteName(const CTxDestination &address, const std::string &strName);
     bool EraseName(const CTxDestination &address);
@@ -196,8 +196,8 @@ public:
     bool WriteVersion(int nVersion);
 
 private:
-    CDB batch;
-    CWalletDBWrapper &m_dbw;
+    BerkeleyBatch batch;
+    WalletDatabase &m_dbw;
 };
 
 //! Compacts BDB state so that wallet.dat is self-contained (if there are
