@@ -103,20 +103,20 @@
       use TxId properly in coincontroldialog
       [wallet] Fix potential memory leak in CreateWalletFromFile
       Rename wallet database classes
-      wallet: Initialize m_last_block_processed to nullptr. Initialize fields where defined.
-      Merge #10728: fix typo in help text for removeprunedfunds
+#     wallet: Initialize m_last_block_processed to nullptr. Initialize fields where defined.
+#     Merge #10728: fix typo in help text for removeprunedfunds
       wallet: Make vpwallets usage thread safe
       Regenerate timing.json
       Merge #14985: test: Remove thread_local from test_bitcoin
       Rename wallet_accounts.py test
-      [qt] Add support to search the address book
+#     [qt] Add support to search the address book
       [script_tests] add tests for pubkey encoding with strictenc + nullfail
       [schnorr functional test] improve tx handling
       [schnorr functional test] simplify funding logic
       [schnorr functional test] change block setup logic
       [schnorr functional test] remove ComparisonTestFramework dependency
-      Merge #10684: Remove no longer used mempool.exists(outpoint)
-      Merge #10581: Simplify return values of GetCoin/HaveCoin(InCache)
+#     Merge #10684: Remove no longer used mempool.exists(outpoint)
+#     Merge #10581: Simplify return values of GetCoin/HaveCoin(InCache)
       Merge #10685: Clarify CCoinsViewMemPool documentation.
       Merge #14571: [tests] Test that nodes respond to getdata with notfound
 #     Move CheckBlock() call to critical section
