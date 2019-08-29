@@ -156,7 +156,7 @@ protected:
     std::atomic<bool> interrupt;
 
 public:
-    explicit BerkeleyBatch(WalletDatabase &dbw, const char *pszMode = "r+",
+    explicit BerkeleyBatch(WalletDatabase &database, const char *pszMode = "r+",
                  bool fFlushOnCloseIn = true);
     ~BerkeleyBatch() { Close(); }
 
@@ -174,7 +174,7 @@ public:
 
     /* flush the wallet passively (TRY_LOCK)
        ideal to be called periodically */
-    static bool PeriodicFlush(WalletDatabase &dbw);
+    static bool PeriodicFlush(WalletDatabase &database);
     /* verifies the database environment */
     static bool VerifyEnvironment(const std::string &walletFile,
                                   const fs::path &walletDir,
@@ -385,8 +385,8 @@ public:
         return Write(std::string("version"), nVersion);
     }
 
-    static bool Rewrite(WalletDatabase &dbw, const char *pszSkip = nullptr);
-    static bool Backup(WalletDatabase &dbw, const std::string& strDest);
+    static bool Rewrite(WalletDatabase &database, const char *pszSkip = nullptr);
+    static bool Backup(WalletDatabase &database, const std::string& strDest);
 };
 
 #endif // BITCOIN_WALLET_DB_H

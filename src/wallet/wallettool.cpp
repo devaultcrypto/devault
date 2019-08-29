@@ -20,11 +20,11 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
     return nullptr;
   }
 
-  std::unique_ptr<WalletDatabase> dbw(new WalletDatabase(&bitdb, "wallet.dat"));
+  std::unique_ptr<WalletDatabase> database(new WalletDatabase(&bitdb, "wallet.dat"));
   auto &config = const_cast<Config &>(GetConfig());
   auto &chainParams = config.GetChainParams();
   // dummy chain interface
-  std::shared_ptr<CWallet> wallet_instance = std::make_unique<CWallet>(chainParams, std::move(dbw));
+  std::shared_ptr<CWallet> wallet_instance = std::make_unique<CWallet>(chainParams, std::move(database));
   DBErrors load_wallet_ret;
   try {
     bool first_run;
