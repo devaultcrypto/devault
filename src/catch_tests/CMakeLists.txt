@@ -39,13 +39,13 @@ gen_json_header(JSON_HEADERS
 )
 
 #include(TestSuite)
-#add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
+add_compiler_flag(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
 
 add_library(unit
   callrpc.cpp
-	jsonutil.cpp
-	scriptflags.cpp
-	sigutil.cpp
+  jsonutil.cpp
+  scriptflags.cpp
+  sigutil.cpp
   test_bitcoin.cpp
   test_bitcoin_main.cpp
   ${JSON_HEADERS}
@@ -170,7 +170,7 @@ endfunction(set_memcheck_test_properties)
 #---------VALGRIND STUFF----------------------------------------------------
 
 FOREACH(tst ${UNIT_CTESTS})
-	add_executable(tb_${tst} ${tst}_tests.cpp)
+  add_executable(tb_${tst} ${tst}_tests.cpp)
   target_include_directories(tb_${tst}  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
   target_link_libraries(tb_${tst} rpcclient server devaultconsensus common unit)
   add_test(NAME test_${tst} COMMAND tb_${tst})
