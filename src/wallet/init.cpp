@@ -367,7 +367,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
         }
 
         std::string strError;
-        if (!CWalletDB::VerifyEnvironment(walletFile, GetWalletDir().string(),
+        if (!WalletBatch::VerifyEnvironment(walletFile, GetWalletDir().string(),
                                           strError)) {
             return InitError(strError);
         }
@@ -376,15 +376,15 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
             // Recover readable keypairs:
             CWallet dummyWallet(chainParams);
             std::string backup_filename;
-            if (!CWalletDB::Recover(walletFile, (void *)&dummyWallet,
-                                    CWalletDB::RecoverKeysOnlyFilter,
+            if (!WalletBatch::Recover(walletFile, (void *)&dummyWallet,
+                                    WalletBatch::RecoverKeysOnlyFilter,
                                     backup_filename)) {
                 return false;
             }
         }
 
         std::string strWarning;
-        bool dbV = CWalletDB::VerifyDatabaseFile(
+        bool dbV = WalletBatch::VerifyDatabaseFile(
             walletFile, GetWalletDir().string(), strWarning, strError);
         if (!strWarning.empty()) {
             InitWarning(strWarning);
