@@ -1495,21 +1495,25 @@ static void FlushBlockFile(bool fFinalize = false) {
     CDiskBlockPos posOld(nLastBlockFile, 0);
 
     FILE *fileOld = OpenBlockFile(posOld);
+    bool status = true;
     if (fileOld) {
         if (fFinalize) {
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nSize);
+            status &= TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nSize);
         }
-        FileCommit(fileOld);
+        status &= FileCommit(fileOld);
         fclose(fileOld);
     }
 
     fileOld = OpenUndoFile(posOld);
     if (fileOld) {
         if (fFinalize) {
-            TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nUndoSize);
+            status &= TruncateFile(fileOld, vinfoBlockFile[nLastBlockFile].nUndoSize);
         }
-        FileCommit(fileOld);
+        status &= FileCommit(fileOld);
         fclose(fileOld);
+    }
+    if (!status) {
+        AbortNode("Flushing block file to disk failed. This is likely the result of an I/O error.");
     }
 }
 
