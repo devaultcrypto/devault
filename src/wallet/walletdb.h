@@ -75,7 +75,7 @@ private:
         if (!batch.Write(key, value, fOverwrite)) {
             return false;
         }
-        m_dbw.IncrementUpdateCounter();
+        m_database.IncrementUpdateCounter();
         return true;
     }
 
@@ -83,14 +83,14 @@ private:
         if (!batch.Erase(key)) {
             return false;
         }
-        m_dbw.IncrementUpdateCounter();
+        m_database.IncrementUpdateCounter();
         return true;
     }
 
 public:
-    explicit WalletBatch(WalletDatabase &dbw, const char *pszMode = "r+",
+    explicit WalletBatch(WalletDatabase &database, const char *pszMode = "r+",
                        bool _fFlushOnClose = true)
-        : batch(dbw, pszMode, _fFlushOnClose), m_dbw(dbw) {}
+        : batch(database, pszMode, _fFlushOnClose), m_database(database) {}
     WalletBatch(const WalletBatch &) = delete;
     WalletBatch &operator=(const WalletBatch &) = delete;
 
@@ -197,7 +197,7 @@ public:
 
 private:
     BerkeleyBatch batch;
-    WalletDatabase &m_dbw;
+    WalletDatabase &m_database;
 };
 
 //! Compacts BDB state so that wallet.dat is self-contained (if there are

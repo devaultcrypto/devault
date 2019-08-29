@@ -662,7 +662,7 @@ private:
                      std::set<CInputCoin> &setCoinsRet, Amount &nValueRet,
                      const CCoinControl *coinControl = nullptr) const;
 
-    std::unique_ptr<WalletDatabase> dbw;
+    std::unique_ptr<WalletDatabase> database;
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
@@ -748,14 +748,14 @@ public:
      * Get database handle used by this wallet. Ideally this function would not
      * be necessary.
      */
-    WalletDatabase &GetDBHandle() { return *dbw; }
+    WalletDatabase &GetDBHandle() { return *database; }
 
     /**
      * Get a name for this wallet for logging/debugging purposes.
      */
     std::string GetName() const {
-        if (dbw) {
-            return dbw->GetName();
+        if (database) {
+            return database->GetName();
         } else {
             return "dummy";
         }
@@ -778,13 +778,13 @@ public:
 
     // Create wallet with dummy database handle
     explicit CWallet(const CChainParams &chainParamsIn)
-        : dbw(new WalletDatabase()), chainParams(chainParamsIn) {
+        : database(new WalletDatabase()), chainParams(chainParamsIn) {
     }
 
     // Create wallet with passed-in database handle
     CWallet(const CChainParams &chainParamsIn,
-            std::unique_ptr<WalletDatabase> dbw_in)
-        : dbw(std::move(dbw_in)), chainParams(chainParamsIn) {
+            std::unique_ptr<WalletDatabase> database_in)
+        : database(std::move(database_in)), chainParams(chainParamsIn) {
     }
 
     ~CWallet() override {}

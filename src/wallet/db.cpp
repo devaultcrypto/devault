@@ -419,17 +419,17 @@ void BerkeleyEnvironment::CheckpointLSN(const std::string &strFile) {
     dbenv->lsn_reset(strFile.c_str(), 0);
 }
 
-BerkeleyBatch::BerkeleyBatch(WalletDatabase &dbw, const char *pszMode, bool fFlushOnCloseIn)
+BerkeleyBatch::BerkeleyBatch(WalletDatabase &database, const char *pszMode, bool fFlushOnCloseIn)
     : pdb(nullptr), activeTxn(nullptr) {
     fReadOnly = (!strchr(pszMode, '+') && !strchr(pszMode, 'w'));
     fFlushOnClose = fFlushOnCloseIn;
-    env = dbw.env;
+    env = database.env;
     interrupt=false;
-    if (dbw.IsDummy()) {
+    if (database.IsDummy()) {
         return;
     }
 
-    const std::string &strFilename = dbw.strFile;
+    const std::string &strFilename = database.strFile;
 
     bool fCreate = strchr(pszMode, 'c') != nullptr;
     unsigned int nFlags = DB_THREAD;
@@ -541,12 +541,12 @@ void BerkeleyEnvironment::CloseDb(const std::string &strFile) {
     }
 }
 
-bool BerkeleyBatch::Rewrite(WalletDatabase &dbw, const char *pszSkip) {
-    if (dbw.IsDummy()) {
+bool BerkeleyBatch::Rewrite(WalletDatabase &database, const char *pszSkip) {
+    if (database.IsDummy()) {
         return true;
     }
-    BerkeleyEnvironment *env = dbw.env;
-    const std::string &strFile = dbw.strFile;
+    BerkeleyEnvironment *env = database.env;
+    const std::string &strFile = database.strFile;
     while (true) {
         {
             LOCK(env->cs_db);
@@ -562,7 +562,7 @@ bool BerkeleyBatch::Rewrite(WalletDatabase &dbw, const char *pszSkip) {
                 std::string strFileRes = strFile + ".rewrite";
                 {
                     // surround usage of db with extra {}
-                    BerkeleyBatch db(dbw, "r");
+                    BerkeleyBatch db(database, "r");
                     std::unique_ptr<Db> pdbCopy =
                         std::make_unique<Db>(env->dbenv.get(), 0);
 
@@ -697,13 +697,13 @@ void BerkeleyEnvironment::Flush(bool fShutdown) {
     }
 }
 
-bool BerkeleyBatch::PeriodicFlush(WalletDatabase &dbw) {
-    if (dbw.IsDummy()) {
+bool BerkeleyBatch::PeriodicFlush(WalletDatabase &database) {
+    if (database.IsDummy()) {
         return true;
     }
     bool ret = false;
-    BerkeleyEnvironment *env = dbw.env;
-    const std::string &strFile = dbw.strFile;
+    BerkeleyEnvironment *env = database.env;
+    const std::string &strFile = database.strFile;
     TRY_LOCK(bitdb.cs_db, lockDb);
     if (lockDb) {
         // Don't do this if any databases are in use
@@ -736,12 +736,12 @@ bool BerkeleyBatch::PeriodicFlush(WalletDatabase &dbw) {
     return ret;
 }
 
-bool BerkeleyBatch::Backup(WalletDatabase &dbw, const std::string &strDest) {
-    if (dbw.IsDummy()) {
+bool BerkeleyBatch::Backup(WalletDatabase &database, const std::string &strDest) {
+    if (database.IsDummy()) {
       return false;
     }
-    BerkeleyEnvironment *env = dbw.env;
-    const std::string &strFile = dbw.strFile;
+    BerkeleyEnvironment *env = database.env;
+    const std::string &strFile = database.strFile;
     while (true) {
         {
             LOCK(env->cs_db);
