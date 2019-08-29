@@ -119,38 +119,38 @@
       Merge #10581: Simplify return values of GetCoin/HaveCoin(InCache)
       Merge #10685: Clarify CCoinsViewMemPool documentation.
       Merge #14571: [tests] Test that nodes respond to getdata with notfound
-      Move CheckBlock() call to critical section
-      Merge #10191: [trivial] Rename unused RPC arguments 'dummy'
+#     Move CheckBlock() call to critical section
+#     Merge #10191: [trivial] Rename unused RPC arguments 'dummy'
       Update doc/release-process.md
       Merge #10627: fixed listunspent rpc convert parameter
-      Fix scheduler test race due to BOOST_CHECK in multithreaded context
-      tests: Fix lock-order-inversion (potential deadlock) in DoS_tests.
-      Merge #13039: Add logging and error handling for file syncing
+#     Fix scheduler test race due to BOOST_CHECK in multithreaded context
+#     tests: Fix lock-order-inversion (potential deadlock) in DoS_tests.
+#     Merge #13039: Add logging and error handling for file syncing
       Optimize PNG images
-      [1 of 5] util: Move CheckDiskSpace to util.
-      Merge #10559: Change semantics of HaveCoinInCache to match HaveCoin
+#     [1 of 5] util: Move CheckDiskSpace to util.
+#     Merge #10559: Change semantics of HaveCoinInCache to match HaveCoin
       [script_tests] add small NUM2BIN case
       Various nits in the wallet code
       Implements a virtual destructor on the BaseRequestHandler class.
       Add the sanitizers suppression files and use them in teamcity build
-      Fix checkqueue_tests use-after-scope
-      Merge #10626: doc: Remove outdated minrelaytxfee comment
+#     Fix checkqueue_tests use-after-scope
+#     Merge #10626: doc: Remove outdated minrelaytxfee comment
       Use functional tests timings from the source directory
       [LINTER] Enforce source code file name conventions
 #     doc: Make build system insert version in Doxyfile
       Make various functions in src/test/ static
       Merge #10347: Use range-based for loops (C++11) when looping over vector elements
       Split off key_io_tests from base58_tests
-      Make printchunk() in support/lockedpool.cpp static
+#     Make printchunk() in support/lockedpool.cpp static
 #     Merge #10530: Fix invalid instantiation and possibly unsafe accesses of array in class base_uint<BITS>
       [LINTER] Add a linter to replace `unsigned char` with `uint8_t`
       Move make check test logs out of tree
       Partial backport of Core PR11167 to have similar feature in base58_tests.cpp
       Merge #13145: Use common getPath method to create temp directory in tests.
       Use cstdint in generated test headers
-      Merge #10248: Rewrite addrdb with less duplication using CHashVerifier
-      Merge #11737: Document partial validation in ConnectBlock()
-      Merge #11747: Fix: Open files read only if requested
+#     Merge #10248: Rewrite addrdb with less duplication using CHashVerifier
+#     Merge #11737: Document partial validation in ConnectBlock()
+#     Merge #11747: Fix: Open files read only if requested
       whitespaces nits in CMakeLists
       Split key_io (address/key encodings) off from base58
       Stop using CBase58Data for ext keys
