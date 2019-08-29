@@ -491,7 +491,7 @@ static UniValue createrawtransaction(const Config &config,
         const UniValue &input = inputs[idx];
         const UniValue &o = input.get_obj();
 
-        uint256 txid = ParseHashO(o, "txid");
+        TxId txid(ParseHashO(o, "txid"));
 
         const UniValue &vout_v = find_value(o, "vout");
         if (vout_v.isNull()) {
@@ -874,7 +874,7 @@ UniValue SignTransaction(CMutableTransaction &mtx,
                                 // (which are valid JSON)
                             });
 
-            uint256 txid = ParseHashO(prevOut, "txid");
+            TxId txid(ParseHashO(prevOut, "txid"));
 
             int nOut = find_value(prevOut, "vout").get_int();
             if (nOut < 0) {
@@ -1403,7 +1403,7 @@ static UniValue sendrawtransaction(const Config &config,
     }
 
     CTransactionRef tx(MakeTransactionRef(std::move(mtx)));
-    const uint256 &txid = tx->GetId();
+    const TxId &txid = tx->GetId();
 
     Amount nMaxRawTxFee = maxTxFee;
     if (request.params.size() > 1 && request.params[1].get_bool()) {

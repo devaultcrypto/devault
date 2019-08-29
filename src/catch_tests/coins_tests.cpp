@@ -256,7 +256,7 @@ UtxoData utxoData;
 
 UtxoData::iterator FindRandomFrom(const std::set<COutPoint> &utxoSet) {
   assert(utxoSet.size());
-  auto utxoSetIt = utxoSet.lower_bound(COutPoint(InsecureRand256(), 0));
+  auto utxoSetIt = utxoSet.lower_bound(COutPoint(TxId(InsecureRand256()), 0));
   if (utxoSetIt == utxoSet.end()) { utxoSetIt = utxoSet.begin(); }
   auto utxoDataIt = utxoData.find(*utxoSetIt);
   assert(utxoDataIt != utxoData.end());
