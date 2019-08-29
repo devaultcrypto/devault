@@ -3027,7 +3027,8 @@ static UniValue lockunspent(const Config &config,
                                "Invalid parameter, vout must be positive");
         }
 
-        const COutPoint outpt(uint256S(txid), nOutput);
+        const TxId tx_id(uint256S(txid));
+        const COutPoint outpt(tx_id, nOutput);
 
         const auto it = pwallet->mapWallet.find(outpt.GetTxId());
         if (it == pwallet->mapWallet.end()) {

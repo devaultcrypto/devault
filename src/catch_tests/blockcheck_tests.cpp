@@ -59,7 +59,7 @@ TEST_CASE("blockfail") {
   RunCheckOnBlock(config, block);
 
   // No coinbase
-  tx.vin[0].prevout = COutPoint(InsecureRand256(), 0);
+  tx.vin[0].prevout = COutPoint(TxId(InsecureRand256()), 0);
   block.vtx[0] = MakeTransactionRef(tx);
 
   RunCheckOnBlock(config, block, "bad-cb-missing");
@@ -78,7 +78,7 @@ TEST_CASE("blockfail") {
   auto maxTxCount = ((DEFAULT_MAX_BLOCK_SIZE - 1) / txSize) - 1;
 
   for (size_t i = 1; i < maxTxCount; i++) {
-    tx.vin[0].prevout = COutPoint(InsecureRand256(), 0);
+    tx.vin[0].prevout = COutPoint(TxId(InsecureRand256()), 0);
     block.vtx.push_back(MakeTransactionRef(tx));
   }
 
@@ -87,7 +87,7 @@ TEST_CASE("blockfail") {
 
   // But reject it with one more transaction as it goes over the maximum
   // allowed block size.
-  tx.vin[0].prevout = COutPoint(InsecureRand256(), 0);
+  tx.vin[0].prevout = COutPoint(TxId(InsecureRand256()), 0);
   block.vtx.push_back(MakeTransactionRef(tx));
   RunCheckOnBlock(config, block, "bad-blk-length");
 }
