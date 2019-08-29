@@ -2064,8 +2064,9 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
             // Write blocks and block index to disk.
             if (fDoFullFlush || fPeriodicWrite) {
                 // Depend on nMinDiskSpace to ensure we can write block index
-                if (!CheckDiskSpace(0, true)) {
-                    return state.Error("out of disk space");
+                if (!CheckDiskSpace(0, true)) { 
+                   AbortNode("Disk space is low!", _("Error: Disk space is low!"));
+                   return state.Error("out of disk space");
                 }
 
                 // First make sure all block and undo data is flushed to disk.
@@ -2112,6 +2113,7 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
                 // entry or overwrite one. Still, use a conservative safety
                 // factor of 2.
                 if (!CheckDiskSpace(48 * 2 * 2 * pcoinsTip->GetCacheSize())) {
+                   AbortNode("Disk space is low!", _("Error: Disk space is low!"));
                     return state.Error("out of disk space");
                 }
 
@@ -3368,6 +3370,7 @@ static bool FindBlockPos(CDiskBlockPos &pos, unsigned int nAddSize,
                     fclose(file);
                 }
             } else {
+                AbortNode("Disk space is low!", _("Error: Disk space is low!"));
                 return error("out of disk space");
             }
         }
@@ -3407,6 +3410,7 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
                 fclose(file);
             }
         } else {
+            AbortNode("Disk space is low!", _("Error: Disk space is low!"));
             return state.Error("out of disk space");
         }
     }
@@ -4295,21 +4299,6 @@ static void FindFilesToPrune(std::set<int> &setFilesToPrune,
              nPruneTarget / 1024 / 1024, nCurrentUsage / 1024 / 1024,
              ((int64_t)nPruneTarget - (int64_t)nCurrentUsage) / 1024 / 1024,
              nLastBlockWeCanPrune, count);
-}
-
-bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir) {
-
-    // Below version was causing crashes in unit_tests, so skip using blocks_dir
-    // uint64_t nFreeBytesAvailable = fs::space(blocks_dir ? GetBlocksDir() : GetDataDir()).available;
-
-    uint64_t nFreeBytesAvailable = fs::space(GetDataDir()).available;
-
-    // Check for nMinDiskSpace bytes (currently 50MB)
-    if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes) {
-        return AbortNode("Disk space is low!", _("Error: Disk space is low!"));
-    }
-
-    return true;
 }
 
 static FILE *OpenDiskFile(const CDiskBlockPos &pos, const char *prefix,

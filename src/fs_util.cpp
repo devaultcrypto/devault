@@ -524,3 +524,19 @@ const fs::path &GetBlocksDir(bool fNetSpecific) {
     fs::create_directories(path);
     return path;
 }
+
+bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir) {
+
+    constexpr uint64_t nMinDiskSpace = 52428800;
+    // Below version was causing crashes in unit_tests, so skip using blocks_dir
+    // uint64_t nFreeBytesAvailable = fs::space(blocks_dir ? GetBlocksDir() : GetDataDir()).available;
+
+    uint64_t nFreeBytesAvailable = fs::space(GetDataDir()).available;
+
+    // Check for nMinDiskSpace bytes (currently 50MB)
+    if (nFreeBytesAvailable < nMinDiskSpace + nAdditionalBytes) {
+        return false;
+    }
+
+    return true;
+}

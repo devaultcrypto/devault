@@ -30,6 +30,7 @@ bool LockDirectory(const fs::path &directory, const std::string lockfile_name, b
 void ReleaseDirectoryLocks();
 bool LockDataDirectory(bool probeOnly);
 bool DirIsWritable(const fs::path &directory);
+bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir);
 
 // in validation.cpp
 /** Translation to a filesystem path. */
