@@ -21,15 +21,15 @@
       Fix phpcs warnings for unused function parameters
       Don't replay the gitian initial setup at each build
       Merge #8330: Structure Packing Optimizations in C{,Mutable}Transaction
-      Give an error and exit if there are unknown parameters
+#     Give an error and exit if there are unknown parameters
       [teamcity/build] Fix a bug where CONFIGURE_FLAGS would not parse multiple flags correctly
       Add circular dependencies script
-      Use a struct for arguments and nested map for categories
+#     Use a struct for arguments and nested map for categories
       Pass WalletModel down to SendCoinsEntry by construct
       Allow linters to run once
       Use nullptr instead of 0 in various places in Qt code
       Merge #11886: Clarify getbalance meaning a tiny bit in response to questions.
-      Merge #10777: [tests] Avoid redundant assignments. Remove unused variables
+#     Merge #10777: [tests] Avoid redundant assignments. Remove unused variables
       Remove inexistant parameter keypoolmin from integration test
       Add license blurb to server_tests
       test: Move linters to test/lint, add readme
@@ -39,8 +39,8 @@
       Merge #11997: [tests] util_tests.cpp: actually check ignored args
       Merge #11879: [tests] remove redundant univalue_tests.cpp
       scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
-      Merge #11714: [tests] Test that mempool rejects coinbase transactions
-      Merge #11133: Document assumptions that are beoing made to avoid division by zero
+#     Merge #11714: [tests] Test that mempool rejects coinbase transactions
+#     Merge #11133: Document assumptions that are beoing made to avoid division by zero
       [Part 5 of 5] Add a CChainState class to clarify internal interfaces
       QA: Fix race condition in wallet_encryption test
       [tests] [qt] Add tests for address book manipulation via EditAddressDialog
@@ -53,20 +53,20 @@
       [gitian-build] Default the number of jobs to the number of CPUs
       [test_runner] Fix junitoutput typo
       Fix a bug where the TeamCity build only reports one of the test_runner runs
-      Merge #11495: [trivial] Make namespace explicit for is_regular_file
-      Merge #10845: Remove unreachable code
+#     Merge #11495: [trivial] Make namespace explicit for is_regular_file
+#     Merge #10845: Remove unreachable code
       Merge #10793: Changing &var[0] to var.data()
       [script_tests] improve coverage of minimal number encoding
       add SCRIPT_ENABLE_SCHNORR_MULTISIG flag for new multisig mode
-      [refactor multisig] remove redundant counters
+#     [refactor multisig] remove redundant counters
       [2 of 5] validation: Extract basic block file logic into FlatFileSeq class.
-      Error messages in LoadBlockIndexGuts() use __func__ instead of hardcoding function name.
-      [qt] Display more helpful message when adding a send address has failed
-      Add purpose arg to Wallet::getAddress
-      [tests] [qt] Introduce qt/test/util with a generalized ConfirmMessage
+#     Error messages in LoadBlockIndexGuts() use __func__ instead of hardcoding function name.
+#     [qt] Display more helpful message when adding a send address has failed
+#     Add purpose arg to Wallet::getAddress
+#     [tests] [qt] Introduce qt/test/util with a generalized ConfirmMessage
       Merge #9544: [trivial] Add end of namespace comments. Improve consistency.
-      Merge #12298: Refactor HaveKeys to early return on false result
-      Add virtual transaction size to the transaction description in Qt
+#     Merge #12298: Refactor HaveKeys to early return on false result
+#     Add virtual transaction size to the transaction description in Qt
       wallet: Change output type globals to members
       Merge #11330: Trivial: Fix comments for DEFAULT_WHITELIST[FORCE]RELAY
       Merge #11469: fix typo in comment of chain.cpp
@@ -74,14 +74,14 @@
       [wallet] use P2WPKH change output if any destination is P2WPKH or P2WSH
       [qt] receive tab: bech32 address opt-in checkbox
       Bech32 addresses in dumpwallet
-      fix backported comment placement
-      [refactor multisig] separate nullfail from stack cleanup
-      [refactor multisig] move nulldummy check to front
-      [refactor multisig] make const values up front
+#     fix backported comment placement
+#     [refactor multisig] separate nullfail from stack cleanup
+#     [refactor multisig] move nulldummy check to front
+#     [refactor multisig] make const values up front
       remove ComparisonTestFramework dependency from segwit recovery test
       CONTRIBUTING.md - update instructions on linting dependencies
-      Use size_t for stack index in OP_MULTISIG
-      Merge #12988: Hold cs_main while calling UpdatedBlockTip() signal
+#     Use size_t for stack index in OP_MULTISIG
+#     Merge #12988: Hold cs_main while calling UpdatedBlockTip() signal
       Version number bumped to 0.19.11
 # 19.10      
       Update manpages for 0.19.10 release
