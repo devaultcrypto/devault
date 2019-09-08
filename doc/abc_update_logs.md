@@ -132,30 +132,30 @@
       Update seeds
       Added some release notes for 0.19.12 release
       Merge #12284: Remove assigned but never used local variables. Enable linter checking for unused local variables.
-      Merge #12569: net: Increase signal-to-noise ratio in debug.log by adjusting log level when logging failed non-manual connect():s
-      better error message for mandatory-flag tx rejections
-      Merge #12537: [arith_uint256] Make it safe to use "self" in operators
+#     Merge #12569: net: Increase signal-to-noise ratio in debug.log by adjusting log level when logging failed non-manual connect():s
+#     better error message for mandatory-flag tx rejections
+#     Merge #12537: [arith_uint256] Make it safe to use "self" in operators
       build: add missing leveldb defines
       Fix leveldb compilation for NetBSD
-      Detect if char equals int8_t
+#     Detect if char equals int8_t
       Enforce clang-format version 7.x
-      Merge #12925: wallet: Logprint the start of a rescan
+#     Merge #12925: wallet: Logprint the start of a rescan
       Merge #12918: test: Assert on correct variable
-      Merge #12797: init: Fix help message for checkblockindex
+#     Merge #12797: init: Fix help message for checkblockindex
       Fix some more copies in loops
-      Merge #12460: Assert CPubKey::ValidLength to the pubkey's header-relevant size
-      [CMAKE] Refactor the AddCompilerFlags facilities
+#     Merge #12460: Assert CPubKey::ValidLength to the pubkey's header-relevant size
+#     [CMAKE] Refactor the AddCompilerFlags facilities
       Add -ftrapv to DEBUG_CXXFLAGS when --enable-debug is used
-      [CMAKE] Use plural form when multiple arguments are expected
-      [CMAKE] Avoid warning when checking flags
-      [CMAKE] Enable -Wthread-safety-analysis
+#     [CMAKE] Use plural form when multiple arguments are expected
+#     [CMAKE] Avoid warning when checking flags
+#     [CMAKE] Enable -Wthread-safety-analysis
       [CMAKE] Refactor warnings for secp256k1
       Add a message to static_assert
       [CI] Enable the undefined behaviour sanitizer
-      Merge #12128: Refactor: One CBaseChainParams should be enough
+#     Merge #12128: Refactor: One CBaseChainParams should be enough
       Merge #12225: Mempool cleanups
-      Merge #12118: Sort mempool by min(feerate, ancestor_feerate)
-      Merge #12780: Reduce variable scopes
+#     Merge #12118: Sort mempool by min(feerate, ancestor_feerate)
+#     Merge #12780: Reduce variable scopes
       Fix a copy in sigencoding_tests
       Use a regex to determine the list of sources for check-rpc-mappings
 #     Avoid copies in range-for loops and add a warning to detect them
