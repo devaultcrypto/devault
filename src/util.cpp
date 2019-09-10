@@ -372,20 +372,6 @@ bool ArgsManager::ParseParameters(int argc, const char *const argv[],
             }
         }
     }
-
-    // we do not allow -includeconf from command line, so we clear it here
-    auto it = m_override_args.find("-includeconf");
-    if (it != m_override_args.end()) {
-        if (it->second.size() > 0) {
-            for (const auto &ic : it->second) {
-                fprintf(stderr,
-                        "warning: -includeconf cannot be used from "
-                        "commandline; ignoring -includeconf=%s\n",
-                        ic.c_str());
-            }
-            m_override_args.erase(it);
-        }
-    }
     return true;
 }
 
@@ -740,14 +726,6 @@ bool ArgsManager::ReadConfigFiles(std::string &error,
     if (stream.good()) {
         if (!ReadConfigStream(stream, error, ignore_invalid_keys)) {
             return false;
-        }
-        // if there is an -includeconf in the override args, but it is empty,
-        // that means the user passed '-noincludeconf' on the command line, in
-        // which case we should not include anything
-        bool emptyIncludeConf;
-        {
-            LOCK(cs_args);
-            emptyIncludeConf = m_override_args.count("-includeconf") == 0;
         }
     }
 
