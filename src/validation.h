@@ -52,6 +52,10 @@ struct ChainTxData;
 struct PrecomputedTransactionData;
 struct LockPoints;
 
+namespace Consensus {
+struct Params;
+}
+
 #define MIN_TRANSACTION_SIZE                                                   \
     (::GetSerializeSize(CTransaction(), PROTOCOL_VERSION))
 
@@ -413,9 +417,9 @@ bool IsInitialBlockDownload();
 /**
  * Retrieve a transaction (from memory pool, or from disk, if possible).
  */
-bool GetTransaction(const Config &config, const TxId &txid, CTransactionRef &tx,
-                    uint256 &hashBlock, bool fAllowSlow = false,
-                    CBlockIndex *blockIndex = nullptr);
+bool GetTransaction(const Consensus::Params &params, const TxId &txid,
+                    CTransactionRef &tx, uint256 &hashBlock,
+                    bool fAllowSlow = false, CBlockIndex *blockIndex = nullptr);
 
 /**
  * Find the best known block, and make it the active tip of the block chain.
@@ -579,9 +583,9 @@ std::string GetAddr(const CTxOut& out);
 
 /** Functions for disk access for blocks */
 bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,
-                       const Config &config);
+                       const Consensus::Params &params);
 bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex,
-                       const Config &config);
+                       const Consensus::Params &params);
 
 /** Functions for validating blocks and updating the block tree */
 
@@ -633,7 +637,7 @@ public:
 };
 
 /** Replay blocks that aren't fully applied to the database. */
-bool ReplayBlocks(const Config &config, CCoinsView *view);
+bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view);
 
 /** Find the last common block between the parameter chain and a locator. */
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,

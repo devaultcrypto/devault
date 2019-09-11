@@ -177,7 +177,8 @@ static UniValue getrawtransaction(const Config &config,
     TxId txid = TxId(ParseHashV(request.params[0], "parameter 1"));
     CBlockIndex *blockindex = nullptr;
 
-    if (txid == config.GetChainParams().GenesisBlock().hashMerkleRoot) {
+    const CChainParams &params = config.GetChainParams();
+    if (txid == params.GenesisBlock().hashMerkleRoot) {
         // Special exception for the genesis block coinbase transaction
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "The genesis block coinbase is not considered an "
@@ -212,7 +213,7 @@ static UniValue getrawtransaction(const Config &config,
 
     CTransactionRef tx;
     BlockHash hash_block;
-    if (!GetTransaction(config, txid, tx, hash_block, true, blockindex)) {
+    if (!GetTransaction(params.GetConsensus(), txid, tx, hash_block, true, blockindex)) {
         std::string errmsg;
         if (blockindex) {
             if (!blockindex->nStatus.hasData()) {
@@ -325,11 +326,13 @@ static UniValue gettxoutproof(const Config &config,
         g_txindex->BlockUntilSyncedToCurrentChain();
     }
 
+    const Consensus::Params &params = config.GetChainParams().GetConsensus();
+
     LOCK(cs_main);
 
     if (pblockindex == nullptr) {
         CTransactionRef tx;
-        if (!GetTransaction(config, oneTxId, tx, hashBlock, false) ||
+        if (!GetTransaction(params, oneTxId, tx, hashBlock, false) ||
             hashBlock.IsNull()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                                "Transaction not yet in block");
@@ -343,7 +346,7 @@ static UniValue gettxoutproof(const Config &config,
     }
 
     CBlock block;
-    if (!ReadBlockFromDisk(block, pblockindex, config)) {
+    if (!ReadBlockFromDisk(block, pblockindex, params)) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
     }
 
