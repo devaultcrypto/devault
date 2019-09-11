@@ -248,7 +248,8 @@ static bool rest_block(const Config &config, HTTPRequest *req,
                            hashStr + " not available (pruned data)");
         }
 
-        if (!ReadBlockFromDisk(block, pblockindex, config)) {
+        if (!ReadBlockFromDisk(block, pblockindex,
+                               config.GetChainParams().GetConsensus())) {
             return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
         }
     }
@@ -397,7 +398,8 @@ static bool rest_tx(Config &config, HTTPRequest *req,
 
     CTransactionRef tx;
     uint256 hashBlock = uint256();
-    if (!GetTransaction(config, txid, tx, hashBlock, true)) {
+    if (!GetTransaction(config.GetChainParams().GetConsensus(), txid, tx,
+                        hashBlock, true)) {
         return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
     }
 
