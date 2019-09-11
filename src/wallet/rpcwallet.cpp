@@ -184,7 +184,7 @@ std::string generateOneBlock(const Config &config, CScript& coinbaseScript) {
     
     IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
     
-    while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, config)) {
+    while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, config.GetChainParams().GetConsensus())) {
         ++pblock->nNonce;
     }
 

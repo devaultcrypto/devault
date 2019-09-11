@@ -57,7 +57,7 @@ TEST_CASE("get_next_work") {
   std::vector<CBlockIndex> blocks;
   make_blocks(blocks, config);
   CBlockHeader blkHeader = blocks[99].GetBlockHeader();
-  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[99], &blkHeader, config), 0x1c7ffffe);
+  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[99], &blkHeader, config.GetChainParams().GetConsensus()), 0x1c7ffffe);
 }
 
 // TBD
@@ -120,10 +120,10 @@ TEST_CASE("retargeting_test") {
 
   // Now we expect the difficulty to decrease.
   blocks[100] = GetBlockIndex(&blocks[99], long_interval, initialBits);
-  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[100], &blkHeaderDummy, config), 0x1D009188);
+  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[100], &blkHeaderDummy, params), 0x1D009188);
 
   blocks[101] = GetBlockIndex(&blocks[100], long_interval, currentPow.GetCompact());
-  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[101], &blkHeaderDummy, config), 0x1D00A2D3);
+  BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[101], &blkHeaderDummy, params), 0x1D00A2D3);
 
   // Drop down to minimum difficulty
   for (int i = 0; i < 33; i++) {
@@ -132,7 +132,7 @@ TEST_CASE("retargeting_test") {
   // Once we reached the minimal difficulty, we stick with it.
   for (int i = 0; i < 32; i++) {
     blocks[135 + i] = GetBlockIndex(&blocks[134 + i], long_interval, powLimit.GetCompact());
-    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[135 + i], &blkHeaderDummy, config), powLimit.GetCompact());
+    BOOST_CHECK_EQUAL(GetNextWorkRequired(&blocks[135 + i], &blkHeaderDummy, params), powLimit.GetCompact());
   }
 }
 

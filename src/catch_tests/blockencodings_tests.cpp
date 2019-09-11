@@ -54,7 +54,7 @@ static CBlock BuildBlockTestCase() {
   assert(!mutated);
 
   GlobalConfig config;
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
     ++block.nNonce;
   }
 
@@ -313,7 +313,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
   assert(!mutated);
 
   GlobalConfig config;
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
     ++block.nNonce;
   }
 

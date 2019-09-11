@@ -22,7 +22,10 @@ struct BlockHash;
 class CBlockIndex;
 class CCoinsViewDBCursor;
 class uint256;
-class Config;
+
+namespace Consensus {
+struct Params;
+}
 
 namespace Consensus {
 struct Params;
@@ -142,7 +145,7 @@ public:
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
     bool LoadBlockIndexGuts(
-                            const Config &config,
+                            const Consensus::Params &params,
                             std::function<CBlockIndex *(const BlockHash &)> insertBlockIndex);
 };
 
