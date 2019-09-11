@@ -982,7 +982,8 @@ bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,
     }
 
     // Check the header
-    if (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
+    if (!CheckProofOfWork(block.GetHash(), block.nBits,
+                          config.GetChainParams().GetConsensus())) {
         return error("ReadBlockFromDisk: Errors in block header at %s",
                      pos.ToString());
     }
@@ -3622,7 +3623,8 @@ static bool CheckBlockHeader(const Config &config, const CBlockHeader &block,
                              BlockValidationOptions validationOptions) {
     // Check proof of work matches claimed amount
     if (validationOptions.shouldValidatePoW() &&
-        !CheckProofOfWork(block.GetHash(), block.nBits, config)) {
+        !CheckProofOfWork(block.GetHash(), block.nBits,
+                          config.GetChainParams().GetConsensus())) {
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false,
                          "proof of work failed");
     }
@@ -3763,7 +3765,8 @@ static bool ContextualCheckBlockHeader(const Config &config,
     const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, config)) {
+    const Consensus::Params &consensusParams =  config.GetChainParams().GetConsensus();
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
         LogPrintf("bad bits after height: %d\n", pindexPrev->nHeight);
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false,
                          "incorrect proof of work");
@@ -4601,7 +4604,7 @@ CBlockIndex *InsertBlockIndex(const BlockHash &hash) {
 
 bool CChainState::LoadBlockIndexDB(const Config &config) {
     AssertLockHeld(cs_main);
-    if (!pblocktree->LoadBlockIndexGuts(config, InsertBlockIndex)) {
+    if (!pblocktree->LoadBlockIndexGuts(config.GetChainParams().GetConsensus(), InsertBlockIndex)) {
         return false;
     }
 
