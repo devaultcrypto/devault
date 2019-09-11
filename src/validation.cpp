@@ -3759,8 +3759,7 @@ static bool ContextualCheckBlockHeader(const CChainParams &params,
                                        CValidationState &state,
                                        const CBlockIndex *pindexPrev,
                                        int64_t nAdjustedTime) {
-    // const Consensus::Params &consensusParams =
-    // config.GetChainParams().GetConsensus();
+    const Consensus::Params &consensusParams = params.GetConsensus();
     assert(pindexPrev != nullptr);
     const int nHeight = pindexPrev->nHeight + 1;
 
@@ -3866,8 +3865,8 @@ bool ContextualCheckTransactionForCurrentBlock(const Consensus::Params &params,
  * in ConnectBlock().
  * Note that -reindex-chainstate skips the validation that happens here!
  */
-static bool ContextualCheckBlock(const Config &config, const CBlock &block,
-                                 CValidationState &state,
+static bool ContextualCheckBlock(const CBlock &block, CValidationState &state,
+                                 const Consensus::Params &params,
                                  const CBlockIndex *pindexPrev) {
     const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
     // const Consensus::Params &consensusParams =
@@ -3905,7 +3904,7 @@ static bool ContextualCheckBlock(const Config &config, const CBlock &block,
             prevTx = &tx;
         }
 
-        if (!ContextualCheckTransaction(config.GetChainParams().GetConsensus(), tx, state, nHeight,
+        if (!ContextualCheckTransaction(params, tx, state, nHeight,
                                         nLockTimeCutoff, nMedianTimePast)) {
             // state set by ContextualCheckTransaction.
             return false;
@@ -4201,8 +4200,11 @@ bool CChainState::AcceptBlock(const Config &config,
         }
     }
 
+    const CChainParams &chainparams = config.GetChainParams();
+
     if (!CheckBlock(config, block, state, BlockValidationOptions(config)) ||
-        !ContextualCheckBlock(config, block, state, pindex->pprev)) {
+        !ContextualCheckBlock(block, state, chainparams.GetConsensus(),
+                              pindex->pprev)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
             pindex->nStatus = pindex->nStatus.withFailed();
             setDirtyBlockIndex.insert(pindex);
@@ -4235,8 +4237,6 @@ bool CChainState::AcceptBlock(const Config &config,
     if (!IsInitialBlockDownload() && chainActive.Tip() == pindex->pprev) {
         GetMainSignals().NewPoWValidBlock(pindex, pblock);
     }
-
-    const CChainParams &chainparams = config.GetChainParams();
 
     // Write block to history file
     if (fNewBlock) {
@@ -4334,7 +4334,8 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
                      FormatStateMessage(state));
     }
 
-    if (!ContextualCheckBlock(config, block, state, pindexPrev)) {
+    if (!ContextualCheckBlock(
+            block, state, config.GetChainParams().GetConsensus(), pindexPrev)) {
         return error("%s: Consensus::ContextualCheckBlock: %s", __func__,
                      FormatStateMessage(state));
     }
