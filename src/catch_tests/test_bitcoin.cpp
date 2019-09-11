@@ -196,7 +196,7 @@ CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransa
     IncrementExtraNonce(config, &block, chainActive.Tip(), extraNonce);
   }
 
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
     ++block.nNonce;
   }
 
