@@ -1983,7 +1983,7 @@ CBlockIndex *CWallet::ScanForWalletTransactions(
             if (StopDialogRequested()) AbortRescan();
           
             CBlock block;
-            if (ReadBlockFromDisk(block, pindex, GetConfig())) {
+            if (ReadBlockFromDisk(block, pindex, chainParams.GetConsensus())) {
                 auto locked_chain = chain().lock();
                 LOCK(cs_wallet);
                 if (pindex && !chainActive.Contains(pindex)) {

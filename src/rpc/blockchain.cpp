@@ -872,7 +872,7 @@ static UniValue getdifficulties(const Config &config, const JSONRPCRequest &requ
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
       }
       CBlock block;
-      if (!ReadBlockFromDisk(block, pblockindex, config)) {
+      if (!ReadBlockFromDisk(block, pblockindex, config.GetChainParams().GetConsensus())) {
         // Block not found on disk. This could be because we have the block
         // header in our index but don't have the block (for example if a
         // non-whitelisted node sends us an unrequested long chain of valid
@@ -924,7 +924,8 @@ static CBlock GetBlockChecked(const Config &config,
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
     }
 
-    if (!ReadBlockFromDisk(block, pblockindex, config)) {
+    if (!ReadBlockFromDisk(block, pblockindex,
+                           config.GetChainParams().GetConsensus())) {
         // Block not found on disk. This could be because we have the block
         // header in our index but don't have the block (for example if a
         // non-whitelisted node sends us an unrequested long chain of valid
@@ -2285,6 +2286,8 @@ static UniValue getblockstats(const Config &config,
     std::vector<Amount> feerate_array;
     std::vector<int64_t> txsize_array;
 
+    const Consensus::Params &params = config.GetChainParams().GetConsensus();
+
     for (const auto &tx : block.vtx) {
         outputs += tx->vout.size();
         Amount tx_total_out = Amount::zero();
@@ -2318,17 +2321,17 @@ static UniValue getblockstats(const Config &config,
         }
 
         if (loop_inputs) {
-
             if (!g_txindex) {
                 throw JSONRPCError(RPC_INVALID_PARAMETER,
                                    "One or more of the selected stats requires "
                                    "-txindex enabled");
             }
+
             Amount tx_total_in = Amount::zero();
             for (const CTxIn &in : tx->vin) {
                 CTransactionRef tx_in;
                 uint256 hashBlock;
-                if (!GetTransaction(config, in.prevout.GetTxId(), tx_in,
+                if (!GetTransaction(params, in.prevout.GetTxId(), tx_in,
                                     hashBlock, false)) {
                     throw JSONRPCError(RPC_INTERNAL_ERROR,
                                        std::string("Unexpected internal error "
