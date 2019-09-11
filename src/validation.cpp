@@ -3618,13 +3618,12 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
  * Do not call this for any check that depends on the context.
  * For context-dependant calls, see ContextualCheckBlockHeader.
  */
-static bool CheckBlockHeader(const Config &config, const CBlockHeader &block,
-                             CValidationState &state,
+static bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state,
+                             const Consensus::Params &params,
                              BlockValidationOptions validationOptions) {
     // Check proof of work matches claimed amount
     if (validationOptions.shouldValidatePoW() &&
-        !CheckProofOfWork(block.GetHash(), block.nBits,
-                          config.GetChainParams().GetConsensus())) {
+        !CheckProofOfWork(block.GetHash(), block.nBits, params)) {
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false,
                          "proof of work failed");
     }
@@ -3642,7 +3641,8 @@ bool CheckBlock(const Config &config, const CBlock &block,
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(config, block, state, validationOptions)) {
+    if (!CheckBlockHeader(block, state, config.GetChainParams().GetConsensus(),
+                          validationOptions)) {
         return false;
     }
 
@@ -3959,7 +3959,7 @@ bool CChainState::AcceptBlockHeader(const Config &config,
             return true;
         }
 
-        if (!CheckBlockHeader(config, block, state,
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(),
                               BlockValidationOptions(config))) {
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__,
                          hash.ToString(), FormatStateMessage(state));
