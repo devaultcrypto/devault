@@ -154,9 +154,11 @@ public:
                                      CCoinsViewCache &view,
                                      bool ignoreAddressIndex=false);
 
-    bool ConnectBlock(const Config &config, const CBlock &block,
+    bool ConnectBlock(const CChainParams &params, const CBlock &block,
                       CValidationState &state, CBlockIndex *pindex,
-                      CCoinsViewCache &view, bool fJustCheck = false,
+                      CCoinsViewCache &view,
+                      BlockValidationOptions options,
+                      bool fJustCheck = false,
                       bool ignoreAddressIndex = false);
 
     // Block disconnection on our pcoinsTip:
@@ -1778,17 +1780,18 @@ static int64_t nBlocksTotal = 0;
  * done; ConnectBlock() can fail if those validity checks fail (among other
  * reasons).
  */
-bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
-                         CValidationState &state, CBlockIndex *pindex,
-                         CCoinsViewCache &view, bool fJustCheck,
-                         bool ignoreAddressIndex) {
+bool CChainState::ConnectBlock(const CChainParams &params, const CBlock &block,
+                               CValidationState &state, CBlockIndex *pindex,
+                               CCoinsViewCache &view,
+                               BlockValidationOptions options,
+                               bool fJustCheck,
+                               bool ignoreAddressIndex) {
     AssertLockHeld(cs_main);
     assert(pindex);
     assert(*pindex->phashBlock == block.GetHash());
     int64_t nTimeStart = GetTimeMicros();
 
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
+    const Consensus::Params &consensusParams = params.GetConsensus();
 
     // Check it again in case a previous version let a bad block in
     // NOTE: We don't currently (re-)invoke ContextualCheckBlock() or
@@ -1804,9 +1807,8 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
     // re-enforce that rule here (at least until we make it impossible for
     // GetAdjustedTime() to go backward).
     if (!CheckBlock(block, state, consensusParams,
-                    BlockValidationOptions(config)
-                        .withCheckPoW(!fJustCheck)
-                        .withCheckMerkleRoot(!fJustCheck))) {
+                    options.withCheckPoW(!fJustCheck)
+                    .withCheckMerkleRoot(!fJustCheck))) {
         if (state.CorruptionPossible()) {
             // We don't write down blocks to disk if they may have been
             // corrupted, so this should be impossible unless we're having
@@ -2110,8 +2112,7 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
         return true;
     }
 
-    if (!WriteUndoDataForBlock(blockundo, state, pindex,
-                               config.GetChainParams())) {
+    if (!WriteUndoDataForBlock(blockundo, state, pindex, params)) {
         return false;
     }
 
@@ -2622,8 +2623,10 @@ bool CChainState::ConnectTip(const Config &config, CValidationState &state,
              (nTime2 - nTime1) * MILLI, nTimeReadFromDisk * MICRO);
     {
         CCoinsViewCache view(pcoinsTip.get());
-        bool rv = ConnectBlock(config, blockConnecting, state, pindexNew, view);
-        GetMainSignals().BlockChecked(blockConnecting, state);
+        bool rv = ConnectBlock(config.GetChainParams(), 
+                               blockConnecting,
+                               state, pindexNew, view,
+                               BlockValidationOptions(config));
         if (!rv) {
             if (state.IsInvalid()) {
                 InvalidBlockFound(pindexNew, state);
@@ -4343,7 +4346,8 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
                      FormatStateMessage(state));
     }
 
-    if (!g_chainstate.ConnectBlock(config, block, state, &indexDummy, viewNew,
+    if (!g_chainstate.ConnectBlock(config.GetChainParams(),block, state, &indexDummy, viewNew,
+                                   validationOptions,
                                    true)) {
         return false;
     }
@@ -4854,8 +4858,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                          int nCheckLevel, int nCheckDepth) {
     LOCK(cs_main);
 
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
+    const CChainParams &params = config.GetChainParams();
+    const Consensus::Params &consensusParams = params.GetConsensus();
 
     if (chainActive.Tip() == nullptr || chainActive.Tip()->pprev == nullptr) {
         return true;
@@ -4982,8 +4986,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
                     "VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s",
                     pindex->nHeight, pindex->GetBlockHash().ToString());
             }
-            if (!g_chainstate.ConnectBlock(config, block, state, pindex, coins, false,
-                              true)) {
+            if (!g_chainstate.ConnectBlock(config.GetChainParams(), block, state, pindex, coins, BlockValidationOptions(config),
+                                           false, true)) {
                 return error("VerifyDB(): *** found unconnectable block at %d, "
                              "hash=%s (%s)",
                              pindex->nHeight, pindex->GetBlockHash().ToString(),
