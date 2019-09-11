@@ -3020,8 +3020,8 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Updated seeds
 #     Fixes compilation of leveldb tests broken in D4004
       [CI] Make IBD a standard build configuration
-      Remove ContextualCheckBlock's dependency on Config
-      Remove CheckBlockHeader's dependency on Config
+###   Remove ContextualCheckBlock's dependency on Config
+###   Remove CheckBlockHeader's dependency on Config
       [CMAKE] Fix Linux64 toolchain name
 #     Source the Excessive block size from BlockValidationOptions
 #     Do not construct out-of-bound pointers in SHA2 code
@@ -3030,9 +3030,9 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       [CMAKE] Move version to the top level CMakeLists.txt
       [CMAKE] Rename the top-level and `src/` cmake projects
       Generalized ibd.sh to provide a logging tool for running similar types of tests
-      Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
-      Remove ReadBlockFromDisk's dependency on Config
-      Remove dependency on Config from the PoW code
+###   Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
+###   Remove ReadBlockFromDisk's dependency on Config
+###   Remove dependency on Config from the PoW code
 ###   Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
 ###   Activate consensus rule based on consensus params rather than config
       Add warning about redundant moves
