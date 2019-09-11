@@ -3759,7 +3759,7 @@ bool CheckBlock(const Config &config, const CBlock &block,
  * in ConnectBlock().
  * Note that -reindex-chainstate skips the validation that happens here!
  */
-static bool ContextualCheckBlockHeader(const Config &config,
+static bool ContextualCheckBlockHeader(const CChainParams &params,
                                        const CBlockHeader &block,
                                        CValidationState &state,
                                        const CBlockIndex *pindexPrev,
@@ -3770,7 +3770,6 @@ static bool ContextualCheckBlockHeader(const Config &config,
     const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
-    const Consensus::Params &consensusParams =  config.GetChainParams().GetConsensus();
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
         LogPrintf("bad bits after height: %d\n", pindexPrev->nHeight);
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false,
@@ -3779,8 +3778,7 @@ static bool ContextualCheckBlockHeader(const Config &config,
 
     // Check against checkpoints
     if (fCheckpointsEnabled) {
-        const CCheckpointData &checkpoints =
-            config.GetChainParams().Checkpoints();
+        const CCheckpointData &checkpoints = params.Checkpoints();
 
         // Check that the block chain matches the known block chain up to a
         // checkpoint.
@@ -3986,7 +3984,7 @@ bool CChainState::AcceptBlockHeader(const Config &config,
                              REJECT_INVALID, "bad-prevblk");
         }
 
-        if (!ContextualCheckBlockHeader(config, block, state, pindexPrev,
+        if (!ContextualCheckBlockHeader(chainparams, block, state, pindexPrev,
                                         GetAdjustedTime())) {
             return error("%s: Consensus::ContextualCheckBlockHeader: %s, %s",
                          __func__, hash.ToString(), FormatStateMessage(state));
@@ -4331,8 +4329,8 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
     indexDummy.phashBlock = &block_hash;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(config, block, state, pindexPrev,
-                                    GetAdjustedTime())) {
+    if (!ContextualCheckBlockHeader(config.GetChainParams(), block, state,
+                                    pindexPrev, GetAdjustedTime())) {
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__,
                      FormatStateMessage(state));
     }
