@@ -1787,6 +1787,9 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
     assert(*pindex->phashBlock == block.GetHash());
     int64_t nTimeStart = GetTimeMicros();
 
+    const Consensus::Params &consensusParams =
+        config.GetChainParams().GetConsensus();
+
     // Check it again in case a previous version let a bad block in
     // NOTE: We don't currently (re-)invoke ContextualCheckBlock() or
     // ContextualCheckBlockHeader() here. This means that if we add a new
@@ -1800,7 +1803,7 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
     // is enforced in ContextualCheckBlockHeader(); we wouldn't want to
     // re-enforce that rule here (at least until we make it impossible for
     // GetAdjustedTime() to go backward).
-    if (!CheckBlock(config, block, state,
+    if (!CheckBlock(block, state, consensusParams,
                     BlockValidationOptions(config)
                         .withCheckPoW(!fJustCheck)
                         .withCheckMerkleRoot(!fJustCheck))) {
@@ -1822,8 +1825,6 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
 
     // Special case for the genesis block, skipping connection of its
     // transactions (its coinbase is unspendable)
-    const Consensus::Params &consensusParams =
-        config.GetChainParams().GetConsensus();
     if (block.GetHash() == consensusParams.hashGenesisBlock) {
         if (!fJustCheck) {
             view.SetBestBlock(pindex->GetBlockHash());
@@ -3631,8 +3632,8 @@ static bool CheckBlockHeader(const CBlockHeader &block, CValidationState &state,
     return true;
 }
 
-bool CheckBlock(const Config &config, const CBlock &block,
-                CValidationState &state,
+bool CheckBlock(const CBlock &block, CValidationState &state,
+                const Consensus::Params &params,
                 BlockValidationOptions validationOptions) {
     // These are checks that are independent of context.
     if (block.fChecked) {
@@ -3641,8 +3642,7 @@ bool CheckBlock(const Config &config, const CBlock &block,
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, config.GetChainParams().GetConsensus(),
-                          validationOptions)) {
+    if (!CheckBlockHeader(block, state, params, validationOptions)) {
         return false;
     }
 
@@ -4202,7 +4202,8 @@ bool CChainState::AcceptBlock(const Config &config,
 
     const CChainParams &chainparams = config.GetChainParams();
 
-    if (!CheckBlock(config, block, state, BlockValidationOptions(config)) ||
+    if (!CheckBlock(block, state, chainparams.GetConsensus(),
+                    BlockValidationOptions(config)) ||
         !ContextualCheckBlock(block, state, chainparams.GetConsensus(),
                               pindex->pprev)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
@@ -4285,7 +4286,8 @@ bool ProcessNewBlock(const Config &config,
         // Ensure that CheckBlock() passes before calling AcceptBlock, as
         // belt-and-suspenders.
         bool ret =
-            CheckBlock(config, *pblock, state, BlockValidationOptions(config));
+            CheckBlock(*pblock, state, config.GetChainParams().GetConsensus(),
+                       BlockValidationOptions(config));
         if (ret) {
             // Store to disk
             ret = g_chainstate.AcceptBlock(
@@ -4329,7 +4331,8 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
                      FormatStateMessage(state));
     }
 
-    if (!CheckBlock(config, block, state, validationOptions)) {
+    if (!CheckBlock(block, state, config.GetChainParams().GetConsensus(),
+                    validationOptions)) {
         return error("%s: Consensus::CheckBlock: %s", __func__,
                      FormatStateMessage(state));
     }
@@ -4909,8 +4912,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         }
 
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 &&
-            !CheckBlock(config, block, state, BlockValidationOptions(config))) {
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, consensusParams,
+                                            BlockValidationOptions(config))) {
             return error("%s: *** found bad block at %d, hash=%s (%s)\n",
                          __func__, pindex->nHeight,
                          pindex->GetBlockHash().ToString(),
