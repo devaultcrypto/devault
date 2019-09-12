@@ -334,7 +334,8 @@ public:
  * Note that we guarantee that either the proof-of-work is valid on pblock, or
  * (and possibly also) BlockChecked will have been called.
  *
- * Call without cs_main held.
+
+ * May not be called in a validationinterface callback.
  *
  * @param[in]   config  The global config.
  * @param[in]   pblock  The block we want to process.
@@ -346,12 +347,13 @@ public:
  */
 bool ProcessNewBlock(const Config &config,
                      const std::shared_ptr<const CBlock> pblock,
-                     bool fForceProcessing, bool *fNewBlock);
+                     bool fForceProcessing, bool *fNewBlock)
+    LOCKS_EXCLUDED(cs_main);
 
 /**
  * Process incoming block headers.
  *
- * Call without cs_main held.
+ * May not be called in a validationinterface callback.
  *
  * @param[in]  config        The config.
  * @param[in]  block         The block headers themselves.
@@ -366,7 +368,8 @@ bool ProcessNewBlockHeaders(const Config &config,
                             const std::vector<CBlockHeader> &block,
                             CValidationState &state,
                             const CBlockIndex **ppindex = nullptr,
-                            CBlockHeader *first_invalid = nullptr);
+                            CBlockHeader *first_invalid = nullptr)
+    LOCKS_EXCLUDED(cs_main);
 
 /**
  * Open a block file (blk?????.dat).
@@ -394,7 +397,7 @@ bool LoadGenesisBlock(const CChainParams &chainparams);
  * Load the block tree and coins database from disk, initializing state if we're
  * running with -reindex.
  */
-bool LoadBlockIndex(const Config &config);
+bool LoadBlockIndex(const Config &config) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /**
  * Update the chain tip based on database information.
@@ -615,11 +618,12 @@ bool ContextualCheckTransactionForCurrentBlock(const Consensus::Params &params,
 
 /**
  * Check a block is completely valid from start to finish (only works on top of
- * our current best block, with cs_main held)
+ * our current best block)
  */
 bool TestBlockValidity(const CChainParams &chainparams, CValidationState &state,
                        const CBlock &block, CBlockIndex *pindexPrev,
-                       BlockValidationOptions validationOptions);
+                       BlockValidationOptions validationOptions)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /**
  * When there are blocks in the active chain with missing data, rewind the
@@ -653,10 +657,10 @@ CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
  * PreciousBlock() will override the effects of earlier calls. The effects of
  * calls to PreciousBlock() are not retained across restarts.
  *
- * Returns true if the provided block index successfully became the chain tip.
+ * May not be called in a validationinterface callback.
  */
 bool PreciousBlock(const Config &config, CValidationState &state,
-                   CBlockIndex *pindex);
+                   CBlockIndex *pindex) LOCKS_EXCLUDED(cs_main);
 
 /**
  * Mark a block as finalized.
@@ -668,30 +672,32 @@ bool FinalizeBlockAndInvalidate(const Config &config, CValidationState &state,
 
 /** Mark a block as invalid. */
 bool InvalidateBlock(const Config &config, CValidationState &state,
-                     CBlockIndex *pindex);
+                     CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /** Park a block. */
 bool ParkBlock(const Config &config, CValidationState &state,
-               CBlockIndex *pindex);
+               CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /** Remove invalidity status from a block and its descendants. */
-bool ResetBlockFailureFlags(CBlockIndex *pindex);
+bool ResetBlockFailureFlags(CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /** Remove parked status from a block and its descendants. */
-bool UnparkBlockAndChildren(CBlockIndex *pindex);
+bool UnparkBlockAndChildren(CBlockIndex *pindex)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /** Remove parked status from a block. */
-bool UnparkBlock(CBlockIndex *pindex);
+bool UnparkBlock(CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /**
  * Retrieve the topmost finalized block.
  */
-const CBlockIndex *GetFinalizedBlock();
+const CBlockIndex *GetFinalizedBlock() EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /**
  * Checks if a block is finalized.
  */
-bool IsBlockFinalized(const CBlockIndex *pindex);
+bool IsBlockFinalized(const CBlockIndex *pindex)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
 /** The currently-connected chain of blocks (protected by cs_main). */
 extern CChain &chainActive;
