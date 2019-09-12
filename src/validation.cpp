@@ -135,18 +135,21 @@ public:
     CBlockIndex *pindexBestParked = nullptr;
 
     bool LoadBlockIndexDB(const Config &config);
-    bool LoadBlockIndex(const Config &config, CBlockTreeDB &blocktree);
+    bool LoadBlockIndex(const Config &config, CBlockTreeDB &blocktree)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     bool ActivateBestChain(
         const Config &config, CValidationState &state,
         std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>());
 
     bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
-                           CValidationState &state, CBlockIndex **ppindex);
+                           CValidationState &state, CBlockIndex **ppindex)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     bool AcceptBlock(const Config &config,
                      const std::shared_ptr<const CBlock> &pblock,
                      CValidationState &state, bool fRequested,
-                     const CDiskBlockPos *dbp, bool *fNewBlock);
+                     const CDiskBlockPos *dbp, bool *fNewBlock)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     // Block (dis)connection on a given view:
     DisconnectResult DisconnectBlock(const CBlock &block,
@@ -167,17 +170,20 @@ public:
 
     // Manual block validity manipulation:
     bool PreciousBlock(const Config &config, CValidationState &state,
-                       CBlockIndex *pindex);
+                       CBlockIndex *pindex) LOCKS_EXCLUDED(cs_main);
     bool UnwindBlock(const Config &config, CValidationState &state,
-                     CBlockIndex *pindex, bool invalidate);
-    bool ResetBlockFailureFlags(CBlockIndex *pindex);
+                     CBlockIndex *pindex, bool invalidate)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    bool ResetBlockFailureFlags(CBlockIndex *pindex)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     template <typename F>
     void UpdateFlagsForBlock(CBlockIndex *pindexBase, CBlockIndex *pindex, F f);
     template <typename F, typename C>
     void UpdateFlags(CBlockIndex *pindex, F f, C fchild);
     template <typename F> void UpdateFlags(CBlockIndex *pindex, F f);
     /** Remove parked status from a block and its descendants. */
-    bool UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren);
+    bool UnparkBlockImpl(CBlockIndex *pindex, bool fClearChildren)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view);
     bool RewindBlockIndex(const Config &config);
@@ -202,6 +208,13 @@ private:
     /** Create a new block index entry for a given block hash */
   //CBlockIndex *InsertBlockIndex(const BlockHash &hash);
 public:
+  //      EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    /**
+     * Make various assertions about the state of the block index.
+     *
+     * By default this only executes fully when using the Regtest chain; see:
+     * fCheckBlockIndex.
+     */
     void CheckBlockIndex(const Consensus::Params &consensusParams);
 private:
     void InvalidBlockFound(CBlockIndex *pindex, const CValidationState &state);
@@ -211,7 +224,8 @@ private:
                                    const CDiskBlockPos &pos);
 
     bool RollforwardBlock(const CBlockIndex *pindex, CCoinsViewCache &inputs,
-                          const Consensus::Params &params);
+                          const Consensus::Params &params)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 } g_chainstate;
 
 /**
@@ -2508,7 +2522,8 @@ public:
 };
 
 static bool FinalizeBlockInternal(const Config &config, CValidationState &state,
-                                  const CBlockIndex *pindex) {
+                                  const CBlockIndex *pindex)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
     if (pindex->nStatus.isInvalid()) {
         // We try to finalize an invalid block.
@@ -2539,7 +2554,8 @@ static bool FinalizeBlockInternal(const Config &config, CValidationState &state,
 }
 
 static const CBlockIndex *FindBlockToFinalize(const Config &config,
-                                              CBlockIndex *pindexNew) {
+                                              CBlockIndex *pindexNew)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
 
     const int32_t maxreorgdepth =
@@ -2990,7 +3006,7 @@ bool CChainState::ActivateBestChainStep(
     return true;
 }
 
-static void NotifyHeaderTip() {
+static void NotifyHeaderTip() LOCKS_EXCLUDED(cs_main) {
     bool fNotify = false;
     bool fInitialBlockDownload = false;
     static CBlockIndex *pindexHeaderOld = nullptr;
@@ -3359,7 +3375,7 @@ bool CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
     return true;
 }
 
-bool ResetBlockFailureFlags(CBlockIndex *pindex) {
+bool ResetBlockFailureFlags(CBlockIndex *pindex) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     return g_chainstate.ResetBlockFailureFlags(pindex);
 }
 
@@ -4691,7 +4707,8 @@ bool CChainState::LoadBlockIndexDB(const Config &config) {
     return true;
 }
 
-bool static LoadBlockIndexDB(const Config &config) {
+bool static LoadBlockIndexDB(const Config &config)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     if (!g_chainstate.LoadBlockIndex(config, *pblocktree)) {
         return false;
     }

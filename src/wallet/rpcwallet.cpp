@@ -169,7 +169,7 @@ std::string LabelFromValue(const UniValue &value) {
 std::string generateOneBlock(const Config &config, CScript& coinbaseScript) {
   {
     // keep cs_main locked.
-    LOCK(cs_main);
+    //LOCK(cs_main);
     
     unsigned int nExtraNonce = 0;
     std::unique_ptr<CBlockTemplate> pblocktemplate(
