@@ -196,6 +196,9 @@ double GuessVerificationPercent(const ChainTxData &data, const CBlockIndex *pind
   return percent;
 }
                       
+BlockValidationOptions::BlockValidationOptions(const Config &config)
+    : checkPoW(true), checkMerkleRoot(true),
+      excessiveBlockSize(config.GetMaxBlockSize()) {}
 
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
@@ -1674,9 +1677,10 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     // is enforced in ContextualCheckBlockHeader(); we wouldn't want to
     // re-enforce that rule here (at least until we make it impossible for
     // GetAdjustedTime() to go backward).
-    BlockValidationOptions validationOptions =
-        BlockValidationOptions(!fJustCheck, !fJustCheck);
-    if (!CheckBlock(config, block, state, validationOptions)) {
+    if (!CheckBlock(config, block, state,
+                    BlockValidationOptions(config)
+                        .withCheckPoW(!fJustCheck)
+                        .withCheckMerkleRoot(!fJustCheck))) {
         if (state.CorruptionPossible()) {
             // We don't write down blocks to disk if they may have been
             // corrupted, so this should be impossible unless we're having
@@ -3461,9 +3465,9 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos,
  * Do not call this for any check that depends on the context.
  * For context-dependant calls, see ContextualCheckBlockHeader.
  */
-static bool CheckBlockHeader(
-    const Config &config, const CBlockHeader &block, CValidationState &state,
-    BlockValidationOptions validationOptions = BlockValidationOptions()) {
+static bool CheckBlockHeader(const Config &config, const CBlockHeader &block,
+                             CValidationState &state,
+                             BlockValidationOptions validationOptions) {
     // Check proof of work matches claimed amount
     if (validationOptions.shouldValidatePoW() &&
         !CheckProofOfWork(block.GetHash(), block.nBits, config)) {
@@ -3517,7 +3521,7 @@ bool CheckBlock(const Config &config, const CBlock &block,
     }
 
     // Size limits.
-    auto nMaxBlockSize = config.GetMaxBlockSize();
+    auto nMaxBlockSize = validationOptions.getExcessiveBlockSize();
 
     // Bail early if there is no way this block is of reasonable size.
     if ((block.vtx.size() * MIN_TRANSACTION_SIZE) > nMaxBlockSize) {
@@ -3801,7 +3805,8 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
             return true;
         }
 
-        if (!CheckBlockHeader(config, block, state)) {
+        if (!CheckBlockHeader(config, block, state,
+                              BlockValidationOptions(config))) {
             return error("%s: Consensus::CheckBlockHeader: %s, %s", __func__,
                          hash.ToString(), FormatStateMessage(state));
         }
@@ -4022,7 +4027,7 @@ static bool AcceptBlock(const Config &config,
         *fNewBlock = true;
     }
 
-    if (!CheckBlock(config, block, state) ||
+    if (!CheckBlock(config, block, state, BlockValidationOptions(config)) ||
         !ContextualCheckBlock(config, block, state, pindex->pprev)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
             pindex->nStatus = pindex->nStatus.withFailed();
@@ -4098,7 +4103,8 @@ bool ProcessNewBlock(const Config &config,
         
         // Ensure that CheckBlock() passes before calling AcceptBlock, as
         // belt-and-suspenders.
-        bool ret = CheckBlock(config, *pblock, state);
+        bool ret =
+            CheckBlock(config, *pblock, state, BlockValidationOptions(config));
         if (ret) {
             // Store to disk
             ret = AcceptBlock(config, pblock, state, fForceProcessing, nullptr,
@@ -4646,7 +4652,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         }
 
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(config, block, state)) {
+        if (nCheckLevel >= 1 &&
+            !CheckBlock(config, block, state, BlockValidationOptions(config))) {
             return error("%s: *** found bad block at %d, hash=%s (%s)\n",
                          __func__, pindex->nHeight,
                          pindex->GetBlockHash().ToString(),
