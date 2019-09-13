@@ -31,7 +31,7 @@ struct Params {
     // Rewards
     std::vector<int64_t> nPerCentPerYear;
     int64_t nMinRewardBlocks;
-    Amount nMinRewardBalance;
+    std::vector<std::tuple<int64_t,Amount>> vecMinRewardBalances;
     Amount nMinReward;
   
     uint256 nMinimumChainWork;
@@ -40,7 +40,17 @@ struct Params {
     // Params for Zawy's LWMA difficulty adjustment algorithm.
     int64_t nZawyLwmaAveragingWindow;
 
+    Amount getMinRewardBalance(int Height) const {
+        size_t index=0;
+        int BalanceHeight=0;
+        Amount Balance;
+        do {
+            std::tie(BalanceHeight,Balance) = vecMinRewardBalances[index++];
+        } while ((BalanceHeight < Height) && (index < vecMinRewardBalances.size()));
+        return Balance;
+    }
 };
+             
 } // namespace Consensus
 
 #endif // DEVAULT_CONSENSUS_PARAMS_H

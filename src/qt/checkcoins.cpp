@@ -53,8 +53,9 @@ std::string checkcoins(const interfaces::Wallet::CoinsList &coinList) {
     }
 
     std::stringstream s;
+    auto Height = chainActive.Tip()->nHeight;
     Amount total_sum = invalid_sum + valid_sum;
-    if (total_sum > Params().GetConsensus().nMinRewardBalance) {
+    if (total_sum > Params().GetConsensus().getMinRewardBalance(Height)) {
       if (invalid_sum > Amount(0)) {
         s << "unused sum = " << invalid_sum.ToString() << " in " << invalid_cold.size() << " utxos ";
       }
