@@ -2953,7 +2953,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     banman: create and split out banman
       Move util files to directory
 #     Use C++11 default member initializers
-      debug log number of unknown wallet records on load
+##    debug log number of unknown wallet records on load
 #     Add compile time verification of assumptions we're currently making implicitly/tacitly
 #     Use std::make_unique more consistently
 #     bench: Use non-throwing ParseDouble(...) instead of throwing boost::lexical_cast<double>(...)
@@ -3004,9 +3004,9 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     [qt] coincontrol: Remove unused qt4 workaround
       [build] .gitignore: add QT Creator artifacts
       Adding test case for SINGLE|ANYONECANPAY hash type in tx_valid.json
-      Remove TestBlockValidity's dependency on Config
-      Remove ConnectBlock's dependency on Config
-      Remove CheckBlock's dependency on Config
+##    Remove TestBlockValidity's dependency on Config
+##    Remove ConnectBlock's dependency on Config
+##    Remove CheckBlock's dependency on Config
       [net] Tighten scope in net_processing
 #     Add documentation to PeerLogicValidation interface and related functions
 20.2      
