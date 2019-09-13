@@ -673,11 +673,15 @@ static UniValue consolidaterewards(const Config &config,
 
     std::string message;
 
-    Amount minAmount = Params().GetConsensus().nMinRewardBalance;
+    
+    int Height = chainActive.Height();
+    Amount minRewardBalance = Params().GetConsensus().getMinRewardBalance(Height);
+    
+    Amount minAmount = minRewardBalance;
     if (!request.params[2].isNull()) {
         Amount coinMin(0);
         coinMin = Amount(request.params[2].get_int() * COIN);
-        if (coinMin < Params().GetConsensus().nMinRewardBalance) coinMin = Params().GetConsensus().nMinRewardBalance;
+        if (coinMin < minRewardBalance) coinMin = minRewardBalance;
         minAmount = coinMin;
     }
     

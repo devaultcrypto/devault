@@ -39,7 +39,7 @@ CColdRewards::CColdRewards(const Consensus::Params &consensusParams, CRewardsVie
 
 void CColdRewards::Setup(const Consensus::Params &consensusParams) {
   nMinBlocks = consensusParams.nMinRewardBlocks;
-  nMinBalance = consensusParams.nMinRewardBalance;
+  vecMinRewardBalances = consensusParams.vecMinRewardBalances;
   nMinReward = consensusParams.nMinReward;
 }
 
@@ -48,6 +48,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
   const Consensus::Params consensusParams = config.GetChainParams().GetConsensus();
   CBlock block;
   int nHeight = pindexNew->nHeight;
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(nHeight);
   ReadBlockFromDisk(block, pindexNew, config);
 
   // Loop through block
@@ -65,7 +66,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
         Amount balance = out.nValue;
         // LogPrintf("Found spend to %d COINS at height %d\n", balance/COIN, nHeight);
         COutPoint outpoint(TxId, n); // Unique
-        if (balance >= nMinBalance) {
+        if (balance >= minRewardBalance) {
           LogPrint(BCLog::COLD, "CR: %s : Writing to Rewards db, addr %s, Value of %d at Height %d\n", __func__,
                    GetAddrFromTxOut(out), balance.toIntCoins(), nHeight);
           CRewardValue e(out, nHeight, nHeight, nHeight);
