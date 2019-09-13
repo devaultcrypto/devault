@@ -40,7 +40,6 @@ CColdRewards::CColdRewards(const Consensus::Params &consensusParams, CRewardsVie
 void CColdRewards::Setup(const Consensus::Params &consensusParams) {
   nMinBlocks = consensusParams.nMinRewardBlocks;
   nMinBalance = consensusParams.nMinRewardBalance;
-  nMaxReward = consensusParams.nMaxReward;
   nMinReward = consensusParams.nMinReward;
 }
 
@@ -243,10 +242,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
           if (reward >= nMinReward) {
             // This is one of the oldest unrewarded UTXO with a + reward value
             // But there could be other valid UTXOs at same Height and same RewardValue
-            if (reward < nMaxReward)
-              minHReward = reward;
-            else
-              minHReward = nMaxReward;
+            minHReward = reward;
             
             // if older than previous solutions and passed other checks, reset the mins
             if (nHeight < minHeight) {
