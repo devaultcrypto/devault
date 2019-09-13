@@ -237,6 +237,7 @@ public:
     bool fIsEncrypted{false};
     bool fAnyUnordered{false};
     int nFileVersion{0};
+    unsigned int m_unknown_records{0};
     std::vector<TxId> vWalletUpgrade;
 
     CWalletScanState() {}
@@ -411,6 +412,8 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             WalletFlag flags;
             ssValue >> flags;
             pwallet->SetWalletFlags(flags);
+        } else if (strType != "bestblock" && strType != "bestblock_nomerkle") {
+            wss.m_unknown_records++;
         }
     } catch (...) {
         return false;
@@ -519,7 +522,8 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
     }
 
 
-    LogPrintf("Keys: %u encrypted, %u w/ metadata\n", wss.nCKeys, wss.nKeyMeta);
+    LogPrintf("Keys: %u encrypted, %u w/ metadata, unknown wallet records: %u\n", wss.nCKeys, wss.nKeyMeta,
+              wss.m_unknown_records);
 
     // nTimeFirstKey is only reliable if all keys have metadata
     if ((wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {
