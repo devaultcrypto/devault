@@ -150,7 +150,6 @@ public:
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward = 50 * COIN;
-        consensus.nMaxReward = 62500 * COIN;
 
         consensus.nZawyLwmaAveragingWindow = 72;
         
@@ -234,7 +233,6 @@ public:
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward =  50 * COIN;
-        consensus.nMaxReward = 62500 * COIN;
 
         consensus.nZawyLwmaAveragingWindow = 72;
   
@@ -322,7 +320,6 @@ public:
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.nMinRewardBalance = 1000 * COIN;
         consensus.nMinReward = 50 * COIN;
-        consensus.nMaxReward = 62500 * COIN;
 
         consensus.nZawyLwmaAveragingWindow = 72;
 

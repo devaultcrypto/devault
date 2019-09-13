@@ -33,7 +33,6 @@ struct Params {
     int64_t nMinRewardBlocks;
     Amount nMinRewardBalance;
     Amount nMinReward;
-    Amount nMaxReward;
   
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
