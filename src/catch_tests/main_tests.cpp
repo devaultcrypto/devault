@@ -16,21 +16,22 @@
 static void TestBlockRewards(const Consensus::Params &consensusParams) {
   const int maxYears = 4;
   const int nInitialReward = consensusParams.nInitialMiningRewardInCoins;
+  const int nPeakReward = 1.5*consensusParams.nInitialMiningRewardInCoins;
   const int nBlocksPerYear = consensusParams.nBlocksPerYear;
   Amount nInitialSubsidy = nInitialReward * COIN;
 
   for (int n = 0; n < maxYears; n++) {
     int nHeight = n * nBlocksPerYear;
     Amount nSubsidy = GetBlockSubsidy(nHeight, consensusParams);
-    if (n < 2)
+    if (n < 1)
       BOOST_CHECK(nSubsidy >= nInitialSubsidy);
     else
       BOOST_CHECK(nSubsidy <= 2 * nInitialReward * COIN);
   }
-  // Peak is 1.5 years out. Check here
-  BOOST_CHECK_EQUAL(GetBlockSubsidy(1.5 * nBlocksPerYear, consensusParams), 2 * nInitialReward * COIN);
+  // Peak is 0.5 years out. Check here
+  BOOST_CHECK_EQUAL(GetBlockSubsidy(0.5 * nBlocksPerYear, consensusParams), nPeakReward * COIN);
   // Check next block reward drops
-  BOOST_CHECK(GetBlockSubsidy((1.5 * nBlocksPerYear) + 1, consensusParams) < 2 * nInitialReward * COIN);
+  BOOST_CHECK(GetBlockSubsidy((0.5 * nBlocksPerYear) + 1, consensusParams) < 2 * nInitialReward * COIN);
 }
 
 TEST_CASE("block_subsidy_test") {
@@ -48,6 +49,6 @@ TEST_CASE("subsidy_limit_test") {
     nSum += nSubsidy;
     BOOST_CHECK(MoneyRange(nSum));
   }
-  BOOST_CHECK_EQUAL(nSum, Amount(1742400000000LL));
+  BOOST_CHECK_EQUAL(nSum, Amount(558400000000LL));
 }
 // BOOST_AUTO_TEST_SUITE_END()

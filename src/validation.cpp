@@ -915,15 +915,17 @@ bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex,
 }
 
 Amount GetBlockSubsidy(int nHeight, const Consensus::Params &consensusParams) {
-  // Peak currently happens 1 1/2 years out
-  const int64_t nPeakHeight = 1.5*consensusParams.nBlocksPerYear;
+  // Peak happens after 1/2 a year
+  const int64_t peakDiv = 2;  // for 1/2 a year
+  const int64_t nPeakHeight = consensusParams.nBlocksPerYear/peakDiv;
   const int64_t nInitialReward = consensusParams.nInitialMiningRewardInCoins;
+  const int64_t peak = nInitialReward + int(nInitialReward/peakDiv);
   int64_t nReward;
 
   if (nHeight <= nPeakHeight) {
-    nReward = (nInitialReward) + int((2*nInitialReward*nHeight)/(nPeakHeight+nHeight));
+    nReward = (nInitialReward) + int((2*nInitialReward*nHeight)/(3*nPeakHeight+nHeight));
   } else {
-    nReward =  int((2 * nInitialReward * nPeakHeight)/nHeight);
+    nReward =  nPeakHeight*peak/nHeight;
   }
   Amount nSubsidy = nReward * COIN;
   return nSubsidy;
