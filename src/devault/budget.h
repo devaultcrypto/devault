@@ -5,6 +5,7 @@
 #include <amount.h>
 #include <script/script.h>
 #include <cstdint>
+#include <chainparams.h>
 
 class CTransaction;
 class Config;
@@ -19,11 +20,15 @@ class CBudget {
 
     int64_t nBlocksPerPeriod;
     bool fTestNet;
+    int BudgetSize;
+    const CChainParams* pChainparams;
+    
     
   public:
     CBudget(const Config &config);
     // Superblock is once/month
-    bool IsSuperBlock(int nBlockHeight) { return (nBlockHeight % nBlocksPerPeriod == 0); }
+    void SetupForHeight(int nHeight);
+    bool IsSuperBlock(int nBlockHeight);
     Amount CalculateSuperBlockRewards(int nBlockHeight, const Amount &nOverallReward);
     bool CheckBudgetTransaction(const int nHeight, const CTransaction &tx);
     bool Validate(const CBlock &block, int nHeight, const Amount& BlockRewrd, Amount& nSumReward);
