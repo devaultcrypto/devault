@@ -53,12 +53,6 @@
 #include <sstream>
 #include <thread>
 
-#include <thread>
-
-#if defined(NDEBUG)
-#error "DeVault cannot be compiled without assertions."
-#endif
-
 #define MICRO 0.000001
 #define MILLI 0.001
 /**
