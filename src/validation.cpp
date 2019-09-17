@@ -240,7 +240,7 @@ static void FindFilesToPrune(std::set<int> &setFilesToPrune,
                              uint64_t nPruneAfterHeight);
 static FILE *OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
 static uint32_t GetBlockScriptFlags(const Config &config,
-                                    const CBlockIndex *pChainTip) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+                                    const CBlockIndex *pChainTip);
 
 bool TestLockPointValidity(const LockPoints *lp) {
     AssertLockHeld(cs_main);
@@ -1580,10 +1580,9 @@ int32_t ComputeBlockVersion(const CBlockIndex *pindexPrev,
 
 // Returns the script flags which should be checked for a given block
 static uint32_t GetBlockScriptFlags(const Config &config,
-                                    const CBlockIndex *pChainTip) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+                                    const CBlockIndex *pChainTip) {
     AssertLockHeld(cs_main);
     //const Consensus::Params &consensusParams = config.GetChainParams().GetConsensus();
-
     uint32_t flags = SCRIPT_VERIFY_NONE;
 
     flags |= SCRIPT_VERIFY_P2SH;
