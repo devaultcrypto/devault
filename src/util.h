@@ -13,6 +13,7 @@
 #include <config/bitcoin-config.h>
 
 #include <compat.h>
+#include <compat/assumptions.h>
 #include <logging.h>
 #include <sync.h>
 #include <tinyformat.h>
