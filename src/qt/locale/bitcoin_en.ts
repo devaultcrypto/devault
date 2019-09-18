@@ -3609,7 +3609,7 @@
     </message>
     <message>
         <location line="+2"/>
-        <source>Buget payment</source>
+        <source>Budget payment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

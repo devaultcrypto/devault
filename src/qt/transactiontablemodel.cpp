@@ -352,7 +352,7 @@ TransactionTableModel::formatTxType(const TransactionRecord *wtx) const {
         case TransactionRecord::Reward:
             return tr("ColdReward");
         case TransactionRecord::Budget:
-            return tr("Buget payment");
+            return tr("Budget payment");
         default:
             return QString();
     }
