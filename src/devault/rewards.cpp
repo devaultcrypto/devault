@@ -39,7 +39,6 @@ CColdRewards::CColdRewards(const Consensus::Params &consensusParams, CRewardsVie
 
 void CColdRewards::Setup(const Consensus::Params &consensusParams) {
   nMinBlocks = consensusParams.nMinRewardBlocks;
-  vecMinRewardBalances = consensusParams.vecMinRewardBalances;
   nMinReward = consensusParams.nMinReward;
 }
 
@@ -356,12 +355,19 @@ void CColdRewards::UpdateRewardsDB(int nNewHeight) {
   // Should have erased coin with balance/height
   LogPrint(BCLog::COLD, "CR: %s : %s\n", __func__, coinreward.ToString());
   pdb->EraseReward(rewardKey);
-  // Get Height of last payment and shift into Coin
-  CRewardValue newReward(coinreward);
-  newReward.SetOldHeight(newReward.GetHeight()); // Move Height of creation Height or last payment to OldHeight
-  newReward.SetHeight(nNewHeight);
-  newReward.payCount++;
-  pdb->PutReward(rewardKey, newReward);
+  
+  const Consensus::Params consensusParams = GetConfig().GetChainParams().GetConsensus();
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(nNewHeight);
+  
+  // Just put back into DB if >= Min Reward Balance
+  if (coinreward.GetValue() >= minRewardBalance) {
+      CRewardValue newReward(coinreward);
+      // Get Height of last payment and shift into Coin
+      newReward.SetOldHeight(newReward.GetHeight()); // Move Height of creation Height or last payment to OldHeight
+      newReward.SetHeight(nNewHeight);
+      newReward.payCount++;
+      pdb->PutReward(rewardKey, newReward);
+  }
 }
 
 // Create CTxOut based on coin and reward
