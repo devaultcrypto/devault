@@ -22,7 +22,6 @@ class CColdRewards {
   CRewardsViewDB *pdb;
   COutPoint rewardKey;
   int64_t nMinBlocks;
-  std::vector<std::tuple<int64_t,Amount>> vecMinRewardBalances;
   Amount nMaxReward;
   Amount nMinReward;
   int32_t nNumCandidates = 0; // num of reward candidates (that are active)
