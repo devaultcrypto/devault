@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE(work_comparator) {
     }
 
     // All else equal, so checking pointer address as final check
-    CBlockIndex *pindexA = new CBlockIndex();
-    CBlockIndex *pindexB = new CBlockIndex();
+    auto pindexA = std::make_unique<CBlockIndex>();
+    auto pindexB = std::make_unique<CBlockIndex>();
     if (pindexA < pindexB) {
         BOOST_CHECK(CBlockIndexWorkComparator()(pindexB, pindexA));
     } else {
