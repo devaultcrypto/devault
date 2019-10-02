@@ -46,8 +46,8 @@ CBlockIndex CreateBlockIndex(int nHeight) {
 }
 
 bool TestSequenceLocks(const CTransaction &tx, int flags) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-    LOCK(g_mempool.cs);
-    return CheckSequenceLocks(tx, flags);
+    LOCK(::g_mempool.cs);
+    return CheckSequenceLocks(::g_mempool, tx, flags);
 }
 
 // Test suite for ancestor feerate transaction selection.
