@@ -301,6 +301,7 @@ namespace {
             result.balance = m_wallet.GetBalance();
             result.currentBalanceOptional = result.balance; // copy balance
             result.unconfirmed_balance = m_wallet.GetUnconfirmedBalance();
+            result.unvesting_balance = m_wallet.GetUnvestingBalance();
             result.immature_balance = m_wallet.GetImmatureBalance();
             result.have_watch_only = m_wallet.HaveWatchOnly();
             if (result.have_watch_only) {

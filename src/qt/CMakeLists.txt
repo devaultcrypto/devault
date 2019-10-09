@@ -163,6 +163,9 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/debugwindow.ui
 	forms/sendcoinsdialog.ui
 	forms/sendcoinsentry.ui
+	forms/rewardcontroldialog.ui
+	forms/rewardsdialog.ui
+	forms/rewardsentry.ui
 	forms/signverifymessagedialog.ui
 	forms/transactiondescdialog.ui
 	forms/startoptionsdialog.ui
@@ -293,6 +296,10 @@ if(BUILD_WALLET)
 			recentrequeststablemodel.cpp
 			sendcoinsdialog.cpp
 			sendcoinsentry.cpp
+			rewardcontroldialog.cpp
+			rewardcontroltreewidget.cpp
+			rewardsdialog.cpp
+			rewardsentry.cpp
 			signverifymessagedialog.cpp
 			transactiondesc.cpp
 			transactiondescdialog.cpp

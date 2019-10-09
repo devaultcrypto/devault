@@ -109,6 +109,9 @@ QT_FORMS_UI = \
   qt/forms/receivecoinsdialog.ui \
   qt/forms/receiverequestdialog.ui \
   qt/forms/revealphrase.ui \
+  qt/forms/rewardsdialog.ui \
+  qt/forms/rewardcontroldialog.ui \
+  qt/forms/rewardsentry.ui \
   qt/forms/sendcoinsdialog.ui \
   qt/forms/sendcoinsentry.ui \
   qt/forms/setpassphrasedialog.ui \
@@ -140,6 +143,7 @@ QT_MOC_CPP = \
   qt/moc_clientmodel.cpp \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
+  qt/moc_rewardcontroltreewidget.cpp \
   qt/moc_csvmodelwriter.cpp \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
@@ -152,6 +156,9 @@ QT_MOC_CPP = \
   qt/moc_optionsdialog.cpp \
   qt/moc_optionsmodel.cpp \
   qt/moc_overviewpage.cpp \
+  qt/moc_rewardcontroldialog.cpp \
+  qt/moc_rewardsdialog.cpp \
+  qt/moc_rewardsentry.cpp \
   qt/moc_peertablemodel.cpp \
   qt/moc_qvalidatedlineedit.cpp \
   qt/moc_qvaluecombobox.cpp \
@@ -184,6 +191,7 @@ QT_MOC = \
   qt/bitcoinamountfield.moc \
   qt/intro.moc \
   qt/overviewpage.moc \
+  qt/rewardpage.moc \
   qt/rpcconsole.moc
 
 QT_QRC_CPP = qt/qrc_bitcoin.cpp
@@ -204,6 +212,7 @@ BITCOIN_QT_H = \
   qt/clientmodel.h \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
+  qt/rewardcontroltreewidget.h \
   qt/csvmodelwriter.h \
   qt/editaddressdialog.h \
   qt/guiconstants.h \
@@ -227,6 +236,9 @@ BITCOIN_QT_H = \
   qt/receiverequestdialog.h \
   qt/recentrequeststablemodel.h \
   qt/revealphrase.h \
+  qt/rewardsdialog.h \
+  qt/rewardcontroldialog.h \
+  qt/rewardsentry.h \
   qt/rpcconsole.h \
   qt/setpassphrasedialog.h \
   qt/startoptionsdialog.h \
@@ -377,6 +389,7 @@ BITCOIN_QT_WALLET_CPP = \
   qt/checkcoins.cpp \
   qt/coincontroldialog.cpp \
   qt/coincontroltreewidget.cpp \
+  qt/rewardcontroltreewidget.cpp \
   qt/editaddressdialog.cpp \
   qt/openuridialog.cpp \
   qt/overviewpage.cpp \
@@ -384,6 +397,9 @@ BITCOIN_QT_WALLET_CPP = \
   qt/receiverequestdialog.cpp \
   qt/recentrequeststablemodel.cpp \
   qt/revealphrase.cpp \
+  qt/rewardsdialog.cpp \
+  qt/rewardcontroldialog.cpp \
+  qt/rewardsentry.cpp \
   qt/sendcoinsdialog.cpp \
   qt/sendcoinsentry.cpp \
   qt/signverifymessagedialog.cpp \

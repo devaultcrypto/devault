@@ -418,6 +418,7 @@ public:
     Amount GetCredit(const isminefilter &filter) const;
     Amount GetImmatureCredit(bool fUseCache = true) const;
     Amount GetAvailableCredit(bool fUseCache = true) const;
+    Amount GetUnvestingCredit(bool fUseCache = true) const;
     Amount GetImmatureWatchOnlyCredit(const bool fUseCache = true) const;
     Amount GetAvailableWatchOnlyCredit(const bool fUseCache = true) const;
     Amount GetChange() const;
@@ -980,6 +981,7 @@ public:
                                                         CConnman *connman);
     Amount GetBalance() const;
     Amount GetUnconfirmedBalance() const;
+    Amount GetUnvestingBalance() const;
     Amount GetImmatureBalance() const;
     Amount GetWatchOnlyBalance() const;
     Amount GetUnconfirmedWatchOnlyBalance() const;
