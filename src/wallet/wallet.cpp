@@ -1914,6 +1914,44 @@ Amount CWalletTx::GetAvailableCredit(bool fUseCache) const {
     return nCredit;
 }
 
+Amount CWalletTx::GetUnvestingCredit(bool fUseCache) const {
+    if (pwallet == nullptr) {
+        return Amount::zero();
+    }
+
+    // Must wait until coinbase is safely deep enough in the chain before
+    // valuing it.
+    if (IsImmatureCoinBase()) {
+        return Amount::zero();
+    }
+
+    // Anything below the Min Reward Balance will be counted as Unvesting
+    int Height = chainActive.Height();
+    const Amount minAmount = Params().GetConsensus().getMinRewardBalance(Height);
+
+    //    if (fUseCache && fAvailableCreditCached) {        return nAvailableCreditCached;    }
+
+    Amount nCredit = Amount::zero();
+    const TxId &txid = GetId();
+    for (uint32_t i = 0; i < tx->vout.size(); i++) {
+        if (!pwallet->IsSpent(COutPoint(txid, i))) {
+            const CTxOut &txout = tx->vout[i];
+            Amount val = pwallet->GetCredit(txout, ISMINE_SPENDABLE);
+            if (val < minAmount || IsCoinBase()) {
+                nCredit += pwallet->GetCredit(txout, ISMINE_SPENDABLE);
+                if (!MoneyRange(nCredit)) {
+                    throw std::runtime_error(std::string(__func__) +
+                                             " : value out of range");
+                }
+            }
+        }
+    }
+
+    //    nAvailableCreditCached = nCredit;
+    //    fAvailableCreditCached = true;
+    return nCredit;
+}
+
 Amount CWalletTx::GetImmatureWatchOnlyCredit(const bool fUseCache) const {
     if (IsImmatureCoinBase() && IsInMainChain()) {
         if (fUseCache && fImmatureWatchCreditCached) {
@@ -2121,6 +2159,20 @@ Amount CWallet::GetUnconfirmedBalance() const {
         if (!pcoin->IsTrusted() && pcoin->GetDepthInMainChain() == 0 &&
             pcoin->InMempool()) {
             nTotal += pcoin->GetAvailableCredit();
+        }
+    }
+
+    return nTotal;
+}
+
+Amount CWallet::GetUnvestingBalance() const {
+    LOCK2(cs_main, cs_wallet);
+
+    Amount nTotal = Amount::zero();
+    for (const auto &p : mapWallet) {
+        const CWalletTx *pcoin = &p.second;
+        if (pcoin->IsTrusted()) {
+            nTotal += pcoin->GetUnvestingCredit();
         }
     }
 

@@ -14,6 +14,7 @@
 #include <platformstyle.h>
 #include <receivecoinsdialog.h>
 #include <sendcoinsdialog.h>
+#include <rewardsdialog.h>
 #include <signverifymessagedialog.h>
 #include <startoptionsrevealed.h>
 #include <revealphrase.h>
@@ -57,6 +58,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, const Config *cfg,
 
     receiveCoinsPage = new ReceiveCoinsDialog(platformStyle, cfg);
     sendCoinsPage = new SendCoinsDialog(platformStyle);
+    rewardsPage = new RewardsDialog(platformStyle);
 
     usedSendingAddressesPage =
         new AddressBookPage(platformStyle, AddressBookPage::ForEditing,
@@ -66,6 +68,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, const Config *cfg,
                             AddressBookPage::ReceivingTab, this);
 
     addWidget(overviewPage);
+    addWidget(rewardsPage);
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
@@ -136,6 +139,7 @@ void WalletView::setClientModel(ClientModel *_clientModel) {
     this->clientModel = _clientModel;
 
     overviewPage->setClientModel(_clientModel);
+    rewardsPage->setClientModel(_clientModel);
     sendCoinsPage->setClientModel(_clientModel);
 }
 
@@ -145,6 +149,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel) {
     // Put transaction list in tabs
   //  transactionView->setModel(_walletModel);
     overviewPage->setWalletModel(_walletModel);
+    rewardsPage->setModel(_walletModel);
     receiveCoinsPage->setModel(_walletModel);
     sendCoinsPage->setModel(_walletModel);
     usedReceivingAddressesPage->setModel(
@@ -217,6 +222,10 @@ void WalletView::processNewTransaction(const QModelIndex &parent, int start,
 void WalletView::gotoOverviewPage() {
     setCurrentWidget(overviewPage);
     overviewPage->showTransactions();
+}
+void WalletView::gotoRewardsPage() {
+    setCurrentWidget(rewardsPage);
+    //????    rewardsPage->showCoins();
 }
 /*
 void WalletView::gotoHistoryPage() {

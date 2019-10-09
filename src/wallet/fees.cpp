@@ -31,6 +31,7 @@ Amount GetMinimumFee(unsigned int nTxBytes, const CCoinControl &coin_control,
     return nFeeNeeded;
 }
 
+
 CFeeRate GetRequiredFeeRate() {
     return GetConfig().GetMinFeePerKB();
 }

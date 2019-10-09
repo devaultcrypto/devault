@@ -207,6 +207,13 @@ void BitcoinGUI::createActions() {
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
+    rewardAction = new QAction(QIcon(":/icons/reward"), tr("&ColdRewards"), this);
+    rewardAction->setStatusTip(tr("Show general reward of wallet"));
+    rewardAction->setToolTip(rewardAction->statusTip());
+    rewardAction->setCheckable(true);
+    rewardAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(rewardAction);
+
     sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setStatusTip(tr("Send coins to a DeVault address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
@@ -237,6 +244,8 @@ void BitcoinGUI::createActions() {
     // useful.
     connect(overviewAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
     connect(overviewAction, &QAction::triggered, this,  &BitcoinGUI::gotoOverviewPage);
+    connect(rewardAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
+    connect(rewardAction, &QAction::triggered, this,  &BitcoinGUI::gotoRewardsPage);
     connect(sendCoinsAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
     connect(sendCoinsAction, &QAction::triggered, [this] { gotoSendCoinsPage(); });
     connect(sendCoinsMenuAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
@@ -453,6 +462,7 @@ void BitcoinGUI::createToolBars() {
         toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         toolbar->addAction(dvtLogoAction);
         toolbar->addAction(overviewAction);
+        toolbar->addAction(rewardAction);
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->widgetForAction(dvtLogoAction)->setStyleSheet("background: transparent; width: 108; height: 108; padding:30; margin: 20px; border: none; image: url(:/icons/devault)");
@@ -523,6 +533,11 @@ void BitcoinGUI::createToolBars() {
         QWidget *spacer = new QWidget();
         spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         toolbar->addWidget(spacer);
+
+        rewardAction->setChecked(true);
+        QWidget *spacer1 = new QWidget();
+        spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        toolbar->addWidget(spacer1);
 
         m_wallet_selector = new QComboBox();
         connect(m_wallet_selector, SIGNAL(currentIndexChanged(const QString &)),
@@ -633,6 +648,7 @@ void BitcoinGUI::removeAllWallets() {
 void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     dvtLogoAction->setEnabled(enabled);
     overviewAction->setEnabled(enabled);
+    rewardAction->setEnabled(enabled);
     sendCoinsAction->setEnabled(enabled);
     sendCoinsMenuAction->setEnabled(enabled);
     receiveCoinsAction->setEnabled(enabled);
@@ -746,6 +762,11 @@ void BitcoinGUI::openClicked() {
 void BitcoinGUI::gotoOverviewPage() {
     overviewAction->setChecked(true);
     if (walletFrame) walletFrame->gotoOverviewPage();
+}
+
+void BitcoinGUI::gotoRewardsPage() {
+    rewardAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoRewardsPage();
 }
 
 void BitcoinGUI::openDVT_global()

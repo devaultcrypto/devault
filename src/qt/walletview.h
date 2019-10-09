@@ -12,6 +12,7 @@
 class BitcoinGUI;
 class ClientModel;
 class OverviewPage;
+class RewardsDialog;
 class PlatformStyle;
 class ReceiveCoinsDialog;
 class SendCoinsDialog;
@@ -65,6 +66,7 @@ private:
     WalletModel *walletModel;
 
     OverviewPage *overviewPage;
+    RewardsDialog *rewardsPage;
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
@@ -79,6 +81,7 @@ private:
 public Q_SLOTS:
     /** Switch to overview (home) page */
     void gotoOverviewPage();
+    void gotoRewardsPage();
     /** Switch to history (transactions) page */
  //   void gotoHistoryPage();
     /** Switch to receive coins page */

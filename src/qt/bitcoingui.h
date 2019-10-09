@@ -112,6 +112,7 @@ private:
     QMenuBar *appMenuBar = nullptr;
     QToolBar *appToolBar = nullptr;
     QAction *overviewAction = nullptr;
+    QAction *rewardAction = nullptr;
     QAction *dvtLogoAction = nullptr;
     QAction *quitAction = nullptr;
     QAction *sendCoinsAction = nullptr;
@@ -233,6 +234,8 @@ public Q_SLOTS:
     void openDVT_global();
     /** Switch to overview (home) page */
     void gotoOverviewPage();
+    /** Switch to Reward page */
+    void gotoRewardsPage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

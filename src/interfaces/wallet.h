@@ -281,6 +281,7 @@ struct WalletBalances {
     Amount balance = Amount::zero();
     Amount unconfirmed_balance = Amount::zero();
     Amount immature_balance = Amount::zero();
+    Amount unvesting_balance = Amount::zero();
     bool have_watch_only = false;
     Amount watch_only_balance = Amount::zero();
     Amount unconfirmed_watch_only_balance = Amount::zero();
@@ -289,6 +290,7 @@ struct WalletBalances {
     bool balanceChanged(const WalletBalances &prev) const {
         return balance != prev.balance ||
                unconfirmed_balance != prev.unconfirmed_balance ||
+               unvesting_balance != prev.unvesting_balance ||
                immature_balance != prev.immature_balance ||
                watch_only_balance != prev.watch_only_balance ||
                unconfirmed_watch_only_balance !=
