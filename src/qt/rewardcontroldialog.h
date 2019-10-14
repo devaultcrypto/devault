@@ -62,6 +62,7 @@ private:
     int sortColumn;
     Qt::SortOrder sortOrder;
     int percent;
+    bool unvestingonly;
     
     const PlatformStyle *platformStyle;
 
@@ -88,6 +89,7 @@ private Q_SLOTS:
     void headerSectionClicked(int);
     void buttonBoxClicked(QAbstractButton *);
     void buttonSelectAllClicked();
+    void buttonUnvestingClicked();
     void updateLabelLocked();
     void changePercent();
 };

@@ -296,7 +296,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayoutPanel" stretch="0,0,0,0,0">
+       <layout class="QHBoxLayout" name="horizontalLayoutPanel" stretch="0,0,0,0,0,0">
         <property name="spacing">
          <number>14</number>
         </property>
@@ -334,6 +334,13 @@
           </property>
           <property name="autoDefault">
            <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonUnvesting">
+          <property name="text">
+           <string>Unvesting Only</string>
           </property>
          </widget>
         </item>

@@ -80,6 +80,10 @@ RewardControlDialog::RewardControlDialog(const PlatformStyle *_platformStyle,
     connect(ui->pushButtonSelectAll, &QPushButton::clicked, this,
             &RewardControlDialog::buttonSelectAllClicked);
 
+     // unvested only
+    connect(ui->pushButtonUnvesting, &QPushButton::clicked, this,
+            &RewardControlDialog::buttonUnvestingClicked);
+
     // change coin control first column label due Qt4 bug.
     // see https://github.com/bitcoin/bitcoin/issues/5716
     ui->treeWidget->headerItem()->setText(COLUMN_CHECKBOX, QString());
@@ -103,6 +107,7 @@ RewardControlDialog::RewardControlDialog(const PlatformStyle *_platformStyle,
     ui->percent->setMaximum(100);
     ui->percent->setValue(10); // 10% by default
     percent = ui->percent->value(); // get from spinbox....
+    unvestingonly = false;
     
     connect(ui->percent, SIGNAL(valueChanged(int)), this,  SLOT(changePercent()));
     
@@ -165,10 +170,17 @@ void RewardControlDialog::buttonSelectAllClicked() {
     }
     RewardControlDialog::updateLabels(model, this);
 }
+// (un)vesting all
+void RewardControlDialog::buttonUnvestingClicked() {
+    unvestingonly = !unvestingonly;
+    updateView();
+    RewardControlDialog::updateLabels(model, this);
+}
 
 // Percent changed
 void RewardControlDialog::changePercent() {
     percent = ui->percent->value(); // get from spinbox....
+    unvestingonly = false;
     updateView();
     RewardControlDialog::updateLabels(model, this);
 }
@@ -537,6 +549,7 @@ void RewardControlDialog::updateView() {
 
 
             CRewardValue rewardval;
+            bool unsetCheckbox = false;
             if (prewardsdb->GetReward(output, rewardval)) {
               ///
               auto Height = chainActive.Tip()->nHeight;
@@ -548,10 +561,16 @@ void RewardControlDialog::updateView() {
               itemOutput->setText(COLUMN_REWARDAGE, QString::number(payAge).rightJustified(2,'0') + QString("%"));
               itemOutput->setText(COLUMN_NUMREWARDS, QString::number(payCount));
 
-              if (payAge > percent)
+              if (!unvestingonly) {
+                if (payAge > percent) {
                   itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
-              else
+                  unsetCheckbox = true;
+                } else
                   itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
+              } else {
+                itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
+                unsetCheckbox = true;
+              }
 
               int nNumOlder = 0;
               for (auto& inner_val : rewards) {
@@ -598,7 +617,7 @@ void RewardControlDialog::updateView() {
             }
 
             // set checkbox
-            if (coinControl()->IsSelected(output)) {
+            if (coinControl()->IsSelected(output) && !unsetCheckbox) {
                 itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
             }
         }
