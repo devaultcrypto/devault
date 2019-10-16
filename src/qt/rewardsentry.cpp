@@ -5,6 +5,8 @@
 #include <ui_rewardsentry.h>
 #include <qt/rewardsentry.h>
 
+#include <qt/rewardsdialog.h>
+
 #include <config.h>
 #include <qt/addressbookpage.h>
 #include <qt/addresstablemodel.h>
@@ -112,9 +114,6 @@ void RewardsEntry::deleteClicked() {
     Q_EMIT removeEntry(this);
 }
 
-void RewardsEntry::useAvailableBalanceClicked() {
-    Q_EMIT useAvailableBalance(this);
-}
 
 bool RewardsEntry::validate(interfaces::Node &node) {
     if (!model) {
@@ -136,7 +135,7 @@ SendCoinsRecipient RewardsEntry::getValue() {
     // Normal payment
     recipient.address = ui->payTo->text();
     recipient.label = ui->addAsLabel->text();
-    //    recipient.amount = ui->payAmount->value();
+    recipient.amount = m_amount;
     recipient.message = ui->messageTextLabel->text();
 
     return recipient;
@@ -145,14 +144,6 @@ SendCoinsRecipient RewardsEntry::getValue() {
 QWidget *RewardsEntry::setupTabChain(QWidget *prev) {
     QWidget::setTabOrder(prev, ui->payTo);
     QWidget::setTabOrder(ui->payTo, ui->addAsLabel);
-    /*
-    QWidget *w = ui->payAmount->setupTabChain(ui->addAsLabel);
-    QWidget::setTabOrder(w, ui->checkboxSubtractFeeFromAmount);
-    QWidget::setTabOrder(ui->checkboxSubtractFeeFromAmount,
-                         ui->addressBookButton);
-    QWidget::setTabOrder(ui->addressBookButton, ui->pasteButton);
-    QWidget::setTabOrder(ui->pasteButton, ui->deleteButton);
-    */
     return ui->deleteButton;
 }
 
@@ -181,7 +172,7 @@ void RewardsEntry::setAddress(const QString &address) {
 }
 
 void RewardsEntry::setAmount(const Amount amount) {
-    //    ui->payAmount->setValue(amount);
+    m_amount = amount;
 }
 
 bool RewardsEntry::isClear() {

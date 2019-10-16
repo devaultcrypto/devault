@@ -42,7 +42,7 @@
 #include <QMessageBox>
 
 QList<Amount> RewardControlDialog::payAmounts;
-bool RewardControlDialog::fSubtractFeeFromAmount = false;
+bool RewardControlDialog::fSubtractFeeFromAmount = true;
 
 bool CRewardControlWidgetItem::operator<(const QTreeWidgetItem &other) const {
     int column = treeWidget()->sortColumn();
@@ -168,6 +168,7 @@ void RewardControlDialog::buttonSelectAllClicked() {
         // just to be sure
         coinControl()->UnSelectAll();
     }
+    unvestingonly = false;
     RewardControlDialog::updateLabels(model, this);
 }
 // (un)vesting all
@@ -549,7 +550,7 @@ void RewardControlDialog::updateView() {
 
 
             CRewardValue rewardval;
-            bool unsetCheckbox = false;
+            bool setCheckbox = false;
             if (prewardsdb->GetReward(output, rewardval)) {
               ///
               auto Height = chainActive.Tip()->nHeight;
@@ -562,16 +563,14 @@ void RewardControlDialog::updateView() {
               itemOutput->setText(COLUMN_NUMREWARDS, QString::number(payCount));
 
               if (!unvestingonly) {
-                if (payAge > percent) {
-                  itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
-                  unsetCheckbox = true;
-                } else
-                  itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
+                  if (payAge > percent) {
+                      setCheckbox = false;
+                  } else
+                      setCheckbox = true;
               } else {
-                itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
-                unsetCheckbox = true;
+                  setCheckbox = false;
               }
-
+              
               int nNumOlder = 0;
               for (auto& inner_val : rewards) {
                   if ((inner_val.GetHeight() < rewardval.GetHeight()) && inner_val.IsActive()) nNumOlder++;
@@ -603,7 +602,7 @@ void RewardControlDialog::updateView() {
               itemOutput->setText(COLUMN_NUMREWARDS, tr("N.A."));
               itemOutput->setText(COLUMN_REWARDBLOCK, tr("N.A."));
               itemOutput->setText(COLUMN_REWARDDATE, tr("N.A."));
-              itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
+              setCheckbox = true;
             }
             
             // disable locked coins
@@ -614,11 +613,15 @@ void RewardControlDialog::updateView() {
                 itemOutput->setIcon(
                     COLUMN_CHECKBOX,
                     platformStyle->SingleColorIcon(":/icons/lock_closed"));
-            }
-
-            // set checkbox
-            if (coinControl()->IsSelected(output) && !unsetCheckbox) {
-                itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
+                itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
+            } else {
+                if (setCheckbox) {
+                    coinControl()->Select(output);
+                    itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Checked);
+                } else {
+                    coinControl()->UnSelect(output);
+                    itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
+                }
             }
         }
     }

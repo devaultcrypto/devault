@@ -99,12 +99,9 @@ void RewardsDialog::setModel(WalletModel *_model) {
     this->model = _model;
 
     if (_model && _model->getOptionsModel()) {
-        for (int i = 0; i < ui->entries->count(); ++i) {
-            RewardsEntry *entry = qobject_cast<RewardsEntry *>(
-                ui->entries->itemAt(i)->widget());
-            if (entry) {
-                entry->setModel(_model);
-            }
+        RewardsEntry *entry = qobject_cast<RewardsEntry *>(ui->entries->itemAt(0)->widget());
+        if (entry) {
+            entry->setModel(_model);
         }
 
         interfaces::WalletBalances balances = _model->wallet().getBalances();
@@ -140,15 +137,14 @@ void RewardsDialog::on_sendButton_clicked() {
     QList<SendCoinsRecipient> recipients;
     bool valid = true;
 
-    for (int i = 0; i < ui->entries->count(); ++i) {
-        RewardsEntry *entry =
-            qobject_cast<RewardsEntry *>(ui->entries->itemAt(i)->widget());
-        if (entry) {
-            if (entry->validate(model->node())) {
-                recipients.append(entry->getValue());
-            } else {
-                valid = false;
-            }
+    // Just one entry
+    RewardsEntry *entry = qobject_cast<RewardsEntry *>(ui->entries->itemAt(0)->widget());
+    if (entry) {
+        if (entry->validate(model->node())) {
+            recipients.append(entry->getValue());
+            recipients[0].fSubtractFeeFromAmount = true;
+        } else {
+            valid = false;
         }
     }
 
@@ -178,6 +174,13 @@ void RewardsDialog::on_sendButton_clicked() {
     updateRewardControlState(ctrl);
 
     prepareStatus = model->prepareTransaction(currentTransaction, ctrl);
+
+    // Check if the total to be consolidate is above the min balance to receive rewards
+    Amount conAmount = currentTransaction.getTotalTransactionAmount();
+    Amount minBalance = Params().GetConsensus().getMinRewardBalance(chainActive.Tip()->nHeight);
+    if (conAmount < minBalance) {
+      prepareStatus.status = WalletModel::StatusCode::AmountBelowMinForRewardConsolidation;
+    }
 
     // process prepareStatus and on error generate message shown to user
     processRewardsReturn(
@@ -317,10 +320,6 @@ RewardsEntry *RewardsDialog::addEntry() {
     ui->entries->addWidget(entry);
     connect(entry, &RewardsEntry::removeEntry, this,
             &RewardsDialog::removeEntry);
-    connect(entry, &RewardsEntry::useAvailableBalance, this,
-            &RewardsDialog::useAvailableBalance);
-    connect(entry, &RewardsEntry::subtractFeeFromAmountChanged, this,
-            &RewardsDialog::rewardControlUpdateLabels);
 
     // Focus the field, so that entry can start immediately
     entry->clear();
@@ -452,6 +451,9 @@ void RewardsDialog::processRewardsReturn(
         case WalletModel::InvalidAmount:
             msgParams.first = tr("The amount to pay must be larger than 0.");
             break;
+        case WalletModel::AmountBelowMinForRewardConsolidation:
+            msgParams.first = tr("The amount to send must be larger than the amount required to generate Rewards");
+            break;
         case WalletModel::AmountExceedsBalance:
             msgParams.first = tr("The amount exceeds your balance.");
             break;
@@ -527,9 +529,6 @@ void RewardsDialog::useAvailableBalance(RewardsEntry *entry) {
     }
 }
 
-void RewardsDialog::setMinimumFee() {
-}
-
 void RewardsDialog::updateRewardControlState(CCoinControl &ctrl) {
     ctrl.m_feerate.reset();
 }
@@ -569,11 +568,10 @@ void RewardsDialog::rewardControlUpdateLabels() {
         RewardsEntry *entry =
             qobject_cast<RewardsEntry *>(ui->entries->itemAt(i)->widget());
         if (entry && !entry->isHidden()) {
+            useAvailableBalance(entry); // set Amount
             SendCoinsRecipient rcp = entry->getValue();
             RewardControlDialog::payAmounts.append(rcp.amount);
-            if (rcp.fSubtractFeeFromAmount) {
-                RewardControlDialog::fSubtractFeeFromAmount = true;
-            }
+            RewardControlDialog::fSubtractFeeFromAmount = true;
         }
     }
 
