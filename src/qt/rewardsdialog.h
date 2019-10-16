@@ -89,7 +89,6 @@ private Q_SLOTS:
     void rewardControlFeatureChanged(bool);
     void rewardControlButtonClicked();
     void rewardControlUpdateLabels();
-    void setMinimumFee();
 
 Q_SIGNALS:
     // Fired when a message should be reported to the user

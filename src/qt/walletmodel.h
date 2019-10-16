@@ -101,6 +101,7 @@ public:
         OK,
         InvalidAmount,
         InvalidAddress,
+        AmountBelowMinForRewardConsolidation,
         AmountExceedsBalance,
         AmountWithFeeExceedsBalance,
         DuplicateAddress,

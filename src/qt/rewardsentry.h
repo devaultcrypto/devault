@@ -52,23 +52,21 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void removeEntry(RewardsEntry *entry);
-    void useAvailableBalance(RewardsEntry *entry);
-    void subtractFeeFromAmountChanged();
 
 private Q_SLOTS:
     void deleteClicked();
-    void useAvailableBalanceClicked();
     void on_payTo_textChanged(const QString &address);
     void on_addressBookButton_clicked();
     void on_pasteButton_clicked();
     void updateDisplayUnit();
 
 private:
+    Amount m_amount;
     SendCoinsRecipient recipient;
     Ui::RewardsEntry *ui;
     WalletModel *model;
     const PlatformStyle *platformStyle;
-
+    
     bool updateLabel(const QString &address);
 };
 
