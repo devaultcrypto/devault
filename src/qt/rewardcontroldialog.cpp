@@ -91,7 +91,7 @@ RewardControlDialog::RewardControlDialog(const PlatformStyle *_platformStyle,
     ui->treeWidget->setColumnWidth(COLUMN_CHECKBOX, 75);
     ui->treeWidget->setColumnWidth(COLUMN_AMOUNT, 110);
     ui->treeWidget->setColumnWidth(COLUMN_ADDRESS, 400);
-    ui->treeWidget->setColumnWidth(COLUMN_REWARDAGE, 100);
+    ui->treeWidget->setColumnWidth(COLUMN_REWARDAGE, 120);
     ui->treeWidget->setColumnWidth(COLUMN_NUMREWARDS, 100);
     // store transaction hash in this column, but don't show it
     ui->treeWidget->setColumnHidden(COLUMN_TXID, true);
