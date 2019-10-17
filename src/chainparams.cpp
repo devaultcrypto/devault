@@ -148,7 +148,8 @@ public:
         // Rewards
         consensus.nPerCentPerYear = {15,12,9,7,5};
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
-        consensus.vecMinRewardBalances = {std::tuple<int,Amount>(std::numeric_limits<int32_t>::max(), 1000 * COIN)};
+        consensus.vecMinRewardBalances = {std::tuple<int,Amount>(109575, 1000 * COIN),
+                                          std::tuple<int,Amount>(std::numeric_limits<int32_t>::max(), 25000 * COIN)};
         consensus.nMinReward = 50 * COIN;
         consensus.nZawyLwmaAveragingWindow = 72;
         
@@ -230,7 +231,8 @@ public:
         // Rewards
         consensus.nPerCentPerYear = {1500,1200,900,7,5};
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
-        consensus.vecMinRewardBalances = {std::tuple<int,Amount>(std::numeric_limits<int32_t>::max(), 1000 * COIN)};
+        consensus.vecMinRewardBalances = {std::tuple<int,Amount>(2000, 1000 * COIN),
+                                          std::tuple<int,Amount>(std::numeric_limits<int32_t>::max(), 25000 * COIN)};
         consensus.nMinReward =  50 * COIN;
 
         consensus.nZawyLwmaAveragingWindow = 72;
