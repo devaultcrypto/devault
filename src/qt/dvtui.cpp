@@ -229,6 +229,16 @@ bool DVTUI::customThemeIsSet() {
             "#radioTreeMode:unchecked{background-color:transparent; border-width:2px; border-color:#777;}"
             "#radioTreeMode:unchecked:hover{background-color: #1f1f1f;}"
 
+	    // Rewards Page
+            "#labelRewardControlTop "
+            "{ color: " + s_LBlue + "; font-size: 24px; font-weight: light; }"
+            "#labelRewardControlFeatures "
+            "{ font-size: 20px; }"
+            "#labelBalanceR, #ulabelBalance "
+            "{ font-size: 18px;  font-weight: bold;}"
+            "#labelR, #ulabel "
+            "{ font-size: 17px; }"
+
             // Start-Up / Seed Words
             "QListView::item {color: white; height:36px; text-align:center; font-size:22px; }"
             "QListWidget::item {margin-left: 10px;margin-right: 10px;margin-top: 5px;margin-bottom: 5px;background:#2e3436;text-align:center; border-radius: 8px; color:#fff; padding-left:15px;}"
