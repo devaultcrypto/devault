@@ -23,7 +23,7 @@ This is a list of constants used in this system
 * BlocksPerYear    - Estimated number of blocks in 1 year
 * PerCentPerYear   - Percentage return for Cold Rewards, currently changes each year from 15,12,9,7,5 %
 * nMinRewardBlocks  - Rewards occur no more frequently than this
-* nMinRewardBalance = 1000 * COIN
+* nMinRewardBalance = 25000 * COIN after the 5th Superblock, 1000 * COIN before that
 * nMinReward =  50 * COIN  - Only pay out reward if it's bigger than this
 
 # Description
