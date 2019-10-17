@@ -414,7 +414,7 @@ bool RewardsDialog::handlePaymentRequest(const SendCoinsRecipient &rv) {
 
 void RewardsDialog::setBalance(const interfaces::WalletBalances &balances) {
     if (model && model->getOptionsModel()) {
-        ui->labelBalance->setText(BitcoinUnits::formatWithUnit(
+        ui->labelBalanceR->setText(BitcoinUnits::formatWithUnit(
             model->getOptionsModel()->getDisplayUnit(), balances.balance));
     }
 }
