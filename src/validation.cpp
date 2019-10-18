@@ -5879,6 +5879,10 @@ bool LoadMempool(const Config &config, CTxMemPool &pool) {
             } else {
                 ++expired;
             }
+
+            if (ShutdownRequested()) {
+                return false;
+            }
         }
         std::map<uint256, Amount> mapDeltas;
         file >> mapDeltas;
