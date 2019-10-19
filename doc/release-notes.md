@@ -12,4 +12,5 @@ This release includes the following features and fixes since 1.0.7 release:
   - Add exchange faq
   - Handle blank/default password
   - Fix help comment for -bypasspassword
+  - Add `multisigsignraw` RPC command to make it easier for team to sign multisig transactions
   
