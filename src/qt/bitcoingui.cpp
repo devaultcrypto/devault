@@ -200,21 +200,21 @@ void BitcoinGUI::createActions() {
     dvtLogoAction->setCheckable(false);
     tabGroup->addAction(dvtLogoAction);
 
-    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
+    overviewAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("&Overview"), this);
     overviewAction->setStatusTip(tr("Show general overview of wallet"));
     overviewAction->setToolTip(overviewAction->statusTip());
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
-    rewardAction = new QAction(QIcon(":/icons/reward"), tr("&ColdRewards"), this);
+    rewardAction = new QAction(platformStyle->SingleColorIcon(":/icons/reward"), tr("&ColdRewards"), this);
     rewardAction->setStatusTip(tr("Show general reward of wallet"));
     rewardAction->setToolTip(rewardAction->statusTip());
     rewardAction->setCheckable(true);
     rewardAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(rewardAction);
 
-    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
+    sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setStatusTip(tr("Send coins to a DeVault address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
@@ -225,7 +225,7 @@ void BitcoinGUI::createActions() {
     sendCoinsMenuAction->setStatusTip(sendCoinsAction->statusTip());
     sendCoinsMenuAction->setToolTip(sendCoinsMenuAction->statusTip());
 
-    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+    receiveCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
     receiveCoinsAction->setStatusTip(
         tr("Request payments (generates QR codes and %1: URIs)")
             .arg(GUIUtil::bitcoinURIScheme(*config)));
