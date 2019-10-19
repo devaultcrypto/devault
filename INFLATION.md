@@ -35,9 +35,18 @@ For inflation purposes, we are assuming that 75% of all coins will generate Cold
 
 Below is the graph for DeVault supply for the first 10 years with the above assumptions
 
+<<<<<<< HEAD
 
 ![Supply](./share/pixmaps/Supply.png)
 
+=======
+![Supply](./share/pixmaps/Supply.png)
+
+Inflation rate for DeVault for the first 10 years with the above assumptions
+
+![Inflation](./share/pixmaps/Inflation.png)
+
+>>>>>>> x
 
 
 
