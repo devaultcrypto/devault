@@ -167,8 +167,8 @@ public:
                                  "afbc0364cd")},
             }};
 
-        // Data as of block 9825
-        chainTxData = ChainTxData{1566331646, 55339, 0.01};
+        // Data as of block 90230
+        chainTxData = ChainTxData{1571497149, 214799, 0.01};
     }
 };
 
