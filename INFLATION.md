@@ -21,14 +21,18 @@ We use a math expresssion (see below) to calculate the rewards so that the chang
 
   // Pseudo-code
 ```
-  // PeakHeight is 1 1/2 years out
+  // PeakHeight is 1/2 years out
 
-  if (Height <= PeakHeight) {
-    Reward = 500 + (500*Height)/(PeakHeight+Height);
+  const int nPeakH = nPeakHeight/3;
+  int64_t peak = 500 + int((500*nPeakH)/nBlocksPerYear);
+
+  if (nHeight <= nPeakH) {
+      nReward = 500 + int((1000 * nHeight) / (nPeakHeight + nHeight));
   } else {
-    Reward =  (1000 * PeakHeight/Height);
+      nReward = nPeakH*peak/nHeight;
   }
-  
+}
+
 ```
 
 For inflation purposes, we are assuming that 75% of all coins will generate Cold Rewards
