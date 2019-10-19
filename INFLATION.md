@@ -33,6 +33,11 @@ We use a math expresssion (see below) to calculate the rewards so that the chang
 
 For inflation purposes, we are assuming that 75% of all coins will generate Cold Rewards
 
+Below is the graph for DeVault supply for the first 10 years with the above assumptions
+
+
+![Supply](./share/pixmaps/Supply.png)
+
 
 
 
