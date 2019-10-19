@@ -208,17 +208,17 @@ void BitcoinGUI::createActions() {
     tabGroup->addAction(overviewAction);
 
     rewardAction = new QAction(platformStyle->SingleColorIcon(":/icons/reward"), tr("&ColdRewards"), this);
-    rewardAction->setStatusTip(tr("Show general reward of wallet"));
+    rewardAction->setStatusTip(tr("Show & Consolidate Cold Rewards"));
     rewardAction->setToolTip(rewardAction->statusTip());
     rewardAction->setCheckable(true);
-    rewardAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    rewardAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(rewardAction);
 
     sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setStatusTip(tr("Send coins to a DeVault address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
-    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
+    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
     tabGroup->addAction(sendCoinsAction);
 
     sendCoinsMenuAction = new QAction(sendCoinsAction->text(), this);
@@ -231,7 +231,7 @@ void BitcoinGUI::createActions() {
             .arg(GUIUtil::bitcoinURIScheme(*config)));
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
-    receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
+    receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(receiveCoinsAction);
 
     receiveCoinsMenuAction = new QAction(receiveCoinsAction->text(), this);
@@ -245,7 +245,7 @@ void BitcoinGUI::createActions() {
     connect(overviewAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
     connect(overviewAction, &QAction::triggered, this,  &BitcoinGUI::gotoOverviewPage);
     connect(rewardAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
-    connect(rewardAction, &QAction::triggered, this,  &BitcoinGUI::gotoRewardsPage);
+    connect(rewardAction, &QAction::triggered, [this] { gotoRewardsPage(); });
     connect(sendCoinsAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
     connect(sendCoinsAction, &QAction::triggered, [this] { gotoSendCoinsPage(); });
     connect(sendCoinsMenuAction, &QAction::triggered, [this] { showNormalIfMinimized(); });
@@ -534,7 +534,7 @@ void BitcoinGUI::createToolBars() {
         spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         toolbar->addWidget(spacer);
 
-        rewardAction->setChecked(true);
+        rewardAction->setChecked(false);
         QWidget *spacer1 = new QWidget();
         spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         toolbar->addWidget(spacer1);
