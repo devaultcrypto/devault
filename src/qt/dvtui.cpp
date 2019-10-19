@@ -7,7 +7,7 @@ qreal DVTUI::getDevicePixelRatio() {
 }
 
 QSize DVTUI::getToolbarIconSize() {
-    QSize size = QSize(76,33);
+    QSize size = QSize(24,24);
     return size;
 }
 
