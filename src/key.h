@@ -17,8 +17,7 @@
 
 /**
  * secure_allocator is defined in allocators.h
- * CPrivKey is a serialized private key, with all parameters included
- * (PRIVATE_KEY_SIZE bytes)
+ * CPrivKey is a serialized private key, with all parameters included (COMPRESSED_PRIVATE_KEY_SIZE bytes)
  */
 typedef std::vector<uint8_t, secure_allocator<uint8_t>> CPrivKey;
 
@@ -28,15 +27,7 @@ public:
     /**
      * secp256k1:
      */
-    static const unsigned int PRIVATE_KEY_SIZE = 279;
     static const unsigned int COMPRESSED_PRIVATE_KEY_SIZE = 214;
-    /**
-     * see www.keylength.com
-     * script supports up to 75 for single byte push
-     */
-    static_assert(
-        PRIVATE_KEY_SIZE >= COMPRESSED_PRIVATE_KEY_SIZE,
-        "COMPRESSED_PRIVATE_KEY_SIZE is larger than PRIVATE_KEY_SIZE");
 
 private:
     //! Whether this private key is valid. We check for correctness when
@@ -85,13 +76,6 @@ public:
 
     //! Generate a new private key using a cryptographic PRNG.
     void MakeNewKey();
-
-    /**
-     * Convert the private key to a CPrivKey (serialized OpenSSL private key
-     * data).
-     * This is expensive.
-     */
-    CPrivKey GetPrivKey() const;
 
     /**
      * Compute the public key from a private key.
