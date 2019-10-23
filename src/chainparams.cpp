@@ -182,8 +182,8 @@ public:
         // Reduce this difficult a lot to get started
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetSpacing = 2 * 2; // 4 seconds
-        consensus.nBlocksPerYear = 2400;  // 30 * 6 * 365; // 65.7k block years & 5,475 block rewards
+        consensus.nPowTargetSpacing = 2 * 15; // 30 seconds
+        consensus.nBlocksPerYear = 30 * 24 * 365.25; 
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
