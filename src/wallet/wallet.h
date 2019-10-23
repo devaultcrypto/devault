@@ -70,6 +70,7 @@ class CScript;
 class CScheduler;
 class CTxMemPool;
 class CWalletTx;
+class Coin;
 
 /** (client) version numbers for particular wallet features */
 enum WalletFeature {
@@ -1023,6 +1024,8 @@ public:
                           double minPercent,
                           CTransactionRef &tx, 
                           std::string &strFailReason);
+    bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason);
+
     CValidationState CommitConsolidate(CTransactionRef tx, CConnman *connman);
     bool CommitTransaction(
         CTransactionRef tx, mapValue_t mapValue,

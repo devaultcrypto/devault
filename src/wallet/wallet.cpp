@@ -8,6 +8,7 @@
 #include <wallet/wallet.h>
 #include <benchmark.h>
 #include <chain.h>
+#include <coins.h>
 #include <checkpoints.h>
 #include <config.h>
 #include <consensus/consensus.h>
@@ -31,6 +32,7 @@
 #include <utilstrencodings.h> // for debug
 #include <utilsplitstring.h>
 #include <utilmoneystr.h>
+#include <utxo_functions.h> // for GetUTXOSet in SweepCoinsToWallet
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/fees.h>
@@ -3422,6 +3424,116 @@ bool CWallet::ConsolidateCoins(const CTxDestination &recipient,
             
       UpdateTransaction(txNew, nIn, sigdata);
       nIn++;
+    }
+    
+    // Return the constructed transaction data.
+    tx = MakeTransactionRef(std::move(txNew));
+
+    // Limit size.
+    if (tx->GetTotalSize() >= MAX_STANDARD_TX_SIZE) {
+        strFailReason = _("Transaction too large");
+        return false;
+    }
+
+    
+    CValidationState state = CommitConsolidate(tx, g_connman.get());
+    return true;
+}
+ 
+bool CWallet::SweepCoinsToWallet(const CKey& key,
+                                 CTransactionRef &tx, std::string &strFailReason) {
+    
+    CTxDestination source = key.GetPubKey().GetID();
+    CScript coinscript =  GetScriptForDestination(source);
+
+    if (::IsMine(*this, coinscript)) {//IsFromMe(tx)) {
+        strFailReason = _("Source address already contained in this wallet, can not sweep");
+        return false;
+    }
+
+    std::map<COutPoint, Coin> coins_to_use = GetUTXOSet(pcoinsdbview.get(), coinscript);
+
+    if (coins_to_use.size() == 0) {
+        strFailReason = _("Error: No UTXOs at this address");
+        return false;
+    }
+    
+    Amount nAmount(0);
+    for (const auto &coin : coins_to_use) {
+        nAmount += coin.second.GetTxOut().nValue;
+    }
+    
+    CMutableTransaction txNew;
+
+    txNew.nLockTime = chainActive.Height();
+    if (GetRandInt(10) == 0) {
+        txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
+    }
+
+    assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
+    assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
+
+    LOCK2(cs_main, cs_wallet);
+
+    // no change ....
+    txNew.vin.clear();
+    txNew.vout.clear();
+
+    // Generate a new key that is added to wallet
+    if (!IsLocked()) {
+        TopUpKeyPool();
+    }
+
+    CPubKey newKey;
+    if (!GetKeyFromPool(newKey, false)) {
+        strFailReason = _("Error: Keypool ran out, please call keypoolrefill first");
+        return false;
+    }
+
+    // vouts to the payees
+    CTxDestination recipient = newKey.GetID();
+    CScript scriptPub = GetScriptForDestination(recipient);
+    CTxOut txout(nAmount, scriptPub);
+    // add for sizing, replace later after fee subtracted
+    txNew.vout.push_back(txout);
+
+    // Note how the sequence number is set to non-maxint so that the nLockTime set above actually works.
+    for (const auto &coin : coins_to_use) {
+      txNew.vin.emplace_back(coin.first, CScript(),
+                             std::numeric_limits<uint32_t>::max() - 1);
+    }
+
+    CTransaction txNewConst(txNew);
+    int nBytes = CalculateMaximumSignedTxSize(txNewConst, this);
+    if (nBytes < 0) {
+        strFailReason = _("Signing transaction failed");
+        return false;
+    }
+
+    // for now
+    Amount nFee = GetConfig().GetMinFeePerKB().GetFee(nBytes);
+
+    txNew.vout.clear();
+    txout.nValue -= nFee;
+    txNew.vout.push_back(txout);
+    CTransaction txRedoNewConst(txNew);
+
+    SigHashType sigHashType = SigHashType().withForkId();
+    int nIn = 0;
+    for (const auto &coin : coins_to_use) {
+        const CScript &scriptPubKey = coin.second.GetTxOut().scriptPubKey;
+        SignatureData sigdata;
+        
+        if (!ProduceSignature(
+                              TransactionSignatureCreator(this, &txRedoNewConst, nIn,
+                                                          coin.second.GetTxOut().nValue, sigHashType),
+                              scriptPubKey, sigdata)) {
+            strFailReason = _("Signing transaction failed");
+            return false;
+        }
+            
+        UpdateTransaction(txNew, nIn, sigdata);
+        nIn++;
     }
     
     // Return the constructed transaction data.
