@@ -163,6 +163,8 @@ public:
     //! Get list of all wallet transactions.
     virtual std::vector<WalletTx> getWalletTxs() = 0;
 
+    virtual bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason) = 0;
+
     //! Try to get updated status for a particular transaction, if possible
     //! without blocking.
     virtual bool tryGetTxStatus(const TxId &txid, WalletTxStatus &tx_status,

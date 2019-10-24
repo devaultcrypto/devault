@@ -175,6 +175,7 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/startoptionsrevealed.ui
 	forms/startoptionsmain.ui
 	forms/revealphrase.ui
+	forms/sweep.ui
 )
 
 # Qt MOC
@@ -201,7 +202,7 @@ add_library(bitcoin-qt-base
 	clientmodel.cpp
 	checkcoins.cpp
 	csvmodelwriter.cpp
-  dvtui.cpp
+    dvtui.cpp
 	guiutil.cpp
 	intro.cpp
 	modaloverlay.cpp
@@ -220,6 +221,7 @@ add_library(bitcoin-qt-base
 	setpassphrasedialog.cpp
 	dvtui.cpp
 	revealphrase.cpp
+	sweep.cpp
 
 	startoptionsdialog.cpp
 	startoptions.cpp

@@ -229,6 +229,10 @@ namespace {
             }
             return pending;
         }
+        bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason) override {
+            return m_wallet.SweepCoinsToWallet(key, tx, strFailReason);
+        }
+        
         bool transactionCanBeAbandoned(const TxId &txid) override {
             return m_wallet.TransactionCanBeAbandoned(txid);
         }

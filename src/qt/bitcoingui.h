@@ -135,6 +135,7 @@ private:
     QAction *openAction = nullptr;
     QAction *showHelpMessageAction = nullptr;
     QAction *revealPhraseAction = nullptr;
+    QAction *sweepAction = nullptr;
     QWidgetAction *actProgressBar = nullptr;
     QWidgetAction *actProgressBarLabel = nullptr;
 

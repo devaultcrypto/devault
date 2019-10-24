@@ -220,6 +220,7 @@ BITCOIN_CORE_H = \
   ui_interface.h \
   undo.h \
   upgrade_check.h \
+  utxo_functions.h \
   util.h \
   utilmoneystr.h \
   utiltime.h \
@@ -311,6 +312,7 @@ libbitcoin_server_a_SOURCES = \
   txdb.cpp \
   txmempool.cpp \
   upgrade_check.cpp \
+  utxo_functions.cpp \
   validation.cpp \
   validationinterface.cpp \
   $(BITCOIN_CORE_H)

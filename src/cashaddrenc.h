@@ -35,5 +35,6 @@ std::vector<uint8_t> PackCashAddrContent(const CashAddrContent &content);
 
 CKey DecodeSecret(const std::string &addr);
 std::string EncodeSecret(const CKey& key);
+bool CheckSecretIsValid(const std::string &addr);
 
 #endif

@@ -111,6 +111,8 @@ public Q_SLOTS:
     void lockWallet();
     /** show word phrase to user in a window */
     void revealPhrase();
+    /** sweep privte key */
+    void sweep();
 
     /** Show used sending addresses */
     void usedSendingAddresses();
