@@ -517,6 +517,13 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
 
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
+    if (wss.nCKeys) {
+        InitWarning(_("You have encrypted one or more private keys in your wallet that are potentially not backed"
+                      " by your seed phrase. You should send funds stored in such to a new address."
+                      "Support for unbacked keys may be removed in the future"));
+    }
+
+
     LogPrintf("Keys: %u encrypted, %u w/ metadata\n", wss.nCKeys, wss.nKeyMeta);
 
     // nTimeFirstKey is only reliable if all keys have metadata
