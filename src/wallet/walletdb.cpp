@@ -234,7 +234,6 @@ void WalletBatch::ListAccountCreditDebit(const std::string &strAccount,
 
 class CWalletScanState {
 public:
-    unsigned int nKeys;
     unsigned int nCKeys;
     unsigned int nWatchKeys;
     unsigned int nKeyMeta;
@@ -244,7 +243,7 @@ public:
     std::vector<TxId> vWalletUpgrade;
 
     CWalletScanState() {
-        nKeys = nCKeys = nWatchKeys = nKeyMeta = 0;
+        nCKeys = nWatchKeys = nKeyMeta = 0;
         fIsEncrypted = false;
         fAnyUnordered = false;
         nFileVersion = 0;
@@ -518,11 +517,10 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
 
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
-    LogPrintf("Keys: %u plaintext, %u encrypted, %u w/ metadata, %u total\n",
-              wss.nKeys, wss.nCKeys, wss.nKeyMeta, wss.nKeys + wss.nCKeys);
+    LogPrintf("Keys: %u encrypted, %u w/ metadata\n", wss.nCKeys, wss.nKeyMeta);
 
     // nTimeFirstKey is only reliable if all keys have metadata
-    if ((wss.nKeys + wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {
+    if ((wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {
         pwallet->UpdateTimeFirstKey(1);
     }
 
