@@ -51,6 +51,8 @@
 #include <boost/optional.hpp>
 #endif
 
+//#include <cashaddrenc.h>
+
 
 std::vector<CWalletRef> vpwallets;
 
@@ -3315,7 +3317,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     if (fBroadcastTransactions) {
         // Broadcast
         if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
-            LogPrintf("CommitTransaction(): Transaction cannot be broadcast "
+            LogPrintf("CommitConsolidate(): Transaction cannot be broadcast "
                       "immediately, %s\n",
                       state.GetRejectReason());
             // TODO: if we expect the failure to be long term or permanent,
@@ -3327,6 +3329,38 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     return state;
 }
 
+
+CValidationState CWallet::CommitSweep(CTransactionRef tx, CConnman *connman) {
+    CValidationState state;
+
+    CWalletTx wtxNew(this, std::move(tx));
+    wtxNew.fTimeReceivedIsTxTime = true;
+    wtxNew.fFromMe = true;
+
+    LogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString());
+
+    // Add tx to wallet, because if it has change it's also ours, otherwise just
+    // for transaction history.
+    AddToWallet(wtxNew);
+
+    // Get the inserted-CWalletTx from mapWallet so that the fInMempool flag is cached properly
+    CWalletTx &wtx = mapWallet.at(wtxNew.GetId());
+
+    if (fBroadcastTransactions) {
+        // Broadcast
+        if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
+            LogPrintf("CommitSweep(): Transaction cannot be broadcast "
+                      "immediately, %s\n",
+                      state.GetRejectReason());
+            // TODO: if we expect the failure to be long term or permanent,
+            // instead delete wtx from the wallet and return failure.
+        } else {
+            wtx.RelayWalletTransaction(connman);
+        }
+    }
+    return state;
+}
+ 
 bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPercent, Amount minAmount, std::string &message) {
 
     CTransactionRef tx;
@@ -3344,7 +3378,6 @@ bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPerc
         message = strprintf("Error: ConsolidateCoins failed! Reason given: %s", message);
         return false;
     }
-    //CValidationState state = CommitConsolidate(tx, g_connman.get());
     
     message = tx->GetId().GetHex();
     return true;
@@ -3451,7 +3484,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
         return false;
     }
 
-    std::map<COutPoint, Coin> coins_to_use = GetUTXOSet(pcoinsdbview.get(), coinscript);
+    std::map<COutPoint, Coin> coins_to_use = GetUTXOSet(pcoinsdbview.get(), source);
 
     if (coins_to_use.size() == 0) {
         strFailReason = _("Error: No UTXOs at this address");
@@ -3504,7 +3537,16 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     }
 
     CTransaction txNewConst(txNew);
-    int nBytes = CalculateMaximumSignedTxSize(txNewConst, this);
+    
+    // We add this key to our wallet for signing purposes,
+    // it will be emptied as part of the process so doesn't need backup
+    // by the word phrase
+    AddKey(key);
+
+    std::vector<CTxOut> vtx;
+    vtx.push_back(txout);
+    int nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
+    //int nBytes = CalculateMaximumSignedInputSize(txNewConst, this);
     if (nBytes < 0) {
         strFailReason = _("Signing transaction failed");
         return false;
@@ -3523,7 +3565,6 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     for (const auto &coin : coins_to_use) {
         const CScript &scriptPubKey = coin.second.GetTxOut().scriptPubKey;
         SignatureData sigdata;
-        
         if (!ProduceSignature(
                               TransactionSignatureCreator(this, &txRedoNewConst, nIn,
                                                           coin.second.GetTxOut().nValue, sigHashType),
@@ -3545,8 +3586,14 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
         return false;
     }
 
+    CValidationState state = CommitSweep(tx, g_connman.get());
+
+    // Notify that coin is spent (just 1 address)
+    NotifyTransactionChanged(this, tx->GetId(), CT_UPDATED);
+
+    // Remove the Key temporarily added to the wallet now
+    RemoveKey(key);
     
-    CValidationState state = CommitConsolidate(tx, g_connman.get());
     return true;
 }
  

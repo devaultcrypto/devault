@@ -25,6 +25,8 @@
 #include <validation.h>
 #include <init.h> // for ShutdownRequested
 
+#include <cashaddrenc.h>
+#include <chainparams.h>
 /**
  * Calculate the difficulty for a given block index.
  */
@@ -67,6 +69,37 @@ void ApplyStats(CCoinsStats &stats, CHashWriter &ss, const uint256 &hash,
     ss << VARINT(0);
 }
 
+std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const CTxDestination& source) {
+    std::unique_ptr<CCoinsViewCursor> pcursor(view->Cursor());
+    assert(pcursor);
+
+    CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
+    auto hb = pcursor->GetBestBlock();
+    int nHeight;
+    {
+        LOCK(cs_main);
+        nHeight = mapBlockIndex.find(hb)->second->nHeight;
+    }
+    uint256 prevkey;
+    std::map<COutPoint, Coin> outputs;
+
+    std::string address = EncodeCashAddr(source, Params());
+    
+    while (pcursor->Valid()) {
+        interruption_point(ShutdownRequested());
+        COutPoint key;
+        Coin coin;
+        if (pcursor->GetKey(key) && pcursor->GetValue(coin)) {
+            if (address == GetAddrFromTxOut(coin.GetTxOut())) {
+                outputs.emplace(key, coin);
+            }
+        } else {
+            break; //error("%s: unable to read value", __func__);
+        }
+        pcursor->Next();
+    }
+    return outputs;
+}
 std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, CScript& coinscript) {
     std::unique_ptr<CCoinsViewCursor> pcursor(view->Cursor());
     assert(pcursor);

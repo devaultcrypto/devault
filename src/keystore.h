@@ -23,6 +23,7 @@ public:
     //! Add a key to the store.
     virtual bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) = 0;
     virtual bool AddKey(const CKey &key);
+    virtual bool RemoveKey(const CKey &key) = 0; // For temporary addition
 
     //! Check whether a key corresponding to a given address is present in the
     //! store.
@@ -64,6 +65,7 @@ protected:
 
 public:
     bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
+    bool RemoveKey(const CKey &key) override; // For temporary addition
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
     bool HaveKey(const CKeyID &address) const override;
     std::set<CKeyID> GetKeys() const override;

@@ -9,6 +9,7 @@
 #include <coins.h>
 #include <primitives/transaction.h>
 #include <script/script.h>
+#include <script/standard.h>
 #include <txdb.h>
 
 struct Amount;
@@ -36,6 +37,8 @@ void ApplyStats(CCoinsStats &stats, CHashWriter &ss, const uint256 &hash,
                 const std::map<uint32_t, Coin> &outputs);
 
 std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, CScript& coinscript);
+std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const CTxDestination& source);
+//std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const std::string& address);
 
 //! Calculate statistics about the unspent transaction output set
 bool GetUTXOStats(CCoinsView *view, CCoinsStats &stats);

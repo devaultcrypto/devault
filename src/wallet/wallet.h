@@ -1027,6 +1027,7 @@ public:
     bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason);
 
     CValidationState CommitConsolidate(CTransactionRef tx, CConnman *connman);
+    CValidationState CommitSweep(CTransactionRef tx, CConnman *connman);
     bool CommitTransaction(
         CTransactionRef tx, mapValue_t mapValue,
         std::vector<std::pair<std::string, std::string>> orderForm,
