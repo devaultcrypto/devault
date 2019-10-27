@@ -3475,15 +3475,24 @@ bool CWallet::ConsolidateCoins(const CTxDestination &recipient,
  
 bool CWallet::SweepCoinsToWallet(const CKey& key,
                                  CTransactionRef &tx, std::string &strFailReason) {
+
+    // 1. Get all the UTXOs for the Key/Address
+    // 2. Get a (new) key from wallet to send to
+    // 3. Create transaction with the above info
+    // 4. Calculate fee & sign transaction using temporary keystore
+    // 5. Call CommitSweep to add to Memory pool/Relay
+    // 6. Notify
+
     
     CTxDestination source = key.GetPubKey().GetID();
     CScript coinscript =  GetScriptForDestination(source);
 
-    if (::IsMine(*this, coinscript)) {//IsFromMe(tx)) {
+    if (::IsMine(*this, coinscript)) {
         strFailReason = _("Source address already contained in this wallet, can not sweep");
         return false;
     }
 
+    // Get the list of UTXOs for the coin
     std::map<COutPoint, Coin> coins_to_use = GetUTXOSet(pcoinsdbview.get(), source);
 
     if (coins_to_use.size() == 0) {
@@ -3538,9 +3547,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
 
     CTransaction txNewConst(txNew);
     
-    // We add this key to our wallet for signing purposes,
-    // it will be emptied as part of the process so doesn't need backup
-    // by the word phrase
+    // We create a temporary keystore and then add this key to it for signing purposes
     CBasicKeyStore keystore;
     keystore.AddKey(key);
     
@@ -3548,7 +3555,6 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     std::vector<CTxOut> vtx;
     vtx.push_back(txout);
     int nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
-    //int nBytes = CalculateMaximumSignedInputSize(txNewConst, this);
     if (nBytes < 0) {
         strFailReason = _("Signing transaction failed");
         return false;
