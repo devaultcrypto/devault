@@ -518,9 +518,11 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
     if (wss.nCKeys) {
-        InitWarning(_("You have encrypted one or more private keys in your wallet that are potentially not backed"
-                      " by your seed phrase. You should send funds stored in such to a new address."
-                      "Support for unbacked keys may be removed in the future"));
+        std::string key_list = "";
+        for (const auto& k : pwallet->GetKeys()) key_list += EncodeDestination(k) + "\n";
+        InitWarning(strprintf(_("You have one or more private keys in your wallet that are potentially not backed"
+                                " by your seed phrase. You should send funds stored in these to addresses in your wallet."
+                                "Support for unbacked keys may be removed in the future, these are the addresses :\n %s"), key_list));
     }
 
 
