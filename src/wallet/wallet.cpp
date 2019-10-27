@@ -3298,7 +3298,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.fFromMe = true;
 
-    LogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString());
+    LogPrintf("CommitConsolidate:\n%s", wtxNew.tx->ToString());
 
     // Add tx to wallet, because if it has change it's also ours, otherwise just
     // for transaction history.
@@ -3337,7 +3337,7 @@ CValidationState CWallet::CommitSweep(CTransactionRef tx, CConnman *connman) {
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.fFromMe = true;
 
-    LogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString());
+    LogPrintf("CommitSweep:\n%s", wtxNew.tx->ToString());
 
     // Add tx to wallet, because if it has change it's also ours, otherwise just
     // for transaction history.
@@ -3541,7 +3541,9 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     // We add this key to our wallet for signing purposes,
     // it will be emptied as part of the process so doesn't need backup
     // by the word phrase
-    AddKey(key);
+    CBasicKeyStore keystore;
+    keystore.AddKey(key);
+    
 
     std::vector<CTxOut> vtx;
     vtx.push_back(txout);
@@ -3559,20 +3561,22 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     txout.nValue -= nFee;
     txNew.vout.push_back(txout);
     CTransaction txRedoNewConst(txNew);
+    Amount amount;
 
     SigHashType sigHashType = SigHashType().withForkId();
     int nIn = 0;
     for (const auto &coin : coins_to_use) {
         const CScript &scriptPubKey = coin.second.GetTxOut().scriptPubKey;
         SignatureData sigdata;
-        if (!ProduceSignature(
-                              TransactionSignatureCreator(this, &txRedoNewConst, nIn,
-                                                          coin.second.GetTxOut().nValue, sigHashType),
-                              scriptPubKey, sigdata)) {
-            strFailReason = _("Signing transaction failed");
-            return false;
-        }
-            
+        amount = coin.second.GetTxOut().nValue;
+        ProduceSignature(MutableTransactionSignatureCreator(
+                                                            &keystore, &txNew, nIn, amount, sigHashType),
+                         scriptPubKey, sigdata);
+
+        sigdata = CombineSignatures(
+                                    scriptPubKey, TransactionSignatureChecker(&txRedoNewConst, nIn, amount),
+                                    sigdata, DataFromTransaction(txNew, nIn));
+
         UpdateTransaction(txNew, nIn, sigdata);
         nIn++;
     }
@@ -3591,9 +3595,6 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     // Notify that coin is spent (just 1 address)
     NotifyTransactionChanged(this, tx->GetId(), CT_UPDATED);
 
-    // Remove the Key temporarily added to the wallet now
-    RemoveKey(key);
-    
     return true;
 }
  
