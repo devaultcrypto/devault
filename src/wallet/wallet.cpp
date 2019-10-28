@@ -3551,13 +3551,17 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     CBasicKeyStore keystore;
     keystore.AddKey(key);
     
-
-    std::vector<CTxOut> vtx;
-    vtx.push_back(txout);
-    int nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
-    if (nBytes < 0) {
-        strFailReason = _("Signing transaction failed");
-        return false;
+    int nBytes;
+    {
+        std::vector<CTxOut> vtx;
+        // resize to same size at vins since seems to be required for
+        // Calc function below to work
+        for (size_t i=0;i<coins_to_use.size();i++) vtx.push_back(txout);
+        nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
+        if (nBytes < 0) {
+            strFailReason = _("Signing transaction failed");
+            return false;
+        }
     }
 
     // for now
