@@ -199,40 +199,6 @@ void generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveS
     }
 }
 
-
-/////
-#ifdef DISABLE
-//! Search for a given pubkey script
-bool FindScriptPubKey(std::atomic<int>& scan_progress, const std::atomic<bool>& should_abort, int64_t& count,
-                      CCoinsViewCursor* cursor, const CScript& needles, std::map<COutPoint, Coin>& out_results) {
-    scan_progress = 0;
-    count = 0;
-    while (cursor->Valid()) {
-        COutPoint key;
-        Coin coin;
-        if (!cursor->GetKey(key) || !cursor->GetValue(coin)) return false;
-        if (++count % 8192 == 0) {
-            // TBD boost::this_thread::interruption_point();
-            if (should_abort) {
-                // allow to abort the scan via the abort reference
-                return false;
-            }
-        }
-        if (count % 256 == 0) {
-            // update progress reference every 256 item
-            uint32_t high = 0x100;// * *key.hash.begin() + *(key.hash.begin() + 1);
-            scan_progress = (int)(high * 100.0 / 65536.0 + 0.5);
-        }
-        if (needles == coin.GetTxOut().scriptPubKey) {
-            out_results.emplace(key, coin);
-        }
-        cursor->Next();
-    }
-    scan_progress = 100;
-    return true;
-}
-#endif
-
 static UniValue getnewaddress(const Config &config,
                               const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
