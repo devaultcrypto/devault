@@ -508,6 +508,8 @@ private:
 
     void trackPackageRemoved(const CFeeRate &rate) EXCLUSIVE_LOCKS_REQUIRED(cs);
 
+    bool m_is_loaded GUARDED_BY(cs){false};
+
 public:
     // public only for testing
     static const int ROLLING_FEE_HALFLIFE = 60 * 60 * 12;
@@ -735,7 +737,13 @@ public:
     bool TransactionWithinChainLimit(const uint256 &txid,
                                      size_t chainLimit) const;
 
-    unsigned long size() {
+    /** @returns true if the mempool is fully loaded */
+    bool IsLoaded() const;
+
+    /** Sets the current loaded state */
+    void SetIsLoaded(bool loaded);
+
+    unsigned long size() const {
         LOCK(cs);
         return mapTx.size();
     }

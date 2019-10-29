@@ -1785,11 +1785,12 @@ static UniValue getchaintips(const Config &config,
     return res;
 }
 
-UniValue mempoolInfoToJSON() {
+UniValue MempoolInfoToJSON(const CTxMemPool &pool) {
     UniValue ret(UniValue::VOBJ);
-    ret.pushKV("size", (int64_t)g_mempool.size());
-    ret.pushKV("bytes", (int64_t)g_mempool.GetTotalTxSize());
-    ret.pushKV("usage", (int64_t)g_mempool.DynamicMemoryUsage());
+    ret.pushKV("loaded", pool.IsLoaded());
+    ret.pushKV("size", (int64_t)pool.size());
+    ret.pushKV("bytes", (int64_t)pool.GetTotalTxSize());
+    ret.pushKV("usage", (int64_t)pool.DynamicMemoryUsage());
     size_t maxmempool =
         gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
     ret.pushKV("maxmempool", (int64_t)maxmempool);
@@ -1809,6 +1810,8 @@ static UniValue getmempoolinfo(const Config &config,
             "\nReturns details on the active state of the TX memory pool.\n"
             "\nResult:\n"
             "{\n"
+            "  \"loaded\": true|false         (boolean) True if the mempool is "
+            "fully loaded\n"
             "  \"size\": xxxxx,               (numeric) Current tx count\n"
             "  \"bytes\": xxxxx,              (numeric) Transaction size.\n"
             "  \"usage\": xxxxx,              (numeric) Total memory usage for "
@@ -1826,8 +1829,7 @@ static UniValue getmempoolinfo(const Config &config,
             HelpExampleCli("getmempoolinfo", "") +
             HelpExampleRpc("getmempoolinfo", ""));
     }
-
-    return mempoolInfoToJSON();
+    return MempoolInfoToJSON(::g_mempool);
 }
 
 static UniValue preciousblock(const Config &config,
@@ -2635,11 +2637,11 @@ static UniValue savemempool(const Config &config,
                                  HelpExampleRpc("savemempool", ""));
     }
 
-    if (!g_is_mempool_loaded) {
+    if (!::g_mempool.IsLoaded()) {
         throw JSONRPCError(RPC_MISC_ERROR, "The mempool was not loaded yet");
     }
 
-    if (!DumpMempool()) {
+    if (!DumpMempool(::g_mempool)) {
         throw JSONRPCError(RPC_MISC_ERROR, "Unable to dump mempool to disk");
     }
 
