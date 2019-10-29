@@ -96,7 +96,6 @@ CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE_PER_KB);
 Amount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
 CTxMemPool g_mempool;
-std::atomic_bool g_is_mempool_loaded{false};
 
 static void CheckBlockIndex(const Consensus::Params &consensusParams);
 
@@ -5495,7 +5494,7 @@ CBlockFileInfo *GetBlockFileInfo(size_t n) {
 
 static const uint64_t MEMPOOL_DUMP_VERSION = 1;
 
-bool LoadMempool(const Config &config) {
+bool LoadMempool(const Config &config, CTxMemPool &pool) {
     int64_t nExpiryTimeout =
         gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60;
     FILE *filestr = fsbridge::fopen(GetDataDir() / "mempool.dat", "rb");
@@ -5533,14 +5532,14 @@ bool LoadMempool(const Config &config) {
 
             Amount amountdelta(nFeeDelta);
             if (amountdelta != Amount::zero()) {
-                g_mempool.PrioritiseTransaction(tx->GetId(), prioritydummy,
-                                                amountdelta);
+                pool.PrioritiseTransaction(tx->GetId(), prioritydummy,
+                                           amountdelta);
             }
             CValidationState state;
             if (nTime + nExpiryTimeout > nNow) {
                 LOCK(cs_main);
                 AcceptToMemoryPoolWithTime(
-                    config, g_mempool, state, tx, true /* fLimitFree */,
+                    config, pool, state, tx, true /* fLimitFree */,
                     nullptr /* pfMissingInputs */, nTime,
                     false /* fOverrideMempoolLimit */,
                     Amount::zero() /* nAbsurdFee */, false /* test_accept */);
@@ -5551,7 +5550,7 @@ bool LoadMempool(const Config &config) {
                     // wallet(s) having loaded it while we were processing
                     // mempool transactions; consider these as valid, instead of
                     // failed, but mark them as 'already there'
-                    if (g_mempool.exists(tx->GetHash())) {
+                    if (pool.exists(tx->GetHash())) {
                         ++already_there;
                     } else {
                         ++failed;
@@ -5565,7 +5564,7 @@ bool LoadMempool(const Config &config) {
         file >> mapDeltas;
 
         for (const auto &i : mapDeltas) {
-            g_mempool.PrioritiseTransaction(i.first, prioritydummy, i.second);
+            pool.PrioritiseTransaction(i.first, prioritydummy, i.second);
         }
     } catch (const std::exception &e) {
         LogPrintf("Failed to deserialize mempool data on disk: %s. Continuing "
@@ -5580,7 +5579,7 @@ bool LoadMempool(const Config &config) {
     return true;
 }
 
-bool DumpMempool() {
+bool DumpMempool(const CTxMemPool &pool) {
     int64_t start = GetTimeMicros();
 
     std::map<uint256, Amount> mapDeltas;
@@ -5590,12 +5589,12 @@ bool DumpMempool() {
     LOCK(dump_mutex);
 
     {
-        LOCK(g_mempool.cs);
-        for (const auto &i : g_mempool.mapDeltas) {
+        LOCK(pool.cs);
+        for (const auto &i : pool.mapDeltas) {
             mapDeltas[i.first] = i.second.second;
         }
 
-        vinfo = g_mempool.infoAll();
+        vinfo = pool.infoAll();
     }
 
     int64_t mid = GetTimeMicros();
