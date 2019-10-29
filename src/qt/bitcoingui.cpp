@@ -302,6 +302,10 @@ void BitcoinGUI::createActions() {
                     tr("&Show Word Phrase.."), this);
     revealPhraseAction->setStatusTip(tr("Reward 12 or 24 word phrase for wallet"));
 
+    sweepAction = new QAction(platformStyle->TextColorIcon(":/icons/eye2"),
+                    tr("&Sweep Private Key.."), this);
+    sweepAction->setStatusTip(tr("Sweeps funds from private key into this wallet"));
+
     signMessageAction =
         new QAction(platformStyle->TextColorIcon(":/icons/edit"),
                     tr("Sign &message..."), this);
@@ -374,6 +378,8 @@ void BitcoinGUI::createActions() {
               &WalletFrame::unlockWallet);
       connect(revealPhraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::revealPhrase);
+      connect(sweepAction, &QAction::triggered, walletFrame,
+              &WalletFrame::sweep);
 
       connect(signMessageAction, &QAction::triggered,
               [this] { gotoSignMessageTab(); });
@@ -426,6 +432,8 @@ void BitcoinGUI::createMenuBar() {
         settings->addAction(unlockWalletAction);
         settings->addSeparator();
         settings->addAction(revealPhraseAction);
+        settings->addSeparator();
+        settings->addAction(sweepAction);
         settings->addSeparator();
     }
     settings->addAction(optionsAction);
@@ -656,6 +664,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
     revealPhraseAction->setEnabled(enabled);
+    sweepAction->setEnabled(enabled);
     signMessageAction->setEnabled(enabled);
     verifyMessageAction->setEnabled(enabled);
     usedSendingAddressesAction->setEnabled(enabled);
@@ -1153,30 +1162,28 @@ void BitcoinGUI::setHDStatus() {
 }
 
 void BitcoinGUI::setWalletStatus(int status) {
+    labelWalletEncryptionIcon->show();
     switch (status) {
-        case WalletModel::Unlocked:
-            labelWalletEncryptionIcon->show();
-            labelWalletEncryptionIcon->setPixmap(
-                platformStyle->SingleColorIcon(":/icons/lock_open")
-                    .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-            labelWalletEncryptionIcon->setToolTip(
-                tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
-            changePassphraseAction->setEnabled(true);
-            revealPhraseAction->setEnabled(true);
-            unlockWalletAction->setEnabled(false);
-            break;
-        case WalletModel::Locked:
-            labelWalletEncryptionIcon->show();
-            labelWalletEncryptionIcon->setPixmap(
-                platformStyle->SingleColorIcon(":/icons/lock_closed")
-                    .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-            labelWalletEncryptionIcon->setToolTip(
-                tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
-            changePassphraseAction->setEnabled(true);
-            revealPhraseAction->setEnabled(true);
-            unlockWalletAction->setEnabled(true);
-            break;
+    case WalletModel::Unlocked:
+        labelWalletEncryptionIcon->setPixmap(
+                                             platformStyle->SingleColorIcon(":/icons/lock_open")
+                                             .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        labelWalletEncryptionIcon->setToolTip(
+                                              tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        unlockWalletAction->setEnabled(false);
+        break;
+    case WalletModel::Locked:
+        labelWalletEncryptionIcon->setPixmap(
+                                             platformStyle->SingleColorIcon(":/icons/lock_closed")
+                                             .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        labelWalletEncryptionIcon->setToolTip(
+                                              tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
+        unlockWalletAction->setEnabled(true);
+        break;
     }
+    changePassphraseAction->setEnabled(true);
+    revealPhraseAction->setEnabled(true);
+    sweepAction->setEnabled(true);
 }
 
 void BitcoinGUI::updateWalletStatus() {

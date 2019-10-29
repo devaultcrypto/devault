@@ -8,6 +8,7 @@
 #include <wallet/wallet.h>
 #include <benchmark.h>
 #include <chain.h>
+#include <coins.h>
 #include <checkpoints.h>
 #include <config.h>
 #include <consensus/consensus.h>
@@ -31,6 +32,7 @@
 #include <utilstrencodings.h> // for debug
 #include <utilsplitstring.h>
 #include <utilmoneystr.h>
+#include <utxo_functions.h> // for GetUTXOSet in SweepCoinsToWallet
 #include <validation.h>
 #include <wallet/coincontrol.h>
 #include <wallet/fees.h>
@@ -48,6 +50,8 @@
 #else
 #include <boost/optional.hpp>
 #endif
+
+//#include <cashaddrenc.h>
 
 
 std::vector<CWalletRef> vpwallets;
@@ -3294,7 +3298,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     wtxNew.fTimeReceivedIsTxTime = true;
     wtxNew.fFromMe = true;
 
-    LogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString());
+    LogPrintf("CommitConsolidate:\n%s", wtxNew.tx->ToString());
 
     // Add tx to wallet, because if it has change it's also ours, otherwise just
     // for transaction history.
@@ -3313,7 +3317,7 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     if (fBroadcastTransactions) {
         // Broadcast
         if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
-            LogPrintf("CommitTransaction(): Transaction cannot be broadcast "
+            LogPrintf("CommitConsolidate(): Transaction cannot be broadcast "
                       "immediately, %s\n",
                       state.GetRejectReason());
             // TODO: if we expect the failure to be long term or permanent,
@@ -3325,6 +3329,38 @@ CValidationState CWallet::CommitConsolidate(CTransactionRef tx, CConnman *connma
     return state;
 }
 
+
+CValidationState CWallet::CommitSweep(CTransactionRef tx, CConnman *connman) {
+    CValidationState state;
+
+    CWalletTx wtxNew(this, std::move(tx));
+    wtxNew.fTimeReceivedIsTxTime = true;
+    wtxNew.fFromMe = true;
+
+    LogPrintf("CommitSweep:\n%s", wtxNew.tx->ToString());
+
+    // Add tx to wallet, because if it has change it's also ours, otherwise just
+    // for transaction history.
+    AddToWallet(wtxNew);
+
+    // Get the inserted-CWalletTx from mapWallet so that the fInMempool flag is cached properly
+    CWalletTx &wtx = mapWallet.at(wtxNew.GetId());
+
+    if (fBroadcastTransactions) {
+        // Broadcast
+        if (!wtx.AcceptToMemoryPool(maxTxFee, state)) {
+            LogPrintf("CommitSweep(): Transaction cannot be broadcast "
+                      "immediately, %s\n",
+                      state.GetRejectReason());
+            // TODO: if we expect the failure to be long term or permanent,
+            // instead delete wtx from the wallet and return failure.
+        } else {
+            wtx.RelayWalletTransaction(connman);
+        }
+    }
+    return state;
+}
+ 
 bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPercent, Amount minAmount, std::string &message) {
 
     CTransactionRef tx;
@@ -3342,7 +3378,6 @@ bool CWallet::ConsolidateRewards(const CTxDestination &recipient, double minPerc
         message = strprintf("Error: ConsolidateCoins failed! Reason given: %s", message);
         return false;
     }
-    //CValidationState state = CommitConsolidate(tx, g_connman.get());
     
     message = tx->GetId().GetHex();
     return true;
@@ -3435,6 +3470,141 @@ bool CWallet::ConsolidateCoins(const CTxDestination &recipient,
 
     
     CValidationState state = CommitConsolidate(tx, g_connman.get());
+    return true;
+}
+ 
+bool CWallet::SweepCoinsToWallet(const CKey& key,
+                                 CTransactionRef &tx, std::string &strFailReason) {
+
+    // 1. Get all the UTXOs for the Key/Address
+    // 2. Get a (new) key from wallet to send to
+    // 3. Create transaction with the above info
+    // 4. Calculate fee & sign transaction using temporary keystore
+    // 5. Call CommitSweep to add to Memory pool/Relay
+    // 6. Notify
+
+    
+    CTxDestination source = key.GetPubKey().GetID();
+    CScript coinscript =  GetScriptForDestination(source);
+
+    if (::IsMine(*this, coinscript)) {
+        strFailReason = _("Source address already contained in this wallet, can not sweep");
+        return false;
+    }
+
+    // Get the list of UTXOs for the coin
+    std::map<COutPoint, Coin> coins_to_use = GetUTXOSet(pcoinsdbview.get(), source);
+
+    if (coins_to_use.size() == 0) {
+        strFailReason = _("Error: No UTXOs at this address");
+        return false;
+    }
+    
+    Amount nAmount(0);
+    for (const auto &coin : coins_to_use) {
+        nAmount += coin.second.GetTxOut().nValue;
+    }
+    
+    CMutableTransaction txNew;
+
+    txNew.nLockTime = chainActive.Height();
+    if (GetRandInt(10) == 0) {
+        txNew.nLockTime = std::max(0, (int)txNew.nLockTime - GetRandInt(100));
+    }
+
+    assert(txNew.nLockTime <= (unsigned int)chainActive.Height());
+    assert(txNew.nLockTime < LOCKTIME_THRESHOLD);
+
+    LOCK2(cs_main, cs_wallet);
+
+    // no change ....
+    txNew.vin.clear();
+    txNew.vout.clear();
+
+    // Generate a new key that is added to wallet
+    if (!IsLocked()) {
+        TopUpKeyPool();
+    }
+
+    CPubKey newKey;
+    if (!GetKeyFromPool(newKey, false)) {
+        strFailReason = _("Error: Keypool ran out, please call keypoolrefill first");
+        return false;
+    }
+
+    // vouts to the payees
+    CTxDestination recipient = newKey.GetID();
+    CScript scriptPub = GetScriptForDestination(recipient);
+    CTxOut txout(nAmount, scriptPub);
+    // add for sizing, replace later after fee subtracted
+    txNew.vout.push_back(txout);
+
+    // Note how the sequence number is set to non-maxint so that the nLockTime set above actually works.
+    for (const auto &coin : coins_to_use) {
+      txNew.vin.emplace_back(coin.first, CScript(),
+                             std::numeric_limits<uint32_t>::max() - 1);
+    }
+
+    CTransaction txNewConst(txNew);
+    
+    // We create a temporary keystore and then add this key to it for signing purposes
+    CBasicKeyStore keystore;
+    keystore.AddKey(key);
+    
+    int nBytes;
+    {
+        std::vector<CTxOut> vtx;
+        // resize to same size at vins since seems to be required for
+        // Calc function below to work
+        for (size_t i=0;i<coins_to_use.size();i++) vtx.push_back(txout);
+        nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
+        if (nBytes < 0) {
+            strFailReason = _("Signing transaction failed");
+            return false;
+        }
+    }
+
+    // for now
+    Amount nFee = GetConfig().GetMinFeePerKB().GetFee(nBytes);
+
+    txNew.vout.clear();
+    txout.nValue -= nFee;
+    txNew.vout.push_back(txout);
+    CTransaction txRedoNewConst(txNew);
+    Amount amount;
+
+    SigHashType sigHashType = SigHashType().withForkId();
+    int nIn = 0;
+    for (const auto &coin : coins_to_use) {
+        const CScript &scriptPubKey = coin.second.GetTxOut().scriptPubKey;
+        SignatureData sigdata;
+        amount = coin.second.GetTxOut().nValue;
+        ProduceSignature(MutableTransactionSignatureCreator(
+                                                            &keystore, &txNew, nIn, amount, sigHashType),
+                         scriptPubKey, sigdata);
+
+        sigdata = CombineSignatures(
+                                    scriptPubKey, TransactionSignatureChecker(&txRedoNewConst, nIn, amount),
+                                    sigdata, DataFromTransaction(txNew, nIn));
+
+        UpdateTransaction(txNew, nIn, sigdata);
+        nIn++;
+    }
+    
+    // Return the constructed transaction data.
+    tx = MakeTransactionRef(std::move(txNew));
+
+    // Limit size.
+    if (tx->GetTotalSize() >= MAX_STANDARD_TX_SIZE) {
+        strFailReason = _("Transaction too large");
+        return false;
+    }
+
+    CValidationState state = CommitSweep(tx, g_connman.get());
+
+    // Notify that coin is spent (just 1 address)
+    NotifyTransactionChanged(this, tx->GetId(), CT_UPDATED);
+
     return true;
 }
  

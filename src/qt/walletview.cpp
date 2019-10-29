@@ -18,6 +18,7 @@
 #include <signverifymessagedialog.h>
 #include <startoptionsrevealed.h>
 #include <revealphrase.h>
+#include <sweep.h>
 #include <transactiontablemodel.h>
 #include <transactionview.h>
 #include <walletmodel.h>
@@ -321,6 +322,37 @@ void WalletView::revealPhrase() {
         SecureVector words = walletModel->getWords();
         RevealPhrase dlg(words, this);
         dlg.exec();
+        walletModel->setWalletLocked(true, "");
+    }
+}
+
+void WalletView::sweep() {
+    if (walletModel->getWalletStatus() == WalletModel::Locked) {
+        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+    if (walletModel->getWalletStatus() == WalletModel::Unlocked) {
+        bool ok;
+        Sweep dlg(this);
+        dlg.exec();
+
+        std::string secret = dlg.getSecretAddress();
+
+        // Skip
+        if (secret == "") return;
+        
+        CKey key = DecodeSecret(secret);
+        std::string strFailReason;
+        CTransactionRef tx;
+        ok = walletModel->wallet().SweepCoinsToWallet(key, tx, strFailReason);
+        if (!ok) {
+            Q_EMIT message(
+                           tr("Sweep Failed"),
+                           tr("Error sweeping fund to wallet, reason:  %1.")
+                           .arg(QString::fromUtf8(strFailReason.c_str())),
+                           CClientUIInterface::MSG_ERROR);
+        }            
         walletModel->setWalletLocked(true, "");
     }
 }

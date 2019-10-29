@@ -332,7 +332,7 @@ add_library(util
 	utilmoneystr.cpp
 	utilstrencodings.cpp
 	utiltime.cpp
-  ui_interface.cpp # for InitError in fs_util
+    ui_interface.cpp # for InitError in fs_util
 	util/bytevectorhash.cpp
 )
 
@@ -483,7 +483,8 @@ add_library(server
 	torcontrol.cpp
 	txdb.cpp
 	txmempool.cpp
-  upgrade_check.cpp
+    upgrade_check.cpp
+    utxo_functions.cpp
 	validation.cpp
 	validationinterface.cpp
 )

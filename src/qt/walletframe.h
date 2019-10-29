@@ -89,6 +89,8 @@ public Q_SLOTS:
     void unlockWallet();
     /** Show word phrase */
     void revealPhrase();
+    /** Sweep private key */
+    void sweep();
 
     /** Show used sending addresses */
     void usedSendingAddresses();

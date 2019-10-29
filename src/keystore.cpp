@@ -13,6 +13,11 @@ bool CKeyStore::AddKey(const CKey &key) {
     return AddKeyPubKey(key, key.GetPubKey());
 }
 
+// Remove key temporarily added for Sweep function
+bool CBasicKeyStore::RemoveKey(const CKey& key) {
+    return mapKeys.erase(key.GetPubKey().GetID());
+}
+
 void CBasicKeyStore::ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey) {
     AssertLockHeld(cs_KeyStore);
     CKeyID key_id = pubkey.GetID();

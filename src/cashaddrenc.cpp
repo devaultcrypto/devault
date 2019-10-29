@@ -246,7 +246,12 @@ std::string EncodeSecret(const CKey& key) {
   
   return cashaddr::Encode(Params().CashAddrSecretPrefix(), converted);
 }
-
+    
+bool CheckSecretIsValid(const std::string &addr) {
+    CKey k = DecodeSecret(addr);
+    return k.IsValid();
+}
+    
 CKey DecodeSecret(const std::string &addr) {
     CKey key;
     std::string prefix;

@@ -20,6 +20,7 @@
 #include <util.h>
 #include <utilstrencodings.h>
 #include <validation.h>
+#include <utxo_functions.h>
 
 #include <warnings.h>
 
@@ -458,7 +459,7 @@ static UniValue getaddressbalance(const Config &config, const JSONRPCRequest &re
   
   if (request.fHelp || request.params.size() != 1)
     throw std::runtime_error(
-                             "getbalance ( \"address\" )\n"
+                             "getaddressbalance ( \"address\" )\n"
             "\nReturns the balance for an address (requires addressindex to be enabled).\n"
             "\nArguments: address\n"
             "\nResult:\n"
@@ -501,8 +502,49 @@ static UniValue getaddressbalance(const Config &config, const JSONRPCRequest &re
 
 }
 
+// This does not require addressindex but is probably slow in comparison,
+// suitable for single address checking or sweeping an address
+//
+static UniValue getutxobalance(const Config &config, const JSONRPCRequest &request) {
+  
+  if (request.fHelp || request.params.size() != 1)
+      throw std::runtime_error(
+                               "getutxobalance ( \"address\" )\n"
+                               "\nReturns the balance for an address.\n"
+                               "\nArguments: address\n"
+                               "\nResult:\n"
+                               "{\n"
+                               "  \"coins\"  (string) The current balance in coins\n"
+                               "}\n"
+                               "\nExamples:\n"
+                               + HelpExampleCli("getutxobalance","\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\"")
+                               + HelpExampleRpc("getutxobalance","\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\""));
+    
 
+   std::string address = request.params[0].get_str();
+   CTxDestination dest = DecodeDestination(address, config.GetChainParams());
+   if (!IsValidDestination(dest)) {
+       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+   }
 
+   CScript coinscript =  GetScriptForDestination(dest);
+   FlushStateToDisk();
+   std::map<COutPoint, Coin> setvals = GetUTXOSet(pcoinsdbview.get(), coinscript);
+
+   int numUtxos = 0;
+   Amount balance = Amount::zero();
+   for (const auto& c : setvals) {
+       balance += c.second.GetTxOut().nValue;
+       numUtxos++;
+   }
+   
+   UniValue result(UniValue::VOBJ);
+   result.push_back(Pair("utxos", numUtxos));
+   result.push_back(Pair("balance", ValueFromAmount(balance)));
+   
+   return result;
+
+}
 
 // clang-format off
 static const ContextFreeRPCCommand commands[] = {
@@ -516,6 +558,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "util",               "signmessagewithprivkey", signmessagewithprivkey, {"privkey","message"} },
     /* Address index */
     { "addressindex",       "getaddressbalance",      getaddressbalance,      {} },
+    { "util",       "getutxobalance",         getutxobalance,      {"address"} },
 
     /* Not shown in help */
     { "hidden",             "setmocktime",            setmocktime,            {"timestamp"}},

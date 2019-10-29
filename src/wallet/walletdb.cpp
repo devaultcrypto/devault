@@ -234,7 +234,6 @@ void WalletBatch::ListAccountCreditDebit(const std::string &strAccount,
 
 class CWalletScanState {
 public:
-    unsigned int nKeys;
     unsigned int nCKeys;
     unsigned int nWatchKeys;
     unsigned int nKeyMeta;
@@ -244,7 +243,7 @@ public:
     std::vector<TxId> vWalletUpgrade;
 
     CWalletScanState() {
-        nKeys = nCKeys = nWatchKeys = nKeyMeta = 0;
+        nCKeys = nWatchKeys = nKeyMeta = 0;
         fIsEncrypted = false;
         fAnyUnordered = false;
         nFileVersion = 0;
@@ -381,9 +380,6 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             pwallet->LoadKeyPool(nIndex, keypool);
         } else if (strType == "version") {
             ssValue >> wss.nFileVersion;
-            if (wss.nFileVersion == 10300) {
-                wss.nFileVersion = 300;
-            }
         } else if (strType == "cscript") {
             uint160 hash;
             ssKey >> hash;
@@ -521,22 +517,24 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
 
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
-    LogPrintf("Keys: %u plaintext, %u encrypted, %u w/ metadata, %u total\n",
-              wss.nKeys, wss.nCKeys, wss.nKeyMeta, wss.nKeys + wss.nCKeys);
+    if (wss.nCKeys) {
+        std::string key_list = "";
+        for (const auto& k : pwallet->GetKeys()) key_list += EncodeDestination(k) + "\n";
+        InitWarning(strprintf(_("You have one or more private keys in your wallet that are potentially not backed"
+                                " by your seed phrase. You should send funds stored in these to addresses in your wallet."
+                                "Support for unbacked keys may be removed in the future, these are the addresses :\n %s"), key_list));
+    }
+
+
+    LogPrintf("Keys: %u encrypted, %u w/ metadata\n", wss.nCKeys, wss.nKeyMeta);
 
     // nTimeFirstKey is only reliable if all keys have metadata
-    if ((wss.nKeys + wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {
+    if ((wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {
         pwallet->UpdateTimeFirstKey(1);
     }
 
     for (const TxId &txid : wss.vWalletUpgrade) {
         WriteTx(pwallet->mapWallet.at(txid));
-    }
-
-    // Rewrite encrypted wallets of versions 0.4.0 and 0.5.0rc:
-    if (wss.fIsEncrypted &&
-        (wss.nFileVersion == 40000 || wss.nFileVersion == 50000)) {
-        return DBErrors::NEED_REWRITE;
     }
 
     if (wss.nFileVersion < CLIENT_VERSION) {

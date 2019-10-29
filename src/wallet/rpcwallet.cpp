@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
+#include <cashaddrenc.h>
 #include <chain.h>
 #include <chainparams.h> // for GetConsensus.
 #include <config.h>
@@ -30,6 +31,7 @@
 #include <miner.h> // for CBlockTemplate GenerateUntilShutdown
 // Input src/init.h (not wallet/init.h) for StartShutdown
 #include <init.h>
+#include <utxo_functions.h>
 
 #include <univalue.h>
 
@@ -196,7 +198,6 @@ void generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveS
         MilliSleep(10000);
     }
 }
-
 
 static UniValue getnewaddress(const Config &config,
                               const JSONRPCRequest &request) {
@@ -628,6 +629,52 @@ static UniValue sendtoaddress(const Config &config,
                   std::move(mapValue), {} /* fromAccount */);
     return tx->GetId().GetHex();
 }
+
+
+UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "sweepprivkey \"privkey\"\n"
+            "\nSend funds from entered private key to a key in your wallet (HD chain). "
+            "\nArguments:\n"
+            "1. \"DeVaultprivkey\"   (string, required) The private key (see "
+            "dumpprivkey)\n"
+            "\nExamples:\n"
+            "\nSweep a private key\n" +
+            HelpExampleCli("Sweepprivkey", "\"myaddress\"") +
+            "\nSweep the private key\n" +
+            HelpExampleRpc("importprivkey", R"("mykey")"));
+
+    {
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        EnsureWalletIsUnlocked(pwallet);
+
+        std::string strSecret = request.params[0].get_str();
+        CKey key = DecodeSecret(strSecret);
+        //std::string p = EncodeCashAddr(key.GetPubKey().GetID(), Params());
+        
+        if (!key.IsValid()) { 
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+        }
+
+        FlushStateToDisk();
+
+        std::string strFailReason;
+        CTransactionRef tx;
+        bool ok = pwallet->SweepCoinsToWallet(key, tx, strFailReason);
+        if (!ok) {
+            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+        } 
+        return tx->GetId().GetHex();
+    }
+}
+
 
 static UniValue consolidaterewards(const Config &config,
                                    const JSONRPCRequest &request) {
@@ -4136,6 +4183,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
     { "wallet",             "sendtoaddress",                sendtoaddress,                {"address","amount","comment","comment_to","subtractfeefromamount"} },
     { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
+    { "wallet",             "sweepprivkey",                 sweepprivkey,                 {"privkey"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
     { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
