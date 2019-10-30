@@ -292,8 +292,8 @@ void Intro::startThread() {
     connect(executor, &FreespaceChecker::reply, this, &Intro::setStatus);
     connect(this, &Intro::requestCheck, executor, &FreespaceChecker::check);
     /*  make sure executor object is deleted in its own thread */
-    connect(this, SIGNAL(stopThread()), executor, SLOT(deleteLater()));
-    connect(this, SIGNAL(stopThread()), thread, SLOT(quit()));
+    connect(this, &Intro::stopThread, executor, &QObject::deleteLater);
+    connect(this, &Intro::stopThread, thread, &QThread::quit);
 
     thread->start();
 }
