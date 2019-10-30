@@ -43,7 +43,7 @@ platformStyle(_platformStyle)
         "QLabel { color: rgb(40,40,40); }"); 
     }
 
-    connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(closeClicked()));
+    connect(ui->closeButton, &QPushButton::clicked, this,   &ModalOverlay::closeClicked);
     if (parent) {
         parent->installEventFilter(this);
         raise();
