@@ -435,8 +435,7 @@ bool BitcoinApplication::createWindow(const Config *config,
   window = new BitcoinGUI(m_node, config, platformStyle, networkStyle, nullptr);
 
   pollShutdownTimer = new QTimer(window);
-  connect(pollShutdownTimer, SIGNAL(timeout()), window,
-          SLOT(detectShutdown()));
+  connect(pollShutdownTimer, &QTimer::timeout, window, &BitcoinGUI::detectShutdown);
   return true;
 }
 
@@ -446,9 +445,10 @@ void BitcoinApplication::createSplashScreen(const NetworkStyle *networkStyle) {
     // the splash screen will take care of deleting itself when slotFinish
     // happens.
     splash->show();
-    connect(this, SIGNAL(splashFinished(QWidget *)), splash,
-            SLOT(slotFinish(QWidget *)));
-    connect(this, SIGNAL(requestedShutdown()), splash, SLOT(close()));
+    connect(this, &BitcoinApplication::splashFinished, splash,
+            &SplashScreen::slotFinish);
+    connect(this, &BitcoinApplication::requestedShutdown, splash,
+            &QWidget::close);
 }
 
 void BitcoinApplication::startThread() {
@@ -460,11 +460,12 @@ void BitcoinApplication::startThread() {
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
-    connect(executor, SIGNAL(initializeResult(bool)), this,
-            SLOT(initializeResult(bool)));
-    connect(executor, SIGNAL(shutdownResult()), this, SLOT(shutdownResult()));
-    connect(executor, SIGNAL(runawayException(QString)), this,
-            SLOT(handleRunawayException(QString)));
+    connect(executor, &DeVault::initializeResult, this,
+            &BitcoinApplication::initializeResult);
+    connect(executor, &DeVault::shutdownResult, this,
+            &BitcoinApplication::shutdownResult);
+    connect(executor, &DeVault::runawayException, this,
+            &BitcoinApplication::handleRunawayException);
 
     // Note on how Qt works: it tries to directly invoke methods if the signal
     // is emitted on the same thread that the target object 'lives' on.
@@ -483,10 +484,12 @@ void BitcoinApplication::startThread() {
             SIGNAL(requestedInitialize(Config *, RPCServer *, HTTPRPCRequestProcessor *)),
             executor, SLOT(initialize(Config *, RPCServer *, HTTPRPCRequestProcessor *)));
 
-    connect(this, SIGNAL(requestedShutdown()), executor, SLOT(shutdown()));
+    connect(this, &BitcoinApplication::requestedShutdown, executor,
+            &DeVault::shutdown);
     /*  make sure executor object is deleted in its own thread */
-    connect(this, SIGNAL(stopThread()), executor, SLOT(deleteLater()));
-    connect(this, SIGNAL(stopThread()), coreThread, SLOT(quit()));
+    connect(this, &BitcoinApplication::stopThread, executor,
+            &QObject::deleteLater);
+    connect(this, &BitcoinApplication::stopThread, coreThread, &QThread::quit);
 
     coreThread->start();
 }
