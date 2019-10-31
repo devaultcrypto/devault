@@ -63,6 +63,13 @@ RewardControlDialog::RewardControlDialog(const PlatformStyle *_platformStyle,
         setStyleSheet(DVTUI::styleSheetString);
     } 
 
+    QAction *copyAddressAction = new QAction(tr("Copy address"), this);
+    contextMenu = new QMenu(this);
+    contextMenu->addAction(copyAddressAction);
+
+    connect(ui->treeWidget, &QWidget::customContextMenuRequested, this, &RewardControlDialog::showMenu);
+    connect(copyAddressAction, &QAction::triggered, this,  &RewardControlDialog::copyAddress);
+
     // click on checkbox
     connect(ui->treeWidget, &QTreeWidget::itemChanged, this,
             &RewardControlDialog::viewItemChanged);
@@ -113,17 +120,17 @@ RewardControlDialog::RewardControlDialog(const PlatformStyle *_platformStyle,
     
     // restore list mode and sortorder as a convenience feature
     QSettings settings;
-    if (settings.contains("nCoinControlSortColumn") &&
-        settings.contains("nCoinControlSortOrder"))
-        sortView(settings.value("nCoinControlSortColumn").toInt(),
+    if (settings.contains("nRewardControlSortColumn") &&
+        settings.contains("nRewardControlSortOrder"))
+        sortView(settings.value("nRewardControlSortColumn").toInt(),
                  (static_cast<Qt::SortOrder>(
                      settings.value("nRewardControlSortOrder").toInt())));
 }
 
 RewardControlDialog::~RewardControlDialog() {
     QSettings settings;
-    settings.setValue("nCoinControlSortColumn", sortColumn);
-    settings.setValue("nCoinControlSortOrder", (int)sortOrder);
+    settings.setValue("nRewardControlSortColumn", sortColumn);
+    settings.setValue("nRewardControlSortOrder", (int)sortOrder);
 
     delete ui;
 }
@@ -630,7 +637,20 @@ void RewardControlDialog::updateView() {
     sortView(sortColumn, sortOrder);
     ui->treeWidget->setEnabled(true);
 
-    //std::string s = checkcoins(model->wallet().listCoins());
-    //QMessageBox::warning(this, tr("OK"), QString::fromStdString(s));
 }
 
+
+// context menu action: copy address
+void RewardControlDialog::copyAddress() {
+    GUIUtil::setClipboard(contextMenuItem->text(COLUMN_ADDRESS));
+}
+
+// context menu
+void RewardControlDialog::showMenu(const QPoint &point) {
+    QTreeWidgetItem *item = ui->treeWidget->itemAt(point);
+    if (item) {
+        contextMenuItem = item;
+        // show context menu
+        contextMenu->exec(QCursor::pos());
+    }
+}

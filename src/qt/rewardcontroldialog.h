@@ -61,6 +61,8 @@ private:
     WalletModel *model;
     int sortColumn;
     Qt::SortOrder sortOrder;
+    QMenu *contextMenu;
+    QTreeWidgetItem *contextMenuItem;
     int percent;
     bool unvestingonly;
     
@@ -85,6 +87,7 @@ private:
     static COutPoint buildOutPoint(const QTreeWidgetItem *item);
 
 private Q_SLOTS:
+    void showMenu(const QPoint &);
     void viewItemChanged(QTreeWidgetItem *, int);
     void headerSectionClicked(int);
     void buttonBoxClicked(QAbstractButton *);
@@ -92,5 +95,6 @@ private Q_SLOTS:
     void buttonUnvestingClicked();
     void updateLabelLocked();
     void changePercent();
+    void copyAddress();
 };
 

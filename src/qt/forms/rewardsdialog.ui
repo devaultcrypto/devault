@@ -149,7 +149,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Unvested Balance:</string>
+           <string>Non-vesting Balance:</string>
           </property>
          </widget>
         </item>
@@ -246,7 +246,7 @@
              <string notr="true"/>
             </property>
             <property name="text">
-             <string>Select</string>
+             <string>Reward Details/Select Coins</string>
             </property>
             <property name="autoDefault">
              <bool>false</bool>
