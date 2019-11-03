@@ -1218,6 +1218,105 @@ static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
     return blockToJSON(block, chainActive.Tip(), pblockindex, verbosity >= 2);
 }
 
+static UniValue getblockbynumber(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() < 1 ||
+        request.params.size() > 2) {
+        throw std::runtime_error(
+            "getblockbynumber \"blocknumber\" ( verbosity )\n"
+            "\nIf verbosity is 0 or false, returns a string that is "
+            "serialized, hex-encoded data for block 'hash'.\n"
+            "If verbosity is 1 or true, returns an Object with information "
+            "about block <hash>.\n"
+            "If verbosity is 2, returns an Object with information about block "
+            "<hash> and information about each transaction.\n"
+            "\nArguments:\n"
+            "1. \"blocknumber\"           (string, required) The block number\n"
+            "2. verbosity             (numeric, optional, default=1) 0 for "
+            "hex-encoded data, 1 for a json object, and 2 for json object with "
+            "transaction data\n"
+            "\nResult (for verbosity = 0):\n"
+            "\"data\"                   (string) A string that is serialized, "
+            "hex-encoded data for block 'hash'.\n"
+            "\nResult (for verbosity = 1):\n"
+            "{\n"
+            "  \"hash\" : \"hash\",       (string) The block hash (same as "
+            "provided)\n"
+            "  \"confirmations\" : n,   (numeric) The number of confirmations, "
+            "or -1 if the block is not on the main chain\n"
+            "  \"size\" : n,            (numeric) The block size\n"
+            "  \"height\" : n,          (numeric) The block height or index\n"
+            "  \"version\" : n,         (numeric) The block version\n"
+            "  \"versionHex\" : \"00000000\", (string) The block version "
+            "formatted in hexadecimal\n"
+            "  \"merkleroot\" : \"xxxx\", (string) The merkle root\n"
+            "  \"tx\" : [               (array of string) The transaction ids\n"
+            "     \"transactionid\"     (string) The transaction id\n"
+            "     ,...\n"
+            "  ],\n"
+            "  \"time\" : ttt,          (numeric) The block time in seconds "
+            "since epoch (Jan 1 1970 GMT)\n"
+            "  \"mediantime\" : ttt,    (numeric) The median block time in "
+            "seconds since epoch (Jan 1 1970 GMT)\n"
+            "  \"nonce\" : n,           (numeric) The nonce\n"
+            "  \"bits\" : \"1d00ffff\",   (string) The bits\n"
+            "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
+            "  \"chainwork\" : \"xxxx\",  (string) Expected number of hashes "
+            "required to produce the chain up to this block (in hex)\n"
+            "  \"previousblockhash\" : \"hash\",  (string) The hash of the "
+            "previous block\n"
+            "  \"nextblockhash\" : \"hash\"       (string) The hash of the "
+            "next block\n"
+            "}\n"
+            "\nResult (for verbosity = 2):\n"
+            "{\n"
+            "  ...,                   Same output as verbosity = 1\n"
+            "  \"tx\" : [               (array of Objects) The transactions in "
+            "the format of the getrawtransaction RPC; different from verbosity "
+            "= 1 \"tx\" result\n"
+            "    ...\n"
+            "  ],\n"
+            "  ...                    Same output as verbosity = 1\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getblockbynumber", "1000") +
+            HelpExampleRpc("getblockbynumber", "1000"));
+    }
+
+    LOCK(cs_main);
+
+    int nHeight = request.params[0].get_int();
+    if (nHeight < 0 || nHeight > chainActive.Height()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+    }
+    CBlockIndex *pblockindex = chainActive[nHeight];
+    auto hash = pblockindex->GetBlockHash(); 
+
+    int verbosity = 1;
+    if (!request.params[1].isNull()) {
+        if (request.params[1].isNum()) {
+            verbosity = request.params[1].get_int();
+        } else {
+            verbosity = request.params[1].get_bool() ? 1 : 0;
+        }
+    }
+
+    if (mapBlockIndex.count(hash) == 0) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+    }
+
+    CBlock block = GetBlockChecked(config, pblockindex);
+
+    if (verbosity <= 0) {
+        CDataStream ssBlock(SER_NETWORK,
+                            PROTOCOL_VERSION | RPCSerializationFlags());
+        ssBlock << block;
+        std::string strHex = HexStr(ssBlock.begin(), ssBlock.end());
+        return strHex;
+    }
+
+    return blockToJSON(block, chainActive.Tip(), pblockindex, verbosity >= 2);
+}
+
 static UniValue pruneblockchain(const Config &config,
                                 const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 1) {
@@ -2535,6 +2634,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "blockchain",         "getblockhashes",         getblockhashes,         {} },
 #endif
     { "blockchain",         "getblockhash",           getblockhash,           {"height"} },
+    { "blockchain",         "getblockbynumber",       getblockbynumber,       {"height"} },
     { "blockchain",         "getdifficulties",        getdifficulties,        {"height"} },
     { "blockchain",         "getblockheader",         getblockheader,         {"blockhash","verbose"} },
     { "blockchain",         "getblockstats",          getblockstats,          {"hash_or_height","stats"} },
