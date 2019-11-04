@@ -103,22 +103,22 @@
       Merge #11395: Qt: Enable searching by transaction id
       Merge #11015: [Qt] Add delay before filtering transactions
       [teamcity/gitian] Do not remove src tarball from results
-      Merge #10642: Remove obsolete _MSC_VER check
+#     Merge #10642: Remove obsolete _MSC_VER check
       Merge #12447: test: Add missing signal.h header
       Bump version to 0.20.0
       [CMAKE] Make secp256k1 build standalone
       Fix missing plural form from commit reversal
-      Merge #9910: Docs: correct and elaborate -rpcbind doc
-      Merge #10085: Docs: remove 'noconnect' option
+#     Merge #9910: Docs: correct and elaborate -rpcbind doc
+#     Merge #10085: Docs: remove 'noconnect' option
       Merge #10036: Fix init README format to render correctly on github
       Fix incorrect node being checked in segwit recovery test
-      Merge #11617: Avoid lock: Call FlushStateToDisk(...) regardless of fCheckForPruning
-      Merge #12969: Drop dead code CScript::Find
-      Merge #11573: [Util] Update tinyformat.h
+#     Merge #11617: Avoid lock: Call FlushStateToDisk(...) regardless of fCheckForPruning
+#     Merge #12969: Drop dead code CScript::Find
+#     Merge #11573: [Util] Update tinyformat.h
       Revert "macOS: Prevent Xcode 9.3 build warnings"
       Revert "Bump version to 0.20.0"
-      [CMAKE] Avoid duplicating the compiler/linker flags
-      [CMAKE] Fix -Wunused-command-line-argument when adding linker flag
+#     [CMAKE] Avoid duplicating the compiler/linker flags
+#     [CMAKE] Fix -Wunused-command-line-argument when adding linker flag
       build: avoid getifaddrs when unavailable
 #     build: Enable -Wredundant-decls where available
       Bump version to 0.20.0
