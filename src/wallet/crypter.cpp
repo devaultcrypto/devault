@@ -192,7 +192,7 @@ bool CCryptoKeyStore::Lock() {
 
     {
         LOCK(cs_KeyStore);
-        vMasterKey.clear();
+        if (!gArgs.GetBoolArg("-bypasspassword",false))  vMasterKey.clear();
     }
 
     NotifyStatusChanged(this);

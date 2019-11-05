@@ -11,6 +11,7 @@
 #include <recentrequeststablemodel.h>
 #include <transactiontablemodel.h>
 
+#include <init.h> // for BypassPassword
 #include <config.h>
 #include <dstencode.h>
 #include <keystore.h>
@@ -292,6 +293,8 @@ WalletModel::WalletStatus WalletModel::getWalletStatus() const {
 }
 
 bool WalletModel::setWalletLocked(bool locked, const SecureString &passPhrase) {
+    // must set -bypsasword and already have that password
+    if (gArgs.GetBoolArg("-bypasspassword", false) && passPhrase == BypassPassword) return true;
     if (locked) {
         // Lock
         return m_wallet->lock();
