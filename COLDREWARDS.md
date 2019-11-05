@@ -12,7 +12,7 @@ Distributed under the MIT software license, see http://www.opensource.org/licens
 # Overview
 ---------------------
 
-Cold Rewards are a way for Coin holders to get rewarded for merely holding coins for approximately more than one month. The ROI is based on a scale that changes yearly and starts at 15% annualized. The wallet doesn't need to be kept open to get these rewards and action is generally not required (except by miners). There is also a minimum balance of 1000 DeVault needed at an unspent transaction output (UTXO). A transaction from an exchange or another person of greater than 1000 DeVault will achieve this. Please read below for more details. 
+Cold Rewards are a way for Coin holders to get rewarded for merely holding coins for approximately more than one month. The ROI is based on a scale that changes yearly and starts at 15% annualized. The wallet doesn't need to be kept open to get these rewards and action is generally not required (except by miners). There is also a minimum balance of 25000 DeVault needed at an unspent transaction output (UTXO). A transaction from an exchange or another person of greater than 25000 DeVault will achieve this. Please read below for more details. 
 
 
 # Constants
