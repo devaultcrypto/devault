@@ -84,6 +84,7 @@ Upgrades/Changes in this code fork
 
 | Requirement   | Details              |
 |---------------|----------------------|
-| Confirmations | 21915 Blocks         |
-| Amount        | 1000+ DVT (Per Input)|
+| Confirmations           | 21915 Blocks          |
+| Amount (Block #1-109575)| 1000+ DVT (Per Input) |
+| Amount (Block #109575+) | 25000+ DVT (Per Input)|
 
