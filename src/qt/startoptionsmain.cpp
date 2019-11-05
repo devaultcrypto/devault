@@ -1,5 +1,8 @@
 //
+// Copyright (c) 2019 DeVault developers
 // Created by Kolby on 6/19/2019.
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
 #include <startoptionsdialog.h>
 #include <startoptionsmain.h>
@@ -15,11 +18,11 @@
 #include <ui_interface.h>
 #include <wallet/mnemonic.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QPushButton>
+
+inline bool is_not_space(int c) { return !std::isspace(c); }
 
 StartOptionsMain::StartOptionsMain(QWidget *parent)
     : QDialog(parent), ui(new Ui::StartOptionsMain) {
@@ -52,7 +55,7 @@ StartOptionsMain::~StartOptionsMain() {
 }
 
 void StartOptionsMain::on_NewWallet_clicked() {
-    pageNum = 2;
+    pageNum = CreateOrRestorePage;
     ui->NewWallet->setVisible(false);
     ui->RestoreWallet->setVisible(false);
     ui->Back->setVisible(true);
@@ -72,7 +75,7 @@ void StartOptionsMain::on_NewWallet_clicked() {
 }
 
 void StartOptionsMain::on_RestoreWallet_clicked() {
-    pageNum = 4;
+    pageNum = CheckWordsPage;
     ui->NewWallet->setVisible(false);
     ui->RestoreWallet->setVisible(false);
     ui->Back->setVisible(true);
@@ -94,11 +97,11 @@ void StartOptionsMain::on_Back_clicked() {
      *          Page 4 Enter words to restore
      */
     switch (pageNum) {
-        case 1: {
+        case StartPage: {
             // does nothing as you can not click back on page one
         }
-        case 2: {
-            pageNum = 1;
+        case CreateOrRestorePage: {
+            pageNum = StartPage;
             ui->NewWallet->setVisible(true);
             ui->RestoreWallet->setVisible(true);
             ui->Back->setVisible(false);
@@ -106,14 +109,14 @@ void StartOptionsMain::on_Back_clicked() {
             ui->QStackTutorialContainer->setCurrentWidget(startOptions);
             break;
         }
-        case 3: {
-            pageNum = 2;
+        case OrderWordsPage: {
+            pageNum = CreateOrRestorePage;
             ui->QStackTutorialContainer->addWidget(startOptionsRevealed);
             ui->QStackTutorialContainer->setCurrentWidget(startOptionsRevealed);
             break;
         }
-        case 4: {
-            pageNum = 1;
+        case CheckWordsPage: {
+            pageNum = StartPage;
             ui->NewWallet->setVisible(true);
             ui->RestoreWallet->setVisible(true);
             ui->Back->setVisible(false);
@@ -125,6 +128,7 @@ void StartOptionsMain::on_Back_clicked() {
 }
 
 void StartOptionsMain::on_Next_clicked() {
+    auto rtrim = [](std::string& s) { s.erase(std::find_if(s.rbegin(), s.rend(), is_not_space).base(), s.end()); };
     /*  Pages
      * Page 1 : Main page were you select the amount of words and the option
      *      Path 1 : Create wallet
@@ -134,18 +138,18 @@ void StartOptionsMain::on_Next_clicked() {
      *          Page 4 Enter words to restore
      */
     switch (pageNum) {
-        case 1: {
+        case StartPage: {
             // does nothing as you can not click back on page one
         }
 
-        case 2: {
-            pageNum = 3;
+        case CreateOrRestorePage: {
+            pageNum = OrderWordsPage;
             startOptionsSort = new StartOptionsSort(words, rows, this);
             ui->QStackTutorialContainer->addWidget(startOptionsSort);
             ui->QStackTutorialContainer->setCurrentWidget(startOptionsSort);
             break;
         }
-        case 3: {
+        case OrderWordsPage: {
             words_empty_str = "";
             std::list<QString> word_str = startOptionsSort->getOrderedStrings();
             // reverses the lists order
@@ -164,8 +168,8 @@ void StartOptionsMain::on_Next_clicked() {
                 else
                     words_mnemonic += "" + q_word;
             }
-            boost::trim_right(words_empty_str);
-            boost::trim_right(words_mnemonic);
+            rtrim(words_empty_str);
+            rtrim(words_mnemonic);
             if (words_empty_str != words_mnemonic) {
                 QString error = "Unfortunately, your words are in the wrong "
                                 "order. Please try again.";
@@ -177,9 +181,8 @@ void StartOptionsMain::on_Next_clicked() {
             }
             break;
         }
-        case 4: {
-            std::vector<std::string> word_str =
-                startOptionsRestore->getOrderedStrings();
+        case CheckWordsPage: {
+            std::vector<std::string> word_str = startOptionsRestore->getOrderedStrings();
 
             std::string seedphrase = "";
             for (std::string &q_word : word_str) {

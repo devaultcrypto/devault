@@ -25,6 +25,7 @@ class StartOptionsMain : public QDialog {
     Q_OBJECT
 
 public:
+    enum Pages { StartPage, CreateOrRestorePage, OrderWordsPage, CheckWordsPage };
     explicit StartOptionsMain(QWidget *parent);
     ~StartOptionsMain();
 
@@ -38,7 +39,7 @@ public slots:
 
 private:
     Ui::StartOptionsMain *ui;
-    int pageNum = 1;
+    Pages pageNum = StartPage;
     int rows;
     QStringList qWordList;
     mnemonic::WordList wordsList;
