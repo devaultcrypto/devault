@@ -251,16 +251,13 @@ static UniValue getnewaddress(const Config &config,
     return EncodeDestination(keyID);
 }
 
-CTxDestination GetLabelDestination(CWallet *const pwallet,
-                                   const std::string &label,
-                                   bool bForceNew = false) {
-    CTxDestination dest;
-    if (!pwallet->GetLabelDestination(dest, label, bForceNew)) {
+std::string GetLabelDestination(CWallet *const pwallet, const std::string &label) {
+    std::string dest;
+    if (!pwallet->GetLabelDestination(dest, label)) {
         throw JSONRPCError(
-            RPC_WALLET_KEYPOOL_RAN_OUT,
-            "Error: Keypool ran out, please call keypoolrefill first");
+            RPC_MISC_ERROR,
+            "Error: label has no associated address");
     }
-
     return dest;
 }
 
@@ -293,10 +290,8 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
 
     // Parse the label first so we don't generate a key if there's an error
     std::string label = LabelFromValue(request.params[0]);
-
     UniValue ret(UniValue::VSTR);
-
-    ret = EncodeDestination(GetLabelDestination(pwallet, label));
+    ret = GetLabelDestination(pwallet, label);
     return ret;
 }
 
@@ -379,15 +374,6 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
 
     // Only add the label if the address is yours.
     if (IsMine(*pwallet, dest)) {
-        // Detect when changing the label of an address that is the 'unused
-        // current key' of another label:
-        if (pwallet->mapAddressBook.count(dest)) {
-            std::string old_label = pwallet->mapAddressBook[dest].name;
-            if (dest == GetLabelDestination(pwallet, old_label)) {
-                GetLabelDestination(pwallet, old_label, true);
-            }
-        }
-
         pwallet->SetAddressBook(dest, label, "receive");
     } else {
         throw JSONRPCError(RPC_MISC_ERROR,
@@ -397,85 +383,58 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
     return NullUniValue;
 }
 
-static UniValue getaccount(const Config &config,
-                           const JSONRPCRequest &request) {
+static UniValue getaddressesbylabels(const Config &config,
+                                     const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() != 1) {
+    if (request.fHelp || request.params.size() != 0) {
         throw std::runtime_error(
-            "getaccount \"address\"\n"
-            "\nDEPRECATED. Returns the account associated with the given "
-            "address.\n"
-            "\nArguments:\n"
-            "1. \"address\"         (string, required) The devault address for "
-            "account lookup.\n"
+            "getaddressesbylabels \n"
+            "\nReturns the list of addresses in your wallet that have labels\n "
             "\nResult:\n"
-            "\"accountname\"        (string) the account address\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getaccount",
-                           "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\"") +
-            HelpExampleRpc("getaccount",
-                           "\"devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u\""));
-    }
-
-    LOCK2(cs_main, pwallet->cs_wallet);
-
-    CTxDestination dest =
-        DecodeDestination(request.params[0].get_str(), config.GetChainParams());
-    if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                           "Invalid Devault address");
-    }
-
-    std::string strAccount;
-    auto mi = pwallet->mapAddressBook.find(dest);
-    if (mi != pwallet->mapAddressBook.end() && !(*mi).second.name.empty()) {
-        strAccount = (*mi).second.name;
-    }
-
-    return strAccount;
-}
-
-static UniValue getaddressesbyaccount(const Config &config,
-                                      const JSONRPCRequest &request) {
-    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    if (request.fHelp || request.params.size() != 1) {
-        throw std::runtime_error(
-            "getaddressesbyaccount \"account\"\n"
-            "\nDEPRECATED. Returns the list of addresses for the given "
-            "account.\n"
-            "\nArguments:\n"
-            "1. \"account\"        (string, required) The account name.\n"
-            "\nResult:\n"
-            "[                     (json array of string)\n"
-            "  \"address\"         (string) a devault address associated with "
-            "the given account\n"
+            "[                   (json array of string)\n"
+            "  \"label\"         (string) label associated with the below address\n"
+            "  \"address\"       (string) devault address\n"
             "  ,...\n"
             "]\n"
             "\nExamples:\n" +
-            HelpExampleCli("getaddressesbyaccount", "\"tabby\"") +
-            HelpExampleRpc("getaddressesbyaccount", "\"tabby\""));
+            HelpExampleCli("getaddressesbylabels","") +
+            HelpExampleRpc("getaddressesbylabels",""));
     }
 
     LOCK2(cs_main, pwallet->cs_wallet);
 
-    std::string strAccount = LabelFromValue(request.params[0]);
-
-    // Find all addresses that have the given account
+    // Go through AddressBook and list labels with their addresses
     UniValue ret(UniValue::VARR);
+
+    std::map<std::string, std::string> setLabels;
+
+    // For Labels that are in the Wallet (and previously set in older software)
     for (const auto &item :  pwallet->mapAddressBook) {
+        UniValue obj(UniValue::VOBJ);
         const CTxDestination &dest = item.first;
         const std::string &strName = item.second.name;
-        if (strName == strAccount) {
-            ret.push_back(EncodeDestination(dest));
-        }
+        setLabels.insert(std::make_pair(strName, EncodeDestination(dest)));
+    }
+
+    // Now use other method
+    // For Labels that are not in the Wallet (and newly set after version 1.1)
+    std::map<std::string, std::string> mapLabels;
+    if (pwallet->FindLabelledAddresses(mapLabels) != DBErrors::LOAD_OK) {
+       throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Wallet DB error.");
+    }
+
+    // Combine maps
+    for (const auto &item :  mapLabels) setLabels.insert(std::make_pair(item.first, item.second));
+    
+    for (const auto &item :  setLabels) {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV(item.first,item.second);
+        ret.push_back(obj);
     }
 
     return ret;
@@ -4152,10 +4111,8 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "getaccountaddress",            getlabeladdress,              {"account"} },
     { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
-    { "wallet",             "getaccount",                   getaccount,                   {"address"} },
-    { "wallet",             "getaddressesbyaccount",        getaddressesbyaccount,        {"account"} },
+    { "wallet",             "getaddressesbylabels",         getaddressesbylabels,         {} },
     { "wallet",             "getbalance",                   getbalance,                   {"account","minconf","include_watchonly"} },
     { "wallet",             "getnewaddress",                getnewaddress,                {"label|account"} },
     { "wallet",             "getrawchangeaddress",          getrawchangeaddress,          {} },
@@ -4185,7 +4142,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
     { "wallet",             "sweepprivkey",                 sweepprivkey,                 {"privkey"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
-    { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
     { "wallet",             "signmessage",                  signmessage,                  {"address","message"} },
     { "wallet",             "signrawtransactionwithwallet", signrawtransactionwithwallet, {"hextring","prevtxs","sighashtype"} },

@@ -843,48 +843,17 @@ bool CWallet::AccountMove(std::string strFrom, std::string strTo,
     return batch.TxnCommit();
 }
 
-bool CWallet::GetLabelDestination(CTxDestination &dest,
-                                  const std::string &label, bool bForceNew) {
+bool CWallet::GetLabelDestination(std::string &dest,
+                                  const std::string &label) {
     WalletBatch batch(*database);
-
-    CAccount account;
-    batch.ReadAccount(label, account);
-
-    if (!bForceNew) {
-        if (!account.vchPubKey.IsValid()) {
-            bForceNew = true;
-        } else {
-            // Check if the current key has been used.
-            CScript scriptPubKey =
-                GetScriptForDestination(account.vchPubKey.GetID());
-            for (std::map<TxId, CWalletTx>::iterator it = mapWallet.begin();
-                 it != mapWallet.end() && account.vchPubKey.IsValid(); ++it) {
-                for (const CTxOut &txout : (*it).second.tx->vout) {
-                    if (txout.scriptPubKey == scriptPubKey) {
-                        bForceNew = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // Generate a new key
-    if (bForceNew) {
-        if (!GetKeyFromPool(account.vchPubKey, false)) {
-            return false;
-        }
-
-        dest = account.vchPubKey.GetID();
-        SetAddressBook(dest, label, "receive");
-        batch.WriteAccount(label, account);
-    } else {
-        dest = account.vchPubKey.GetID();
-    }
-
-    return true;
+    return batch.ReadLabel(dest, label);
 }
 
+DBErrors CWallet::FindLabelledAddresses(std::map<std::string, std::string>& mapLabels) {
+    WalletBatch batch(*database);
+    return batch.FindLabelledAddresses(mapLabels);
+}
+    
 void CWallet::MarkDirty() {
     LOCK(cs_wallet);
     for (std::pair<const TxId, CWalletTx> &item : mapWallet) {
@@ -3739,7 +3708,7 @@ bool CWallet::SetAddressBook(const CTxDestination &address,
         return false;
     }
 
-    return WalletBatch(*database).WriteName(address, strName);
+    return WalletBatch(*database).WriteNameAndLabel(address, strName);
 }
 
 bool CWallet::DelAddressBook(const CTxDestination &address) {
