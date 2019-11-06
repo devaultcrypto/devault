@@ -372,12 +372,11 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
         label = LabelFromValue(request.params[1]);
     }
 
-    // Only add the label if the address is yours.
     if (IsMine(*pwallet, dest)) {
+        // Only add the label to Address Book if the address is yours.
         pwallet->SetAddressBook(dest, label, "receive");
     } else {
-        throw JSONRPCError(RPC_MISC_ERROR,
-                           "setlabel can only be used with own address");
+        pwallet->SetLabel(dest, label, "external");
     }
 
     return NullUniValue;
