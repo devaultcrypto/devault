@@ -846,8 +846,7 @@ bool CWallet::AccountMove(std::string strFrom, std::string strTo,
 bool CWallet::GetLabelDestination(std::string &dest,
                                   const std::string &label) {
     WalletBatch batch(*database);
-    batch.ReadName(dest, label);
-    return true;
+    return batch.ReadName(dest, label);
 }
 
 void CWallet::MarkDirty() {

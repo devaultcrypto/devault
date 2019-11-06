@@ -255,10 +255,9 @@ std::string GetLabelDestination(CWallet *const pwallet, const std::string &label
     std::string dest;
     if (!pwallet->GetLabelDestination(dest, label)) {
         throw JSONRPCError(
-            RPC_WALLET_KEYPOOL_RAN_OUT,
-            "Error: Keypool ran out, please call keypoolrefill first");
+            RPC_MISC_ERROR,
+            "Error: label has no associated address");
     }
-
     return dest;
 }
 
@@ -291,9 +290,7 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
 
     // Parse the label first so we don't generate a key if there's an error
     std::string label = LabelFromValue(request.params[0]);
-
     UniValue ret(UniValue::VSTR);
-
     ret = GetLabelDestination(pwallet, label);
     return ret;
 }
