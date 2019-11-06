@@ -843,45 +843,10 @@ bool CWallet::AccountMove(std::string strFrom, std::string strTo,
     return batch.TxnCommit();
 }
 
-bool CWallet::GetLabelDestination(CTxDestination &dest,
-                                  const std::string &label, bool bForceNew) {
+bool CWallet::GetLabelDestination(std::string &dest,
+                                  const std::string &label) {
     WalletBatch batch(*database);
-
-    CAccount account;
-    batch.ReadAccount(label, account);
-
-    if (!bForceNew) {
-        if (!account.vchPubKey.IsValid()) {
-            bForceNew = true;
-        } else {
-            // Check if the current key has been used.
-            CScript scriptPubKey =
-                GetScriptForDestination(account.vchPubKey.GetID());
-            for (std::map<TxId, CWalletTx>::iterator it = mapWallet.begin();
-                 it != mapWallet.end() && account.vchPubKey.IsValid(); ++it) {
-                for (const CTxOut &txout : (*it).second.tx->vout) {
-                    if (txout.scriptPubKey == scriptPubKey) {
-                        bForceNew = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // Generate a new key
-    if (bForceNew) {
-        if (!GetKeyFromPool(account.vchPubKey, false)) {
-            return false;
-        }
-
-        dest = account.vchPubKey.GetID();
-        SetAddressBook(dest, label, "receive");
-        batch.WriteAccount(label, account);
-    } else {
-        dest = account.vchPubKey.GetID();
-    }
-
+    batch.ReadName(dest, label);
     return true;
 }
 

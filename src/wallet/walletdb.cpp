@@ -28,6 +28,10 @@
 // WalletBatch
 //
 
+bool WalletBatch::ReadName(std::string& address, const std::string &strName) {
+    return batch.Read(std::make_pair(std::string("name"), strName), address);
+}
+
 bool WalletBatch::WriteName(const CTxDestination &address,
                           const std::string &strName) {
     if (!IsValidDestination(address)) {
@@ -148,16 +152,6 @@ bool WalletBatch::ErasePool(int64_t nPool) {
 
 bool WalletBatch::WriteMinVersion(int nVersion) {
     return WriteIC(std::string("minversion"), nVersion);
-}
-
-bool WalletBatch::ReadAccount(const std::string &strAccount, CAccount &account) {
-    account.SetNull();
-    return batch.Read(std::make_pair(std::string("acc"), strAccount), account);
-}
-
-bool WalletBatch::WriteAccount(const std::string &strAccount,
-                             const CAccount &account) {
-    return WriteIC(std::make_pair(std::string("acc"), strAccount), account);
 }
 
 bool WalletBatch::WriteAccountingEntry(const uint64_t nAccEntryNum,

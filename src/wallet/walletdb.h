@@ -40,7 +40,6 @@
 
 static const bool DEFAULT_FLUSHWALLET = true;
 
-class CAccount;
 class CAccountingEntry;
 struct CBlockLocator;
 class CKeyPool;
@@ -94,6 +93,7 @@ public:
     WalletBatch(const WalletBatch &) = delete;
     WalletBatch &operator=(const WalletBatch &) = delete;
 
+    bool ReadName(std::string& address, const std::string &strName);
     bool WriteName(const CTxDestination &address, const std::string &strName);
     bool EraseName(const CTxDestination &address);
 
@@ -133,8 +133,6 @@ public:
     /// Use wallet.AddAccountingEntry instead, to write *and* update its caches.
     bool WriteAccountingEntry(const uint64_t nAccEntryNum,
                               const CAccountingEntry &acentry);
-    bool ReadAccount(const std::string &strAccount, CAccount &account);
-    bool WriteAccount(const std::string &strAccount, const CAccount &account);
 
     /// Write destination data key,value tuple to database.
     bool WriteDestData(const CTxDestination &address, const std::string &key,

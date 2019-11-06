@@ -251,11 +251,9 @@ static UniValue getnewaddress(const Config &config,
     return EncodeDestination(keyID);
 }
 
-CTxDestination GetLabelDestination(CWallet *const pwallet,
-                                   const std::string &label,
-                                   bool bForceNew = false) {
-    CTxDestination dest;
-    if (!pwallet->GetLabelDestination(dest, label, bForceNew)) {
+std::string GetLabelDestination(CWallet *const pwallet, const std::string &label) {
+    std::string dest;
+    if (!pwallet->GetLabelDestination(dest, label)) {
         throw JSONRPCError(
             RPC_WALLET_KEYPOOL_RAN_OUT,
             "Error: Keypool ran out, please call keypoolrefill first");
@@ -296,7 +294,7 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
 
     UniValue ret(UniValue::VSTR);
 
-    ret = EncodeDestination(GetLabelDestination(pwallet, label));
+    ret = GetLabelDestination(pwallet, label);
     return ret;
 }
 
@@ -379,15 +377,6 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
 
     // Only add the label if the address is yours.
     if (IsMine(*pwallet, dest)) {
-        // Detect when changing the label of an address that is the 'unused
-        // current key' of another label:
-        if (pwallet->mapAddressBook.count(dest)) {
-            std::string old_label = pwallet->mapAddressBook[dest].name;
-            if (dest == GetLabelDestination(pwallet, old_label)) {
-                GetLabelDestination(pwallet, old_label, true);
-            }
-        }
-
         pwallet->SetAddressBook(dest, label, "receive");
     } else {
         throw JSONRPCError(RPC_MISC_ERROR,
@@ -4152,7 +4141,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "getaccountaddress",            getlabeladdress,              {"account"} },
     { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
     { "wallet",             "getaccount",                   getaccount,                   {"address"} },
     { "wallet",             "getaddressesbyaccount",        getaddressesbyaccount,        {"account"} },
@@ -4185,7 +4173,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
     { "wallet",             "sweepprivkey",                 sweepprivkey,                 {"privkey"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
-    { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
     { "wallet",             "signmessage",                  signmessage,                  {"address","message"} },
     { "wallet",             "signrawtransactionwithwallet", signrawtransactionwithwallet, {"hextring","prevtxs","sighashtype"} },

@@ -950,8 +950,7 @@ public:
     DBErrors ReorderTransactions();
     bool AccountMove(std::string strFrom, std::string strTo,
                      const Amount nAmount, std::string strComment = "");
-    bool GetLabelDestination(CTxDestination &dest, const std::string &label,
-                             bool bForceNew = false);
+    bool GetLabelDestination(std::string &dest, const std::string &label);
 
     void MarkDirty();
     bool AddToWallet(const CWalletTx &wtxIn, bool fFlushOnClose = true);
@@ -1258,31 +1257,6 @@ public:
     bool GetReservedKey(CPubKey &pubkey, bool internal = false);
     void KeepKey();
     void KeepScript() override { KeepKey(); }
-};
-
-/**
- * Account information.
- * Stored in wallet with key "acc"+string account name.
- */
-class CAccount {
-public:
-    CPubKey vchPubKey;
-
-    CAccount() { SetNull(); }
-
-    void SetNull() { vchPubKey = CPubKey(); }
-
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream &s, Operation ser_action) {
-        int nVersion = s.GetVersion();
-        if (!(s.GetType() & SER_GETHASH)) {
-            READWRITE(nVersion);
-        }
-
-        READWRITE(vchPubKey);
-    }
 };
 
 OutputType ParseOutputType(const std::string &str,
