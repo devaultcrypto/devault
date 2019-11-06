@@ -40,8 +40,8 @@ TEST_CASE("write_erase_name") {
     CTxDestination dst1 = CKeyID(uint160S("c0ffee"));
     CTxDestination dst2 = CKeyID(uint160S("f00d"));
 
-    REQUIRE(walletdb.WriteName(dst1, "name1"));
-    REQUIRE(walletdb.WriteName(dst2, "name2"));
+    REQUIRE(walletdb.WriteNameAndLabel(dst1, "name1"));
+    REQUIRE(walletdb.WriteNameAndLabel(dst2, "name2"));
     {
         auto w = LoadWallet(&walletdb);
         REQUIRE(1 == w->mapAddressBook.count(dst1));
@@ -127,6 +127,6 @@ TEST_CASE("no_dest_fails") {
     WalletBatch walletdb(setup.pwalletMain->GetDBHandle(), "cr+");
 
     CTxDestination dst = CNoDestination{};
-    REQUIRE(!walletdb.WriteName(dst, "name"));
+    REQUIRE(!walletdb.WriteNameAndLabel(dst, "name"));
     REQUIRE(!walletdb.WritePurpose(dst, "purpose"));
 }

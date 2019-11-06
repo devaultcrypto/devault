@@ -28,14 +28,21 @@
 // WalletBatch
 //
 
-bool WalletBatch::WriteName(const CTxDestination &address,
+bool WalletBatch::ReadName(const std::string& address, std::string &strName) {
+    return batch.Read(std::make_pair(std::string("name"), address), strName);
+}
+bool WalletBatch::ReadLabel(std::string& address, const std::string &strName) {
+    return batch.Read(std::make_pair(std::string("label"), strName), address);
+}
+
+bool WalletBatch::WriteNameAndLabel(const CTxDestination &address,
                           const std::string &strName) {
     if (!IsValidDestination(address)) {
         return false;
     }
-    return WriteIC(std::make_pair(std::string("name"),
-                                  EncodeCashAddr(address, Params())),
-                   strName);
+    // Provide 2-way look ups by label/address
+    if (!WriteIC(std::make_pair(std::string("label"), strName), EncodeCashAddr(address, Params()))) return false;
+    return WriteIC(std::make_pair(std::string("name"),EncodeCashAddr(address, Params())),strName);
 }
 
 bool WalletBatch::EraseName(const CTxDestination &address) {
@@ -148,16 +155,6 @@ bool WalletBatch::ErasePool(int64_t nPool) {
 
 bool WalletBatch::WriteMinVersion(int nVersion) {
     return WriteIC(std::string("minversion"), nVersion);
-}
-
-bool WalletBatch::ReadAccount(const std::string &strAccount, CAccount &account) {
-    account.SetNull();
-    return batch.Read(std::make_pair(std::string("acc"), strAccount), account);
-}
-
-bool WalletBatch::WriteAccount(const std::string &strAccount,
-                             const CAccount &account) {
-    return WriteIC(std::make_pair(std::string("acc"), strAccount), account);
 }
 
 bool WalletBatch::WriteAccountingEntry(const uint64_t nAccEntryNum,
@@ -841,4 +838,51 @@ bool WalletBatch::WritePool(const std::vector<CKeyPool> & keys, int64_t index) {
     // Not sure flush is useful here or not
     batch.Flush();
     return ok;
+}
+
+DBErrors WalletBatch::FindLabelledAddresses(std::map<std::string, std::string>& mapLabels) {
+
+    DBErrors result = DBErrors::LOAD_OK;
+
+    try {
+        // Get cursor
+        Dbc *pcursor = batch.GetCursor();
+        if (!pcursor) {
+            LogPrintf("Error getting wallet database cursor\n");
+            return DBErrors::CORRUPT;
+        }
+
+        while (true) {
+            // Read next record
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+            int ret = batch.ReadAtCursor(pcursor, ssKey, ssValue);
+            if (ret == DB_NOTFOUND) {
+                break;
+            }
+
+            if (ret != 0) {
+                LogPrintf("Error reading next record from wallet database\n");
+                return DBErrors::CORRUPT;
+            }
+
+            std::string strType;
+            ssKey >> strType;
+            if (strType == "label") {
+                std::string label;
+                std::string addr;
+                ssKey >> label;
+                ssValue >> addr;
+
+                mapLabels.insert(std::make_pair(label,addr));
+            }
+        }
+        pcursor->close();
+    } catch (const thread_interrupted &) {
+        throw;
+    } catch (...) {
+        result = DBErrors::CORRUPT;
+    }
+
+    return result;
 }

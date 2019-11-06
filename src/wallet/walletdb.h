@@ -40,7 +40,6 @@
 
 static const bool DEFAULT_FLUSHWALLET = true;
 
-class CAccount;
 class CAccountingEntry;
 struct CBlockLocator;
 class CKeyPool;
@@ -94,7 +93,9 @@ public:
     WalletBatch(const WalletBatch &) = delete;
     WalletBatch &operator=(const WalletBatch &) = delete;
 
-    bool WriteName(const CTxDestination &address, const std::string &strName);
+    bool ReadName(const std::string& address, std::string &strName);
+    bool ReadLabel(std::string& address, const std::string &strName);
+    bool WriteNameAndLabel(const CTxDestination &address, const std::string &strName);
     bool EraseName(const CTxDestination &address);
 
     bool WritePurpose(const CTxDestination &address,
@@ -133,8 +134,6 @@ public:
     /// Use wallet.AddAccountingEntry instead, to write *and* update its caches.
     bool WriteAccountingEntry(const uint64_t nAccEntryNum,
                               const CAccountingEntry &acentry);
-    bool ReadAccount(const std::string &strAccount, CAccount &account);
-    bool WriteAccount(const std::string &strAccount, const CAccount &account);
 
     /// Write destination data key,value tuple to database.
     bool WriteDestData(const CTxDestination &address, const std::string &key,
@@ -152,6 +151,8 @@ public:
     DBErrors ZapWalletTx(std::vector<CWalletTx> &vWtx);
     DBErrors ZapSelectTx(std::vector<TxId> &txIdsIn,
                          std::vector<TxId> &txIdsOut);
+    DBErrors FindLabelledAddresses(std::map<std::string, std::string>& mapLabels);
+    
     /* Try to (very carefully!) recover wallet database (with a possible key
      * type filter) */
     static bool Recover(const std::string &filename, void *callbackDataIn,

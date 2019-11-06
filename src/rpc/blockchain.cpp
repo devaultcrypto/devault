@@ -246,6 +246,7 @@ UniValue blockToJSON(const CBlock &block, const CBlockIndex *tip,
     return result;
 }
 
+
 static UniValue getblockcount(const Config &config,
                               const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 0) {
