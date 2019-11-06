@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <checkqueue.h>
-#include <bench.h>
+#include <bench/bench.h>
 #include <prevector.h>
 #include <random.h>
 #include <util.h>

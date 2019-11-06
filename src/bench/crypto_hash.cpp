@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <bench.h>
+#include <bench/bench.h>
 #include <bloom.h>
 #include <crypto/ripemd160.h>
 #include <crypto/sha1.h>

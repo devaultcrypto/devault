@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <cashaddr.h>
-#include <bench.h>
+#include <bench/bench.h>
 
 #include <string>
 #include <vector>
