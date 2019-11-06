@@ -1102,6 +1102,9 @@ public:
 
     bool SetAddressBook(const CTxDestination &address,
                         const std::string &strName, const std::string &purpose);
+    
+    bool SetLabel(const CTxDestination &address,
+                  const std::string &strName, const std::string &purpose);
 
     bool DelAddressBook(const CTxDestination &address);
 

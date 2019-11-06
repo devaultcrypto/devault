@@ -3711,6 +3711,18 @@ bool CWallet::SetAddressBook(const CTxDestination &address,
     return WalletBatch(*database).WriteNameAndLabel(address, strName);
 }
 
+bool CWallet::SetLabel(const CTxDestination &address,
+                       const std::string &strName,
+                       const std::string &strPurpose) {
+
+    if (!strPurpose.empty() &&
+        !WalletBatch(*database).WritePurpose(address, strPurpose)) {
+        return false;
+    }
+
+    return WalletBatch(*database).WriteNameAndLabel(address, strName);
+}
+
 bool CWallet::DelAddressBook(const CTxDestination &address) {
     {
         // mapAddressBook

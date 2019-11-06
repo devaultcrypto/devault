@@ -3,5 +3,7 @@ This release includes the following features and fixes since 1.1.0 release:
   - Add copyaddress for RewardsControl
   - Add RPC + GUI functions to sweep private key funds into wallet
   - Remove RPC functions `importprivkey`, `importmulti`, add `getutxtobalance`
+  - Remove RPC functions `getaddressesbyaccount, `getaccountaddress`, `getaccount`, `setaccount`
+  - Add RPC functions `getaddressesbylabels`
   
   
