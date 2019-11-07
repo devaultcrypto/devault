@@ -407,11 +407,11 @@ static UniValue getaddressesbylabels(const Config &config,
     LOCK2(cs_main, pwallet->cs_wallet);
 
     // Go through AddressBook and list labels with their addresses
-    UniValue ret(UniValue::VARR);
-
     std::map<std::string, std::string> setLabels;
 
     // For Labels that are in the Wallet (and previously set in older software)
+    // NOTE: In future, wallet upgrade should consolidate the older method and rewrite in new format
+    
     for (const auto &item :  pwallet->mapAddressBook) {
         UniValue obj(UniValue::VOBJ);
         const CTxDestination &dest = item.first;
@@ -430,13 +430,9 @@ static UniValue getaddressesbylabels(const Config &config,
     // Combine maps
     for (const auto &item :  mapLabels) setLabels.insert(std::make_pair(item.first, item.second));
     
-    for (const auto &item :  setLabels) {
-        UniValue obj(UniValue::VOBJ);
-        obj.pushKV(item.first,item.second);
-        ret.push_back(obj);
-    }
-
-    return ret;
+    UniValue obj(UniValue::VOBJ);
+    for (const auto &item :  setLabels) obj.pushKV(item.first,item.second);
+    return obj;
 }
 
 static CTransactionRef SendMoney(CWallet *const pwallet,
