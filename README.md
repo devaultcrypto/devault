@@ -41,7 +41,8 @@ Disclosure Policy
 
 See [DISCLOSURE_POLICY](DISCLOSURE_POLICY.md)
 
-Upgrades/Changes in this code fork
+Upgrades/Changes in this code fork - when coin was launched
+for overall changes please see [Summary](SUMMARY.md))
 -----------------
 
 - Cold Rewards Code (details here : [Cold Reward](COLDREWARDS.md))
