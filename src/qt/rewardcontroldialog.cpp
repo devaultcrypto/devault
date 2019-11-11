@@ -314,26 +314,7 @@ void RewardControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
         nAmount += out.txout.nValue;
 
         // Bytes
-        CTxDestination address;
-        if (ExtractDestination(out.txout.scriptPubKey, address)) {
-            CPubKey pubkey;
-#ifdef HAVE_VARIANT
-            CKeyID *keyid = &std::get<CKeyID>(address);
-#else
-            CKeyID *keyid = boost::get<CKeyID>(&address);
-#endif
-            if (keyid && model->wallet().getPubKey(*keyid, pubkey)) {
-                nBytesInputs += (pubkey.IsCompressed() ? 148 : 180);
-                if (!pubkey.IsCompressed()) {
-                    nQuantityUncompressed++;
-                }
-            } else {
-                // in all error cases, simply assume 148 here
-                nBytesInputs += 148;
-            }
-        } else {
-            nBytesInputs += 148;
-        }
+        nBytesInputs += 148;
     }
 
     // calculation
