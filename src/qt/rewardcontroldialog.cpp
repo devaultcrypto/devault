@@ -287,7 +287,6 @@ void RewardControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
     unsigned int nBytes = 0;
     unsigned int nBytesInputs = 0;
     unsigned int nQuantity = 0;
-    int nQuantityUncompressed = 0;
 
     std::vector<COutPoint> vRewardControl;
     coinControl()->ListSelected(vRewardControl);
