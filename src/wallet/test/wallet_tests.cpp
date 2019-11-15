@@ -565,6 +565,9 @@ TEST_CASE("rescan, TestChain100Setup") {
 TEST_CASE("coin_mark_dirty_immature_credit") {
     TestChain100Setup setup;
     CWallet wallet(Params());
+    CKeyingMaterial km;
+    wallet.CreateMasteyKey("bypass", km);
+    wallet.SetMasterKey(km);
     CWalletTx wtx(&wallet, MakeTransactionRef(setup.coinbaseTxns.back()));
     LOCK2(cs_main, wallet.cs_wallet);
     wtx.hashBlock = chainActive.Tip()->GetBlockHash();
@@ -667,6 +670,9 @@ public:
                           new WalletDatabase(&bitdb, "wallet_test.dat"))));
         bool firstRun;
         wallet->LoadWallet(firstRun);
+        CKeyingMaterial km;
+        wallet->CreateMasteyKey("bypass", km);
+        wallet->SetMasterKey(km);
         AddKey(*wallet, coinbaseKey);
         WalletRescanReserver reserver(wallet.get());
         reserver.reserve();

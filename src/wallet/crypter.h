@@ -121,16 +121,10 @@ private:
     CKeyingMaterial vMasterKey;
     CHDChain cryptedHDChain;
 
-    //! if fUseCrypto is true, mapKeys must be empty
-    //! if fUseCrypto is false, vMasterKey must be empty
-    std::atomic<bool> fUseCrypto;
-
     //! keeps track of whether Unlock has run a thorough check before
     bool fDecryptionThoroughlyChecked;
 
 protected:
-    bool SetCrypted();
-
     bool EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc);
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
@@ -139,10 +133,8 @@ protected:
     CryptedKeyMap mapCryptedKeys;
     
 public:
-    CCryptoKeyStore()
-        : fUseCrypto(false), fDecryptionThoroughlyChecked(false) {}
+    CCryptoKeyStore() : fDecryptionThoroughlyChecked(false) {}
 
-    bool IsCrypted() const { return fUseCrypto; }
     bool IsLocked() const;
     bool Lock();
 
@@ -155,10 +147,10 @@ public:
     std::set<CKeyID> GetKeys() const override;
     bool GetCryptedHDChain(CHDChain& hdChainRet) const;
     bool GetDecryptedHDChain(CHDChain& hdChainRet) const;
-
-
+    void SetMasterKey(const CKeyingMaterial &MasterKey) {     vMasterKey = MasterKey; }
+    
     /**
-     * Wallet status (encrypted, locked) changed.
+     * Wallet status (locked/unlocked) changed.
      * Note: Called without locks held.
      */
     boost::signals2::signal<void(CCryptoKeyStore *wallet)> NotifyStatusChanged;

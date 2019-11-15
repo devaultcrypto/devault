@@ -57,9 +57,6 @@ class Wallet {
 public:
     virtual ~Wallet() {}
 
-    //! Return whether wallet is encrypted.
-    virtual bool isCrypted() = 0;
-
     //! Lock wallet.
     virtual bool lock() = 0;
 
