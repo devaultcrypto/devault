@@ -80,7 +80,7 @@ CWallet *GetWalletForJSONRPCRequest(const JSONRPCRequest &request) {
 }
 
 std::string HelpRequiringPassphrase(CWallet *const pwallet) {
-    return pwallet && pwallet->IsCrypted() ? "\nRequires wallet passphrase to "
+    return pwallet ? "\nRequires wallet passphrase to "
                                              "be set with walletpassphrase "
                                              "call."
                                            : "";
@@ -2732,7 +2732,7 @@ static UniValue walletpassphrase(const Config &config,
         return NullUniValue;
     }
 
-    if (pwallet->IsCrypted() && (request.fHelp || request.params.size() != 2)) {
+    if ((request.fHelp || request.params.size() != 2)) {
         throw std::runtime_error(
             "walletpassphrase \"passphrase\" timeout\n"
             "\nStores the wallet decryption key in memory for 'timeout' "
@@ -2759,12 +2759,6 @@ static UniValue walletpassphrase(const Config &config,
 
     if (request.fHelp) {
         return true;
-    }
-
-    if (!pwallet->IsCrypted()) {
-        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE,
-                           "Error: running with an unencrypted wallet, but "
-                           "walletpassphrase was called.");
     }
 
     // Note that the walletpassphrase is stored in request.params[0] which is
@@ -2820,7 +2814,7 @@ static UniValue walletpassphrasechange(const Config &config,
         return NullUniValue;
     }
 
-    if (pwallet->IsCrypted() && (request.fHelp || request.params.size() != 2)) {
+    if ((request.fHelp || request.params.size() != 2)) {
         throw std::runtime_error(
             "walletpassphrasechange \"oldpassphrase\" \"newpassphrase\"\n"
             "\nChanges the wallet passphrase from 'oldpassphrase' to "
@@ -2839,11 +2833,6 @@ static UniValue walletpassphrasechange(const Config &config,
 
     if (request.fHelp) {
         return true;
-    }
-    if (!pwallet->IsCrypted()) {
-        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE,
-                           "Error: running with an unencrypted wallet, but "
-                           "walletpassphrasechange was called.");
     }
 
     // TODO: get rid of these .c_str() calls by implementing
@@ -2881,7 +2870,7 @@ static UniValue walletlock(const Config &config,
         return NullUniValue;
     }
 
-    if (pwallet->IsCrypted() && (request.fHelp || request.params.size() != 0)) {
+    if ((request.fHelp || request.params.size() != 0)) {
         throw std::runtime_error(
             "walletlock\n"
             "\nRemoves the wallet encryption key from memory, locking the "
@@ -2906,11 +2895,6 @@ static UniValue walletlock(const Config &config,
 
     if (request.fHelp) {
         return true;
-    }
-    if (!pwallet->IsCrypted()) {
-        throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE,
-                           "Error: running with an unencrypted wallet, but "
-                           "walletlock was called.");
     }
 
     pwallet->Lock();
@@ -3265,11 +3249,7 @@ static UniValue getwalletinfo(const Config &config,
         accounts.push_back(account);
     }
     obj.push_back(Pair("hdaccounts", accounts));
-  
-    
-    if (pwallet->IsCrypted()) {
-        obj.pushKV("unlocked_until", pwallet->nRelockTime);
-    }
+    obj.pushKV("unlocked_until", pwallet->nRelockTime);
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
     return obj;
 }
