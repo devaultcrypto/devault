@@ -112,9 +112,9 @@ public:
     };
 
     enum WalletStatus {
-        // wallet->IsCrypted() && wallet->IsLocked()
+        // wallet->IsLocked()
         Locked,
-        // wallet->IsCrypted() && !wallet->IsLocked()
+        // !wallet->IsLocked()
         Unlocked
     };
 

@@ -96,7 +96,7 @@ static void WalletShowInfo(CWallet *wallet_instance) {
   LOCK(wallet_instance->cs_wallet);
 
   tfm::format(std::cout, "Wallet info\n===========\n");
-  tfm::format(std::cout, "Encrypted: %s\n", wallet_instance->IsCrypted() ? "yes" : "no");
+  tfm::format(std::cout, "Encrypted: yes\n");
 
   assert(wallet_instance->mapMasterKeys.size() > 0);
   

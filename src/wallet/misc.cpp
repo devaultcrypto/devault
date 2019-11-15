@@ -131,7 +131,7 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
         obj.pushKV("keypoololdest", pwallet->GetOldestKeyPoolTime());
         obj.pushKV("keypoolsize", (int)pwallet->GetKeyPoolSize());
     }
-    if (pwallet && pwallet->IsCrypted()) {
+    if (pwallet) {
         obj.pushKV("unlocked_until", pwallet->nRelockTime);
     }
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
