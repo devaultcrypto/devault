@@ -298,6 +298,10 @@ void BitcoinGUI::createActions() {
                     tr("&Unlock Wallet..."), this);
     unlockWalletAction->setToolTip(tr("Unlock wallet"));
 
+    lockWalletAction = new QAction(platformStyle->TextColorIcon(":/icons/lock_closed"),
+                  tr("&Lock Wallet..."), this);
+    lockWalletAction->setToolTip(tr("Lock wallet"));
+
     revealPhraseAction = new QAction(platformStyle->TextColorIcon(":/icons/eye2"),
                     tr("&Show Word Phrase.."), this);
     revealPhraseAction->setStatusTip(tr("Reward 12 or 24 word phrase for wallet"));
@@ -374,8 +378,8 @@ void BitcoinGUI::createActions() {
               &WalletFrame::backupWallet);
       connect(changePassphraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::changePassphrase);
-      connect(unlockWalletAction, &QAction::triggered, walletFrame,
-              &WalletFrame::unlockWallet);
+      connect(unlockWalletAction, &QAction::triggered, walletFrame,  &WalletFrame::unlockWallet);
+      connect(lockWalletAction, &QAction::triggered, walletFrame,  &WalletFrame::lockWallet);
       connect(revealPhraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::revealPhrase);
       connect(sweepAction, &QAction::triggered, walletFrame,
@@ -430,6 +434,7 @@ void BitcoinGUI::createMenuBar() {
         settings->addAction(changePassphraseAction);
         settings->addSeparator();
         settings->addAction(unlockWalletAction);
+        settings->addAction(lockWalletAction);
         settings->addSeparator();
         settings->addAction(revealPhraseAction);
         settings->addSeparator();
@@ -493,7 +498,6 @@ void BitcoinGUI::createToolBars() {
         frameBlocksLayout->setSpacing(3);
         unitDisplayControl = new UnitDisplayStatusBarControl(platformStyle);
         labelWalletEncryptionIcon = new QLabel();
-        labelWalletHDStatusIcon = new QLabel();
         connectionsControl = new GUIUtil::ClickableLabel();
         labelBlocksIcon = new GUIUtil::ClickableLabel();
 
@@ -1150,17 +1154,6 @@ bool BitcoinGUI::handlePaymentRequest(const SendCoinsRecipient &recipient) {
     return false;
 }
 
-void BitcoinGUI::setHDStatus() {
-    labelWalletHDStatusIcon->setPixmap(
-        platformStyle
-            ->SingleColorIcon(":/icons/hd_enabled")
-            .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
-    labelWalletHDStatusIcon->setToolTip(tr("HD key generation is <b>enabled</b>"));;
-
-    // eventually disable the QLabel to set its opacity to 50%
-    labelWalletHDStatusIcon->setEnabled(true);
-}
-
 void BitcoinGUI::setWalletStatus(int status) {
     labelWalletEncryptionIcon->show();
     switch (status) {
@@ -1171,6 +1164,7 @@ void BitcoinGUI::setWalletStatus(int status) {
         labelWalletEncryptionIcon->setToolTip(
                                               tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
         unlockWalletAction->setEnabled(false);
+        lockWalletAction->setEnabled(true);
         break;
     case WalletModel::Locked:
         labelWalletEncryptionIcon->setPixmap(
@@ -1179,6 +1173,7 @@ void BitcoinGUI::setWalletStatus(int status) {
         labelWalletEncryptionIcon->setToolTip(
                                               tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
         unlockWalletAction->setEnabled(true);
+        lockWalletAction->setEnabled(false);
         break;
     }
     changePassphraseAction->setEnabled(true);
@@ -1196,7 +1191,6 @@ void BitcoinGUI::updateWalletStatus() {
     }
     WalletModel *const walletModel = walletView->getWalletModel();
     setWalletStatus(walletModel->getWalletStatus());
-    setHDStatus();
 }
 
 void BitcoinGUI::showNormalIfMinimized(bool fToggleHidden) {

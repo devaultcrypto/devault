@@ -367,7 +367,7 @@ void WalletView::unlockWallet() {
         AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
         dlg.setModel(walletModel);
         dlg.exec();
-    }
+     }
 }
 void WalletView::lockWallet() {
     if (!walletModel) {
