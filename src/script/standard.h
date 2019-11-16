@@ -87,7 +87,6 @@ typedef std::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
 #else
 typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
 #endif
-const char *GetTxnOutputType(txnouttype t);
 
 /** Check whether a CTxDestination is a CNoDestination. */
 bool IsValidDestination(const CTxDestination &dest);
