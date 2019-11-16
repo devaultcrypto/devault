@@ -104,7 +104,7 @@ void CKey::MakeNewKey() {
 CPubKey CKey::GetPubKey() const {
     assert(fValid);
     secp256k1_pubkey pubkey;
-    size_t clen = CPubKey::PUBLIC_KEY_SIZE;
+    size_t clen = CPubKey::COMPRESSED_PUBLIC_KEY_SIZE;
     CPubKey result;
     int ret =
         secp256k1_ec_pubkey_create(secp256k1_context_sign, &pubkey, begin());
@@ -112,7 +112,8 @@ CPubKey CKey::GetPubKey() const {
     secp256k1_ec_pubkey_serialize(
         secp256k1_context_sign, (uint8_t *)result.begin(), &clen, &pubkey,
         SECP256K1_EC_COMPRESSED);
-    assert(result.size() == clen);
+    result.SetSize(clen);
+    assert(result.HasCompressedByte());
     assert(result.IsValid());
     return result;
 }
