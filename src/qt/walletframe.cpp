@@ -168,7 +168,18 @@ void WalletFrame::sweep() {
 
 void WalletFrame::unlockWallet() {
     WalletView *walletView = currentWalletView();
-    if (walletView) walletView->unlockWallet();
+    if (walletView) {
+        walletView->unlockWallet();
+        walletView->updateWalletStatus();
+    }
+}
+
+void WalletFrame::lockWallet() {
+    WalletView *walletView = currentWalletView();
+    if (walletView) {
+        walletView->lockWallet();
+        walletView->updateWalletStatus();
+    }
 }
 
 void WalletFrame::usedSendingAddresses() {

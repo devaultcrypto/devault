@@ -102,7 +102,6 @@ private:
 
     UnitDisplayStatusBarControl *unitDisplayControl = nullptr;
     QLabel *labelWalletEncryptionIcon = nullptr;
-    QLabel *labelWalletHDStatusIcon = nullptr;
     QLabel *connectionsControl = nullptr;
     QLabel *labelBlocksIcon = nullptr;
     QLabel *progressBarLabel = nullptr;
@@ -129,6 +128,7 @@ private:
     QAction *backupWalletAction = nullptr;
     QAction *changePassphraseAction = nullptr;
     QAction *unlockWalletAction = nullptr;
+    QAction *lockWalletAction = nullptr;
     QAction *aboutQtAction = nullptr;
     QAction *openRPCConsoleAction = nullptr;
     QAction *openRPCWindowAction = nullptr;
@@ -217,11 +217,6 @@ private:
        @see WalletModel::WalletStatus
      */
     void setWalletStatus(int status);
-
-    /** Set the hd-enabled status as shown in the UI.
-     @see WalletModel::EncryptionStatus
-     */
-    void setHDStatus();
 
 public Q_SLOTS:
     bool handlePaymentRequest(const SendCoinsRecipient &recipient);
