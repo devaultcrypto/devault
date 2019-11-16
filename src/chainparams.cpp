@@ -275,8 +275,8 @@ public:
         // valid.
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        // Nov 15, 2019 12:00:00 UTC protocol upgrade
-        consensus.greatWallActivationTime = 1573819200;
+        // TBD
+        consensus.greatWallActivationTime = 1999999999;
 
         diskMagic[0] = 0xfa;
         diskMagic[1] = 0xbf;
