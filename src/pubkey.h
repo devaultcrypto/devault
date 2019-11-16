@@ -50,24 +50,14 @@ private:
      * Its length can very cheaply be computed from the first byte.
      */
     uint8_t vch[PUBLIC_KEY_SIZE];
-
-    //! Compute the length of a pubkey with a given first byte.
-    static unsigned int GetLen(uint8_t chHeader) {
-        if (chHeader == 2 || chHeader == 3) {
-            return COMPRESSED_PUBLIC_KEY_SIZE;
-        }
-        if (chHeader == 4 || chHeader == 6 || chHeader == 7) {
-            return PUBLIC_KEY_SIZE;
-        }
-        return 0;
-    }
+    uint8_t _size;
 
     //! Set this key data to be invalid
-    void Invalidate() { vch[0] = 0xFF; }
+    void Invalidate() { _size = 0; }
 
 public:
     bool static ValidSize(const std::vector<uint8_t> &vch) {
-        return vch.size() > 0 && GetLen(vch[0]) == vch.size();
+        return vch.size() == COMPRESSED_PUBLIC_KEY_SIZE;
     }
 
     //! Construct an invalid public key.
@@ -75,11 +65,9 @@ public:
 
     //! Initialize a public key using begin/end iterators to byte data.
     template <typename T> void Set(const T pbegin, const T pend) {
-        int len = pend == pbegin ? 0 : GetLen(pbegin[0]);
-        if (len && len == (pend - pbegin)) {
-            memcpy(vch, (uint8_t *)&pbegin[0], len);
-        } else {
-            Invalidate();
+        _size = pend - pbegin;
+        if (_size) {
+            memcpy(vch, (uint8_t *)&pbegin[0], _size);
         }
     }
 
@@ -94,7 +82,7 @@ public:
     }
 
     //! Simple read-only vector-like interface to the pubkey data.
-    unsigned int size() const { return GetLen(vch[0]); }
+    unsigned int size() const { return _size; }
     const uint8_t *begin() const { return vch; }
     const uint8_t *end() const { return vch + size(); }
     const uint8_t &operator[](unsigned int pos) const { return vch[pos]; }
@@ -119,15 +107,9 @@ public:
     }
     template <typename Stream> void Unserialize(Stream &s) {
         unsigned int len = ::ReadCompactSize(s);
-        if (len <= PUBLIC_KEY_SIZE) {
+       _size = len;
+        if (len == COMPRESSED_PUBLIC_KEY_SIZE) {
             s.read((char *)vch, len);
-        } else {
-            // invalid pubkey, skip available data
-            char dummy;
-            while (len--) {
-                s.read(&dummy, 1);
-            }
-            Invalidate();
         }
     }
 
@@ -142,7 +124,7 @@ public:
      *
      * Note that this is consensus critical as CheckSig() calls it!
      */
-    bool IsValid() const { return size() > 0; }
+    bool IsValid() const { return size() == COMPRESSED_PUBLIC_KEY_SIZE; }
 
     //! fully validate whether this is a valid public key (more expensive than
     //! IsValid())
@@ -150,6 +132,8 @@ public:
 
     //! Check whether this is a compressed public key.
     bool IsCompressed() const { return size() == COMPRESSED_PUBLIC_KEY_SIZE; }
+    bool HasCompressedByte() const { return vch[0] == 2 || vch[0] == 3; }
+    void SetSize(int s) { _size = s; }
 
     /**
      * Verify a DER-serialized ECDSA signature (~72 bytes).
