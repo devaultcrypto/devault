@@ -4674,7 +4674,10 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       if (walletInstance->Unlock(BypassPassword)) {
           LogPrintf("Wallet successfully unlocked with bypass password\n");
       } else {
-          throw std::runtime_error(std::string(__func__) + ": Unable to unlock wallet with \" \" bypass password\n");
+          InitError(strprintf(
+                              _("Error loading %s: Wallet password is not compatible with -bypasspassword option."),
+                              walletFile));
+          return nullptr;
       }
     }
 
