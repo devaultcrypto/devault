@@ -2007,7 +2007,18 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
         // cleanSubVer has /DeVault.../ for us
         ShouldUpgrade(cleanSubVer);
-      
+        bool connectnew = ShouldConnect(cleanSubVer);
+        if (!connectnew) {
+            connman->PushMessage(
+                                 pfrom,
+                                 CNetMsgMaker(INIT_PROTO_VERSION)
+                                 .Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                                       strprintf("Software Version must be 1.1 or greater")));
+            pfrom->fDisconnect = true;
+            return false;
+        }
+
+        
         LogPrint(BCLog::NET,
                  "receive version message: [%s] %s: version %d, blocks=%d, "
                  "us=%s, peer=%d%s\n",

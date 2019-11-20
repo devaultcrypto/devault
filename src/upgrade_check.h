@@ -6,3 +6,4 @@
 #pragma once
 #include <string>
 void ShouldUpgrade(const std::string& ver);
+bool ShouldConnect(const std::string& ver);
