@@ -1131,17 +1131,15 @@ void CleanupBlockRevFiles() {
     // ordered map keyed by block file index.
     LogPrintf("Removing unusable blk?????.dat and rev?????.dat files for "
               "-reindex with -prune\n");
-    fs::path blocksdir = GetBlocksDir();
-    for (fs::directory_iterator it(blocksdir); it != fs::directory_iterator();
-         it++) {
-        if (fs::is_regular_file(*it) &&
-            it->path().filename().string().length() == 12 &&
-            it->path().filename().string().substr(8, 4) == ".dat") {
-            if (it->path().filename().string().substr(0, 3) == "blk") {
-                mapBlockFiles[it->path().filename().string().substr(3, 5)] =
-                    it->path();
-            } else if (it->path().filename().string().substr(0, 3) == "rev") {
-                remove(it->path());
+    const auto directoryIterator = fs::directory_iterator{GetBlocksDir()};
+    for (const auto &file : directoryIterator) {
+        const auto fileName = file.path().filename().string();
+        if (fs::is_regular_file(file) && fileName.length() == 12 &&
+            fileName.substr(8, 4) == ".dat") {
+            if (fileName.substr(0, 3) == "blk") {
+                mapBlockFiles[fileName.substr(3, 5)] = file.path();
+            } else if (fileName.substr(0, 3) == "rev") {
+                remove(file.path());
             }
         }
     }
@@ -1150,10 +1148,10 @@ void CleanupBlockRevFiles() {
     // zero by walking the ordered map (keys are block file indices) by keeping
     // a separate counter. Once we hit a gap (or if 0 doesn't exist) start
     // removing block files.
-    int nContigCounter = 0;
+    int contiguousCounter = 0;
     for (const auto &item : mapBlockFiles) {
-        if (std::atoi(item.first.c_str()) == nContigCounter) {
-            nContigCounter++;
+        if (atoi(item.first) == contiguousCounter) {
+            contiguousCounter++;
             continue;
         }
         remove(item.second);
