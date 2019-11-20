@@ -66,6 +66,18 @@ void PrintExceptionContinue(const std::exception *pex, const char *pszThread);
 int RaiseFileDescriptorLimit(int nMinFD);
 void runCommand(const std::string &strCommand);
 
+NODISCARD bool ParseKeyValue(std::string &key, std::string &val);
+
+/**
+ * Most paths passed as configuration arguments are treated as relative to
+ * the datadir if they are not absolute.
+ *
+ * @param path The path to be conditionally prefixed with datadir.
+ * @param net_specific Forwarded to GetDataDir().
+ * @return The normalized path.
+ */
+fs::path AbsPathForConfigVal(const fs::path &path, bool net_specific = true);
+
 inline bool IsSwitchChar(char c) {
 #ifdef WIN32
     return c == '-' || c == '/';

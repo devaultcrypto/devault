@@ -2599,7 +2599,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [cmake] Remove useless copy of create_cache.py
      [tests] Remove 'account' API from wallet_listreceivedby
      Split out key-value parsing in ArgsManager into its own function
-     IsReachable is the inverse of IsLimited (DRY). Includes unit tests
+#### IsReachable is the inverse of IsLimited (DRY). Includes unit tests
      Bump version to 0.20.8
      [cmake] Use terminal when runnign integration tests
      Rename GetLogger() to LogInstance()
@@ -2607,9 +2607,9 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Use RdSeed when available, and reduce RdRand load
      Print to console by default when not run with -daemon
      Improve formatting in rpcwallet.cpp
-#     Leftover from PR13423
-     Stop translating command line options
-     minor refactor to use ranged_for, auto and const-ness
+#    Leftover from PR13423
+#### Stop translating command line options
+#### minor refactor to use ranged_for, auto and const-ness
      test: Make bloom tests deterministic
      qa: Increase includeconf test coverage
      Bump minimum Qt version to 5.5.1
