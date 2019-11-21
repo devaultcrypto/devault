@@ -443,6 +443,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
         bool in_db =  CheckReward(ref_addr);
         LogPrintf("WARNING: Cold Reward in coinbase but not in DB (reward in coinbase) at %s for %d, this address in reward db? %d",ref_addr, txCoinbase->vout[1].nValue, in_db);
         valid = in_db;
+        reward = txCoinbase->vout[1].nValue;
     } else {
       reward = Amount();
     }
