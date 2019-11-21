@@ -282,17 +282,19 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
             found = true;
           }
         } else {
+          // Temp code for debug usea
           if (HeightDiff > TempMaxDiff) {
             TempMaxDiff = HeightDiff;
             int blocksToGo = 21915 - TempMaxDiff;
-            LogPrintf("CR: %s : For  Diff % d : Blocks left %d, Candidate : %s\n", __func__, TempMaxDiff,blocksToGo, the_reward.ToString());
+            LogPrint(BCLog::COLD, "CR: %s : For  Diff % d : Blocks left %d, Candidate : %s\n", __func__, TempMaxDiff,blocksToGo, the_reward.ToString());
           }
+          // end
         }
       }
     } else {
       if (skipLowBalance) {
-        LogPrintf("CR: %s : Dropping Candidate %s : %s, Reward %d\n", __func__,the_reward.ToString());
-        pdb->EraseReward(key);
+          LogPrint(BCLog::COLD, "CR: %s : Dropping Candidate %s : %s, Reward %d\n", __func__,the_reward.ToString());
+          pdb->EraseReward(key);
       }
       // For very old in-active entires we should remove from the db,
       auto el = cachedInactives.find(key);
@@ -432,7 +434,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
   } else {
     bool valid = (size == 1);
     if (!valid) {
-      LogPrintf("ERROR: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase) at %s for %d",GetAddrFromTxOut(txCoinbase->vout[1]), txCoinbase->vout[1].nValue);
+      LogPrintf("WARNING: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase) at %s for %d",GetAddrFromTxOut(txCoinbase->vout[1]), txCoinbase->vout[1].nValue);
     }
     // Override case Coinbase has small reward due to re-org
     if (size == 2 && (txCoinbase->vout[1].nValue < 2*consensusParams.nMinReward) && nHeight > SuperBlock5Height && nHeight < Last1000Height) {
