@@ -21,6 +21,9 @@
 
 using namespace std;
 
+const int Last1000Height = 110420;
+const int SuperBlock5Height = 109575;
+
 CCriticalSection cs_rewardsdb;
 
 // Probably should be a shared function
@@ -220,16 +223,23 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   const int32_t maxreorgdepth = gArgs.GetArg("-maxreorgdepth", DEFAULT_MAX_REORG_DEPTH);
   std::vector<COutPoint> cacheRemovals;
     
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
+  bool skipLowBalance = false;
+  
+  int TempMaxDiff = 0;
+  
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
     if (!pcursor->GetKey(key)) { break; }
     if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
-
+  
     int nHeight = the_reward.GetHeight();
+    
+    skipLowBalance = (nHeight >= Last1000Height && the_reward.GetValue() < minRewardBalance);
 
     // get Height (last reward)
-    if (the_reward.IsActive()) {
+    if (the_reward.IsActive() && !skipLowBalance) {
       count++; // just count active ones
       if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
         HeightDiff = Height - nHeight;
@@ -271,9 +281,19 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
             }
             found = true;
           }
+        } else {
+          if (HeightDiff > TempMaxDiff) {
+            TempMaxDiff = HeightDiff;
+            int blocksToGo = 21915 - TempMaxDiff;
+            LogPrintf("CR: %s : For  Diff % d : Blocks left %d, Candidate : %s\n", __func__, TempMaxDiff,blocksToGo, the_reward.ToString());
+          }
         }
       }
     } else {
+      if (skipLowBalance) {
+        LogPrintf("CR: %s : Dropping Candidate %s : %s, Reward %d\n", __func__,the_reward.ToString());
+        pdb->EraseReward(key);
+      }
       // For very old in-active entires we should remove from the db,
       auto el = cachedInactives.find(key);
       if (el != cachedInactives.end()) {
@@ -325,6 +345,8 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
   CRewardValue the_reward;
   COutPoint key;
   
+  const Consensus::Params consensusParams = GetConfig().GetChainParams().GetConsensus();
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
@@ -332,7 +354,8 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
     if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
 
     int nHeight = the_reward.GetHeight();
-    if (nHeight == Height) { // Bingo!
+    // Just put back into DB if >= Min Reward Balance
+    if (nHeight == Height && the_reward.GetValue() >= minRewardBalance) { // Bingo!
       // Restore previous height
       the_reward.SetHeight(the_reward.GetOldHeight());
       the_reward.payCount--;
@@ -383,6 +406,7 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
                             Amount &reward) {
   auto txCoinbase = block.vtx[0];
   int size = txCoinbase->vout.size();
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(nHeight);
   // Coinbase has Cold Reward
   CTxOut out;
   // Found Reward
@@ -391,18 +415,35 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
     if (size > 1) {
       CTxOut coinbase_reward = txCoinbase->vout[1];
       bool valid = (out == coinbase_reward);
-      if (!valid) LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n", GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
+      if (!valid) {
+        LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n", GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
+      }
       return valid;
     } else {
-      LogPrintf("ERROR: Cold Reward invalid coinbase size ! > 1, while reward = %d\n\n", reward.ToString());
+      LogPrintf("WARNING: Have Cold Reward in local DB but not in actual coinbase,address = %s : reward : %d\n\n", GetAddrFromTxOut(out),out.nValue.ToString());
+      if (reward < minRewardBalance) {
+        pdb->EraseReward(rewardKey); // removing....
+      }
+      reward = Amount::zero();
       // Coinbase has Reward but FindReward can't find it
-      return false;
+      return true;
     }
     // Validate didn't find reward, so Coinbase size should be 1
   } else {
-    reward = Amount();
     bool valid = (size == 1);
-    if (!valid) LogPrintf("ERROR: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase)\n");
+    if (!valid) {
+      LogPrintf("ERROR: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase) at %s for %d",GetAddrFromTxOut(txCoinbase->vout[1]), txCoinbase->vout[1].nValue);
+    }
+    // Override case Coinbase has small reward due to re-org
+    if (size == 2 && (txCoinbase->vout[1].nValue < 2*consensusParams.nMinReward) && nHeight > SuperBlock5Height && nHeight < Last1000Height) {
+        // Let it go, if that address is in the DB already
+        std::string ref_addr = GetAddrFromTxOut(txCoinbase->vout[1]);
+        bool in_db =  CheckReward(ref_addr);
+        LogPrintf("WARNING: Cold Reward in coinbase but not in DB (reward in coinbase) at %s for %d, this address in reward db? %d",ref_addr, txCoinbase->vout[1].nValue, in_db);
+        valid = in_db;
+    } else {
+      reward = Amount();
+    }
     return valid;
   }
 }
@@ -441,6 +482,23 @@ std::vector<CRewardValue> CColdRewards::GetOrderedRewards() {
 
   nNumCandidates = count;
   return vals;
+}
+
+bool CColdRewards::CheckReward(const std::string& ref) {
+  COutPoint key;
+  CRewardValue val;
+  
+  std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
+  while (pcursor->Valid()) {
+      interruption_point(ShutdownRequested());
+      if (!pcursor->GetKey(key)) { break; }
+      if (!pcursor->GetValue(val)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }        
+      std::string addr = GetAddrFromTxOut(val.GetTxOut());
+      if (addr == ref) return true;
+      pcursor->Next();
+  }
+
+  return false;
 }
 
 void CColdRewards::DumpOrderedRewards(const std::string& filename) {
