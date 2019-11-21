@@ -43,5 +43,6 @@ class CColdRewards {
   void DumpOrderedRewards(const std::string &filename = "");
   int32_t GetNumberOfCandidates() { return nNumCandidates; }
   void GetInActivesFromDB(int Height);
+  bool CheckReward(const std::string& r);
     
 };
