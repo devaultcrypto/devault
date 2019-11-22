@@ -4571,6 +4571,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
     for (CBlockIndex *pindex = chainActive.Tip(); pindex && pindex->pprev;
          pindex = pindex->pprev) {
         interruption_point(ShutdownRequested());
+        if (StopDialogRequested()) break;
         int percentageDone = std::max(1, std::min(99,
                                                   (int)(((double)(chainActive.Height() - pindex->nHeight)) /
                                                         (double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100))));
@@ -4660,6 +4661,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         CBlockIndex *pindex = pindexState;
         while (pindex != chainActive.Tip()) {
             interruption_point(ShutdownRequested());
+            if (StopDialogRequested()) break;
+
             uiInterface.ShowProgress(
                 _("Verifying blocks..."),
                 std::max(

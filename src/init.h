@@ -27,6 +27,8 @@ class thread_group;
 
 void StartShutdown();
 bool ShutdownRequested();
+void StopDialog();
+bool StopDialogRequested();
 /** Interrupt threads */
 void Interrupt();
 /** Interrupt all script checking threads once they're out of work */

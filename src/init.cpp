@@ -118,6 +118,16 @@ bool ShutdownRequested() {
     return fRequestShutdown;
 }
 
+std::atomic<bool> fRequestStopDialog(false);
+
+void StopDialog() {
+    fRequestStopDialog = true;
+}
+
+bool StopDialogRequested() {
+    return fRequestStopDialog;
+}
+
 /**
  * This is a minimally invasive approach to shutdown on LevelDB read errors from
  * the chainstate, while keeping user interface out of the common library, which

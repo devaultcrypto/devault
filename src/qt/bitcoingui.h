@@ -83,6 +83,7 @@ public:
      */
     bool addWallet(WalletModel *walletModel);
     void removeAllWallets();
+    void cancel();
     bool enableWallet = false;
 
 protected:
