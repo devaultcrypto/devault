@@ -1225,10 +1225,16 @@ void BitcoinGUI::detectShutdown() {
         qApp->quit();
     }
 }
+// Called when showProgress is cancelled - not using thread stuff for StopDialog
+void BitcoinGUI::cancel() {
+   disconnect(progressDialog, &QProgressDialog::canceled, this, &BitcoinGUI::cancel);
+   StopDialog();
+}
 
 void BitcoinGUI::showProgress(const QString &title, int nProgress) {
     if (nProgress == 0) {
         progressDialog = new QProgressDialog(title, "", 0, 100);
+        connect(progressDialog, &QProgressDialog::canceled, this, &BitcoinGUI::cancel);
         progressDialog->setWindowModality(Qt::ApplicationModal);
         progressDialog->setMinimumDuration(0);
         progressDialog->setCancelButton(nullptr);
