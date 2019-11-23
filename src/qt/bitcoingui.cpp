@@ -1240,8 +1240,10 @@ void BitcoinGUI::showProgress(const QString &title, int nProgress) {
         progressDialog->setCancelButton(nullptr);
         progressDialog->setAutoClose(false);
         progressDialog->setValue(0);
+        StartDialog();
     } else if (progressDialog) {
         if (nProgress == 100) {
+            disconnect(progressDialog, &QProgressDialog::canceled, this, &BitcoinGUI::cancel);
             progressDialog->close();
             progressDialog->deleteLater();
         } else {

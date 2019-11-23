@@ -120,6 +120,10 @@ bool ShutdownRequested() {
 
 std::atomic<bool> fRequestStopDialog(false);
 
+void StartDialog() {
+    fRequestStopDialog = false;
+}
+
 void StopDialog() {
     fRequestStopDialog = true;
 }
