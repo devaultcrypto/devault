@@ -4,7 +4,8 @@
 
 #include <net.h>
 
-std::unique_ptr<CConnman> g_connman;
+// Already in init.cpp which is linked
+//std::unique_ptr<CConnman> g_connman;
 
 [[noreturn]] void Shutdown(void *parg) { std::exit(EXIT_SUCCESS); }
 

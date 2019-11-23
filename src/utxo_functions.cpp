@@ -75,11 +75,6 @@ std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const CTxDestination& sou
 
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     auto hb = pcursor->GetBestBlock();
-    int nHeight;
-    {
-        LOCK(cs_main);
-        nHeight = mapBlockIndex.find(hb)->second->nHeight;
-    }
     uint256 prevkey;
     std::map<COutPoint, Coin> outputs;
 
@@ -106,11 +101,6 @@ std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, CScript& coinscript) {
 
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     auto hb = pcursor->GetBestBlock();
-    int nHeight;
-    {
-        LOCK(cs_main);
-        nHeight = mapBlockIndex.find(hb)->second->nHeight;
-    }
     uint256 prevkey;
     std::map<COutPoint, Coin> outputs;
     while (pcursor->Valid()) {

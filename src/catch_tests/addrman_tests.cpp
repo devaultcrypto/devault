@@ -30,20 +30,38 @@ class CAddrManTest : public CAddrMan {
     insecure_rand = FastRandomContext(true);
   }
 
-  CAddrInfo *Find(const CNetAddr &addr, int *pnId = nullptr) { return CAddrMan::Find(addr, pnId); }
-
-  CAddrInfo *Create(const CAddress &addr, const CNetAddr &addrSource, int *pnId = nullptr) {
-    return CAddrMan::Create(addr, addrSource, pnId);
+  CAddrInfo *Find(const CNetAddr &addr, int *pnId = nullptr) {
+      {
+          LOCK(cs);
+          auto ret = CAddrMan::Find(addr, pnId);
+          return ret;
+      }
   }
 
-  void Delete(int nId) { CAddrMan::Delete(nId); }
+  CAddrInfo *Create(const CAddress &addr, const CNetAddr &addrSource, int *pnId = nullptr) {
+      {
+          LOCK(cs);
+          auto ret =  CAddrMan::Create(addr, addrSource, pnId);
+          return ret;
+      }
+  }
+
+  void Delete(int nId) {
+      {
+          LOCK(cs);
+          CAddrMan::Delete(nId);
+      }
+  }
 
   // Simulates connection failure so that we can test eviction of offline
   // nodes
   void SimConnFail(CService &addr) {
     int64_t nLastSuccess = 1;
     // Set last good connection in the deep past.
-    Good_(addr, true, nLastSuccess);
+    {
+        LOCK(cs);
+        Good_(addr, true, nLastSuccess);
+    }
 
     bool count_failure = false;
     int64_t nLastTry = GetAdjustedTime() - 61;

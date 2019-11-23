@@ -63,14 +63,17 @@ TEST_CASE("TestPackageAccounting") {
       // due to possible duplicates.  Calculate a valid range based on
       // parents.
 
-      CTxMemPoolEntry parent = *testPool.mapTx.find(mtx.vin.back().prevout.GetTxId());
+      {
+          LOCK(testPool.cs);
+          CTxMemPoolEntry parent = *testPool.mapTx.find(mtx.vin.back().prevout.GetTxId());
 
-      minAncestors = std::min(minAncestors, parent.GetCountWithAncestors());
-      maxAncestors += parent.GetCountWithAncestors();
-      minFees = std::min(minFees, parent.GetModFeesWithAncestors());
-      maxFees += parent.GetModFeesWithAncestors();
-      minSize = std::min(minSize, parent.GetSizeWithAncestors());
-      maxSize += parent.GetSizeWithAncestors();
+          minAncestors = std::min(minAncestors, parent.GetCountWithAncestors());
+          maxAncestors += parent.GetCountWithAncestors();
+          minFees = std::min(minFees, parent.GetModFeesWithAncestors());
+          maxFees += parent.GetModFeesWithAncestors();
+          minSize = std::min(minSize, parent.GetSizeWithAncestors());
+          maxSize += parent.GetSizeWithAncestors();
+      }
     }
 
     // Produce random number of outputs
@@ -101,23 +104,26 @@ TEST_CASE("TestPackageAccounting") {
     // Calculate overall values
     totalFee += randFee;
     totalSize += CTransaction(tx).GetTotalSize();
-    CTxMemPoolEntry parentEntry = *testPool.mapTx.find(parentOfAllId);
-    CTxMemPoolEntry latestEntry = *testPool.mapTx.find(curId);
+    {
+        LOCK(testPool.cs);
+        CTxMemPoolEntry parentEntry = *testPool.mapTx.find(parentOfAllId);
+        CTxMemPoolEntry latestEntry = *testPool.mapTx.find(curId);
     
-    // Ensure values are within the expected ranges
-    BOOST_CHECK(latestEntry.GetCountWithAncestors() >= minAncestors);
-    BOOST_CHECK(latestEntry.GetCountWithAncestors() <= maxAncestors);
-
-    BOOST_CHECK(latestEntry.GetSizeWithAncestors() >= minSize);
-    BOOST_CHECK(latestEntry.GetSizeWithAncestors() <= maxSize);
+        // Ensure values are within the expected ranges
+        BOOST_CHECK(latestEntry.GetCountWithAncestors() >= minAncestors);
+        BOOST_CHECK(latestEntry.GetCountWithAncestors() <= maxAncestors);
+        
+        BOOST_CHECK(latestEntry.GetSizeWithAncestors() >= minSize);
+        BOOST_CHECK(latestEntry.GetSizeWithAncestors() <= maxSize);
     
-    BOOST_CHECK(latestEntry.GetModFeesWithAncestors() >= minFees);
-    BOOST_CHECK(latestEntry.GetModFeesWithAncestors() <= maxFees);
-    
-    BOOST_CHECK_EQUAL(parentEntry.GetCountWithDescendants(),
-                      testPool.mapTx.size());
-    BOOST_CHECK_EQUAL(parentEntry.GetSizeWithDescendants(), totalSize);
-    BOOST_CHECK_EQUAL(parentEntry.GetModFeesWithDescendants(), totalFee);
+        BOOST_CHECK(latestEntry.GetModFeesWithAncestors() >= minFees);
+        BOOST_CHECK(latestEntry.GetModFeesWithAncestors() <= maxFees);
+        
+        BOOST_CHECK_EQUAL(parentEntry.GetCountWithDescendants(),
+                          testPool.mapTx.size());
+        BOOST_CHECK_EQUAL(parentEntry.GetSizeWithDescendants(), totalSize);
+        BOOST_CHECK_EQUAL(parentEntry.GetModFeesWithDescendants(), totalFee);
+    }
   }
 }
 
@@ -226,17 +232,23 @@ TEST_CASE("MempoolClearTest") {
 
   // Add the transaction
   testPool.addUnchecked(txParent.GetId(), entry.FromTx(txParent));
-  BOOST_CHECK_EQUAL(testPool.size(), 1UL);
-  BOOST_CHECK_EQUAL(testPool.mapTx.size(), 1UL);
-  BOOST_CHECK_EQUAL(testPool.mapNextTx.size(), 1UL);
-  BOOST_CHECK_EQUAL(testPool.vTxHashes.size(), 1UL);
 
-  // CTxMemPool's members should be empty after a clear
-  testPool.clear();
-  BOOST_CHECK_EQUAL(testPool.size(), 0UL);
-  BOOST_CHECK_EQUAL(testPool.mapTx.size(), 0UL);
-  BOOST_CHECK_EQUAL(testPool.mapNextTx.size(), 0UL);
-  BOOST_CHECK_EQUAL(testPool.vTxHashes.size(), 0UL);
+  {
+      LOCK(testPool.cs);
+      
+      BOOST_CHECK_EQUAL(testPool.size(), 1UL);
+      BOOST_CHECK_EQUAL(testPool.mapTx.size(), 1UL);
+      BOOST_CHECK_EQUAL(testPool.mapNextTx.size(), 1UL);
+      BOOST_CHECK_EQUAL(testPool.vTxHashes.size(), 1UL);
+      
+      // CTxMemPool's members should be empty after a clear
+      testPool.clear();
+      BOOST_CHECK_EQUAL(testPool.size(), 0UL);
+      BOOST_CHECK_EQUAL(testPool.mapTx.size(), 0UL);
+      BOOST_CHECK_EQUAL(testPool.mapNextTx.size(), 0UL);
+      BOOST_CHECK_EQUAL(testPool.vTxHashes.size(), 0UL);
+
+  }
 }
 
 template <typename name>

@@ -13,6 +13,7 @@
 #include <init.h>
 #include <net.h>
 #include <netbase.h>
+#include <utxo_functions.h>
 #include <rpc/blockchain.h>
 #include <rpc/server.h>
 #include <timedata.h>

@@ -1,4 +1,5 @@
 #include <rpc/blockchain.h>
+#include <utxo_functions.h>
 
 #include <chain.h>
 
