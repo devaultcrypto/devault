@@ -1669,7 +1669,8 @@ CBlockIndex *CWallet::ScanForWalletTransactions(
                 LogPrintf("Still rescanning. At block %d. Progress=%f\n",
                           pindex->nHeight, gvp);
             }
-
+            if (StopDialogRequested()) AbortRescan();
+          
             CBlock block;
             if (ReadBlockFromDisk(block, pindex, GetConfig())) {
                 LOCK2(cs_main, cs_wallet);
