@@ -11,13 +11,8 @@
 #include <random.h>
 #include <uint256.h>
 #include <util.h>
-
-#ifdef HAVE_STD_SHARED_MUTEX
 #include <shared_mutex>
-#else
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/locks.hpp>
-#endif
+
 
 namespace {
 
@@ -48,11 +43,7 @@ private:
     uint256 nonce;
     typedef CuckooCache::cache<uint256, SignatureCacheHasher> map_type;
     map_type setValid;
-#ifdef HAVE_STD_SHARED_MUTEX
     std::shared_mutex cs_sigcache;
-#else
-    boost::shared_mutex cs_sigcache;
-#endif
 
 public:
     CSignatureCache() { GetRandBytes(nonce.begin(), 32); }
@@ -71,20 +62,12 @@ public:
     }
 
     bool Get(const uint256 &entry, const bool erase) {
-#ifdef HAVE_STD_SHARED_MUTEX
         std::shared_lock<std::shared_mutex> lock(cs_sigcache);
-#else
-        boost::shared_lock<boost::shared_mutex> lock(cs_sigcache);
-#endif
         return setValid.contains(entry, erase);
     }
 
     void Set(uint256 &entry) {
-#ifdef HAVE_STD_SHARED_MUTEX
         std::unique_lock<std::shared_mutex> lock(cs_sigcache);
-#else
-        boost::unique_lock<boost::shared_mutex> lock(cs_sigcache);
-#endif
         setValid.insert(entry);
     }
     uint32_t setup_bytes(size_t n) { return setValid.setup_bytes(n); }

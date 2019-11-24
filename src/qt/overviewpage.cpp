@@ -267,11 +267,7 @@ void OverviewPage::setWalletModel(WalletModel *model) {
 
 void OverviewPage::updateDisplayUnit() {
     if (walletModel && walletModel->getOptionsModel()) {
-#ifdef HAVE_VARIANT
         if (m_balances.currentBalanceOptional != std::nullopt) {
-#else
-        if (m_balances.currentBalanceOptional.is_initialized()) {
-#endif
             setBalance(m_balances);
         }
         // Update txdelegate->unit with the current unit

@@ -10,12 +10,7 @@
 #include <primitives/transaction.h>
 #include <utilstrencodings.h>
 
-#ifdef HAVE_VARIANT
 #include <variant>
-#else
-#include <boost/variant/static_visitor.hpp>
-#endif
-
 #include <algorithm>
 
 namespace {
@@ -70,12 +65,7 @@ std::vector<uint8_t> PackAddrData(const T &id, uint8_t type) {
 }
 
 // Implements encoding of CTxDestination using cashaddr.
-class CashAddrEncoder 
-#ifdef HAVE_VARIANT
-  : public std::variant<std::string> {
-#else
-  : public boost::static_visitor<std::string> {
-#endif
+class CashAddrEncoder  : public std::variant<std::string> {
 public:
     CashAddrEncoder(const CChainParams &p) : params(p) {}
 
@@ -96,12 +86,7 @@ private:
 };
 
 // Implements encoding of CTxDestination using cashaddr.
-class CashSecretAddrEncoder
-#ifdef HAVE_VARIANT
-  : public std::variant<std::string> {
-#else
-  : boost::static_visitor<std::string> {
-#endif
+class CashSecretAddrEncoder  : public std::variant<std::string> {
 public:
     CashSecretAddrEncoder(const CChainParams &p) : params(p) {}
 
@@ -125,11 +110,7 @@ private:
 
 std::string EncodeCashAddr(const CTxDestination &dst,
                            const CChainParams &params) {
-#ifdef HAVE_VARIANT
   return std::visit(CashAddrEncoder(params), dst);
-#else
-  return boost::apply_visitor(CashAddrEncoder(params), dst);
-#endif
 }
 
 std::string EncodeCashAddr(const std::string &prefix,

@@ -150,11 +150,7 @@ static UniValue verifymessage(const Config &config,
     if (!IsValidDestination(destination)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
-#ifdef HAVE_VARIANT
     const CKeyID *keyID = &std::get<CKeyID>(destination);
-#else
-    const CKeyID *keyID = boost::get<CKeyID>(&destination);
-#endif
     if (!keyID) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
