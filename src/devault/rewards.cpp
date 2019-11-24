@@ -21,9 +21,6 @@
 
 using namespace std;
 
-const int Last1000Height = 110420;
-const int SuperBlock5Height = 109575;
-
 CCriticalSection cs_rewardsdb;
 
 // Probably should be a shared function
@@ -43,6 +40,7 @@ CColdRewards::CColdRewards(const Consensus::Params &consensusParams, CRewardsVie
 void CColdRewards::Setup(const Consensus::Params &consensusParams) {
   nMinBlocks = consensusParams.nMinRewardBlocks;
   nMinReward = consensusParams.nMinReward;
+  fMainNet = GetConfig().GetChainParams().NetworkIDString() == "main";
 }
 
 bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew) {
@@ -223,11 +221,6 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   const int32_t maxreorgdepth = gArgs.GetArg("-maxreorgdepth", DEFAULT_MAX_REORG_DEPTH);
   std::vector<COutPoint> cacheRemovals;
     
-  Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
-  bool skipLowBalance = false;
-  
-  int TempMaxDiff = 0;
-  
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
@@ -236,10 +229,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   
     int nHeight = the_reward.GetHeight();
     
-    skipLowBalance = (nHeight >= Last1000Height && the_reward.GetValue() < minRewardBalance);
-
     // get Height (last reward)
-    if (the_reward.IsActive() && !skipLowBalance) {
+    if (the_reward.IsActive()) {
       count++; // just count active ones
       if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
         HeightDiff = Height - nHeight;
@@ -281,21 +272,9 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
             }
             found = true;
           }
-        } else {
-          // Temp code for debug usea
-          if (HeightDiff > TempMaxDiff) {
-            TempMaxDiff = HeightDiff;
-            int blocksToGo = 21915 - TempMaxDiff;
-            LogPrint(BCLog::COLD, "CR: %s : For  Diff % d : Blocks left %d, Candidate : %s\n", __func__, TempMaxDiff,blocksToGo, the_reward.ToString());
-          }
-          // end
         }
       }
     } else {
-      if (skipLowBalance) {
-          LogPrint(BCLog::COLD, "CR: %s : Dropping Candidate %s : %s, Reward %d\n", __func__,the_reward.ToString());
-          pdb->EraseReward(key);
-      }
       // For very old in-active entires we should remove from the db,
       auto el = cachedInactives.find(key);
       if (el != cachedInactives.end()) {
@@ -405,10 +384,20 @@ CTxOut CColdRewards::GetPayment(const CRewardValue &coinreward, Amount reward) {
 // Validate!
 
 bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlock &block, int nHeight,
-                            Amount &reward) {
+                            Amount &reward, bool fJustCheck) {
+    
   auto txCoinbase = block.vtx[0];
   int size = txCoinbase->vout.size();
-  Amount minRewardBalance = consensusParams.getMinRewardBalance(nHeight);
+
+  if (fJustCheck) {
+      if (size > 1) {
+          reward = txCoinbase->vout[1].nValue;
+      } else {
+          reward = Amount();
+      }
+      return true;
+  }
+  
   // Coinbase has Cold Reward
   CTxOut out;
   // Found Reward
@@ -418,35 +407,30 @@ bool CColdRewards::Validate(const Consensus::Params &consensusParams, const CBlo
       CTxOut coinbase_reward = txCoinbase->vout[1];
       bool valid = (out == coinbase_reward);
       if (!valid) {
-        LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n", GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
+        LogPrintf("ERROR: Cold Reward invalid since TxOut doesn't match,\n coinbase(%s : %d)\n reward  (%s : %d)\n",
+                  GetAddrFromTxOut(coinbase_reward),coinbase_reward.nValue, GetAddrFromTxOut(out),out.nValue);
       }
       return valid;
     } else {
-      LogPrintf("WARNING: Have Cold Reward in local DB but not in actual coinbase,address = %s : reward : %d\n\n", GetAddrFromTxOut(out),out.nValue.ToString());
-      if (reward < minRewardBalance) {
-        pdb->EraseReward(rewardKey); // removing....
+      if (((nHeight == 110068) || (nHeight == 110070)) && fMainNet) {
+        pdb->EraseReward(rewardKey); // removing due to hard fork issue Nov 2019
+        reward = Amount::zero();
+        // Coinbase has Reward but FindReward can't find it
+        return true;
+      } else {
+        LogPrintf("WARNING: Have Cold Reward in local DB but not in actual coinbase,address = %s : reward : %d\n\n",
+                  GetAddrFromTxOut(out),out.nValue.ToString());
+        // Coinbase has Reward but FindReward can't find it
+        return false;
       }
-      reward = Amount::zero();
-      // Coinbase has Reward but FindReward can't find it
-      return true;
     }
     // Validate didn't find reward, so Coinbase size should be 1
   } else {
     bool valid = (size == 1);
     if (!valid) {
-      LogPrintf("WARNING: Cold Reward invalid since no Reward found but size != 1 (reward in coinbase) at %s for %d",GetAddrFromTxOut(txCoinbase->vout[1]), txCoinbase->vout[1].nValue);
+      LogPrintf("WARNING: Cold Reward invalid at Height %d since no Reward in DB but reward in coinbase at %s for %d \n",nHeight, GetAddrFromTxOut(txCoinbase->vout[1]), txCoinbase->vout[1].nValue);
     }
-    // Override case Coinbase has small reward due to re-org
-    if (size == 2 && (txCoinbase->vout[1].nValue < 2*consensusParams.nMinReward) && nHeight > SuperBlock5Height && nHeight < Last1000Height) {
-        // Let it go, if that address is in the DB already
-        std::string ref_addr = GetAddrFromTxOut(txCoinbase->vout[1]);
-        bool in_db =  CheckReward(ref_addr);
-        LogPrintf("WARNING: Cold Reward in coinbase but not in DB (reward in coinbase) at %s for %d, this address in reward db? %d",ref_addr, txCoinbase->vout[1].nValue, in_db);
-        valid = in_db;
-        reward = txCoinbase->vout[1].nValue;
-    } else {
-      reward = Amount();
-    }
+    reward = Amount();
     return valid;
   }
 }
