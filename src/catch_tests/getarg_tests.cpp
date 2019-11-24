@@ -9,13 +9,13 @@
 #include <vector>
 
 #include "catch_unit.h"
-#include <boost/algorithm/string.hpp>
+#include <utilsplitstring.h>
 
 // BOOST_FIXTURE_TEST_SUITE(getarg_tests, BasicTestingSetup)
 
 static void ResetArgs(const std::string &strArg) {
   std::vector<std::string> vecArg;
-  if (strArg.size()) boost::split(vecArg, strArg, boost::is_space(), boost::token_compress_on);
+  if (strArg.size()) Split(vecArg, strArg, " ");
 
   // Insert dummy executable name:
   vecArg.insert(vecArg.begin(), "testbitcoin");
