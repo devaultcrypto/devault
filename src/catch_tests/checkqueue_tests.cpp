@@ -7,7 +7,6 @@
 #include <validation.h>
 
 #include <atomic>
-#include <boost/thread.hpp>
 #include <checkqueue.h>
 #include <condition_variable>
 #include <mutex>

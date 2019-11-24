@@ -5,9 +5,7 @@
 #include <test/scriptflags.h>
 
 #include <script/interpreter.h>
-
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <utilsplitstring.h>
 
 #include <map>
 #include <vector>
@@ -43,7 +41,7 @@ uint32_t ParseScriptFlags(std::string strFlags) {
 
   uint32_t flags = 0;
   std::vector<std::string> words;
-  boost::algorithm::split(words, strFlags, boost::algorithm::is_any_of(","));
+  Split(words, strFlags,"," );
 
   for (std::string &word : words) {
     if (!mapFlagNames.count(word)) BOOST_ERROR("Bad test: unknown verification flag '" + word + "'");
