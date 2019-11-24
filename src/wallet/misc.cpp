@@ -144,13 +144,7 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
 }
 
 
-class DescribeAddressVisitor
-#ifdef HAVE_VARIANT
-  : public std::variant<UniValue>
-#else
-  : public boost::static_visitor<UniValue>
-#endif
-{
+class DescribeAddressVisitor  : public std::variant<UniValue> {
 public:
     CWallet *const pwallet;
 
@@ -263,22 +257,14 @@ static UniValue validateaddress(const Config &config,
         isminetype mine = pwallet ? IsMine(*pwallet, dest) : ISMINE_NO;
         ret.pushKV("ismine", (mine & ISMINE_SPENDABLE) ? true : false);
         ret.pushKV("iswatchonly", (mine & ISMINE_WATCH_ONLY) ? true : false);
-#ifdef HAVE_VARIANT
         UniValue detail = std::visit(DescribeAddressVisitor(pwallet), dest);
-#else
-        UniValue detail = boost::apply_visitor(DescribeAddressVisitor(pwallet), dest);
-#endif
         ret.pushKVs(detail);
         if (pwallet && pwallet->mapAddressBook.count(dest)) {
             ret.pushKV("account", pwallet->mapAddressBook[dest].name);
         }
         if (pwallet) {
             const CKeyMetadata *meta = nullptr;
-#ifdef HAVE_VARIANT
             if (const CKeyID *key_id = &std::get<CKeyID>(dest)) {
-#else
-            if (const CKeyID *key_id = boost::get<CKeyID>(&dest)) {
-#endif
               auto it = pwallet->mapKeyMetadata.find(*key_id);
               if (it != pwallet->mapKeyMetadata.end()) meta = &it->second;
               // inside if
