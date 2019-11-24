@@ -805,11 +805,7 @@ static UniValue signmessage(const Config &config,
     if (!IsValidDestination(dest)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
-#ifdef HAVE_VARIANT
     const CKeyID *keyID = &std::get<CKeyID>(dest);
-#else
-    const CKeyID *keyID = boost::get<CKeyID>(&dest);
-#endif
     if (!keyID) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
@@ -3515,11 +3511,7 @@ static UniValue listunspent(const Config &config,
             }
 
             if (scriptPubKey.IsPayToScriptHash()) {
-#ifdef HAVE_VARIANT
                 const CScriptID &hash = std::get<CScriptID>(address);
-#else
-                const CScriptID &hash = boost::get<CScriptID>(address);
-#endif
                 CScript redeemScript;
                 if (pwallet->GetCScript(hash, redeemScript)) {
                     entry.pushKV("redeemScript", HexStr(redeemScript.begin(),
