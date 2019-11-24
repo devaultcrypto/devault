@@ -25,6 +25,7 @@ class CColdRewards {
   Amount nMaxReward;
   Amount nMinReward;
   int32_t nNumCandidates = 0; // num of reward candidates (that are active)
+  bool fMainNet;
   std::map<COutPoint, int> cachedInactives; // cache map on Inactive rewards that are still needed in case of re-org
 
   public:
@@ -34,7 +35,7 @@ class CColdRewards {
   CTxOut GetPayment(const CRewardValue &coin, Amount reward);
   bool FindReward(const Consensus::Params &consensusParams, int Height, CTxOut &out);
   void FillPayments(const Consensus::Params &consensusParams, CMutableTransaction &txNew, int nHeight);
-  bool Validate(const Consensus::Params &consensusParams, const CBlock &block, int nHeight, Amount &reward);
+  bool Validate(const Consensus::Params &consensusParams, const CBlock &block, int nHeight, Amount &reward, bool fJustCheck=0);
   void UpdateRewardsDB(int nNewHeight);
   bool UndoBlock(const CBlock &block, const CBlockIndex *pindex, bool undoReward = true);
   bool RestoreRewardAtHeight(int Height);

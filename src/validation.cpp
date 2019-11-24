@@ -1916,9 +1916,9 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                        REJECT_INVALID, "bad-cb-amount");
     }
   
+    // Only check Cold Rewards, if not a Superblock
     if (!pbudget->IsSuperBlock(pindex->nHeight)) {
-      // Only check Cold Rewards, if not a Superblock
-      if (!prewards->Validate(consensusParams, block, pindex->nHeight, nColdReward)) {
+      if (!prewards->Validate(consensusParams, block, pindex->nHeight, nColdReward, ignoreAddressIndex)) {
         return state.DoS(100,
                          error("ConnectBlock(): Cold Reward Invalid with %s",FormatStateMessage(state)),
                          REJECT_INVALID, "bad-cb-amount");

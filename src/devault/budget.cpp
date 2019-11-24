@@ -71,11 +71,11 @@ bool CBudget::Validate(const CBlock &block, int nHeight, const Amount &BlockRewa
   // Just Log during Validation
   for (int i = 0; i < BudgetSize; i++) {
     if (fTestNet) {
-      LogPrintf("%s: budget payment to %s (%s) for %d COINs\n", __func__, Payouts[Index].budget[i].Purpose,
-                Payouts[Index].budget[i].TestNetAddress, nPayment[i] );
+      LogPrintf("%s: budget payment to %s (%s) for %s COINs\n", __func__, Payouts[Index].budget[i].Purpose,
+                Payouts[Index].budget[i].TestNetAddress, nPayment[i].ToString() );
     } else {
-      LogPrintf("%s: budget payment to %s (%s) for %d COINs\n", __func__, Payouts[Index].budget[i].Purpose,
-                Payouts[Index].budget[i].MainNetAddress, nPayment[i] );
+      LogPrintf("%s: budget payment to %s (%s) for %s COINs\n", __func__, Payouts[Index].budget[i].Purpose,
+                Payouts[Index].budget[i].MainNetAddress, nPayment[i].ToString() );
     }
   }
 
