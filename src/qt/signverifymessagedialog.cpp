@@ -117,11 +117,7 @@ void SignVerifyMessageDialog::on_signMessageButton_SM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-#ifdef HAVE_VARIANT
     const CKeyID *keyID = &std::get<CKeyID>(destination);
-#else
-    const CKeyID *keyID = boost::get<CKeyID>(&destination);
-#endif
     if (!keyID) {
         ui->addressIn_SM->setValid(false);
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
@@ -201,12 +197,8 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-#ifdef HAVE_VARIANT
     CKeyID *keyID = &std::get<CKeyID>(destination);
     if (!keyID) {
-#else
-    if (!boost::get<CKeyID>(&destination)) {
-#endif
         ui->addressIn_VM->setValid(false);
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(
