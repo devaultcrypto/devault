@@ -11,11 +11,7 @@
 #include <script/script_flags.h>
 #include <uint256.h>
 
-#ifdef HAVE_VARIANT
 #include <variant>
-#else
-#include <boost/variant.hpp>
-#endif
 #include <cstdint>
 
 static const bool DEFAULT_ACCEPT_DATACARRIER = true;
@@ -82,11 +78,8 @@ public:
  *  * CScriptID: TX_SCRIPTHASH destination
  *  A CTxDestination is the internal data type encoded in a bitcoin address
  */
-#ifdef HAVE_VARIANT
 typedef std::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
-#else
-typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
-#endif
+
 
 /** Check whether a CTxDestination is a CNoDestination. */
 bool IsValidDestination(const CTxDestination &dest);
