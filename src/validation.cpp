@@ -184,6 +184,14 @@ std::set<const CBlockIndex *> setDirtyBlockIndex;
 std::set<int> setDirtyFileInfo;
 } // namespace
 
+// Convert to % done for Show Progress based on Depth + Level
+int CalculatePercentDone(int HeightDiff, int nCheckDepth, int nCheckLevel) {
+    int percentageDone = std::max(1, std::min(99,
+                                          (int)(((double)HeightDiff /(double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100)))));
+    return percentageDone;
+}
+
+
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
     // Find the first block the caller has in the main chain
@@ -4572,10 +4580,7 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
          pindex = pindex->pprev) {
         if (StopDialogRequested()) break;
         interruption_point(ShutdownRequested());
-        int percentageDone = std::max(1, std::min(99,
-                                                  (int)(((double)(chainActive.Height() - pindex->nHeight)) /
-                                                        (double)nCheckDepth * (nCheckLevel >= 4 ? 50 : 100))));
-
+        int percentageDone = CalculatePercentDone(chainActive.Height() - pindex->nHeight,nCheckDepth, nCheckLevel);
         if (reportDone < percentageDone / 10) {
             // report every 10% step
             LogPrintf("[%d%%]...", percentageDone);
@@ -4662,13 +4667,8 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         while (pindex != chainActive.Tip()) {
             if (StopDialogRequested()) break;
             interruption_point(ShutdownRequested());
-
             uiInterface.ShowProgress(
-                _("Verifying blocks..."),
-                std::max(
-                    1, std::min(99, 100 - (int)(((double)(chainActive.Height() -
-                                                          pindex->nHeight)) /
-                                                (double)nCheckDepth * 50))),
+                _("Verifying blocks..."), CalculatePercentDone(chainActive.Height() - pindex->nHeight, nCheckDepth, nCheckLevel),
                 false);
             pindex = chainActive.Next(pindex);
             CBlock block;
