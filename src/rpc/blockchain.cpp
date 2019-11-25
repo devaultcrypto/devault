@@ -1548,8 +1548,9 @@ static UniValue verifychain(const Config &config,
         nCheckDepth = request.params[1].get_int();
     }
 
-    return CVerifyDB().VerifyDB(config, pcoinsTip.get(), nCheckLevel,
-                                nCheckDepth);
+    bool ret = CVerifyDB().VerifyDB(config, pcoinsTip.get(), nCheckLevel, nCheckDepth);
+    if (!ret) throw JSONRPCError(RPC_MISC_ERROR, "Failed Verifychain Check");
+    return ret;
 }
 
 UniValue getblockchaininfo(const Config &config,
