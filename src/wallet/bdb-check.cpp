@@ -37,7 +37,21 @@ static bool WalletAppInit(int argc, char* argv[]) {
     BCLog::Logger &logger = GetLogger();
     logger.m_print_to_console = true; //gArgs.GetBoolArg("-printtoconsole", gArgs.GetBoolArg("-debug", false));
     
-    if (!fs::is_directory(GetDataDir(false))) {
+    gArgs.AddArg("-testnet", _("Use the test chain"), false, OptionsCategory::OPTIONS);
+    
+    std::string error;
+    if (!gArgs.ParseParameters(argc, argv, error)) {
+        fprintf(stderr, "Error parsing command line arguments: %s\n",
+                error.c_str());
+        return EXIT_FAILURE;
+    }
+
+
+    bool fTestNet =  gArgs.IsArgSet("-testnet");
+    
+    if (fTestNet) SelectParams(CBaseChainParams::TESTNET);
+    
+    if (!fs::is_directory(GetDataDir(fTestNet))) {
         tfm::format(std::cerr, "Error: Specified data directory \"%s\" does not exist.\n", gArgs.GetArg("-datadir", "").c_str());
         return false;
     }

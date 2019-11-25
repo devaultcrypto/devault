@@ -110,7 +110,7 @@ static void WalletShowInfo(CWallet *wallet_instance) {
 
   bool decrypt = unlockWallet(wallet_instance);
 
-  if (!decrypt) {
+  if (!decrypt || wallet_instance->Unlock("")) {
     i = 0;
     for (const auto &m : wallet_instance->mapAddressBook) {
       tfm::format(std::cout, "[%d] Address: %s, purpose: %s, name: %s\n", i++, EncodeDestination(m.first),
