@@ -947,7 +947,9 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime &blockDate,
         actProgressBar->setVisible(true);
         progressBar->setMaximum(1000000000);
         progressBar->setValue(1000000000);
-        progressBarLabel->setText(tr("Fully synchronized!"));
+        std::stringstream stmp;
+        stmp << "Synced at Block " << count;
+        progressBarLabel->setText(QString::fromStdString(stmp.str()));
     } else {
         QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
 
