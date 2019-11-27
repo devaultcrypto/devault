@@ -52,7 +52,11 @@ TransactionDesc::FormatTxStatus(const interfaces::WalletTx &wtx,
         } else if (nDepth < 6) {
             return tr("%1/unconfirmed").arg(nDepth);
         } else {
-            return tr("%1 confirmations").arg(nDepth);
+            QString conf;
+            conf.reserve(100);
+            conf += tr("%1 confirmations").arg(nDepth);
+            conf += tr(" since block %1").arg(status.block_height);
+            return conf;
         }
     }
 }
