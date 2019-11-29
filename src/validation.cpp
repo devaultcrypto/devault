@@ -4020,7 +4020,7 @@ static bool AcceptBlock(const Config &config,
     if (gArgs.GetBoolArg("-parkdeepreorg", true)) {
         const CBlockIndex *pindexFork = chainActive.FindFork(pindex);
         if (pindexFork && pindexFork->nHeight + 1 < pindex->nHeight) {
-            LogPrintf("Park block %s as it would cause a deep reorg.\n",pindex->GetBlockHash().ToString());
+            LogPrint(BCLog::NET,"Park block %s as it would cause a deep reorg. fork height = %d, other height = %d\n",pindex->GetBlockHash().ToString(), pindexFork->nHeight, pindex->nHeight);
             pindex->nStatus = pindex->nStatus.withParked();
             setDirtyBlockIndex.insert(pindex);
         }
