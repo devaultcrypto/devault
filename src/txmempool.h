@@ -239,7 +239,7 @@ private:
 
 // extracts a transaction hash from CTxMempoolEntry or CTransactionRef
 struct mempoolentry_txid {
-    typedef uint256 result_type;
+    typedef TxId result_type;
     result_type operator()(const CTxMemPoolEntry &entry) const {
         return entry.GetTx().GetId();
     }
@@ -405,7 +405,7 @@ private:
 public:
     SaltedTxidHasher();
 
-    size_t operator()(const uint256 &txid) const {
+    size_t operator()(const TxId &txid) const {
         return SipHashUint256(k0, k1, txid);
     }
 };
@@ -632,9 +632,9 @@ public:
     void clear();
     // lock free
     void _clear() EXCLUSIVE_LOCKS_REQUIRED(cs);
-    bool CompareDepthAndScore(const uint256 &hasha, const uint256 &hashb);
-    void queryHashes(std::vector<uint256> &vtxid);
-    bool isSpent(const COutPoint &outpoint);
+    bool CompareDepthAndScore(const TxId &txida, const TxId &txidb);
+    void queryHashes(std::vector<uint256> &vtxid) const;
+    bool isSpent(const COutPoint &outpoint) const;
     unsigned int GetTransactionsUpdated() const;
     void AddTransactionsUpdated(unsigned int n);
     /**
@@ -645,7 +645,7 @@ public:
     bool HasNoInputsOf(const CTransaction &tx) const;
 
     /** Affect CreateNewBlock prioritisation of transactions */
-    void PrioritiseTransaction(const uint256 &hash, double dPriorityDelta,
+    void PrioritiseTransaction(const TxId &txid, double dPriorityDelta,
                                const Amount nFeeDelta);
     void ApplyDeltas(const uint256 hash, double &dPriorityDelta,
                      Amount &nFeeDelta) const;
@@ -736,7 +736,7 @@ public:
      * Returns false if the transaction is in the mempool and not within the
      * chain limit specified.
      */
-    bool TransactionWithinChainLimit(const uint256 &txid,
+    bool TransactionWithinChainLimit(const TxId &txid,
                                      size_t chainLimit) const;
 
     /** @returns true if the mempool is fully loaded */
@@ -755,13 +755,13 @@ public:
         return totalTxSize;
     }
 
-    bool exists(uint256 hash) const {
+    bool exists(const TxId &txid) const {
         LOCK(cs);
-        return mapTx.count(hash) != 0;
+        return mapTx.count(txid) != 0;
     }
 
-    CTransactionRef get(const uint256 &hash) const;
-    TxMempoolInfo info(const uint256 &hash) const;
+    CTransactionRef get(const TxId &txid) const;
+    TxMempoolInfo info(const TxId &txid) const;
     std::vector<TxMempoolInfo> infoAll() const;
 
     CFeeRate estimateFee() const;
