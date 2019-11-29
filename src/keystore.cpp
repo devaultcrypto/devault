@@ -15,6 +15,7 @@ bool CKeyStore::AddKey(const CKey &key) {
 
 // Remove key temporarily added for Sweep function
 bool CBasicKeyStore::RemoveKey(const CKey& key) {
+    LOCK(cs_KeyStore);
     if (mapKeys.count(key.GetPubKey().GetKeyID())) {
         return mapKeys.erase(key.GetPubKey().GetKeyID());
     } else if (mapBLSKeysTemp.count(key.GetPubKeyForBLS().GetBLSKeyID())) {

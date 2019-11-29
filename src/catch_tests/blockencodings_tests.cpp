@@ -176,7 +176,7 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
   LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[2]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
-  uint256 txhash;
+  TxId txid;
 
   // Test with pre-forwarding tx 1, but not coinbase
   {
@@ -227,15 +227,15 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
     BOOST_CHECK_EQUAL(block.hashMerkleRoot.ToString(), BlockMerkleRoot(block3, &mutated).ToString());
     BOOST_CHECK(!mutated);
 
-    txhash = block.vtx[2]->GetId();
+    txid = block.vtx[2]->GetId();
     block.vtx.clear();
     block2.vtx.clear();
     block3.vtx.clear();
 
     // + 1 because of partialBlockCopy.
-    BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
+    BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
   }
-  BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
+  BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 }
 
 TEST_CASE("SufficientPreforwardRTTest") {
@@ -248,7 +248,7 @@ TEST_CASE("SufficientPreforwardRTTest") {
   LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[1]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
-  uint256 txhash;
+  TxId txid;
 
   // Test with pre-forwarding coinbase + tx 2 with tx 1 in mempool
   {
@@ -282,14 +282,14 @@ TEST_CASE("SufficientPreforwardRTTest") {
     BOOST_CHECK_EQUAL(block.hashMerkleRoot.ToString(), BlockMerkleRoot(block2, &mutated).ToString());
     BOOST_CHECK(!mutated);
 
-    txhash = block.vtx[1]->GetId();
+    txid = block.vtx[1]->GetId();
     block.vtx.clear();
     block2.vtx.clear();
 
     // + 1 because of partialBlockCopy.
-    BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
+    BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
   }
-  BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
+  BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 }
 
 TEST_CASE("EmptyBlockRoundTripTest") {

@@ -301,10 +301,10 @@ static UniValue prioritisetransaction(const Config &config,
 
     LOCK(cs_main);
 
-    uint256 hash = ParseHashStr(request.params[0].get_str(), "txid");
+    TxId txid(ParseHashStr(request.params[0].get_str(), "txid"));
     Amount nAmount(request.params[2].get_int64());
 
-    g_mempool.PrioritiseTransaction(hash, request.params[1].get_real(),
+    g_mempool.PrioritiseTransaction(txid, request.params[1].get_real(),
                                     nAmount);
     return true;
 }
