@@ -335,8 +335,7 @@ bool CColdRewards::RestoreRewardAtHeight(int Height) {
     if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
 
     int nHeight = the_reward.GetHeight();
-    // Just put back into DB if >= Min Reward Balance
-    if (nHeight == Height && the_reward.GetValue() >= minRewardBalance) { // Bingo!
+    if (nHeight == Height) { // Bingo!
       // Restore previous height
       the_reward.SetHeight(the_reward.GetOldHeight());
       the_reward.payCount--;
