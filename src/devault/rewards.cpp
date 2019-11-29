@@ -220,6 +220,10 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   int64_t count = 0;
   const int32_t maxreorgdepth = gArgs.GetArg("-maxreorgdepth", DEFAULT_MAX_REORG_DEPTH);
   std::vector<COutPoint> cacheRemovals;
+  int64_t nBlocksPerPeriod = (GetConfig().GetChainParams().GetConsensus().nBlocksPerYear / 12);
+  Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
+  // Stop paying out UTXOs below minRewards after this point and remove from dB
+  bool stop_lowrewards = (Height >= 6*nBlocksPerPeriod);
     
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
@@ -228,9 +232,11 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
     if (!pcursor->GetValue(the_reward)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
   
     int nHeight = the_reward.GetHeight();
+
+    bool remove_lowrewards = (stop_lowrewards && (the_reward.GetValue() < minRewardBalance));
     
     // get Height (last reward)
-    if (the_reward.IsActive()) {
+    if (the_reward.IsActive() & !remove_lowrewards) {
       count++; // just count active ones
       if (nHeight <= minHeight) { // same Height OK to check for bigger rewards
         HeightDiff = Height - nHeight;
@@ -275,6 +281,10 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
         }
       }
     } else {
+      if (remove_lowrewards) {
+          LogPrint(BCLog::COLD, "CR: %s : Dropping Candidate %s : %s, Reward %d\n", __func__,the_reward.ToString());
+          pdb->EraseReward(key);
+      }
       // For very old in-active entires we should remove from the db,
       auto el = cachedInactives.find(key);
       if (el != cachedInactives.end()) {
@@ -325,9 +335,6 @@ void CColdRewards::GetInActivesFromDB(int Height) {
 bool CColdRewards::RestoreRewardAtHeight(int Height) {
   CRewardValue the_reward;
   COutPoint key;
-  
-  const Consensus::Params consensusParams = GetConfig().GetChainParams().GetConsensus();
-  Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
     interruption_point(ShutdownRequested());
