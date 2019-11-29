@@ -195,7 +195,7 @@ TEST_CASE("block_register") {
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   const Config &config = GetConfig();
@@ -362,11 +362,11 @@ TEST_CASE("multi_block_register") {
 
   // Make sure the block has a hash.
   CBlock blockA = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHashA = blockA.GetHash();
+  const BlockHash blockHashA = blockA.GetHash();
   const CBlockIndex *pindexA = mapBlockIndex[blockHashA];
 
   CBlock blockB = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHashB = blockB.GetHash();
+  const BlockHash blockHashB = blockB.GetHash();
   const CBlockIndex *pindexB = mapBlockIndex[blockHashB];
 
   // Querying for random block returns false.
@@ -460,7 +460,7 @@ TEST_CASE("poll_and_response") {
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   // There is no node to query.
@@ -555,7 +555,7 @@ TEST_CASE("poll_and_response") {
 
   // Out of order response are rejected.
   CBlock block2 = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash2 = block2.GetHash();
+  const BlockHash blockHash2 = block2.GetHash();
   CBlockIndex *pindex2 = mapBlockIndex[blockHash2];
   BOOST_CHECK(p.addBlockToReconcile(pindex2));
 
@@ -591,7 +591,7 @@ TEST_CASE("poll_inflight_timeout") {
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   // Add the block
@@ -642,7 +642,7 @@ TEST_CASE("poll_inflight_count") {
 
   // Add a block to poll
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
   BOOST_CHECK(p.addBlockToReconcile(pindex));
 
@@ -693,7 +693,7 @@ TEST_CASE("quorum_diversity") {
   std::vector<AvalancheBlockUpdate> updates;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   // Create nodes that supports avalanche.
@@ -761,7 +761,7 @@ TEST_CASE("event_loop") {
   CScheduler s;
 
   CBlock block = setup.CreateAndProcessBlock({}, CScript());
-  const uint256 blockHash = block.GetHash();
+  const BlockHash blockHash = block.GetHash();
   const CBlockIndex *pindex = mapBlockIndex[blockHash];
 
   // Starting the event loop.

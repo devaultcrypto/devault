@@ -26,10 +26,10 @@
 BOOST_AUTO_TEST_CASE(sanity) {
   const auto params = CreateChainParams(CBaseChainParams::MAIN);
   const CCheckpointData &checkpoints = params->Checkpoints();
-  uint256 p5000 = uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988db13888907");
-  //uint256 p0 = uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90");
-  uint256 p1 = uint256S("173c13a23fed27056b5a76912a27d62064cb988");
-  uint256 p2 = uint256S("38e62464371566f6a8d35c01aa54a7da351b2dbf85d92f");
+  BlockHash p5000 = BlockHash::fromHex("000000000000000173c13a23fed27056b5a76912a27d62064cb988db13888907");
+  //BlockHash p0 = BlockHashS("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90");
+  BlockHash p1 = BlockHash::fromHex("173c13a23fed27056b5a76912a27d62064cb988");
+  BlockHash p2 = BlockHash::fromHex("38e62464371566f6a8d35c01aa54a7da351b2dbf85d92f");
 
   BOOST_CHECK(Checkpoints::CheckBlock(checkpoints, 5000, p5000));
   //  BOOST_CHECK(Checkpoints::CheckBlock(checkpoints, 0, p0));
@@ -85,7 +85,7 @@ class MainnetConfigWithTestCheckpoints : public DummyConfig {
 
   static std::unique_ptr<CChainParams> createChainParams() {
     CCheckpointData checkpoints = {.mapCheckpoints = {
-                                       {2, uint256S("000000006a625f06636b8bb6ac7b960a8d0"
+                                                      {2, BlockHash::fromHex("000000006a625f06636b8bb6ac7b960a8d0"
                                                     "3705d1ace08b1a19da3fdcc99ddbd")},
                                    }};
     const auto mainParams = CreateChainParams(CBaseChainParams::MAIN);
@@ -107,7 +107,7 @@ TEST_CASE("ban_fork_prior_to_and_at_checkpoints") {
 
   // Start with mainnet genesis block
   CBlockHeader headerG = config.GetChainParams().GenesisBlock();
-  BOOST_CHECK(headerG.GetHash() == uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90"));
+  BOOST_CHECK(headerG.GetHash() == BlockHash::fromHex("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90"));
   BOOST_CHECK(ProcessNewBlockHeaders(config, {headerG}, state, &pindex, &invalid));
   pindex = nullptr;
 
@@ -120,7 +120,7 @@ TEST_CASE("ban_fork_prior_to_and_at_checkpoints") {
 
       SER_NETWORK, PROTOCOL_VERSION);
   stream >> headerA;
-  BOOST_CHECK(headerA.GetHash() == uint256S("00000000a2daf649e9d0c0453caba957f02b441bae82117627a723f399818c9e"));
+  BOOST_CHECK(headerA.GetHash() == BlockHash::fromHex("00000000a2daf649e9d0c0453caba957f02b441bae82117627a723f399818c9e"));
   BOOST_CHECK(headerA.hashPrevBlock == headerG.GetHash());
 
   stream = CDataStream(
@@ -130,7 +130,7 @@ TEST_CASE("ban_fork_prior_to_and_at_checkpoints") {
                "000ffffffff0100743ba40b0000001976a91480d057b26c1768ef56420a5c752ca7d3ed4a378288ac00000000"),
       SER_NETWORK, PROTOCOL_VERSION);
   stream >> headerAA;
-  BOOST_CHECK(headerAA.GetHash() == uint256S("00000000cff2a1fe12fb1ce2c85da0acb2a4a135935fe0a6df26626980770c8f"));
+  BOOST_CHECK(headerAA.GetHash() == BlockHash::fromHex("00000000cff2a1fe12fb1ce2c85da0acb2a4a135935fe0a6df26626980770c8f"));
   BOOST_CHECK(headerAA.hashPrevBlock == headerA.GetHash());
 
   stream = CDataStream(

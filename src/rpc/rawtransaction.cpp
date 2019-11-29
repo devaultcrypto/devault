@@ -42,7 +42,7 @@
 #include <future>
 #include <univalue.h>
 
-static void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
+static void TxToJSON(const CTransaction &tx, const BlockHash &hashBlock,
                      UniValue &entry) {
     // Call into TxToUniv() in bitcoin-common to decode the transaction hex.
     //
@@ -195,7 +195,7 @@ static UniValue getrawtransaction(const Config &config,
     if (!request.params[2].isNull()) {
         LOCK(cs_main);
 
-        uint256 blockhash = ParseHashV(request.params[2], "parameter 3");
+        BlockHash blockhash = BlockHash(ParseHashV(request.params[2], "parameter 3"));
         auto it = mapBlockIndex.find(blockhash);
         if (it == mapBlockIndex.end()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
@@ -211,7 +211,7 @@ static UniValue getrawtransaction(const Config &config,
     }
 
     CTransactionRef tx;
-    uint256 hash_block;
+    BlockHash hash_block;
     if (!GetTransaction(config, txid, tx, hash_block, true, blockindex)) {
         std::string errmsg;
         if (blockindex) {
@@ -298,10 +298,10 @@ static UniValue gettxoutproof(const Config &config,
 
     CBlockIndex *pblockindex = nullptr;
 
-    uint256 hashBlock;
+    BlockHash hashBlock;
     if (!request.params[1].isNull()) {
         LOCK(cs_main);
-        hashBlock = uint256S(request.params[1].get_str());
+        hashBlock = BlockHash::fromHex(request.params[1].get_str());
         if (!mapBlockIndex.count(hashBlock)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
         }

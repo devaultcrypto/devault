@@ -37,7 +37,7 @@ static CBlock BuildBlockTestCase() {
   block.vtx.resize(3);
   block.vtx[0] = MakeTransactionRef(tx);
   block.nVersion = 42;
-  block.hashPrevBlock = InsecureRand256();
+  block.hashPrevBlock = BlockHash(InsecureRand256());
   block.nBits = 0x207fffff;
 
   tx.vin[0].prevout = InsecureRandOutPoint();
@@ -305,7 +305,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
   block.vtx.resize(1);
   block.vtx[0] = MakeTransactionRef(std::move(coinbase));
   block.nVersion = 42;
-  block.hashPrevBlock = InsecureRand256();
+  block.hashPrevBlock = BlockHash(InsecureRand256());
   block.nBits = 0x207fffff;
 
   bool mutated;
@@ -343,7 +343,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
 TEST_CASE("TransactionsRequestSerializationTest") {
   RegtestingSetup setup;
   BlockTransactionsRequest req1;
-  req1.blockhash = InsecureRand256();
+  req1.blockhash = BlockHash(InsecureRand256());
   req1.indices.resize(4);
   req1.indices[0] = 0;
   req1.indices[1] = 1;

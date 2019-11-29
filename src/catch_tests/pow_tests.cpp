@@ -34,7 +34,7 @@ static void make_blocks(std::vector<CBlockIndex> &blocks, DummyConfig &config) {
   uint32_t initialBits = currentPow.GetCompact();
 
   // Genesis block.
-  const uint256 zeroHash = uint256();
+  const BlockHash zeroHash = BlockHash();
   blocks[0] = CBlockIndex();
   blocks[0].nHeight = 0;
   blocks[0].nTime = 1269211443;

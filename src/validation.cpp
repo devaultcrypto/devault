@@ -94,7 +94,7 @@ static const int32_t VERSIONBITS_TOP_BITS = 0x20000000UL;
 /** Total bits available for versionbits */
 // static const int32_t VERSIONBITS_NUM_BITS = 29;
 
-uint256 hashAssumeValid;
+BlockHash hashAssumeValid;
 arith_uint256 nMinimumChainWork;
 
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE_PER_KB);
@@ -205,7 +205,7 @@ BlockValidationOptions::BlockValidationOptions(const Config &config)
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
     // Find the first block the caller has in the main chain
-    for (const uint256 &hash : locator.vHave) {
+    for (const BlockHash &hash : locator.vHave) {
         auto mi = mapBlockIndex.find(hash);
         if (mi != mapBlockIndex.end()) {
             CBlockIndex *pindex = (*mi).second;
@@ -754,7 +754,7 @@ bool AcceptToMemoryPool(const Config &config, CTxMemPool &pool,
 }
 
 bool HashOnchainActive(const uint256 &hash) {
-    CBlockIndex *pblockindex = mapBlockIndex[hash];
+    CBlockIndex *pblockindex = mapBlockIndex[BlockHash(hash)];
 
     if (!chainActive.Contains(pblockindex)) {
         return false;
@@ -1691,8 +1691,8 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     }
 
     // Verify that the view's current state corresponds to the previous block
-    uint256 hashPrevBlock =
-        pindex->pprev == nullptr ? uint256() : pindex->pprev->GetBlockHash();
+    BlockHash hashPrevBlock =
+        pindex->pprev == nullptr ? BlockHash() : pindex->pprev->GetBlockHash();
     assert(hashPrevBlock == view.GetBestBlock());
 
     // Special case for the genesis block, skipping connection of its
@@ -3096,7 +3096,7 @@ static bool UnwindBlock(const Config &config, CValidationState &state,
 
     // The resulting new best tip may not be in setBlockIndexCandidates anymore,
     // so add it again.
-    for (const std::pair<const uint256, CBlockIndex *> &it : mapBlockIndex) {
+    for (const std::pair<const BlockHash, CBlockIndex *> &it : mapBlockIndex) {
         CBlockIndex *i = it.second;
         if (i->IsValid(BlockValidity::TRANSACTIONS) && i->nChainTx &&
             !setBlockIndexCandidates.value_comp()(i, chainActive.Tip())) {
@@ -3262,7 +3262,7 @@ bool IsBlockFinalized(const CBlockIndex *pindex) {
 static CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
     AssertLockHeld(cs_main);
     // Check for duplicate
-    uint256 hash = block.GetHash();
+    BlockHash hash = block.GetHash();
     auto it = mapBlockIndex.find(hash);
     if (it != mapBlockIndex.end()) {
         return it->second;
@@ -3800,7 +3800,7 @@ static bool AcceptBlockHeader(const Config &config, const CBlockHeader &block,
     const CChainParams &chainparams = config.GetChainParams();
 
     // Check for duplicate
-    uint256 hash = block.GetHash();
+    BlockHash hash = block.GetHash();
     auto miSelf = mapBlockIndex.find(hash);
     CBlockIndex *pindex = nullptr;
     if (hash != chainparams.GetConsensus().hashGenesisBlock) {
@@ -4178,7 +4178,7 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
     AssertLockHeld(cs_main);
     assert(pindexPrev && pindexPrev == chainActive.Tip());
     CCoinsViewCache viewNew(pcoinsTip.get());
-    uint256 block_hash(block.GetHash());
+    BlockHash block_hash(block.GetHash());
     CBlockIndex indexDummy(block);
     indexDummy.pprev = pindexPrev;
     indexDummy.nHeight = pindexPrev->nHeight + 1;
@@ -4229,7 +4229,7 @@ static uint64_t CalculateCurrentUsage() {
  * Prune a block file (modify associated database entries)
  */
 void PruneOneBlockFile(const int fileNumber) {
-    for (const std::pair<const uint256, CBlockIndex *> &it : mapBlockIndex) {
+    for (const auto &it : mapBlockIndex) {
         CBlockIndex *pindex = it.second;
         if (pindex->nFile == fileNumber) {
             pindex->nStatus = pindex->nStatus.withData(false).withUndo(false);
@@ -4442,7 +4442,9 @@ fs::path GetBlockPosFilename(const FlatFilePos &pos, const char *prefix) {
     return GetBlocksDir() / strprintf("%s%05u.dat", prefix, pos.nFile);
 }
 
-CBlockIndex *InsertBlockIndex(uint256 hash) {
+CBlockIndex *InsertBlockIndex(const BlockHash& hash) {
+    AssertLockHeld(cs_main);
+
     if (hash.IsNull()) {
         return nullptr;
     }
@@ -4820,7 +4822,7 @@ bool ReplayBlocks(const Config &config, CCoinsView *view) {
 
     CCoinsViewCache cache(view);
 
-    std::vector<uint256> hashHeads = view->GetHeadBlocks();
+    std::vector<BlockHash> hashHeads = view->GetHeadBlocks();
     if (hashHeads.empty()) {
         // We're already in a consistent state.
         return true;
@@ -5122,7 +5124,7 @@ bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
                 nRewind = blkdat.GetPos();
 
                 // detect out of order blocks, and store them for later
-                uint256 hash = block.GetHash();
+                BlockHash hash = block.GetHash();
                 if (hash != chainparams.GetConsensus().hashGenesisBlock &&
                     mapBlockIndex.find(block.hashPrevBlock) ==
                         mapBlockIndex.end()) {
@@ -5239,7 +5241,7 @@ static void CheckBlockIndex(const Consensus::Params &consensusParams) {
 
     // Build forward-pointing map of the entire block tree.
     std::multimap<CBlockIndex *, CBlockIndex *> forward;
-    for (const std::pair<const uint256, CBlockIndex *> &it : mapBlockIndex) {
+    for (const auto &it : mapBlockIndex) {
         forward.emplace(it.second->pprev, it.second);
     }
 
@@ -5719,7 +5721,7 @@ public:
     CMainCleanup() = default;
     ~CMainCleanup() {
         // block headers
-        for (const std::pair<const uint256, CBlockIndex *> &it :
+        for (const std::pair<const BlockHash, CBlockIndex *> &it :
              mapBlockIndex) {
             delete it.second;
         }
