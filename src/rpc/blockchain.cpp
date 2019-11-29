@@ -579,11 +579,11 @@ static UniValue getmempoolancestors(const Config &config,
         fVerbose = request.params[1].get_bool();
     }
 
-    uint256 hash = ParseHashV(request.params[0], "parameter 1");
+    TxId txid(ParseHashV(request.params[0], "parameter 1"));
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
@@ -606,10 +606,10 @@ static UniValue getmempoolancestors(const Config &config,
         UniValue o(UniValue::VOBJ);
         for (CTxMemPool::txiter ancestorIt : setAncestors) {
             const CTxMemPoolEntry &e = *ancestorIt;
-            const uint256 &_hash = e.GetTx().GetId();
+            const TxId &_txid = e.GetTx().GetId();
             UniValue info(UniValue::VOBJ);
             entryToJSON(info, e);
-            o.pushKV(_hash.ToString(), info);
+            o.pushKV(_txid.ToString(), info);
         }
         return o;
     }
@@ -649,11 +649,11 @@ static UniValue getmempooldescendants(const Config &config,
         fVerbose = request.params[1].get_bool();
     }
 
-    uint256 hash = ParseHashV(request.params[0], "parameter 1");
+    TxId txid(ParseHashV(request.params[0], "parameter 1"));
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
@@ -675,10 +675,10 @@ static UniValue getmempooldescendants(const Config &config,
         UniValue o(UniValue::VOBJ);
         for (CTxMemPool::txiter descendantIt : setDescendants) {
             const CTxMemPoolEntry &e = *descendantIt;
-            const uint256 &_hash = e.GetTx().GetId();
+            const TxId &_txid = e.GetTx().GetId();
             UniValue info(UniValue::VOBJ);
             entryToJSON(info, e);
-            o.pushKV(_hash.ToString(), info);
+            o.pushKV(_txid.ToString(), info);
         }
         return o;
     }
@@ -702,11 +702,11 @@ static UniValue getmempoolentry(const Config &config,
             HelpExampleRpc("getmempoolentry", "\"mytxid\""));
     }
 
-    uint256 hash = ParseHashV(request.params[0], "parameter 1");
+    TxId txid(ParseHashV(request.params[0], "parameter 1"));
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
