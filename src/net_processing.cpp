@@ -2007,6 +2007,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
         // cleanSubVer has /DeVault.../ for us
         ShouldUpgrade(cleanSubVer);
+      /* now superceded by Protocol bump - re-enable as/when needed, but edit ShouldConnect as appropriate
         bool connectnew = ShouldConnect(cleanSubVer);
         if (!connectnew) {
             connman->PushMessage(
@@ -2017,6 +2018,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
             pfrom->fDisconnect = true;
             return false;
         }
+       */
 
         
         LogPrint(BCLog::NET,
