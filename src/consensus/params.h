@@ -8,7 +8,7 @@
 
 #include <amount.h>
 #include <vector>
-#include <uint256.h>
+#include <primitives/blockhash.h>
 
 namespace Consensus {
 
@@ -16,7 +16,7 @@ namespace Consensus {
  * Parameters that influence chain consensus.
  */
 struct Params {
-    uint256 hashGenesisBlock;
+    BlockHash hashGenesisBlock;
     /** Unix time used for MTP activation of TBD upgrade */
     int blsActivationTime;
     /** Proof of work parameters */
@@ -35,7 +35,7 @@ struct Params {
     Amount nMinReward;
   
     uint256 nMinimumChainWork;
-    uint256 defaultAssumeValid;
+    BlockHash defaultAssumeValid;
 
     // Params for Zawy's LWMA difficulty adjustment algorithm.
     int64_t nZawyLwmaAveragingWindow;

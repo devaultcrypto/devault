@@ -2582,9 +2582,7 @@ static UniValue listsinceblock(const Config &config,
     isminefilter filter = ISMINE_SPENDABLE;
 
     if (!request.params[0].isNull() && !request.params[0].get_str().empty()) {
-        uint256 blockId;
-
-        blockId.SetHex(request.params[0].get_str());
+        BlockHash blockId(uint256S(request.params[0].get_str()));
         auto it = mapBlockIndex.find(blockId);
         if (it == mapBlockIndex.end()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");

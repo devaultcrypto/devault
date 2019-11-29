@@ -244,7 +244,7 @@ extern int64_t nMaxTipAge;
  * Block hash whose ancestors we will assume to have valid scripts without
  * checking them.
  */
-extern uint256 hashAssumeValid;
+extern BlockHash hashAssumeValid;
 
 /**
  * Minimum work we will assume exists on some valid chain.
@@ -444,7 +444,7 @@ void PruneOneBlockFile(const int fileNumber);
 void UnlinkPrunedFiles(const std::set<int> &setFilesToPrune);
 
 /** Create a new block index entry for a given block hash */
-CBlockIndex *InsertBlockIndex(uint256 hash);
+CBlockIndex *InsertBlockIndex(const BlockHash& hash);
 /** Flush all state, indexes and buffers to disk. */
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */

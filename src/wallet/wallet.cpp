@@ -195,7 +195,7 @@ std::shared_ptr<CWallet> LoadWallet(const CChainParams &chainParams,
  */
 CFeeRate CWallet::fallbackFee = CFeeRate(DEFAULT_FALLBACK_FEE);
 
-const uint256 CMerkleTx::ABANDON_HASH(uint256S(
+const BlockHash CMerkleTx::ABANDON_HASH(uint256S(
     "0000000000000000000000000000000000000000000000000000000000000001"));
 
 /** @defgroup mapWallet
@@ -1304,7 +1304,7 @@ bool CWallet::AbandonTransaction(interfaces::Chain::Lock &locked_chain,
     return true;
 }
 
-void CWallet::MarkConflicted(const uint256 &hashBlock, const TxId &txid) {
+void CWallet::MarkConflicted(const BlockHash &hashBlock, const TxId &txid) {
     auto locked_chain = chain().lock();
     LOCK(cs_wallet);
 

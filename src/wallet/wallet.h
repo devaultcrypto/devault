@@ -11,6 +11,7 @@
 #include <amount.h>
 #include <interfaces/chain.h>
 #include <outputtype.h>
+#include <primitives/blockhash.h>
 #include <script/ismine.h>
 #include <script/sign.h>
 #include <streams.h>
@@ -205,11 +206,11 @@ struct COutputEntry {
 class CMerkleTx {
 private:
     /** Constant used in hashBlock to indicate tx has been abandoned */
-    static const uint256 ABANDON_HASH;
+    static const BlockHash ABANDON_HASH;
 
 public:
     CTransactionRef tx;
-    uint256 hashBlock;
+    BlockHash hashBlock;
 
     /**
      * An nIndex == -1 means that hashBlock (in nonzero) refers to the earliest
@@ -230,7 +231,7 @@ public:
     }
 
     void Init() {
-        hashBlock = uint256();
+        hashBlock = BlockHash();
         nIndex = -1;
     }
 
@@ -748,7 +749,7 @@ private:
      * Mark a transaction (and its in-wallet descendants) as conflicting with a
      * particular block.
      */
-    void MarkConflicted(const uint256 &hashBlock, const TxId &txid);
+    void MarkConflicted(const BlockHash &hashBlock, const TxId &txid);
 
     void SyncMetaData(std::pair<TxSpends::iterator, TxSpends::iterator>);
 

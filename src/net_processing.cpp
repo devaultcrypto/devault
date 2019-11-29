@@ -225,7 +225,7 @@ struct CNodeState {
     //! The best known block we know this peer has announced.
     const CBlockIndex *pindexBestKnownBlock;
     //! The hash of the last unknown block this peer has announced.
-    uint256 hashLastUnknownBlock;
+    BlockHash hashLastUnknownBlock;
     //! The last full block we both have.
     const CBlockIndex *pindexLastCommonBlock;
     //! The best header we have sent our peer.
@@ -369,7 +369,7 @@ struct CNodeState {
         nMisbehavior = 0;
         fShouldBan = false;
         pindexBestKnownBlock = nullptr;
-        hashLastUnknownBlock.SetNull();
+        hashLastUnknownBlock = BlockHash();
         pindexLastCommonBlock = nullptr;
         pindexBestHeaderSent = nullptr;
         nUnconnectingHeaders = 0;
@@ -556,7 +556,7 @@ static void ProcessBlockAvailability(NodeId nodeid)
 }
 
 /** Update tracking information about which blocks a peer is assumed to have. */
-static void UpdateBlockAvailability(NodeId nodeid, const uint256 &hash)
+static void UpdateBlockAvailability(NodeId nodeid, const BlockHash &hash)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     CNodeState *state = State(nodeid);
     assert(state != nullptr);
@@ -1264,7 +1264,7 @@ void PeerLogicValidation::UpdatedBlockTip(const CBlockIndex *pindexNew,
     if (!fInitialDownload) {
         // Find the hashes of all blocks that weren't previously in the best
         // chain.
-        std::vector<uint256> vHashes;
+        std::vector<BlockHash> vHashes;
         const CBlockIndex *pindexToAnnounce = pindexNew;
         while (pindexToAnnounce != pindexFork) {
             vHashes.push_back(pindexToAnnounce->GetBlockHash());
@@ -1281,7 +1281,7 @@ void PeerLogicValidation::UpdatedBlockTip(const CBlockIndex *pindexNew,
             if (nNewHeight > (pnode->nStartingHeight != -1
                                   ? pnode->nStartingHeight - 2000
                                   : 0)) {
-                for (const uint256 &hash : reverse_iterate(vHashes)) {
+                for (const BlockHash &hash : reverse_iterate(vHashes)) {
                     pnode->PushBlockHash(hash);
                 }
             }
@@ -1375,7 +1375,7 @@ static bool AlreadyHave(const CInv &inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
                    pcoinsTip->HaveCoinInCache(COutPoint(txid, 1));
         }
         case MSG_BLOCK:
-            return mapBlockIndex.count(inv.hash);
+            return mapBlockIndex.count(BlockHash(inv.hash));
     }
     // Don't know what it is, just say we already got one
     return true;
@@ -1435,6 +1435,8 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
     const Consensus::Params &consensusParams =
         config.GetChainParams().GetConsensus();
 
+    const BlockHash hash(inv.hash);
+
     bool send = false;
     std::shared_ptr<const CBlock> a_recent_block;
     std::shared_ptr<const CBlockHeaderAndShortTxIDs> a_recent_compact_block;
@@ -1447,7 +1449,7 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
     bool need_activate_chain = false;
     {
         LOCK(cs_main);
-        auto mi = mapBlockIndex.find(inv.hash);
+        auto mi = mapBlockIndex.find(BlockHash(inv.hash));
         if (mi != mapBlockIndex.end()) {
             if (mi->second->nChainTx &&
                 !mi->second->IsValid(BlockValidity::SCRIPTS) &&
@@ -1470,7 +1472,7 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
     }
 
     LOCK(cs_main);
-    auto mi = mapBlockIndex.find(inv.hash);
+    auto mi = mapBlockIndex.find(BlockHash(inv.hash));
     if (mi != mapBlockIndex.end()) {
         send = BlockRequestAllowed(mi->second, consensusParams);
         if (!send) {
@@ -1588,14 +1590,14 @@ void static ProcessGetBlockData(const Config &config, CNode *pfrom,
 
         // Trigger the peer node to send a getblocks request for the next batch
         // of inventory.
-        if (inv.hash == pfrom->hashContinue) {
+        if (hash == pfrom->hashContinue) {
             // Bypass PushInventory, this must send even if redundant, and we
             // want it right after the last block so they don't wait for other
             // stuff first.
             std::vector<CInv> vInv;
             vInv.emplace_back(MSG_BLOCK, chainActive.Tip()->GetBlockHash());
             connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::INV, vInv));
-            pfrom->hashContinue.SetNull();
+            pfrom->hashContinue = BlockHash();
         }
     }
 }
@@ -1757,7 +1759,7 @@ static bool ProcessHeadersMessage(const Config &config, CNode *pfrom,
             return true;
         }
 
-        uint256 hashLastBlock;
+        BlockHash hashLastBlock;
         for (const CBlockHeader &header : headers) {
             if (!hashLastBlock.IsNull() &&
                 header.hashPrevBlock != hashLastBlock) {
@@ -2405,9 +2407,10 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                      fAlreadyHave ? "have" : "new", pfrom->GetId());
 
             if (inv.type == MSG_BLOCK) {
-                UpdateBlockAvailability(pfrom->GetId(), inv.hash);
+                const BlockHash hash(inv.hash);
+                UpdateBlockAvailability(pfrom->GetId(), hash);
                 if (!fAlreadyHave && !fImporting && !fReindex &&
-                    !mapBlocksInFlight.count(inv.hash)) {
+                    !mapBlocksInFlight.count(hash)) {
                     // We used to request the full block here, but since
                     // headers-announcements are now the primary method of
                     // announcement on the network, and since, in the case that
@@ -2419,9 +2422,9 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
                         pfrom,
                         msgMaker.Make(NetMsgType::GETHEADERS,
                                       chainActive.GetLocator(pindexBestHeader),
-                                      inv.hash));
+                                      hash));
                     LogPrint(BCLog::NET, "getheaders (%d) %s to peer=%d\n",
-                             pindexBestHeader->nHeight, inv.hash.ToString(),
+                             pindexBestHeader->nHeight, hash.ToString(),
                              pfrom->GetId());
                 }
             } else {
@@ -2602,7 +2605,7 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
     if (strCommand == NetMsgType::GETHEADERS) {
         CBlockLocator locator;
-        uint256 hashStop;
+        BlockHash hashStop;
         vRecv >> locator >> hashStop;
 
         if (locator.vHave.size() > MAX_LOCATOR_SZ) {
@@ -4151,7 +4154,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
             // Try to find first header that our peer doesn't have, and then
             // send all headers past that one. If we come across an headers that
             // aren't on chainActive, give up.
-            for (const uint256 &hash : pto->vBlockHashesToAnnounce) {
+            for (const auto &hash : pto->vBlockHashesToAnnounce) {
                 auto mi = mapBlockIndex.find(hash);
                 assert(mi != mapBlockIndex.end());
                 const CBlockIndex *pindex = mi->second;
@@ -4256,7 +4259,7 @@ bool PeerLogicValidation::SendMessages(const Config &config, CNode *pto,
             // last entry in vBlockHashesToAnnounce was our tip at some point in
             // the past.
             if (!pto->vBlockHashesToAnnounce.empty()) {
-                const uint256 &hashToAnnounce =
+                const BlockHash &hashToAnnounce =
                     pto->vBlockHashesToAnnounce.back();
                 auto mi = mapBlockIndex.find(hashToAnnounce);
                 assert(mi != mapBlockIndex.end());

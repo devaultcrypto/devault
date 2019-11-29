@@ -475,7 +475,7 @@ static UniValue getblocktemplate(const Config &config,
                                    "Block decode failed");
             }
 
-            uint256 hash = block.GetHash();
+            const BlockHash hash = block.GetHash();
             auto mi = mapBlockIndex.find(hash);
             if (mi != mapBlockIndex.end()) {
                 CBlockIndex *pindex = mi->second;
@@ -736,7 +736,7 @@ static UniValue submitblock(const Config &config,
                            "Block does not start with a coinbase");
     }
 
-    uint256 hash = block.GetHash();
+    const BlockHash hash = block.GetHash();
     {
         LOCK(cs_main);
         auto mi = mapBlockIndex.find(hash);
