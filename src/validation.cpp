@@ -749,6 +749,7 @@ static bool AcceptToMemoryPoolWithTime(
     const CTransactionRef &tx, bool fLimitFree, bool *pfMissingInputs,
     int64_t nAcceptTime, bool fOverrideMempoolLimit, const Amount nAbsurdFee,
     bool test_accept) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+    AssertLockHeld(cs_main);
     std::vector<COutPoint> coins_to_uncache;
     bool res = AcceptToMemoryPoolWorker(
         config, pool, state, tx, fLimitFree, pfMissingInputs, nAcceptTime,
@@ -1073,8 +1074,9 @@ static void CheckForkWarningConditionsOnNewFork(CBlockIndex *pindexNewForkTip)
     CheckForkWarningConditions();
 }
 
-void static InvalidChainFound(CBlockIndex *pindexNew)
+static void InvalidChainFound(CBlockIndex *pindexNew)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+    AssertLockHeld(cs_main);
     if (!pindexBestInvalid ||
         pindexNew->nChainWork > pindexBestInvalid->nChainWork) {
         pindexBestInvalid = pindexNew;
@@ -1163,8 +1165,8 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
                  const uint32_t flags, bool sigCacheStore,
                  bool scriptCacheStore,
                  const PrecomputedTransactionData &txdata,
-                 std::vector<CScriptCheck> *pvChecks)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+                 std::vector<CScriptCheck> *pvChecks) {
+    AssertLockHeld(cs_main);
     assert(!tx.IsCoinBase());
 
     if (pvChecks) {
@@ -1672,8 +1674,7 @@ static int64_t nBlocksTotal = 0;
 static bool ConnectBlock(const Config &config, const CBlock &block,
                          CValidationState &state, CBlockIndex *pindex,
                          CCoinsViewCache &view, bool fJustCheck = false,
-                         bool ignoreAddressIndex = false)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+                         bool ignoreAddressIndex = false) {
     AssertLockHeld(cs_main);
     assert(pindex);
     assert(*pindex->phashBlock == block.GetHash());
@@ -2258,8 +2259,8 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
  * in any case).
  */
 static bool DisconnectTip(const Config &config, CValidationState &state,
-                          DisconnectedBlockTransactions *disconnectpool)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+                          DisconnectedBlockTransactions *disconnectpool) {
+    AssertLockHeld(cs_main);
     CBlockIndex *pindexDelete = chainActive.Tip();
     assert(pindexDelete);
 
@@ -3122,8 +3123,7 @@ static bool UnwindBlock(const Config &config, CValidationState &state,
 }
 
 bool FinalizeBlockAndInvalidate(const Config &config, CValidationState &state,
-                                CBlockIndex *pindex)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+                                CBlockIndex *pindex) {
     AssertLockHeld(cs_main);
     if (!FinalizeBlockInternal(config, state, pindex)) {
         // state is set by FinalizeBlockInternal.
@@ -3175,8 +3175,7 @@ void UpdateFlagsForBlock(CBlockIndex *pindexBase, CBlockIndex *pindex, F f) {
 }
 
 template <typename F, typename C>
-void UpdateFlags(CBlockIndex *pindex, F f, C fchild)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+void UpdateFlags(CBlockIndex *pindex, F f, C fchild) {
     AssertLockHeld(cs_main);
 
     // Update the current block.
@@ -3204,7 +3203,7 @@ void UpdateFlags(CBlockIndex *pindex, F f, C fchild)
 }
 
 template <typename F>
-void UpdateFlags(CBlockIndex *pindex, F f) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+  void UpdateFlags(CBlockIndex *pindex, F f) {
     // Handy shorthand.
     UpdateFlags(pindex, f, f);
 }
@@ -3271,8 +3270,7 @@ bool IsBlockFinalized(const CBlockIndex *pindex) {
            pindexFinalized->GetAncestor(pindex->nHeight) == pindex;
 }
 
-static CBlockIndex *AddToBlockIndex(const CBlockHeader &block)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+static CBlockIndex *AddToBlockIndex(const CBlockHeader &block) {
     AssertLockHeld(cs_main);
     // Check for duplicate
     uint256 hash = block.GetHash();
@@ -4475,6 +4473,7 @@ CBlockIndex *InsertBlockIndex(uint256 hash) {
 }
 
 static bool LoadBlockIndexDB(const Config &config) {
+    AssertLockHeld(cs_main);
     if (!pblocktree->LoadBlockIndexGuts(config, InsertBlockIndex)) {
         return false;
     }
