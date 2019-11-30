@@ -2531,7 +2531,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Update mempool's mapTx to index from TxId.
      Use TxId in setInventoryTxToSend
      refactor: Drop boost::this_thread::interruption_point and boost::thread_interrupted in main thread
-     Use BlockHash in BlockTransactionsRequest
+xx   Use BlockHash in BlockTransactionsRequest
      [cmake] link test runners by default
      Drop minor GetSerializeSize template
      Avoid creating a temporary vector for size-prefixed elements
