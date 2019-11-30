@@ -159,8 +159,6 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {0, uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f"
-                                 "30357f3a90")},
                 {5000, uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988"
                                  "db13888907")},
                 {50000, uint256S("00000000000000600f43cf743ca452b38d4cf175d588089c3c73ca"
@@ -171,8 +169,8 @@ public:
                                  "0716c4d4a1")},
             }};
 
-        // Data as of block 113305
-        chainTxData = ChainTxData{1574702296, 1544167, 0.4413};
+        // Currently inaccurate but gives a better progress indicator
+        chainTxData = ChainTxData{1574702296, 744167, 0.1};
     }
 };
 
