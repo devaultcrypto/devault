@@ -414,19 +414,18 @@ void CTxMemPool::AddTransactionsUpdated(unsigned int n) {
     nTransactionsUpdated += n;
 }
 
-void CTxMemPool::addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
+void CTxMemPool::addUnchecked(const TxId &txid, const CTxMemPoolEntry &entry,
                               setEntries &setAncestors) {
     NotifyEntryAdded(entry.GetSharedTx());
     // Add to memory pool without checking anything.
     // Used by AcceptToMemoryPool(), which DOES do all the appropriate checks.
-    LOCK(cs);
     indexed_transaction_set::iterator newit = mapTx.insert(entry).first;
     mapLinks.insert(make_pair(newit, TxLinks()));
 
     // Update transaction for any feeDelta created by PrioritiseTransaction
     // TODO: refactor so that the fee delta is calculated before inserting into
     // mapTx.
-    auto pos = mapDeltas.find(hash);
+    auto pos = mapDeltas.find(txid);
     if (pos != mapDeltas.end()) {
         const TXModifier &deltas = pos->second;
         if (deltas.second != Amount::zero()) {
@@ -1033,10 +1032,10 @@ void CTxMemPool::PrioritiseTransaction(const TxId &txid, double dPriorityDelta,
               txid.ToString(), dPriorityDelta, FormatMoney(nFeeDelta));
 }
 
-void CTxMemPool::ApplyDeltas(const uint256 hash, double &dPriorityDelta,
+void CTxMemPool::ApplyDeltas(const TxId &txid, double &dPriorityDelta,
                              Amount &nFeeDelta) const {
     LOCK(cs);
-    auto pos = mapDeltas.find(hash);
+    auto pos = mapDeltas.find(txid);
     if (pos == mapDeltas.end()) {
         return;
     }
@@ -1046,9 +1045,9 @@ void CTxMemPool::ApplyDeltas(const uint256 hash, double &dPriorityDelta,
     nFeeDelta += deltas.second;
 }
 
-void CTxMemPool::ClearPrioritisation(const uint256 hash) {
+void CTxMemPool::ClearPrioritisation(const TxId &txid) {
     LOCK(cs);
-    mapDeltas.erase(hash);
+    mapDeltas.erase(txid);
 }
 
 bool CTxMemPool::HasNoInputsOf(const CTransaction &tx) const {
@@ -1136,15 +1135,14 @@ void CTxMemPool::LimitSize(size_t limit, unsigned long age) {
     }
 }
 
-void CTxMemPool::addUnchecked(const uint256 &hash,
+void CTxMemPool::addUnchecked(const TxId &txid,
                               const CTxMemPoolEntry &entry) {
-    LOCK(cs);
     setEntries setAncestors;
     uint64_t nNoLimit = std::numeric_limits<uint64_t>::max();
     std::string dummy;
     CalculateMemPoolAncestors(entry, setAncestors, nNoLimit, nNoLimit, nNoLimit,
                               nNoLimit, dummy);
-    return addUnchecked(hash, entry, setAncestors);
+    return addUnchecked(txid, entry, setAncestors);
 }
 
 void CTxMemPool::UpdateChild(txiter entry, txiter child, bool add) {
