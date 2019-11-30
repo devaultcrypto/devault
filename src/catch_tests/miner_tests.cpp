@@ -72,6 +72,7 @@ void TestPackageSelection(Config &config, CScript scriptPubKey, std::vector<CTra
   // This tx has a low fee: 1000 satoshis.
   // Save this txid for later use.
   TxId parentTxId = tx.GetId();
+  LOCK2(cs_main, ::g_mempool.cs);
   g_mempool.addUnchecked(parentTxId, entry.Fee(Amount(1000)).Time(GetTime()).SpendsCoinbase(true).FromTx(tx));
 
   // This tx has a medium fee: 10000 satoshis.
@@ -255,7 +256,7 @@ TEST_CASE("CreateNewBlock_validity") {
     pblock->hashPrevBlock = pblock->GetHash();
   }
 
-  LOCK(cs_main);
+  LOCK2(cs_main, ::g_mempool.cs);
 
   // Just to make sure we can still make simple blocks.
   BOOST_CHECK(pblocktemplate = BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey));

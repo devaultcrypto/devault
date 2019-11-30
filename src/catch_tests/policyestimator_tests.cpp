@@ -17,6 +17,7 @@
 TEST_CASE("MempoolMinimumFeeEstimate") {
   CTxMemPool mpool;
   TestMemPoolEntryHelper entry;
+  LOCK2(cs_main, mpool.cs);
 
   // Create a transaction template
   CScript garbage;
