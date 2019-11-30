@@ -1,3 +1,471 @@
+20.7 
+      Update manpages for 0.20.7 release
+      Update chainparams
+      Update seeds
+      util: Add [[nodiscard]] to all {Decode,Parse}[...](...) functions returning bool
+      Make SignPSBTInput operate on a private SignatureData object
+      Pass HD path data through SignatureData
+      Implement key origin lookup in CWallet
+      wallet: Fix non-determinism in ParseHDKeypath(...). Avoid using an uninitialized variable in path calculation.
+      Generalize PublicOnlySigningProvider into HidingSigningProvider
+      More tests of signer checks
+      Update valid PSBT test vectors so that they properly use the value 0 for utxos's key
+      Add aarch64 qt depends support for cross compiling bitcoin-qt
+      [CMAKE] Migrate windows gitian build to cmake and ninja
+      [GITIAN] Migrate OSX Gitian builds to CMake and Ninja
+      [CMAKE] Migrate linux gitian build to cmake and ninja
+      Allow to pass the chain parameters when formatting a bitcoin URI
+      Move BitcoinApplication to header so it can be tested
+      Don't use systray icon on inappropriate systems
+      add a couple more Schnorr checkmultisig tests
+      Make SigningProvider expose key origin information
+      [MOVEONLY] Move ParseHDKeypath to utilstrencodings
+      Introduce KeyOriginInfo for fingerprint + path
+      Merge #9662: Add createwallet "disableprivatekeys" option: a sane mode for watchonly-wallets
+      Use local instance of ArgsManager in getarg_tests
+      [CMAKE] Add DBus support to bitcoin-qt
+      qt: All tray menu actions call showNormalIfMinimized
+      qt: Use GUIUtil::bringToFront where possible
+      qt: Add GUIUtil::bringToFront
+      Remove obj_c for macOS Dock icon menu
+      Use Qt signal for macOS Dock icon click event
+      [CMAKE] Use a NSIS custom template
+      Test that a non-witness script as witness utxo is not signed
+      Use 72 byte dummy signatures when watching only inputs may be used
+      Use 71 byte signature for DUMMY_SIGNATURE_CREATOR
+      Always create 70 byte signatures with low R values
+      Additional sanity checks in SignPSBTInput
+      Introduce a maximum size for locators.
+      test: Add tests for RPC help
+      Remove obj_c for macOS Dock icon setting
+      gui: Favor macOS show / hide action in dock menu
+      Add missing braces on key.cpp
+      qa: Premine to deterministic address with -disablewallet
+      RPC: Add new getzmqnotifications method.
+      Break circular dependency: init -> * -> init by extracting shutdown.h
+      Drop unused init.h includes
+      Add Windows shutdown handler
+      Add checkpoints for graviton upgrade
+      [github-release] Add optional param to specify release notes path
+      Fix merging of global unknown data in PSBTs
+      Check that PSBT keys are the correct length
+      Add brace in bitcoin-tx.cpp
+      Fix PSBT error test vectors
+      Add outputtype module
+      [CMAKE] Use a stripped binary to build the dist and DMG for OSX
+      [CMAKE] Only build the bitcoin-qt application bundle on OSX
+      [CI] Add a new build configuration to run tests with cmake and ninja
+      [CI] Rename build.sh to build_autotools.sh
+      Merge #14025: p2p: Remove dead code for nVersion=10300
+      fix txvalidationcache_tests to not rely on NULLDUMMY
+      Various nits in the ChainParams code.
+      Added missing instructions for OSX gitian building
+      Various nits in cuckoocache.h
+      [CMAKE] Avoid dependencies when building native bin during cross build
+      Add/update copyright lines to top of seeder code
+      Added CMake function to detect BOOST_TEST_DYN_LINK
+      Add descriptor reference documentation
+      Swap in descriptors support into scantxoutset
+      Output descriptors module
+      [CMAKE] Actually build the DMG image
+      Get rid of ambiguous OutputType::NONE value
+      Fix unecessary copies in rpcwallet.cpp
+      Add scantxoutset RPC method
+      [CMAKE] Install DLL to bin/ by default
+      [CMAKE] Complete the dist directory to prepare for the DMG image build
+      [CMAKE] Build the background dist image on native OSX
+      [CMAKE] Add the background image to the dist directory
+      [CMAKE] Create a distribution directory with translations
+      [CMAKE] Prepare the application bundle for localization
+      Add simple FlatSigningProvider
+      Tests for PSBT
+      Create wallet RPCs for PSBT
+      Bump version to 0.20.7
+      Document RNG design in random.h
+      Use secure allocator for RNG state
+      Encapsulate RNGState better
+      DRY: Implement GetRand using FastRandomContext::randrange
+      Remove hwrand_initialized.
+      Sprinkle some sweet noexcepts over the RNG code
+      [CI] Run the thread sanitizer as part of the CI
+      Switch all RNG code to the built-in PRNG.
+      Integrate util/system's CInit into RNGState
+20.6      
+      Updated manpages for 0.20.6 release
+      Updated chainparams
+      Updated seeds
+      Added a release note regarding builds needing python 3.5
+      Abstract out seeding/extracting entropy into RNGState::MixExtract
+      Add thread safety annotations to RNG state
+      Rename some hardware RNG related functions
+      Automatically initialize RNG on first use.
+      Don't log RandAddSeedPerfmon details
+      Use FRC::randbytes instead of reading >32 bytes from RNG
+      [CMAKE] Generate the split-debug.sh script
+      Create utility RPCs for PSBT
+      [CMAKE] Use native strip on OSX
+      build: depends: Switch to python3
+      depends: biplist 1.0.3
+      Upgrade mac_alias to 2.0.7
+      [depends] mac_alias 2.0.6, ds_store 1.1.2
+      Add more methods to Span class
+      Fix comment layout in client.h
+      Deprecate wallet 'account' API
+      [wallet] Deprecate account RPC methods
+      [wallet] [rpc] Remove duplicate entries in rpcwallet.cpp's CRPCCommand table
+      [tests] Rename rpc_listtransactions.py to wallet_listtransactions.py
+      Merge #12892: [wallet] [rpc] introduce 'label' API for wallet
+      Merge #9894: remove 'label' filter for rpc command help
+      test: Remove python3.4 workaround in feature_dbcrash
+      build: Require python 3.5
+      Run all extended tests on master for build-default
+      Display the default values as part of the test_runner.py help
+      scripted-diff: Update copyright in ./test
+      Fix various linter issues
+      scripted-diff: test: Remove brackets after assert
+      scripted-diff: test: Use py3.5 bytes::hex() method
+      [GITIAN] Sort dependencies lexically
+      [GITIAN] Remove symbolic link to asm for 32-bits gitian build
+      test: Add lint to prevent SIGNAL/SLOT connect style
+      [contrib] Support ARM symbol check
+      Migrate Gitian container to Debian 10 Buster
+      Various fixups for PR13557
+      [CMAKE] Move FDELT_TYPE declaration to config
+      Update qt/optionsdialog.cpp with Qt5 connect syntax
+      Update qt/walletview.cpp with Qt5 syntax
+      Update qt/test/paymentservertests.cpp to use Qt5 connect syntax
+      Update qt/walletmodel.cpp with Qt5 connect syntax
+      Update qt/bitcoin.cpp with Qt5 connect syntax
+      Update qt/qvalidatedlinedit.cpp to use Qt5 connect syntax
+      Update qt/walletframe.cpp with Qt5 connect syntax
+      Update qt/bitcoingui with Qt5 connect syntax
+      [CMAKE] Fix missing inclusion when libbitcoinconsensus is disabled
+      Update qt/transactionview.cpp with Qt5 connect syntax
+      Update qt/sendcoinsdialog.cpp with Qt5 connect syntax
+      Update qt/rpcconsole with Qt5 connect syntax
+      Update qt/recentrequestdialog.cpp with Qt5 connect syntax
+      Update qt/receivecoinsdialog.cpp with Qt5 connect syntax
+      Update qt/transactiontablemodel.cpp with Qt5 connect syntax
+      Update qt/trafficgraphwidget.cpp with Qt5 connect syntax
+      Update qt/sendcoinsentry.cpp with Qt5 connect syntax
+      Update qt/qvaluecombobox.cpp to use Qt5 connect syntax
+      Update qt/receiverequestdialog.cpp with Qt5 connect syntax
+      Update user agent filter in makeseeds.py
+      Update qt/peertablemodel.cpp with Qt5 connect synax
+      Update qt/paymentserver.cpp with Qt5 connect syntax
+      Update qt/overviewpage.cpp with Qt5 connect syntax
+      Update qt/modaloverlay.cpp with Qt5 connect syntax
+      Update qt/intro.cpp to use Qt5 connect syntax
+      Update qt/guiutil.cpp to use Qt5 connect syntax
+      Update qt/coincontroldialog.cpp to use Qt5 connect syntax
+      SignPSBTInput wrapper function
+      Methods for interacting with PSBT structs
+      Add pubkeys and whether input was witness to SignatureData
+      Implement PSBT Structures and un/serialization methods per BIP 174
+      [CMAKE] Build the OSX application bundle for bitcoin qt
+      [CMAKE] Create a windows installer
+      [CMAKE] Build bitcoinconsensus library both static and shared
+      Add testnet-seed.bchd.cash to seeder lists
+      Update qt/clientmodel.cpp to use Qt5 syntax
+      Merge #12924: Fix hdmaster-key / seed-key confusion
+      Rename master key to seed
+      Update qt/bitcoinamountfield.cpp to use Qt5 connect syntax
+      Update qt/askpassphrasedialog.cpp to use Qt5 connect syntax
+      Update qt/addressbookpage.cpp to use Qt5 connect syntax
+      rpc: Expose g_is_mempool_loaded via getmempoolinfo
+      Refactor transaction creation and transaction funding logic
+      Separate CSeederNode class declaration from definition
+      Move parse_name() to dns.h so it can be tested
+      Bump version to 0.20.6
+      Merge #13481: doc: Rewrite some validation docs as lock annotations
+20.5      
+      Updated manpages for 0.20.5 release
+      Updated chainparams
+      Update seeds
+      bench: Benchmark MempoolToJSON
+      Merge #14444: Add compile time checking for cs_main locks which we assert at run time
+      Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
+      Add test_runner flag to suppress ASAN errors from wallet_multiwallet.py
+      [CMAKE] Move package name and copyright to the top level
+      Added build-werror config to error on build warnings
+      Merge #13248: [gui] Make proxy icon from statusbar clickable
+      Merge #13043: [qt] OptionsDialog: add prune setting
+      Fix -Wrange-loop-analysis warnings
+      Fix -Wthread-safety-analysis warnings
+      [CMAKE] Use CPack to build source packages
+      [CMAKE] Use CPack to build packages
+      mempool: remove unused magic number from consistency check
+      Merge #13258: uint256: Remove unnecessary crypto/common.h dependency
+      Merge #11491: [gui] Add proxy icon in statusbar
+      bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
+      ui: Support wallets unloaded dynamically
+      rpc: Add unloadwallet RPC, release notes, and tests
+      rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
+      [mempool] Mark mempool import fails that were found in mempool as 'already there'
+      [CMAKE] Propagate requirements for cmake >= 3.12
+      Merge #11050: Avoid treating null RPC arguments different from missing arguments
+      Merge #11191: RPC: Improve help text and behavior of RPC-logging.
+      Merge #11626: rpc: Make `logging` RPC public
+      [rpc] Add logging RPC
+      Change CDnsSeedOpts to use std::string instead of c-strings
+      Introduce constant default variables to initialize seeder options
+      Remove strlcpy.h
+      Fix misnamed 0.20.4 release notes
+      [CMAKE] Add resource file to bitcoin-qt
+      Merge #13722: trivial: Replace CPubKey::operator[] with CPubKey::vch where possible
+      Fix --wipeignore and add message indicating if wipe options are set and successful
+      Decodehextx scripts sanity check
+      Update seeder files to use fprintf() instead of printf()
+      Merge #9598: Improve readability by removing redundant casts to same type (on all platforms)
+      Merge #13275: Qt: use [default wallet] as name for wallet with no name
+      Merge #13506: Qt: load wallet in UI after possible init aborts
+      Merge #13564: [wallet] loadwallet shouldn't create new wallets.
+      Merge #13097: ui: Support wallets loaded dynamically
+      Merge #13273: Qt/Bugfix: fix handling default wallet with no name
+      Version Bump to v20.5
+      [gitian-build] Move manifest files to output directory
+      [gitian-build] Refactor to calculate output directories in fewer places
+20.4
+      Update manpages for 0.20.4 release
+      Update chainparams
+      Update seeds
+      Do not cache version in cmake build
+      mempool, validation: Explain cs_main locking semantics
+      [build-configurations] Make BUILD_DIR configurable
+      [LINTER] Check for header guard closure comment
+      Merge #13058: [wallet] `createwallet` RPC - create new wallet at runtime
+      Update Seeder to use fsbridge::fopen() instead of fopen()
+      Make objects in range declarations immutable by default. Avoid unnecessary copying of objects in range declarations.
+      cli: Ignore libevent warnings
+      Merge #13252: Wallet: Refactor ReserveKeyFromKeyPool for safety
+      [build-configurations] Resurface the more informative error message when ABC_BUILD_NAME is not set
+      Added translations for new send coins dialog box
+      Merge #13158: [Qt]: Improve sendcoinsdialog readability
+      Bump wallet version for pre split keypool
+      Allow -upgradewallet to upgradewallets to HD and use a keypool of presplit keys after upgrading to hd chain split
+      Remove redundant assignments (dead stores)
+      Drop ParseHashUV in favor of calling ParseHashStr
+      Add 'sethdseed' RPC to initialize or replace HD seed and test
+      Remove CombineSignatures and replace tests
+      Replace CombineSignatures with ProduceSignature
+      Make SignatureData able to store signatures and scripts
+      Drop UpdateTransaction in favor of UpdateInput
+      Generic TransactionSignatureCreator works with both CTransaction and CMutableTransaction
+      Introduce Span type and use it instead of FLATDATA
+      [cmake] Create a lib specifically for script related components
+      Inline Sign1 and SignN
+      Separate HaveKey function that checks whether a key is in a keystore
+      Merge #13176: Improve CRollingBloomFilter performance: replace modulus with FastMod
+      Add native support for serializing char arrays without FLATDATA
+      refactor: Avoid locking tx pool cs thrice
+      Return void instead of bool for functions that cannot fail
+      Relayout comment in sign.h
+      Merge #11411: script: Change SignatureHash input index check to an assert.
+      Minor improvements to github-release script
+      validation: Pass tx pool reference into CheckSequenceLocks
+      utils: Convert Windows args to utf-8 string
+      Merge #12240: [rpc] Introduced a new `fees` structure that aggregates all sub-field fee types denominated in BCH
+      Change CI builds to use utf-8 encoding
+      Added support for `export LC_ALL=C.UTF-8` to the shell linter
+      Updated release-process to use github-release.sh
+      Added more explicit instructions for release tagging
+      Bump version to 0.20.4
+      Add phpcs exclusion for strict_types declararion
+      Add static_assert to prevent VARINT(<signed value>)
+      [CMAKE] Enable Large File Support on platforms that don't enable it by default
+      Add support for Glibc version 2.28
+      util: Replace boost::signals2 with std::function
+      Added a script for creating Github release drafts
+      doxygen: Fix member comments
+      [CMAKE] Use CMake built-in to set PIC and PIE
+      [CMAKE] Fix check-security to allow running on windows executables
+      Use only 3 levels for defining the version
+      tiny refactor for ArgsManager
+      Document RPC method aliasing
+      Add AssertLockHeld assertions in CWallet::ListCoins
+      Merge #13304: qa: Fix wallet_listreceivedby race
+      Merge #13284: gui: fix visual "overflow" of amount input.
+20.3
+      Update seeds
+      Updated manpages for 0.20.3 release
+      Updated chainparams
+      Added README for generating chainparams constants
+      Avoid locking mutexes that are already held by the same thread
+      Added net debug info to IBD builds
+      Merge #12265: [test] fundrawtransaction: lock watch-only shared address
+      Added a script to generate chainparams constants from intermediate files
+      [CMAKE] Detect if the compiler supports visibility function attribute
+      [CMAKE] Install executables
+      [CMAKE] Install the man pages
+      [CMAKE] Add the check-security target
+      [CMAKE] Add the check-symbols target
+      Move cs_main locking annotations from .cpp to .h
+      Merge #11220: Check specific validation error in miner tests
+      Remove redundant variables, statements and forward declarations
+      Fix errant newline in make_chainparams
+      [CMAKE] Consistently find and use the python interpreter
+      [CMAKE] Migrate the python header generation scripts to python 3
+      [CMAKE] Only change obj/build.h if the content has changed
+      Run miner_tests with fixed options
+      Abstract out BlockAssembler options
+      Fix compiler warnings emitted when compiling under stock OpenBSD 6.3
+      Merge #13201: [qa] Handle disconnect_node race
+      Merge #13402: Document validationinterace callback blocking deadlock potential.
+      Revert change to PreciousBlock() comment made in D1182
+      Fix missing newline in make_chainparams
+      [RPC] Fix header guard comment
+      Merge #13197: util: warn about ignored recursive -includeconf calls
+      Merge #13079: Fix rescanblockchain rpc to properly report progress
+      Merge #13012: [doc] Add comments for chainparams.h, validation.cpp
+      Merge #12716: Fix typos and cleanup in various files
+      wallet: Use shared pointer to retain wallet instance
+      scripted-diff: Replace boost::bind with std::bind
+      refactor: Use boost::scoped_connection in signal/slot, also prefer range-based loop instead of std::transform
+      Use TxId where apropriate in wallettests.cpp
+      [CMAKE] Fix linux cross compilation with the glibc compatibility
+      [CMAKE] Remove useless dependency for the check-rpcauth target
+      scripted-diff: batch-recase BanMan variables
+      banman: Add, use CBanEntry ctor that takes ban reason
+      banman: reformulate nBanUtil calculation
+      banman: add thread annotations and mark members const where possible
+      scripted-diff: batch-rename BanMan members
+      net: move BanMan to its own files
+      banman: pass in default ban time as a parameter
+      banman: pass the banfile path in
+      banman: create and split out banman
+      Move util files to directory
+      Use C++11 default member initializers
+      debug log number of unknown wallet records on load
+      Add compile time verification of assumptions we're currently making implicitly/tacitly
+      Use std::make_unique more consistently
+      bench: Use non-throwing ParseDouble(...) instead of throwing boost::lexical_cast<double>(...)
+      [qt] send: Clear All also resets coin control options
+      [qt] Replaces numbered place marker %2 with %1.
+      Remove unecessary obj folder
+      [CMAKE] Always build obj/build.h
+      Revert change to ActivateBestChain() comments made in D1182
+      Merge #13234: Break circular dependency: chain -> pow -> chain
+      Partial Merge #12920: test: Fix sign for expected values
+      Merge #13431: validation: count blocks correctly for check level < 3
+      Merge #13428: validation: check the specified number of blocks (off-by-one)
+      Merge #12885: Reduce implementation code inside CScript
+      net: split up addresses/ban dumps in preparation for moving them
+      depends: qt: avoid system harfbuzz and bz2
+      [gitian-build] Change output file destinations to separate directories for each platform
+      Merge #13022: [qa] Attach node index to test_node AssertionError and print messages
+      Merge #15239: scripts and tools: Move non-linux build source tarballs to "bitcoin-binaries/version" directory
+      Fix avalanche test with boost 1.58
+      Remove GetNextBlockScriptFlags's requirement to hold cs_main
+      Add compile time checking for all cs_main runtime locking assertions
+      Use C++11 default member initializers
+      Drop unused pindexRet arg to CMerkleTx::GetDepthInMainChain
+      Merge #13149: Handle unsuccessful fseek(...):s
+      [CI] Workaround ubsan failure in functional tests
+      [CI] Refactor the build configuration by moving out tests from the build
+      Add recommendation: By default, declare single-argument constructors `explicit`
+      Nits in httpserver.cpp
+      Move SocketHandler logic to private method.
+      Update the agent pattern filter in the makeseeds.py script
+      [CMAKE] Add support to build secp256k1 JNI binding and tests
+      Move InactivityCheck logic to private method.
+      Move DisconnectNodes logic to private method.
+      Move NotifyNumConnectionsChanged logic to private method.
+      tests: remove member connman/peerLogic in TestingSetup
+      [SECP256K1] Create a different library when building with JNI
+      Convert comments to thread safety annotations
+      net: Add Clang thread safety annotations for guarded variables in the networking code
+      Report minfeefilter value in getpeerinfo rpc
+      Prefer wait_until over polling with time.sleep
+      [SECP256K1] Build java class files out of tree
+      Add seed.bchd.cash to seeder lists
+      Bump version to 0.20.3
+      net: Break disconnecting out of Ban()
+      Improve reliability of avalanche test
+      [ibd.sh] Fix IBD progress logging
+      [trivial,doc] Fix memory consistency model in comment
+      [qt] coincontrol: Remove unused qt4 workaround
+      [build] .gitignore: add QT Creator artifacts
+      Adding test case for SINGLE|ANYONECANPAY hash type in tx_valid.json
+      Remove TestBlockValidity's dependency on Config
+      Remove ConnectBlock's dependency on Config
+      Remove CheckBlock's dependency on Config
+      [net] Tighten scope in net_processing
+      Add documentation to PeerLogicValidation interface and related functions
+20.2      
+      [CI] Fix missing parameters transfer from ibd.sh to bitcoind
+      Update manpages for 0.20.2 release
+      Update chainparams
+      Merge #12159: Use the character based overload for std::string::find.
+      Merge #13983: rpc: Return more specific reject reason for submitblock
+      Merge #13399: rpc: Add submitheader
+      Merge #13439: rpc: Avoid "duplicate" return value for invalid submitblock
+      Updated seeds
+      Fixes compilation of leveldb tests broken in D4004
+      [CI] Make IBD a standard build configuration
+      Remove ContextualCheckBlock's dependency on Config
+      Remove CheckBlockHeader's dependency on Config
+      [CMAKE] Fix Linux64 toolchain name
+      Source the Excessive block size from BlockValidationOptions
+      Do not construct out-of-bound pointers in SHA2 code
+      Avoid triggering undefined behaviour (std::memset(nullptr, 0, 0)) if an invalid string is passed to DecodeSecret(...)
+      Pull leveldb subtree
+      [CMAKE] Move version to the top level CMakeLists.txt
+      [CMAKE] Rename the top-level and `src/` cmake projects
+      Generalized ibd.sh to provide a logging tool for running similar types of tests
+      Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
+      Remove ReadBlockFromDisk's dependency on Config
+      Remove dependency on Config from the PoW code
+      Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
+      Activate consensus rule based on consensus params rather than config
+      Add warning about redundant moves
+      Remove redundant call to std::move
+      Fix the build-osx target for the depends subsystem
+      Merge #12853: qa: Match full plain text by default
+      Added a script to test seeds
+      Added some release notes
+      [CI] Improve error catching and build log verbosity
+      Merge #10537: Few Minor per-utxo assert-semantics re-adds and tweak
+      Merge #12928: qt: Initialize non-static class members that were previously neither initialized where defined nor in constructor
+      Merge #13747: tests: Skip P2PConnection's is_closing() check when not available
+      Merge #13916: qa: wait_for_verack by default
+      [SECP256K1] JNI tests : remove dependency to obsolete DatatypeConverter
+      [TRIVIAL] Cleanup the JNI test file
+      [Linter] Check the log prints are terminated with a newline
+      [LINTER] Enforce using C++ style for void parameters
+      Bugfix: NSIS: Exclude Makefile* from docs
+      Merge #12503: [RPC] createmultisig no longer takes addresses
+      Merge #13658: [moveonly] Extract RescanWallet to handle a simple rescan
+      Merge #11338: qt: Backup former GUI settings on `-resetguisettings`
+      [rebase] threads: fix unitialized members in sched_param
+      Update univalue subtree
+      Merge leveldb subtree
+      Bump leveldb subtree
+      Merge #13517: qa: Remove need to handle the network thread in tests
+      Merge #11818: I accidentally [deliberately] killed it [the ComparisonTestFramework]
+      Merge #13512: [qa] mininode: Expose connection state through is_connected
+      Fix incorrectly backported return statements in mininode.py
+      Increase LevelDB max_open_files unless on 32-bit Unix.
+      Remove extra newline that leads to linter warning
+      Added a script to generate chainparams intermediate files
+      wallet: Catch filesystem_error and raise InitError
+      During IBD, when doing pruning, prune 10% extra to avoid pruning again soon after
+      Merge #13081: wallet: Add compile time checking for cs_wallet runtime locking assertions
+      Merge #11044: [wallet] Keypool topup cleanups
+      Migrated abc-p2p-compactblocks.py off of ComparisonTestFramework
+      Migrated abc-p2p-fullblocktest.py off of ComparisonTestFramework
+      Migrated abc-mempool-coherence-on-activations.py off of ComparisonTestFramework
+      Migrated abc-transaction-ordering.py off of ComparisonTestFramework
+      Merge #13077: Add compile time checking for all cs_KeyStore runtime locking assertions
+      Add missing override keyword to DummySignatureCreator::CreateSig()
+      Merge #13159: Don't close old debug log file handle prematurely when trying to re-open (on SIGHUP)
+      Merge #13148: logging: Fix potential use-after-free in LogPrintStr(...)
+      Default to defining endian-conversion DECLs in compat w/o config
+      Consistently log CValidationState on failure
+      Remove deprecated features for the 0.20.x branch
+      Merge #12507: Interrupt rescan on shutdown request
+      Make sure LC_ALL=C is set in all shell scripts
+      Fix deprecated copy warnings in amount.h
+      Bump version to 0.20.2
 20.1
       Update manpages for 0.20.1 release
       Update chainparams
