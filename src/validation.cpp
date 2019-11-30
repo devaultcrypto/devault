@@ -191,6 +191,11 @@ int CalculatePercentDone(int HeightDiff, int nCheckDepth, int nCheckLevel) {
     return percentageDone;
 }
 
+double GuessVerificationPercent(const ChainTxData &data, const CBlockIndex *pindex) {
+  double percent = 0.1*(int)(1000.0 * GuessVerificationProgress(data, pindex));
+  return percent;
+}
+                      
 
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
@@ -1081,14 +1086,14 @@ static void InvalidChainFound(CBlockIndex *pindexNew) {
         pindexFinalized = pindexNew->pprev;
     }
 
-    LogPrintf("%s: invalid block=%s  height=%d  log2_work=%.8g  date=%s\n",
+    LogPrintf("%s: invalid block=%s  height=%d  log2_work=%0.6g  date=%s\n",
               __func__, pindexNew->GetBlockHash().ToString(),
               pindexNew->nHeight,
               log(pindexNew->nChainWork.getdouble()) / log(2.0),
               FormatISO8601DateTime(pindexNew->GetBlockTime()));
     CBlockIndex *tip = chainActive.Tip();
     assert(tip);
-    LogPrintf("%s:  current best=%s  height=%d  log2_work=%.8g  date=%s\n",
+    LogPrintf("%s:  current best=%s  height=%d  log2_work=%0.6g  date=%s\n",
               __func__, tip->GetBlockHash().ToString(), chainActive.Height(),
               log(tip->nChainWork.getdouble()) / log(2.0),
               FormatISO8601DateTime(tip->GetBlockTime()));
@@ -2183,15 +2188,15 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    LogPrintf("%s: new best=%s height=%d version=0x%0x log2_work=%.8g tx=%lu "
-              "date='%s' progress=%.2f cache=%.1fMiB(%utxo)\n",
+    LogPrintf("%s: new best=%s height=%d progess=%2.1f version=0x%0x log2_work=%0.6g tx=%lu "
+              "date='%s' cache=%.1fMiB(%utxo)\n",
               __func__, chainActive.Tip()->GetBlockHash().ToString(),
-              chainActive.Height(), (chainActive.Tip()->nVersion >> 28),
+              chainActive.Height(),
+              GuessVerificationPercent(config.GetChainParams().TxData(), chainActive.Tip()),
+              (chainActive.Tip()->nVersion >> 28),
               log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
               (unsigned long)chainActive.Tip()->nChainTx,
               FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()),
-              GuessVerificationProgress(config.GetChainParams().TxData(),
-                                        chainActive.Tip()),
               pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)),
               pcoinsTip->GetCacheSize());
 }
