@@ -582,7 +582,7 @@ private:
 
 public:
     indirectmap<COutPoint, const CTransaction *> mapNextTx GUARDED_BY(cs);
-    std::map<uint256, TXModifier> mapDeltas;
+    std::map<TxId, TXModifier> mapDeltas;
 
     /**
      * Create a new CTxMemPool.
@@ -609,15 +609,16 @@ public:
     // Note that addUnchecked is ONLY called from ATMP outside of tests
     // and any other callers may break wallet's in-mempool tracking (due to
     // lack of CValidationInterface::TransactionAddedToMempool callbacks).
-    void addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry);
-    void addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
-                      setEntries &setAncestors);
+    void addUnchecked(const TxId &hash, const CTxMemPoolEntry &entry)
+        EXCLUSIVE_LOCKS_REQUIRED(cs, cs_main);
+    void addUnchecked(const TxId &hash, const CTxMemPoolEntry &entry,
+                      setEntries &setAncestors)
+        EXCLUSIVE_LOCKS_REQUIRED(cs, cs_main);
 
     void addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCache &view);
     bool getAddrIndex(std::vector<std::string> &addresses,
                       std::vector<std::pair<CMempoolAddrDeltaKey, CMempoolAddrDelta> > &results);
     bool removeAddrIndex(const uint256 txhash);
-    
     
     void removeRecursive(
         const CTransaction &tx,
@@ -647,9 +648,9 @@ public:
     /** Affect CreateNewBlock prioritisation of transactions */
     void PrioritiseTransaction(const TxId &txid, double dPriorityDelta,
                                const Amount nFeeDelta);
-    void ApplyDeltas(const uint256 hash, double &dPriorityDelta,
+    void ApplyDeltas(const TxId &txid, double &dPriorityDelta,
                      Amount &nFeeDelta) const;
-    void ClearPrioritisation(const uint256 hash);
+    void ClearPrioritisation(const TxId &txid);
 
 public:
     /**

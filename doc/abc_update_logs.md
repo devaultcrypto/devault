@@ -2527,9 +2527,9 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Update GetTransaction's parameters
      Update mempool and compact block logic to use TxHash
      tx pool: Use class methods to hide raw map iterator impl details
-     Update mempool's mapDelta to use TxId
-     Update mempool's mapTx to index from TxId.
-     Use TxId in setInventoryTxToSend
+xx   Update mempool's mapDelta to use TxId
+xx   Update mempool's mapTx to index from TxId.
+xx   Use TxId in setInventoryTxToSend
      refactor: Drop boost::this_thread::interruption_point and boost::thread_interrupted in main thread
 xx   Use BlockHash in BlockTransactionsRequest
      [cmake] link test runners by default

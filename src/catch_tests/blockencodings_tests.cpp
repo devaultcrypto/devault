@@ -68,11 +68,11 @@ static CBlock BuildBlockTestCase() {
 TEST_CASE("SimpleRoundTripTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
+  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[2]->GetId(), entry.FromTx(*block.vtx[2]));
-  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[2]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
   // Do a simple ShortTxIDs RT
@@ -169,11 +169,11 @@ class TestHeaderAndShortIDs {
 TEST_CASE("NonCoinbasePreforwardRTTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
+  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[2]->GetId(), entry.FromTx(*block.vtx[2]));
-  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[2]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
   TxId txid;
@@ -241,11 +241,11 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
 TEST_CASE("SufficientPreforwardRTTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
+  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[1]->GetId(), entry.FromTx(*block.vtx[1]));
-  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[1]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
   TxId txid;
