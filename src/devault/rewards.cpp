@@ -19,6 +19,8 @@
 #include <fs.h> // for Dump debug stuff
 #include <fstream>
 
+const int StopLowRewardsSuperblock = 6;
+
 using namespace std;
 
 CCriticalSection cs_rewardsdb;
@@ -223,7 +225,8 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   int64_t nBlocksPerPeriod = (GetConfig().GetChainParams().GetConsensus().nBlocksPerYear / 12);
   Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
   // Stop paying out UTXOs below minRewards after this point and remove from dB
-  bool stop_lowrewards = (Height >= 6*nBlocksPerPeriod);
+  bool stop_lowrewards = false;
+  if (fMainNet) stop_lowrewards = (Height >= StopLowRewardsSuperblock*nBlocksPerPeriod);
     
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
