@@ -14,7 +14,7 @@
 
 #include "catch_unit.h"
 
-std::vector<std::pair<uint256, CTransactionRef>> extra_txn;
+std::vector<std::pair<TxHash, CTransactionRef>> extra_txn;
 
 struct RegtestingSetup : public TestingSetup {
   RegtestingSetup() : TestingSetup(CBaseChainParams::REGTEST) {}
@@ -139,7 +139,7 @@ class TestHeaderAndShortIDs {
   }
   explicit TestHeaderAndShortIDs(const CBlock &block) : TestHeaderAndShortIDs(CBlockHeaderAndShortTxIDs(block)) {}
 
-  uint64_t GetShortID(const uint256 &txhash) const {
+  uint64_t GetShortID(const TxHash &txhash) const {
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << *this;
     CBlockHeaderAndShortTxIDs base;
@@ -184,8 +184,8 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
     shortIDs.prefilledtxn.resize(1);
     shortIDs.prefilledtxn[0] = {1, block.vtx[1]};
     shortIDs.shorttxids.resize(2);
-    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[0]->GetId());
-    shortIDs.shorttxids[1] = shortIDs.GetShortID(block.vtx[2]->GetId());
+    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[0]->GetHash());
+    shortIDs.shorttxids[1] = shortIDs.GetShortID(block.vtx[2]->GetHash());
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << shortIDs;
@@ -258,7 +258,7 @@ TEST_CASE("SufficientPreforwardRTTest") {
     // id == 1 as it is 1 after index 1
     shortIDs.prefilledtxn[1] = {1, block.vtx[2]};
     shortIDs.shorttxids.resize(1);
-    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[1]->GetId());
+    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[1]->GetHash());
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << shortIDs;
