@@ -13,7 +13,12 @@
 #include <support/allocators/secure.h> // For SecureString
 #include <ui_interface.h>              // For ChangeType
 
+#ifdef HAVE_VARIANT
 #include <optional>
+#else
+#include <boost/optional.hpp>
+#endif
+
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -267,7 +272,11 @@ struct WalletAddress {
 
 //! Collection of wallet balances.
 struct WalletBalances {
+#ifdef HAVE_VARIANT  
     std::optional<Amount> currentBalanceOptional;
+#else
+    boost::optional<Amount> currentBalanceOptional;
+#endif
     Amount balance = Amount::zero();
     Amount unconfirmed_balance = Amount::zero();
     Amount immature_balance = Amount::zero();

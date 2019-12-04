@@ -43,8 +43,13 @@
 #include <cassert>
 #include <future>
 #include <random>
+
+#ifdef HAVE_VARIANT
 #include <variant>
 #include <optional>
+#else
+#include <boost/optional.hpp>
+#endif
 
 //#include <cashaddrenc.h>
 
@@ -83,7 +88,11 @@ std::string COutput::ToString() const {
                      nDepth, FormatMoney(tx->tx->vout[i].nValue));
 }
 
-class CAffectedKeysVisitor {
+class CAffectedKeysVisitor
+#ifndef HAVE_VARIANT
+  : public boost::static_visitor<void>
+#endif
+{
 private:
     const CKeyStore &keystore;
     std::vector<CKeyID> &vKeys;
@@ -99,7 +108,11 @@ public:
         int nRequired;
         if (ExtractDestinations(script, type, vDest, nRequired)) {
             for (const CTxDestination &dest : vDest) {
+#ifdef HAVE_VARIANT
               std::visit(*this, dest);
+#else
+              boost::apply_visitor(*this, dest);
+#endif
             }
         }
     }
@@ -2517,7 +2530,11 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
     nValueRet = Amount::zero();
 
     // List of values less than target
+#ifdef HAVE_VARIANT    
     std::optional<CInputCoin> coinLowestLarger;
+#else
+    boost::optional<CInputCoin> coinLowestLarger;
+#endif
     std::vector<CInputCoin> vValue;
     Amount nTotalLower = Amount::zero();
 
@@ -2562,7 +2579,12 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
         if (!coinLowestLarger) {
             return false;
         }
+
+#ifdef HAVE_VARIANT        
         setCoinsRet.insert(coinLowestLarger.value());
+#else
+        setCoinsRet.insert(coinLowestLarger.get());
+#endif
         nValueRet += coinLowestLarger->txout.nValue;
         return true;
     }
@@ -2585,7 +2607,11 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
     if (coinLowestLarger &&
         ((nBest != nTargetValue && nBest < nTargetValue + MIN_CHANGE) ||
          coinLowestLarger->txout.nValue <= nBest)) {
+#ifdef HAVE_VARIANT        
         setCoinsRet.insert(coinLowestLarger.value());
+#else
+        setCoinsRet.insert(coinLowestLarger.get());
+#endif
         nValueRet += coinLowestLarger->txout.nValue;
     } else {
         for (unsigned int i = 0; i < vValue.size(); i++) {
@@ -2883,12 +2909,18 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
         CScript scriptChange;
 
         // coin control: send change to custom address
+#ifdef HAVE_VARIANT
         {
           try {
             std::get<CNoDestination>(coinControl.destChange);
             scriptChange = GetScriptForDestination(coinControl.destChange);
           }
           catch (std::bad_variant_access&) { LogPrintf("bad variant access"); }
+#else
+          if (!boost::get<CNoDestination>(&coinControl.destChange)) {
+            scriptChange = GetScriptForDestination(coinControl.destChange);
+        } else {
+#endif
             // no coin control: send change to newly generated address
             // Note: We use a new key here to keep it from being obvious
             // which side is the change.
@@ -4465,9 +4497,15 @@ unsigned int CWallet::ComputeTimeSmart(const CWalletTx &wtx) const {
 
 bool CWallet::AddDestData(const CTxDestination &dest, const std::string &key,
                           const std::string &value) {
+#ifdef HAVE_VARIANT
   try {
     std::get<CNoDestination>(dest);
   } catch (std::bad_variant_access&) { return false; }
+#else
+  if (boost::get<CNoDestination>(&dest)) {
+    return false;
+  }
+#endif
  
   mapAddressBook[dest].destdata.insert(std::make_pair(key, value));
   return WalletBatch(*database).WriteDestData(dest, key, value);
