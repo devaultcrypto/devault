@@ -6,7 +6,12 @@
 #define BITCOIN_WALLET_COINCONTROL_H
 
 #include <primitives/transaction.h>
+
+#ifdef HAVE_VARIANT
 #include <optional>
+#else
+#include <boost/optional.hpp>
+#endif
 
 /** Coin Control Features. */
 class CCoinControl {
@@ -20,10 +25,18 @@ public:
     bool fAllowWatchOnly;
     //! Override automatic min/max checks on fee, m_feerate must be set if true
     bool fOverrideFeeRate;
+#ifdef HAVE_VARIANT    
     //! Override the default payTxFee if set
     std::optional<CFeeRate> m_feerate;
     //! Override the default confirmation target if set
-    std::optional<unsigned int> m_confirm_target; 
+    std::optional<unsigned int> m_confirm_target;
+#else
+    //! Override the default payTxFee if set
+    boost::optional<CFeeRate> m_feerate;
+    //! Override the default confirmation target if set
+    boost::optional<unsigned int> m_confirm_target;
+#endif
+    
 
     CCoinControl() { SetNull(); }
 

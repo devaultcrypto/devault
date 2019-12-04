@@ -8,7 +8,13 @@
 #include <noncopyable.h>
 #include <boost/range/iterator.hpp>
 
+#ifdef HAVE_STD_SHARED_MUTEX
 #include <shared_mutex>
+#else
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
+#endif
+
 #include <iterator>
 #include <type_traits>
 #include <utility>
@@ -61,17 +67,29 @@ public:
 
 template <typename T> class RWCollection {
 private:
+#ifdef HAVE_STD_SHARED_MUTEX
     mutable std::shared_mutex rwlock;
+#else
+    mutable boost::shared_mutex rwlock;
+#endif
     T collection;
 
 public:
     RWCollection() : collection() {}
 
+#ifdef HAVE_STD_SHARED_MUTEX
     typedef RWCollectionView<const T, std::shared_lock<std::shared_mutex>> ReadView;
     ReadView getReadView() const { return ReadView(std::shared_lock<std::shared_mutex>(rwlock), collection);  }
     typedef RWCollectionView<T, std::unique_lock<std::shared_mutex>> WriteView;
     WriteView getWriteView() {
         return WriteView(std::unique_lock<std::shared_mutex>(rwlock), collection);
     }
-
+#else
+    typedef RWCollectionView<const T, boost::shared_lock<boost::shared_mutex>>  ReadView;
+    ReadView getReadView() const { return ReadView(boost::shared_lock<boost::shared_mutex>(rwlock), collection);  }
+    typedef RWCollectionView<T, boost::shared_lock<boost::shared_mutex>> WriteView;
+    WriteView getWriteView() {
+        return WriteView(boost::unique_lock<boost::shared_mutex>(rwlock), collection);
+    }
+#endif
 };

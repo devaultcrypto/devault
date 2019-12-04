@@ -221,7 +221,13 @@ bool ExtractDestinations(const CScript &scriptPubKey, txnouttype &typeRet,
 }
 
 namespace {
-class CScriptVisitor : public std::variant<bool> {
+class CScriptVisitor :
+#ifdef HAVE_VARIANT
+    public std::variant<bool>
+#else
+    public boost::static_visitor<bool>
+#endif
+{
 private:
     CScript *script;
 
@@ -250,7 +256,11 @@ public:
 
 CScript GetScriptForDestination(const CTxDestination &dest) {
     CScript script;
+#ifdef HAVE_VARIANT
     std::visit(CScriptVisitor(&script), dest);
+#else
+    boost::apply_visitor(CScriptVisitor(&script), dest);
+#endif
     return script;
 }
 
@@ -271,5 +281,9 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey> &keys) {
 }
 
 bool IsValidDestination(const CTxDestination &dest) {
+#ifdef HAVE_VARIANT
   return !std::holds_alternative<CNoDestination>(dest);
+#else
+  return dest.which() != 0;
+#endif
 }
