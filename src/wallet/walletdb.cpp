@@ -41,8 +41,8 @@ bool WalletBatch::WriteNameAndLabel(const CTxDestination &address,
         return false;
     }
     // Provide 2-way look ups by label/address
-    if (!WriteIC(std::make_pair(std::string("label"), strName), EncodeCashAddr(address, Params()))) return false;
-    return WriteIC(std::make_pair(std::string("name"),EncodeCashAddr(address, Params())),strName);
+    if (!WriteIC(std::make_pair(std::string("label"), strName), EncodeDestination(address))) return false;
+    return WriteIC(std::make_pair(std::string("name"),EncodeDestination(address)),strName);
 }
 
 bool WalletBatch::EraseName(const CTxDestination &address) {
@@ -53,7 +53,7 @@ bool WalletBatch::EraseName(const CTxDestination &address) {
         return false;
     }
     return EraseIC(std::make_pair(std::string("name"),
-                                  EncodeCashAddr(address, Params())));
+                                  EncodeDestination(address)));
 }
 
 bool WalletBatch::WritePurpose(const CTxDestination &address,
@@ -62,7 +62,7 @@ bool WalletBatch::WritePurpose(const CTxDestination &address,
         return false;
     }
     return WriteIC(std::make_pair(std::string("purpose"),
-                                  EncodeCashAddr(address, Params())),
+                                  EncodeDestination(address)),
                    strPurpose);
 }
 
@@ -71,7 +71,7 @@ bool WalletBatch::ErasePurpose(const CTxDestination &address) {
         return false;
     }
     return EraseIC(std::make_pair(std::string("purpose"),
-                                  EncodeCashAddr(address, Params())));
+                                  EncodeDestination(address)));
 }
 
 bool WalletBatch::WriteTx(const CWalletTx &wtx) {
@@ -765,7 +765,7 @@ bool WalletBatch::WriteDestData(const CTxDestination &address,
     return WriteIC(
         std::make_pair(
             std::string("destdata"),
-            std::make_pair(EncodeCashAddr(address, Params()), key)),
+            std::make_pair(EncodeDestination(address), key)),
         value);
 }
 
@@ -776,7 +776,7 @@ bool WalletBatch::EraseDestData(const CTxDestination &address,
     }
     return EraseIC(std::make_pair(
         std::string("destdata"),
-        std::make_pair(EncodeCashAddr(address, Params()), key)));
+        std::make_pair(EncodeDestination(address), key)));
 }
 
 bool WalletBatch::TxnBegin() {

@@ -26,6 +26,7 @@
 #include <init.h> // for ShutdownRequested
 
 #include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chainparams.h>
 /**
  * Calculate the difficulty for a given block index.
@@ -78,7 +79,7 @@ std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const CTxDestination& sou
     uint256 prevkey;
     std::map<COutPoint, Coin> outputs;
 
-    std::string address = EncodeCashAddr(source, Params());
+    std::string address = EncodeDestination(source);
     
     while (pcursor->Valid()) {
         interruption_point(ShutdownRequested());
