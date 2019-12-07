@@ -2188,7 +2188,7 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    LogPrintf("%s: new best=%s height=%d progess=%2.1f version=0x%0x log2_work=%0.6g tx=%lu "
+    LogPrintf("%s: new best=%s height=%d progress=%2.1f%% version=0x%0x log2_work=%0.6g tx=%lu "
               "date='%s' cache=%.1fMiB(%utxo)\n",
               __func__, chainActive.Tip()->GetBlockHash().ToString(),
               chainActive.Height(),
