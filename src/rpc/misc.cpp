@@ -376,7 +376,7 @@ bool getAddressesFromParams(const Config &config, const UniValue& params, std::v
         for (const auto& it : values) {
             CTxDestination address = DecodeDestination(it.get_str(), config.GetChainParams());
             if (!IsValidDestination(address)) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-            std::string addr =  EncodeCashAddr(address, Params());
+            std::string addr =  EncodeDestination(address);
             addresses.push_back(addr);
         }
     } else {

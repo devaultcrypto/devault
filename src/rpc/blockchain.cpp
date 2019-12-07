@@ -139,9 +139,9 @@ UniValue blockToDeltasJSON(const Config &config, const CBlock& block, const CBlo
 
                 if (GetSpentIndex(spentKey, spentInfo)) {
                     if (spentInfo.addressType == 1) {
-                        delta.push_back(Pair("address", EncodeCashAddr(CKeyID(spentInfo.addressHash),Params)));
+                        delta.push_back(Pair("address", EncodeDestination(CKeyID(spentInfo.addressHash))));
                     } else if (spentInfo.addressType == 2)  {
-                        delta.push_back(Pair("address", EncodeCashAddr(CScriptID(spentInfo.addressHash),Params)));
+                        delta.push_back(Pair("address", EncodeDestination(CScriptID(spentInfo.addressHash))));
                     } else {
                         continue;
                     }
@@ -169,11 +169,11 @@ UniValue blockToDeltasJSON(const Config &config, const CBlock& block, const CBlo
 
             if (out.scriptPubKey.IsPayToScriptHash()) {
                 std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
-                delta.push_back(Pair("address", EncodeCashAddr(CScriptID(uint160(hashBytes)),Params)));
+                delta.push_back(Pair("address", EncodeDestination(CScriptID(uint160(hashBytes)))));
 
             } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
                 std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
-                delta.push_back(Pair("address", EncodeCashAddr(CKeyID(uint160(hashBytes)), Params)));
+                delta.push_back(Pair("address", EncodeDestination(CKeyID(uint160(hashBytes)))));
             } else {
                 continue;
             }

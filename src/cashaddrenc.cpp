@@ -9,6 +9,7 @@
 #include <script/script.h>
 #include <primitives/transaction.h>
 #include <utilstrencodings.h>
+#include <dstencode.h>
 
 #ifdef HAVE_VARIANT
 #include <variant>
@@ -308,6 +309,6 @@ CKey DecodeSecret(const std::string &addr) {
 std::string GetAddrFromTxOut(const CTxOut& out) {
   CTxDestination dest;
   ExtractDestination(out.scriptPubKey, dest);
-  std::string SDest = EncodeCashAddr(dest, Params());
+  std::string SDest = EncodeDestination(dest);
   return SDest;
 }

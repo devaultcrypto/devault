@@ -611,7 +611,7 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
         std::string strSecret = request.params[0].get_str();
         CKey key = DecodeSecret(strSecret);
-        //std::string p = EncodeCashAddr(key.GetPubKey().GetID(), Params());
+        //std::string p = EncodeDestination(key.GetPubKey().GetID());
         
         if (!key.IsValid()) { 
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
