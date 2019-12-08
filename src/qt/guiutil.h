@@ -55,7 +55,6 @@ QString convertToConfiguredAddressFormat(const Config &config,
 
 // Set up widgets for address and amounts
 void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
-void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
 QString bitcoinURIScheme(const CChainParams &, bool useCashAddr);
 QString bitcoinURIScheme(const Config &);

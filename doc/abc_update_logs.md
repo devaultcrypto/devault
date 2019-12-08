@@ -520,7 +520,7 @@
       Update timing.json
       Bump version to 0.20.1
       [CMAKE] Add the -commit suffix to version number through obj/build.h
-      Merge #12779: Qt: Remove unused method setupAmountWidget(...)
+#     Merge #12779: Qt: Remove unused method setupAmountWidget(...)
       Cleanup reject_code in abc-schnorrmultisig-activation
       Cleanup reject_code in abc-minimaldata-activation
       docs: Update osx brew install instruction
@@ -530,7 +530,7 @@
       [doc] Minor corrections to osx dependencies
       Merge #12714: Introduce interface for signing providers
       Merge #12762: Make CKeyStore an interface
-      Merge #12752: [MOVEONLY] Move compressor utility functions out of class
+#     Merge #12752: [MOVEONLY] Move compressor utility functions out of class
       Merge #12811: test: Make summary row bold-red if any test failed and show failed tests at end of table
       Merge #12787: rpc: Adjust ifdef to avoid unreachable code
       Migrated abc-replay-protection off of ComparisonTestFramework
@@ -540,8 +540,8 @@
       Read more reject messages from debug logs in feature_dersig.py
       Cleanup reject_code in feature_block.py
       Merge #11200: Allow for aborting rescans in the GUI
-      Merge #12837: rpc: fix type mistmatch in `listreceivedbyaddress`
-      Merge #12650: gui: Fix issue: "default port not shown correctly in settings dialog"
+#     Merge #12837: rpc: fix type mistmatch in `listreceivedbyaddress`
+#     Merge #12650: gui: Fix issue: "default port not shown correctly in settings dialog"
       Merge #11353: Small refactor of CCoinsViewCache::BatchWrite()
 #     Merge #12621: Avoid querying unnecessary model data when filtering transactions
 20.0
