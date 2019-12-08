@@ -469,8 +469,8 @@
 20.1
       Update manpages for 0.20.1 release
       Update chainparams
-      Merge #12923: util: Pass pthread_self() to pthread_setschedparam instead of 0
-      Merge #12618: Set SCHED_BATCH priority on the loadblk thread.
+#     Merge #12923: util: Pass pthread_self() to pthread_setschedparam instead of 0
+#     Merge #12618: Set SCHED_BATCH priority on the loadblk thread.
       Update seeds
       Add some more release notes for 0.20.1
       Fix running teamcity builds when multiple configure flags are set
@@ -489,17 +489,17 @@
       Migrate gitian-build.sh to python
       [docs] Add instructions for lcov coverage report generation
       Remove script to clean up datadirs
-      Add DynamicMemoryUsage() to LevelDB
+#     Add DynamicMemoryUsage() to LevelDB
       [contrib] Add Valgrind suppressions file
       Merge #12747: Fix typos
-      Merge #11193: [Qt] Terminate string *pszExePath after readlink and without using memset
+#     Merge #11193: [Qt] Terminate string *pszExePath after readlink and without using memset
       use base58 map instead of strchr()
       Disable wallet and address book Qt tests on macOS minimal platform
       Merge #12305: [docs] [refactor] Add help messages for datadir path mangling
-      Merge #12770: Use explicit casting in cuckoocache's compute_hashes(...) to clarify integer conversion
-      Merge #12561: Check for block corruption in ConnectBlock()
+#     Merge #12770: Use explicit casting in cuckoocache's compute_hashes(...) to clarify integer conversion
+#     Merge #12561: Check for block corruption in ConnectBlock()
 #     Merge #11131: rpc: Write authcookie atomically
-#     Merge #12721: Qt: remove "new" button during receive-mode in addressbook
+      Merge #12721: Qt: remove "new" button during receive-mode in addressbook
       Add python3 script shebang lint
       Remove the ZMQ example for Python 2
       Various textual improvements in build docs

@@ -14,7 +14,7 @@ struct CDiskBlockPos;
 fs::path GetDefaultDataDir();
 fs::path GetDebugLogPath();
 /** Get name of RPC authentication cookie file */
-fs::path GetAuthCookieFile();
+fs::path GetAuthCookieFile(bool temp=false);
 bool CheckIfWalletDatExists(bool fNetSpecific = true);
 const fs::path &GetDataDir(bool fNetSpecific = true);
 const fs::path GetDataDirNoCreate();
