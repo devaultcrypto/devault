@@ -68,7 +68,7 @@ static const std::string COOKIEAUTH_USER = "__cookie__";
 static const std::string COOKIEAUTH_FILE = ".cookie";
 
 /** Get name of RPC authentication cookie file */
-static fs::path GetAuthCookieFile(bool temp = false) {
+fs::path GetAuthCookieFile(bool temp) {
     std::string arg = gArgs.GetArg("-rpccookiefile", COOKIEAUTH_FILE);
     if (temp) {
         arg += ".tmp";
