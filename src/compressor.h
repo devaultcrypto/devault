@@ -29,7 +29,7 @@ int64_t DecompressAmount(uint64_t nAmount);
  * 3 special cases are defined:
  *  * Pay to pubkey hash (encoded as 21 bytes)
  *  * Pay to script hash (encoded as 21 bytes)
- *  * Pay to pubkey starting with 0x02, 0x03 or 0x04 (encoded as 33 bytes)
+ *  * Pay to pubkey starting with 0x02, 0x03 (encoded as 33 bytes)
  *
  * Other scripts up to 121 bytes require 1 byte + script length. Above that,
  * scripts up to 16505 bytes require 2 bytes + script length.

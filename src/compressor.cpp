@@ -36,16 +36,11 @@ static bool IsToScriptID(const CScript &script, CScriptID &hash) {
 }
 
 static bool IsToPubKey(const CScript &script, CPubKey &pubkey) {
+  // assumes compressed public key since uncompressed was dropped
     if (script.size() == 35 && script[0] == 33 && script[34] == OP_CHECKSIG &&
         (script[1] == 0x02 || script[1] == 0x03)) {
         pubkey.Set(&script[1], &script[34]);
         return true;
-    }
-    if (script.size() == 67 && script[0] == 65 && script[66] == OP_CHECKSIG &&
-        script[1] == 0x04) {
-        pubkey.Set(&script[1], &script[66]);
-        // if not fully valid, a case that would not be compressible
-        return pubkey.IsFullyValid();
     }
     return false;
 }
@@ -71,9 +66,6 @@ bool CompressScript(const CScript &script, std::vector<uint8_t> &out) {
         memcpy(&out[1], &pubkey[1], 32);
         if (pubkey[0] == 0x02 || pubkey[0] == 0x03) {
             out[0] = pubkey[0];
-            return true;
-        } else if (pubkey[0] == 0x04) {
-            out[0] = 0x04 | (pubkey[64] & 0x01);
             return true;
         }
     }
@@ -116,19 +108,6 @@ bool DecompressScript(CScript &script, unsigned int nSize,
             script[1] = nSize;
             memcpy(&script[2], in.data(), 32);
             script[34] = OP_CHECKSIG;
-            return true;
-        case 0x04:
-        case 0x05:
-            uint8_t vch[33] = {};
-            vch[0] = nSize - 2;
-            memcpy(&vch[1], in.data(), 32);
-            CPubKey pubkey(&vch[0], &vch[33]);
-            if (!pubkey.Decompress()) return false;
-            assert(pubkey.size() == 65);
-            script.resize(67);
-            script[0] = 65;
-            memcpy(&script[1], pubkey.begin(), 65);
-            script[66] = OP_CHECKSIG;
             return true;
     }
     return false;
