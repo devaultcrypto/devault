@@ -966,12 +966,14 @@ void RPCConsole::message(int category, const QString &message, bool html) {
 void RPCConsole::updateNetworkState() {
     QString connections =
         QString::number(clientModel->getNumConnections()) + " (";
-    connections +=
-        tr("In:") + " " +
-        QString::number(clientModel->getNumConnections(CConnman::CONNECTIONS_IN)) + " / ";
-    connections +=
-        tr("Out:") + " " +
-        QString::number(clientModel->getNumConnections(CConnman::CONNECTIONS_OUT)) + ")";
+    connections += tr("In:") + " " +
+                   QString::number(clientModel->getNumConnections(
+                       ClientModel::CONNECTIONS_IN)) +
+                   " / ";
+    connections += tr("Out:") + " " +
+                   QString::number(clientModel->getNumConnections(
+                       ClientModel::CONNECTIONS_OUT)) +
+                   ")";
 
     if (!clientModel->node().getNetworkActive()) {
         connections += " (" + tr("Network activity disabled") + ")";

@@ -34,6 +34,13 @@ class ClientModel : public QObject {
     Q_OBJECT
 
 public:
+    enum NumConnections {
+        CONNECTIONS_NONE = 0,
+        CONNECTIONS_IN = (1U << 0),
+        CONNECTIONS_OUT = (1U << 1),
+        CONNECTIONS_ALL = (CONNECTIONS_IN | CONNECTIONS_OUT),
+    };
+
     explicit ClientModel(interfaces::Node &node, OptionsModel *optionsModel,
                          QObject *parent = nullptr);
     ~ClientModel();
@@ -44,7 +51,7 @@ public:
     BanTableModel *getBanTableModel();
 
     //! Return number of connections, default is in- and outbound (total)
-    int getNumConnections(unsigned int flags = CConnman::CONNECTIONS_ALL) const;
+    int getNumConnections(NumConnections flags = ClientModel::CONNECTIONS_ALL) const;
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;
 
