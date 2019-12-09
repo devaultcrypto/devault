@@ -49,14 +49,14 @@ ClientModel::~ClientModel() {
     unsubscribeFromCoreSignals();
 }
 
-int ClientModel::getNumConnections(unsigned int flags) const {
+int ClientModel::getNumConnections(NumConnections flags) const {
     CConnman::NumConnections connections = CConnman::CONNECTIONS_NONE;
 
-    if (flags == CConnman::CONNECTIONS_IN)
+    if (flags == ClientModel::CONNECTIONS_IN)
         connections = CConnman::CONNECTIONS_IN;
-    else if (flags == CConnman::CONNECTIONS_OUT)
+    else if (flags == ClientModel::CONNECTIONS_OUT)
         connections = CConnman::CONNECTIONS_OUT;
-    else if (flags == CConnman::CONNECTIONS_ALL)
+    else if (flags == ClientModel::CONNECTIONS_ALL)
         connections = CConnman::CONNECTIONS_ALL;
 
     return m_node.getNodeCount(connections);
