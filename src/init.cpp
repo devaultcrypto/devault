@@ -204,7 +204,8 @@ void Shutdown() {
     RenameThread("devault-shutoff");
     g_mempool.AddTransactionsUpdated(1);
   
-    // prewards->DumpOrderedRewards(); if needed for debug
+    LogPrintf("%s: Dumping rewards for debug\n", __func__);
+    prewards->DumpOrderedRewards(); // temporarily for debug
     
     StopHTTPRPC();
     StopREST();

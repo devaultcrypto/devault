@@ -17,6 +17,7 @@
 #include <validation.h>
 
 #include <fs.h> // for Dump debug stuff
+#include <fs_util.h> // for GetDataDir
 #include <fstream>
 
 using namespace std;
@@ -496,16 +497,18 @@ bool CColdRewards::CheckReward(const std::string& ref) {
 
 void CColdRewards::DumpOrderedRewards(const std::string& filename) {
 
-    fs::path filepath;
+    fs::path filepath = GetDataDir();
     if (filename == "") {
         std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        filepath = fs::absolute("rewarddb-"+FormatDebugLogDateTime(cftime)+".log");
+        filepath /= "rewarddb-"+FormatDebugLogDateTime(cftime)+".log";
     } else {
-        filepath = fs::absolute(filename);
+        filepath /= filename;
     }
     std::ofstream file;
     file.open(filepath.string().c_str());
 
+    file << "Block Height is " << chainActive.Height() << "\n";
+    
     CRewardValue val;
     COutPoint key;
   
@@ -525,4 +528,30 @@ void CColdRewards::DumpOrderedRewards(const std::string& filename) {
     }
   
     file.close();
+    RemoveOlderDumpFile();
+}
+
+//! Remove rewarddb-.log files older than 7 days
+void CColdRewards::RemoveOlderDumpFile() {
+    int days_to_keep = 7;
+    fs::directory_iterator dir_it(GetDataDir());
+    for(const auto& it : dir_it) {
+        if (!fs::is_regular_file(it.status())) continue;
+        std::string filename = it.path().filename().string();
+        std::size_t found_log = filename.find(".log");
+        std::size_t found_debug = filename.find("rewarddb-");
+        if (found_log !=std::string::npos && found_debug != std::string::npos) {
+            auto last_write_time = fs::last_write_time(it.path());
+            std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+#ifdef NO_BOOST_FILESYSTEM
+            auto last_write_int = last_write_time.time_since_epoch().count();
+#else
+            auto last_write_int = last_write_time;
+#endif
+            if ((cftime - last_write_int) > (60*60*24*days_to_keep)) {
+                LogPrintf("Removing %s since older than %d day\n",it.path().filename().string(),days_to_keep);
+                fs::remove(it.path());
+            }
+        }
+    }
 }

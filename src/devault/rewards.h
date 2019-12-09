@@ -42,6 +42,8 @@ class CColdRewards {
   std::map<COutPoint, CRewardValue> GetRewards();
   std::vector<CRewardValue> GetOrderedRewards();
   void DumpOrderedRewards(const std::string &filename = "");
+  void RemoveOlderDumpFile();
+
   int32_t GetNumberOfCandidates() { return nNumCandidates; }
   void GetInActivesFromDB(int Height);
   bool CheckReward(const std::string& r);
