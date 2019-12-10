@@ -1,7 +1,7 @@
 # Copyright (c) 2017 The Bitcoin developers
 # Copyright (c) 2017 The DeVault developers
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 project(devault
 	VERSION 1.1.2
 	DESCRIPTION "DeVault is a full node implementation of the DeVault protocol."
