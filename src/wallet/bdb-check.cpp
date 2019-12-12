@@ -22,7 +22,7 @@ const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 static bool WalletAppInit(int argc, char* argv[]) {
     SetupChainParamsBaseOptions();
     if (HelpRequested(gArgs)) {
-        std::string usage = strprintf("%s bdb-check version", PACKAGE_NAME) + " " + FormatFullVersion() + "\n\n" +
+        std::string usage = strprintf("%s bdb-check version", "DeVault Core") + " " + FormatFullVersion() + "\n\n" +
             "bdb-check is an offline tool for examining DeVault wallet files.\n" +
             "It will act on wallets in the default mainnet wallet directory.\n" +
             "With some source code modification it could be made to handle non-default options.\n\n" +

@@ -530,7 +530,7 @@ RPCConsole::RPCConsole(interfaces::Node &node,
     }
 
     ui->openDebugLogfileButton->setToolTip(
-        ui->openDebugLogfileButton->toolTip().arg(tr(PACKAGE_NAME)));
+        ui->openDebugLogfileButton->toolTip().arg(tr("DeVault Core")));
 
     if (platformStyle->getImagesOnButtons()) {
         ui->openDebugLogfileButton->setIcon(
@@ -910,7 +910,7 @@ void RPCConsole::clear(bool clearHistory) {
 #endif
 
     message(CMD_REPLY,
-            (tr("Welcome to the %1 RPC console.").arg(tr(PACKAGE_NAME)) +
+            (tr("Welcome to the %1 RPC console.").arg(tr("DeVault Core")) +
              "<br>" +
              tr("Use up and down arrows to navigate history, and "
                 "%1 to clear screen.")

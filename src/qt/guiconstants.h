@@ -51,4 +51,6 @@ static const int MAX_URI_LENGTH = 255;
 #define QAPP_APP_NAME_DEFAULT "DeVault-Core"
 #define QAPP_APP_NAME_TESTNET "DeVault-Core-testnet"
 
+#define PACKAGE_NAME "DeVault Core"
+
 #endif // BITCOIN_QT_GUICONSTANTS_H

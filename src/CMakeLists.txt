@@ -158,11 +158,11 @@ add_compiler_flags(
 	-Wcast-align
 	-Wunused-parameter
 	-Wmissing-braces
-	# FIXME: Activating this flag cause cmake to fail on leveldb.
 	-Wthread-safety-analysis
 	-Wshadow
 	-Wrange-loop-analysis
 	-Wredundant-decls
+	-Wredundant-move
 )
 
 option(EXTRA_WARNINGS "Enable extra warnings" OFF)
@@ -281,7 +281,6 @@ add_subdirectory(devault)
 #--------------------------------------------------------------------------------
 
 
-
 file(GLOB PRIMITIVE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/primitives/*.h)
 source_group("PrimitiveHeaders" FILES ${PRIMITIVE_HEADERS})
 
@@ -377,7 +376,7 @@ if (Filesystem_FOUND)
   include_directories($include_directories "${Boost_INCLUDE_DIR}")
 else()
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
-  find_package(Boost 1.69 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  find_package(Boost 1.65 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
   target_link_libraries(util univalue crypto sodium ${BOOST_LIBRARIES})
 endif()
 
@@ -502,9 +501,9 @@ target_link_libraries(server
 	${EVENT_LIBRARY}
 	${EVENT_PTHREAD_LIBRARY}
 	devaultconsensus
-        ${DB_LIBRARIES}
-        ${MINIUPNP_LIBRARY}
-	      Threads::Threads
+  ${DB_LIBRARIES}
+  ${MINIUPNP_LIBRARY}
+	Threads::Threads
 )
 
 if(ENABLE_UPNP)

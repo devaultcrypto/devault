@@ -2248,9 +2248,9 @@ bool CConnman::BindListenPort(const CService &addrBind, std::string &strError,
         SOCKET_ERROR) {
         int nErr = WSAGetLastError();
         if (nErr == WSAEADDRINUSE) {
-            strError = strprintf(_("Unable to bind to %s on this computer. %s "
+            strError = strprintf(_("Unable to bind to %s on this computer. DeVault-Core "
                                    "is probably already running."),
-                                 addrBind.ToString(), _(PACKAGE_NAME));
+                                 addrBind.ToString());
         } else {
             strError = strprintf(_("Unable to bind to %s on this computer "
                                    "(bind returned error %s)"),

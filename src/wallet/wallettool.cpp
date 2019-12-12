@@ -45,11 +45,10 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
                   " or address book entries might be missing or incorrect.",
                   wallet_path.string());
     } else if (load_wallet_ret == DBErrors::TOO_NEW) {
-      tfm::format(std::cerr, "Error loading %s: Wallet requires newer version of %s", wallet_path.string(),
-                  PACKAGE_NAME);
+      tfm::format(std::cerr, "Error loading %s: Wallet requires newer version of DeVault Core", wallet_path.string());
       return nullptr;
     } else if (load_wallet_ret == DBErrors::NEED_REWRITE) {
-      tfm::format(std::cerr, "Wallet needed to be rewritten: restart %s to complete", PACKAGE_NAME);
+      tfm::format(std::cerr, "Wallet needed to be rewritten: restart DeVault Core to complete");
       return nullptr;
     } else {
       tfm::format(std::cerr, "Error loading %s", wallet_path.string());

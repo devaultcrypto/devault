@@ -135,14 +135,13 @@ static int AppInitRPC(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     if (argc < 2 || HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
-        std::string strUsage =
-            PACKAGE_NAME " RPC client version " + FormatFullVersion() + "\n";
+        std::string strUsage = "DeVault Core RPC client version " + FormatFullVersion() + "\n";
         if (!gArgs.IsArgSet("-version")) {
             strUsage += "\n"
                         "Usage:  devault-cli [options] <command> [params]  "
-                        "Send command to " PACKAGE_NAME "\n"
+                        "Send command to DeVault Core\n"
                         "or:     devault-cli [options] -named <command> "
-                        "[name=value]...  Send command to " PACKAGE_NAME
+                        "[name=value]...  Send command to DeVault Core"
                         " (with named arguments)\n"
                         "or:     devault-cli [options] help                "
                         "List commands\n"
