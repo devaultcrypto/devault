@@ -76,12 +76,12 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet)
     QDir translations(":translations");
 
     ui->bitcoinAtStartup->setToolTip(
-        ui->bitcoinAtStartup->toolTip().arg(tr(PACKAGE_NAME)));
+        ui->bitcoinAtStartup->toolTip().arg(tr("DeVault Core")));
     ui->bitcoinAtStartup->setText(
-        ui->bitcoinAtStartup->text().arg(tr(PACKAGE_NAME)));
+        ui->bitcoinAtStartup->text().arg(tr("DeVault Core")));
 
-    ui->lang->setToolTip(ui->lang->toolTip().arg(tr(PACKAGE_NAME)));
-    ui->theme->setToolTip(ui->theme->toolTip().arg(tr(PACKAGE_NAME)));
+    ui->lang->setToolTip(ui->lang->toolTip().arg(tr("DeVault Core")));
+    ui->theme->setToolTip(ui->theme->toolTip().arg(tr("DeVault Core")));
     ui->lang->addItem(QString("(") + tr("default") + QString(")"),
                       QVariant("")); 
     ui->theme->addItem(tr("dark"), QVariant("dark"));

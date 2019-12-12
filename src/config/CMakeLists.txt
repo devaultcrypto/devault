@@ -7,13 +7,10 @@ include(CheckIncludeFiles)
 include(CheckSymbolExists)
 include(CheckCXXSourceCompiles)
 
-# Package informations
-set(PACKAGE_NAME "DeVault Core" CACHE STRING "Package name")
-
 # Version
-set(CLIENT_VERSION_MAJOR 1 CACHE STRING "Major version number")
-set(CLIENT_VERSION_MINOR 1 CACHE STRING "Minor version number")
-set(CLIENT_VERSION_REVISION 2 CACHE STRING "Revision version number")
+set(CLIENT_VERSION_MAJOR ${devault_VERSION_MAJOR})
+set(CLIENT_VERSION_MINOR ${devault_VERSION_MINOR})
+set(CLIENT_VERSION_REVISION ${devault_VERSION_PATCH})
 set(CLIENT_VERSION_BUILD 0 CACHE STRING "Build version number")
 
 set(VERSION_MAJOR ${CLIENT_VERSION_MAJOR} PARENT_SCOPE)
@@ -22,12 +19,6 @@ set(VERSION_REVISION ${CLIENT_VERSION_REVISION} PARENT_SCOPE)
 set(VERSION_BUILD ${CLIENT_VERSION_BUILD} PARENT_SCOPE)
 
 option(CLIENT_VERSION_IS_RELEASE "Build a release version" OFF)
-
-# Copyright
-set(COPYRIGHT_YEAR 2019)
-set(COPYRIGHT_HOLDERS "The %s developers")
-set(COPYRIGHT_HOLDERS_SUBSTITUTION Bitcoin)
-string(REPLACE "%s" ${COPYRIGHT_HOLDERS_SUBSTITUTION} COPYRIGHT_HOLDERS_FINAL ${COPYRIGHT_HOLDERS})
 
 # Process info with GIT to determine if this is a tagged release or not
 # If not an annotated tags, then BUILD_SUFFIX with the git sha should be set and used

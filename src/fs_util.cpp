@@ -494,18 +494,17 @@ bool LockDataDirectory(bool probeOnly) {
             pathLockFile.string().c_str());
         if (!lock.try_lock()) {
             return InitError(
-                strprintf(_("Cannot obtain a lock on data directory %s. %s is "
-                            "probably already running."),
-                          strDataDir, _(PACKAGE_NAME)));
+                strprintf(_("Cannot obtain a lock on data directory %s. DeVault Core is probably already running."),
+                          strDataDir));
         }
         if (probeOnly) {
             lock.unlock();
         }
     } catch (const boost::interprocess::interprocess_exception &e) {
         return InitError(strprintf(_("Cannot obtain a lock on data directory "
-                                     "%s. %s is probably already running.") +
+                                     "%s. DeVault Core is probably already running.") +
                                        " %s.",
-                                   strDataDir, _(PACKAGE_NAME), e.what()));
+                                   strDataDir, e.what()));
     }
     return true;
 }

@@ -123,13 +123,13 @@ bool AppInit(int argc, char *argv[]) {
     // Process help and version before taking care about datadir
     if (HelpRequested(gArgs) || gArgs.IsArgSet("-version")) {
         std::string strUsage =
-            PACKAGE_NAME " Daemon version " + FormatFullVersion() + "\n";
+            "DeVault Core Daemon version " + FormatFullVersion() + "\n";
 
         if (gArgs.IsArgSet("-version")) {
             strUsage += FormatParagraph(LicenseInfo());
         } else {
             strUsage += "\nUsage:  devaultd [options]                     "
-                        "Start " PACKAGE_NAME " Daemon\n";
+                        "Start " "DeVault Core Daemon\n";
 
             strUsage += "\n" + gArgs.GetHelpMessage();
         }

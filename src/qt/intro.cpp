@@ -21,6 +21,8 @@
 
 #include <cmath>
 
+#define PACKAGE_NAME "DeVault Core"
+
 static const uint64_t GB_BYTES = 1000000000LL;
 /**
  * Minimum free space (in GB) needed for data directory.

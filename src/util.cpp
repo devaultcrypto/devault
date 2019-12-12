@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <config/bitcoin-config.h>
-#include <config/version.h>
 
 #include <util.h>
 
@@ -834,8 +833,7 @@ int GetNumCores() {
 }
 
 std::string CopyrightHolders(const std::string &strPrefix) {
-    return strPrefix +
-           strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
+    return strPrefix + "The Bitcoin developers";
 }
 
 // Obtain the application startup time (used for uptime calculation)

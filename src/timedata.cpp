@@ -3,7 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <config/bitcoin-config.h>
-#include <config/version.h>
 
 #include <timedata.h>
 
@@ -96,8 +95,7 @@ void AddTimeData(const CNetAddr &ip, int64_t nOffsetSample) {
                     std::string strMessage =
                         strprintf(_("Please check that your computer's date "
                                     "and time are correct! If your clock is "
-                                    "wrong, %s will not work properly."),
-                                  _(PACKAGE_NAME));
+                                    "wrong, DeVault Core will not work properly."));
                     SetMiscWarning(strMessage);
                     uiInterface.ThreadSafeMessageBox(
                         strMessage, "", CClientUIInterface::MSG_WARNING);

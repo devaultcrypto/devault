@@ -4602,13 +4602,12 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                 walletFile));
         } else if (nLoadWalletRet == DBErrors::TOO_NEW) {
             InitError(strprintf(
-                _("Error loading %s: Wallet requires newer version of %s"),
-                walletFile, _(PACKAGE_NAME)));
+                _("Error loading %s: Wallet requires newer version of DeVault-Core"),
+                walletFile));
             return nullptr;
         } else if (nLoadWalletRet == DBErrors::NEED_REWRITE) {
             InitError(strprintf(
-                _("Wallet needed to be rewritten: restart %s to complete"),
-                _(PACKAGE_NAME)));
+                _("Wallet needed to be rewritten: restart DeVault-Core to complete")));
             return nullptr;
         } else {
             InitError(strprintf(_("Error loading %s"), walletFile));
