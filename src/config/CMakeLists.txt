@@ -6,6 +6,7 @@
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
 include(CheckCXXSourceCompiles)
+include(GitTools)
 
 # Version
 set(CLIENT_VERSION_MAJOR ${devault_VERSION_MAJOR})
@@ -18,73 +19,14 @@ set(VERSION_MINOR ${CLIENT_VERSION_MINOR} PARENT_SCOPE)
 set(VERSION_REVISION ${CLIENT_VERSION_REVISION} PARENT_SCOPE)
 set(VERSION_BUILD ${CLIENT_VERSION_BUILD} PARENT_SCOPE)
 
-option(CLIENT_VERSION_IS_RELEASE "Build a release version" OFF)
-
 # Process info with GIT to determine if this is a tagged release or not
 # If not an annotated tags, then BUILD_SUFFIX with the git sha should be set and used
 FIND_PROGRAM(GIT git)
 IF(GIT)
-   EXECUTE_PROCESS(
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMAND ${GIT} diff --quiet 
-    RESULT_VARIABLE GIT_DIRTY
-    OUTPUT_VARIABLE GIT_TEMP
-    )
-
-  EXECUTE_PROCESS(
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMAND ${GIT} rev-parse HEAD
-    OUTPUT_VARIABLE GIT_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-  EXECUTE_PROCESS(
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMAND ${GIT} describe --abbrev=0
-    RESULT_VARIABLE GIT_HAS_NO_TAG
-    OUTPUT_VARIABLE GIT_TEMP
-    ERROR_QUIET
-    )
-
-  if (GIT_HAS_NO_TAG)
-  else()
-    EXECUTE_PROCESS(
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${GIT} describe --abbrev=0
-      OUTPUT_VARIABLE GIT_TAG OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-
-    EXECUTE_PROCESS(
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      COMMAND ${GIT} rev-list -1 ${GIT_TAG}
-      OUTPUT_VARIABLE GIT_TAG_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-  endif()
-
-  EXECUTE_PROCESS(
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMAND ${GIT} rev-parse --short HEAD 
-    OUTPUT_VARIABLE GIT_OUT OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-  if (${GIT_DIRTY})
-    SET(BUILD_SUFFIX_DEFINED true)
-    SET(BUILD_SUFFIX "${GIT_OUT}-dirty")
-    SET(BUILD_DESC "")
-		message(STATUS "Neither a tagged nor checked in release ${BUILD_SUFFIX} ")
-  elseif (${GIT_TAG_SHA} MATCHES ${GIT_SHA})
-		message(STATUS "This is a tagged release ${GIT_TAG}")
-    SET(BUILD_DESC ${GIT_TAG})
-    SET(BUILD_DESC_DEFINED true)
-    SET(BUILD_SUFFIX 0)
-  else()
-    SET(BUILD_SUFFIX_DEFINED true)
-    SET(BUILD_SUFFIX "${GIT_OUT}")
-    SET(BUILD_DESC "")
-		message(STATUS "Not a tagged release ${GIT_OUT}")
-  ENDIF()
-ELSE()
-		message(ERROR "Need git installed for proper tagging")
-ENDIF(GIT)
+  get_git_status()
+else()
+	message(ERROR "Need git installed for proper tagging")
+endif(GIT)
 
 # For QT
 set(VERSION_DESC ${BUILD_DESC} PARENT_SCOPE)

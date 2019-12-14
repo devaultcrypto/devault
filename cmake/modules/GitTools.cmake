@@ -1,0 +1,68 @@
+# Copyright (c) 2019 DeVault developers
+# Copyright (c) 2019 Jon Spock
+
+# Process info with GIT to determine if this is a tagged release or not
+# If not an annotated tags, then BUILD_SUFFIX with the git sha should be set and used
+
+# Set BUILD_SUFFIX, BUILD_DESC, BUILD_SUFFIX_DEFINED, BUILD_DESC_DEFINED in parent scope
+
+function(get_git_status)
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} diff --quiet 
+    RESULT_VARIABLE GIT_DIRTY
+    OUTPUT_VARIABLE GIT_TEMP
+    )
+
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} rev-parse HEAD
+    OUTPUT_VARIABLE GIT_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} describe --abbrev=0
+    RESULT_VARIABLE GIT_HAS_NO_TAG
+    OUTPUT_VARIABLE GIT_TEMP
+    ERROR_QUIET
+    )
+
+  if (GIT_HAS_NO_TAG)
+  else()
+    EXECUTE_PROCESS(
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${GIT} describe --abbrev=0
+      OUTPUT_VARIABLE GIT_TAG OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+
+    EXECUTE_PROCESS(
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${GIT} rev-list -1 ${GIT_TAG}
+      OUTPUT_VARIABLE GIT_TAG_SHA OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+
+  EXECUTE_PROCESS(
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${GIT} rev-parse --short HEAD 
+    OUTPUT_VARIABLE GIT_OUT OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+  if (${GIT_DIRTY})
+    SET(BUILD_SUFFIX "${GIT_OUT}-dirty" PARENT_SCOPE)
+    SET(BUILD_DESC "" PARENT_SCOPE)
+    SET(BUILD_SUFFIX_DEFINED true PARENT_SCOPE)
+		message(STATUS "Neither a tagged nor checked in release : ${GIT_OUT}-dirty ")
+  elseif (${GIT_TAG_SHA} MATCHES ${GIT_SHA})
+    SET(BUILD_DESC ${GIT_TAG} PARENT_SCOPE)
+    SET(BUILD_SUFFIX 0 PARENT_SCOPE)
+    SET(BUILD_DESC_DEFINED true PARENT_SCOPE)
+		message(STATUS "This is a tagged release ${GIT_TAG}")
+  else()
+    SET(BUILD_SUFFIX "${GIT_OUT}" PARENT_SCOPE)
+    SET(BUILD_DESC "" PARENT_SCOPE)
+    SET(BUILD_SUFFIX_DEFINED true PARENT_SCOPE)
+		message(STATUS "Not a tagged release ${GIT_OUT}")
+  endif()
+endfunction()
