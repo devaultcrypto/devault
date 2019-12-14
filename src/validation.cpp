@@ -186,7 +186,6 @@ public:
         EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
     bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view);
-    bool RewindBlockIndex(const Config &config);
     bool LoadGenesisBlock(const CChainParams &chainparams);
 
     void PruneBlockIndexCandidates();
@@ -226,9 +225,6 @@ private:
     bool RollforwardBlock(const CBlockIndex *pindex, CCoinsViewCache &inputs,
                           const Consensus::Params &params)
         EXCLUSIVE_LOCKS_REQUIRED(cs_main);
-
-    //! Mark a block as not having block data
-    void EraseBlockData(CBlockIndex *index) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 } g_chainstate;
 
 /**
@@ -1821,8 +1817,7 @@ bool CChainState::ConnectBlock(const CChainParams &params, const CBlock &block,
     // may have let in a block that violates the rule prior to updating the
     // software, and we would NOT be enforcing the rule here. Fully solving
     // upgrade from one software version to the next after a consensus rule
-    // change is potentially tricky and issue-specific (see RewindBlockIndex()
-    // for one general approach that was used for BIP 141 deployment).
+    // change is potentially tricky and issue-specific.
     // Also, currently the rule against blocks more than 2 hours in the future
     // is enforced in ContextualCheckBlockHeader(); we wouldn't want to
     // re-enforce that rule here (at least until we make it impossible for
@@ -5158,6 +5153,7 @@ bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view) {
     return g_chainstate.ReplayBlocks(params, view);
 }
 
+/*
 //! Helper for CChainState::RewindBlockIndex
 void CChainState::EraseBlockData(CBlockIndex *index) {
     AssertLockHeld(cs_main);
@@ -5283,6 +5279,7 @@ bool RewindBlockIndex(const Config &config) {
 
     return true;
 }
+*/
 
 // May NOT be used after any connections are up as much of the peer-processing
 // logic assumes a consistent block index state
