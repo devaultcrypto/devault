@@ -42,12 +42,13 @@ Disclosure Policy
 See [DISCLOSURE_POLICY](DISCLOSURE_POLICY.md)
 
 Upgrades/Changes in this code fork - when coin was launched
-for overall changes please see [Summary](SUMMARY.md))
+for overall changes please see [Summary](./devault_docs/SUMMARY.md))
+Also other DeVault specific information is in the ./devault_docs subdirectory
 -----------------
 
-- Cold Rewards Code (details here : [Cold Reward](COLDREWARDS.md))
-- Budget Rewards (detail here : [Budget](BUDGET.md))
-- `Shark` block inflation for a fairer initial distribution - details here : [Inflation](INFLATION.md) ![Shark](./share/pixmaps/Shark.png)
+- Cold Rewards Code (details here : [Cold Reward](./devault_docs/COLDREWARDS.md))
+- Budget Rewards (detail here : [Budget](./devault_docs/BUDGET.md))
+- `Shark` block inflation for a fairer initial distribution - details here : [Inflation](./devault_docs/INFLATION.md) ![Shark](./devault_docs/image3.png)
 - Removed BIP70 & protobuf dependency
 - Updated CMake config
 - Redesigned QT Wallet GUI
