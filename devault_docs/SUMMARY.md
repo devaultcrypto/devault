@@ -1,4 +1,4 @@
-![DeVault](./share/pixmaps/dvt-logo.png)
+![DeVault](../share/pixmaps/dvt-logo.png)
 
 This file is an ongoing list of various things done differently in DeVault vs a pure Bitcoin clone
 
