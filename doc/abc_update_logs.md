@@ -2434,13 +2434,13 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Merge #14350: Add WalletLocation class
      [CI] Always move the Gitian install and build log
      Update Debian 10.x ISO link in the Gitian setup docs
-     We assume uint8_t is an alias of unsigned char.
+##   We assume uint8_t is an alias of unsigned char.
      Merge #14474: bitcoin-tx: Use constant for n pubkeys check
-     Merge #11866: Do not un-mark fInMempool on wallet txn if ATMP fails.
+##   Merge #11866: Do not un-mark fInMempool on wallet txn if ATMP fails.
      test: Move main_tests to validation_tests
-     Merge #14206: doc: Document -checklevel levels
+##   Merge #14206: doc: Document -checklevel levels
 #    Merge #13534: Don't assert(foo()) where foo() has side effects
-     Merge #13662: Explain when reindex-chainstate can be used instead of reindex
+##   Merge #13662: Explain when reindex-chainstate can be used instead of reindex
      Fixes AES benchmarks
 ##   qt: Replace objc_msgSend with native syntax
      [CMAKE] Fix wrong Openssl include directory variable name
