@@ -47,8 +47,8 @@ else()
 endif()
 
 
-# bitcoin-tx
-if(BUILD_WALLET)
+# bdb-check
+if(BUILD_WALLETTOOL)
 	add_executable(bdb-check bdb-check.cpp)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		target_sources(bdb-check PRIVATE bdb-check-res.rc)
