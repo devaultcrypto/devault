@@ -18,11 +18,9 @@ add_library(devault
   budget.cpp
 )
 
-find_package(Boost 1.58 REQUIRED ${BOOST_PACKAGES_REQUIRED})
-
 target_include_directories(devault
 	PRIVATE
-    ${Boost_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
 		..
 	PUBLIC
