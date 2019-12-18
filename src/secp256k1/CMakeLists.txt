@@ -133,11 +133,19 @@ add_feature_info(WITH_PRECOMPUTATION SECP256K1_ECMULT_STATIC_PRECOMPUTATION "Pre
 if(SECP256K1_ECMULT_STATIC_PRECOMPUTATION)
 	set(USE_ECMULT_STATIC_PRECOMPUTATION 1)
 	include(NativeExecutable)
-	add_custom_command(
-		OUTPUT src/ecmult_static_context.h
-		COMMAND gen_context
-	  )
 
+  if (TOOLCHAIN_PREFIX)
+  	add_custom_command(
+		  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/src/ecmult_static_context.h
+		  COMMAND ${NATIVE_BINARY_DIR}/../gen_context
+	    )
+  else()
+	  add_custom_command(
+		  OUTPUT src/ecmult_static_context.h
+		  COMMAND gen_context
+	    )
+  endif()
+  
 	target_sources(secp256k1 PRIVATE src/ecmult_static_context.h)
 	add_native_executable(gen_context src/gen_context.c)
 endif()

@@ -222,6 +222,14 @@ endif()
 
 include(BrewHelper)
 
+# Without these, find sodium doesn't work for cross compiles
+if (TOOLCHAIN_PREFIX)
+  set(CC "${CMAKE_CURRENT_SOURCE_DIR}/../depends/${TOOLCHAIN_PREFIX}/")
+  set(sodium_INCLUDE_DIR "${CC}/include")
+  set(sodium_LIBRARY_DEBUG "${CC}/lib/libsodium.a")
+  set(sodium_LIBRARY_RELEASE "${CC}/lib/libsodium.a")
+endif()
+
 find_package(sodium REQUIRED)
 if (SODIUM_FOUND)
   message(STATUS "Found libsodium")
