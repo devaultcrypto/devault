@@ -2399,10 +2399,10 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Filter IPv6 by ASN
      Update manpages for 0.20.9 release
      Update chainparams
-     Remove blockprioritypercentage config parameter.
+##   Remove blockprioritypercentage config parameter.
      Add phonon activation logic
      [CMAKE] Override default flags
-     Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
+##   Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
 #    [backport] net: Allow connections from misbehavior banned peers
      [CI] Don't override the default Junit file name
      [CMAKE] Unbreak the activated tests

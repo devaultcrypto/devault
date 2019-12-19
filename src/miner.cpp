@@ -70,8 +70,7 @@ int64_t UpdateTime(CBlockHeader *pblock, const Consensus::Params &params,
 BlockAssembler::Options::Options()
     : nExcessiveBlockSize(DEFAULT_MAX_BLOCK_SIZE),
       nMaxGeneratedBlockSize(DEFAULT_MAX_GENERATED_BLOCK_SIZE),
-      blockMinFeeRate(DEFAULT_BLOCK_MIN_TX_FEE_PER_KB),
-      nBlockPriorityPercentage(DEFAULT_BLOCK_PRIORITY_PERCENTAGE) {}
+      blockMinFeeRate(DEFAULT_BLOCK_MIN_TX_FEE_PER_KB) {}
 
 BlockAssembler::BlockAssembler(const CChainParams &params,
                                const CTxMemPool &_mempool,
@@ -82,8 +81,6 @@ BlockAssembler::BlockAssembler(const CChainParams &params,
     nMaxGeneratedBlockSize = std::max<uint64_t>(
         1000, std::min<uint64_t>(options.nExcessiveBlockSize - 1000,
                                  options.nMaxGeneratedBlockSize));
-    // Reserve a portion of the block for high priority transactions.
-    nBlockPriorityPercentage = options.nBlockPriorityPercentage;
 }
 
 static BlockAssembler::Options DefaultOptions(const Config &config) {
@@ -105,8 +102,6 @@ static BlockAssembler::Options DefaultOptions(const Config &config) {
         ParseMoney(gArgs.GetArg("-blockmintxfee", ""), n);
         options.blockMinFeeRate = CFeeRate(n);
     }
-
-    options.nBlockPriorityPercentage = config.GetBlockPriorityPercentage();
 
     return options;
 }
@@ -166,7 +161,6 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
             ? nMedianTimePast
             : pblock->GetBlockTime();
 
-    addPriorityTxs();
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
     addPackageTxs(nPackagesSelected, nDescendantsUpdated);
@@ -601,103 +595,6 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected,
 
         // Update transactions that depend on each of these
         nDescendantsUpdated += UpdatePackagesForAdded(ancestors, mapModifiedTx);
-    }
-}
-
-void BlockAssembler::addPriorityTxs() {
-    // How much of the block should be dedicated to high-priority transactions,
-    // included regardless of the fees they pay.
-    if (nBlockPriorityPercentage == 0) {
-        return;
-    }
-
-    uint64_t nBlockPrioritySize =
-        nMaxGeneratedBlockSize * nBlockPriorityPercentage / 100;
-
-    // This vector will be sorted into a priority queue:
-    std::vector<TxCoinAgePriority> vecPriority;
-    TxCoinAgePriorityCompare pricomparer;
-    std::map<CTxMemPool::txiter, double, CTxMemPool::CompareIteratorByHash>
-        waitPriMap;
-    double actualPriority = -1;
-
-    {
-    LOCK(mempool->cs);
-    vecPriority.reserve(mempool->mapTx.size());
-    for (CTxMemPool::indexed_transaction_set::iterator mi =
-             mempool->mapTx.begin();
-         mi != mempool->mapTx.end(); ++mi) {
-        double dPriority = mi->GetPriority(nHeight);
-        Amount dummy;
-        mempool->ApplyDeltas(mi->GetTx().GetId(), dPriority, dummy);
-        vecPriority.emplace_back(dPriority, mi);
-    }
-    std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-    }
-    CTxMemPool::txiter iter;
-
-    // Add a tx from priority queue to fill the part of block reserved to
-    // priority transactions.
-    while (!vecPriority.empty()) {
-        iter = vecPriority.front().second;
-        actualPriority = vecPriority.front().first;
-        std::pop_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-        vecPriority.pop_back();
-
-        // If tx already in block, skip.
-        if (inBlock.count(iter)) {
-            // Shouldn't happen for priority txs.
-            assert(false);
-            continue;
-        }
-
-        // If tx is dependent on other mempool txs which haven't yet been
-        // included then put it in the waitSet.
-        if (isStillDependent(iter)) {
-            waitPriMap.insert(std::make_pair(iter, actualPriority));
-            continue;
-        }
-
-        TestForBlockResult testResult = TestForBlock(iter);
-        // Break if the block is completed
-        if (testResult == TestForBlockResult::BlockFinished) {
-            break;
-        }
-
-        // If this tx does not fit in the block, skip to next transaction.
-        if (testResult != TestForBlockResult::TXFits) {
-            continue;
-        }
-
-        AddToBlock(iter);
-
-        // If now that this txs is added we've surpassed our desired priority
-        // size, then we're done adding priority transactions.
-        if (nBlockSize >= nBlockPrioritySize) {
-            break;
-        }
-
-        // if we have dropped below the AllowFreeThreshold, then we're done
-        // adding priority transactions.
-        if (!AllowFree(actualPriority)) {
-            break;
-        }
-
-        // This tx was successfully added, so add transactions that depend
-        // on this one to the priority queue to try again.
-        {
-        LOCK(mempool->cs);
-        for (CTxMemPool::txiter child : mempool->GetMemPoolChildren(iter)) {
-            auto wpiter = waitPriMap.find(child);
-            if (wpiter == waitPriMap.end()) {
-                continue;
-            }
-
-            vecPriority.emplace_back(wpiter->second, child);
-            std::push_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-            waitPriMap.erase(wpiter);
-        }
-        }
     }
 }
 

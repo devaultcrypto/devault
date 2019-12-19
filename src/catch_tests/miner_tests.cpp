@@ -58,9 +58,6 @@ void TestPackageSelection(Config &config, CScript scriptPubKey, std::vector<CTra
   // Test the ancestor feerate transaction selection.
   TestMemPoolEntryHelper entry;
 
-  // these 3 tests assume blockprioritypercentage is 0.
-  config.SetBlockPriorityPercentage(0);
-
   // Test that a medium fee transaction will be selected after a higher fee
   // rate package with a low fee rate parent.
   CMutableTransaction tx;
