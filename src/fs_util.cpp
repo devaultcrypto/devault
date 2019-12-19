@@ -557,3 +557,11 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes, bool blocks_dir) {
 
     return true;
 }
+
+fs::path AbsPathForConfigVal(const fs::path &path, bool net_specific) {
+#ifdef NO_BOOST_FILESYSTEM
+    return GetDataDir(net_specific) / path;
+#else
+    return fs::absolute(path, GetDataDir(net_specific));
+#endif     
+}

@@ -1,6 +1,6 @@
 # Copyright (c) 2017 The Bitcoin developers
+# Copyright (c) 2019 DeVault developers
 
-cmake_minimum_required(VERSION 3.5)
 project(DeVault)
 
 # Default visibility is hidden on all targets.
@@ -283,13 +283,6 @@ endif()
 add_subdirectory(secp256k1)
 add_subdirectory(univalue)
 
-#--------------------------------------------------------------------------------
-# DeVault
-#--------------------------------------------------------------------------------
-add_subdirectory(devault)
-#
-#--------------------------------------------------------------------------------
-
 
 file(GLOB PRIMITIVE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/primitives/*.h)
 source_group("PrimitiveHeaders" FILES ${PRIMITIVE_HEADERS})
@@ -348,26 +341,26 @@ add_library(util
 
 target_compile_definitions(util PUBLIC HAVE_CONFIG_H)
 target_include_directories(util
-	PUBLIC
-		.
-		# To access the config.
-		${CMAKE_CURRENT_BINARY_DIR}
-    ${sodium_INCLUDE_DIR}
+  PUBLIC
+  .
+  # To access the config.
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${sodium_INCLUDE_DIR}
 )
 
 # Target specific configs
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set(Boost_USE_STATIC_LIBS ON)
-	set(Boost_THREADAPI win32)
+  set(Boost_USE_STATIC_LIBS ON)
+  set(Boost_THREADAPI win32)
 
-	find_package(SHLWAPI REQUIRED)
-	target_link_libraries(util ${SHLWAPI_LIBRARY})
-	target_include_directories(util PUBLIC ${SHLWAPI_INCLUDE_DIR})
-
-	find_library(WS2_32_LIBRARY NAMES ws2_32)
-	target_link_libraries(util ${WS2_32_LIBRARY})
-	
-	target_compile_definitions(util PUBLIC BOOST_THREAD_USE_LIB)
+  find_package(SHLWAPI REQUIRED)
+  target_link_libraries(util ${SHLWAPI_LIBRARY})
+  target_include_directories(util PUBLIC ${SHLWAPI_INCLUDE_DIR})
+  
+  find_library(WS2_32_LIBRARY NAMES ws2_32)
+  target_link_libraries(util ${WS2_32_LIBRARY})
+  
+  target_compile_definitions(util PUBLIC BOOST_THREAD_USE_LIB)
 endif()
 
 function(prepend var prefix)
@@ -380,6 +373,7 @@ endfunction(prepend)
 
 if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
+  message(STATUS "Find Boost for headers use only")
   find_package(Boost 1.69) # bump up requirement to 1.69 so boost::system is not needed
   target_link_libraries(util univalue crypto sodium std::filesystem)
   # can probably be more selective than this, but needed for now
@@ -391,8 +385,13 @@ else()
 endif()
 
 
-# Make sure boost uses std::atomic (it doesn't before 1.63)
-target_compile_definitions(util PUBLIC BOOST_SP_USE_STD_ATOMIC BOOST_AC_USE_STD_ATOMIC)
+#--------------------------------------------------------------------------------
+# DeVault (after boost setup)
+#--------------------------------------------------------------------------------
+add_subdirectory(devault)
+#
+#--------------------------------------------------------------------------------
+
 
 # More completely unrelated features shared by all executables.
 # Because nothing says this is different from util than "common"

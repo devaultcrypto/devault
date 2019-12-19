@@ -8,12 +8,11 @@ project(devault)
 file(GLOB DEVAULT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 source_group("DevaultHeaders" FILES ${DEVAULT_HEADERS})
 
-
 # The library
 add_library(devault
   ${DEVAULT_HEADERS}
-	rewards.cpp
-	rewards_calculation.cpp
+  rewards.cpp
+  rewards_calculation.cpp
   rewardsview.cpp
   budget.cpp
 )
@@ -21,10 +20,10 @@ add_library(devault
 target_include_directories(devault
 	PRIVATE
     ${Boost_INCLUDE_DIR}
-		${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
-		..
+	${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
+	..
 	PUBLIC
-		# To access the config.
-		${CMAKE_CURRENT_BINARY_DIR}/..
+	# To access the config.
+	${CMAKE_CURRENT_BINARY_DIR}/..
 )
 
