@@ -74,10 +74,7 @@ fs::path GetAuthCookieFile(bool temp) {
         arg += ".tmp";
     }
     fs::path path(arg);
-    if (!path.is_complete()) {
-        path = GetDataDir() / path;
-    }
-    return path;
+    return AbsPathForConfigVal(fs::path(arg));
 }
 
 bool GenerateAuthCookie(std::string *cookie_out) {

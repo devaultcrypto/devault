@@ -11,6 +11,7 @@ extern const char *const BITCOIN_PID_FILENAME;
 
 struct CDiskBlockPos;
 
+fs::path AbsPathForConfigVal(const fs::path &path, bool net_specific = true);
 fs::path GetDefaultDataDir();
 fs::path GetDebugLogPath();
 /** Get name of RPC authentication cookie file */

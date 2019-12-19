@@ -841,10 +841,6 @@ int64_t GetStartupTime() {
     return nStartupTime;
 }
 
-fs::path AbsPathForConfigVal(const fs::path &path, bool net_specific) {
-    return fs::absolute(path, GetDataDir(net_specific));
-}
-
 int ScheduleBatchPriority() {
 #ifdef SCHED_BATCH
     const static sched_param param{0};
