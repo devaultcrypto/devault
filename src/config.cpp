@@ -8,6 +8,10 @@
 #include <globals.h>
 #include <policy/policy.h> // DEFAULT_BLOCK_PRIORITY_PERCENTAGE
 
+bool IsSuperBlock(int nBlockHeight) {
+  return GetConfig().GetChainParams().GetConsensus().IsSuperBlock(nBlockHeight);
+}
+
 GlobalConfig::GlobalConfig()
     : nMaxBlockSize(DEFAULT_MAX_BLOCK_SIZE),
       nBlockPriorityPercentage(DEFAULT_BLOCK_PRIORITY_PERCENTAGE) {}
