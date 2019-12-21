@@ -312,3 +312,11 @@ std::string GetAddrFromTxOut(const CTxOut& out) {
   std::string SDest = EncodeDestination(dest);
   return SDest;
 }
+
+CTxDestination GetDestFromTxOut(const CTxOut& out) {
+  CTxDestination dest;
+  // Assume always a valid scriptkey
+  ExtractDestination(out.scriptPubKey, dest);
+  return dest;
+}
+

@@ -48,19 +48,19 @@ struct CRewardValue {
   uint8_t version = 1;
   bool active;
 
-  CScript scriptPubKey() { return txout.scriptPubKey; }
+  CScript scriptPubKey() const { return txout.scriptPubKey; }
   CTxOut &GetTxOut() { return txout; }
-  Amount GetValue() { return txout.nValue; }
-  uint32_t GetCreationHeight() { return creationHeight; }
-  uint32_t GetOldHeight() { return OldHeight; }
-  uint32_t GetHeight() { return height; }
+  Amount GetValue() const { return txout.nValue; }
+  uint32_t GetCreationHeight() const { return creationHeight; }
+  uint32_t GetOldHeight() const { return OldHeight; }
+  uint32_t GetHeight() const { return height; }
   uint32_t GetPayCount() { return payCount; }
   uint8_t GetVersion() const { return version; }
   void SetVersion(const uint8_t nVersion) { version = nVersion; }
   void SetHeight(uint32_t h) { height = h; }
   void SetOldHeight(uint32_t h) { OldHeight = h; }
-  bool was_paid() { return (GetHeight() != GetOldHeight()); }
-  bool IsActive() { return active; }
+  bool was_paid() const { return (GetHeight() != GetOldHeight()); }
+  bool IsActive() const { return active; }
   void SetActive(bool a) { active = a;}
   CRewardValue() : creationHeight(0), OldHeight(0), height(0), payCount(0), active(false) {}
   explicit CRewardValue(const CTxOut &ptr, uint32_t cH, uint32_t OldH, uint32_t NewH)

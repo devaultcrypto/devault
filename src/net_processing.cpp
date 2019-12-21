@@ -38,7 +38,7 @@
 
 #if defined(NDEBUG)
 // raw asserts have no side effects below
-#error "DeVault cannot be compiled without assertions."
+#warning "DeVault compiled without assertions."
 #endif
 
 
