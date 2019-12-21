@@ -20,6 +20,7 @@ struct CashAddrContent {
 };
 
 std::string GetAddrFromTxOut(const CTxOut& out);
+CTxDestination GetDestFromTxOut(const CTxOut& out);
 
 std::string EncodeCashAddr(const CTxDestination &, const CChainParams &);
 std::string EncodeCashAddr(const std::string &prefix,
