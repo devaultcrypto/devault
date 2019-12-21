@@ -40,6 +40,8 @@ class CColdRewards {
   bool CheckReward(const Consensus::Params &consensusParams, int Height, CTxOut &rewardPayment);
   void UpdateRewardsDB(int nNewHeight);
   bool UndoBlock(const CBlock &block, const CBlockIndex *pindex, bool undoReward = true);
+  void ClearLowRewards(const Consensus::Params &consensusParams, const Amount min);
+  
   bool RestoreRewardAtHeight(int Height);
   std::map<COutPoint, CRewardValue> GetRewards();
   std::vector<CRewardValue> GetOrderedRewards();

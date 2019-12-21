@@ -49,6 +49,12 @@ struct Params {
         } while ((BalanceHeight < Height) && (index < vecMinRewardBalances.size()));
         return Balance;
     }
+
+    bool IsSuperBlock(int nBlockHeight) const {
+      int64_t nBlocksPerPeriod = (nBlocksPerYear / 12);
+      return (nBlockHeight % nBlocksPerPeriod == 0);
+    }
+
 };
              
 } // namespace Consensus

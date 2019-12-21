@@ -129,12 +129,12 @@ CBudget::CBudget(const Config &config) {
 }
 
 bool CBudget::IsSuperBlock(int nBlockHeight) {
-    if (nBlockHeight % nBlocksPerPeriod == 0) {
-        SetupForHeight(nBlockHeight);
-        return true;
-    } else {
-        return false;
-    }
+  if (pChainparams->GetConsensus().IsSuperBlock(nBlockHeight)) {
+    SetupForHeight(nBlockHeight);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 void CBudget::SetupForHeight(int nHeight) {

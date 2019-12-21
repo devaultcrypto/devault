@@ -110,4 +110,6 @@ private:
 // Temporary woraround.
 const Config &GetConfig();
 
+bool IsSuperBlock(int nBlockHeight);
+
 #endif

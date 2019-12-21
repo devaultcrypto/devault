@@ -22,13 +22,9 @@
 
 using namespace std;
 
-CCriticalSection cs_rewardsdb;
+const int clearLowRewardsSuperBlock = 6;
 
-// Probably should be a shared function
-bool IsSuperBlock(int nBlockHeight) {
-  int64_t nBlocksPerPeriod = (GetConfig().GetChainParams().GetConsensus().nBlocksPerYear / 12);
-  return (nBlockHeight % nBlocksPerPeriod == 0);
-}
+CCriticalSection cs_rewardsdb;
 
 //
 
@@ -221,7 +217,7 @@ bool CColdRewards::FindReward(const Consensus::Params &consensusParams, int Heig
   int64_t nBlocksPerPeriod = (GetConfig().GetChainParams().GetConsensus().nBlocksPerYear / 12);
   Amount minRewardBalance = consensusParams.getMinRewardBalance(Height);
   // Stop paying out UTXOs below minRewards after this point and remove from dB
-  bool stop_lowrewards = (Height >= 6 * nBlocksPerPeriod);
+  bool stop_lowrewards = (Height >= clearLowRewardsSuperBlock * nBlocksPerPeriod);
 
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
@@ -322,6 +318,7 @@ bool CColdRewards::CheckReward(const Consensus::Params &consensusParams, int Hei
 
   // Find all active rewards for this address
   std::map<COutPoint, CRewardValue> vals;
+  std::vector<COutPoint> cacheRemovals;
   
   std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
   while (pcursor->Valid()) {
@@ -340,10 +337,21 @@ bool CColdRewards::CheckReward(const Consensus::Params &consensusParams, int Hei
       if (reward == rewardPayment.nValue) {
         vals.emplace(key, val);
       }
+    } 
+
+    // For very old in-active entires we should remove from the db,
+    auto el = cachedInactives.find(key);
+    if (el != cachedInactives.end()) {
+      if ((Height - cachedInactives[key]) > 2*DEFAULT_MAX_REORG_DEPTH) {
+        cachedInactives.erase(el);
+        cacheRemovals.push_back(key);
+      }
     }
     pcursor->Next();
   }
 
+  if (cacheRemovals.size() > 0) pdb->Erase(cacheRemovals);
+  
   if (vals.size() == 0) return false;
   
   // After all that we still could have multiple possbilities
@@ -367,6 +375,22 @@ bool CColdRewards::CheckReward(const Consensus::Params &consensusParams, int Hei
   }
 
   return true;
+}
+
+// Clear Low Rewards from DB
+//
+void CColdRewards::ClearLowRewards(const Consensus::Params &consensusParams, const Amount minRewardBalance) {
+  
+  std::unique_ptr<CRewardsViewDBCursor> pcursor(pdb->Cursor());
+  while (pcursor->Valid()) {
+    CRewardValue val;
+    COutPoint key;
+    if (!pcursor->GetKey(key)) { break; }
+    if (!pcursor->GetValue(val)) { LogPrint(BCLog::COLD, "CR: %s: cannot parse CCoins record", __func__); }
+    // Remove balances < min at this height
+    if (val.GetValue() < minRewardBalance) pdb->EraseReward(key);
+    pcursor->Next();
+  }
 }
 
 // Should run at startup, gets inactive rewards (only)
@@ -501,7 +525,7 @@ bool CColdRewards::FullValidate(const Consensus::Params &consensusParams, const 
 
 bool CColdRewards::QuickValidate(const Consensus::Params &consensusParams, const CBlock &block, int nHeight,
                                  Amount &reward, bool fJustCheck) {
-
+  
   auto txCoinbase = block.vtx[0];
   int size = txCoinbase->vout.size();
 
@@ -514,6 +538,13 @@ bool CColdRewards::QuickValidate(const Consensus::Params &consensusParams, const
     return true;
   }
 
+  // One time clear out of low rewards +1 since this function doesn't run on Superblock
+  const int64_t nBlocksPerPeriod = (GetConfig().GetChainParams().GetConsensus().nBlocksPerYear / 12);
+  if (nHeight == clearLowRewardsSuperBlock*nBlocksPerPeriod + 1) {
+        const Amount minRewardBalance = consensusParams.getMinRewardBalance(nHeight);
+        ClearLowRewards(consensusParams, minRewardBalance);
+  }
+  
   if (size > 1) {
     CTxOut coinbase_reward = txCoinbase->vout[1];
     reward = coinbase_reward.nValue;
