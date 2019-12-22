@@ -905,7 +905,7 @@
                   <widget class="BitcoinAmountField" name="customFee"/>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_6">
+                  <spacer name="horizontalSpacer_66">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
@@ -1006,7 +1006,7 @@
                   </widget>
                  </item>
                  <item>
-                  <spacer name="horizontalSpacer_6">
+                  <spacer name="horizontalSpacer_67">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>

@@ -109,6 +109,7 @@ static datadb::Options GetOptions(size_t nCacheSize) {
     // Only trigger error on corruption in later versions.
     options.paranoid_checks = true;
   }
+  SetMaxOpenFiles(&options);
   return options;
 #endif
 }
