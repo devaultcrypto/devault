@@ -349,48 +349,48 @@
       Merge #13431: validation: count blocks correctly for check level < 3
       Merge #13428: validation: check the specified number of blocks (off-by-one)
       Merge #12885: Reduce implementation code inside CScript
-      net: split up addresses/ban dumps in preparation for moving them
+#     net: split up addresses/ban dumps in preparation for moving them
       depends: qt: avoid system harfbuzz and bz2
       [gitian-build] Change output file destinations to separate directories for each platform
       Merge #13022: [qa] Attach node index to test_node AssertionError and print messages
       Merge #15239: scripts and tools: Move non-linux build source tarballs to "bitcoin-binaries/version" directory
       Fix avalanche test with boost 1.58
-      Remove GetNextBlockScriptFlags's requirement to hold cs_main
-      Add compile time checking for all cs_main runtime locking assertions
-      Use C++11 default member initializers
-      Drop unused pindexRet arg to CMerkleTx::GetDepthInMainChain
-      Merge #13149: Handle unsuccessful fseek(...):s
+#     Remove GetNextBlockScriptFlags's requirement to hold cs_main
+#     Add compile time checking for all cs_main runtime locking assertions
+#     Use C++11 default member initializers
+#     Drop unused pindexRet arg to CMerkleTx::GetDepthInMainChain
+#     Merge #13149: Handle unsuccessful fseek(...):s
       [CI] Workaround ubsan failure in functional tests
       [CI] Refactor the build configuration by moving out tests from the build
       Add recommendation: By default, declare single-argument constructors `explicit`
       Nits in httpserver.cpp
-      Move SocketHandler logic to private method.
+#     Move SocketHandler logic to private method.
       Update the agent pattern filter in the makeseeds.py script
       [CMAKE] Add support to build secp256k1 JNI binding and tests
-      Move InactivityCheck logic to private method.
-      Move DisconnectNodes logic to private method.
-      Move NotifyNumConnectionsChanged logic to private method.
+#     Move InactivityCheck logic to private method.
+#     Move DisconnectNodes logic to private method.
+#     Move NotifyNumConnectionsChanged logic to private method.
       tests: remove member connman/peerLogic in TestingSetup
       [SECP256K1] Create a different library when building with JNI
-      Convert comments to thread safety annotations
-      net: Add Clang thread safety annotations for guarded variables in the networking code
-      Report minfeefilter value in getpeerinfo rpc
+#     Convert comments to thread safety annotations
+#     net: Add Clang thread safety annotations for guarded variables in the networking code
+#     Report minfeefilter value in getpeerinfo rpc
       Prefer wait_until over polling with time.sleep
       [SECP256K1] Build java class files out of tree
       Add seed.bchd.cash to seeder lists
       Bump version to 0.20.3
-      net: Break disconnecting out of Ban()
-      Improve reliability of avalanche test
+#     net: Break disconnecting out of Ban()
+#     Improve reliability of avalanche test
       [ibd.sh] Fix IBD progress logging
       [trivial,doc] Fix memory consistency model in comment
-      [qt] coincontrol: Remove unused qt4 workaround
+#     [qt] coincontrol: Remove unused qt4 workaround
       [build] .gitignore: add QT Creator artifacts
       Adding test case for SINGLE|ANYONECANPAY hash type in tx_valid.json
       Remove TestBlockValidity's dependency on Config
       Remove ConnectBlock's dependency on Config
       Remove CheckBlock's dependency on Config
       [net] Tighten scope in net_processing
-      Add documentation to PeerLogicValidation interface and related functions
+#     Add documentation to PeerLogicValidation interface and related functions
 20.2      
       [CI] Fix missing parameters transfer from ibd.sh to bitcoind
       Update manpages for 0.20.2 release
