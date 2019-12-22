@@ -129,6 +129,7 @@ static UniValue getinfo(const Config &config, const JSONRPCRequest &request) {
     obj.pushKV("testnet", config.GetChainParams().NetworkIDString() ==
                               CBaseChainParams::TESTNET);
     if (pwallet) {
+        LOCK(pwallet->cs_wallet);
         obj.pushKV("keypoololdest", pwallet->GetOldestKeyPoolTime());
         obj.pushKV("keypoolsize", (int)pwallet->GetKeyPoolSize());
     }
