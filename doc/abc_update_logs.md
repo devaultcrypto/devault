@@ -424,7 +424,7 @@
       Added a script to test seeds
       Added some release notes
       [CI] Improve error catching and build log verbosity
-      Merge #10537: Few Minor per-utxo assert-semantics re-adds and tweak
+#     Merge #10537: Few Minor per-utxo assert-semantics re-adds and tweak
       Merge #12928: qt: Initialize non-static class members that were previously neither initialized where defined nor in constructor
       Merge #13747: tests: Skip P2PConnection's is_closing() check when not available
       Merge #13916: qa: wait_for_verack by default
@@ -435,32 +435,32 @@
       Bugfix: NSIS: Exclude Makefile* from docs
       Merge #12503: [RPC] createmultisig no longer takes addresses
       Merge #13658: [moveonly] Extract RescanWallet to handle a simple rescan
-      Merge #11338: qt: Backup former GUI settings on `-resetguisettings`
-      [rebase] threads: fix unitialized members in sched_param
+#     Merge #11338: qt: Backup former GUI settings on `-resetguisettings`
+#     [rebase] threads: fix unitialized members in sched_param
       Update univalue subtree
-      Merge leveldb subtree
-      Bump leveldb subtree
+#     Merge leveldb subtree
+#     Bump leveldb subtree
       Merge #13517: qa: Remove need to handle the network thread in tests
       Merge #11818: I accidentally [deliberately] killed it [the ComparisonTestFramework]
       Merge #13512: [qa] mininode: Expose connection state through is_connected
       Fix incorrectly backported return statements in mininode.py
-      Increase LevelDB max_open_files unless on 32-bit Unix.
+#     Increase LevelDB max_open_files unless on 32-bit Unix.
       Remove extra newline that leads to linter warning
-      Added a script to generate chainparams intermediate files
+#     Added a script to generate chainparams intermediate files
       wallet: Catch filesystem_error and raise InitError
-      During IBD, when doing pruning, prune 10% extra to avoid pruning again soon after
-      Merge #13081: wallet: Add compile time checking for cs_wallet runtime locking assertions
-      Merge #11044: [wallet] Keypool topup cleanups
+#     During IBD, when doing pruning, prune 10% extra to avoid pruning again soon after
+#     Merge #13081: wallet: Add compile time checking for cs_wallet runtime locking assertions
+#     Merge #11044: [wallet] Keypool topup cleanups
       Migrated abc-p2p-compactblocks.py off of ComparisonTestFramework
       Migrated abc-p2p-fullblocktest.py off of ComparisonTestFramework
       Migrated abc-mempool-coherence-on-activations.py off of ComparisonTestFramework
       Migrated abc-transaction-ordering.py off of ComparisonTestFramework
-      Merge #13077: Add compile time checking for all cs_KeyStore runtime locking assertions
+#     Merge #13077: Add compile time checking for all cs_KeyStore runtime locking assertions
       Add missing override keyword to DummySignatureCreator::CreateSig()
-      Merge #13159: Don't close old debug log file handle prematurely when trying to re-open (on SIGHUP)
-      Merge #13148: logging: Fix potential use-after-free in LogPrintStr(...)
-      Default to defining endian-conversion DECLs in compat w/o config
-      Consistently log CValidationState on failure
+#     Merge #13159: Don't close old debug log file handle prematurely when trying to re-open (on SIGHUP)
+#     Merge #13148: logging: Fix potential use-after-free in LogPrintStr(...)
+#     Default to defining endian-conversion DECLs in compat w/o config
+#     Consistently log CValidationState on failure
       Remove deprecated features for the 0.20.x branch
       Merge #12507: Interrupt rescan on shutdown request
       Make sure LC_ALL=C is set in all shell scripts
