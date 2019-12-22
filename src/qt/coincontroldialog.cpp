@@ -155,10 +155,6 @@ CoinControlDialog::CoinControlDialog(const PlatformStyle *_platformStyle,
     connect(ui->pushButtonSelectAll, &QPushButton::clicked, this,
             &CoinControlDialog::buttonSelectAllClicked);
 
-    // change coin control first column label due Qt4 bug.
-    // see https://github.com/bitcoin/bitcoin/issues/5716
-    ui->treeWidget->headerItem()->setText(COLUMN_CHECKBOX, QString());
-
     ui->treeWidget->setColumnWidth(COLUMN_CHECKBOX, 75);
     ui->treeWidget->setColumnWidth(COLUMN_AMOUNT, 110);
     ui->treeWidget->setColumnWidth(COLUMN_LABEL, 140);
