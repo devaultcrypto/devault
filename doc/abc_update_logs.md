@@ -395,20 +395,20 @@
       [CI] Fix missing parameters transfer from ibd.sh to bitcoind
       Update manpages for 0.20.2 release
       Update chainparams
-      Merge #12159: Use the character based overload for std::string::find.
-      Merge #13983: rpc: Return more specific reject reason for submitblock
-      Merge #13399: rpc: Add submitheader
-      Merge #13439: rpc: Avoid "duplicate" return value for invalid submitblock
+#     Merge #12159: Use the character based overload for std::string::find.
+#     Merge #13983: rpc: Return more specific reject reason for submitblock
+#     Merge #13399: rpc: Add submitheader
+#     Merge #13439: rpc: Avoid "duplicate" return value for invalid submitblock
       Updated seeds
-      Fixes compilation of leveldb tests broken in D4004
+#     Fixes compilation of leveldb tests broken in D4004
       [CI] Make IBD a standard build configuration
       Remove ContextualCheckBlock's dependency on Config
       Remove CheckBlockHeader's dependency on Config
       [CMAKE] Fix Linux64 toolchain name
-      Source the Excessive block size from BlockValidationOptions
-      Do not construct out-of-bound pointers in SHA2 code
+#     Source the Excessive block size from BlockValidationOptions
+#     Do not construct out-of-bound pointers in SHA2 code
       Avoid triggering undefined behaviour (std::memset(nullptr, 0, 0)) if an invalid string is passed to DecodeSecret(...)
-      Pull leveldb subtree
+#     Pull leveldb subtree
       [CMAKE] Move version to the top level CMakeLists.txt
       [CMAKE] Rename the top-level and `src/` cmake projects
       Generalized ibd.sh to provide a logging tool for running similar types of tests
