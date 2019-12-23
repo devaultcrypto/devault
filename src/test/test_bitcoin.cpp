@@ -30,6 +30,7 @@
 #include <validation.h>
 #include <init.h> // for InterruptThredScriptCheck
 #include <sodium/core.h>
+#include <pow.h>
 
 #include <atomic>
 #include <chrono>

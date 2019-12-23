@@ -19,6 +19,7 @@
 #include <logging.h>
 #include <miner.h>
 #include <net_processing.h>
+#include <pow.h>
 #include <pubkey.h>
 #include <random.h>
 #include <rpc/register.h>

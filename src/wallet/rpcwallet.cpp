@@ -14,6 +14,7 @@
 #include <net.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
+#include <pow.h>
 #include <rpc/mining.h>
 #include <wallet/misc.h>
 #include <rpc/util.h>
