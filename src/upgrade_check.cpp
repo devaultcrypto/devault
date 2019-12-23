@@ -54,7 +54,7 @@ bool ShouldConnect(const std::string& SubVer) {
     int PeerVersion = UnformatSubVersion(SubVer);
     
     if (PeerVersion) {
-        if (PeerVersion > 1009000)  return true;
+        if (PeerVersion > 1010100)  return true;
         return false;
     } else {
         return false;

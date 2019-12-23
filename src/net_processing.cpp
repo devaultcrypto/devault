@@ -2010,18 +2010,17 @@ static bool ProcessMessage(const Config &config, CNode *pfrom,
 
         // cleanSubVer has /DeVault.../ for us
         ShouldUpgrade(cleanSubVer);
-      /* now superceded by Protocol bump - re-enable as/when needed, but edit ShouldConnect as appropriate
+        // now superceded by Protocol bump - re-enable as/when needed, but edit ShouldConnect as appropriate
         bool connectnew = ShouldConnect(cleanSubVer);
         if (!connectnew) {
             connman->PushMessage(
                                  pfrom,
                                  CNetMsgMaker(INIT_PROTO_VERSION)
                                  .Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                                       strprintf("Software Version must be 1.1 or greater")));
+                                       strprintf("Software Version must be 1.1.2 or greater")));
             pfrom->fDisconnect = true;
             return false;
         }
-       */
 
         
         LogPrint(BCLog::NET,
