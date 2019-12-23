@@ -167,10 +167,12 @@ public:
                                  "62bcf40726")},
                 {110420, uint256S("000000000000007edbec10fadbf144be667309ceb4eec9a377bb95"
                                  "0716c4d4a1")},
+                {131502, uint256S("00000000000000161d9356272df6aa2c551738634ecb6b4a16b7c8"
+                                 "a6bf62c14c")},
             }};
 
         // Currently inaccurate but gives a better progress indicator
-        chainTxData = ChainTxData{1574702296, 744167, 0.1};
+        chainTxData = ChainTxData{1577083133, 944167, 0.008};
     }
 };
 
