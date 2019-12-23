@@ -11,7 +11,6 @@
 #include <blockvalidity.h>
 #include <consensus/params.h>
 #include <diskblockpos.h>
-#include <pow.h>
 #include <primitives/block.h>
 #include <tinyformat.h>
 #include <sync.h>
