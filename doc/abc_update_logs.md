@@ -324,31 +324,31 @@
       Use TxId where apropriate in wallettests.cpp
       [CMAKE] Fix linux cross compilation with the glibc compatibility
       [CMAKE] Remove useless dependency for the check-rpcauth target
-      scripted-diff: batch-recase BanMan variables
-      banman: Add, use CBanEntry ctor that takes ban reason
-      banman: reformulate nBanUtil calculation
-      banman: add thread annotations and mark members const where possible
-      scripted-diff: batch-rename BanMan members
-      net: move BanMan to its own files
-      banman: pass in default ban time as a parameter
-      banman: pass the banfile path in
-      banman: create and split out banman
+#     scripted-diff: batch-recase BanMan variables
+#     banman: Add, use CBanEntry ctor that takes ban reason
+#     banman: reformulate nBanUtil calculation
+#     banman: add thread annotations and mark members const where possible
+#     scripted-diff: batch-rename BanMan members
+#     net: move BanMan to its own files
+#     banman: pass in default ban time as a parameter
+#     banman: pass the banfile path in
+#     banman: create and split out banman
       Move util files to directory
-      Use C++11 default member initializers
+#     Use C++11 default member initializers
       debug log number of unknown wallet records on load
-      Add compile time verification of assumptions we're currently making implicitly/tacitly
-      Use std::make_unique more consistently
-      bench: Use non-throwing ParseDouble(...) instead of throwing boost::lexical_cast<double>(...)
+#     Add compile time verification of assumptions we're currently making implicitly/tacitly
+#     Use std::make_unique more consistently
+#     bench: Use non-throwing ParseDouble(...) instead of throwing boost::lexical_cast<double>(...)
       [qt] send: Clear All also resets coin control options
       [qt] Replaces numbered place marker %2 with %1.
       Remove unecessary obj folder
       [CMAKE] Always build obj/build.h
       Revert change to ActivateBestChain() comments made in D1182
-      Merge #13234: Break circular dependency: chain -> pow -> chain
+#     Merge #13234: Break circular dependency: chain -> pow -> chain
       Partial Merge #12920: test: Fix sign for expected values
-      Merge #13431: validation: count blocks correctly for check level < 3
-      Merge #13428: validation: check the specified number of blocks (off-by-one)
-      Merge #12885: Reduce implementation code inside CScript
+#     Merge #13431: validation: count blocks correctly for check level < 3
+#     Merge #13428: validation: check the specified number of blocks (off-by-one)
+#     Merge #12885: Reduce implementation code inside CScript
 #     net: split up addresses/ban dumps in preparation for moving them
       depends: qt: avoid system harfbuzz and bz2
       [gitian-build] Change output file destinations to separate directories for each platform
