@@ -8,6 +8,7 @@
 #include <memory>
 
 #include <addrman.h>
+#include <banman.h>
 #include <blockencodings.h>
 #include <blockvalidity.h>
 #include <chainparams.h>

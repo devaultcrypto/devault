@@ -455,6 +455,7 @@ add_library(server
 	addrman.cpp
 	addrdb.cpp
 	avalanche.cpp
+  banman.cpp
 	bloom.cpp
 	blockencodings.cpp
 	blockfilter.cpp

@@ -19,6 +19,8 @@
 #include <vector>
 
 #include <support/allocators/secure.h>
+
+class BanMan;
 class CCoinControl;
 class CFeeRate;
 struct CNodeStateStats;
