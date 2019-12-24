@@ -8,6 +8,8 @@ project(devault
 #	HOMEPAGE_URL "https://www.devault.cc"
 )
 
+enable_testing()
+
 # Package information
 set(PACKAGE_NAME "DeVault Core")
 # Copyright
