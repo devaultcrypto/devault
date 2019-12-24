@@ -290,7 +290,7 @@
       Updated manpages for 0.20.3 release
       Updated chainparams
       Added README for generating chainparams constants
-      Avoid locking mutexes that are already held by the same thread
+#     Avoid locking mutexes that are already held by the same thread
       Added net debug info to IBD builds
       Merge #12265: [test] fundrawtransaction: lock watch-only shared address
       Added a script to generate chainparams constants from intermediate files
@@ -299,7 +299,7 @@
       [CMAKE] Install the man pages
       [CMAKE] Add the check-security target
       [CMAKE] Add the check-symbols target
-      Move cs_main locking annotations from .cpp to .h
+#     Move cs_main locking annotations from .cpp to .h
       Merge #11220: Check specific validation error in miner tests
       Remove redundant variables, statements and forward declarations
       Fix errant newline in make_chainparams
@@ -315,12 +315,12 @@
       Fix missing newline in make_chainparams
       [RPC] Fix header guard comment
       Merge #13197: util: warn about ignored recursive -includeconf calls
-      Merge #13079: Fix rescanblockchain rpc to properly report progress
+#     Merge #13079: Fix rescanblockchain rpc to properly report progress
       Merge #13012: [doc] Add comments for chainparams.h, validation.cpp
       Merge #12716: Fix typos and cleanup in various files
       wallet: Use shared pointer to retain wallet instance
-      scripted-diff: Replace boost::bind with std::bind
-      refactor: Use boost::scoped_connection in signal/slot, also prefer range-based loop instead of std::transform
+#     scripted-diff: Replace boost::bind with std::bind
+#     refactor: Use boost::scoped_connection in signal/slot, also prefer range-based loop instead of std::transform
       Use TxId where apropriate in wallettests.cpp
       [CMAKE] Fix linux cross compilation with the glibc compatibility
       [CMAKE] Remove useless dependency for the check-rpcauth target
