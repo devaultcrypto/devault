@@ -114,6 +114,7 @@ BITCOIN_CORE_H = \
   addrman.h \
   avalanche.h \
 	ban.h \
+	banman.h \
   benchmark.h \
   bloom.h \
   blockencodings.h \
@@ -266,6 +267,7 @@ libbitcoin_server_a_SOURCES = \
   addrman.cpp \
   addrdb.cpp \
   avalanche.cpp \
+  banman.cpp \
   bloom.cpp \
   blockencodings.cpp \
   blockfilter.cpp \
