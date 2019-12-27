@@ -236,15 +236,15 @@
       Merge #13058: [wallet] `createwallet` RPC - create new wallet at runtime
       Update Seeder to use fsbridge::fopen() instead of fopen()
       Make objects in range declarations immutable by default. Avoid unnecessary copying of objects in range declarations.
-      cli: Ignore libevent warnings
+#     cli: Ignore libevent warnings
       Merge #13252: Wallet: Refactor ReserveKeyFromKeyPool for safety
       [build-configurations] Resurface the more informative error message when ABC_BUILD_NAME is not set
       Added translations for new send coins dialog box
       Merge #13158: [Qt]: Improve sendcoinsdialog readability
       Bump wallet version for pre split keypool
       Allow -upgradewallet to upgradewallets to HD and use a keypool of presplit keys after upgrading to hd chain split
-      Remove redundant assignments (dead stores)
-      Drop ParseHashUV in favor of calling ParseHashStr
+#     Remove redundant assignments (dead stores)
+#     Drop ParseHashUV in favor of calling ParseHashStr
       Add 'sethdseed' RPC to initialize or replace HD seed and test
       Remove CombineSignatures and replace tests
       Replace CombineSignatures with ProduceSignature
@@ -255,16 +255,16 @@
       [cmake] Create a lib specifically for script related components
       Inline Sign1 and SignN
       Separate HaveKey function that checks whether a key is in a keystore
-      Merge #13176: Improve CRollingBloomFilter performance: replace modulus with FastMod
+#     Merge #13176: Improve CRollingBloomFilter performance: replace modulus with FastMod
       Add native support for serializing char arrays without FLATDATA
       refactor: Avoid locking tx pool cs thrice
-      Return void instead of bool for functions that cannot fail
+#     Return void instead of bool for functions that cannot fail
       Relayout comment in sign.h
-      Merge #11411: script: Change SignatureHash input index check to an assert.
+#     Merge #11411: script: Change SignatureHash input index check to an assert.
       Minor improvements to github-release script
-      validation: Pass tx pool reference into CheckSequenceLocks
-      utils: Convert Windows args to utf-8 string
-      Merge #12240: [rpc] Introduced a new `fees` structure that aggregates all sub-field fee types denominated in BCH
+#     validation: Pass tx pool reference into CheckSequenceLocks
+#     utils: Convert Windows args to utf-8 string
+#     Merge #12240: [rpc] Introduced a new `fees` structure that aggregates all sub-field fee types denominated in BCH
       Change CI builds to use utf-8 encoding
       Added support for `export LC_ALL=C.UTF-8` to the shell linter
       Updated release-process to use github-release.sh
@@ -280,9 +280,9 @@
       [CMAKE] Use CMake built-in to set PIC and PIE
       [CMAKE] Fix check-security to allow running on windows executables
       Use only 3 levels for defining the version
-      tiny refactor for ArgsManager
-      Document RPC method aliasing
-      Add AssertLockHeld assertions in CWallet::ListCoins
+#     tiny refactor for ArgsManager
+#     Document RPC method aliasing
+#     Add AssertLockHeld assertions in CWallet::ListCoins
       Merge #13304: qa: Fix wallet_listreceivedby race
       Merge #13284: gui: fix visual "overflow" of amount input.
 20.3
