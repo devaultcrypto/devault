@@ -183,7 +183,7 @@
       Updated chainparams
       Update seeds
       bench: Benchmark MempoolToJSON
-      Merge #14444: Add compile time checking for cs_main locks which we assert at run time
+#     Merge #14444: Add compile time checking for cs_main locks which we assert at run time
       Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
       Add test_runner flag to suppress ASAN errors from wallet_multiwallet.py
       [CMAKE] Move package name and copyright to the top level
@@ -194,14 +194,14 @@
       Fix -Wthread-safety-analysis warnings
       [CMAKE] Use CPack to build source packages
       [CMAKE] Use CPack to build packages
-      mempool: remove unused magic number from consistency check
-      Merge #13258: uint256: Remove unnecessary crypto/common.h dependency
+#     mempool: remove unused magic number from consistency check
+#     Merge #13258: uint256: Remove unnecessary crypto/common.h dependency
       Merge #11491: [gui] Add proxy icon in statusbar
       bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
       ui: Support wallets unloaded dynamically
       rpc: Add unloadwallet RPC, release notes, and tests
       rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
-      [mempool] Mark mempool import fails that were found in mempool as 'already there'
+#     [mempool] Mark mempool import fails that were found in mempool as 'already there'
       [CMAKE] Propagate requirements for cmake >= 3.12
       Merge #11050: Avoid treating null RPC arguments different from missing arguments
       Merge #11191: RPC: Improve help text and behavior of RPC-logging.
@@ -212,11 +212,11 @@
       Remove strlcpy.h
       Fix misnamed 0.20.4 release notes
       [CMAKE] Add resource file to bitcoin-qt
-      Merge #13722: trivial: Replace CPubKey::operator[] with CPubKey::vch where possible
+#     Merge #13722: trivial: Replace CPubKey::operator[] with CPubKey::vch where possible
       Fix --wipeignore and add message indicating if wipe options are set and successful
-      Decodehextx scripts sanity check
+#     Decodehextx scripts sanity check
       Update seeder files to use fprintf() instead of printf()
-      Merge #9598: Improve readability by removing redundant casts to same type (on all platforms)
+#     Merge #9598: Improve readability by removing redundant casts to same type (on all platforms)
       Merge #13275: Qt: use [default wallet] as name for wallet with no name
       Merge #13506: Qt: load wallet in UI after possible init aborts
       Merge #13564: [wallet] loadwallet shouldn't create new wallets.

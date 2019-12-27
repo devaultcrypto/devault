@@ -2147,6 +2147,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
         bool fReset = fReindex;
         std::string strLoadError;
 
+        LOCK(cs_main);
         
         uiInterface.InitMessage(_("Loading block index..."));
 
@@ -2298,7 +2299,6 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
                     }
 
                     {
-                        LOCK(cs_main);
                         CBlockIndex *tip = chainActive.Tip();
                         RPCNotifyBlockChange(true, tip);
                         if (tip && tip->nTime > GetAdjustedTime() +
