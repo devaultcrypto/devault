@@ -6,7 +6,7 @@
 #include <bench/bench.h>
 #include <prevector.h>
 #include <random.h>
-#include <util.h>
+#include <util/system.h>
 #include <validation.h>
 
 #include <thread>

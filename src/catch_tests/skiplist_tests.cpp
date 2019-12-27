@@ -3,8 +3,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chain.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <vector>
 

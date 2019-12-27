@@ -2,11 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <random.h>
-
-#include <catch_tests/test_bitcoin.h>
-
 #include <cstdint>
 #include <vector>
 

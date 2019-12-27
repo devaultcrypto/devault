@@ -2,7 +2,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <banman.h>
 #include <net.h>
 
 // Already in init.cpp which is linked
@@ -13,3 +12,4 @@
 [[noreturn]] void StartShutdown() { std::exit(EXIT_SUCCESS); }
 
 bool ShutdownRequested() { return false; }
+

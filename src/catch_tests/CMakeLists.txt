@@ -60,12 +60,7 @@ target_link_libraries(unit rpcclient server devaultconsensus common)
 set(UNIT_CTESTS
 #  activation - nothing currently in here
   addrman
-  allocator
-  arith_uint256
-  amount
   avalanche
-  base32
-  base64
   blockchain
   blockcheck
   blockencodings
@@ -73,15 +68,10 @@ set(UNIT_CTESTS
   blockindex
   blockstatus
   bloom
-  bswap
-  cashaddr
-  cashaddrenc
   checkdatasig
   checkpoints 
   checkqueue
   coins
-  compress
-  config
   core_io
   crypto
   cuckoocache
@@ -90,13 +80,9 @@ set(UNIT_CTESTS
   dstencode
   excessiveblock
   feerate
-  file
   finalization
-  getarg
   hash
-  inv
   key
-  lcg
   limitedmap
   main
   mempool
@@ -105,20 +91,14 @@ set(UNIT_CTESTS
   monolith_opcodes
   multisig
 #  net  - ok on Mac
-  netbase
   pmt
   policyestimator
   pow
   prevector
-  radix
   raii_event
-  random
   rcu
-  reward
-  reverselock
 #  rpc  - nothing yet
   rpc_server
-  rwcollection
   sanity
   scheduler
   schnorr
@@ -136,7 +116,6 @@ set(UNIT_CTESTS
   skiplist
   streams
   sync
-  timedata
   torcontrol
   transaction
   txindex
@@ -144,11 +123,38 @@ set(UNIT_CTESTS
   txvalidationcache
   uint256
   undo
+  validation
+#  ../rpc/test/server
+)
+
+
+
+set(UNIT_STESTS
+  allocator
+  arith_uint256
+  amount
+  base32
+  base64
+#  blockchain
+  bswap
+  cashaddr
+  cashaddrenc
+  compress
+  config
+  file
+  getarg
+  inv
+  lcg
+  netbase
+  radix
+  random
+  reward
+  reverselock
+  rwcollection
+  timedata
   univalue
   util
-  validation
   work_comparator
-#  ../rpc/test/server
 )
 
 #---------VALGRIND STUFF----------------------------------------------------
@@ -176,4 +182,11 @@ FOREACH(tst ${UNIT_CTESTS})
   target_link_libraries(tb_${tst} rpcclient server devaultconsensus common unit)
   add_test(NAME test_${tst} COMMAND tb_${tst})
 ENDFOREACH(tst ${UNIT_CTESTS})
+
+FOREACH(tst ${UNIT_STESTS})
+  add_executable(tb_${tst} ${tst}_tests.cpp)
+  target_include_directories(tb_${tst}  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(tb_${tst} common unit)
+  add_test(NAME tb_${tst} COMMAND tb_${tst})
+ENDFOREACH(tst ${UNIT_STESTS})
 

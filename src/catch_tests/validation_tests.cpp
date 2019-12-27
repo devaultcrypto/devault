@@ -6,10 +6,11 @@
 #include <chainparams.h>
 #include <config.h>
 #include <consensus/consensus.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <primitives/transaction.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
-#include <util.h>
+#include <util/system.h>
 #include <validation.h>
 
 #include <cstdint>

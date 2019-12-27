@@ -7,8 +7,8 @@
 #include <config.h>
 #include <dstencode.h>
 #include <fs.h>
-#include <utiltime.h>
-#include <utilsplitstring.h>
+#include <util/time.h>
+#include <util/splitstring.h>
 #include <wallet/wallet.h>
 #include <wallet/walletutil.h>
 

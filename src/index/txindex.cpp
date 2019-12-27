@@ -7,8 +7,8 @@
 #include <chain.h>
 #include <init.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
+#include <util/system.h>
 #include <validation.h>
 
 constexpr char DB_BEST_BLOCK = 'B';

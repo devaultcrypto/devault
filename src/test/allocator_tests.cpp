@@ -2,7 +2,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+<<<<<<< HEAD
 #include <util.h>
+=======
+#include <support/allocators/secure.h>
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <support/allocators/secure.h>
 #include <test/test_bitcoin.h>

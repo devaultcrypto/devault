@@ -18,7 +18,7 @@
 #include <net.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <validation.h>
 #include <warnings.h>
 

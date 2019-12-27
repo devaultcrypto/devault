@@ -4,8 +4,8 @@
 
 #include <wallet/hdchain.h>
 #include <chainparams.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 #include <iostream>
 
 void CHDChain::Setup(const mnemonic::WordList& words, const std::vector<uint8_t>& hashWords) {

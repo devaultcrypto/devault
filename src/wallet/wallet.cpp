@@ -28,10 +28,10 @@
 #include <timedata.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <utilstrencodings.h> // for debug
-#include <utilsplitstring.h>
-#include <utilmoneystr.h>
+#include <util/strencodings.h> // for debug
+#include <util/splitstring.h>
+#include <util/moneystr.h>
+#include <util/system.h>
 #include <utxo_functions.h> // for GetUTXOSet in SweepCoinsToWallet
 #include <validation.h>
 #include <wallet/coincontrol.h>

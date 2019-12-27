@@ -7,7 +7,7 @@
 #include <rpc/server.h>
 
 #include <config.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
 #include <univalue.h>
 
 #include <catch2/catch.hpp>

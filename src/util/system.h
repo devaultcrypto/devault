@@ -7,8 +7,8 @@
  * Server/client environment: argument handling, config file parsing,
  * thread wrappers, startup time
  */
-#ifndef BITCOIN_UTIL_H
-#define BITCOIN_UTIL_H
+#ifndef BITCOIN_UTIL_SYSTEM_H
+#define BITCOIN_UTIL_SYSTEM_H
 
 #include <config/bitcoin-config.h>
 
@@ -17,7 +17,7 @@
 #include <logging.h>
 #include <sync.h>
 #include <tinyformat.h>
-#include <utiltime.h>
+#include <util/time.h>
 
 #include <atomic>
 #include <cstdint>
@@ -338,4 +338,4 @@ inline void insert(std::set<TsetT> &dst, const Tsrc &src) {
  */
 int ScheduleBatchPriority();
 
-#endif // BITCOIN_UTIL_H
+#endif // BITCOIN_UTIL_SYSTEM_H

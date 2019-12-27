@@ -7,8 +7,8 @@
 #include <tinyformat.h>
 
 #include <string>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/strencodings.h>
+#include <util/splitstring.h>
 
 /**
  * Name of client reported in the 'version' message. Report the same name

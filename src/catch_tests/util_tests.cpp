@@ -2,14 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
-
-#include <catch_tests/test_bitcoin.h>
+#include <chainparamsbase.h>
 #include <clientversion.h>
 #include <primitives/transaction.h>
 #include <sync.h>
-#include <utilmoneystr.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/moneystr.h>
+#include <util/strencodings.h>
 
 #include <cstdint>
 #include <vector>
@@ -742,30 +741,6 @@ BOOST_AUTO_TEST_CASE(util_IsHexNumber) {
   BOOST_CHECK(!IsHexNumber("0x0ga"));  // invalid character
   BOOST_CHECK(!IsHexNumber("x0"));     // broken prefix
   BOOST_CHECK(!IsHexNumber("0x0x00")); // two prefixes not allowed
-}
-
-BOOST_AUTO_TEST_CASE(util_seed_insecure_rand) {
-  SeedInsecureRand(true);
-  for (int mod = 2; mod < 11; mod++) {
-    int mask = 1;
-    // Really rough binomal confidence approximation.
-    int err = 30 * 10000. / mod * sqrt((1. / mod * (1 - 1. / mod)) / 10000.);
-    // mask is 2^ceil(log2(mod))-1
-    while (mask < mod - 1)
-      mask = (mask << 1) + 1;
-
-    int count = 0;
-    // How often does it get a zero from the uniform range [0,mod)?
-    for (int i = 0; i < 10000; i++) {
-      uint32_t rval;
-      do {
-        rval = InsecureRand32() & mask;
-      } while (rval >= (uint32_t)mod);
-      count += rval == 0;
-    }
-    BOOST_CHECK(count <= 10000 / mod + err);
-    BOOST_CHECK(count >= 10000 / mod - err);
-  }
 }
 
 BOOST_AUTO_TEST_CASE(util_TimingResistantEqual) {

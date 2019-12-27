@@ -39,9 +39,9 @@
 #include <txdb.h>
 #include <txmempool.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <fs_util.h>
-#include <utilmoneystr.h>
+#include <util/fs_util.h>
+#include <util/moneystr.h>
+#include <util/system.h>
 #include <validation.h>
 #include <validationinterface.h>
 #include <wallet/rpcdump.h>

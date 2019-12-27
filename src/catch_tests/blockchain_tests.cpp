@@ -1,12 +1,7 @@
 #include <rpc/blockchain.h>
 #include <utxo_functions.h>
-
 #include <chain.h>
-
-#include <catch_tests/test_bitcoin.h>
-
 #include "catch_unit.h"
-
 #include <cstdlib>
 
 /**

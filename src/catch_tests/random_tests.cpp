@@ -3,9 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <random.h>
-
-#include <catch_tests/test_bitcoin.h>
-
+#include <catch_tests/test_rand.h>
 #include "catch_unit.h"
 
 // BOOST_FIXTURE_TEST_SUITE(random_tests, BasicTestingSetup)
@@ -111,3 +109,27 @@ BOOST_AUTO_TEST_CASE(shuffle_stat_test) {
     BOOST_CHECK_EQUAL(sum, 12000);
 }
 
+
+BOOST_AUTO_TEST_CASE(util_seed_insecure_rand) {
+  SeedInsecureRand(true);
+  for (int mod = 2; mod < 11; mod++) {
+    int mask = 1;
+    // Really rough binomal confidence approximation.
+    int err = 30 * 10000. / mod * sqrt((1. / mod * (1 - 1. / mod)) / 10000.);
+    // mask is 2^ceil(log2(mod))-1
+    while (mask < mod - 1)
+      mask = (mask << 1) + 1;
+
+    int count = 0;
+    // How often does it get a zero from the uniform range [0,mod)?
+    for (int i = 0; i < 10000; i++) {
+      uint32_t rval;
+      do {
+        rval = InsecureRand32() & mask;
+      } while (rval >= (uint32_t)mod);
+      count += rval == 0;
+    }
+    BOOST_CHECK(count <= 10000 / mod + err);
+    BOOST_CHECK(count >= 10000 / mod - err);
+  }
+}

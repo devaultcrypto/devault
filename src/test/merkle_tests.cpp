@@ -3,6 +3,12 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <consensus/merkle.h>
+<<<<<<< HEAD
+=======
+
+#include <util/strencodings.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 
 #include <boost/test/unit_test.hpp>

@@ -3,9 +3,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <hash.h>
+<<<<<<< HEAD
 #include <test/test_bitcoin.h>
 #include <utilstrencodings.h>
 #include <crypto/siphash.h>
+=======
+
+#include <clientversion.h>
+#include <streams.h>
+#include <util/strencodings.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <vector>
 

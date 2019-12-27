@@ -5,14 +5,14 @@
 
 #include <config/bitcoin-config.h>
 
-#include <util.h>
-
+#include <fs.h>
+#include <util/system.h>
+#include <util/fs_util.h>
 #include <chainparamsbase.h>
-#include <fs_util.h>
 #include <random.h>
 #include <serialize.h>
-#include <utilstrencodings.h>
-#include <utiltime.h>
+#include <util/strencodings.h>
+#include <util/time.h>
 
 #ifndef NO_BOOST_FILESYSTEM
 #include <boost/filesystem/fstream.hpp>

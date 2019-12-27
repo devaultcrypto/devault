@@ -4,11 +4,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
-#include <utilmoneystr.h>
+#include <util/moneystr.h>
 
 #include <primitives/transaction.h>
 #include <tinyformat.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 std::string FormatMoney(const Amount amt) {
     Amount amt_abs = amt > Amount::zero() ? amt : -amt;

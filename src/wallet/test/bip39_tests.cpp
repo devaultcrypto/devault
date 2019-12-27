@@ -1,6 +1,6 @@
 #include <wallet/dictionary.h>
 #include <wallet/mnemonic.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <array>
 #include <assert.h>
 #include <iostream>

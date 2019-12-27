@@ -5,8 +5,9 @@
 #include <policy/policy.h>
 #include <reverse_iterator.h>
 #include <txmempool.h>
-#include <util.h>
+#include <util/system.h>
 
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
 
 #include "catch_unit.h"

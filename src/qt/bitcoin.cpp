@@ -27,7 +27,7 @@
 #include <rpc/server.h>
 #include <ui_interface.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 #include <walletinitinterface.h>
 #include <warnings.h>
 
@@ -41,8 +41,8 @@
 #include <rpc/server.h>
 #include <ui_interface.h>
 #include <uint256.h>
-#include <fs_util.h>
-#include <util.h>
+#include <util/fs_util.h>
+#include <util/system.h>
 #include <warnings.h>
 
 #include <wallet/wallet.h>
@@ -50,8 +50,7 @@
 
 #include <cstdint>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/thread.hpp>
+//#include <boost/filesystem/operations.hpp>
 
 #include <QApplication>
 #include <QDebug>

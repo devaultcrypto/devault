@@ -15,7 +15,7 @@
 #include <consensus/params.h>
 #include <primitives/block.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const CBlockHeader *pblock, const Config &config) 
 {

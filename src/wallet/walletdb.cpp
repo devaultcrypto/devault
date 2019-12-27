@@ -16,9 +16,9 @@
 #include <protocol.h>
 #include <serialize.h>
 #include <sync.h>
-#include <fs_util.h>
-#include <util.h>
-#include <utiltime.h>
+#include <util/fs_util.h>
+#include <util/system.h>
+#include <util/time.h>
 #include <wallet/wallet.h>
 
 #include <thread>

@@ -4,6 +4,12 @@
 
 #include <chainparams.h>
 #include <config.h>
+<<<<<<< HEAD
+=======
+#include <util/time.h>
+#include <validation.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 #include <validation.h>
 

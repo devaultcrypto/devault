@@ -17,8 +17,8 @@
 #include <rpc/server.h>
 #include <timedata.h>
 #include <txmempool.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 #include <validation.h>
 #include <utxo_functions.h>
 

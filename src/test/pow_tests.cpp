@@ -7,6 +7,11 @@
 #include <config.h>
 #include <pow.h>
 #include <random.h>
+<<<<<<< HEAD
+=======
+#include <util/system.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 #include <util.h>
 

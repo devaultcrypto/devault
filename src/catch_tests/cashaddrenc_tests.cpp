@@ -6,9 +6,10 @@
 #include <cashaddrenc.h>
 #include <chainparams.h>
 #include <random.h>
-#include <catch_tests/test_bitcoin.h>
+#include <catch_tests/test_rand.h>
 #include <uint256.h>
 #include <variant>
+#include <util/strencodings.h>
 
 #include "catch_unit.h"
 

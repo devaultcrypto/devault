@@ -5,6 +5,11 @@
 #include <hash.h>
 #include <serialize.h>
 #include <streams.h>
+<<<<<<< HEAD
+=======
+#include <util/strencodings.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 
 #include <cstdint>

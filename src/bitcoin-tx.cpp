@@ -17,11 +17,11 @@
 #include <script/script.h>
 #include <script/sign.h>
 #include <univalue.h>
-#include <util.h>
-#include <fs_util.h>
-#include <utilmoneystr.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/fs_util.h>
+#include <util/splitstring.h>
+#include <util/moneystr.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 
 #include <cstdio>
 #include <memory>

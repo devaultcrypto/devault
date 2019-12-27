@@ -10,10 +10,10 @@
 #include <script/script.h>
 #include <serialize.h>
 #include <streams.h>
-#include <test/jsonutil.h>
-#include <catch_tests/test_bitcoin.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <catch_tests/jsonutil.h>
+#include <catch_tests/test_rand.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 #include <version.h>
 
 #include <iostream>

@@ -10,10 +10,15 @@
 #include <script/script.h>
 #include <serialize.h>
 #include <streams.h>
+<<<<<<< HEAD
 #include <test/jsonutil.h>
 #include <test/test_bitcoin.h>
 #include <util.h>
 #include <utilstrencodings.h>
+=======
+#include <util/strencodings.h>
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <version.h>
 
 #include <iostream>

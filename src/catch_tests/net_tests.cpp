@@ -12,7 +12,6 @@
 #include <netbase.h>
 #include <serialize.h>
 #include <streams.h>
-#include <catch_tests/test_bitcoin.h>
 
 #include <string>
 

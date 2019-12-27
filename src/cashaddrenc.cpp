@@ -8,8 +8,8 @@
 #include <pubkey.h>
 #include <script/script.h>
 #include <primitives/transaction.h>
-#include <utilstrencodings.h>
 #include <dstencode.h>
+#include <util/strencodings.h>
 
 #ifdef HAVE_VARIANT
 #include <variant>

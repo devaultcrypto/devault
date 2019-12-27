@@ -5,10 +5,11 @@
 #include <coins.h>
 #include <consensus/validation.h>
 #include <script/standard.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 #include <undo.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <validation.h>
 
 #include <map>

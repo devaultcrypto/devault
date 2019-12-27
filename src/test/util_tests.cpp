@@ -2,14 +2,19 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
+#include <util/system.h>
 
 #include <clientversion.h>
 #include <primitives/transaction.h>
 #include <sync.h>
+<<<<<<< HEAD
 #include <test/test_bitcoin.h>
 #include <utilmoneystr.h>
 #include <utilstrencodings.h>
+=======
+#include <util/moneystr.h>
+#include <util/strencodings.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <cstdint>
 #include <vector>

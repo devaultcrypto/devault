@@ -6,8 +6,8 @@
 #include <config/bitcoin-config.h>
 #include <config/version.h>
 
-#include <fs_util.h>
-#include <util.h>
+#include <util/fs_util.h>
+#include <util/system.h>
 #include <chainparamsbase.h>
 #include <ui_interface.h>
 #include <random.h>

@@ -5,7 +5,7 @@
 //
 #include <revealphrase.h>
 #include <ui_revealphrase.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
 
 #include <dvtui.h>
 

@@ -3,13 +3,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <radix.h>
-
-#include <test/lcg.h>
-#include <catch_tests/test_bitcoin.h>
-
+#include <catch_tests/lcg.h>
 #include "catch_unit.h"
-
 #include <limits>
+#include <thread>
 #include <type_traits>
 
 // BOOST_FIXTURE_TEST_SUITE(radix_tests, BasicTestingSetup)

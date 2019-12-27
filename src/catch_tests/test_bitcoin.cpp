@@ -14,7 +14,7 @@
 #include <devault/budget.h>
 #include <devault/rewards.h>
 #include <devault/rewardsview.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <init.h> // for InterruptThredScriptCheck
 #include <key.h>
 #include <logging.h>
@@ -42,6 +42,8 @@
 #include <memory>
 #include <thread>
 
+#include <catch_tests/test_rand.h>
+
 FastRandomContext g_insecure_rand_ctx;
 
 void CConnmanTest::AddNode(CNode &node) {
@@ -53,8 +55,6 @@ void CConnmanTest::ClearNodes() {
   LOCK(g_connman->cs_vNodes);
   g_connman->vNodes.clear();
 }
-
-FastRandomContext insecure_rand_ctx;
 
 extern void noui_connect();
 

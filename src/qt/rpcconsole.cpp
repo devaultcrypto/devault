@@ -22,7 +22,7 @@
 #include <netbase.h>
 #include <rpc/client.h>
 #include <rpc/server.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <univalue.h>
 

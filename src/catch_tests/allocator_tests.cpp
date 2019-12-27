@@ -2,11 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <util.h>
-
+#include <util/system.h>
 #include <support/allocators/secure.h>
-#include <catch_tests/test_bitcoin.h>
-
 #include "catch_unit.h"
 
 // BOOST_FIXTURE_TEST_SUITE(allocator_tests, BasicTestingSetup)

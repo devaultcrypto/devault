@@ -23,9 +23,9 @@
 #include <rpc/blockchain.h>
 #include <rpc/server.h>
 #include <txmempool.h>
-#include <util.h>
-#include <utilstrencodings.h>
 #include <utxo_functions.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 #include <validation.h>
 #include <validationinterface.h>
 #include <warnings.h>

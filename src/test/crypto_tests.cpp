@@ -11,8 +11,12 @@
 #include <crypto/sha256.h>
 #include <crypto/sha512.h>
 #include <random.h>
+<<<<<<< HEAD
 #include <test/test_bitcoin.h>
 #include <utilstrencodings.h>
+=======
+#include <util/strencodings.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <vector>
 

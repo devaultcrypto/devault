@@ -21,9 +21,9 @@
 #include <protocol.h>
 #include <script/script.h>
 #include <script/standard.h>
-#include <fs_util.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/fs_util.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 
 #include <chainparams.h>
 #include <interfaces/node.h>

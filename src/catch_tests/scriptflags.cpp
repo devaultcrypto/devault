@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <test/scriptflags.h>
+#include <catch_tests/scriptflags.h>
 
 #include <script/interpreter.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
 
 #include <map>
 #include <vector>

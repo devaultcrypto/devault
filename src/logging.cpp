@@ -5,10 +5,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <logging.h>
-#include <util.h>
-#include <fs_util.h>
-#include <utiltime.h>
 #include <chrono>
+#include <util/fs_util.h>
+#include <util/system.h>
+#include <util/time.h>
 
 bool fLogIPs = DEFAULT_LOGIPS;
 

@@ -12,10 +12,10 @@
 #include <random.h>
 #include <sync.h>
 #include <ui_interface.h>
-#include <util.h>
-#include <fs_util.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/fs_util.h>
+#include <util/splitstring.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 #include <univalue.h>
 #include <boost/signals2/signal.hpp>
 #include <memory> // for unique_ptr

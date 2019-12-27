@@ -56,7 +56,7 @@ END_FOLD
 
 BEGIN_FOLD build
 if [[ $HOST = x86_64-linux-gnu ]]; then
-  DOCKER_EXEC make $MAKEJOBS
+  DOCKER_EXEC make -k $MAKEJOBS
 else
   DOCKER_EXEC make $MAKEJOBS $GOAL || ( echo "Build failure. Verbose build follows." && DOCKER_EXEC make $GOAL V=1 ; false )
 fi

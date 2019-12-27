@@ -7,7 +7,7 @@
 #include <script/script_flags.h>
 #include <script/sigencoding.h>
 
-#include <test/lcg.h>
+#include <catch_tests/lcg.h>
 
 #include "catch_unit.h"
 

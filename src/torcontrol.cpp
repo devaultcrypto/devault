@@ -7,10 +7,9 @@
 #include <crypto/hmac_sha256.h>
 #include <net.h>
 #include <netbase.h>
-#include <fs_util.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
-
+#include <util/fs_util.h>
+#include <util/strencodings.h>
+#include <util/splitstring.h>
 #include <cstdlib>
 #include <deque>
 #include <set>

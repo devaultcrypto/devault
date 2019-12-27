@@ -17,7 +17,7 @@
 #include <validation.h>
 
 #include <fs.h>      // for Dump debug stuff
-#include <fs_util.h> // for GetDataDir
+#include <util/fs_util.h> // for GetDataDir
 #include <fstream>
 
 using namespace std;

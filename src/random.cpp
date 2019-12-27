@@ -6,7 +6,7 @@
 
 #include <random.h>
 #include <support/cleanse.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <cstdlib>
 #include <stdexcept>
 #include <limits>

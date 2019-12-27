@@ -4,7 +4,7 @@
 
 #include <dbwrapper.h>
 #include <random.h>
-#include <catch_tests/test_bitcoin.h>
+#include <catch_tests/test_rand.h>
 #include <uint256.h>
 
 #include "catch_unit.h"

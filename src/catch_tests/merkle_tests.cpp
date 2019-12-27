@@ -3,7 +3,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <consensus/merkle.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
+#include <util/strencodings.h> // FOR BEGIN, etc
 
 #include "catch_unit.h"
 

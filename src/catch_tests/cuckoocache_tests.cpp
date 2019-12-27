@@ -5,10 +5,9 @@
 #include <cuckoocache.h>
 #include <random.h>
 #include <script/sigcache.h>
-#include <catch_tests/test_bitcoin.h>
-
+#include <catch_tests/test_rand.h>
 #include <shared_mutex>
-
+#include <thread>
 #include "catch_unit.h"
 
 /** Test Suite for CuckooCache

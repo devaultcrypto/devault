@@ -7,13 +7,14 @@
 #endif
 #include <config/version.h>
 
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <dvtui.h>
 #include <guiutil.h>
 #include <interfaces/node.h>
-#include <intro.h>
 #include <ui_intro.h>
-#include <util.h>
+#include <qt/guiutil.h>
+#include <qt/intro.h>
+#include <util/system.h>
 
 #include <QFileDialog>
 #include <QMessageBox>

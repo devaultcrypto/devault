@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <fs_util.h>
+#include <util/fs_util.h>
 
 //! Get the path of the wallet directory.
 fs::path GetWalletDir();

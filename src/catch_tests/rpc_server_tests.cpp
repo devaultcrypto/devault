@@ -8,7 +8,7 @@
 #include <rpc/server.h>
 #include <string>
 #include <catch_tests/test_bitcoin.h>
-#include <util.h>
+#include <util/system.h>
 
 #include "catch_unit.h"
 

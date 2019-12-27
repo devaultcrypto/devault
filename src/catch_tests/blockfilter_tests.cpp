@@ -7,7 +7,7 @@
 #include <core_io.h>
 #include <serialize.h>
 #include <streams.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <catch_tests/data/blockfilters.json.h>
 #include <catch_tests/test_bitcoin.h>

@@ -8,6 +8,14 @@
 #include <cashaddrenc.h>
 #include <dstencode.h>
 #include <key.h>
+<<<<<<< HEAD
+=======
+#include <key_io.h>
+#include <streams.h>
+#include <tinyformat.h>
+#include <util/strencodings.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 #include <utilstrencodings.h>
 

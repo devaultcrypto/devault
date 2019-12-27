@@ -6,8 +6,6 @@
 #include <chainparams.h>
 #include <config.h>
 #include <consensus/activation.h>
-#include <catch_tests/test_bitcoin.h>
-
 #include "catch_unit.h"
 
 // BOOST_FIXTURE_TEST_SUITE(activation_tests, BasicTestingSetup)

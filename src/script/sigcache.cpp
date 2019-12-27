@@ -10,7 +10,7 @@
 #include <pubkey.h>
 #include <random.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 #ifdef HAVE_STD_SHARED_MUTEX
 #include <shared_mutex>

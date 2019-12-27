@@ -4,8 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <cashaddr.h>
-#include <catch_tests/test_bitcoin.h>
-
 #include "catch_unit.h"
 
 static std::pair<std::string, std::vector<uint8_t>> CashAddrDecode(const std::string &str) {

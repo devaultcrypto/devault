@@ -8,7 +8,7 @@
 
 #include <optionsmodel.h>
 
-#include <fs_util.h> // for GetDataDir()
+#include <util/fs_util.h> // for GetDataDir()
 #include <bitcoinunits.h>
 #include <guiutil.h>
 

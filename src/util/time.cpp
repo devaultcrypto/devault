@@ -5,8 +5,14 @@
 
 #include <config/bitcoin-config.h>
 
-#include <utiltime.h>
 #include <cassert>
+#include <util/time.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread.hpp>
+
+#include <tinyformat.h>
+
 #include <atomic>
 #include <sstream>
 #include <iomanip> // for put_time

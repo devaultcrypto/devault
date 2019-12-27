@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <test/jsonutil.h>
+#include <catch_tests/jsonutil.h>
 
 #include <catch2/catch.hpp>
 #include <iostream>

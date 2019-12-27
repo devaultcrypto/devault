@@ -7,6 +7,12 @@
 #include <config.h>
 #include <consensus/consensus.h>
 #include <primitives/transaction.h>
+<<<<<<< HEAD
+=======
+#include <streams.h>
+#include <util/system.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 #include <util.h>
 #include <fs_util.h>

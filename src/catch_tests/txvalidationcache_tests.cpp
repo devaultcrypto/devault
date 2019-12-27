@@ -13,10 +13,10 @@
 #include <script/sighashtype.h>
 #include <script/sign.h>
 #include <script/standard.h>
-#include <test/sigutil.h>
+#include <catch_tests/sigutil.h>
 #include <catch_tests/test_bitcoin.h>
 #include <txmempool.h>
-#include <utiltime.h>
+#include <util/time.h>
 #include <validation.h>
 
 #include "catch_unit.h"

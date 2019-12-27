@@ -12,10 +12,11 @@
 #include <random.h>
 #include <serialize.h>
 #include <streams.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 
 #include <vector>
 #include <algorithm>

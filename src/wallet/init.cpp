@@ -7,8 +7,9 @@
 #include <init.h>
 #include <config.h>
 #include <net.h>
-#include <util.h>
-#include <utilmoneystr.h>
+#include <scheduler.h>
+#include <util/moneystr.h>
+#include <util/system.h>
 #include <validation.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/rpcdump.h>

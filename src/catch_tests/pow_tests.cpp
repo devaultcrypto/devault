@@ -7,8 +7,9 @@
 #include <config.h>
 #include <pow.h>
 #include <random.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
-#include <util.h>
+#include <util/system.h>
 
 #include "catch_unit.h"
 

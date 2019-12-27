@@ -7,7 +7,8 @@
 #include <chain.h>
 #include <chainparams.h>
 #include <config.h>
-#include <util.h>
+#include <consensus/params.h>
+#include <util/system.h>
 
 bool IsGreatWallEnabled(const Config &config, const CBlockIndex *pindexPrev) {
   if (pindexPrev == nullptr) {

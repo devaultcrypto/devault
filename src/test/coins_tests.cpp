@@ -8,7 +8,7 @@
 #include <test/test_bitcoin.h>
 #include <uint256.h>
 #include <undo.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <validation.h>
 
 #include <map>

@@ -7,8 +7,8 @@
 
 #include <pubkey.h>
 #include <script/script.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 
 using valtype = std::vector<uint8_t>;
 

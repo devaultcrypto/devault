@@ -12,6 +12,7 @@
 #include <script/interpreter.h>
 #include <script/script.h>
 #include <script/standard.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
 #include <uint256.h>
 

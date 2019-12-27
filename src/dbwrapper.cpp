@@ -5,7 +5,7 @@
 #include <dbwrapper.h>
 
 #include <random.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -79,7 +79,7 @@ public:
         }
     }
 };
-
+#ifndef USE_ROCKSDB
 static void SetMaxOpenFiles(datadb::Options *options) {
     // On most platforms the default setting of max_open_files (which is 1000)
     // is optimal. On Windows using a large file count is OK because the handles
@@ -97,15 +97,14 @@ static void SetMaxOpenFiles(datadb::Options *options) {
 
     int default_open_files = options->max_open_files;
 #ifndef WIN32
-#ifndef USE_ROCKSDB    
     if (sizeof(void *) < 8) {
         options->max_open_files = 64;
     }
 #endif
-#endif
     LogPrint(BCLog::LEVELDB, "LevelDB using max_open_files=%d (default=%d)\n",
              options->max_open_files, default_open_files);
 }
+#endif
 
 static datadb::Options GetOptions(size_t nCacheSize) {
 #ifdef USE_ROCKSDB

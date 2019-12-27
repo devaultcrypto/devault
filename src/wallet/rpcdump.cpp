@@ -16,12 +16,12 @@
 #include <script/script.h>
 #include <script/standard.h>
 #include <sync.h>
-#include <fs_util.h>
-#include <utiltime.h>
+#include <util/fs_util.h>
+#include <util/time.h>
 #include <validation.h>
 #include <wallet/wallet.h>
 #include <wallet/mnemonic.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
 #include <devault/coinreward.h>
 #include <devault/rewards.h>
 

@@ -14,9 +14,9 @@
 #include <sync.h>
 #include <ui_interface.h>
 #include <walletinitinterface.h>
-#include <util.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 
 #include <cstdio>
 

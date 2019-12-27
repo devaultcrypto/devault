@@ -19,7 +19,14 @@
 #include <clientversion.h>
 #include <init.h>
 #include <interfaces/node.h>
-#include <util.h>
+
+#include <qt/bitcoingui.h>
+#include <qt/clientmodel.h>
+#include <ui_helpmessagedialog.h>
+#include <qt/guiconstants.h>
+#include <qt/guiutil.h>
+#include <qt/intro.h>
+#include <util/system.h>
 
 #include <cstdio>
 

@@ -8,8 +8,9 @@
 #include <dstencode.h>
 #include <key.h>
 #include <script/sigcache.h>
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include "catch_unit.h"
 

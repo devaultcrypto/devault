@@ -334,12 +334,13 @@ add_library(util
 	sync.cpp
 	threadinterrupt.cpp
 	uint256.cpp
-	util.cpp # needs libsodium
-	fs_util.cpp
-	utilmoneystr.cpp
-	utilstrencodings.cpp
-	utiltime.cpp
-    ui_interface.cpp # for InitError in fs_util
+
+  ui_interface.cpp # for InitError in fs_util
+	util/system.cpp # needs libsodium
+	util/fs_util.cpp
+	util/moneystr.cpp
+	util/strencodings.cpp
+	util/time.cpp
 	util/bytevectorhash.cpp
 )
 
@@ -442,7 +443,7 @@ add_library(devaultconsensus
 	script/script_error.cpp
 	script/sigencoding.cpp
 	uint256.cpp
-	utilstrencodings.cpp
+	util/strencodings.cpp
 )
 
 target_link_libraries(devaultconsensus common devault)

@@ -3,8 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <reverselock.h>
-#include <catch_tests/test_bitcoin.h>
-
+#include <mutex>
 #include "catch_unit.h"
 
 // BOOST_FIXTURE_TEST_SUITE(reverselock_tests, BasicTestingSetup)

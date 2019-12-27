@@ -17,8 +17,8 @@
 #include <streams.h>
 #include <sync.h>
 #include <txmempool.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
+#include <util/strencodings.h>
 #include <validation.h>
 #include <version.h>
 

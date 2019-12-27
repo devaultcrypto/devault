@@ -6,7 +6,7 @@
 #include <policy/policy.h>
 #include <txmempool.h>
 #include <uint256.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <catch_tests/test_bitcoin.h>
 

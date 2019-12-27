@@ -3,8 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <compat/byteswap.h>
-#include <catch_tests/test_bitcoin.h>
-
 #include "catch_unit.h"
 
 TEST_CASE("bswap_tests") {

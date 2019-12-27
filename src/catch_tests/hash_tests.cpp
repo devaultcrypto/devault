@@ -4,12 +4,14 @@
 
 #include <crypto/siphash.h>
 #include <hash.h>
-#include <catch_tests/test_bitcoin.h>
-#include <utilstrencodings.h>
-
+#include <util/strencodings.h>
 #include <vector>
-
 #include "catch_unit.h"
+
+#include "catch_tests/test_rand.h"
+#include "catch_tests/test_bitcoin.h"
+
+
 
 // BOOST_FIXTURE_TEST_SUITE(hash_tests, BasicTestingSetup)
 

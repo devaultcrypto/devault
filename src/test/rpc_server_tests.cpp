@@ -4,9 +4,13 @@
 
 #include <chainparams.h>
 #include <config.h>
+<<<<<<< HEAD
 #include <rpc/jsonrpcrequest.h>
 #include <rpc/server.h>
 #include <util.h>
+=======
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <test/test_bitcoin.h>
 

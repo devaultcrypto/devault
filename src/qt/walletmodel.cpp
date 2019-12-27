@@ -18,9 +18,9 @@
 #include <net.h> // for g_connman
 #include <sync.h>
 #include <ui_interface.h>
-#include <util.h> // for GetBoolArg
 #include <validation.h>
 #include <wallet/coincontrol.h>
+#include <util/system.h> // for GetBoolArg
 #include <wallet/coincontrol.h>
 #include <wallet/wallet.h>
 #include <wallet/walletdb.h> // for BackupWallet

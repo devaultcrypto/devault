@@ -6,6 +6,12 @@
 #include <cashaddrenc.h>
 #include <chainparams.h>
 #include <random.h>
+<<<<<<< HEAD
+=======
+#include <uint256.h>
+#include <util/strencodings.h>
+
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/test_bitcoin.h>
 #include <uint256.h>
 

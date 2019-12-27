@@ -4,7 +4,11 @@
 
 #include <amount.h>
 #include <array>
-#include <catch_tests/test_bitcoin.h>
+
+
+#include <feerate.h>
+#include <thread>
+
 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>

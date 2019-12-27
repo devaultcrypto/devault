@@ -7,10 +7,10 @@
 
 #include <random.h>
 #include <tinyformat.h>
-#include <util.h>
-#include <fs_util.h>
-#include <utilstrencodings.h>
-#include <utiltime.h>
+#include <util/fs_util.h>
+#include <util/strencodings.h>
+#include <util/system.h>
+#include <util/time.h>
 #include <version.h>
 
 #include <cstdint>

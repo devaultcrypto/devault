@@ -13,12 +13,12 @@
 #include <script/script_error.h>
 #include <script/sighashtype.h>
 #include <script/sign.h>
-#include <test/jsonutil.h>
-#include <test/scriptflags.h>
-#include <test/sigutil.h>
+#include <catch_tests/jsonutil.h>
+#include <catch_tests/scriptflags.h>
+#include <catch_tests/sigutil.h>
 #include <catch_tests/test_bitcoin.h>
-#include <util.h>
-#include <utilstrencodings.h>
+#include <util/system.h>
+#include <util/strencodings.h>
 
 #if defined(HAVE_CONSENSUS_LIB)
 #include <script/devaultconsensus.h>

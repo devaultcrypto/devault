@@ -3,8 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <netbase.h>
-#include <catch_tests/test_bitcoin.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 
 #include <string>
 

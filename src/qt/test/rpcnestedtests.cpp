@@ -12,9 +12,13 @@
 #include <qt/rpcconsole.h>
 #include <rpc/register.h>
 #include <rpc/server.h>
+<<<<<<< HEAD
 #include <test/test_bitcoin.h>
 #include <univalue.h>
 #include <util.h>
+=======
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <validation.h>
 
 #include <QDir>

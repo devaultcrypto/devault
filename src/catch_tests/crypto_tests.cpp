@@ -10,9 +10,10 @@
 #include <crypto/sha1.h>
 #include <crypto/sha256.h>
 #include <crypto/sha512.h>
+#include <hash.h>
 #include <random.h>
-#include <catch_tests/test_bitcoin.h>
-#include <utilstrencodings.h>
+#include <catch_tests/test_rand.h>
+#include <util/strencodings.h>
 
 #include <vector>
 

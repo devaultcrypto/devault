@@ -18,8 +18,8 @@
 #include <wallet/mnemonic.h>
 #include <crypto/pkcs5_pbkdf2.h>
 #include <crypto/sha256.h>
-#include <utilstrencodings.h>
-#include <utilsplitstring.h>
+#include <util/strencodings.h>
+#include <util/splitstring.h>
 #include <random.h>
 #include <iostream>
 #include <random>

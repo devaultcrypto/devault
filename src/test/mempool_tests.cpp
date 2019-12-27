@@ -4,8 +4,12 @@
 
 #include <policy/policy.h>
 #include <reverse_iterator.h>
+<<<<<<< HEAD
 #include <txmempool.h>
 #include <util.h>
+=======
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #include <test/test_bitcoin.h>
 

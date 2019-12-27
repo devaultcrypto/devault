@@ -10,8 +10,8 @@
 #include <chainparamsbase.h>
 #include <logging.h>
 #include <utilstrencodings.h>
-#include <util.h>
-#include <fs_util.h>
+#include <util/system.h>
+#include <util/fs_util.h>
 #include <wallet/wallettool.h>
 
 #include <functional>

@@ -21,9 +21,9 @@
 #include <script/script_error.h>
 #include <script/sign.h>
 #include <script/standard.h>
-#include <test/jsonutil.h>
-#include <test/scriptflags.h>
-#include <utilstrencodings.h>
+#include <catch_tests/jsonutil.h>
+#include <catch_tests/scriptflags.h>
+#include <util/strencodings.h>
 #include <validation.h>
 
 #include <map>

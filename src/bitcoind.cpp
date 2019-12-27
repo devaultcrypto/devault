@@ -14,8 +14,8 @@
 #include <init.h>
 #include <noui.h>
 #include <rpc/server.h>
-#include <fs_util.h>
-#include <utilstrencodings.h>
+#include <util/fs_util.h>
+#include <util/strencodings.h>
 #include <walletinitinterface.h>
 #include <support/allocators/secure.h>
 

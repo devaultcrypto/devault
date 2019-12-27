@@ -13,9 +13,10 @@
 #include <pow.h>
 #include <script/sign.h>
 #include <serialize.h>
-#include <util.h>
+#include <util/system.h>
 #include <validation.h>
 
+#include <catch_tests/test_rand.h>
 #include <catch_tests/test_bitcoin.h>
 
 #include <cstdint>

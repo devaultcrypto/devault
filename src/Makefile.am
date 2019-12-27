@@ -154,7 +154,6 @@ BITCOIN_CORE_H = \
   diskblockpos.h \
   dstencode.h \
   fs.h \
-  fs_util.h \
   globals.h \
   httprpc.h \
   httpserver.h \
@@ -223,9 +222,10 @@ BITCOIN_CORE_H = \
   undo.h \
   upgrade_check.h \
   utxo_functions.h \
-  util.h \
-  utilmoneystr.h \
-  utiltime.h \
+  util/fs_util.h \
+  util/system.h \
+  util/moneystr.h \
+  util/time.h \
   util/bitmanip.h \
   util/bytevectorhash.h \
   validation.h \
@@ -450,9 +450,9 @@ libbitcoin_consensus_a_SOURCES = \
   tinyformat.h \
   uint256.cpp \
   uint256.h \
-  utilstrencodings.cpp \
-  utilstrencodings.h \
-  utilsplitstring.h \
+  util/splitstring.h \
+  util/strencodings.cpp \
+  util/strencodings.h \
   version.h
 
 # common: shared between devaultd, and devault-qt and non-server tools
@@ -493,7 +493,6 @@ libbitcoin_util_a_SOURCES = \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
   fs.cpp \
-  fs_util.cpp \
   logging.cpp \
   random.cpp \
   rcu.cpp \
@@ -505,10 +504,11 @@ libbitcoin_util_a_SOURCES = \
   ui_interface.cpp \
   uint256.cpp \
   uint256.h \
-  util.cpp \
-  utilmoneystr.cpp \
-  utilstrencodings.cpp \
-  utiltime.cpp \
+	util/fs_util.cpp \
+  util/system.cpp \
+  util/moneystr.cpp \
+  util/strencodings.cpp \
+  util/time.cpp \
   util/bytevectorhash.cpp \
   $(BITCOIN_CORE_H)
 

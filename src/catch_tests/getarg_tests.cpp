@@ -2,14 +2,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <catch_tests/test_bitcoin.h>
-#include <util.h>
+#include <util/system.h>
 
 #include <string>
 #include <vector>
 
 #include "catch_unit.h"
-#include <utilsplitstring.h>
+#include <util/splitstring.h>
 
 // BOOST_FIXTURE_TEST_SUITE(getarg_tests, BasicTestingSetup)
 

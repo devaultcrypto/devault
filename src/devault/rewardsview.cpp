@@ -12,7 +12,7 @@
 #include <init.h>
 #include <random.h>
 #include <uint256.h>
-#include <fs_util.h>
+#include <util/fs_util.h>
 #include <cstdint>
 
 using namespace std; // for make_pair

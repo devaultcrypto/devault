@@ -9,10 +9,22 @@
 #include <key.h>
 #include <keystore.h>
 #include <rpc/server.h>
+<<<<<<< HEAD
 #include <script/script.h>
 #include <script/script_error.h>
 #include <script/sighashtype.h>
 #include <script/sign.h>
+=======
+#include <streams.h>
+#include <util/strencodings.h>
+#include <util/system.h>
+
+#if defined(HAVE_CONSENSUS_LIB)
+#include <script/bitcoinconsensus.h>
+#endif
+
+#include <test/data/script_tests.json.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 #include <test/jsonutil.h>
 #include <test/scriptflags.h>
 #include <test/sigutil.h>

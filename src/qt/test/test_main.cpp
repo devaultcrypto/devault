@@ -11,9 +11,13 @@
 #include <compattests.h>
 #include <guiutiltests.h>
 #include <key.h>
+<<<<<<< HEAD
 #include <rpcnestedtests.h>
 #include <uritests.h>
 #include <util.h>
+=======
+#include <util/system.h>
+>>>>>>> c3f3e6af6... Move util files to directory
 
 #ifdef ENABLE_WALLET
 #include <wallettests.h>
