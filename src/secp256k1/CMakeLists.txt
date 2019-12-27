@@ -127,29 +127,6 @@ if(SECP256K1_ENABLE_MODULE_SCHNORR)
 	set(ENABLE_MODULE_SCHNORR 1)
 endif()
 
-# Static precomputation for eliptic curve mutliplication
-option(SECP256K1_ECMULT_STATIC_PRECOMPUTATION "Precompute libsecp256k1's eliptic curve mutliplication tables" ON)
-add_feature_info(WITH_PRECOMPUTATION SECP256K1_ECMULT_STATIC_PRECOMPUTATION "Precompute libsecp256k1's eliptic curve mutliplication tables")
-if(SECP256K1_ECMULT_STATIC_PRECOMPUTATION)
-	set(USE_ECMULT_STATIC_PRECOMPUTATION 1)
-	include(NativeExecutable)
-
-  if (TOOLCHAIN_PREFIX)
-  	add_custom_command(
-		  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/src/ecmult_static_context.h
-		  COMMAND ${NATIVE_BINARY_DIR}/../gen_context
-	    )
-  else()
-	  add_custom_command(
-		  OUTPUT src/ecmult_static_context.h
-		  COMMAND gen_context
-	    )
-  endif()
-  
-	target_sources(secp256k1 PRIVATE src/ecmult_static_context.h)
-	add_native_executable(gen_context src/gen_context.c)
-endif()
-
 # Generate the config
 configure_file(src/libsecp256k1-config.h.cmake.in src/libsecp256k1-config.h ESCAPE_QUOTES)
 target_compile_definitions(secp256k1 PRIVATE HAVE_CONFIG_H SECP256K1_BUILD)
