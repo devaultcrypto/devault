@@ -2034,6 +2034,7 @@ TEST_CASE("script_FindAndDelete") {
   BOOST_CHECK(s == expect);
 }
 
+#ifdef OK
 BOOST_AUTO_TEST_CASE(script_HasValidOps) {
     // Exercise the HasValidOps functionality
     CScript script;
@@ -2080,5 +2081,6 @@ BOOST_AUTO_TEST_CASE(script_can_append_self) {
     s += s;
     BOOST_CHECK(s == d);
 }
+#endif
 
 //BOOST_AUTO_TEST_SUITE_END()
