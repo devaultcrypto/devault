@@ -131,31 +131,31 @@
       Migrate Gitian container to Debian 10 Buster
       Various fixups for PR13557
       [CMAKE] Move FDELT_TYPE declaration to config
-      Update qt/optionsdialog.cpp with Qt5 connect syntax
+#     Update qt/optionsdialog.cpp with Qt5 connect syntax
       Update qt/walletview.cpp with Qt5 syntax
       Update qt/test/paymentservertests.cpp to use Qt5 connect syntax
       Update qt/walletmodel.cpp with Qt5 connect syntax
-      Update qt/bitcoin.cpp with Qt5 connect syntax
-      Update qt/qvalidatedlinedit.cpp to use Qt5 connect syntax
+#     Update qt/bitcoin.cpp with Qt5 connect syntax
+#     Update qt/qvalidatedlinedit.cpp to use Qt5 connect syntax
       Update qt/walletframe.cpp with Qt5 connect syntax
       Update qt/bitcoingui with Qt5 connect syntax
       [CMAKE] Fix missing inclusion when libbitcoinconsensus is disabled
       Update qt/transactionview.cpp with Qt5 connect syntax
       Update qt/sendcoinsdialog.cpp with Qt5 connect syntax
       Update qt/rpcconsole with Qt5 connect syntax
-      Update qt/recentrequestdialog.cpp with Qt5 connect syntax
-      Update qt/receivecoinsdialog.cpp with Qt5 connect syntax
-      Update qt/transactiontablemodel.cpp with Qt5 connect syntax
-      Update qt/trafficgraphwidget.cpp with Qt5 connect syntax
+#     Update qt/recentrequestdialog.cpp with Qt5 connect syntax
+#     Update qt/receivecoinsdialog.cpp with Qt5 connect syntax
+#     Update qt/transactiontablemodel.cpp with Qt5 connect syntax
+#     Update qt/trafficgraphwidget.cpp with Qt5 connect syntax
       Update qt/sendcoinsentry.cpp with Qt5 connect syntax
-      Update qt/qvaluecombobox.cpp to use Qt5 connect syntax
-      Update qt/receiverequestdialog.cpp with Qt5 connect syntax
+#     Update qt/qvaluecombobox.cpp to use Qt5 connect syntax
+#     Update qt/receiverequestdialog.cpp with Qt5 connect syntax
       Update user agent filter in makeseeds.py
-      Update qt/peertablemodel.cpp with Qt5 connect synax
+#     Update qt/peertablemodel.cpp with Qt5 connect synax
       Update qt/paymentserver.cpp with Qt5 connect syntax
       Update qt/overviewpage.cpp with Qt5 connect syntax
-      Update qt/modaloverlay.cpp with Qt5 connect syntax
-      Update qt/intro.cpp to use Qt5 connect syntax
+#     Update qt/modaloverlay.cpp with Qt5 connect syntax
+#     Update qt/intro.cpp to use Qt5 connect syntax
       Update qt/guiutil.cpp to use Qt5 connect syntax
       Update qt/coincontroldialog.cpp to use Qt5 connect syntax
       SignPSBTInput wrapper function
@@ -166,14 +166,14 @@
       [CMAKE] Create a windows installer
       [CMAKE] Build bitcoinconsensus library both static and shared
       Add testnet-seed.bchd.cash to seeder lists
-      Update qt/clientmodel.cpp to use Qt5 syntax
+#     Update qt/clientmodel.cpp to use Qt5 syntax
       Merge #12924: Fix hdmaster-key / seed-key confusion
       Rename master key to seed
       Update qt/bitcoinamountfield.cpp to use Qt5 connect syntax
       Update qt/askpassphrasedialog.cpp to use Qt5 connect syntax
       Update qt/addressbookpage.cpp to use Qt5 connect syntax
-      rpc: Expose g_is_mempool_loaded via getmempoolinfo
-      Refactor transaction creation and transaction funding logic
+#     rpc: Expose g_is_mempool_loaded via getmempoolinfo
+#     Refactor transaction creation and transaction funding logic
       Separate CSeederNode class declaration from definition
       Move parse_name() to dns.h so it can be tested
       Bump version to 0.20.6
