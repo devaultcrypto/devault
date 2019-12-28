@@ -4692,6 +4692,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
         WalletBatch batch(*walletInstance->database);
         CBlockLocator locator;
         if (batch.ReadBestBlock(locator)) {
+            LOCK(cs_main);
             pindexRescan = FindForkInGlobalIndex(chainActive, locator);
         }
     }
