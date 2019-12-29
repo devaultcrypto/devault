@@ -14,7 +14,7 @@
 #include <chain.h>
 #include <coins.h>
 #include <consensus/consensus.h>
-#include <diskblockpos.h>
+#include <flatfile.h>
 #include <protocol.h> // For CMessageHeader::MessageMagic
 #include <script/script_error.h>
 #include <sync.h>
@@ -364,13 +364,13 @@ bool ProcessNewBlockHeaders(const Config &config,
 /**
  * Open a block file (blk?????.dat).
  */
-FILE *OpenBlockFile(const CDiskBlockPos &pos, bool fReadOnly = false);
+FILE *OpenBlockFile(const FlatFilePos &pos, bool fReadOnly = false);
 
 /**
  * Import blocks from an external file.
  */
 bool LoadExternalBlockFile(const Config &config, FILE *fileIn,
-                           CDiskBlockPos *dbp = nullptr);
+                           FlatFilePos *dbp = nullptr);
 
 /**
  * Ensures we have a genesis block in the block tree, possibly writing one to
@@ -574,7 +574,7 @@ bool GetAddrIndex(const std::string& addr,
 std::string GetAddr(const CTxOut& out);
 
 /** Functions for disk access for blocks */
-bool ReadBlockFromDisk(CBlock &block, const CDiskBlockPos &pos,
+bool ReadBlockFromDisk(CBlock &block, const FlatFilePos &pos,
                        const Config &config);
 bool ReadBlockFromDisk(CBlock &block, const CBlockIndex *pindex,
                        const Config &config);

@@ -17,7 +17,7 @@
 #include <compat/sanity.h>
 #include <config.h>
 #include <consensus/validation.h>
-#include <diskblockpos.h>
+#include <flatfile.h>
 #include <httprpc.h>
 #include <httpserver.h>
 #include <index/txindex.h>
@@ -1173,7 +1173,7 @@ void ThreadImport(const Config &config, std::vector<fs::path> vImportFiles) {
         if (fReindex) {
             int nFile = 0;
             while (true) {
-                CDiskBlockPos pos(nFile, 0);
+                FlatFilePos pos(nFile, 0);
                 if (!fs::exists(GetBlockPosFilename(pos, "blk"))) {
                     // No block files left to reindex
                     break;

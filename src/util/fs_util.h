@@ -9,7 +9,7 @@
 
 extern const char *const BITCOIN_PID_FILENAME;
 
-struct CDiskBlockPos;
+struct FlatFilePos;
 
 fs::path AbsPathForConfigVal(const fs::path &path, bool net_specific = true);
 fs::path GetDefaultDataDir();
@@ -36,7 +36,7 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes = 0, bool blocks_dir = false);
 
 // in validation.cpp
 /** Translation to a filesystem path. */
-fs::path GetBlockPosFilename(const CDiskBlockPos &pos, const char *prefix);
+fs::path GetBlockPosFilename(const FlatFilePos &pos, const char *prefix);
 
 /* Only used in Windows */
 fs::path GetSpecialFolderPath(int nFolder, bool fCreate = true);

@@ -52,12 +52,12 @@ public:
     template <typename Stream> void Serialize(Stream &s) const {
         std::vector<uint8_t> compr;
         if (CompressScript(script, compr)) {
-            s << CFlatData(compr);
+            s << MakeSpan(compr);
             return;
         }
         unsigned int nSize = script.size() + nSpecialScripts;
         s << VARINT(nSize);
-        s << CFlatData(script);
+        s << MakeSpan(script);
     }
 
     template <typename Stream> void Unserialize(Stream &s) {
@@ -65,7 +65,7 @@ public:
         s >> VARINT(nSize);
         if (nSize < nSpecialScripts) {
             std::vector<uint8_t> vch(GetSpecialScriptSize(nSize), 0x00);
-            s >> CFlatData(vch);
+            s >> MakeSpan(vch);
             DecompressScript(script, nSize, vch);
             return;
         }
@@ -76,7 +76,7 @@ public:
             s.ignore(nSize);
         } else {
             script.resize(nSize);
-            s >> CFlatData(script);
+            s >> MakeSpan(script);
         }
     }
 };

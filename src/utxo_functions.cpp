@@ -59,7 +59,7 @@ void ApplyStats(CCoinsStats &stats, CHashWriter &ss, const uint256 &hash,
     for (const auto& output : outputs) {
         ss << VARINT(output.first + 1);
         ss << output.second.GetTxOut().scriptPubKey;
-        ss << VARINT(output.second.GetTxOut().nValue.toInt());
+        ss << VARINT(output.second.GetTxOut().nValue.toInt(), VarIntMode::NONNEGATIVE_SIGNED);
         stats.nTransactionOutputs++;
         stats.nTotalAmount += output.second.GetTxOut().nValue;
         stats.nBogoSize +=
@@ -67,7 +67,7 @@ void ApplyStats(CCoinsStats &stats, CHashWriter &ss, const uint256 &hash,
             8 /* amount */ + 2 /* scriptPubKey len */ +
             output.second.GetTxOut().scriptPubKey.size() /* scriptPubKey */;
     }
-    ss << VARINT(0);
+    ss << VARINT(0u);
 }
 
 std::map<COutPoint, Coin> GetUTXOSet(CCoinsView *view, const CTxDestination& source) {
