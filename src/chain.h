@@ -10,8 +10,8 @@
 #include <blockstatus.h>
 #include <blockvalidity.h>
 #include <consensus/params.h>
-#include <diskblockpos.h>
 #include <crypto/common.h> // for ReadLE64
+#include <flatfile.h>
 #include <primitives/block.h>
 #include <tinyformat.h>
 #include <sync.h>
@@ -105,7 +105,7 @@ public:
     //! (memory only) block header metadata
     uint64_t nTimeReceived;
 
-    //! (memory only) Maximum nTime in the chain upto and including this block.
+    //! (memory only) Maximum nTime in the chain up to and including this block.
     unsigned int nTimeMax;
 
     void SetNull() {
@@ -144,8 +144,8 @@ public:
         nNonce = block.nNonce;
     }
 
-    CDiskBlockPos GetBlockPos() const {
-        CDiskBlockPos ret;
+    FlatFilePos GetBlockPos() const {
+        FlatFilePos ret;
         if (nStatus.hasData()) {
             ret.nFile = nFile;
             ret.nPos = nDataPos;
@@ -153,8 +153,8 @@ public:
         return ret;
     }
 
-    CDiskBlockPos GetUndoPos() const {
-        CDiskBlockPos ret;
+    FlatFilePos GetUndoPos() const {
+        FlatFilePos ret;
         if (nStatus.hasUndo()) {
             ret.nFile = nFile;
             ret.nPos = nUndoPos;
@@ -302,14 +302,14 @@ public:
     inline void SerializationOp(Stream &s, Operation ser_action) {
         int _nVersion = s.GetVersion();
         if (!(s.GetType() & SER_GETHASH)) {
-            READWRITE(VARINT(_nVersion));
+            READWRITE(VARINT(_nVersion, VarIntMode::NONNEGATIVE_SIGNED));
         }
 
-        READWRITE(VARINT(nHeight));
+        READWRITE(VARINT(nHeight, VarIntMode::NONNEGATIVE_SIGNED));
         READWRITE(nStatus);
         READWRITE(VARINT(nTx));
         if (nStatus.hasData() || nStatus.hasUndo()) {
-            READWRITE(VARINT(nFile));
+            READWRITE(VARINT(nFile, VarIntMode::NONNEGATIVE_SIGNED));
         }
         if (nStatus.hasData()) {
             READWRITE(VARINT(nDataPos));

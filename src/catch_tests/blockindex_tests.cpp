@@ -4,7 +4,7 @@
 
 #include <blockvalidity.h>
 #include <chain.h>
-#include <diskblockpos.h>
+#include <flatfile.h>
 #include <uint256.h>
 
 #include <catch_tests/test_bitcoin.h>
@@ -64,20 +64,20 @@ TEST_CASE("get_disk_positions") {
       }
 
       // Data and undo positions should be unmodified
-      CDiskBlockPos dataPosition = index.GetBlockPos();
+      FlatFilePos dataPosition = index.GetBlockPos();
       if (flags & 0x01) {
         BOOST_CHECK(dataPosition.nFile == expectedFile);
         BOOST_CHECK(dataPosition.nPos == expectedDataPosition);
       } else {
-        BOOST_CHECK(dataPosition == CDiskBlockPos());
+        BOOST_CHECK(dataPosition == FlatFilePos());
       }
 
-      CDiskBlockPos undoPosition = index.GetUndoPos();
+      FlatFilePos undoPosition = index.GetUndoPos();
       if (flags & 0x02) {
         BOOST_CHECK(undoPosition.nFile == expectedFile);
         BOOST_CHECK(undoPosition.nPos == expectedUndoPosition);
       } else {
-        BOOST_CHECK(undoPosition == CDiskBlockPos());
+        BOOST_CHECK(undoPosition == FlatFilePos());
       }
     }
   }

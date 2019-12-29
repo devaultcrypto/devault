@@ -151,7 +151,7 @@ BITCOIN_CORE_H = \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
-  diskblockpos.h \
+  flatfile.h \
   dstencode.h \
   fs.h \
   globals.h \
@@ -205,6 +205,7 @@ BITCOIN_CORE_H = \
   script/sign.h \
   script/standard.h \
   script/ismine.h \
+  span.h \
   streams.h \
   support/allocators/secure.h \
   support/allocators/zeroafterfree.h \
@@ -280,6 +281,7 @@ libbitcoin_server_a_SOURCES = \
 	devault/rewardsview.cpp \
   consensus/activation.cpp \
   consensus/tx_verify.cpp \
+  flatfile.cpp \
   globals.cpp \
   httprpc.cpp \
   httpserver.cpp \
