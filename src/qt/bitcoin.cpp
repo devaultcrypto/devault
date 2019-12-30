@@ -91,9 +91,12 @@ static void InitMessage(const std::string &message) {
 /**
  * Translate string to current locale using Qt.
  */
-static std::string Translate(const char *psz) {
-    return QCoreApplication::translate("DeVault", psz).toStdString();
-}
+const std::function<std::string(const char *)>
+G_TRANSLATION_FUN = [](const char *psz) {
+                      return QCoreApplication::translate("DeVault", psz).toStdString();
+                    };
+
+
 
 static QString GetLangTerritory() {
     QSettings settings;
@@ -772,7 +775,6 @@ int main(int argc, char *argv[]) {
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
     initTranslations(qtTranslatorBase, qtTranslator, translatorBase,
                      translator);
-    translationInterface.Translate.connect(Translate);
 
     // Show help message immediately after parsing command-line options (for
     // "-lang") and setting locale, but before showing splash screen.

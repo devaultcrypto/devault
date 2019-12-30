@@ -15,6 +15,7 @@
 #include <devault/rewards.h>
 #include <devault/rewardsview.h>
 #include <util/fs_util.h>
+#include <util/system.h>
 #include <init.h> // for InterruptThredScriptCheck
 #include <key.h>
 #include <logging.h>
@@ -45,6 +46,9 @@
 #include <catch_tests/test_rand.h>
 
 FastRandomContext g_insecure_rand_ctx;
+
+const std::function<std::string(const char *)> G_TRANSLATION_FUN = nullptr;
+
 
 void CConnmanTest::AddNode(CNode &node) {
   LOCK(g_connman->cs_vNodes);

@@ -18,6 +18,8 @@
 #include <getopt.h>
 #include <pthread.h>
 
+const std::function<std::string(const char *)> G_TRANSLATION_FUN = nullptr;
+
 class CDnsSeedOpts {
 public:
     int nThreads;
