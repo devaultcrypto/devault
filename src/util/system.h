@@ -28,21 +28,12 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <functional>
 
 #include <condition_variable>
-#include <boost/signals2/signal.hpp>
 
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
-
-/** Signals for translation. */
-class CTranslationInterface {
-public:
-    /** Translate a message to the native language of the user. */
-    boost::signals2::signal<std::string(const char *psz)> Translate;
-};
-
-extern CTranslationInterface translationInterface;
 
 extern const char *const BITCOIN_CONF_FILENAME;
 
@@ -54,15 +45,14 @@ inline void interruption_point(bool interrupt) {
     }
 }
 
+/** Translate a message to the native language of the user. */
+const extern std::function<std::string(const char *)> G_TRANSLATION_FUN;
 
 /**
- * Translation function: Call Translate signal on UI interface, which returns a
- * boost::optional result. If no translation slot is registered, nothing is
- * returned, and simply return the input.
+ * Translation function: return input if no translation function
  */
 inline std::string _(const char *psz) {
-    boost::optional<std::string> rv = translationInterface.Translate(psz);
-    return rv ? (*rv) : psz;
+  return G_TRANSLATION_FUN ? (G_TRANSLATION_FUN)(psz) : psz;
 }
 
 bool SetupNetworking();
