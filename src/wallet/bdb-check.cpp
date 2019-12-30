@@ -9,7 +9,7 @@
 #include <chainparams.h>
 #include <chainparamsbase.h>
 #include <logging.h>
-#include <utilstrencodings.h>
+#include <util/strencodings.h>
 #include <util/system.h>
 #include <util/fs_util.h>
 #include <wallet/wallettool.h>
