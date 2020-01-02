@@ -1,3 +1,226 @@
+20.9
+     [test-seeds] Stop the script if starting bitcoind failed
+     Update seeds
+     Filter IPv6 by ASN
+     Update manpages for 0.20.9 release
+     Update chainparams
+     Remove blockprioritypercentage config parameter.
+     Add phonon activation logic
+     [CMAKE] Override default flags
+     Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
+     [backport] net: Allow connections from misbehavior banned peers
+     [CI] Don't override the default Junit file name
+     [CMAKE] Unbreak the activated tests
+     [CMAKE] Add a status message to inform the user that ccache is used
+     [AUTOTOOLS] Don't build the seeder tests if --disable-tests is set
+     Merge #13419: [tests] Speed up knapsack_solver_test by not recreating wallet 100 times.
+     Merge #13775: doc: Remove newlines from error message
+#    Merge #13773: wallet: Fix accidental use of the comma operator
+     stop rewinding post-segwit blocks on startup
+     [backport] gui: Show messages as text not html
+#    Fix -Wcast-align in crypto_hash.cpp
+     [LINTER] Enable new autopep8 rules
+     [LINTER] Remove empty lines at the beginning of a block
+     test: Add missing LIBBITCOIN_ZMQ to test_test_bitcoin_LDADD
+     autoconf: Sane --enable-debug defaults.
+     [CMAKE] Allow to run boost unit tests in parallel
+     Static assert with no message is a C++17 feature and warns on C++14
+     [LINTER] Fix the tests linter
+     Add a separate executable for seeder tests
+     Fix enum NumConnections shadowing warning
+     checkmultisig: refactor nullfail check
+     remove priority free transactions mechanism (currently off by default)
+     fix some tests that rely on free transactions being submittable via RPC
+     Replace integer literals in dnshandle() with an enum class
+     clean up some tests that needlessly use -replayprotectionactivationtime
+     Add test-seeds CI configs
+     Fetch and check signature and sha256sum of debian ISO instead of comparing against a hardcoded hash
+     [DOC] Update build documentation and contributing to use cmake and ninja
+     Merge #14350: Add WalletLocation class
+     [CI] Always move the Gitian install and build log
+     Update Debian 10.x ISO link in the Gitian setup docs
+     We assume uint8_t is an alias of unsigned char.
+     Merge #14474: bitcoin-tx: Use constant for n pubkeys check
+     Merge #11866: Do not un-mark fInMempool on wallet txn if ATMP fails.
+     test: Move main_tests to validation_tests
+     Merge #14206: doc: Document -checklevel levels
+#    Merge #13534: Don't assert(foo()) where foo() has side effects
+     Merge #13662: Explain when reindex-chainstate can be used instead of reindex
+     Fixes AES benchmarks
+     qt: Replace objc_msgSend with native syntax
+     [CMAKE] Fix wrong Openssl include directory variable name
+     add SCHNORR_MULTISIG to mandatory flags
+     Make more script validation flags backward compatible
+     fix fee estimation bug in functional tests
+     fix some tests that misuse MANDATORY_SCRIPT_VERIFY_FLAGS
+     Sanity check for mempool acceptance when doing standardness checks
+     Merge #13656: Remove the boost/algorithm/string/predicate.hpp dependency
+     Daemonize bitcoind in test-seeds.sh rather than run in a background process
+     Merge #13667: wallet: Fix backupwallet for multiwallets
+     refactor: replace qLowerBound & qUpperBound with std:: upper_bound & lower_bound
+     Merge #13633: Drop dead code from Stacks
+     [CI] Migrate the CI to use cmake and ninja
+     [CMAKE] Fix Qt tests when the wallet is not built
+     Remove unused functions in seeder/db.h
+     [UBSAN] Update exceptions
+     [CMAKE] SYS_getrandom is expected to be linux only
+     [CMAKE] Fix FindBerkeleyDB for FreeBSD
+#    [CMAKE] Enable SSE4.1, SHA-NI and AVX2 for the crypto library
+     reduce code duplication in UpdateFlags
+     Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
+     [wallet] Add wallet name to log messages
+     [tests] Fix race in rpc_deprecated.py
+     add SCRIPT_VERIFY_MINIMALDATA to mandatory flags
+     Add braces to support/lockedpool.cpp
+     Abstract EraseBlockData out of RewindBlockIndex
+     [CI] Print the sanitizer logs
+     [CI] Move the sanitizer log directory to /tmp
+     [CMAKE] Add an option to promote some warnings to errors
+     Remove Unused CTransaction tx in wallet.cpp
+     Privatize CWallet::AddToWalletIfInvolvingMe
+     Extract CWallet::MarkInputsDirty
+     [CMAKE] Silent the Qt translation files generation
+     allow cuckoocache to function as a map
+     Merge #12944: [wallet] ScanforWalletTransactions should mark input txns as dirty
+     Log debug build status and warn when running benchmarks
+     bench_bitcoin: Avoid read/write to default datadir
+     test_bitcoin: Avoid read/write to default datadir
+     Merge #13074: [trivial] Correct help text for `importaddress` RPC
+#    Merge #13500: [wallet] Decouple wallet version from client version
+     partial revert of tx decode sanity check backport
+     fix incomplete txvalidationcache_tests
+     Fix cuckoocache_tests -Wcast-align warnings
+     [cuckoocache] Use getKey and KeyType for contains
+     Merge #13627: Free keystore.h from file scope level type aliases
+     Merge #13603: bitcoin-tx: Stricter check for valid integers
+     [move only] Move BIP70 code together in preparation to backport PR14451 BIP70 changes
+     Sanity-check script sizes in bitcoin-tx
+     Fix unused variable warning when building with wallet disabled
+     Bump version to 0.20.9
+20.8     
+     Update seeds
+     Update manpages for 0.20.8 release
+     Update chainparams
+     Remove errant --testnet argument in chainparams README
+     Fix apptest build failure on Xenial
+     Small fix in CONTRIBUTING.md - clang-format-7 still mentioned, but 8 is required
+     Small fix in backporting.md - remove unneeded trailing . for git remote add command
+     Fix missing blockhash cast in wallet_tests.cpp
+     Add wallet acceptance / mempool acceptance tests for non-standard variants
+     Fix a bug where test-autopatch would fail when the local master branch does not have the same HEAD as origin/master
+     Fix a bug where test-autopatch would fail in an env where no global git config is set
+     Fix ninja check with TEST_WITH_UPGRADE_ACTIVATED for newer versions of boost
+     [CMAKE] Make the source control tools inclusion an option
+     Merge #13566: Fix get balance
+     Remove check-source-control-tools from check and check-all targets
+     [cuckoocache] Use matchKey instead of the == operator.
+     refactoring: add a method for determining if a block is pruned or not
+     Integrate gArgs and chainparams into the Seeder
+     Various nits in cuckoocache_tests.cpp
+     doc: Doxygen-friendly CuckooCache comments
+     Rename contrib/arcanist to source-control-tools
+     Various nits in Seeder files
+     Merge #11293: Deduplicate CMerkleBlock construction code, add test coverage
+     Fix -Wunused-const-variable in descriptor_tests.cpp
+     Bugfix: Include <memory> for std::unique_ptr
+     fix undefined behaviour in seeder (select() aliasing)
+     Update the github issue template to include disclosure policy
+     remove NULLDUMMY
+     refactor: Add and use HaveTxsDownloaded() where appropriate
+     Added autopatch script for patching and rebasing phabricator diffs
+     Make TxIndex::FindTx use BlockHash
+     Update GetTransaction's parameters
+     Update mempool and compact block logic to use TxHash
+     tx pool: Use class methods to hide raw map iterator impl details
+     Update mempool's mapDelta to use TxId
+     Update mempool's mapTx to index from TxId.
+     Use TxId in setInventoryTxToSend
+     refactor: Drop boost::this_thread::interruption_point and boost::thread_interrupted in main thread
+     Use BlockHash in BlockTransactionsRequest
+     [cmake] link test runners by default
+     Drop minor GetSerializeSize template
+     Avoid creating a temporary vector for size-prefixed elements
+#    Drop unused GetType() from CSizeComputer
+     validation: assert that pindexPrev is non-null when required
+     [CMAKE] Avoid rebuilding sec256k1
+     [CMAKE] Fix scope issue in the remove_<lang>_compiler_flags() functions
+#    Rationalize lock anotation in validation code
+     tests: Add missing cs_main locks required when accessing pcoinsdbview, pcoinsTip or pblocktree
+     Introduce BlockHash to represent a block hash
+     Add braces in block.h
+     Use size_t where apropriate in skiplist_tests.cpp
+     Add Benchmark to test input de-duplication worst case
+     Add const modifier to HTTPRequest methods
+     Add braces in txdb.cpp
+     Move pindexFinalized in CChainState
+#    Explain GetAncestor check for m_failed_blocks in AcceptBlockHeader
+#    Remove unnecessary const_cast
+     Fix activation_tests
+     Add fuzz testing for BlockTransactions and BlockTransactionsRequest
+     [test] Speed up fuzzing by ~200x when using afl-fuzz
+     [CMAKE] Build test_bitcoin_fuzzy
+     drop 'check3' upgrade-conditional-script-failure for Schnorr multisig
+     Nit in net_processing.cpp
+     Backport PR14897, PR15834 and PR16196
+     Merge #15149: gui: Show current wallet name in window title
+     Update timings.json
+     Various nits in net_processing.cpp
+#    p2p: Clarify control flow in ProcessMessage()
+#    Backport of Core PR14728: fix uninitialized read when stringifying an addrLocal
+     previous link was dead
+     Merge #14784: qt: Use WalletModel* instead of the wallet name as map key
+     test: Fix test failures
+     qa: fix deprecated log.warn in feature_dbcrash test
+     [tests] fix block time in feature_pruning.py
+     [tests] make pruning test faster
+     [tests] style fixes in feature_pruning.py
+     [test] Rename rpc_timewait to rpc_timeout
+     Minor improvements to add_nodes
+     qa: Extract rpc_timewait as test param
+     Fix copy in loop
+     Trivial: Corrected comment array name from pnSeeds6 to pnSeed6
+     Merge #13498: [wallet] Fixups from account API deprecation
+     Merge #12639: Reduce cs_main lock and avoid extra lookups of mapAddressBook in listunspent RPC
+     [wallet] [rpc] Remove getlabeladdress RPC
+     Fix wrong version in clang-format error message and update the doc
+     Merge #13138: [tests] Remove accounts from wallet_importprunedfunds.py
+     Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
+     Add test coverage for messages requesting invalid blocks
+     Drop IsLimited in favor of IsReachable
+#    Remove undue lock assertion in GuessVerificationProgess
+     Revert use of size_t in ParseParameters
+     Fixes broken link to disclosure policy
+     [tests] Remove 'account' API from wallet_listsinceblock
+     [tests] Remove 'account' API from wallet_basic
+     Move to clang format 8
+     Added support for -gravitonactivationtime to unit tests
+     [tests] Remove 'account' API from wallet_txn_doublespend
+     [tests] Remove 'account' API from wallet_txn_clone
+     [tests] Remove 'account' API from wallet_listtransactions
+     [tests] Remove 'account' API from wallet_keypool_topup
+     [tests] Remove 'account' API from wallet_import_rescan
+     Merge #13055: qt: Don't log to console by default
+     [cmake] Add comments to express what tests do.
+     [cmake] Remove useless copy of create_cache.py
+     [tests] Remove 'account' API from wallet_listreceivedby
+     Split out key-value parsing in ArgsManager into its own function
+     IsReachable is the inverse of IsLimited (DRY). Includes unit tests
+     Bump version to 0.20.8
+     [cmake] Use terminal when runnign integration tests
+     Rename GetLogger() to LogInstance()
+     Add missing parts from PR12954
+     Use RdSeed when available, and reduce RdRand load
+     Print to console by default when not run with -daemon
+     Improve formatting in rpcwallet.cpp
+#     Leftover from PR13423
+     Stop translating command line options
+     minor refactor to use ranged_for, auto and const-ness
+     test: Make bloom tests deterministic
+     qa: Increase includeconf test coverage
+     Bump minimum Qt version to 5.5.1
+     Add BitcoinApplication & RPCConsole tests
+     Kill AddKeypathToMap
+
 20.7 
       Update manpages for 0.20.7 release
       Update chainparams
@@ -16,7 +239,7 @@
       [CMAKE] Migrate linux gitian build to cmake and ninja
       Allow to pass the chain parameters when formatting a bitcoin URI
       Move BitcoinApplication to header so it can be tested
-      Don't use systray icon on inappropriate systems
+#     Don't use systray icon on inappropriate systems
       add a couple more Schnorr checkmultisig tests
       Make SigningProvider expose key origin information
       [MOVEONLY] Move ParseHDKeypath to utilstrencodings
@@ -27,7 +250,7 @@
       qt: All tray menu actions call showNormalIfMinimized
       qt: Use GUIUtil::bringToFront where possible
       qt: Add GUIUtil::bringToFront
-      Remove obj_c for macOS Dock icon menu
+#     Remove obj_c for macOS Dock icon menu
       Use Qt signal for macOS Dock icon click event
       [CMAKE] Use a NSIS custom template
       Test that a non-witness script as witness utxo is not signed
@@ -35,16 +258,16 @@
       Use 71 byte signature for DUMMY_SIGNATURE_CREATOR
       Always create 70 byte signatures with low R values
       Additional sanity checks in SignPSBTInput
-      Introduce a maximum size for locators.
+#     Introduce a maximum size for locators.
       test: Add tests for RPC help
       Remove obj_c for macOS Dock icon setting
       gui: Favor macOS show / hide action in dock menu
       Add missing braces on key.cpp
       qa: Premine to deterministic address with -disablewallet
       RPC: Add new getzmqnotifications method.
-      Break circular dependency: init -> * -> init by extracting shutdown.h
-      Drop unused init.h includes
-      Add Windows shutdown handler
+#     Break circular dependency: init -> * -> init by extracting shutdown.h
+#     Drop unused init.h includes
+#     Add Windows shutdown handler
       Add checkpoints for graviton upgrade
       [github-release] Add optional param to specify release notes path
       Fix merging of global unknown data in PSBTs

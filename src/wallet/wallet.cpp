@@ -4926,7 +4926,8 @@ SecureVector CWallet::getWords() const
 {
   SecureVector words;
   LOCK(cs_wallet);
-  auto [hdChainDec, hdChainEnc] = GetHDChains();
+  auto [hdChainDec, hdChainDec] = GetHDChains();
+  (void)hdChainEnc;
   hdChainDec.GetMnemonic(words);
   return words;
 }
