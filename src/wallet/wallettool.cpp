@@ -153,6 +153,7 @@ static void WalletShowInfo(CWallet *wallet_instance) {
 
   if (decrypt) {
     auto [hdChainDec, hdChainEnc] = wallet_instance->GetHDChains();
+    (void)hdChainEnc;
     SecureVector seed = hdChainDec.GetSeed();
     SecureString words;
     if (!wallet_instance->GetMnemonic(hdChainDec, words)) {
