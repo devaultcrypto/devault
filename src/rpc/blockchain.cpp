@@ -1069,7 +1069,7 @@ static UniValue getdifficulties(const Config &config, const JSONRPCRequest &requ
     int start_time = 0;
     int sum_time_diff = 0;
     int sq_time = 0;
-    int prev_time;
+    int prev_time=0;
     double av_diff=0;
     double diff=0;
     for (int i=nHeight;i<=nLastHeight;i++) {
