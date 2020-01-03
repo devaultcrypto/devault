@@ -94,8 +94,6 @@ const char *const BITCOIN_CONF_FILENAME = "devault.conf";
 
 ArgsManager gArgs;
 
-CTranslationInterface translationInterface;
-
 /**
  * Interpret a string argument as a boolean.
  *

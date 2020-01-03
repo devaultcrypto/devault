@@ -179,14 +179,14 @@ endfunction(set_memcheck_test_properties)
 FOREACH(tst ${UNIT_CTESTS})
   add_executable(tb_${tst} ${tst}_tests.cpp)
   target_include_directories(tb_${tst}  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(tb_${tst} rpcclient wallet server devaultconsensus common unit server)
+  target_link_libraries(tb_${tst} rpcclient wallet server devaultconsensus common unit util unit)
   add_test(NAME test_${tst} COMMAND tb_${tst})
 ENDFOREACH(tst ${UNIT_CTESTS})
 
 FOREACH(tst ${UNIT_STESTS})
   add_executable(tb_${tst} ${tst}_tests.cpp)
   target_include_directories(tb_${tst}  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(tb_${tst} common unit)
+  target_link_libraries(tb_${tst} rpcclient server devaultconsensus common unit util unit) # weird circular dependency
   add_test(NAME tb_${tst} COMMAND tb_${tst})
 ENDFOREACH(tst ${UNIT_STESTS})
 

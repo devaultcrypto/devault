@@ -29,6 +29,8 @@ static const int DEFAULT_HTTP_CLIENT_TIMEOUT = 900;
 static const bool DEFAULT_NAMED = false;
 static const int CONTINUE_EXECUTION = -1;
 
+const std::function<std::string(const char *)> G_TRANSLATION_FUN = nullptr;
+
 static void SetupCliArgs() {
     const auto defaultBaseParams =
         CreateBaseChainParams(CBaseChainParams::MAIN);
