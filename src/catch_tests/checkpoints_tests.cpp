@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(sanity) {
   const auto params = CreateChainParams(CBaseChainParams::MAIN);
   const CCheckpointData &checkpoints = params->Checkpoints();
   uint256 p5000 = uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988db13888907");
-  uint256 p0 = uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90");
+  //uint256 p0 = uint256S("0000000038e62464371566f6a8d35c01aa54a7da351b2dbf85d92f30357f3a90");
   uint256 p1 = uint256S("173c13a23fed27056b5a76912a27d62064cb988");
   uint256 p2 = uint256S("38e62464371566f6a8d35c01aa54a7da351b2dbf85d92f");
 

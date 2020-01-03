@@ -23,7 +23,6 @@
 
 #define BOOST_TEST_MESSAGE(a) std::cout << a
 
-#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 /**

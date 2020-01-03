@@ -16,6 +16,7 @@
 #include <util/strencodings.h>
 
 #include <vector>
+#include <iostream>
 
 #include "catch_unit.h"
 

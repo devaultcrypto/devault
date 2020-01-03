@@ -2,8 +2,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <catch_tests/test_bitcoin.h>
-
 #include <script/script_flags.h>
 #include <script/sigencoding.h>
 

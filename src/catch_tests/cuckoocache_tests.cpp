@@ -8,6 +8,7 @@
 #include <catch_tests/test_rand.h>
 #include <shared_mutex>
 #include <thread>
+#include <deque>
 #include "catch_unit.h"
 
 /** Test Suite for CuckooCache

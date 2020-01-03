@@ -4,6 +4,7 @@
 
 #include <prevector.h>
 #include <vector>
+#include <iostream>
 
 #include <reverse_iterator.h>
 #include <serialize.h>

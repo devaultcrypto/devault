@@ -7,6 +7,7 @@
 #include "catch_unit.h"
 
 #include <set>
+#include <map>
 #include <vector>
 
 // BOOST_AUTO_TEST_SUITE(rwcollection_tests);
