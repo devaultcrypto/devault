@@ -233,6 +233,7 @@ const char *GetOpName(opcodetype opcode) {
         case OP_CHECKDATASIGVERIFY:
             return "OP_CHECKDATASIGVERIFY";
 
+
         // expansion
         case OP_NOP1:
             return "OP_NOP1";

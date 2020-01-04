@@ -9,7 +9,7 @@
 
 
 #include <chainparams.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <dstencode.h>

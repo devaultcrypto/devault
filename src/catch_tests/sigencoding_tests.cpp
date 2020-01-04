@@ -294,6 +294,7 @@ TEST_CASE("checkpubkeyencoding_test") {
   }
 }
 
+#ifdef HAS_SCHNORR
 TEST_CASE("checkschnorr_test") {
   // tests using 64 byte sigs (+hashtype byte where relevant)
   valtype Zero64{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -313,7 +314,6 @@ TEST_CASE("checkschnorr_test") {
     uint32_t flags = lcg.next();
 
     const bool hasForkId = (flags & SCRIPT_ENABLE_SIGHASH_FORKID) != 0;
-    const bool hasSchnorr = (flags & SCRIPT_ENABLE_SCHNORR) != 0;
     const bool hasStricts = (flags & (SCRIPT_VERIFY_DERSIG | SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_STRICTENC)) != 0;
 
     ScriptError err = ScriptError::OK;
@@ -325,20 +325,15 @@ TEST_CASE("checkschnorr_test") {
     BOOST_CHECK_EQUAL(!CheckTransactionECDSASignatureEncoding(DER65_hb, flags, &err), hasSchnorr);
     if (hasSchnorr) { BOOST_CHECK_EQUAL(err, ScriptError::SIG_BADLENGTH); }
 
-    if (hasSchnorr) {
-      BOOST_CHECK(CheckDataSignatureEncoding(Zero64, flags, &err));
-      BOOST_CHECK(CheckTransactionSignatureEncoding(Zero65_hb, flags, &err));
-      BOOST_CHECK(!CheckTransactionECDSASignatureEncoding(Zero65_hb, flags, &err));
-      BOOST_CHECK_EQUAL(err, ScriptError::SIG_BADLENGTH);
-    } else {
-      BOOST_CHECK_EQUAL(!CheckDataSignatureEncoding(Zero64, flags, &err), hasStricts);
+       BOOST_CHECK_EQUAL(!CheckDataSignatureEncoding(Zero64, flags, &err), hasStricts);
       if (hasStricts) { BOOST_CHECK_EQUAL(err, ScriptError::SIG_DER); }
       BOOST_CHECK_EQUAL(!CheckTransactionSignatureEncoding(Zero65_hb, flags, &err), hasStricts);
       if (hasStricts) { BOOST_CHECK_EQUAL(err, ScriptError::SIG_DER); }
       BOOST_CHECK_EQUAL(!CheckTransactionECDSASignatureEncoding(Zero65_hb, flags, &err), hasStricts);
       if (hasStricts) { BOOST_CHECK_EQUAL(err, ScriptError::SIG_DER); }
-    }
+    
   }
 }
+#endif
 
 // BOOST_AUTO_TEST_SUITE_END()

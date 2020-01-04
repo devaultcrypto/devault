@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 // (based on key_tests.cpp)
 
-#include <cashaddrenc.h>
 #include <dstencode.h>
 #include <key.h>
 #include <script/sigcache.h>

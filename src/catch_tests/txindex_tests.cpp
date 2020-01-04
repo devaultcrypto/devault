@@ -58,7 +58,7 @@ TEST_CASE("txindex_initial_sync") {
 
   // Check that new transactions in new blocks make it into the index.
   for (int i = 0; i < 10; i++) {
-    CScript coinbase_script_pub_key = GetScriptForDestination(setup.coinbaseKey.GetPubKey().GetID());
+    CScript coinbase_script_pub_key = GetScriptForDestination(setup.coinbaseKey.GetPubKey().GetKeyID());
     std::vector<CMutableTransaction> no_txns;
     const CBlock &block = setup.CreateAndProcessBlock(no_txns, coinbase_script_pub_key);
     const CTransaction &txn = *block.vtx[0];
