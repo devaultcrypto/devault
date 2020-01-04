@@ -9,7 +9,7 @@
 #include <arith_uint256.h>
 #include <blockindexworkcomparator.h>
 #include <blockvalidity.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chainparams.h>
 #include <checkpoints.h>
 #include <checkqueue.h>
@@ -336,37 +336,10 @@ std::string FormatStateMessage(const CValidationState &state) {
         state.GetRejectCode());
 }
 
-static bool IsGreatWallEnabledForCurrentBlock(const Config &config)
+static bool IsBLSEnabledForCurrentBlock(const Config &config)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
-    return IsGreatWallEnabled(config, chainActive.Tip());
-}
-
-// Command-line argument "-replayprotectionactivationtime=<timestamp>" will
-// cause the node to switch to replay protected SigHash ForkID value when the
-// median timestamp of the previous 11 blocks is greater than or equal to
-// <timestamp>. Defaults to the pre-defined timestamp when not set.
-static bool IsReplayProtectionEnabled(const Config &config,
-                                      int64_t nMedianTimePast) {
-    return nMedianTimePast >=
-           gArgs.GetArg(
-               "-replayprotectionactivationtime",
-               config.GetChainParams().GetConsensus().greatWallActivationTime);
-}
-
-static bool IsReplayProtectionEnabled(const Config &config,
-                                      const CBlockIndex *pindexPrev) {
-    if (pindexPrev == nullptr) {
-        return false;
-    }
-
-    return IsReplayProtectionEnabled(config, pindexPrev->GetMedianTimePast());
-}
-
-static bool IsReplayProtectionEnabledForCurrentBlock(const Config &config)
-    EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-    AssertLockHeld(cs_main);
-    return IsReplayProtectionEnabled(config, chainActive.Tip());
+    return IsBLSEnabled(config, chainActive.Tip());
 }
 
 // Used to avoid mempool polluting consensus critical paths if CCoinsViewMempool
@@ -663,11 +636,8 @@ static bool AcceptToMemoryPoolWorker(
 
         // Set extraFlags as a set of flags that needs to be activated.
         uint32_t extraFlags = SCRIPT_VERIFY_NONE;
-        if (IsReplayProtectionEnabledForCurrentBlock(config)) {
-            extraFlags |= SCRIPT_ENABLE_REPLAY_PROTECTION;
-        }
 
-        if (IsGreatWallEnabledForCurrentBlock(config)) {
+        if (IsBLSEnabledForCurrentBlock(config)) {
             extraFlags |= SCRIPT_ENABLE_SCHNORR;
             extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
         }
@@ -1632,7 +1602,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // transactions using the OP_CHECKDATASIG opcode and it's verify
     // alternative. We also start enforcing push only signatures and
     // clean stack.
-    if (IsGreatWallEnabled(config, pChainTip)) {
+    if (IsBLSEnabled(config, pChainTip)) {
         flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
         flags |= SCRIPT_VERIFY_SIGPUSHONLY;
         flags |= SCRIPT_VERIFY_CLEANSTACK;
@@ -1643,14 +1613,8 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // 65/64-byte Schnorr signatures in CHECKSIG and CHECKDATASIG respectively,
     // and their verify variants. We also stop accepting 65 byte signatures in
     // CHECKMULTISIG and its verify variant.
-    if (IsGreatWallEnabledForCurrentBlock(config)) {
+    if (IsBLSEnabledForCurrentBlock(config)) {
         flags |= SCRIPT_ENABLE_SCHNORR;
-    }
-
-    // We make sure this node will have replay protection during the next hard
-    // fork.
-    if (IsReplayProtectionEnabled(config, pChainTip)) {
-        flags |= SCRIPT_ENABLE_REPLAY_PROTECTION;
     }
 
     return flags;

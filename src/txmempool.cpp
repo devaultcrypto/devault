@@ -5,7 +5,7 @@
 
 #include <txmempool.h>
 
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chainparams.h> // for GetConsensus.
 #include <clientversion.h>
 #include <config.h>

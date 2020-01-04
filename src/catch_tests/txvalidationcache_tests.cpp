@@ -149,7 +149,7 @@ TEST_CASE("checkinputs_test, TestChain100Setup") {
 
   CScript p2pk_scriptPubKey = CScript() << ToByteVector(setup.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
   CScript p2sh_scriptPubKey = GetScriptForDestination(CScriptID(p2pk_scriptPubKey));
-  CScript p2pkh_scriptPubKey = GetScriptForDestination(setup.coinbaseKey.GetPubKey().GetID());
+  CScript p2pkh_scriptPubKey = GetScriptForDestination(setup.coinbaseKey.GetPubKey().GetKeyID());
 
   CBasicKeyStore keystore;
   keystore.AddKey(setup.coinbaseKey);

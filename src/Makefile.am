@@ -116,6 +116,7 @@ BITCOIN_CORE_H = \
 	ban.h \
 	banman.h \
   benchmark.h \
+  bls/bls_functions.h \
   bloom.h \
   blockencodings.h \
   blockfileinfo.h \
@@ -124,7 +125,6 @@ BITCOIN_CORE_H = \
   blockstatus.h \
   blockvalidity.h \
   cashaddr.h \
-  cashaddrenc.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \
@@ -165,6 +165,7 @@ BITCOIN_CORE_H = \
   interfaces/node.h \
   interfaces/wallet.h \
   key.h \
+  keyid.h \
   keystore.h \
   dbwrapper.h \
   limitedmap.h \
@@ -214,6 +215,7 @@ BITCOIN_CORE_H = \
   support/events.h \
   support/lockedpool.h \
   sync.h \
+  testaddr.h \
   threadsafety.h \
   threadinterrupt.h \
   timedata.h \
@@ -239,6 +241,7 @@ BITCOIN_CORE_H = \
   wallet/hdchain.h \
   wallet/db.h \
   wallet/dictionary.h \
+  wallet/extkey.h \
   wallet/finaltx.h \
   wallet/rpcdump.h \
   wallet/fees.h \
@@ -351,6 +354,7 @@ libbitcoin_wallet_a_SOURCES = \
   wallet/hdchain.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
+  wallet/extkey.cpp \
   wallet/finaltx.cpp \
   wallet/fees.cpp \
   wallet/init.cpp \
@@ -464,7 +468,6 @@ libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_common_a_SOURCES = \
   cashaddr.cpp \
-  cashaddrenc.cpp \
   chainparams.cpp \
   config.cpp \
   coins.cpp \

@@ -3,7 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <sweep.h>
 #include <ui_sweep.h>
 

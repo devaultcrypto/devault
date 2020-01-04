@@ -26,7 +26,6 @@
 #include <validation.h>
 #include <init.h> // for ShutdownRequested
 
-#include <cashaddrenc.h>
 #include <dstencode.h>
 #include <chainparams.h>
 /**
