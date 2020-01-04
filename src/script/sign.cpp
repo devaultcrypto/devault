@@ -57,7 +57,7 @@ static bool SignN(const std::vector<valtype> &multisigdata,
     for (size_t i = 1; i < multisigdata.size() - 1 && nSigned < nRequired;
          i++) {
         const valtype &pubkey = multisigdata[i];
-        CKeyID keyID = CPubKey(pubkey).GetID();
+        CKeyID keyID = CPubKey(pubkey).GetKeyID();
         if (Sign1(keyID, creator, scriptCode, ret)) {
             ++nSigned;
         }
@@ -91,7 +91,7 @@ static bool SignStep(const BaseSignatureCreator &creator,
         case TX_NULL_DATA:
             return false;
         case TX_PUBKEY:
-            keyID = CPubKey(vSolutions[0]).GetID();
+            keyID = CPubKey(vSolutions[0]).GetKeyID();
             return Sign1(keyID, creator, scriptPubKey, ret);
         case TX_PUBKEYHASH: {
             keyID = CKeyID(uint160(vSolutions[0]));
