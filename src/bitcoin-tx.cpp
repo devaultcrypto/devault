@@ -4,7 +4,7 @@
 
 #include <config/bitcoin-config.h>
 
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chainparams.h>
 #include <clientversion.h>
 #include <coins.h>

@@ -20,6 +20,7 @@ add_library(wallet
   analyzecoins.cpp
   crypter.cpp
   db.cpp
+  extkey.cpp
   fees.cpp
   finaltx.cpp
   init.cpp

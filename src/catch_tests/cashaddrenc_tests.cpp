@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <cashaddr.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chainparams.h>
 #include <random.h>
 #include <catch_tests/test_rand.h>
@@ -12,6 +12,8 @@
 #include <util/strencodings.h>
 
 #include "catch_unit.h"
+
+#include <testaddr.h>
 
 namespace {
 

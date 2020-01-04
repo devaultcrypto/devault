@@ -6,6 +6,8 @@
 
 // Non-essential consensus functions used in RPC commands and possible QT wallet
 
+#pragma once
+
 #include <coins.h>
 #include <primitives/transaction.h>
 #include <script/script.h>
@@ -14,7 +16,10 @@
 
 struct Amount;
 /**
- * Calculate the difficulty for a given block index.
+ * Get the required difficulty of the next block w/r/t the given block index.
+ *
+ * @return A floating point number that is a multiple of the main net minimum
+ * difficulty (4295032833 hashes).
  */
 double GetDifficulty(const CBlockIndex *blockindex);
 

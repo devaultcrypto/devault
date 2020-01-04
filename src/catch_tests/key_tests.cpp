@@ -4,7 +4,6 @@
 
 #include <key.h>
 
-#include <cashaddrenc.h>
 #include <chainparams.h>
 #include <config.h>
 #include <dstencode.h>
@@ -101,9 +100,9 @@ TEST_CASE("key_test1") {
   const Config &config = GetConfig();
   const CChainParams &chainParams = config.GetChainParams();
 
-  BOOST_CHECK(DecodeDestination(addr1, chainParams) == CTxDestination(pubkey1.GetID()));
-  BOOST_CHECK(DecodeDestination(addr2, chainParams) == CTxDestination(pubkey2.GetID()));
-  BOOST_CHECK(DecodeDestination(addr3, chainParams) == CTxDestination(pubkey3.GetID()));
+  BOOST_CHECK(DecodeDestination(addr1, chainParams) == CTxDestination(pubkey1.GetKeyID()));
+  BOOST_CHECK(DecodeDestination(addr2, chainParams) == CTxDestination(pubkey2.GetKeyID()));
+  BOOST_CHECK(DecodeDestination(addr3, chainParams) == CTxDestination(pubkey3.GetKeyID()));
 
   for (int n = 0; n < 16; n++) {
     std::string strMsg = strprintf("Very secret message %i: 11", n);
@@ -148,41 +147,13 @@ TEST_CASE("key_test1") {
     BOOST_CHECK(rkey2 == pubkey2);
     BOOST_CHECK(rkey3 == pubkey3);
 
-    // Schnorr signatures
-
-    std::vector<uint8_t> ssign1, ssign2, ssign3;
-
-    BOOST_CHECK(key1.SignSchnorr(hashMsg, ssign1));
-    BOOST_CHECK(key2.SignSchnorr(hashMsg, ssign2));
-    BOOST_CHECK(key3.SignSchnorr(hashMsg, ssign3));
-
-    BOOST_CHECK(pubkey1.VerifySchnorr(hashMsg, ssign1));
-    BOOST_CHECK(!pubkey1.VerifySchnorr(hashMsg, ssign2));
-    BOOST_CHECK(!pubkey1.VerifySchnorr(hashMsg, ssign3));
-
-    BOOST_CHECK(!pubkey2.VerifySchnorr(hashMsg, ssign1));
-    BOOST_CHECK(pubkey2.VerifySchnorr(hashMsg, ssign2));
-    BOOST_CHECK(!pubkey2.VerifySchnorr(hashMsg, ssign3));
-
-    BOOST_CHECK(!pubkey3.VerifySchnorr(hashMsg, ssign1));
-    BOOST_CHECK(!pubkey3.VerifySchnorr(hashMsg, ssign2));
-    BOOST_CHECK(pubkey3.VerifySchnorr(hashMsg, ssign3));
-
     // Extract r value from ECDSA and Schnorr. Make sure they are
     // distinct (nonce reuse would be dangerous and can leak private key).
     std::vector<uint8_t> rE1 = get_r_ECDSA(sign1);
-    BOOST_CHECK(ssign1.size() == 64);
-    std::vector<uint8_t> rS1(ssign1.begin(), ssign1.begin() + 32);
     BOOST_CHECK(rE1.size() == 32);
-    BOOST_CHECK(rS1.size() == 32);
-    BOOST_CHECK(rE1 != rS1);
 
     std::vector<uint8_t> rE2 = get_r_ECDSA(sign2);
-    BOOST_CHECK(ssign2.size() == 64);
-    std::vector<uint8_t> rS2(ssign2.begin(), ssign2.begin() + 32);
     BOOST_CHECK(rE2.size() == 32);
-    BOOST_CHECK(rS2.size() == 32);
-    BOOST_CHECK(rE2 != rS2);
   }
 
   // test deterministic signing expected values
@@ -201,12 +172,6 @@ TEST_CASE("key_test1") {
   BOOST_CHECK(key3.SignCompact(hashMsg, detsigc));
 
   BOOST_CHECK(key2.SignCompact(hashMsg, detsig));
-
-  // Schnorr
-  BOOST_CHECK(key1.SignSchnorr(hashMsg, detsig));
-  BOOST_CHECK(key3.SignSchnorr(hashMsg, detsigc));
-
-  BOOST_CHECK(key2.SignSchnorr(hashMsg, detsig));
 }
 
 // BOOST_AUTO_TEST_SUITE_END()
