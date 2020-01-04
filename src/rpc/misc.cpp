@@ -5,7 +5,7 @@
 
 #include <rpc/util.h>
 #include <core_io.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <clientversion.h>
 #include <config.h>
 #include <chain.h>

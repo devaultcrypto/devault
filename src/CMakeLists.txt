@@ -399,7 +399,6 @@ add_subdirectory(devault)
 add_library(common
   ${HEADERS}
 	cashaddr.cpp
-	cashaddrenc.cpp
 	chainparams.cpp
 	config.cpp
 	consensus/merkle.cpp
