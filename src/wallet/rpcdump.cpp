@@ -429,7 +429,7 @@ UniValue importpubkey(const Config &config, const JSONRPCRequest &request) {
     {
         LOCK2(cs_main, pwallet->cs_wallet);
 
-        ImportAddress(pwallet, pubKey.GetID(), strLabel);
+        ImportAddress(pwallet, pubKey.GetKeyID(), strLabel);
         ImportScript(pwallet, GetScriptForRawPubKey(pubKey), strLabel, false);
     }
     if (fRescan) {
