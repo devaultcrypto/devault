@@ -171,7 +171,7 @@ static UniValue verifymessage(const Config &config,
         return false;
     }
 
-    return (pubkey.GetID() == *keyID);
+    return (pubkey.GetKeyID() == *keyID);
 }
 
 static UniValue signmessagewithprivkey(const Config &config,

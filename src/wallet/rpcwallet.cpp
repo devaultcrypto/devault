@@ -243,7 +243,7 @@ static UniValue getnewaddress(const Config &config,
             RPC_WALLET_KEYPOOL_RAN_OUT,
             "Error: Keypool ran out, please call keypoolrefill first");
     }
-    CKeyID keyID = newKey.GetID();
+    CKeyID keyID = newKey.GetKeyID();
 
     pwallet->SetAddressBook(keyID, label, "receive");
 
@@ -329,7 +329,7 @@ static UniValue getrawchangeaddress(const Config &config,
 
     reservekey.KeepKey();
 
-    CKeyID keyID = vchPubKey.GetID();
+    CKeyID keyID = vchPubKey.GetKeyID();
 
     return EncodeDestination(keyID);
 }
@@ -610,7 +610,7 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
         std::string strSecret = request.params[0].get_str();
         CKey key = DecodeSecret(strSecret);
-        //std::string p = EncodeDestination(key.GetPubKey().GetID());
+        //std::string p = EncodeDestination(key.GetPubKey().GetKeyID());
         
         if (!key.IsValid()) { 
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");

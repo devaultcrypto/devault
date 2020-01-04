@@ -193,7 +193,7 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, bool 
       hdChainDec.DeriveChildExtKey(nAccountIndex, internal, nChildIndex, childKey);
       // increment childkey index
       nChildIndex++;
-    } while (HaveKey(childKey.key.GetPubKey().GetID()));
+    } while (HaveKey(childKey.key.GetPubKey().GetKeyID()));
     secret = childKey.key;
   
     CPubKey pubkey = secret.GetPubKey();
@@ -201,7 +201,7 @@ std::pair<CPubKey,CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, bool 
     assert(ok);
   
     // store metadata
-    mapKeyMetadata[pubkey.GetID()] = metadata;
+    mapKeyMetadata[pubkey.GetKeyID()] = metadata;
     UpdateTimeFirstKey(metadata.nCreateTime);
   
     if (internal) {
@@ -227,7 +227,7 @@ bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
     }
 
     LOCK(cs_wallet);
-    return WalletBatch(*database).WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
+    return WalletBatch(*database).WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetKeyID()]);
 }
 
 void CWallet::LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &meta) {
@@ -2896,7 +2896,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
                 return false;
             }
 
-            scriptChange = GetScriptForDestination(vchPubKey.GetID());
+            scriptChange = GetScriptForDestination(vchPubKey.GetKeyID());
         }
         CTxOut change_prototype_txout(Amount::zero(), scriptChange);
         size_t change_prototype_size =
@@ -3420,7 +3420,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     // 6. Notify
 
     
-    CTxDestination source = key.GetPubKey().GetID();
+    CTxDestination source = key.GetPubKey().GetKeyID();
     CScript coinscript =  GetScriptForDestination(source);
 
     if (::IsMine(*this, coinscript)) {
@@ -3469,7 +3469,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     }
 
     // vouts to the payees
-    CTxDestination recipient = newKey.GetID();
+    CTxDestination recipient = newKey.GetKeyID();
     CScript scriptPub = GetScriptForDestination(recipient);
     CTxOut txout(nAmount, scriptPub);
     // add for sizing, replace later after fee subtracted
@@ -3767,7 +3767,7 @@ static void LoadReserveKeysToSet(std::set<CKeyID>& setAddress, const std::set<in
         if (!batch.ReadPool(id, keypool))
             throw std::runtime_error(std::string(__func__) + ": read failed");
         assert(keypool.vchPubKey.IsValid());
-        CKeyID keyID = keypool.vchPubKey.GetID();
+        CKeyID keyID = keypool.vchPubKey.GetKeyID();
         setAddress.insert(keyID);
     }
 }
@@ -3797,12 +3797,12 @@ void CWallet::LoadKeyPool(int64_t nIndex, const CKeyPool &keypool) {
         setExternalKeyPool.insert(nIndex);
     }
     m_max_keypool_index = std::max(m_max_keypool_index, nIndex);
-    m_pool_key_to_index[keypool.vchPubKey.GetID()] = nIndex;
+    m_pool_key_to_index[keypool.vchPubKey.GetKeyID()] = nIndex;
 
     // If no metadata exists yet, create a default with the pool key's
     // creation time. Note that this may be overwritten by actually
     // stored metadata for that key later, which is fine.
-    CKeyID keyid = keypool.vchPubKey.GetID();
+    CKeyID keyid = keypool.vchPubKey.GetKeyID();
     if (mapKeyMetadata.count(keyid) == 0) {
         mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
     }
@@ -3866,7 +3866,7 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize) {
         } else {
             setExternalKeyPool.insert(index);
         }
-        m_pool_key_to_index[pubkey.GetID()] = index;
+        m_pool_key_to_index[pubkey.GetKeyID()] = index;
 
         timer.stop();
         double dProgress = (100.f * count)/ (missingExternal + missingInternal);
@@ -3938,7 +3938,7 @@ void CWallet::ReserveKeyFromKeyPool(int64_t &nIndex, CKeyPool &keypool,
     if (!batch.ReadPool(nIndex, keypool)) {
         throw std::runtime_error(std::string(__func__) + ": read failed");
     }
-    if (!HaveKey(keypool.vchPubKey.GetID())) {
+    if (!HaveKey(keypool.vchPubKey.GetKeyID())) {
         throw std::runtime_error(std::string(__func__) +
                                  ": unknown key in key pool");
     }
@@ -3948,7 +3948,7 @@ void CWallet::ReserveKeyFromKeyPool(int64_t &nIndex, CKeyPool &keypool,
     }
 
     assert(keypool.vchPubKey.IsValid());
-    m_pool_key_to_index.erase(keypool.vchPubKey.GetID());
+    m_pool_key_to_index.erase(keypool.vchPubKey.GetKeyID());
     LogPrintf("keypool reserve %d\n", nIndex);
 }
 
@@ -3968,7 +3968,7 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal, const CPubKey &pubkey) {
         } else {
             setExternalKeyPool.insert(nIndex);
         }
-        m_pool_key_to_index[pubkey.GetID()] = nIndex;
+        m_pool_key_to_index[pubkey.GetKeyID()] = nIndex;
     }
 
     LogPrintf("keypool return %d\n", nIndex);
@@ -4274,7 +4274,7 @@ void CWallet::MarkReserveKeysAsUsed(int64_t keypool_id) {
         CKeyPool keypool;
         if (batch.ReadPool(index, keypool)) {
             // TODO: This should be unnecessary
-            m_pool_key_to_index.erase(keypool.vchPubKey.GetID());
+            m_pool_key_to_index.erase(keypool.vchPubKey.GetKeyID());
         }
         batch.ErasePool(index);
         it = setKeyPool->erase(it);
@@ -4906,7 +4906,7 @@ bool CWallet::LoadHDPubKey(const CHDPubKey &hdPubKey)
 {
     AssertLockHeld(cs_wallet);
 
-    mapHdPubKeys[hdPubKey.extPubKey.pubkey.GetID()] = hdPubKey;
+    mapHdPubKeys[hdPubKey.extPubKey.pubkey.GetKeyID()] = hdPubKey;
     return true;
 }
 
@@ -4921,18 +4921,18 @@ bool CWallet::AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal)
     hdPubKey.extPubKey = extPubKey;
     hdPubKey.hdchainID = hdChainCurrent.GetID();
     hdPubKey.nChangeIndex = fInternal ? 1 : 0;
-    mapHdPubKeys[extPubKey.pubkey.GetID()] = hdPubKey;
+    mapHdPubKeys[extPubKey.pubkey.GetKeyID()] = hdPubKey;
 
     // check if we need to remove from watch-only
     CScript script;
-    script = GetScriptForDestination(extPubKey.pubkey.GetID());
+    script = GetScriptForDestination(extPubKey.pubkey.GetKeyID());
     if (HaveWatchOnly(script))
         RemoveWatchOnly(script);
     script = GetScriptForRawPubKey(extPubKey.pubkey);
     if (HaveWatchOnly(script))
         RemoveWatchOnly(script);
 
-   return WalletBatch(*database).WriteHDPubKey(hdPubKey, mapKeyMetadata[extPubKey.pubkey.GetID()]);
+   return WalletBatch(*database).WriteHDPubKey(hdPubKey, mapKeyMetadata[extPubKey.pubkey.GetKeyID()]);
 }
 
 CHDPubKey CWallet::AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInternal)
@@ -4946,11 +4946,11 @@ CHDPubKey CWallet::AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInter
     hdPubKey.extPubKey = extPubKey;
     hdPubKey.hdchainID = hdChainCurrent.GetID();
     hdPubKey.nChangeIndex = fInternal ? 1 : 0;
-    mapHdPubKeys[extPubKey.pubkey.GetID()] = hdPubKey;
+    mapHdPubKeys[extPubKey.pubkey.GetKeyID()] = hdPubKey;
     
     // check if we need to remove from watch-only
     CScript script;
-    script = GetScriptForDestination(extPubKey.pubkey.GetID());
+    script = GetScriptForDestination(extPubKey.pubkey.GetKeyID());
     if (HaveWatchOnly(script))
       RemoveWatchOnly(script);
     script = GetScriptForRawPubKey(extPubKey.pubkey);
@@ -4968,7 +4968,7 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
 
     // check if we need to remove from watch-only
     CScript script;
-    script = GetScriptForDestination(pubkey.GetID());
+    script = GetScriptForDestination(pubkey.GetKeyID());
     if (HaveWatchOnly(script))
         RemoveWatchOnly(script);
     script = GetScriptForRawPubKey(pubkey);

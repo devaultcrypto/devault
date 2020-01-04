@@ -233,7 +233,7 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
         return;
     }
 
-    if (!(CTxDestination(pubkey.GetID()) == destination)) {
+    if (!(CTxDestination(pubkey.GetKeyID()) == destination)) {
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(QString("<nobr>") +
                                     tr("Message verification failed.") +
