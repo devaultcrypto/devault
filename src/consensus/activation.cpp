@@ -10,13 +10,13 @@
 #include <consensus/params.h>
 #include <util/system.h>
 
-bool IsGreatWallEnabled(const Config &config, const CBlockIndex *pindexPrev) {
+bool IsBLSEnabled(const Config &config, const CBlockIndex *pindexPrev) {
   if (pindexPrev == nullptr) {
     return false;
   }
   
   return pindexPrev->GetMedianTimePast() >=
   gArgs.GetArg(
-               "-greatwallactivationtime",
-               config.GetChainParams().GetConsensus().greatWallActivationTime);
+               "-blsactivationtime",
+               config.GetChainParams().GetConsensus().blsActivationTime);
 }

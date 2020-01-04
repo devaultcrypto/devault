@@ -423,12 +423,12 @@ TEST_CASE("script_build") {
 
   std::vector<TestBuilder> tests;
 
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2PKH", 0)
                       .PushSigECDSA(keys.key1)
                       .Push(keys.pubkey1C));
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey2C.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey2C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2PKH, bad pubkey", 0)
                       .PushSigECDSA(keys.key2)
@@ -447,19 +447,19 @@ TEST_CASE("script_build") {
                       .DamagePush(10)
                       .SetScriptError(ScriptError::EVAL_FALSE));
 
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2SH(P2PKH)", SCRIPT_VERIFY_P2SH, true)
                       .PushSigECDSA(keys.key0)
                       .Push(keys.pubkey0)
                       .PushRedeem());
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2SH(P2PKH), bad sig but no VERIFY_P2SH", 0, true)
                       .PushSigECDSA(keys.key0)
                       .DamagePush(10)
                       .PushRedeem());
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2SH(P2PKH), bad sig", SCRIPT_VERIFY_P2SH, true)
                       .PushSigECDSA(keys.key0)
@@ -679,12 +679,12 @@ TEST_CASE("script_build") {
                       .SetScriptError(ScriptError::SIG_HASHTYPE));
 
   // Generate P2PKH tests for invalid SigHashType
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2PKH with invalid sighashtype", 0)
                       .PushSigECDSA(keys.key0, SigHashType(0x21), 32, 32, Amount::zero(), 0)
                       .Push(keys.pubkey0));
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "P2PKH with invalid sighashtype and STRICTENC", SCRIPT_VERIFY_STRICTENC)
                       .PushSigECDSA(keys.key0, SigHashType(0x21), 32, 32, Amount::zero(), SCRIPT_VERIFY_STRICTENC)
@@ -946,25 +946,25 @@ TEST_CASE("script_build") {
                       .Num(0)
                       .SetScriptError(ScriptError::SIG_DER));
 
-  // Misc ECDSA tests duplicated with Schnorr flag on
-  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "P2PK ECDSA with Schnorr flag on",
+  // Misc ECDSA tests duplicated with SCHNORR flag on
+  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "P2PK ECDSA with SCHNORR flag on",
                               SCRIPT_ENABLE_SCHNORR)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                              "P2PK, bad sig ECDSA with Schnorr flag on", SCRIPT_ENABLE_SCHNORR)
+                              "P2PK, bad sig ECDSA with SCHNORR flag on", SCRIPT_ENABLE_SCHNORR)
                       .PushSigECDSA(keys.key0)
                       .DamagePush(10)
                       .SetScriptError(ScriptError::EVAL_FALSE));
 
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
-                              "P2PKH  ECDSA with Schnorr flag on", SCRIPT_ENABLE_SCHNORR)
+                              "P2PKH  ECDSA with SCHNORR flag on", SCRIPT_ENABLE_SCHNORR)
                       .PushSigECDSA(keys.key1)
                       .Push(keys.pubkey1C));
 
   tests.push_back(TestBuilder(CScript() << OP_2 << ToByteVector(keys.pubkey0C) << ToByteVector(keys.pubkey1C)
                                         << ToByteVector(keys.pubkey2C) << OP_3 << OP_CHECKMULTISIG,
-                              "P2SH(2-of-3) ECDSA with Schnorr flag on", SCRIPT_VERIFY_P2SH | SCRIPT_ENABLE_SCHNORR,
+                              "P2SH(2-of-3) ECDSA with SCHNORR flag on", SCRIPT_VERIFY_P2SH | SCRIPT_ENABLE_SCHNORR,
                               true)
                       .Num(0)
                       .PushSigECDSA(keys.key1)
@@ -972,7 +972,7 @@ TEST_CASE("script_build") {
                       .PushRedeem());
 
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey2C) << OP_CHECKSIG,
-                              "LOW_S violating ECDSA with Schnorr flag on", SCRIPT_VERIFY_LOW_S | SCRIPT_ENABLE_SCHNORR)
+                              "LOW_S violating ECDSA with SCHNORR flag on", SCRIPT_VERIFY_LOW_S | SCRIPT_ENABLE_SCHNORR)
                       .PushSigECDSA(keys.key2, SigHashType(), 32, 33)
                       .SetScriptError(ScriptError::SIG_HIGH_S));
 
@@ -1365,7 +1365,7 @@ TEST_CASE("script_build") {
                       .SetScriptError(ScriptError::SIG_NULLFAIL));
 
   // Make sure P2PKH works with Schnorr
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "Schnorr P2PKH", SCRIPT_ENABLE_SCHNORR)
                       .PushSigSchnorr(keys.key1)
@@ -1382,14 +1382,14 @@ TEST_CASE("script_build") {
                               SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
                       .PushSigSchnorr(keys.key1, SigHashType(5))
                       .SetScriptError(ScriptError::SIG_HASHTYPE));
-  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetID()) << OP_EQUALVERIFY
+  tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
                               "Schnorr P2PKH with invalid sighashtype but no STRICTENC", SCRIPT_ENABLE_SCHNORR)
                       .PushSigSchnorr(keys.key0, SigHashType(0x21), Amount::zero(), 0)
                       .Push(keys.pubkey0));
   tests.push_back(
       TestBuilder(
-          CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetID()) << OP_EQUALVERIFY << OP_CHECKSIG,
+          CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY << OP_CHECKSIG,
           "Schnorr P2PKH with invalid sighashtype and STRICTENC", SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
           .PushSigSchnorr(keys.key0, SigHashType(0x21), Amount::zero(), SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
           .Push(keys.pubkey0)
@@ -1698,7 +1698,7 @@ TEST_CASE("script_combineSigs") {
   }
 
   CMutableTransaction txFrom =
-      BuildCreditingTransaction(GetScriptForDestination(keys[0].GetPubKey().GetID()), Amount::zero());
+      BuildCreditingTransaction(GetScriptForDestination(keys[0].GetPubKey().GetKeyID()), Amount::zero());
   CMutableTransaction txTo = BuildSpendingTransaction(CScript(), CTransaction(txFrom));
   CScript &scriptPubKey = txFrom.vout[0].scriptPubKey;
   CScript &scriptSig = txTo.vin[0].scriptSig;

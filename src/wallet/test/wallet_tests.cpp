@@ -715,7 +715,7 @@ public:
 TEST_CASE("ListCoins") {
     ListCoinsTestingSetup setup;
     std::string coinbaseAddress =
-        setup.coinbaseKey.GetPubKey().GetID().ToString();
+        setup.coinbaseKey.GetPubKey().GetKeyID().ToString();
 
     // Confirm ListCoins initially returns 1 coin grouped under coinbaseKey
     // address.

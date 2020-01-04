@@ -4,7 +4,7 @@
 
 #include <bloom.h>
 
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <clientversion.h>
 #include <consensus/merkle.h>
 #include <key.h>
@@ -110,7 +110,7 @@ TEST_CASE("bloom_create_insert_key") {
 
   CBloomFilter filter(2, 0.001, 0, BLOOM_UPDATE_ALL);
   filter.insert(vchPubKey);
-  uint160 hash = pubkey.GetID();
+  uint160 hash = pubkey.GetKeyID();
   filter.insert(std::vector<uint8_t>(hash.begin(), hash.end()));
 
   CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);

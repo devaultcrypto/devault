@@ -7,7 +7,7 @@
 
 #include <chainparams.h>
 #include <walletmodeltransaction.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <interfaces/wallet.h>
 
 #include <QObject>
