@@ -293,34 +293,6 @@ bool CPubKey::Derive(CPubKey &pubkeyChild, ChainCode &ccChild,
     return true;
 }
 
-void CExtPubKey::Encode(uint8_t code[BIP32_EXTKEY_SIZE]) const {
-    code[0] = nDepth;
-    memcpy(code + 1, vchFingerprint, 4);
-    code[5] = (nChild >> 24) & 0xFF;
-    code[6] = (nChild >> 16) & 0xFF;
-    code[7] = (nChild >> 8) & 0xFF;
-    code[8] = (nChild >> 0) & 0xFF;
-    memcpy(code + 9, chaincode.begin(), 32);
-    assert(pubkey.size() == CPubKey::COMPRESSED_PUBLIC_KEY_SIZE);
-    memcpy(code + 41, pubkey.begin(), CPubKey::COMPRESSED_PUBLIC_KEY_SIZE);
-}
-
-void CExtPubKey::Decode(const uint8_t code[BIP32_EXTKEY_SIZE]) {
-    nDepth = code[0];
-    memcpy(vchFingerprint, code + 1, 4);
-    nChild = (code[5] << 24) | (code[6] << 16) | (code[7] << 8) | code[8];
-    memcpy(chaincode.begin(), code + 9, 32);
-    pubkey.Set(code + 41, code + BIP32_EXTKEY_SIZE);
-}
-
-bool CExtPubKey::Derive(CExtPubKey &out, unsigned int _nChild) const {
-    out.nDepth = nDepth + 1;
-    CKeyID id = pubkey.GetKeyID();
-    memcpy(&out.vchFingerprint[0], &id, 4);
-    out.nChild = _nChild;
-    return pubkey.Derive(out.pubkey, out.chaincode, _nChild, chaincode);
-}
-
 bool CPubKey::CheckLowS(
     const boost::sliced_range<const std::vector<uint8_t>> &vchSig) {
     secp256k1_ecdsa_signature sig;

@@ -12,7 +12,7 @@
 
 // For ToString()
 #include <tinyformat.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 
 static const char DB_REWARD = 'R';
 

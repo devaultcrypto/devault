@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <chain.h>
 #include <chainparams.h> // for GetConsensus.
 #include <config.h>

@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
-#include <cashaddrenc.h> // GetAddrFromTxOut for debug
+#include <dstencode.h> // GetAddrFromTxOut for debug
 #include <chain.h>
 #include <chainparams.h>
 #include <config.h>
