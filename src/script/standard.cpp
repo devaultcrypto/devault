@@ -164,7 +164,7 @@ bool ExtractDestination(const CScript &scriptPubKey,
             return false;
         }
 
-        addressRet = pubKey.GetID();
+        addressRet = pubKey.GetKeyID();
         return true;
     }
     if (whichType == TX_PUBKEYHASH) {
@@ -201,7 +201,7 @@ bool ExtractDestinations(const CScript &scriptPubKey, txnouttype &typeRet,
                 continue;
             }
 
-            CTxDestination address = pubKey.GetID();
+            CTxDestination address = pubKey.GetKeyID();
             addressRet.push_back(address);
         }
 
