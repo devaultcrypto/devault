@@ -4,6 +4,7 @@
 #pragma once
 
 #include <key.h>
+#include <wallet/extkey.h>
 #include <wallet/mnemonic.h>
 #include <sync.h>
 #include <support/allocators/secure.h>

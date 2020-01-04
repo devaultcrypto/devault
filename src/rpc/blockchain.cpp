@@ -31,7 +31,7 @@
 #include <util/system.h>
 #include <validation.h>
 #include <warnings.h>
-#include <cashaddrenc.h>
+#include <dstencode.h>
 #include <init.h> // for ShutdownRequested
 #include <validationinterface.h>
 
