@@ -16,7 +16,7 @@ using valtype = std::vector<uint8_t>;
 static bool HaveKeys(const std::vector<valtype> &pubkeys,
                      const CKeyStore &keystore) {
     for (const valtype &pubkey : pubkeys) {
-        CKeyID keyID = CPubKey(pubkey).GetID();
+        CKeyID keyID = CPubKey(pubkey).GetKeyID();
         if (!keystore.HaveKey(keyID)) {
             return false;
         }
@@ -58,7 +58,7 @@ isminetype IsMine(const CKeyStore &keystore, const CScript &scriptPubKey,
         case TX_NULL_DATA:
             break;
         case TX_PUBKEY:
-            keyID = CPubKey(vSolutions[0]).GetID();
+            keyID = CPubKey(vSolutions[0]).GetKeyID();
             if (keystore.HaveKey(keyID)) return ISMINE_SPENDABLE;
             break;
         case TX_PUBKEYHASH:

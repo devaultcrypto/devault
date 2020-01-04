@@ -346,7 +346,7 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             ssValue >> keyMeta;
             wss.nKeyMeta++;
 
-            pwallet->LoadKeyMetadata(vchPubKey.GetID(), keyMeta);
+            pwallet->LoadKeyMetadata(vchPubKey.GetKeyID(), keyMeta);
         } else if (strType == "watchmeta") {
             CScript script;
             ssKey >> script;
@@ -811,7 +811,7 @@ bool WalletBatch::WriteCryptedHDChain(const CHDChain& chain)
 bool WalletBatch::WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<CKeyID, CKeyMetadata>& mapKeyMeta) {
     bool ok = true;
     for (const auto& k : hdPubKey) {
-        CKeyID id = k.extPubKey.pubkey.GetID();
+        CKeyID id = k.extPubKey.pubkey.GetKeyID();
         auto keyMeta = mapKeyMeta[id];
         if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
         if (!batch.Write(std::make_pair(std::string("hdpubkey"), k.extPubKey.pubkey), k, false)) ok = false;
