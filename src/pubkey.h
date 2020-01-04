@@ -10,6 +10,7 @@
 #include <hash.h>
 #include <serialize.h>
 #include <uint256.h>
+#include <keyid.h>
 
 #include <boost/range/adaptor/sliced.hpp>
 
@@ -17,13 +18,6 @@
 #include <vector>
 
 const unsigned int BIP32_EXTKEY_SIZE = 74;
-
-/** A reference to a CKey: the Hash160 of its serialized public key */
-class CKeyID : public uint160 {
-public:
-    CKeyID() : uint160() {}
-    explicit CKeyID(const uint160 &in) : uint160(in) {}
-};
 
 typedef uint256 ChainCode;
 
@@ -114,7 +108,7 @@ public:
     }
 
     //! Get the KeyID of this public key (hash of its serialization)
-    CKeyID GetID() const { return CKeyID(Hash160(vch, vch + size())); }
+    CKeyID GetKeyID() const { return CKeyID(Hash160(vch, vch + size())); }
 
     //! Get the 256-bit hash of this public key.
     uint256 GetHash() const { return Hash(vch, vch + size()); }
