@@ -15,12 +15,12 @@ bool CKeyStore::AddKey(const CKey &key) {
 
 // Remove key temporarily added for Sweep function
 bool CBasicKeyStore::RemoveKey(const CKey& key) {
-    return mapKeys.erase(key.GetPubKey().GetID());
+    return mapKeys.erase(key.GetPubKey().GetKeyID());
 }
 
 void CBasicKeyStore::ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey) {
     AssertLockHeld(cs_KeyStore);
-    CKeyID key_id = pubkey.GetID();
+    CKeyID key_id = pubkey.GetKeyID();
     // We must actually know about this key already.
     assert(HaveKey(key_id) || mapWatchKeys.count(key_id));
     // This adds the redeemscripts necessary to detect alternative outputs using
@@ -52,7 +52,7 @@ bool CBasicKeyStore::GetPubKey(const CKeyID &address,
 
 bool CBasicKeyStore::AddKeyPubKey(const CKey &key, const CPubKey &pubkey) {
     LOCK(cs_KeyStore);
-    mapKeys[pubkey.GetID()] = key;
+    mapKeys[pubkey.GetKeyID()] = key;
     ImplicitlyLearnRelatedKeyScripts(pubkey);
     return true;
 }
@@ -142,7 +142,7 @@ bool CBasicKeyStore::AddWatchOnly(const CScript &dest) {
     setWatchOnly.insert(dest);
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
-        mapWatchKeys[pubKey.GetID()] = pubKey;
+        mapWatchKeys[pubKey.GetKeyID()] = pubKey;
         ImplicitlyLearnRelatedKeyScripts(pubKey);
     }
     return true;
@@ -153,7 +153,7 @@ bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest) {
     setWatchOnly.erase(dest);
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
-        mapWatchKeys.erase(pubKey.GetID());
+        mapWatchKeys.erase(pubKey.GetKeyID());
     }
     // Related CScripts are not removed; having superfluous scripts around is
     // harmless (see comment in ImplicitlyLearnRelatedKeyScripts).

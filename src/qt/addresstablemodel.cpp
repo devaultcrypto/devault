@@ -349,7 +349,7 @@ QString AddressTableModel::addRow(const QString &type, const QString &label,
                 return QString();
             }
         }
-        strAddress = EncodeDestination(newKey.GetID());
+        strAddress = EncodeDestination(newKey.GetKeyID());
     } else {
         return QString();
     }
