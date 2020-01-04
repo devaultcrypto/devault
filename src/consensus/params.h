@@ -17,8 +17,8 @@ namespace Consensus {
  */
 struct Params {
     uint256 hashGenesisBlock;
-    /** Unix time used for MTP activation of 15 May 2019 12:00:00 UTC upgrade */
-    int greatWallActivationTime;
+    /** Unix time used for MTP activation of TBD upgrade */
+    int blsActivationTime;
     /** Proof of work parameters */
     uint256 powLimit;
     bool fPowAllowMinDifficultyBlocks;

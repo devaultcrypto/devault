@@ -43,16 +43,6 @@ CExtPubKey CExtKey::Neuter() const {
     return ret;
 }
 
-CExtPubKey CExtKey::NeuterBLS() const {
-    CExtPubKey ret;
-    ret.nDepth = nDepth;
-    memcpy(&ret.vchFingerprint[0], &vchFingerprint[0], 4);
-    ret.nChild = nChild;
-    ret.chaincode = chaincode;
-    ret.pubkey = key.GetPubKeyForBLS();
-    return ret;
-}
-
 void CExtKey::Encode(uint8_t code[BIP32_EXTKEY_SIZE]) const {
     code[0] = nDepth;
     memcpy(code + 1, vchFingerprint, 4);
@@ -90,18 +80,6 @@ void CExtPubKey::Encode(uint8_t code[BIP32_EXTKEY_SIZE]) const {
     memcpy(code + 41, pubkey.begin(), CPubKey::COMPRESSED_PUBLIC_KEY_SIZE);
 }
 
-void CExtPubKey::BLSEncode(uint8_t code[BIP32_EXTKEY_BLS_SIZE]) const {
-    code[0] = nDepth;
-    memcpy(code + 1, vchFingerprint, 4);
-    code[5] = (nChild >> 24) & 0xFF;
-    code[6] = (nChild >> 16) & 0xFF;
-    code[7] = (nChild >> 8) & 0xFF;
-    code[8] = (nChild >> 0) & 0xFF;
-    memcpy(code + 9, chaincode.begin(), 32);
-    assert(pubkey.size() == CPubKey::BLS_PUBLIC_KEY_SIZE);
-    memcpy(code + 41, pubkey.begin(), CPubKey::BLS_PUBLIC_KEY_SIZE);
-}
-
 void CExtPubKey::Decode(const uint8_t code[BIP32_EXTKEY_SIZE]) {
     nDepth = code[0];
     memcpy(vchFingerprint, code + 1, 4);
@@ -110,10 +88,3 @@ void CExtPubKey::Decode(const uint8_t code[BIP32_EXTKEY_SIZE]) {
     pubkey.Set(code + 41, code + BIP32_EXTKEY_SIZE);
 }
 
-void CExtPubKey::BLSDecode(const uint8_t code[BIP32_EXTKEY_BLS_SIZE]) {
-    nDepth = code[0];
-    memcpy(vchFingerprint, code + 1, 4);
-    nChild = (code[5] << 24) | (code[6] << 16) | (code[7] << 8) | code[8];
-    memcpy(chaincode.begin(), code + 9, 32);
-    pubkey.Set(code + 41, code + 41+48);
-}

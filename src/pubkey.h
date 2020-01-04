@@ -17,16 +17,15 @@
 #include <stdexcept>
 #include <vector>
 
-const unsigned int BIP32_EXTKEY_SIZE = 74;
-
 typedef uint256 ChainCode;
 
 /** An encapsulated public key. */
 class CPubKey {
 public:
-    /**
-     * secp256k1:
-     */
+    static constexpr unsigned int BLS_SIGNATURE_SIZE = 96;
+    static constexpr unsigned int BLS_PUBLIC_KEY_SIZE = 48;
+    
+    // secp256k1:
     static constexpr unsigned int PUBLIC_KEY_SIZE = 65;
     static constexpr unsigned int COMPRESSED_PUBLIC_KEY_SIZE = 33;
     static constexpr unsigned int SIGNATURE_SIZE = 72;
@@ -128,6 +127,8 @@ public:
     bool IsCompressed() const { return size() == COMPRESSED_PUBLIC_KEY_SIZE; }
     bool HasCompressedByte() const { return vch[0] == 2 || vch[0] == 3; }
     void SetSize(int s) { _size = s; }
+    bool IsEC() const { return size() == COMPRESSED_PUBLIC_KEY_SIZE; }
+    bool IsBLS() const { return size() == BLS_PUBLIC_KEY_SIZE; }
 
     /**
      * Verify a DER-serialized ECDSA signature (~72 bytes).
@@ -162,49 +163,6 @@ public:
     //! Derive BIP32 child pubkey.
     bool Derive(CPubKey &pubkeyChild, ChainCode &ccChild, unsigned int nChild,
                 const ChainCode &cc) const;
-};
-
-struct CExtPubKey {
-    uint8_t nDepth;
-    uint8_t vchFingerprint[4];
-    unsigned int nChild;
-    ChainCode chaincode;
-    CPubKey pubkey;
-
-    friend bool operator==(const CExtPubKey &a, const CExtPubKey &b) {
-        return a.nDepth == b.nDepth &&
-               memcmp(&a.vchFingerprint[0], &b.vchFingerprint[0],
-                      sizeof(vchFingerprint)) == 0 &&
-               a.nChild == b.nChild && a.chaincode == b.chaincode &&
-               a.pubkey == b.pubkey;
-    }
-
-    void Encode(uint8_t code[BIP32_EXTKEY_SIZE]) const;
-    void Decode(const uint8_t code[BIP32_EXTKEY_SIZE]);
-    bool Derive(CExtPubKey &out, unsigned int nChild) const;
-
-    void Serialize(CSizeComputer &s) const {
-        // Optimized implementation for ::GetSerializeSize that avoids copying.
-        // add one byte for the size (compact int)
-        s.seek(BIP32_EXTKEY_SIZE + 1);
-    }
-    template <typename Stream> void Serialize(Stream &s) const {
-        unsigned int len = BIP32_EXTKEY_SIZE;
-        ::WriteCompactSize(s, len);
-        uint8_t code[BIP32_EXTKEY_SIZE];
-        Encode(code);
-        s.write((const char *)&code[0], len);
-    }
-    template <typename Stream> void Unserialize(Stream &s) {
-        unsigned int len = ::ReadCompactSize(s);
-        if (len != BIP32_EXTKEY_SIZE) {
-            throw std::runtime_error("Invalid extended key size\n");
-        }
-
-        uint8_t code[BIP32_EXTKEY_SIZE];
-        s.read((char *)&code[0], len);
-        Decode(code);
-    }
 };
 
 /**

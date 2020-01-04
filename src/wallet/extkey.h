@@ -42,7 +42,6 @@ struct CExtKey {
     void Decode(const uint8_t code[BIP32_EXTKEY_SIZE]);
     bool Derive(CExtKey &out, unsigned int nChild) const;
     CExtPubKey Neuter() const;
-    CExtPubKey NeuterBLS() const;
     void SetMaster(const uint8_t *seed, unsigned int nSeedLen);
     template <typename Stream> void Serialize(Stream &s) const {
         unsigned int len = BIP32_EXTKEY_SIZE;
@@ -81,9 +80,6 @@ struct CExtPubKey {
     void Encode(uint8_t code[BIP32_EXTKEY_SIZE]) const;
     void Decode(const uint8_t code[BIP32_EXTKEY_SIZE]);
     
-    void BLSEncode(uint8_t code[BIP32_EXTKEY_BLS_SIZE]) const;
-    void BLSDecode(const uint8_t code[BIP32_EXTKEY_BLS_SIZE]);
-    
     void Serialize(CSizeComputer &s) const {
         // Optimized implementation for ::GetSerializeSize that avoids copying.
         // add one byte for the size (compact int)
@@ -97,30 +93,18 @@ struct CExtPubKey {
             len = BIP32_EXTKEY_BLS_SIZE;
         }
         ::WriteCompactSize(s, len);
-        if (is_bls) {
-            uint8_t bls_code[BIP32_EXTKEY_BLS_SIZE];
-            BLSEncode(bls_code);
-            s.write((const char *)&bls_code[0], len);
-        } else {
-            uint8_t code[BIP32_EXTKEY_SIZE];
-            Encode(code);
-            s.write((const char *)&code[0], len);
-        }
+        uint8_t code[BIP32_EXTKEY_SIZE];
+        Encode(code);
+        s.write((const char *)&code[0], len);
     }
     template <typename Stream> void Unserialize(Stream &s) {
         unsigned int total_len = ::ReadCompactSize(s);
         if (!((total_len == BIP32_EXTKEY_BLS_SIZE) || (total_len == BIP32_EXTKEY_SIZE))) {
             throw std::runtime_error("Invalid extended key size\n");
         }
-        if (total_len != BIP32_EXTKEY_SIZE) {
-            uint8_t code[BIP32_EXTKEY_BLS_SIZE];
-            s.read((char *)&code[0], total_len);
-            BLSDecode(code);
-        } else {
-            uint8_t code[BIP32_EXTKEY_SIZE];
-            s.read((char *)&code[0], total_len);
-            Decode(code);
-        }
+        uint8_t code[BIP32_EXTKEY_SIZE];
+        s.read((char *)&code[0], total_len);
+        Decode(code);
     }
 };
 
