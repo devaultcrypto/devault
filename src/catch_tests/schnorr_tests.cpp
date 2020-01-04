@@ -95,7 +95,6 @@ TEST_CASE("opcodes_random_flags") {
     uint32_t flags = lcg.next();
 
     const bool hasForkId = (flags & SCRIPT_ENABLE_SIGHASH_FORKID) != 0;
-    const bool hasSchnorr = (flags & SCRIPT_ENABLE_SCHNORR) != 0;
     const bool hasStricts = (flags & (SCRIPT_VERIFY_DERSIG | SCRIPT_VERIFY_LOW_S | SCRIPT_VERIFY_STRICTENC)) != 0;
     const bool hasNullFail = (flags & SCRIPT_VERIFY_NULLFAIL) != 0;
 
@@ -105,7 +104,7 @@ TEST_CASE("opcodes_random_flags") {
 
     // Test CHECKSIG & CHECKDATASIG with he non-DER sig, which can fail from
     // encoding, otherwise upon verification.
-    if (hasStricts && !hasSchnorr) {
+    if (hasStricts) {
       CheckError(flags, {Zero64_with_hashtype, pubkeyC}, scriptCHECKSIG, ScriptError::SIG_DER);
       CheckError(flags, {Zero64_with_hashtype, pubkeyC}, scriptCHECKSIGVERIFY, ScriptError::SIG_DER);
       CheckError(flags, {Zero64, {}, pubkeyC}, scriptCHECKDATASIG, ScriptError::SIG_DER);
@@ -137,16 +136,7 @@ TEST_CASE("opcodes_random_flags") {
     }
 
     // test OP_CHECKMULTISIG/VERIFY
-    if (hasSchnorr) {
-      // When Schnorr flag is on, we always fail with BADLENGTH no matter
-      // what.
-      CheckError(flags, {{}, Zero64_with_hashtype, {1}, pubkeyC, {1}}, scriptCHECKMULTISIG, ScriptError::SIG_BADLENGTH);
-      CheckError(flags, {{}, Zero64_with_hashtype, {1}, pubkeyC, {1}}, scriptCHECKMULTISIGVERIFY,
-                 ScriptError::SIG_BADLENGTH);
-      CheckError(flags, {{}, DER64_with_hashtype, {1}, pubkeyC, {1}}, scriptCHECKMULTISIG, ScriptError::SIG_BADLENGTH);
-      CheckError(flags, {{}, DER64_with_hashtype, {1}, pubkeyC, {1}}, scriptCHECKMULTISIGVERIFY,
-                 ScriptError::SIG_BADLENGTH);
-    } else {
+
       // Otherwise, the failure depends on signature content.
       // The non-DER sig can fail from encoding, otherwise upon
       // verification.
@@ -173,7 +163,6 @@ TEST_CASE("opcodes_random_flags") {
                    ScriptError::CHECKMULTISIGVERIFY);
       }
     }
-  }
 }
 
 // BOOST_AUTO_TEST_SUITE_END()

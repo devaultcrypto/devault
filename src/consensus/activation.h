@@ -8,6 +8,6 @@
 class CBlockIndex;
 class Config;
 
-/** Check Schnorr related protocol upgrade has activated. */
-bool IsGreatWallEnabled(const Config &config, const CBlockIndex *pindexPrev);
+/** Check BLS related protocol upgrade has activated. */
+bool IsBLSEnabled(const Config &config, const CBlockIndex *pindexPrev);
 

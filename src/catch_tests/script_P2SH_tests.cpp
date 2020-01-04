@@ -64,9 +64,9 @@ TEST_CASE("sign") {
   // different keys, straight/P2SH, pubkey/pubkeyhash
   CScript standardScripts[4];
   standardScripts[0] << ToByteVector(key[0].GetPubKey()) << OP_CHECKSIG;
-  standardScripts[1] = GetScriptForDestination(key[1].GetPubKey().GetID());
+  standardScripts[1] = GetScriptForDestination(key[1].GetPubKey().GetKeyID());
   standardScripts[2] << ToByteVector(key[1].GetPubKey()) << OP_CHECKSIG;
-  standardScripts[3] = GetScriptForDestination(key[2].GetPubKey().GetID());
+  standardScripts[3] = GetScriptForDestination(key[2].GetPubKey().GetKeyID());
   CScript evalScripts[4];
   for (int i = 0; i < 4; i++) {
     keystore.AddCScript(standardScripts[i]);
@@ -164,7 +164,7 @@ TEST_CASE("set") {
   }
 
   CScript inner[4];
-  inner[0] = GetScriptForDestination(key[0].GetPubKey().GetID());
+  inner[0] = GetScriptForDestination(key[0].GetPubKey().GetKeyID());
   inner[1] = GetScriptForMultisig(2, std::vector<CPubKey>(keys.begin(), keys.begin() + 2));
   inner[2] = GetScriptForMultisig(1, std::vector<CPubKey>(keys.begin(), keys.begin() + 2));
   inner[3] = GetScriptForMultisig(2, std::vector<CPubKey>(keys.begin(), keys.begin() + 3));
@@ -280,7 +280,7 @@ TEST_CASE("AreInputsStandard") {
   txFrom.vout.resize(7);
 
   // First three are standard:
-  CScript pay1 = GetScriptForDestination(key[0].GetPubKey().GetID());
+  CScript pay1 = GetScriptForDestination(key[0].GetPubKey().GetKeyID());
   keystore.AddCScript(pay1);
   CScript pay1of3 = GetScriptForMultisig(1, keys);
 
@@ -334,7 +334,7 @@ TEST_CASE("AreInputsStandard") {
 
   CMutableTransaction txTo;
   txTo.vout.resize(1);
-  txTo.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetID());
+  txTo.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetKeyID());
 
   txTo.vin.resize(5);
   for (int i = 0; i < 5; i++) {
@@ -359,7 +359,7 @@ TEST_CASE("AreInputsStandard") {
 
   CMutableTransaction txToNonStd1;
   txToNonStd1.vout.resize(1);
-  txToNonStd1.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetID());
+  txToNonStd1.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetKeyID());
   txToNonStd1.vout[0].nValue = Amount(1000);
   txToNonStd1.vin.resize(1);
   txToNonStd1.vin[0].prevout = COutPoint(txFrom.GetId(), 5);
@@ -372,7 +372,7 @@ TEST_CASE("AreInputsStandard") {
 
   CMutableTransaction txToNonStd2;
   txToNonStd2.vout.resize(1);
-  txToNonStd2.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetID());
+  txToNonStd2.vout[0].scriptPubKey = GetScriptForDestination(key[1].GetPubKey().GetKeyID());
   txToNonStd2.vout[0].nValue = Amount(1000);
   txToNonStd2.vin.resize(1);
   txToNonStd2.vin[0].prevout = COutPoint(txFrom.GetId(), 6);
