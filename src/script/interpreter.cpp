@@ -827,6 +827,7 @@ bool EvalScript(std::vector<valtype> &stack, const CScript &script,
                     case OP_SHA1:
                     case OP_SHA256:
                     case OP_HASH160:
+                    case OP_BLSKEYHASH:
                     case OP_HASH256: {
                         // (in -- hash)
                         if (stack.size() < 1) {
@@ -835,7 +836,7 @@ bool EvalScript(std::vector<valtype> &stack, const CScript &script,
                         }
                         valtype &vch = stacktop(-1);
                         valtype vchHash((opcode == OP_RIPEMD160 ||
-                                         opcode == OP_SHA1 ||
+                                         opcode == OP_SHA1 || opcode == OP_BLSKEYHASH ||
                                          opcode == OP_HASH160)
                                             ? 20
                                             : 32);
@@ -851,7 +852,7 @@ bool EvalScript(std::vector<valtype> &stack, const CScript &script,
                             CSHA256()
                                 .Write(vch.data(), vch.size())
                                 .Finalize(vchHash.data());
-                        } else if (opcode == OP_HASH160) {
+                        } else if ((opcode == OP_HASH160) || (opcode == OP_BLSKEYHASH)) {
                             CHash160()
                                 .Write(vch.data(), vch.size())
                                 .Finalize(vchHash.data());
@@ -939,9 +940,15 @@ bool EvalScript(std::vector<valtype> &stack, const CScript &script,
                             CSHA256()
                                 .Write(vchMessage.data(), vchMessage.size())
                                 .Finalize(vchHash.data());
-                            fSuccess = checker.VerifySignature(
-                                vchSig, CPubKey(vchPubKey), uint256(vchHash),
-                                flags);
+                            if ((vchPubKey.size() == CPubKey::COMPRESSED_PUBLIC_KEY_SIZE) ||
+                                (vchSig.size() == CPubKey::BLS_SIGNATURE_SIZE &&
+                                 vchPubKey.size() == CPubKey::BLS_PUBLIC_KEY_SIZE)) {
+                                    fSuccess = checker.VerifySignature(
+                                                                       vchSig, CPubKey(vchPubKey), uint256(vchHash),
+                                                                       flags);
+                            } else {
+                                 return set_error(serror, ScriptError::SIG_BADLENGTH);
+                            }
                         }
 
                         if (!fSuccess && (flags & SCRIPT_VERIFY_NULLFAIL) &&
@@ -1371,6 +1378,24 @@ PrecomputedTransactionData::PrecomputedTransactionData(
     hashOutputs = GetOutputsHash(txTo);
 }
 
+// Ignore Cache stuff + SighHash stuff for now.... XXXX
+//
+uint256 TxSignatureHash(const CTransaction &txTo) {
+
+    CHashWriter ss(SER_GETHASH, 0);
+    CMutableTransaction tx(txTo);
+
+    // Null out the scriptsig from the Vins
+    for (size_t i=0;i<txTo.vin.size();i++) {
+        CScript c;
+        tx.vin[i].scriptSig = c;
+    }
+
+    ss << tx;
+    return ss.GetHash();
+}
+
+
 uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo,
                       unsigned int nIn, SigHashType sigHashType,
                       const Amount amount,
@@ -1457,8 +1482,8 @@ bool BaseSignatureChecker::VerifySignature(const std::vector<uint8_t> &vchSig,
                                            const CPubKey &pubkey,
                                            const uint256 &sighash,
                                            uint32_t flags) const {
-    if ((flags & SCRIPT_ENABLE_SCHNORR) && (vchSig.size() == 64)) {
-        return pubkey.VerifySchnorr(sighash, vchSig);
+    if ((flags & SCRIPT_ENABLE_BLS) && (vchSig.size() == CPubKey::BLS_SIGNATURE_SIZE)) {
+        return pubkey.VerifyBLS(sighash, vchSig);
     } else {
         return pubkey.VerifyECDSA(sighash, vchSig);
     }
@@ -1467,25 +1492,21 @@ bool BaseSignatureChecker::VerifySignature(const std::vector<uint8_t> &vchSig,
 bool TransactionSignatureChecker::CheckSig(
     const std::vector<uint8_t> &vchSigIn, const std::vector<uint8_t> &vchPubKey,
     const CScript &scriptCode, uint32_t flags) const {
-    CPubKey pubkey(vchPubKey);
-    if (!pubkey.IsValid()) {
-        return false;
-    }
 
     // Hash type is one byte tacked on to the end of the signature
     std::vector<uint8_t> vchSig(vchSigIn);
-    if (vchSig.empty()) {
-        return false;
-    }
+    if (vchSig.empty()) return false;
     SigHashType sigHashType = GetHashType(vchSig);
     vchSig.pop_back();
-
+  
     uint256 sighash = SignatureHash(scriptCode, *txTo, nIn, sigHashType, amount,
                                     this->txdata, flags);
 
-    if (!VerifySignature(vchSig, pubkey, sighash, flags)) {
-        return false;
-    }
+    CPubKey pubkey(vchPubKey);
+    if (!pubkey.IsValid()) return false;
+    
+    // Sig check stuff here
+    if (!VerifySignature(vchSig, pubkey, sighash, flags)) return false;
 
     return true;
 }

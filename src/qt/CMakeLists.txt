@@ -5,6 +5,11 @@
 project(devault-qt)
 cmake_minimum_required(VERSION 3.5)
 
+if (CMAKE_GENERATOR STREQUAL Xcode)
+  message(STATUS "Setting DEV_DEBUG for Xcode debugging")
+  add_compiler_flags(-DDEV_DEBUG)
+endif()
+
 
 # Project Info
 SET(APP_NAME DeVault-Core)
@@ -266,11 +271,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 target_link_libraries(bitcoin-qt-base
-	server
-	rpcclient
-	Qt5::Widgets
-	Qt5::Network
+  server
+  rpcclient
+  Qt5::Widgets
+  Qt5::Network
   ${QR_LIB}
+  bls
+  relic_s
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

@@ -4,16 +4,14 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <key.h>
+#include <bls/bls_functions.h>
 
 #include <arith_uint256.h>
-#include <crypto/common.h>
-#include <crypto/hmac_sha512.h>
 #include <pubkey.h>
 #include <random.h>
 
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#include <secp256k1_schnorr.h>
 
 static secp256k1_context *secp256k1_context_sign = nullptr;
 
@@ -101,6 +99,10 @@ void CKey::MakeNewKey() {
     fValid = true;
 }
 
+CPubKey CKey::GetPubKeyForBLS() const {
+    return bls::GetBLSPublicKey(*this);
+}
+
 CPubKey CKey::GetPubKey() const {
     assert(fValid);
     secp256k1_pubkey pubkey;
@@ -138,20 +140,11 @@ bool CKey::SignECDSA(const uint256 &hash, std::vector<uint8_t> &vchSig,
     return true;
 }
 
-bool CKey::SignSchnorr(const uint256 &hash, std::vector<uint8_t> &vchSig,
-                       uint32_t test_case) const {
+bool CKey::SignBLS(const uint256 &hash, std::vector<uint8_t> &vchSig) const {
     if (!fValid) {
         return false;
     }
-    vchSig.resize(64);
-    uint8_t extra_entropy[32] = {0};
-    WriteLE32(extra_entropy, test_case);
-
-    int ret = secp256k1_schnorr_sign(
-        secp256k1_context_sign, &vchSig[0], hash.begin(), begin(),
-        secp256k1_nonce_function_rfc6979, test_case ? extra_entropy : nullptr);
-    assert(ret);
-    return true;
+    return bls::SignBLS(*this, hash, vchSig);
 }
 
 bool CKey::VerifyPubKey(const CPubKey &pubkey) const {
@@ -164,8 +157,13 @@ bool CKey::VerifyPubKey(const CPubKey &pubkey) const {
         .Write(rnd, sizeof(rnd))
         .Finalize(hash.begin());
     std::vector<uint8_t> vchSig;
-    SignECDSA(hash, vchSig);
-    return pubkey.VerifyECDSA(hash, vchSig);
+    if (pubkey.IsEC()) {
+        SignECDSA(hash, vchSig);
+        return pubkey.VerifyECDSA(hash, vchSig);
+    } else {
+        SignBLS(hash, vchSig);
+        return pubkey.VerifyBLS(hash, vchSig);
+    }
 }
 
 bool CKey::SignCompact(const uint256 &hash,
