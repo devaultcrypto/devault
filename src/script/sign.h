@@ -3,17 +3,30 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_SCRIPT_SIGN_H
-#define BITCOIN_SCRIPT_SIGN_H
+#pragma once
 
 #include <script/interpreter.h>
 #include <script/sighashtype.h>
 
 class CKeyID;
+class BKeyID;
 class CKeyStore;
 class CMutableTransaction;
 class CScript;
 class CTransaction;
+
+enum class KeyTypes {
+                    LEGACY_ONLY,
+                    BLS_ONLY,
+                    MIXED_COINS,
+                    POSSIBLY_MIXED
+};
+
+enum class KeyType {
+                    EC,
+                    BLS,
+                    NOTKNOWN
+};
 
 /** Virtual base class for signature creators. */
 class BaseSignatureCreator {
@@ -30,6 +43,9 @@ public:
     /** Create a singular (non-script) signature. */
     virtual bool CreateSig(std::vector<uint8_t> &vchSig, const CKeyID &keyid,
                            const CScript &scriptCode) const = 0;
+    virtual bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid,
+                           const CScript &scriptCode) const = 0;
+    virtual bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid) const = 0;
 };
 
 /** A signature creator for transactions. */
@@ -48,6 +64,9 @@ public:
     const BaseSignatureChecker &Checker() const override { return checker; }
     bool CreateSig(std::vector<uint8_t> &vchSig, const CKeyID &keyid,
                    const CScript &scriptCode) const override;
+    bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid,
+                   const CScript &scriptCode) const override;
+    bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid) const override;
 };
 
 class MutableTransactionSignatureCreator : public TransactionSignatureCreator {
@@ -72,6 +91,9 @@ public:
     const BaseSignatureChecker &Checker() const override;
     bool CreateSig(std::vector<uint8_t> &vchSig, const CKeyID &keyid,
                    const CScript &scriptCode) const override;
+    bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid,
+                   const CScript &scriptCode) const override;
+    bool CreateSig(std::vector<uint8_t> &vchSig, const BKeyID &keyid) const override;
 };
 
 struct SignatureData {
@@ -109,4 +131,5 @@ void UpdateTransaction(CMutableTransaction &tx, unsigned int nIn,
                        const SignatureData &data);
 void UpdateInput(CTxIn &input, const SignatureData &data);
 
-#endif // BITCOIN_SCRIPT_SIGN_H
+// Inject BLS Public Key as script instead of Signature
+void UpdateTransaction(CMutableTransaction &tx, unsigned int nIn, const CScript &data);

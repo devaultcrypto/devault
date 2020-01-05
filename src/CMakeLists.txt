@@ -4,8 +4,8 @@
 project(DeVault)
 
 # Default visibility is hidden on all targets.
-set(CMAKE_C_VISIBILITY_PRESET hidden)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#set(CMAKE_C_VISIBILITY_PRESET hidden)
+#set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 include(FeatureSummary)
 
@@ -155,7 +155,7 @@ add_compiler_flags(
 	-Wall
 	-Wextra
 	-Wformat
-	-Wvla
+##	-Wvla
 	-Wformat-security
 	-Wcast-align
 	-Wunused-parameter
@@ -236,6 +236,11 @@ if (SODIUM_FOUND)
   #message(STATUS "Sodium include dir = ${sodium_INCLUDE_DIR}")
 endif()
 
+find_package(GMP REQUIRED)
+if (GMP_FOUND)
+  message(STATUS "Found libgmp")
+endif()
+
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
@@ -272,17 +277,16 @@ if (BUILD_ROCKSDB)
     message(STATUS "FAILED to FIND RocksDB")
     add_subdirectory(leveldb)
     set(DB_LIBRARIES leveldb memenv)
-    include_directories(${include_directories} leveldb/include)
   endif()
 else()
     add_subdirectory(leveldb)
     set(DB_LIBRARIES leveldb memenv)
-    include_directories(${include_directories} leveldb/include)
 endif()  
 
 add_subdirectory(secp256k1)
 add_subdirectory(univalue)
 
+add_subdirectory(bls)
 
 file(GLOB PRIMITIVE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/primitives/*.h)
 source_group("PrimitiveHeaders" FILES ${PRIMITIVE_HEADERS})
@@ -295,6 +299,12 @@ source_group("SrcHeaders" FILES ${HEADERS})
 
 file(GLOB CON_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/consensus/*.h)
 source_group("ConsenusHeaders" FILES ${CON_HEADERS})
+
+file(GLOB IF_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/interfaces/*.h)
+source_group("InterfaceHeaders" FILES ${IF_HEADERS})
+
+file(GLOB BLS_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/bls/*.h ${CMAKE_CURRENT_SOURCE_DIR}/bls/*.hpp)
+source_group("BLSHeaders" FILES ${BLS_HEADERS})
 
 file(GLOB POLICY_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/policy/*.h)
 source_group("PolicyHeaders" FILES ${POLICY_HEADERS})
@@ -349,6 +359,11 @@ target_include_directories(util
   ${sodium_INCLUDE_DIR}
 )
 
+if (TOOLCHAIN_PREFIX) 
+else()
+  set(Boost_NO_BOOST_CMAKE 1)
+endif()
+
 # Target specific configs
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(Boost_USE_STATIC_LIBS ON)
@@ -375,16 +390,20 @@ endfunction(prepend)
 if (Filesystem_FOUND)
   # Still need Boost header files, but no linkage
   message(STATUS "Find Boost for headers use only")
-  find_package(Boost 1.69) # bump up requirement to 1.69 so boost::system is not needed
+  find_package(Boost CONFIG 1.69 COMPONENTS headers) # bump up requirement to 1.69 so boost::system is not needed
+  target_include_directories(util PUBLIC    ${GMP_INCLUDE_DIR}   Boost::headers) # public for now
   target_link_libraries(util univalue crypto sodium std::filesystem)
-  # can probably be more selective than this, but needed for now
-  include_directories($include_directories "${Boost_INCLUDE_DIR}")
 else()
+  set(Boost_USE_STATIC_LIBS On)
+  set(Boost_USE_STATIC_RUNTIME On)
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
-  find_package(Boost 1.65 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  if (TOOLCHAIN_PREFIX) 
+    find_package(Boost CONFIG 1.65 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  else()
+    find_package(Boost 1.65 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
+  endif()
   target_link_libraries(util univalue crypto sodium ${BOOST_LIBRARIES})
 endif()
-
 
 #--------------------------------------------------------------------------------
 # DeVault (after boost setup)
@@ -392,7 +411,6 @@ endif()
 add_subdirectory(devault)
 #
 #--------------------------------------------------------------------------------
-
 
 # More completely unrelated features shared by all executables.
 # Because nothing says this is different from util than "common"
@@ -421,7 +439,7 @@ add_library(common
 	warnings.cpp
 )
 
-target_link_libraries(common util secp256k1)
+target_link_libraries(common util secp256k1 bls)
 
 # libdevaultconsensus
 add_library(devaultconsensus
@@ -448,6 +466,7 @@ add_library(server
   ${RPC_HEADERS}
   ${CONSENSUS_HEADERS}
   ${POLICY_HEADERS}
+  ${IF_HEADERS}
 	addrman.cpp
 	addrdb.cpp
 	avalanche.cpp
@@ -506,7 +525,10 @@ find_package(Event REQUIRED)
 find_package(Miniupnpc REQUIRED)
 
 if (NOT RocksDB_FOUND)
-  target_include_directories(server PRIVATE leveldb/helpers/memenv)
+  target_include_directories(server
+    PUBLIC  leveldb/include
+    PRIVATE leveldb/helpers/memenv)
+    target_include_directories(util PUBLIC  leveldb/include)
 endif()
 
 target_link_libraries(server
@@ -582,7 +604,7 @@ if(BUILD_CLI)
 		target_sources(devault-cli PRIVATE bitcoin-cli-res.rc)
 	endif()
 
-	target_link_libraries(devault-cli common rpcclient ${EVENT_LIBRARY})
+	target_link_libraries(devault-cli bls relic_s common rpcclient ${EVENT_LIBRARY})
 endif()
 
 # bitcoin-tx
@@ -592,12 +614,12 @@ if(BUILD_TX)
 		target_sources(devault-tx PRIVATE bitcoin-tx-res.rc)
 	endif()
 
-	target_link_libraries(devault-tx devaultconsensus)
+	target_link_libraries(devault-tx devaultconsensus bls relic_s)
 endif()
 
 # bitcoind
 add_executable(devaultd bitcoind.cpp)
-target_link_libraries(devaultd server)
+target_link_libraries(devaultd server bls relic_s)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_sources(devaultd PRIVATE bitcoind-res.rc)
 endif()

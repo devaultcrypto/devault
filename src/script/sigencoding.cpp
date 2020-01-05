@@ -153,8 +153,8 @@ static bool IsValidDERSignatureEncoding(const slicedvaltype &sig) {
     return true;
 }
 
-static bool IsSchnorrSig(uint32_t flags, const slicedvaltype &sig) {
-    return ((flags & SCRIPT_ENABLE_SCHNORR) && (sig.size() == 64));
+static bool IsBLSSig(uint32_t flags, const slicedvaltype &sig) {
+    return ((flags & SCRIPT_ENABLE_BLS) && (sig.size() >= CPubKey::BLS_SIGNATURE_SIZE)); // >? 
 }
 
 static bool CheckRawECDSASignatureEncoding(const slicedvaltype &sig,
@@ -162,7 +162,7 @@ static bool CheckRawECDSASignatureEncoding(const slicedvaltype &sig,
                                            ScriptError *serror) {
     // In an ECDSA-only context, 64-byte signatures are banned when
     // Schnorr flag set.
-    if (IsSchnorrSig(flags, sig)) {
+    if (IsBLSSig(flags, sig)) {
         return set_error(serror, ScriptError::SIG_BADLENGTH);
     }
     // https://bitcoin.stackexchange.com/a/12556:
@@ -183,7 +183,7 @@ static bool CheckRawECDSASignatureEncoding(const slicedvaltype &sig,
 
 static bool CheckRawSignatureEncoding(const slicedvaltype &sig, uint32_t flags,
                                       ScriptError *serror) {
-    if (IsSchnorrSig(flags,sig)) {
+    if (IsBLSSig(flags,sig)) {
         // In a generic-signature context, 64-byte signatures are interpreted
         // as Schnorr signatures (always correctly encoded) when flag set.
         return true;
@@ -278,8 +278,17 @@ static bool IsCompressedPubKey(const valtype &vchPubKey) {
     return true;
 }
 
+static bool IsBLSPubKey(const valtype &vchPubKey) {
+    return (vchPubKey.size() == CPubKey::BLS_PUBLIC_KEY_SIZE);
+}
+
+
 bool CheckPubKeyEncoding(const valtype &vchPubKey, uint32_t flags,
                          ScriptError *serror) {
+  if ((flags & SCRIPT_ENABLE_BLS) && IsBLSPubKey(vchPubKey)) {
+      return true;
+  }
+
     if ((flags & SCRIPT_VERIFY_STRICTENC) &&
         !IsCompressedPubKey(vchPubKey)) {
         return set_error(serror, ScriptError::PUBKEYTYPE);
