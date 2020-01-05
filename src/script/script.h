@@ -188,6 +188,8 @@ enum opcodetype {
     // multi-byte opcodes
     OP_PREFIX_BEGIN = 0xf0,
     OP_PREFIX_END = 0xf7,
+    OP_BLSPUBKEY   = 0xfa,
+    OP_BLSKEYHASH = 0xfe,
 
     OP_INVALIDOPCODE = 0xff,
 };

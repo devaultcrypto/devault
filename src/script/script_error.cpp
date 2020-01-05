@@ -88,8 +88,6 @@ const char *ScriptErrorString(const ScriptError serror) {
                    "operation";
         case ScriptError::SIG_BADLENGTH:
             return "Signature cannot be 65 bytes in CHECKMULTISIG";
-        case ScriptError::SIG_NONSCHNORR:
-            return "Only Schnorr signatures allowed in this operation";
         case ScriptError::DISCOURAGE_UPGRADABLE_NOPS:
             return "NOPx reserved for soft-fork upgrades";
         case ScriptError::PUBKEYTYPE:

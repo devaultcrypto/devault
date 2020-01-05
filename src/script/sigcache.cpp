@@ -132,3 +132,4 @@ bool CachingTransactionSignatureChecker::VerifySignature(
                                                             sighash, flags);
     });
 }
+
