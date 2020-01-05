@@ -946,25 +946,25 @@ TEST_CASE("script_build") {
                       .Num(0)
                       .SetScriptError(ScriptError::SIG_DER));
 
-  // Misc ECDSA tests duplicated with SCHNORR flag on
-  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "P2PK ECDSA with SCHNORR flag on",
-                              SCRIPT_ENABLE_SCHNORR)
+  // Misc ECDSA tests duplicated with BLS flag on
+  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "P2PK ECDSA with BLS flag on",
+                              SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                              "P2PK, bad sig ECDSA with SCHNORR flag on", SCRIPT_ENABLE_SCHNORR)
+                              "P2PK, bad sig ECDSA with BLS flag on", SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key0)
                       .DamagePush(10)
                       .SetScriptError(ScriptError::EVAL_FALSE));
 
   tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
-                              "P2PKH  ECDSA with SCHNORR flag on", SCRIPT_ENABLE_SCHNORR)
+                              "P2PKH  ECDSA with BLS flag on", SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key1)
                       .Push(keys.pubkey1C));
 
   tests.push_back(TestBuilder(CScript() << OP_2 << ToByteVector(keys.pubkey0C) << ToByteVector(keys.pubkey1C)
                                         << ToByteVector(keys.pubkey2C) << OP_3 << OP_CHECKMULTISIG,
-                              "P2SH(2-of-3) ECDSA with SCHNORR flag on", SCRIPT_VERIFY_P2SH | SCRIPT_ENABLE_SCHNORR,
+                              "P2SH(2-of-3) ECDSA with BLS flag on", SCRIPT_VERIFY_P2SH | SCRIPT_ENABLE_BLS,
                               true)
                       .Num(0)
                       .PushSigECDSA(keys.key1)
@@ -972,13 +972,13 @@ TEST_CASE("script_build") {
                       .PushRedeem());
 
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey2C) << OP_CHECKSIG,
-                              "LOW_S violating ECDSA with SCHNORR flag on", SCRIPT_VERIFY_LOW_S | SCRIPT_ENABLE_SCHNORR)
+                              "LOW_S violating ECDSA with BLS flag on", SCRIPT_VERIFY_LOW_S | SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key2, SigHashType(), 32, 33)
                       .SetScriptError(ScriptError::SIG_HIGH_S));
 
   // Duplicated test OP_CHECKDATASIG with Schnorr flag on
   const uint32_t checkdatasigschnorrflags =
-      SCRIPT_VERIFY_STRICTENC | SCRIPT_VERIFY_NULLFAIL | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR;
+      SCRIPT_VERIFY_STRICTENC | SCRIPT_VERIFY_NULLFAIL | SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS;
 
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1C) << OP_CHECKDATASIG, "Standard CHECKDATASIG",
                               checkdatasigschnorrflags)
@@ -1074,11 +1074,11 @@ TEST_CASE("script_build") {
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
                               "CHECKSIG ECDSA w/ neither STRICTENC,SCHNORR", 0)
                       .PushSigECDSA(keys.key0));
-  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "CHECKSIG Schnorr w/ SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR)
+  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "CHECKSIG Schnorr w/ BLS",
+                              SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key0));
-  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "CHECKSIG ECDSA w/ SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR)
+  tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "CHECKSIG ECDSA w/ BLS",
+                              SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG, "CHECKSIG Schnorr w/ STRICTENC",
                               SCRIPT_VERIFY_STRICTENC)
@@ -1088,31 +1088,31 @@ TEST_CASE("script_build") {
                               SCRIPT_VERIFY_STRICTENC)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                              "CHECKSIG Schnorr w/ STRICTENC,SCHNORR", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIG Schnorr w/ STRICTENC,BLS", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG,
-                              "CHECKSIG ECDSA w/ STRICTENC,SCHNORR", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIG ECDSA w/ STRICTENC,BLS", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG, "CHECKSIG Schnorr other key",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key1));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG << OP_NOT,
-                              "CHECKSIG Schnorr mismatched key", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIG Schnorr mismatched key", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key1));
 
   // CHECKSIGVERIFY and Schnorr
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY Schnorr w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKSIGVERIFY Schnorr w/ neither STRICTENC,BLS", 0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::CHECKSIGVERIFY));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY ECDSA w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKSIGVERIFY ECDSA w/ neither STRICTENC,BLS", 0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY Schnorr w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKSIGVERIFY Schnorr w/ BLS", SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY ECDSA w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKSIGVERIFY ECDSA w/ BLS", SCRIPT_ENABLE_BLS)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
                               "CHECKSIGVERIFY Schnorr w/ STRICTENC", SCRIPT_VERIFY_STRICTENC)
@@ -1122,36 +1122,36 @@ TEST_CASE("script_build") {
                               "CHECKSIGVERIFY ECDSA w/ STRICTENC", SCRIPT_VERIFY_STRICTENC)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY Schnorr w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIGVERIFY Schnorr w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY ECDSA w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIGVERIFY ECDSA w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY Schnorr other key", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIGVERIFY Schnorr other key", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key1));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIGVERIFY << OP_1,
-                              "CHECKSIGVERIFY Schnorr mismatched key", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKSIGVERIFY Schnorr mismatched key", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key1)
                       .SetScriptError(ScriptError::CHECKSIGVERIFY));
 
   // CHECKDATASIG and Schnorr
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG Schnorr w/ neither STRICTENC,SCHNORR", SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
+                              "CHECKDATASIG Schnorr w/ neither STRICTENC,BLS", SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
                       .PushDataSigSchnorr(keys.key0, {})
                       .SetScriptError(ScriptError::EVAL_FALSE));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG ECDSA w/ neither STRICTENC,SCHNORR", SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
+                              "CHECKDATASIG ECDSA w/ neither STRICTENC,BLS", SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG Schnorr w/ SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR)
+                              "CHECKDATASIG Schnorr w/ BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS)
                       .PushDataSigSchnorr(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG ECDSA w/ SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR)
+                              "CHECKDATASIG ECDSA w/ BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
                               "CHECKDATASIG Schnorr w/ STRICTENC",
@@ -1163,47 +1163,47 @@ TEST_CASE("script_build") {
                               SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG Schnorr w/ STRICTENC,SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKDATASIG Schnorr w/ STRICTENC,BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG,
-                              "CHECKDATASIG ECDSA w/ STRICTENC,SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKDATASIG ECDSA w/ STRICTENC,BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIG,
                               "CHECKDATASIG Schnorr other key",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIG << OP_NOT,
                               "CHECKDATASIG Schnorr mismatched key",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {}));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIG,
                               "CHECKDATASIG Schnorr other message",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {1}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIG << OP_NOT,
                               "CHECKDATASIG Schnorr wrong message",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {1}));
 
   // CHECKDATASIGVERIFY and Schnorr
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY Schnorr w/ neither STRICTENC,SCHNORR",
+                              "CHECKDATASIGVERIFY Schnorr w/ neither STRICTENC,BLS",
                               SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
                       .PushDataSigSchnorr(keys.key0, {})
                       .SetScriptError(ScriptError::CHECKDATASIGVERIFY));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY ECDSA w/ neither STRICTENC,SCHNORR",
+                              "CHECKDATASIGVERIFY ECDSA w/ neither STRICTENC,BLS",
                               SCRIPT_VERIFY_CHECKDATASIG_SIGOPS)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY Schnorr w/ SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR)
+                              "CHECKDATASIGVERIFY Schnorr w/ BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS)
                       .PushDataSigSchnorr(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY ECDSA w/ SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR)
+                              "CHECKDATASIGVERIFY ECDSA w/ BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
                               "CHECKDATASIGVERIFY Schnorr w/ STRICTENC",
@@ -1215,49 +1215,49 @@ TEST_CASE("script_build") {
                               SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY Schnorr w/ STRICTENC,SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKDATASIGVERIFY Schnorr w/ STRICTENC,BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
-                              "CHECKDATASIGVERIFY ECDSA w/ STRICTENC,SCHNORR",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKDATASIGVERIFY ECDSA w/ STRICTENC,BLS",
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigECDSA(keys.key0, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIGVERIFY << OP_1,
                               "CHECKDATASIGVERIFY Schnorr other key",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey0) << OP_CHECKDATASIGVERIFY << OP_1,
                               "CHECKDATASIGVERIFY Schnorr mismatched key",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {})
                       .SetScriptError(ScriptError::CHECKDATASIGVERIFY));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIGVERIFY << OP_1,
                               "CHECKDATASIGVERIFY Schnorr other message",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {1}));
   tests.push_back(TestBuilder(CScript() << OP_0 << ToByteVector(keys.pubkey1) << OP_CHECKDATASIGVERIFY << OP_1,
                               "CHECKDATASIGVERIFY Schnorr wrong message",
-                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              SCRIPT_VERIFY_CHECKDATASIG_SIGOPS | SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushDataSigSchnorr(keys.key1, {1})
                       .SetScriptError(ScriptError::CHECKDATASIGVERIFY));
 
   // CHECKMULTISIG 1-of-1 and Schnorr
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG Schnorr w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKMULTISIG Schnorr w/ neither STRICTENC,BLS", 0)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::EVAL_FALSE));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG ECDSA w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKMULTISIG ECDSA w/ neither STRICTENC,BLS", 0)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG Schnorr w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKMULTISIG Schnorr w/ BLS", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::SIG_BADLENGTH));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG ECDSA w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKMULTISIG ECDSA w/ BLS", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
@@ -1270,21 +1270,21 @@ TEST_CASE("script_build") {
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG Schnorr w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKMULTISIG Schnorr w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::SIG_BADLENGTH));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIG,
-                              "CHECKMULTISIG ECDSA w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKMULTISIG ECDSA w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
 
   // Test multisig with multiple Schnorr signatures
   tests.push_back(TestBuilder(CScript() << OP_3 << ToByteVector(keys.pubkey0C) << ToByteVector(keys.pubkey1C)
                                         << ToByteVector(keys.pubkey2C) << OP_3 << OP_CHECKMULTISIG,
-                              "Schnorr 3-of-3 without SCHNORR flag", 0)
+                              "Schnorr 3-of-3 without BLS flag", 0)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .PushSigSchnorr(keys.key1)
@@ -1293,7 +1293,7 @@ TEST_CASE("script_build") {
 
   tests.push_back(TestBuilder(CScript() << OP_3 << ToByteVector(keys.pubkey0C) << ToByteVector(keys.pubkey1C)
                                         << ToByteVector(keys.pubkey2C) << OP_3 << OP_CHECKMULTISIG,
-                              "Schnorr 3-of-3 with SCHNORR flag", SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr 3-of-3 with BLS flag", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .PushSigSchnorr(keys.key1)
@@ -1302,7 +1302,7 @@ TEST_CASE("script_build") {
 
   tests.push_back(TestBuilder(CScript() << OP_3 << ToByteVector(keys.pubkey0C) << ToByteVector(keys.pubkey1C)
                                         << ToByteVector(keys.pubkey2C) << OP_3 << OP_CHECKMULTISIG,
-                              "Schnorr-ECDSA-mixed 3-of-3 with SCHNORR flag", SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr-ECDSA-mixed 3-of-3 with BLS flag", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigECDSA(keys.key0)
                       .PushSigECDSA(keys.key1)
@@ -1311,21 +1311,21 @@ TEST_CASE("script_build") {
 
   // CHECKMULTISIGVERIFY 1-of-1 and Schnorr
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY Schnorr w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKMULTISIGVERIFY Schnorr w/ neither STRICTENC,BLS", 0)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::CHECKMULTISIGVERIFY));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY ECDSA w/ neither STRICTENC,SCHNORR", 0)
+                              "CHECKMULTISIGVERIFY ECDSA w/ neither STRICTENC,BLS", 0)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY Schnorr w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKMULTISIGVERIFY Schnorr w/ BLS", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::SIG_BADLENGTH));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY ECDSA w/ SCHNORR", SCRIPT_ENABLE_SCHNORR)
+                              "CHECKMULTISIGVERIFY ECDSA w/ BLS", SCRIPT_ENABLE_BLS)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
@@ -1338,28 +1338,28 @@ TEST_CASE("script_build") {
                       .Num(0)
                       .PushSigECDSA(keys.key0));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY Schnorr w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKMULTISIGVERIFY Schnorr w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .Num(0)
                       .PushSigSchnorr(keys.key0)
                       .SetScriptError(ScriptError::SIG_BADLENGTH));
   tests.push_back(TestBuilder(CScript() << OP_1 << ToByteVector(keys.pubkey0) << OP_1 << OP_CHECKMULTISIGVERIFY << OP_1,
-                              "CHECKMULTISIGVERIFY ECDSA w/ STRICTENC,SCHNORR",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "CHECKMULTISIGVERIFY ECDSA w/ STRICTENC,BLS",
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .Num(0)
                       .PushSigECDSA(keys.key0));
 
   // Test damaged Schnorr signatures
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG << OP_NOT, "Schnorr P2PK, bad sig",
-                              SCRIPT_ENABLE_SCHNORR)
+                              SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key0)
                       .DamagePush(10));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG << OP_NOT,
-                              "Schnorr P2PK, bad sig STRICTENC", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC)
+                              "Schnorr P2PK, bad sig STRICTENC", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC)
                       .PushSigSchnorr(keys.key0)
                       .DamagePush(10));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0) << OP_CHECKSIG << OP_NOT,
-                              "Schnorr P2PK, bad sig NULLFAIL", SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_NULLFAIL)
+                              "Schnorr P2PK, bad sig NULLFAIL", SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_NULLFAIL)
                       .PushSigSchnorr(keys.key0)
                       .DamagePush(10)
                       .SetScriptError(ScriptError::SIG_NULLFAIL));
@@ -1367,52 +1367,52 @@ TEST_CASE("script_build") {
   // Make sure P2PKH works with Schnorr
   tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey1C.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
-                              "Schnorr P2PKH", SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr P2PKH", SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key1)
                       .Push(keys.pubkey1C));
 
   // Test of different pubkey encodings with Schnorr
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey0C) << OP_CHECKSIG,
-                              "Schnorr P2PK with compressed pubkey", SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr P2PK with compressed pubkey", SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key0, SigHashType()));
 
   // Ensure sighash types still get checked with schnorr
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
                               "Schnorr P2PK with undefined basehashtype and STRICTENC",
-                              SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
+                              SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key1, SigHashType(5))
                       .SetScriptError(ScriptError::SIG_HASHTYPE));
   tests.push_back(TestBuilder(CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY
                                         << OP_CHECKSIG,
-                              "Schnorr P2PKH with invalid sighashtype but no STRICTENC", SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr P2PKH with invalid sighashtype but no STRICTENC", SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key0, SigHashType(0x21), Amount::zero(), 0)
                       .Push(keys.pubkey0));
   tests.push_back(
       TestBuilder(
           CScript() << OP_DUP << OP_HASH160 << ToByteVector(keys.pubkey0.GetKeyID()) << OP_EQUALVERIFY << OP_CHECKSIG,
-          "Schnorr P2PKH with invalid sighashtype and STRICTENC", SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
-          .PushSigSchnorr(keys.key0, SigHashType(0x21), Amount::zero(), SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SCHNORR)
+          "Schnorr P2PKH with invalid sighashtype and STRICTENC", SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_BLS)
+          .PushSigSchnorr(keys.key0, SigHashType(0x21), Amount::zero(), SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_BLS)
           .Push(keys.pubkey0)
           .SetScriptError(ScriptError::SIG_HASHTYPE));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG, "Schnorr P2PK anyonecanpay",
-                              SCRIPT_ENABLE_SCHNORR)
+                              SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key1, SigHashType().withAnyoneCanPay()));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
-                              "Schnorr P2PK anyonecanpay marked with normal hashtype", SCRIPT_ENABLE_SCHNORR)
+                              "Schnorr P2PK anyonecanpay marked with normal hashtype", SCRIPT_ENABLE_BLS)
                       .PushSigSchnorr(keys.key1, SigHashType().withAnyoneCanPay())
                       .EditPush(64, "81", "01")
                       .SetScriptError(ScriptError::EVAL_FALSE));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG, "Schnorr P2PK with forkID",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
                       .PushSigSchnorr(keys.key1, SigHashType().withForkId()));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
                               "Schnorr P2PK with non-forkID sig",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
                       .PushSigSchnorr(keys.key1)
                       .SetScriptError(ScriptError::MUST_USE_FORKID));
   tests.push_back(TestBuilder(CScript() << ToByteVector(keys.pubkey1) << OP_CHECKSIG,
                               "Schnorr P2PK with cheater forkID bit",
-                              SCRIPT_ENABLE_SCHNORR | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
+                              SCRIPT_ENABLE_BLS | SCRIPT_VERIFY_STRICTENC | SCRIPT_ENABLE_SIGHASH_FORKID)
                       .PushSigSchnorr(keys.key1)
                       .EditPush(64, "01", "41")
                       .SetScriptError(ScriptError::EVAL_FALSE));

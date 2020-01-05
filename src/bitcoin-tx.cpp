@@ -4,7 +4,6 @@
 
 #include <config/bitcoin-config.h>
 
-#include <dstencode.h>
 #include <chainparams.h>
 #include <clientversion.h>
 #include <coins.h>

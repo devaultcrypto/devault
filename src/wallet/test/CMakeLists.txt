@@ -15,7 +15,7 @@ SET(WALLET_CTESTS
 FOREACH(tst ${WALLET_CTESTS})
 	set(SRC ${tst}_tests.cpp wallet_test_fixture.cpp)
 	add_executable(tb_${tst} ${SRC})
-  target_link_libraries(tb_${tst} rpcclient server unit)
+  target_link_libraries(tb_${tst} rpcclient server unit bls relic_s)
   add_test(NAME test_wallet_${tst} COMMAND tb_${tst})
 ENDFOREACH(tst ${WALLET_CTESTS})
 

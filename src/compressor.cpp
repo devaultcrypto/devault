@@ -5,6 +5,7 @@
 
 #include <compressor.h>
 
+#include <keyid.h>
 #include <pubkey.h>
 #include <script/standard.h>
 
@@ -25,6 +26,16 @@ static bool IsToKeyID(const CScript &script, CKeyID &hash) {
     }
     return false;
 }
+static bool IsToBLSKeyID(const CScript &script, BKeyID &hash) {
+    if (script.size() == 25 && script[0] == OP_DUP && script[1] == OP_BLSKEYHASH &&
+        script[2] == 20 && script[23] == OP_EQUALVERIFY &&
+        script[24] == OP_CHECKSIG) {
+        memcpy(&hash, &script[3], 20);
+        return true;
+    }
+    return false;
+}
+
 
 static bool IsToScriptID(const CScript &script, CScriptID &hash) {
     if (script.size() == 23 && script[0] == OP_HASH160 && script[1] == 20 &&
@@ -69,14 +80,21 @@ bool CompressScript(const CScript &script, std::vector<uint8_t> &out) {
             return true;
         }
     }
+    BKeyID bkeyID;
+    if (IsToBLSKeyID(script, bkeyID)) {
+        out.resize(21);
+        out[0] = 0x04;
+        memcpy(&out[1], &bkeyID, 20);
+        return true;
+    }
     return false;
 }
 
 unsigned int GetSpecialScriptSize(unsigned int nSize) {
-    if (nSize == 0 || nSize == 1) {
+    if (nSize == 0 || nSize == 1 || nSize == 4) {
         return 20;
     }
-    if (nSize == 2 || nSize == 3 || nSize == 4 || nSize == 5) {
+    if (nSize == 2 || nSize == 3) {
         return 32;
     }
     return 0;
@@ -108,6 +126,15 @@ bool DecompressScript(CScript &script, unsigned int nSize,
             script[1] = nSize;
             memcpy(&script[2], in.data(), 32);
             script[34] = OP_CHECKSIG;
+            return true;
+    case 0x04:
+            script.resize(25);
+            script[0] = OP_DUP;
+            script[1] = OP_BLSKEYHASH;
+            script[2] = 20;
+            memcpy(&script[3], in.data(), 20);
+            script[23] = OP_EQUALVERIFY;
+            script[24] = OP_CHECKSIG;
             return true;
     }
     return false;
