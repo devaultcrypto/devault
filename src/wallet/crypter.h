@@ -144,7 +144,7 @@ public:
     bool HaveKey(const CKeyID &address) const override;
     bool GetKey(const CKeyID &address, CKey &keyOut) const override;
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
-    std::set<CKeyID> GetKeys() const override;
+    std::set<CKeyID> GetKeys() const;
     bool GetCryptedHDChain(CHDChain& hdChainRet) const;
     bool GetDecryptedHDChain(CHDChain& hdChainRet) const;
     void SetMasterKey(const CKeyingMaterial &MasterKey) {     vMasterKey = MasterKey; }

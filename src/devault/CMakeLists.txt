@@ -19,7 +19,8 @@ add_library(devault
 
 target_include_directories(devault
 	PRIVATE
-    ${Boost_INCLUDE_DIR}
+  Boost::headers
+  ${GMP_INCLUDE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/../leveldb/include
 	..
 	PUBLIC

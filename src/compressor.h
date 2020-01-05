@@ -11,6 +11,7 @@
 #include <serialize.h>
 
 class CKeyID;
+class BKeyID;
 class CPubKey;
 class CScriptID;
 
@@ -27,9 +28,10 @@ int64_t DecompressAmount(uint64_t nAmount);
  *
  * It detects common cases and encodes them much more efficiently.
  * 3 special cases are defined:
- *  * Pay to pubkey hash (encoded as 21 bytes)
+ *  * Pay to EC pubkey hash (encoded as 21 bytes)
  *  * Pay to script hash (encoded as 21 bytes)
  *  * Pay to pubkey starting with 0x02, 0x03 (encoded as 33 bytes)
+ *  * Pay to BLS pubkey hash (encoded as 21 bytes)
  *
  * Other scripts up to 121 bytes require 1 byte + script length. Above that,
  * scripts up to 16505 bytes require 2 bytes + script length.

@@ -121,7 +121,7 @@ if(SECP256K1_ENABLE_MODULE_RECOVERY)
 endif()
 
 # Schnorr module
-option(SECP256K1_ENABLE_MODULE_SCHNORR "Build libsecp256k1's Schnorr module" ON)
+option(SECP256K1_ENABLE_MODULE_SCHNORR "Build libsecp256k1's Schnorr module" OFF)
 add_feature_info(WITH_SCHNORR SECP256K1_ENABLE_MODULE_SCHNORR "Build libsecp256k1's Schnorr module")
 if(SECP256K1_ENABLE_MODULE_SCHNORR)
 	set(ENABLE_MODULE_SCHNORR 1)
