@@ -7,7 +7,8 @@
 
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
-#include <secp256k1_schnorr.h>
+
+#include <bls/bls_functions.h>
 
 namespace {
 /* Global secp256k1_context object used for verification. */
@@ -195,24 +196,9 @@ bool CPubKey::VerifyECDSA(const uint256 &hash,
                                   &pubkey);
 }
 
-bool CPubKey::VerifySchnorr(const uint256 &hash,
-                            const std::vector<uint8_t> &vchSig) const {
-    if (!IsValid()) {
-        return false;
-    }
 
-    if (vchSig.size() != 64) {
-        return false;
-    }
-
-    secp256k1_pubkey pubkey;
-    if (!secp256k1_ec_pubkey_parse(secp256k1_context_verify, &pubkey,
-                                   &(*this)[0], size())) {
-        return false;
-    }
-
-    return secp256k1_schnorr_verify(secp256k1_context_verify, &vchSig[0],
-                                    hash.begin(), &pubkey);
+bool CPubKey::VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig) const {
+    return bls::VerifyBLS(hash, vchSig, &vch[0]);
 }
 
 bool CPubKey::RecoverCompact(const uint256 &hash,
@@ -223,6 +209,7 @@ bool CPubKey::RecoverCompact(const uint256 &hash,
 
     int recid = (vchSig[0] - 27) & 3;
     bool fComp = ((vchSig[0] - 27) & 4) != 0;
+    assert(fComp);
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sig;
     if (!secp256k1_ecdsa_recoverable_signature_parse_compact(
@@ -233,11 +220,9 @@ bool CPubKey::RecoverCompact(const uint256 &hash,
                                  hash.begin())) {
         return false;
     }
-    uint8_t pub[PUBLIC_KEY_SIZE];
-    size_t publen = PUBLIC_KEY_SIZE;
-    secp256k1_ec_pubkey_serialize(
-        secp256k1_context_verify, pub, &publen, &pubkey,
-        fComp ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED);
+    uint8_t pub[COMPRESSED_PUBLIC_KEY_SIZE];
+    size_t publen = COMPRESSED_PUBLIC_KEY_SIZE;
+    secp256k1_ec_pubkey_serialize(secp256k1_context_verify, pub, &publen, &pubkey, SECP256K1_EC_COMPRESSED);
     Set(pub, pub + publen);
     return true;
 }
@@ -249,23 +234,6 @@ bool CPubKey::IsFullyValid() const {
     secp256k1_pubkey pubkey;
     return secp256k1_ec_pubkey_parse(secp256k1_context_verify, &pubkey, vch,
                                      size());
-}
-
-bool CPubKey::Decompress() {
-    if (!IsValid()) {
-        return false;
-    }
-    secp256k1_pubkey pubkey;
-    if (!secp256k1_ec_pubkey_parse(secp256k1_context_verify, &pubkey, vch,
-                                   size())) {
-        return false;
-    }
-    uint8_t pub[PUBLIC_KEY_SIZE];
-    size_t publen = PUBLIC_KEY_SIZE;
-    secp256k1_ec_pubkey_serialize(secp256k1_context_verify, pub, &publen,
-                                  &pubkey, SECP256K1_EC_UNCOMPRESSED);
-    Set(pub, pub + publen);
-    return true;
 }
 
 bool CPubKey::Derive(CPubKey &pubkeyChild, ChainCode &ccChild,

@@ -111,7 +111,6 @@ add_test_to_suite(devault test_devault
 	rwcollection_tests.cpp
 	sanity_tests.cpp
 	scheduler_tests.cpp
-	schnorr_tests.cpp
 	script_bitfield_tests.cpp
 	script_commitment_tests.cpp
 	script_P2SH_tests.cpp
@@ -297,7 +296,7 @@ FOREACH(tst ${BOOST_TARGETS})
   ADD_EXECUTABLE(tb_${tst} ${SRC})
   #To access the generated json headers.
   target_include_directories(tb_${tst}  PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(tb_${tst} Boost::unit_test_framework rpcclient server devaultconsensus common unit)
+  target_link_libraries(tb_${tst} Boost::unit_test_framework rpcclient server devaultconsensus common unit bls relic_s)
   add_test(NAME test_${tst} COMMAND tb_${tst})
 ENDFOREACH(tst ${EXTS})
 

@@ -6,6 +6,7 @@
 #include <script/sign.h>
 
 #include <key.h>
+#include <pubkey.h>
 #include <keystore.h>
 #include <policy/policy.h>
 #include <primitives/transaction.h>
@@ -38,7 +39,52 @@ bool TransactionSignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
     return true;
 }
 
+bool TransactionSignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
+                                            const BKeyID &address,
+                                            const CScript &scriptCode) const {
+    CKey key;
+    if (!keystore->GetKey(address, key)) {
+        return false;
+    }
+
+    uint256 hash = SignatureHash(scriptCode, *txTo, nIn, sigHashType, amount);
+    if (!key.SignBLS(hash, vchSig)) {
+        return false;
+    }
+
+    vchSig.push_back(uint8_t(sigHashType.getRawSigHashType()));
+    return true;
+}
+
+bool TransactionSignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
+                                            const BKeyID &address) const {
+    CKey key;
+    if (!keystore->GetKey(address, key)) {
+        return false;
+    }
+
+    uint256 hash = TxSignatureHash(*txTo);
+    //std::cout << "Using hash = " << hash.ToString() << "\n";
+    if (!key.SignBLS(hash, vchSig)) {
+        return false;
+    }
+
+    vchSig.push_back(uint8_t(sigHashType.getRawSigHashType()));
+    return true;
+}
+
 static bool Sign1(const CKeyID &address, const BaseSignatureCreator &creator,
+                  const CScript &scriptCode, std::vector<valtype> &ret) {
+    std::vector<uint8_t> vchSig;
+    if (!creator.CreateSig(vchSig, address, scriptCode)) {
+        return false;
+    }
+
+    ret.push_back(vchSig);
+    return true;
+}
+
+static bool Sign1(const BKeyID &address, const BaseSignatureCreator &creator,
                   const CScript &scriptCode, std::vector<valtype> &ret) {
     std::vector<uint8_t> vchSig;
     if (!creator.CreateSig(vchSig, address, scriptCode)) {
@@ -86,6 +132,7 @@ static bool SignStep(const BaseSignatureCreator &creator,
     }
 
     CKeyID keyID;
+    BKeyID keyID1;
     switch (whichTypeRet) {
         case TX_NONSTANDARD:
         case TX_NULL_DATA:
@@ -93,6 +140,9 @@ static bool SignStep(const BaseSignatureCreator &creator,
         case TX_PUBKEY:
             keyID = CPubKey(vSolutions[0]).GetKeyID();
             return Sign1(keyID, creator, scriptPubKey, ret);
+        case TX_BLSPUBKEY:
+            keyID1 = CPubKey(vSolutions[0]).GetBLSKeyID();
+            return Sign1(keyID1, creator, scriptPubKey, ret);
         case TX_PUBKEYHASH: {
             keyID = CKeyID(uint160(vSolutions[0]));
             if (!Sign1(keyID, creator, scriptPubKey, ret)) {
@@ -104,6 +154,18 @@ static bool SignStep(const BaseSignatureCreator &creator,
             ret.push_back(ToByteVector(vch));
             return true;
         }
+        case TX_BLSKEYHASH: {
+            keyID1 = BKeyID(uint160(vSolutions[0]));
+            if (!Sign1(keyID1, creator, scriptPubKey, ret)) {
+                return false;
+            }
+
+            CPubKey vch;
+            creator.KeyStore().GetPubKey(keyID1, vch);
+            ret.push_back(ToByteVector(vch));
+            return true;
+        }
+
         case TX_SCRIPTHASH:
             if (creator.KeyStore().GetCScript(uint160(vSolutions[0]),
                                               scriptRet)) {
@@ -142,6 +204,8 @@ bool ProduceSignature(const BaseSignatureCreator &creator,
                       const CScript &fromPubKey, SignatureData &sigdata) {
     std::vector<valtype> result;
     txnouttype whichType;
+    // works for both EC & BLS
+    // for normal TxPubKeyHash inputs, result with be the signature followed by the public key
     bool solved = SignStep(creator, fromPubKey, result, whichType);
     CScript subscript;
 
@@ -179,6 +243,12 @@ void UpdateTransaction(CMutableTransaction &tx, unsigned int nIn,
                        const SignatureData &data) {
     assert(tx.vin.size() > nIn);
     UpdateInput(tx.vin[nIn], data);
+}
+
+// Not actually a Signature
+void UpdateTransaction(CMutableTransaction &tx, unsigned int nIn, const CScript &data) {
+    assert(tx.vin.size() > nIn);
+    tx.vin[nIn].scriptSig = data;
 }
 
 
@@ -302,7 +372,9 @@ static Stacks CombineSignatures(const CScript &scriptPubKey,
 
             return sigs2;
         case TX_PUBKEY:
+        case TX_BLSPUBKEY:
         case TX_PUBKEYHASH:
+        case TX_BLSKEYHASH:
             // Signatures are bigger than placeholders or empty scripts:
             if (sigs1.script.empty() || sigs1.script[0].empty()) {
                 return sigs2;
@@ -376,6 +448,37 @@ bool DummySignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
                                       const CKeyID &keyid,
                                       const CScript &scriptCode) const {
     // Create a dummy signature that is a valid DER-encoding
+    vchSig.assign(72, '\000');
+    vchSig[0] = 0x30;
+    vchSig[1] = 69;
+    vchSig[2] = 0x02;
+    vchSig[3] = 33;
+    vchSig[4] = 0x01;
+    vchSig[4 + 33] = 0x02;
+    vchSig[5 + 33] = 32;
+    vchSig[6 + 33] = 0x01;
+    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;
+    return true;
+}
+bool DummySignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
+                                      const BKeyID &keyid,
+                                      const CScript &scriptCode) const {
+    // Create a dummy signature that is a valid BLS-encoding
+    vchSig.assign(72, '\000');
+    vchSig[0] = 0x30;
+    vchSig[1] = 69;
+    vchSig[2] = 0x02;
+    vchSig[3] = 33;
+    vchSig[4] = 0x01;
+    vchSig[4 + 33] = 0x02;
+    vchSig[5 + 33] = 32;
+    vchSig[6 + 33] = 0x01;
+    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;
+    return true;
+}
+bool DummySignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
+                                      const BKeyID &keyid) const {
+    // Create a dummy signature that is a valid BLS-encoding
     vchSig.assign(72, '\000');
     vchSig[0] = 0x30;
     vchSig[1] = 69;

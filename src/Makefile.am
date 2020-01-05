@@ -384,19 +384,14 @@ crypto_libbitcoin_crypto_base_a_SOURCES = \
   crypto/common.h \
   crypto/hmac_sha256.cpp \
   crypto/hmac_sha256.h \
-  crypto/hmac_sha512.cpp \
-  crypto/hmac_sha512.h \
   crypto/ripemd160.cpp \
   crypto/ripemd160.h \
-  crypto/sha1.cpp \
-  crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
-  crypto/sha512.cpp \
-  crypto/sha512.h \
   crypto/siphash.cpp \
   crypto/siphash.h
 
+# crypto primitives library
 if USE_ASM
 crypto_libbitcoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
 endif
@@ -426,10 +421,18 @@ libbitcoin_consensus_a_SOURCES = \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
+  crypto/sha512.cpp \
+  crypto/sha512.h \
+  crypto/hmac_sha512.h \
+  crypto/hmac_sha512.cpp \
+  crypto/sha1.cpp \
+  crypto/sha1.h \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
   consensus/validation.h \
+  bls/bls_functions.cpp \
+  bls/bls_functions.h \
   feerate.h \
   hash.cpp \
   hash.h \
@@ -559,8 +562,8 @@ devaultd_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_ZMQ) \
-  $(LIBDEVAULT_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(LIBDEVAULT_CONSENSUS) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
@@ -616,8 +619,8 @@ devault_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
-  $(LIBDEVAULT_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(LIBDEVAULT_CONSENSUS) \
   $(LIBSECP256K1)
 
 devault_tx_LDADD += $(BOOST_LIBS) $(BOOST_THREAD_LIB) $(CRYPTO_LIBS)
@@ -637,10 +640,10 @@ endif
 bdb_check_LDADD = \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
+  $(LIBBITCOIN_CRYPTO) \
   $(LIBDEVAULT_CONSENSUS) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_UTIL) \
-  $(LIBBITCOIN_CRYPTO) \
   $(LIBBITCOIN_ZMQ) \
   $(LIBUNIVALUE) \
   $(LIBLEVELDB) \
@@ -655,7 +658,7 @@ bdb_check_LDADD += $(BOOST_THREAD_LIB) $(BOOST_LIBS) $(BDB_LIBS) $(CRYPTO_LIBS) 
 # devaultconsensus library #
 if BUILD_BITCOIN_LIBS
 include_HEADERS = script/devaultconsensus.h
-libdevaultconsensus_la_SOURCES = $(crypto_libbitcoin_crypto_base_a_SOURCES) $(libbitcoin_consensus_a_SOURCES)
+libdevaultconsensus_la_SOURCES = $(crypto_libbitcoin_crypto_base_a_SOURCES) $(libbitcoin_consensus_a_SOURCES) 
 
 libdevaultconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
 libdevaultconsensus_la_LIBADD = $(LIBSECP256K1)
