@@ -5,7 +5,6 @@
 
 #include <rpc/util.h>
 #include <core_io.h>
-#include <dstencode.h>
 #include <clientversion.h>
 #include <config.h>
 #include <chain.h>
@@ -20,6 +19,7 @@
 #include <txmempool.h>
 #include <util/system.h>
 #include <util/strencodings.h>
+#include <utxo_functions.h>
 #include <validation.h>
 #include <devault/coinreward.h>
 #include <devault/rewards.h>
@@ -165,6 +165,16 @@ public:
         return obj;
     }
 
+    UniValue operator()(const BKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        CPubKey vchPubKey;
+        obj.pushKV("isscript", false);
+        if (pwallet && pwallet->GetPubKey(keyID, vchPubKey)) {
+            obj.pushKV("pubkey", HexStr(vchPubKey));
+        }
+        return obj;
+    }
+
     UniValue operator()(const CScriptID &scriptID) const {
         UniValue obj(UniValue::VOBJ);
         CScript subscript;
@@ -232,15 +242,14 @@ static UniValue validateaddress(const Config &config,
             HelpExampleRpc("validateaddress",
                            "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\""));
     }
-
+    
 #ifdef ENABLE_WALLET
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
 
     LOCK2(cs_main, pwallet ? &pwallet->cs_wallet : nullptr);
 #endif
 
-    CTxDestination dest =
-        DecodeDestination(request.params[0].get_str(), config.GetChainParams());
+    CTxDestination dest = DecodeDestination(request.params[0].get_str(), config.GetChainParams());
     bool isValid = IsValidDestination(dest);
 
     UniValue ret(UniValue::VOBJ);
@@ -274,6 +283,20 @@ static UniValue validateaddress(const Config &config,
                   if (!key_id->IsNull() && pwallet->mapHdPubKeys.count(*key_id)) {
                   ret.push_back(Pair("hdkeypath", pwallet->mapHdPubKeys[*key_id].GetKeyPath()));
                   ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
+                }
+            }
+              
+            if (const BKeyID *key1_id = &std::get<BKeyID>(dest)) {
+                auto it1 = pwallet->mapBLSKeyMetadata.find(*key1_id);
+                if (it1 != pwallet->mapBLSKeyMetadata.end()) meta = &it1->second;
+                // inside if
+                if (meta) {
+                    CHDChain hdChain;
+                    pwallet->GetDecryptedHDChain(hdChain);
+                    if (!key1_id->IsNull() && pwallet->mapBLSPubKeys.count(*key1_id)) {
+                        ret.push_back(Pair("hdkeypath", pwallet->mapBLSPubKeys[*key1_id].GetKeyPath()));
+                        ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
+                    }
                 }
             }
         }

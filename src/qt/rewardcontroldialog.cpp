@@ -300,14 +300,10 @@ void RewardControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
             coinControl()->UnSelect(outpt);
             continue;
         }
-
-         
         // Quantity
         nQuantity++;
-
         // Amount
         nAmount += out.txout.nValue;
-
         // Bytes
         nBytesInputs += 148;
     }
