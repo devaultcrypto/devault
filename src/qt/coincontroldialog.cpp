@@ -502,7 +502,13 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
         nAmount += out.txout.nValue;
 
         // Bytes
-        nBytesInputs += 148;
+        CTxDestination address;
+        if (ExtractDestination(out.txout.scriptPubKey, address)) {
+            // in all error cases, simply assume 148 here
+            nBytesInputs += 148;
+        } else {
+            nBytesInputs += 148;
+        }
     }
 
     // calculation

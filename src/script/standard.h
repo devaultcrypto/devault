@@ -17,6 +17,7 @@
 static const bool DEFAULT_ACCEPT_DATACARRIER = true;
 
 class CKeyID;
+class BKeyID;
 class CScript;
 
 /** A reference to a CScript: the Hash160 of its serialization (see script.h) */
@@ -54,7 +55,9 @@ enum txnouttype {
     TX_NONSTANDARD,
     // 'standard' transaction types:
     TX_PUBKEY,
+    TX_BLSPUBKEY,
     TX_PUBKEYHASH,
+    TX_BLSKEYHASH,
     TX_SCRIPTHASH,
     TX_MULTISIG,
     // unspendable OP_RETURN script that carries data
@@ -78,8 +81,7 @@ public:
  *  * CScriptID: TX_SCRIPTHASH destination
  *  A CTxDestination is the internal data type encoded in a bitcoin address
  */
-typedef std::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
-
+typedef std::variant<CNoDestination, CKeyID, BKeyID, CScriptID> CTxDestination;
 
 /** Check whether a CTxDestination is a CNoDestination. */
 bool IsValidDestination(const CTxDestination &dest);
@@ -138,5 +140,19 @@ CScript GetScriptForRawPubKey(const CPubKey &pubkey);
 
 /** Generate a multisig script. */
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey> &keys);
+
+// Check if a BLS-only transaction
+bool IsValidBLSScriptSize(const CScript &scriptPubKey);
+bool IsValidBLSPubKeySize(const CScript &script);
+
+bool MatchPayToBLSPubkey(const CScript &script, std::vector<uint8_t> &pubkey);
+bool MatchPayToBLSkeyHash(const CScript &script, std::vector<uint8_t> &pubkeyhash);
+
+// Get BLS Public Key from Script
+CPubKey ExtractBLSPubKey(const CScript & scr);
+
+// Get BLS Public Key & Aggregate BLS Signature from Script
+std::tuple<CPubKey,std::vector<uint8_t> > ExtractBLSPubKeyAndSig(const CScript & scr);
+std::vector<uint8_t> ExtractBLSSig(const CScript & scr);
 
 #endif // BITCOIN_SCRIPT_STANDARD_H

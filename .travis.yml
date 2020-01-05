@@ -54,7 +54,7 @@ jobs:
       env: >-
         HOST=x86_64-linux-gnu
         DOCKER_NAME_TAG=ubuntu:18.04
-        PACKAGES="clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev cmake"
+        PACKAGES="clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev libgmp-dev cmake"
         NO_DEPENDS=1
         RUN_UNIT_TESTS=false
         RUN_FUNCTIONAL_TESTS=false

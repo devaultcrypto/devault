@@ -23,8 +23,12 @@ const char *GetTxnOutputType(txnouttype t) {
             return "nonstandard";
         case TX_PUBKEY:
             return "pubkey";
+        case TX_BLSPUBKEY:
+            return "blspubkey";
         case TX_PUBKEYHASH:
             return "pubkeyhash";
+        case TX_BLSKEYHASH:
+            return "blskeyhash";
         case TX_SCRIPTHASH:
             return "scripthash";
         case TX_MULTISIG:
@@ -36,12 +40,6 @@ const char *GetTxnOutputType(txnouttype t) {
 }
 
 static bool MatchPayToPubkey(const CScript &script, valtype &pubkey) {
-    if (script.size() == CPubKey::PUBLIC_KEY_SIZE + 2 &&
-        script[0] == CPubKey::PUBLIC_KEY_SIZE && script.back() == OP_CHECKSIG) {
-        pubkey = valtype(script.begin() + 1,
-                         script.begin() + CPubKey::PUBLIC_KEY_SIZE + 1);
-        return CPubKey::ValidSize(pubkey);
-    }
     if (script.size() == CPubKey::COMPRESSED_PUBLIC_KEY_SIZE + 2 &&
         script[0] == CPubKey::COMPRESSED_PUBLIC_KEY_SIZE &&
         script.back() == OP_CHECKSIG) {
@@ -53,8 +51,31 @@ static bool MatchPayToPubkey(const CScript &script, valtype &pubkey) {
     return false;
 }
 
+bool MatchPayToBLSPubkey(const CScript &script, valtype &pubkey) {
+    if (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE + 2 &&
+        script[0] == CPubKey::BLS_PUBLIC_KEY_SIZE &&
+        script.back() == OP_CHECKSIG) {
+        pubkey =
+            valtype(script.begin() + 1,
+                    script.begin() + CPubKey::BLS_PUBLIC_KEY_SIZE + 1);
+        return true;
+    }
+    return false;
+}
+
+
 static bool MatchPayToPubkeyHash(const CScript &script, valtype &pubkeyhash) {
     if (script.size() == 25 && script[0] == OP_DUP && script[1] == OP_HASH160 &&
+        script[2] == 20 && script[23] == OP_EQUALVERIFY &&
+        script[24] == OP_CHECKSIG) {
+        pubkeyhash = valtype(script.begin() + 3, script.begin() + 23);
+        return true;
+    }
+    return false;
+}
+
+bool MatchPayToBLSkeyHash(const CScript &script, valtype &pubkeyhash) {
+    if (script.size() == 25 && script[0] == OP_DUP && script[1] == OP_BLSKEYHASH &&
         script[2] == 20 && script[23] == OP_EQUALVERIFY &&
         script[24] == OP_CHECKSIG) {
         pubkeyhash = valtype(script.begin() + 3, script.begin() + 23);
@@ -94,6 +115,38 @@ static bool MatchMultisig(const CScript &script, unsigned int &required,
     return (it + 1 == script.end());
 }
 
+bool IsValidBLSScriptSize(const CScript &script) {
+   //std::cout << "Solver size = " << script.size() << "\n";
+   return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
+           (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+CPubKey::BLS_SIGNATURE_SIZE+4) ||
+           (script.size() == 0) ||
+           (script.size() == CPubKey::BLS_SIGNATURE_SIZE+3));
+}
+
+bool IsValidBLSPubKeySize(const CScript &script) {
+   return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
+           (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+CPubKey::BLS_SIGNATURE_SIZE+4));
+}
+
+CPubKey ExtractBLSPubKey(const CScript & scr) {
+    CPubKey pubkey(scr.begin()+1,scr.begin()+CPubKey::BLS_PUBLIC_KEY_SIZE+1);
+    return pubkey;
+}
+
+std::vector<uint8_t> ExtractBLSSig(const CScript & scr) {
+    // Handle Agg Sig
+    std::vector<uint8_t> aggSig = std::vector<uint8_t>(scr.begin()+2, scr.begin()+2+CPubKey::BLS_SIGNATURE_SIZE);
+    return aggSig;
+}
+
+std::tuple<CPubKey,std::vector<uint8_t> > ExtractBLSPubKeyAndSig(const CScript & scr) {
+    // Handle Grabbing PubKey + Agg Sig
+    std::vector<uint8_t> aggSig = std::vector<uint8_t>(scr.begin()+2, scr.begin()+2+CPubKey::BLS_SIGNATURE_SIZE);
+    CPubKey pubkey(scr.begin()+4+CPubKey::BLS_SIGNATURE_SIZE,
+                   scr.begin()+4+CPubKey::BLS_SIGNATURE_SIZE+CPubKey::BLS_PUBLIC_KEY_SIZE);
+    return std::tuple(pubkey,aggSig);
+}
+
 bool Solver(const CScript &scriptPubKey, txnouttype &typeRet,
             std::vector<std::vector<uint8_t>> &vSolutionsRet) {
     vSolutionsRet.clear();
@@ -126,9 +179,22 @@ bool Solver(const CScript &scriptPubKey, txnouttype &typeRet,
         vSolutionsRet.push_back(std::move(data));
         return true;
     }
+  
+    if (MatchPayToBLSPubkey(scriptPubKey, data)) {
+        typeRet = TX_BLSPUBKEY;
+        vSolutionsRet.push_back(std::move(data));
+        return true;
+    }
 
     if (MatchPayToPubkeyHash(scriptPubKey, data)) {
         typeRet = TX_PUBKEYHASH;
+        vSolutionsRet.push_back(std::move(data));
+        return true;
+    }
+
+    // just checking for BLS..
+    if (MatchPayToBLSkeyHash(scriptPubKey, data)) {
+        typeRet = TX_BLSKEYHASH;
         vSolutionsRet.push_back(std::move(data));
         return true;
     }
@@ -167,8 +233,22 @@ bool ExtractDestination(const CScript &scriptPubKey,
         addressRet = pubKey.GetKeyID();
         return true;
     }
+    if (whichType == TX_BLSPUBKEY) {
+        CPubKey pubKey(vSolutions[0]);
+        if (!pubKey.IsValid()) {
+            return false;
+        }
+
+        addressRet = pubKey.GetBLSKeyID();
+        return true;
+    }
+
     if (whichType == TX_PUBKEYHASH) {
         addressRet = CKeyID(uint160(vSolutions[0]));
+        return true;
+    }
+    if (whichType == TX_BLSKEYHASH) {
+        addressRet = BKeyID(uint160(vSolutions[0]));
         return true;
     }
     if (whichType == TX_SCRIPTHASH) {
@@ -239,6 +319,14 @@ public:
                 << OP_CHECKSIG;
         return true;
     }
+        
+    bool operator()(const BKeyID &keyID) const {
+        script->clear();
+        *script << OP_DUP << OP_BLSKEYHASH << ToByteVector(keyID) << OP_EQUALVERIFY
+                    << OP_CHECKSIG;
+        return true;
+    }
+
 
     bool operator()(const CScriptID &scriptID) const {
         script->clear();
