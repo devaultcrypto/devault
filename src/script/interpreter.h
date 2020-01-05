@@ -16,9 +16,14 @@
 #include <vector>
 
 class CPubKey;
+namespace bls {
+  class CPubKey;
+}
 class CScript;
 class CTransaction;
 class uint256;
+
+uint256 TxSignatureHash(const CTransaction &txTo);
 
 uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo,
                       unsigned int nIn, SigHashType sigHashType,
@@ -31,7 +36,7 @@ public:
     virtual bool VerifySignature(const std::vector<uint8_t> &vchSig,
                                  const CPubKey &vchPubKey,
                                  const uint256 &sighash, uint32_t flags) const;
-
+  
     virtual bool CheckSig(const std::vector<uint8_t> &vchSigIn,
                           const std::vector<uint8_t> &vchPubKey,
                           const CScript &scriptCode, uint32_t flags) const {

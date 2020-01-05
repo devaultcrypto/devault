@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <script/ismine.h>
-
 #include <key.h>
 #include <keystore.h>
 #include <script/script.h>
@@ -12,8 +11,7 @@
 #include <script/standard.h>
 
 using valtype = std::vector<uint8_t>;
-
-static bool HaveKeys(const std::vector<valtype> &pubkeys,
+static bool HaveMultiSigKeys(const std::vector<valtype> &pubkeys,
                      const CKeyStore &keystore) {
     for (const valtype &pubkey : pubkeys) {
         CKeyID keyID = CPubKey(pubkey).GetKeyID();
@@ -53,6 +51,7 @@ isminetype IsMine(const CKeyStore &keystore, const CScript &scriptPubKey,
     }
 
     CKeyID keyID;
+    BKeyID keyID1;
     switch (whichType) {
         case TX_NONSTANDARD:
         case TX_NULL_DATA:
@@ -61,9 +60,17 @@ isminetype IsMine(const CKeyStore &keystore, const CScript &scriptPubKey,
             keyID = CPubKey(vSolutions[0]).GetKeyID();
             if (keystore.HaveKey(keyID)) return ISMINE_SPENDABLE;
             break;
+        case TX_BLSPUBKEY:
+            keyID1 = CPubKey(vSolutions[0]).GetBLSKeyID();
+            if (keystore.HaveKey(keyID1)) return ISMINE_SPENDABLE;
+            break;
         case TX_PUBKEYHASH:
             keyID = CKeyID(uint160(vSolutions[0]));
             if (keystore.HaveKey(keyID)) return ISMINE_SPENDABLE;
+            break;
+        case TX_BLSKEYHASH:
+            keyID1 = BKeyID(uint160(vSolutions[0]));
+            if (keystore.HaveKey(keyID1)) return ISMINE_SPENDABLE;
             break;
         case TX_SCRIPTHASH: {
             CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
@@ -85,7 +92,7 @@ isminetype IsMine(const CKeyStore &keystore, const CScript &scriptPubKey,
             std::vector<valtype> keys(vSolutions.begin() + 1,
                                       vSolutions.begin() + vSolutions.size() -
                                           1);
-            if (HaveKeys(keys, keystore)) {
+            if (HaveMultiSigKeys(keys, keystore)) {
                 return ISMINE_SPENDABLE;
             }
             break;

@@ -46,7 +46,8 @@ add_library(bls ${BLS_HEADERS} ${OTHER_HEADERS}
 target_include_directories(bls
   PRIVATE
   ${include_directories}
-  ${Boost_INCLUDE_DIR}
+  Boost::headers
+  ${GMP_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}//relic/include
   ${CMAKE_CURRENT_SOURCE_DIR}/../
   ${CMAKE_BINARY_DIR} # for relic_conf.h

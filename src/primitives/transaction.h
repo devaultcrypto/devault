@@ -11,6 +11,7 @@
 #include <feerate.h>
 #include <primitives/txid.h>
 #include <script/script.h>
+#include <script/standard.h> // for IsValidBLSScriptSize
 #include <serialize.h>
 
 static const int SERIALIZE_TRANSACTION = 0x00;
@@ -167,6 +168,7 @@ public:
   
     bool IsNull() const { return nValue == Amount::null(); }
     bool IsZero() const { return nValue == Amount(0); }
+    bool IsBLS() const { return ((scriptPubKey[1] == OP_BLSKEYHASH) || IsValidBLSScriptSize(scriptPubKey)); }
 
     friend bool operator==(const CTxOut &a, const CTxOut &b) {
         return (a.nValue == b.nValue && a.scriptPubKey == b.scriptPubKey);
@@ -288,6 +290,15 @@ public:
     bool IsCoinBase() const {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
+
+    bool IsBLSOnly() const {
+      // Check for BLS only Transaction
+      for (const auto& v : vin) {
+        if (!IsValidBLSScriptSize(v.scriptSig)) return false;
+      }
+      return true;
+    }
+
 
     friend bool operator==(const CTransaction &a, const CTransaction &b) {
         return a.hash == b.hash;
