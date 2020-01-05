@@ -82,7 +82,8 @@ public:
      * This is expensive.
      */
     CPubKey GetPubKey() const;
-
+    CPubKey GetPubKeyForBLS() const;
+    
     /**
      * Create a DER-serialized ECDSA signature.
      * The test_case parameter tweaks the deterministic nonce.
@@ -91,11 +92,10 @@ public:
                    uint32_t test_case = 0) const;
 
     /**
-     * Create a Schnorr signature.
-     * The test_case parameter tweaks the deterministic nonce.
+     * Create a BLS signature.
      */
-    bool SignSchnorr(const uint256 &hash, std::vector<uint8_t> &vchSig,
-                     uint32_t test_case = 0) const;
+    bool SignBLS(const uint256 &hash, std::vector<uint8_t> &vchSig) const;
+    //bool SignBLS(const uint256 &hash, bls::Signature& sig) const;
 
     /**
      * Create a compact ECDSA signature (65 bytes), which allows reconstructing
