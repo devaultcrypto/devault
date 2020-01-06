@@ -2232,9 +2232,9 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
         g_best_block_cv.notify_all();
     }
 
-    LogPrintf("%s: new best=%s height=%d progress=%2.1f%% version=0x%0x "
+    LogPrintf("%s: %s height=%d progress=%2.1f%% version=0x%0x "
               "log2_work=%0.6g tx=%lu "
-              "date='%s' cache=%.1fMiB(%utxo)\n",
+              "date='%s'",
               __func__, chainActive.Tip()->GetBlockHash().ToString(),
               chainActive.Height(),
               GuessVerificationPercent(config.GetChainParams().TxData(),
@@ -2242,9 +2242,16 @@ static void UpdateTip(const Config &config, CBlockIndex *pindexNew) {
               (chainActive.Tip()->nVersion >> 28),
               log(chainActive.Tip()->nChainWork.getdouble()) / log(2.0),
               (unsigned long)chainActive.Tip()->nChainTx,
-              FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()),
-              pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)),
-              pcoinsTip->GetCacheSize());
+              FormatISO8601DateTime(chainActive.Tip()->GetBlockTime()));
+    
+    // Just show cache if above a threshold
+    if (pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)) > 100) {
+      LogPrintf(" cache=%.1fMiB(%utxo)\n",
+                pcoinsTip->DynamicMemoryUsage() * (1.0 / (1 << 20)),
+                pcoinsTip->GetCacheSize());
+    } else {
+      LogPrintf("\n");
+    }
 }
 
 /**
