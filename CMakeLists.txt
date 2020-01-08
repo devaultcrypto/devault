@@ -33,9 +33,9 @@ if(CCACHE)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE})
 endif(CCACHE)
 
-# Default to RelWithDebInfo configuration
+# Default to Release configuration
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+	set(CMAKE_BUILD_TYPE Release CACHE STRING
 		"Select the configuration for the build" FORCE)
 endif()
 
