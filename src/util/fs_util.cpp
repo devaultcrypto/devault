@@ -536,7 +536,9 @@ const fs::path &GetBlocksDir(bool fNetSpecific) {
     if (fNetSpecific) {
         path /= BaseParams().DataDir();
     }
-
+#ifdef USE_ROCKSDB
+    path /= "rocksdb";
+#endif
     path /= "blocks";
     fs::create_directories(path);
     return path;

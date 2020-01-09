@@ -64,7 +64,11 @@ struct CoinEntry {
 } // namespace
 
 CCoinsViewDB::CCoinsViewDB(size_t nCacheSize, bool fMemory, bool fWipe)
+#ifdef USE_ROCKSDB
+    : db(GetDataDir() / "rocksdb" / "chainstate", nCacheSize, fMemory, fWipe, true) {}
+#else
     : db(GetDataDir() / "chainstate", nCacheSize, fMemory, fWipe, true) {}
+#endif
 
 bool CCoinsViewDB::GetCoin(const COutPoint &outpoint, Coin &coin) const {
     return db.Read(CoinEntry(&outpoint), coin);
@@ -161,7 +165,11 @@ size_t CCoinsViewDB::EstimateSize() const {
 
 CBlockTreeDB::CBlockTreeDB(size_t nCacheSize, bool fMemory, bool fWipe)
     : CDBWrapper(gArgs.IsArgSet("-blocksdir")
+#ifdef USE_ROCKSDB
+                     ? GetDataDir() / "rocksdb" / "blocks" / "index"
+#else
                      ? GetDataDir() / "blocks" / "index"
+#endif
                      : GetBlocksDir() / "index",
                  nCacheSize, fMemory, fWipe) {}
 

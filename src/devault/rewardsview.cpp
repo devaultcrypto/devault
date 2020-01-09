@@ -18,7 +18,11 @@
 using namespace std; // for make_pair
 
 CRewardsViewDB::CRewardsViewDB(const std::string &dbname, size_t nCacheSize, bool fMemory, bool fWipe)
+#ifdef USE_ROCKSDB
+    : db(GetDataDir() / "rocksdb" / dbname, nCacheSize, fMemory, fWipe, true) {}
+#else
     : db(GetDataDir() / dbname, nCacheSize, fMemory, fWipe, true) {}
+#endif
 
 bool CRewardsViewDB::Flush() {
     CDBBatch batch(db);

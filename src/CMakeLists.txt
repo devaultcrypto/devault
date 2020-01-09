@@ -619,13 +619,6 @@ if (BUILD_CTESTS)
   add_subdirectory(catch_tests)
 endif()
 
-
-message(STATUS "-----------------------------------------")
-if (CMAKE_BUILD_TYPE)
-  message(STATUS "Build type is ${CMAKE_BUILD_TYPE}")
-  message(STATUS "-----------------------------------------")
-endif()
-
 #########################################################################
 # print features summary
 #########################################################################
@@ -637,3 +630,11 @@ message(STATUS "Disabled features")
 feature_summary(WHAT DISABLED_FEATURES)
 message(STATUS "######################################################")
 
+if (CMAKE_BUILD_TYPE)
+  if (RocksDB_FOUND)
+    message(STATUS "Build type is ${CMAKE_BUILD_TYPE} - Using RocksDB")
+  else()
+    message(STATUS "Build type is ${CMAKE_BUILD_TYPE} - Using LEVELDB")
+  endif()
+  message(STATUS "######################################################")
+endif()
