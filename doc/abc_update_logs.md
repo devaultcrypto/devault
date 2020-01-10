@@ -1,19 +1,107 @@
+20.11
+      Use best-fit strategy in Arena, now O(log(n)) instead O(n)
+      Nits in rpcdump
+      Various formating fix in validation.h
+      [DEPENDS] Allow to limit the jobs when building packages with ninja
+      [DEPENDS] Make the boost package build parallel
+      [SECP256K1] Move the autotools Travis build to it's own script
+      Added guide for OSX users on how to install clang-format-8.
+      Do not import private keys to wallets with private keys disabled
+      Add pippenger_wnaf for multi-multiplication
+      [DEPENDS] Make the qt package build parallel
+      [DEPENDS] Make bdb, dbus, event, miniupnpc, zmq packages build parallel
+      [DEPENDS] Make qrencode, protobuf and zlib packages build parallel
+      [DEPENDS] Make expat, fontconfig and freetype packages build parallel
+      [DEPENDS] Make all the x* packages build parallel
+      [DEPENDS] Make all the libX_* packages build parallel
+      [DEPENDS] Make all the native_* packages build parallel
+      [SECP256k1] Update the README to include the CMake build instructions
+      [SECP256K1] Add a case with Schnorr disabled to the Travis matrix
+      [CMAKE] Don't use C++ features for building secp256k1
+      Bump version to 0.20.11
+      [DEPENDS] Use parallel compilation when building packages
+      Add a facility to extract libsecp256k1 from the repository
+      Add Accelerate book to Bitcoin ABC reading list
+      Clean up more instances of create_transaction()
+      [CMAKE] Allow building secp256k1 as a standalone project
+      [UBSAN] Fix UBSAN issue in test_bitcon_main.cpp
+      [CMAKE] Cleanup secp256k1 module path
+      [cmake] Use list append when adding path to CMAKE_MODULE_PATH
+      [CI] Disable crypto assembly when building with ASAN
+      Avoid custom main for passing arguments to the unit tests
+      GUI: Change the receive button to respond to keypool state changing
+      [Tests] Cleanup feature_block.py, remove unnecessary PreviousSpendableOutput object
+      [Tests] Cleanup extra instances of create_transaction
+      [Tests] Rename create_tx and move to blocktools.py
+      Various nits in receivecoinsdialog.cpp
+      Various nits in walletmodel.cpp
+      [CMAKE] Fix DLL exports
+      [cmake] Make bench-secp256k1 actually run benchmarks, not simply build them.
+      Update secp256k1 README
+      add nSigChecks counting to EvalScript
+      [rpc] Finish backporting changes to prioritisetransaction's priority_delta argument
+      Revert "[mining] Rename several CBlockTemplateEntry members for clarity"
+20.10
+      Merge #14568: build: Fix Qt link order for Windows build
+      Update seeds
+      Update manpages for 0.20.10 release
+      Update chainparams
+      Fix protobuf linking when building without the wallet
+      finish backporting PR9602 - misc
+      finish backporting PR9602 : remove unused priority number in mempool mapDeltas
+      finish backporting PR9602 - test_bitcoin clean up unused param
+      finish backporting PR9602 - remove unused and untested miner code
+      finish backporting PR9602 - remove unused functional test framework code
+      finish backporting PR9602 - remove unused modified-size computations
+      Add sig files to Github release
+      Fix nits in check-keys.sh
+      Fix missing newline at end of keys file
+      [CMAKE] Allow to run the extended functional tests
+      [CMAKE] Make the functional test run with upgrade activated
+      [CMAKE] Add a check-upgrade-activated magic target
+      [tests] allow BOOST_CHECK_EQUAL for ScriptErrors
+      [CMAKE] Separate the target for running the unit tests with upgrade
+#     Merge #13791: gui: Reject dialogs if key escape is pressed
+      refactor null-signature checks in OP_CHECKSIG, OP_CHECKDATASIG
+      Backport PR11309: Minor cleanups for AcceptToMemoryPool
+      [diagnostic] perform more aggressive checking of the index during ActivateBestChain
+      Merge #15101: gui: Add WalletController
+      Merge #14451: Allow building GUI without BIP70 support
+      Fix heap-use-after-free in activation_tests
+      Remove GetPriority from CCoinsViewCache
+      Bump version to 0.20.10
+      Remove priority from CTxMemPoolEntry
+      kill CTxMemPoolEntry::GetPriority
+      Remove deprecated startingpriority and currentpriority from RPC
+      CompareIteratorByHash => CompareIteratorById
+      Remove TxCoinAgePriorityCompare
+      Do not log priority when using -printpriority
+      [cmake] Use more sensible name for individual test targets
+      Merge #13844: doc: correct the help output for -prune
+      Merge #13412: Make ReceivedBlockTransactions return void
+      Rename activation tests which are now feature tests
+#     Merge #13824: doc: Remove outdated net comment
+      Cleanup graviton activation
+      Make the tests use phonon activation instead of graviton
+#     Merge #13776: net: Add missing verification of IPv6 address in CNetAddr::GetIn6Addr(...)
+#     Some formatting nits in netaddress.cpp
+
 20.9
      [test-seeds] Stop the script if starting bitcoind failed
      Update seeds
-     Filter IPv6 by ASN
+#    Filter IPv6 by ASN
      Update manpages for 0.20.9 release
      Update chainparams
      Remove blockprioritypercentage config parameter.
      Add phonon activation logic
      [CMAKE] Override default flags
      Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
-     [backport] net: Allow connections from misbehavior banned peers
+#    [backport] net: Allow connections from misbehavior banned peers
      [CI] Don't override the default Junit file name
      [CMAKE] Unbreak the activated tests
-     [CMAKE] Add a status message to inform the user that ccache is used
+#    [CMAKE] Add a status message to inform the user that ccache is used
      [AUTOTOOLS] Don't build the seeder tests if --disable-tests is set
-     Merge #13419: [tests] Speed up knapsack_solver_test by not recreating wallet 100 times.
+#    Merge #13419: [tests] Speed up knapsack_solver_test by not recreating wallet 100 times.
      Merge #13775: doc: Remove newlines from error message
 #    Merge #13773: wallet: Fix accidental use of the comma operator
      stop rewinding post-segwit blocks on startup
