@@ -21,8 +21,6 @@ set(CMAKE_MODULE_PATH
 	${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
 )
 
-set(Boost_NO_BOOST_CMAKE 1)
-
 # Make contrib script accessible.
 set(CONTRIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/contrib)
 
