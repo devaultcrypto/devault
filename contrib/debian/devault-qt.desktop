@@ -2,13 +2,13 @@
 # sudo desktop-file-install devault.desktop
 
 [Desktop Entry]
-Comment=DeVault Wallet
+Comment=DeVault Core wallet
 Exec=devault-qt %u
-GenericName[en_US]=Devault-qt
-GenericName=Devault-qt
+GenericName[en_US]=Devault Core
+GenericName=Devault Core
 Icon=devault-128.png
-Name[en_US]=devault-qt
-Name=DeVault Wallet
+Name[en_US]=Devault Core
+Name=DeVault Core wallet
 Categories=Network;
 StartupNotify=false
 Terminal=false
