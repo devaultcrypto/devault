@@ -401,9 +401,9 @@ AC_ARG_WITH([daemon],
 
 AC_ARG_WITH([seeder],
   [AS_HELP_STRING([--with-seeder],
-  [build seeder (default=yes)])],
+  [build seeder (default=no)])],
   [build_devault_seeder=$withval],
-  [build_devault_seeder=yes])
+  [build_devault_seeder=no])
 
 use_pkgconfig=yes
 case $host in
