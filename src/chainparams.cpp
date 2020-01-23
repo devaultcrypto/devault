@@ -172,7 +172,7 @@ public:
             }};
 
         // Currently inaccurate but gives a better progress indicator
-        chainTxData = ChainTxData{1577083133, 944167, 0.008};
+        chainTxData = ChainTxData{1579810314, 1587743, 0.0088};
     }
 };
 
