@@ -244,11 +244,11 @@ static UniValue getnewaddress(const Config &config,
     }
 
     if (pwallet->UseBLSKeys()) {
-        CKeyID keyID = newKey.GetKeyID();
+        BKeyID keyID = newKey.GetBLSKeyID();
         pwallet->SetAddressBook(keyID, label, "receive");
         return EncodeDestination(keyID);
     } else {
-        BKeyID keyID = newKey.GetBLSKeyID();
+        CKeyID keyID = newKey.GetKeyID();
         pwallet->SetAddressBook(keyID, label, "receive");
         return EncodeDestination(keyID);
     }
