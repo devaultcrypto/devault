@@ -181,6 +181,8 @@ enum opcodetype {
     // More crypto
     OP_CHECKDATASIG = 0xba,
     OP_CHECKDATASIGVERIFY = 0xbb,
+    OP_BLSPUBKEY   = 0xbc,
+    OP_BLSKEYHASH = 0xbd,
 
     // The first op_code value after all defined opcodes
     FIRST_UNDEFINED_OP_VALUE,
@@ -188,9 +190,6 @@ enum opcodetype {
     // multi-byte opcodes
     OP_PREFIX_BEGIN = 0xf0,
     OP_PREFIX_END = 0xf7,
-    OP_BLSPUBKEY   = 0xfa,
-    OP_BLSKEYHASH = 0xfe,
-
     OP_INVALIDOPCODE = 0xff,
 };
 
