@@ -81,9 +81,12 @@ void CHDChain::AddAccount() {
 
 bool CHDChain::GetAccount(uint32_t nAccountIndex, CHDAccount &hdAccountRet) {
   LOCK(cs_accounts);
-  if (nAccountIndex > mapAccounts.size() - 1) return false;
-  hdAccountRet = mapAccounts[nAccountIndex];
-  return true;
+  if (mapAccounts.count(nAccountIndex)) {
+    hdAccountRet = mapAccounts[nAccountIndex];
+    return true;
+  } else {
+    return false;
+  }
 }
 
 bool CHDChain::SetAccount(uint32_t nAccountIndex, const CHDAccount &hdAccount) {
