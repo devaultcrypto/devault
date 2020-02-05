@@ -314,9 +314,9 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             ssValue >> keyMeta;
             wss.nKeyMeta++;
             if (vchPubKey.IsBLS()) {
-                pwallet->LoadKeyMetadata(vchPubKey.GetKeyID(), keyMeta);
-            } else {
                 pwallet->LoadKeyMetadata(vchPubKey.GetBLSKeyID(), keyMeta);
+            } else {
+                pwallet->LoadKeyMetadata(vchPubKey.GetKeyID(), keyMeta);
             }
         } else if (strType == "watchmeta") {
             CScript script;
