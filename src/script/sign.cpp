@@ -464,30 +464,14 @@ bool DummySignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
                                       const BKeyID &keyid,
                                       const CScript &scriptCode) const {
     // Create a dummy signature that is a valid BLS-encoding
-    vchSig.assign(72, '\000');
-    vchSig[0] = 0x30;
-    vchSig[1] = 69;
-    vchSig[2] = 0x02;
-    vchSig[3] = 33;
-    vchSig[4] = 0x01;
-    vchSig[4 + 33] = 0x02;
-    vchSig[5 + 33] = 32;
-    vchSig[6 + 33] = 0x01;
-    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;
+    vchSig.assign(97, '\000');
+    vchSig[96] = SIGHASH_ALL | SIGHASH_FORKID;
     return true;
 }
 bool DummySignatureCreator::CreateSig(std::vector<uint8_t> &vchSig,
                                       const BKeyID &keyid) const {
     // Create a dummy signature that is a valid BLS-encoding
-    vchSig.assign(72, '\000');
-    vchSig[0] = 0x30;
-    vchSig[1] = 69;
-    vchSig[2] = 0x02;
-    vchSig[3] = 33;
-    vchSig[4] = 0x01;
-    vchSig[4 + 33] = 0x02;
-    vchSig[5 + 33] = 32;
-    vchSig[6 + 33] = 0x01;
-    vchSig[6 + 33 + 32] = SIGHASH_ALL | SIGHASH_FORKID;
+    vchSig.assign(97, '\000');
+    vchSig[96] = SIGHASH_ALL | SIGHASH_FORKID;
     return true;
 }
