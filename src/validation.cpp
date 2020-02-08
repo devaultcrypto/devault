@@ -1175,7 +1175,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
         ScriptError scriptError = ScriptError::CHECKSIGVERIFY;
         return state.DoS(
                          100, false, REJECT_INVALID,
-                         strprintf("mandatory-script-verify-flag-failed (%s)",
+                         strprintf("bls-signature-verification-failed (%s)",
                                    ScriptErrorString(scriptError)));
       }
 
