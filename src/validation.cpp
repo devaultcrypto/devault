@@ -5734,7 +5734,7 @@ bool CheckBLSSigs(const CTransaction &tx, const CCoinsViewCache & inputs) {
   std::set<std::vector<uint8_t>> pubkeyset;
   std::vector<uint8_t> aggSig;
       
-  LogPrintf("For %d inputs, Tx size for Temporary debug = %d\n",tx.vin.size(), tx.GetTotalSize());
+  LogPrintf("CheckBLSSigs : For %d inputs, Tx size for Temporary debug = %d\n",tx.vin.size(), tx.GetTotalSize());
 
   // Collect Public Keys 1st
   for (size_t i = 0; i < tx.vin.size(); i++) {
@@ -5788,7 +5788,7 @@ bool CheckBLSSigs(const CTransaction &tx, const CCoinsViewCache & inputs) {
   std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys);
   uint256 sighash = TxSignatureHash(tx); // NULLs out the CScript to be compatible with Sender
 
-  /*
+  /*  
     std::cout << "Hash = " << sighash.ToString() << "\n";
     std::cout << "aggSig = " << HexStr(aggSig) << "\n";
     std::cout << "aggKeys = " << HexStr(aggKeys) << "\n";

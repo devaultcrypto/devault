@@ -2775,8 +2775,18 @@ bool CWallet::SelectCoins(const std::vector<COutput> &vAvailableCoins,
     // Add preset inputs to the total value selected.
     nValueRet += nValueFromPresetInputs;
 
-    // Not sure since mixed with other stuff here
-    ktype = KeyTypes::POSSIBLY_MIXED;
+  
+    LegacyOnly = true;
+    BLSOnly = true;
+
+    for (const auto& out : setCoinsRet) {
+        if (out.txout.IsBLS()) LegacyOnly = false;
+        else BLSOnly = false;
+    }
+
+    if (LegacyOnly) ktype = KeyTypes::LEGACY_ONLY;
+    else if (BLSOnly) ktype = KeyTypes::BLS_ONLY;
+    else ktype = KeyTypes::MIXED_COINS;
     
     return res;
 }
@@ -5268,6 +5278,7 @@ bool CWallet::CreateBLSTxWithSig(const std::set<CInputCoin> &setCoins, CMutableT
   CTransaction txNewConst(txNew);
   int nIn = 0;
   
+  LogPrintf("CreateBLSTxWithSig : For %d inputs\n",setCoins.size());
   // Collect the Public Keys, getting from Hashes if necessary
   
   // Most args of TransactionSignatureCreator actually ignored
@@ -5319,13 +5330,17 @@ bool CWallet::CreateBLSTxWithSig(const std::set<CInputCoin> &setCoins, CMutableT
   
   {
     aggSig.pop_back();
-    /*
-      std::cout << "Hash = " << hash.ToString() << "\n";
-      std::cout << "aggSig = " << HexStr(aggSig) << "\n";
-    */
+    
     std::vector<std::vector<uint8_t>> pubkeys;
     for (const auto& p : pubkeyset) pubkeys.push_back(ToByteVector(p));
     std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys);
+
+    /*
+      std::cout << "Hash = " << hash.ToString() << "\n";
+      std::cout << "aggSig = " << HexStr(aggSig) << "\n";
+      std::cout << "aggKeys = " << HexStr(aggKeys) << "\n";
+    */
+    
     bool check = bls::VerifyAggregate(hash, aggSig, aggKeys);
     if (!check) {
       strFailReason = _("BLS Verify check failed in CreateTransaction");
