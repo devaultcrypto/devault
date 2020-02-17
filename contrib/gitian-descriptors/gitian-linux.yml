@@ -3,7 +3,7 @@ name: "devault-linux"
 enable_cache: true
 distro: "debian"
 suites:
-- "buster"
+- "bionic"
 architectures:
 - "amd64"
 multiarch:
@@ -33,6 +33,7 @@ packages:
 - "pkg-config"
 - "python3"
 - "libgmp-dev"
+- "libsodium-dev"
 # FIXME: these dependencies are only required to make CMake happy when building
 # native tools. They can be removed when the `NativeExecutable.cmake` gets
 # improved to avoid requiring all the devault dependencies.

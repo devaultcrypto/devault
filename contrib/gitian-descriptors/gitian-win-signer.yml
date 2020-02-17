@@ -2,7 +2,7 @@
 name: "bitcoin-win-signer"
 distro: "debian"
 suites:
-- "buster"
+- "bionic"
 architectures:
 - "amd64"
 packages:
