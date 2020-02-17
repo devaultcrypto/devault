@@ -5,6 +5,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <wallet/analyzecoins.h>
+#include <wallet/bls_tx.h>
 #include <wallet/wallet.h>
 #include <benchmark.h>
 #include <chain.h>
@@ -3193,7 +3194,9 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
 
             // BLS only inputs
             if (kTypes == KeyTypes::BLS_ONLY) {
-              if (!CreateBLSTxWithSig(setCoins, txNew, strFailReason)) {
+              auto strFail = CreatePrivateTxWithSig(this, setCoins, txNew);
+              if (strFail) {
+                strFailReason = strFail.value();
                 return false;
               }
               
@@ -5247,7 +5250,7 @@ std::tuple<CHDChain,CHDChain> CWallet::GetHDChains() const {
   return std::tuple(hdChainDec, hdChainEnc);
 }
 
-std::tuple<bool, CKey, CPubKey, bool> CWallet::ExtractFromBLSScript(const CScript &scriptPubKey) {
+std::tuple<bool, CKey, CPubKey, bool> CWallet::ExtractFromBLSScript(const CScript &scriptPubKey) const {
     CKey key;
     CPubKey pubkey;
     txnouttype whichTypeRet;
@@ -5268,89 +5271,4 @@ std::tuple<bool, CKey, CPubKey, bool> CWallet::ExtractFromBLSScript(const CScrip
     GetPubKey(keyID1, pubkey);
 
     return std::tuple(got_key, key, pubkey, whichTypeRet == TX_BLSPUBKEY);
-}
-
-
-bool CWallet::CreateBLSTxWithSig(const std::set<CInputCoin> &setCoins, CMutableTransaction &txNew,
-                                 std::string &strFailReason) {
-
-  SigHashType sigHashType = SigHashType().withForkId();
-  CTransaction txNewConst(txNew);
-  int nIn = 0;
-  
-  LogPrintf("CreateBLSTxWithSig : For %d inputs\n",setCoins.size());
-  // Collect the Public Keys, getting from Hashes if necessary
-  
-  // Most args of TransactionSignatureCreator actually ignored
-  uint256 hash = TxSignatureHash(txNewConst);
-  CPubKey pubkey;
-  
-  bool was_public=false;
-  std::vector<CKey> keys;
-  std::set<CPubKey> pubkeyset;
-  bool has_pubkey_already = false;
-  for (const auto &coin : setCoins) {
-    CKey key;
-    bool got_key;
-    std::tie(got_key, key, pubkey, was_public) = ExtractFromBLSScript(coin.txout.scriptPubKey);
-    if (!got_key) {
-      strFailReason = _("Unable to get BLS Public Key or Sign with BLS Key");
-      return false;
-    }
-    
-    // collect private keys in a vector without repeats
-    has_pubkey_already = false;
-    if (pubkeyset.count(pubkey) == 0) {
-      keys.push_back(key); // previous using std::set but compile issues arose
-      pubkeyset.emplace(pubkey);
-    } else {
-      has_pubkey_already = true;
-    }
-    
-    // Add PubKey
-    // if was_public no need to add to script
-    CScript c;
-    if (!was_public) {
-      // also if pubkey was already added no need to repeat
-      if (!has_pubkey_already) {
-        c << ToByteVector(pubkey) << OP_CHECKSIG;
-      }
-    }
-    UpdateTransaction(txNew, nIn++, c);
-                
-  }
-
-  std::vector<uint8_t> aggSig = bls::AggregateSig(keys, hash);
-  // for Script serialization
-  aggSig.push_back(uint8_t(sigHashType.getRawSigHashType()));
-  CScript c; // Should be compatible with 1 BLS sig case
-  c << aggSig;
-  if (!was_public && !has_pubkey_already) c << ToByteVector(pubkey);
-  SignatureData sigdata(c);
-  
-  {
-    aggSig.pop_back();
-    
-    std::vector<std::vector<uint8_t>> pubkeys;
-    for (const auto& p : pubkeyset) pubkeys.push_back(ToByteVector(p));
-    std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys);
-
-    /*
-      std::cout << "Hash = " << hash.ToString() << "\n";
-      std::cout << "aggSig = " << HexStr(aggSig) << "\n";
-      std::cout << "aggKeys = " << HexStr(aggKeys) << "\n";
-    */
-    
-    bool check = bls::VerifyAggregate(hash, aggSig, aggKeys);
-    if (!check) {
-      strFailReason = _("BLS Verify check failed in CreateTransaction");
-      return false;
-    }
-  }
-
-                   
-  // Put Agg Sig into the vin of the last input of the tx. Check this later...
-  UpdateTransaction(txNew, nIn-1, sigdata);
-  
-  return true;
 }

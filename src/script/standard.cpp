@@ -147,6 +147,25 @@ std::tuple<CPubKey,std::vector<uint8_t> > ExtractBLSPubKeyAndSig(const CScript &
     return std::tuple(pubkey,aggSig);
 }
 
+std::tuple<std::vector<std::vector<uint8_t>>,std::vector<uint8_t> > ExtractBLSPubKeysAndSig(const CScript & scr, int rand_keys) {
+    std::vector<std::vector<uint8_t> > pubkeys;
+    
+    int start = 1;
+    for (int i=0;i < rand_keys+1 ; i++) {
+        std::vector<uint8_t> p = std::vector<uint8_t>(scr.begin()+start, scr.begin()+start+CPubKey::BLS_PUBLIC_KEY_SIZE);
+        start += CPubKey::BLS_PUBLIC_KEY_SIZE + 1;
+        pubkeys.push_back(p);
+    }
+    
+    start++;
+    std::vector<uint8_t> aggSig = std::vector<uint8_t>(scr.begin()+start, scr.begin()+start+CPubKey::BLS_SIGNATURE_SIZE+1);
+
+    
+    return std::tuple(pubkeys,aggSig);
+}
+    
+
+
 bool Solver(const CScript &scriptPubKey, txnouttype &typeRet,
             std::vector<std::vector<uint8_t>> &vSolutionsRet) {
     vSolutionsRet.clear();

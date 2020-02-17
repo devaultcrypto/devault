@@ -891,7 +891,7 @@ public:
      * Generate a new key
      */
     std::tuple<CPubKey, CHDPubKey> GenerateNewKey(CHDChain& clearChain, bool internal) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    std::tuple<bool, CKey, CPubKey, bool> ExtractFromBLSScript(const CScript &scriptPubKey);
+    std::tuple<bool, CKey, CPubKey, bool> ExtractFromBLSScript(const CScript &scriptPubKey) const;
 
     //! Load metadata (used by LoadWallet)
     void LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &metadata) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);

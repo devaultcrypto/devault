@@ -11,6 +11,7 @@
 #include <blockvalidity.h>
 #include <chainparams.h>
 #include <checkpoints.h>
+#include <checksigs.h>
 #include <checkqueue.h>
 #include <config.h>
 #include <consensus/activation.h>
@@ -102,7 +103,6 @@ Amount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 CTxMemPool g_mempool;
 
 static void CheckBlockIndex(const Consensus::Params &consensusParams);
-static bool CheckBLSSigs(const CTransaction &tx, const CCoinsViewCache & inputs);
 
 
 /** Constant stuff for coinbase transactions we create: */
@@ -1169,7 +1169,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
     // Check for BLS only Transaction
     if (tx.IsBLSOnly()) {
       
-      bool check = CheckBLSSigs(tx, inputs);
+      bool check = CheckPrivateSigs(tx, inputs);
       if (!check) {
         // Refine this/do more flag checks?
         ScriptError scriptError = ScriptError::CHECKSIGVERIFY;
@@ -5728,70 +5728,3 @@ public:
     }
 } instance_of_cmaincleanup;
 
-
-bool CheckBLSSigs(const CTransaction &tx, const CCoinsViewCache & inputs) {
-
-  std::set<std::vector<uint8_t>> pubkeyset;
-  std::vector<uint8_t> aggSig;
-      
-  LogPrintf("For %d inputs, Tx size for Temporary debug = %d\n",tx.vin.size(), tx.GetTotalSize());
-
-  // Collect Public Keys 1st
-  for (size_t i = 0; i < tx.vin.size(); i++) {
-    const CScript& scr = tx.vin[i].scriptSig;
-    const COutPoint &prevout = tx.vin[i].prevout;
-    const Coin &coin = inputs.AccessCoin(prevout);
-    assert(!coin.IsSpent());
-    
-    // Go from script to PubKeys here
-    bool was_pubkey = IsValidBLSPubKeySize(scr);
-    
-    if (!was_pubkey) {
-      std::vector<uint8_t> pubk;
-      MatchPayToBLSPubkey(coin.GetTxOut().scriptPubKey, pubk);
-      pubkeyset.emplace(pubk);
-    }
-    
-    // if not "was_pubkey" it means the prevout was a P2PK, hence look up the pub key
-    
-    // For non-last Tx
-    // Check if script is either 1) empty (P2PK) case, 2) Has Public Key (P2PKH) case,
-    // For last Tx
-    // Check if script is 1) Public Key + Aggregate Signature 2) Just Aggregate Signature
-    
-    // For cases without Public Key, get the Public Key from previous transaction lookup - how?
-    
-    CPubKey pubkey;
-    if (i < tx.vin.size()-1) {
-      if (was_pubkey) {
-        pubkey = ExtractBLSPubKey(scr); // ).Set(scr.begin()+1,scr.begin()+CPubKey::BLS_PUBLIC_KEY_SIZE+1);
-        pubkeyset.emplace(ToByteVector(pubkey));
-      }
-    } else {
-      if (was_pubkey) {
-        // Handle Grabbing PubKey + Agg Sig
-        std::tie(pubkey, aggSig) = ExtractBLSPubKeyAndSig(scr);
-        
-        /*
-          aggSig = std::vector<uint8_t>(scr.begin()+2, scr.begin()+2+CPubKey::BLS_SIGNATURE_SIZE);
-          pubkey.Set(scr.begin()+4+CPubKey::BLS_SIGNATURE_SIZE,
-          scr.begin()+4+CPubKey::BLS_SIGNATURE_SIZE+CPubKey::BLS_PUBLIC_KEY_SIZE);
-        */
-        pubkeyset.emplace(ToByteVector(pubkey));
-      } else {
-        aggSig = ExtractBLSSig(scr);
-      }
-    }
-  }
-  // Verify Aggregate Signature here
-  std::vector<std::vector<uint8_t>> pubkeys(pubkeyset.begin(),pubkeyset.end());
-  std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys);
-  uint256 sighash = TxSignatureHash(tx); // NULLs out the CScript to be compatible with Sender
-
-  /*
-    std::cout << "Hash = " << sighash.ToString() << "\n";
-    std::cout << "aggSig = " << HexStr(aggSig) << "\n";
-    std::cout << "aggKeys = " << HexStr(aggKeys) << "\n";
-  */
-  return bls::VerifyAggregate(sighash, aggSig, aggKeys);
-}
