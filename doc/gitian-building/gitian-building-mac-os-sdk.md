@@ -23,7 +23,7 @@ Non-MacOS host:
 ---------------
 
 Alternatively, you can use 7zip and SleuthKit to extract the files one by one.
-The script [extract-osx-sdk.sh](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/contrib/macdeploy/extract-osx-sdk.sh) automates this. First ensure
+The script [extract-osx-sdk.sh](https://github.com/devaultcrypto/devault/blob/master/contrib/macdeploy/extract-osx-sdk.sh) automates this. First ensure
 the dmg file is in the current directory, and then run the script.
 
 You may wish to delete the intermediate 5.hfs file and MacOSX10.11.sdk (the directory) when
@@ -53,4 +53,4 @@ mv MacOSX10.11.sdk.tar.gz gitian-builder/inputs
 
 Troubleshooting
 ---------------
-See [README_osx.md](https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/doc/README_osx.md) for troubleshooting tips.
+See [README_osx.md](https://github.com/devaultcrypto/devault/blob/master/doc/README_osx.md) for troubleshooting tips.
