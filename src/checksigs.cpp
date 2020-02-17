@@ -28,7 +28,6 @@ std::vector<uint8_t> ExtractPubKeyFromBLSScript(const CScript &scriptPubKey) {
 bool CheckPrivateSigs(const CTransaction &tx, const CCoinsViewCache &inputs) {
 
     std::map<std::vector<uint8_t>, CPubKey> mapPubKeys;
-    
     std::vector<std::vector<uint8_t>> input_pubkeys;
     std::vector<uint256> input_hashes;
     std::vector<std::vector<uint8_t>> rand_pubkeys;
@@ -76,7 +75,6 @@ bool CheckPrivateSigs(const CTransaction &tx, const CCoinsViewCache &inputs) {
 
         // Go from script to PubKeys here if it was P2PK
         bool was_pubkey = IsValidBLSPubKeySize(scr);
-      
         //std::cout << "i = " << i << " script size = " << scr.size() << "\n";
         
         CPubKey pubkey;
