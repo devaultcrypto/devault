@@ -25,6 +25,7 @@ packages:
 - "python3"
 - "zip"
 - "libgmp-dev"
+- "libsodium-dev"
 # FIXME: these dependencies are only required to make CMake happy when building
 # native tools. They can be removed when the `NativeExecutable.cmake` gets
 # improved to avoid requiring all the devault dependencies.
