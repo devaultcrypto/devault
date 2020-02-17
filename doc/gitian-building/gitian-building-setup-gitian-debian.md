@@ -71,7 +71,7 @@ Clone the git repositories for bitcoin and Gitian.
 
 ```bash
 git clone https://github.com/devrandom/gitian-builder.git
-git clone https://github.com/Bitcoin-ABC/bitcoin-abc.git
+git clone https://github.com/devaultcrypto/devault.git
 ```
 
 Setting up the Gitian image
@@ -106,5 +106,5 @@ Execute the following as user `gitianuser`:
 
 ```bash
 cd gitian-builder
-make -C ../bitcoin-abc/depends download SOURCES_PATH=`pwd`/cache/common
+make -C ../devault/depends download SOURCES_PATH=`pwd`/cache/common
 ```
