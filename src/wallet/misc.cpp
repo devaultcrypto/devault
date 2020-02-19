@@ -264,19 +264,39 @@ static UniValue validateaddress(const Config &config,
         }
         if (pwallet) {
             const CKeyMetadata *meta = nullptr;
-            if (const CKeyID *key_id = &std::get<CKeyID>(dest)) {
-              auto it = pwallet->mapKeyMetadata.find(*key_id);
-              if (it != pwallet->mapKeyMetadata.end()) meta = &it->second;
-              // inside if
-              if (meta) {
-                  CHDChain hdChain;
-                  pwallet->GetDecryptedHDChain(hdChain);
-                  if (!key_id->IsNull() && pwallet->mapHdPubKeys.count(*key_id)) {
-                  ret.push_back(Pair("hdkeypath", pwallet->mapHdPubKeys[*key_id].GetKeyPath()));
-                  ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
+            CKeyID *key_id;
+            BKeyID *key1_id;
+            
+            try {
+                key_id = &std::get<CKeyID>(dest);
+                auto it = pwallet->mapKeyMetadata.find(*key_id);
+                if (it != pwallet->mapKeyMetadata.end()) meta = &it->second;
+                // inside if
+                if (meta) {
+                    CHDChain hdChain;
+                    pwallet->GetDecryptedHDChain(hdChain);
+                    if (!key_id->IsNull() && pwallet->mapHdPubKeys.count(*key_id)) {
+                        ret.push_back(Pair("hdkeypath", pwallet->mapHdPubKeys[*key_id].GetKeyPath()));
+                        ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
+                    }
                 }
             }
-        }
+            catch (...) { ; }
+            try {
+                key1_id = &std::get<BKeyID>(dest);
+                auto it1 = pwallet->mapBLSKeyMetadata.find(*key1_id);
+                if (it1 != pwallet->mapBLSKeyMetadata.end()) meta = &it1->second;
+                // inside if
+                if (meta) {
+                    CHDChain hdChain;
+                    pwallet->GetDecryptedHDChain(hdChain);
+                    if (!key1_id->IsNull() && pwallet->mapBLSPubKeys.count(*key1_id)) {
+                        ret.push_back(Pair("hdkeypath", pwallet->mapBLSPubKeys[*key1_id].GetKeyPath()));
+                        ret.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
+                    }
+                }
+            }
+            catch (...) { ; }
             }
 #endif
     }
