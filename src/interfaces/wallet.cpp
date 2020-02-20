@@ -149,6 +149,13 @@ namespace {
         bool getPrivKey(const CKeyID &address, CKey &key) override {
             return m_wallet.GetKey(address, key);
         }
+        bool getPrivKey(const BKeyID &address, CKey &key) override {
+            return m_wallet.GetKey(address, key);
+        }
+        bool getPubKey(const BKeyID &address, CPubKey &pub_key) override {
+            return m_wallet.GetPubKey(address, pub_key);
+        }
+
         bool isSpendable(const CTxDestination &dest) override {
             return IsMine(m_wallet, dest) & ISMINE_SPENDABLE;
         }

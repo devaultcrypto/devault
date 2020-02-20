@@ -39,7 +39,7 @@ extern std::vector<CWalletRef> vpwallets;
 extern CFeeRate payTxFee;
 extern bool bSpendZeroConfChange;
 
-static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
+static const unsigned int DEFAULT_KEYPOOL_SIZE = 100; // Originally needed for non-HD wallets
 //! -paytxfee default
 static const Amount DEFAULT_TRANSACTION_FEE = 2*COIN;
 //! -fallbackfee default
@@ -517,9 +517,11 @@ public:
      * spending transactions.
      */
     bool fSafe;
+    
+    KeyType ktype;
 
     COutput(const CWalletTx *txIn, int iIn, int nDepthIn, bool fSpendableIn,
-            bool fSolvableIn, bool fSafeIn) {
+            bool fSolvableIn, bool fSafeIn, KeyType keytype = KeyType::NOTKNOWN) {
         tx = txIn;
         i = iIn;
         nDepth = nDepthIn;
@@ -527,13 +529,15 @@ public:
         fSolvable = fSolvableIn;
         fSafe = fSafeIn;
         nInputBytes = -1;
+        ktype = keytype;
         // If known and signable by the given wallet, compute nInputBytes
         // Failure will keep this value -1
         if (fSpendable && tx) {
             nInputBytes = tx->GetSpendSize(i);
         }
     }
-
+    void SetType(const KeyType k) { ktype = k; }
+    KeyType GetType() const { return ktype; }
     std::string ToString() const;
 };
 
@@ -666,6 +670,7 @@ private:
     bool SelectCoins(const std::vector<COutput> &vAvailableCoins,
                      const Amount nTargetValue,
                      std::set<CInputCoin> &setCoinsRet, Amount &nValueRet,
+                     KeyTypes& ktype,
                      const CCoinControl *coinControl = nullptr) const;
 
     std::unique_ptr<WalletDatabase> database;
@@ -681,6 +686,7 @@ private:
     int64_t nNextResend = 0;
     int64_t nLastResend = 0;
     bool fBroadcastTransactions = false;
+    bool fUpgradeBLSKeys = false; // for new key stuff
 
     /**
      * Used to keep track of spent outpoints, and detect and report conflicts
@@ -718,6 +724,7 @@ private:
     std::set<int64_t> setExternalKeyPool;
     int64_t m_max_keypool_index = 0;
     std::map<CKeyID, int64_t> m_pool_key_to_index;
+    std::map<BKeyID, int64_t> m_pool_blskey_to_index;
 
     int64_t nTimeFirstKey = 0;
 
@@ -775,7 +782,7 @@ public:
 
     // Map from Key ID to key metadata.
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata;
-    std::map<BKeyID, CKeyMetadata> mapBLSKeyMetadata; // not used yet
+    std::map<BKeyID, CKeyMetadata> mapBLSKeyMetadata;
 
     // Map from Script ID to key metadata (for watch-only keys).
     std::map<CScriptID, CKeyMetadata> m_script_metadata;
@@ -785,7 +792,7 @@ public:
     unsigned int nMasterKeyMaxID = 0;
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
-    std::map<BKeyID, CHDPubKey> mapBLSPubKeys; // not used yet
+    std::map<BKeyID, CHDPubKey> mapBLSPubKeys; //<! memory map of BLS HD extended pubkeys
 
 
     // Create wallet with dummy database handle
@@ -865,10 +872,12 @@ public:
 
     bool IsSpent(const COutPoint &outpoint) const  EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     bool IsLockedCoin(const COutPoint &outpoint) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    void LockCoin(const COutPoint &output) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    void UnlockCoin(const COutPoint &output) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    void UnlockAllCoins() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void LockCoin(const COutPoint &output);
+    void UnlockCoin(const COutPoint &output)  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void UnlockAllCoins()  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void ListLockedCoins(std::vector<COutPoint> &vOutpts) const  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    bool HasBLSKeys() const { return !mapBLSPubKeys.empty(); }
+    bool UseBLSKeys() const { return HasBLSKeys() || fUpgradeBLSKeys; }
 
     /*
      * Rescan abort properties
@@ -881,17 +890,12 @@ public:
      * keystore implementation
      * Generate a new key
      */
-    std::pair<CPubKey,CHDPubKey> GenerateNewKey(CHDChain& clearChain, bool internal) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    //! Adds a key to the store, and saves it to disk.
-    bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    //! Adds a key to the store, without saving it to disk (used by LoadWallet)
-    bool LoadKey(const CKey &key, const CPubKey &pubkey) {
-        return CCryptoKeyStore::AddKeyPubKey(key, pubkey);
-    }
+    std::tuple<CPubKey, CHDPubKey> GenerateNewKey(CHDChain& clearChain, bool internal) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    std::tuple<bool, CKey, CPubKey, bool> ExtractFromBLSScript(const CScript &scriptPubKey);
 
     //! Load metadata (used by LoadWallet)
-    void LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &metadata)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void LoadKeyMetadata(const CKeyID &keyID, const CKeyMetadata &metadata) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void LoadKeyMetadata(const BKeyID &keyID, const CKeyMetadata &metadata) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void LoadScriptMetadata(const CScriptID &script_id,
                             const CKeyMetadata &metadata)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
@@ -905,13 +909,6 @@ public:
     void UpdateTimeFirstKey(int64_t nCreateTime)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
-    //! Adds an encrypted key to the store, and saves it to disk.
-    bool AddCryptedKey(const CPubKey &vchPubKey,
-                       const std::vector<uint8_t> &vchCryptedSecret) override;
-    //! Adds an encrypted key to the store, without saving it to disk (used by
-    //! LoadWallet)
-    bool LoadCryptedKey(const CPubKey &vchPubKey,
-                        const std::vector<uint8_t> &vchCryptedSecret);
     bool AddCScript(const CScript &redeemScript) override;
     bool LoadCScript(const CScript &redeemScript);
 
@@ -957,8 +954,8 @@ public:
 
   
 
-    void GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void GetKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void GetBLSKeyBirthTimes(std::map<CTxDestination, int64_t> &mapKeyBirth) const EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     unsigned int ComputeTimeSmart(const CWalletTx &wtx) const;
 
     /**
@@ -1036,6 +1033,10 @@ public:
                            Amount &nFeeRet, int &nChangePosInOut,
                            std::string &strFailReason,
                            const CCoinControl &coinControl, bool sign = true);
+
+    bool CreateBLSTxWithSig(const std::set<CInputCoin> &setCoins, CMutableTransaction &txNew,
+                            std::string &strFailReason);
+
     bool ConsolidateRewards(const CTxDestination &recipient,
                             double minPercent, Amount minAmount,
                             std::string &strFailReason);
@@ -1083,19 +1084,23 @@ public:
     bool GetKeyFromPool(CPubKey &key, bool internal = false);
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
+    void GetAllBLSReserveKeys(std::set<BKeyID>& setAddress) const;
      /**
      * Marks all keys in the keypool up to and including reserve_key as used.
      */
-    void MarkReserveKeysAsUsed(int64_t keypool_id)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void MarkReserveKeysAsUsed(int64_t keypool_id)   EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void MarkReserveBLSKeysAsUsed(int64_t keypool_id) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     const std::map<CKeyID, int64_t> &GetAllReserveKeys() const {
         return m_pool_key_to_index;
     }
-    std::set<std::set<CTxDestination>> GetAddressGroupings()
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-    std::map<CTxDestination, Amount> GetAddressBalances()
-        EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+    const std::map<BKeyID, int64_t> &GetAllBLSReserveKeys() const {
+        return m_pool_blskey_to_index;
+    }
+    /** Does the wallet have at least min_keys in the keypool? */
+    bool HasUnusedKeys(size_t min_keys) const;
 
+    std::set<std::set<CTxDestination>> GetAddressGroupings() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    std::map<CTxDestination, Amount> GetAddressBalances() EXCLUSIVE_LOCKS_REQUIRED(cs_main);
     std::set<CTxDestination> GetLabelAddresses(const std::string &label) const;
 
     isminetype IsMine(const CTxIn &txin) const;
@@ -1240,12 +1245,15 @@ public:
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
     bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const override;
+    bool GetPubKey(const BKeyID &address, CPubKey& vchPubKeyOut) const override;
     //! GetKey implementation that can derive a HD private key on the fly
     bool GetKey(const CKeyID &address, CKey& keyOut) const override;
+    bool GetKey(const BKeyID &address, CKey& keyOut) const override;
     //! Load metadata (used by LoadWallet)
     bool LoadKeyMetadata(const CTxDestination& pubKey, const CKeyMetadata &metadata);
 
     bool HaveKey(const CKeyID &address) const override;
+    bool HaveKey(const BKeyID &address) const override;
     bool LoadHDPubKey(const CHDPubKey &hdPubKey);
     bool AddHDPubKey(const CExtPubKey &extPubKey, bool fInternal);
     CHDPubKey AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInternal);

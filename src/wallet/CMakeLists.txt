@@ -39,7 +39,7 @@ add_library(wallet
 target_link_libraries(wallet util univalue Event ${BDBXX_LIBRARY})
 
 if (RocksDB_FOUND)
-  target_include_directories(wallet  PUBLIC ${BDBXX_INCLUDE_DIR} )
+  target_include_directories(wallet  PUBLIC ${BDBXX_INCLUDE_DIR})
 else()
   target_include_directories(wallet
     PUBLIC ${BDBXX_INCLUDE_DIR}
@@ -55,7 +55,7 @@ if(BUILD_WALLETTOOL)
 		target_sources(bdb-check PRIVATE bdb-check-res.rc)
 	endif()
 
-	target_link_libraries(bdb-check devaultconsensus wallet server)
+	target_link_libraries(bdb-check devaultconsensus wallet server bls relic_s)
 endif()
 
 
