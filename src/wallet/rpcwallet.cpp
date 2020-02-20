@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
-#include <dstencode.h>
 #include <chain.h>
 #include <chainparams.h> // for GetConsensus.
 #include <config.h>
@@ -243,11 +242,16 @@ static UniValue getnewaddress(const Config &config,
             RPC_WALLET_KEYPOOL_RAN_OUT,
             "Error: Keypool ran out, please call keypoolrefill first");
     }
-    CKeyID keyID = newKey.GetKeyID();
 
-    pwallet->SetAddressBook(keyID, label, "receive");
-
-    return EncodeDestination(keyID);
+    if (pwallet->UseBLSKeys()) {
+        BKeyID keyID = newKey.GetBLSKeyID();
+        pwallet->SetAddressBook(keyID, label, "receive");
+        return EncodeDestination(keyID);
+    } else {
+        CKeyID keyID = newKey.GetKeyID();
+        pwallet->SetAddressBook(keyID, label, "receive");
+        return EncodeDestination(keyID);
+    }
 }
 
 std::string GetLabelDestination(CWallet *const pwallet, const std::string &label) {
