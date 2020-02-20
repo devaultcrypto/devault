@@ -126,6 +126,7 @@ public:
               bool fSkipCheck);
 };
 
+
 /**
  * Initialize the elliptic curve support. May not be called twice without
  * calling ECC_Stop first.
