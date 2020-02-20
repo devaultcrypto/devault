@@ -143,10 +143,16 @@ void StartOptionsMain::on_Next_clicked() {
         }
 
         case CreateOrRestorePage: {
+#ifndef DEV_DEBUG
             pageNum = OrderWordsPage;
             startOptionsSort = new StartOptionsSort(words, rows, this);
             ui->QStackTutorialContainer->addWidget(startOptionsSort);
             ui->QStackTutorialContainer->setCurrentWidget(startOptionsSort);
+#else
+#pragma warning "Quick Dev hack for new wallets"
+            wordsDone = words;
+            QApplication::quit();
+#endif
             break;
         }
         case OrderWordsPage: {

@@ -5,7 +5,6 @@
 
 #include <rpc/util.h>
 #include <core_io.h>
-#include <dstencode.h>
 #include <clientversion.h>
 #include <config.h>
 #include <chain.h>
@@ -149,8 +148,18 @@ static UniValue verifymessage(const Config &config,
     if (!IsValidDestination(destination)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
-    const CKeyID *keyID = &std::get<CKeyID>(destination);
-    if (!keyID) {
+    CKeyID keyID;
+    BKeyID keyID1;
+    try {
+        keyID = std::get<CKeyID>(destination);
+    }
+    catch (...) {  keyID.SetNull(); }
+    try {
+        keyID1 = std::get<BKeyID>(destination);
+    }
+    catch (...) { keyID1.SetNull(); }
+
+    if (keyID.IsNull() && keyID1.IsNull()) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
 
@@ -170,8 +179,11 @@ static UniValue verifymessage(const Config &config,
     if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
         return false;
     }
-
-    return (pubkey.GetKeyID() == *keyID);
+    if (!keyID.IsNull()) {
+        return (pubkey.GetKeyID() == keyID);
+    } else {
+        return (pubkey.GetBLSKeyID() == keyID1);
+    }
 }
 
 static UniValue signmessagewithprivkey(const Config &config,

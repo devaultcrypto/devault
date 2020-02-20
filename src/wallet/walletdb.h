@@ -105,9 +105,6 @@ public:
     bool WriteTx(const CWalletTx &wtx);
     bool EraseTx(uint256 hash);
 
-    bool WriteCryptedKey(const CPubKey &vchPubKey,
-                         const std::vector<uint8_t> &vchCryptedSecret,
-                         const CKeyMetadata &keyMeta);
     bool WriteMasterKey(unsigned int nID, const CMasterKey &kMasterKey);
 
     bool WriteCScript(const uint160 &hash, const CScript &redeemScript);
@@ -124,9 +121,14 @@ public:
     bool WritePool(int64_t nPool, const CKeyPool &keypool);
     bool ErasePool(int64_t nPool);
 
-    bool WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<CKeyID, CKeyMetadata>& mapkeyMeta);
-    bool WritePool(const std::vector<CKeyPool> & keys, int64_t index);
+    bool ReadHDPubKeyTest(CPubKey& pubkey, CHDPubKey& hdpubkey);
+    bool WriteHDPubKeyTest(CHDPubKey& hdpubkey);
     
+    bool WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey,
+                        std::map<CKeyID, CKeyMetadata>& mapKeyMeta,
+                        std::map<BKeyID, CKeyMetadata>& mapBLSKeyMeta);
+    bool WritePool(const std::vector<CKeyPool> & keys, int64_t index);
+
     bool WriteMinVersion(int nVersion);
 
     /// This writes directly to the database, and will not update the CWallet's
