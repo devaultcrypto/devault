@@ -3,7 +3,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <dstencode.h>
 #include <chain.h>
 #include <chainparams.h>
 #include <config.h>
@@ -473,21 +472,48 @@ UniValue dumpprivkey(const Config &config, const JSONRPCRequest &request) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Invalid DeVault address");
     }
-    const CKeyID *keyID = &std::get<CKeyID>(dest);
-    if (!keyID) {
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+    bool isBLS = true;
+    bool isEC = true;
+    CKeyID *keyID0;
+    BKeyID *keyID1;
+    try {
+        keyID0 = &std::get<CKeyID>(dest);
     }
-    CKey vchSecret;
-    if (!pwallet->GetKey(*keyID, vchSecret)) {
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " +
-                                                 strAddress + " is not known");
+    catch (...) { isEC = false; }
+    try {
+        keyID1 = &std::get<BKeyID>(dest);
     }
+    catch (...) { isBLS = false; }
+    if (!keyID0) isEC = false;
+    if (!keyID1) isBLS = false;
+
+    if (isBLS || isEC) {
+
+        CKey vchSecret;
+        if (isEC) {
+            if (!pwallet->GetKey(*keyID0, vchSecret)) {
+                throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " +
+                                   strAddress + " is not known");
+            }
+        } else {
+            if (!pwallet->GetKey(*keyID1, vchSecret)) {
+                throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " +
+                                   strAddress + " is not known");
+            }
+
+        }
         
-    std::string bech32string = EncodeSecret(vchSecret);
-    
-    UniValue keys(UniValue::VOBJ);
-    keys.pushKV("bech32",bech32string);
-    return keys;
+        std::string bech32string = EncodeSecret(vchSecret);
+        
+        UniValue keys(UniValue::VOBJ);
+        keys.pushKV("bech32",bech32string);
+        return keys;
+    } else {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                           "DeVault address decoding problem");
+    }
+    return NullUniValue;
+
 }
 
 UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
@@ -547,9 +573,10 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     }
 
     std::map<CTxDestination, int64_t> mapKeyBirth;
+    std::map<CTxDestination, int64_t> mapBLSKeyBirth;
     const std::map<CKeyID, int64_t> &mapKeyPool = pwallet->GetAllReserveKeys();
     pwallet->GetKeyBirthTimes(mapKeyBirth);
-
+    
     std::set<CScriptID> scripts = pwallet->GetCScripts();
     // TODO: include scripts in GetKeyBirthTimes() output instead of separate
 
@@ -563,6 +590,19 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     }
     mapKeyBirth.clear();
     std::sort(vKeyBirth.begin(), vKeyBirth.end());
+
+    pwallet->GetBLSKeyBirthTimes(mapBLSKeyBirth);
+    const std::map<BKeyID, int64_t> &mapBLSKeyPool = pwallet->GetAllBLSReserveKeys();
+    std::vector<std::pair<int64_t, BKeyID>> vBLSKeyBirth;
+
+    for (const auto &entry : mapBLSKeyBirth) {
+        if (const BKeyID *keyID = &std::get<BKeyID>(entry.first)) {
+            // set and test
+            vBLSKeyBirth.emplace_back(entry.second, *keyID);
+        }
+    }
+    mapBLSKeyBirth.clear();
+    std::sort(vBLSKeyBirth.begin(), vBLSKeyBirth.end());
 
     // produce output
     file << strprintf("# Wallet dump created by DeVault %s\n", CLIENT_BUILD);
@@ -590,28 +630,22 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     CExtKey masterKey;
     masterKey.SetMaster(&vchSeed[0], vchSeed.size());
 
-    /*
-    CBitcoinExtKey b58extkey;
-    b58extkey.SetKey(masterKey);
-
-    file << "# extended private masterkey: " << b58extkey.ToString() << "\n";
-
-    CExtPubKey masterPubkey;
-    masterPubkey = masterKey.Neuter();
-
-    CBitcoinExtPubKey b58extpubkey;
-    b58extpubkey.SetKey(masterPubkey);
-    file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
-*/
-      
-    for (size_t i = 0; i < hdChain.CountAccounts(); ++i) {
-        CHDAccount acc;
-        if(hdChain.GetAccount(i, acc)) {
-            file << "# external chain counter: " << acc.nExternalChainCounter << "\n";
-            file << "# internal chain counter: " << acc.nInternalChainCounter << "\n\n";
+    CHDAccount acc;
+    
+    if (pwallet->HasBLSKeys()) {
+        if(hdChain.GetAccount(BLS_ACCOUNT, acc)) {
+            file << "# BLS external chain counter: " << acc.nExternalChainCounter << "\n";
+            file << "# BLS internal chain counter: " << acc.nInternalChainCounter << "\n\n";
         } else {
-            file << "# WARNING: ACCOUNT " << i << " IS MISSING!" << "\n\n";
+            file << "# WARNING: BLS_ACCOUNT IS MISSING!" << "\n\n";
         }
+    }
+
+    if(hdChain.GetAccount(0, acc)) {
+        file << "# EC external chain counter: " << acc.nExternalChainCounter << " for Account 0 \n";
+        file << "# EC internal chain counter: " << acc.nInternalChainCounter << " for Account 0 \n\n";
+    } else {
+        file << "# Only BLS keys exist in wallet!" << "\n\n";
     }
 
     // Rather than just print out the keypaths in a somewhat random order
@@ -651,8 +685,48 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
           }
         }
     }
+
+   std::map<uint64_t,std::string> blskeypaths;
     
+
+   for (const auto& it : vBLSKeyBirth) {
+        const BKeyID &keyid = it.second;
+        std::string strTime = FormatISO8601DateTime(it.first);
+        std::string strAddr = EncodeDestination(keyid);
+        CKey key;
+        std::string fullstr="";
+        if (pwallet->GetKey(keyid, key)) {
+          fullstr += strprintf("%s %s ", EncodeSecret(key),strTime);
+          if (pwallet->mapAddressBook.count(keyid)) {
+            fullstr += strprintf("label=%s",EncodeDumpString(pwallet->mapAddressBook[keyid].name));
+          } else if (mapBLSKeyPool.count(keyid)) {
+            fullstr += "reserve=1";
+          } else {
+            fullstr += "change=1";
+          }
+          {
+            std::string hdkeypath="";
+            if (pwallet->mapBLSPubKeys.count(keyid)) hdkeypath += pwallet->mapBLSPubKeys[keyid].GetKeyPath();
+            fullstr += strprintf(" # addr=%s,hdkeypath=%s\n", strAddr, hdkeypath);
+
+            // This is to make the output keys sorted by path
+            // Put into a std::map based on numeric path that will be stored in sorted order
+            std::vector<std::string> vParts;
+            Split(vParts, hdkeypath, "/");
+            uint64_t keynum = std::stoi(vParts.back());
+            vParts.pop_back();
+            uint64_t ext = std::stoi(vParts.back());
+            uint64_t order = ext*100000+keynum;
+            blskeypaths.insert(make_pair(order,fullstr));
+          }
+        }
+    }
+
     // Print sorted map
+    for (const auto& s : blskeypaths) {
+      file << s.second;
+    }
+    
     for (const auto& s : keypaths) {
       file << s.second;
     }

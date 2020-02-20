@@ -20,6 +20,7 @@ typedef uint256 ChainCode;
 
 static constexpr unsigned int BLS_ACCOUNT = 1; // 0 would mean secret keys same as default EC Account/Keys
 
+
 /** An encapsulated public key. */
 class CPubKey {
 public:
