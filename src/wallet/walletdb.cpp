@@ -9,7 +9,6 @@
 
 
 #include <chainparams.h>
-#include <dstencode.h>
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <dstencode.h>
@@ -52,8 +51,7 @@ bool WalletBatch::EraseName(const CTxDestination &address) {
     if (!IsValidDestination(address)) {
         return false;
     }
-    return EraseIC(std::make_pair(std::string("name"),
-                                  EncodeDestination(address)));
+    return EraseIC(std::make_pair(std::string("name"), EncodeDestination(address)));
 }
 
 bool WalletBatch::WritePurpose(const CTxDestination &address,
@@ -61,8 +59,7 @@ bool WalletBatch::WritePurpose(const CTxDestination &address,
     if (!IsValidDestination(address)) {
         return false;
     }
-    return WriteIC(std::make_pair(std::string("purpose"),
-                                  EncodeDestination(address)),
+    return WriteIC(std::make_pair(std::string("purpose"),EncodeDestination(address)),
                    strPurpose);
 }
 
@@ -70,8 +67,7 @@ bool WalletBatch::ErasePurpose(const CTxDestination &address) {
     if (!IsValidDestination(address)) {
         return false;
     }
-    return EraseIC(std::make_pair(std::string("purpose"),
-                                  EncodeDestination(address)));
+    return EraseIC(std::make_pair(std::string("purpose"),EncodeDestination(address)));
 }
 
 bool WalletBatch::WriteTx(const CWalletTx &wtx) {
@@ -80,22 +76,6 @@ bool WalletBatch::WriteTx(const CWalletTx &wtx) {
 
 bool WalletBatch::EraseTx(uint256 hash) {
     return EraseIC(std::make_pair(std::string("tx"), hash));
-}
-
-bool WalletBatch::WriteCryptedKey(const CPubKey &vchPubKey,
-                                const std::vector<uint8_t> &vchCryptedSecret,
-                                const CKeyMetadata &keyMeta) {
-
-    if (!WriteIC(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta)) {
-        return false;
-    }
-
-    if (!WriteIC(std::make_pair(std::string("ckey"), vchPubKey),
-                 vchCryptedSecret, false)) {
-        return false;
-    }
-
-    return true;
 }
 
 bool WalletBatch::WriteMasterKey(unsigned int nID, const CMasterKey &kMasterKey) {
@@ -323,30 +303,21 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             if (pwallet->nMasterKeyMaxID < nID) {
                 pwallet->nMasterKeyMaxID = nID;
             }
-        } else if (strType == "ckey") {
-            CPubKey vchPubKey;
-            ssKey >> vchPubKey;
-            if (!vchPubKey.IsValid()) {
-                strErr = "Error reading wallet database: CPubKey corrupt";
-                return false;
-            }
-            std::vector<uint8_t> vchPrivKey;
-            ssValue >> vchPrivKey;
+         } else if (strType == "ckey") {
             wss.nCKeys++;
-
-            if (!pwallet->LoadCryptedKey(vchPubKey, vchPrivKey)) {
-                strErr = "Error reading wallet database: LoadCryptedKey failed";
-                return false;
-            }
-            wss.fIsEncrypted = true;
-        } else if (strType == "keymeta") {
+            strErr = "Problem with wallet database: You have Crypted Keys not supported by this software";
+            return false;
+         } else if (strType == "keymeta") {
             CPubKey vchPubKey;
             ssKey >> vchPubKey;
             CKeyMetadata keyMeta;
             ssValue >> keyMeta;
             wss.nKeyMeta++;
-
-            pwallet->LoadKeyMetadata(vchPubKey.GetKeyID(), keyMeta);
+            if (vchPubKey.IsBLS()) {
+                pwallet->LoadKeyMetadata(vchPubKey.GetBLSKeyID(), keyMeta);
+            } else {
+                pwallet->LoadKeyMetadata(vchPubKey.GetKeyID(), keyMeta);
+            }
         } else if (strType == "watchmeta") {
             CScript script;
             ssKey >> script;
@@ -398,7 +369,7 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 strErr = "Error reading wallet database: SetHDCrypted failed";
                 return false;
             }
-        } else if (strType == "hdpubkey")  {
+        } else if (strType == "hdpubkey")  { // Later change this to blspubkey
             CPubKey vchPubKey;
             ssKey >> vchPubKey;
 
@@ -410,6 +381,7 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 strErr = "Error reading wallet database: CHDPubKey corrupt";
                 return false;
             }
+            
             if (!pwallet->LoadHDPubKey(hdPubKey))
             {
                 strErr = "Error reading wallet database: LoadHDPubKey failed";
@@ -420,6 +392,12 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
         return false;
     }
     return true;
+}
+bool WalletBatch::ReadHDPubKeyTest(CPubKey& pubkey, CHDPubKey& hdpubkey) {
+    return batch.Read(std::make_pair(std::string("hdpubkey"), pubkey), hdpubkey);
+}
+bool WalletBatch::WriteHDPubKeyTest(CHDPubKey& hdPubKey) {
+    return (!WriteIC(std::make_pair(std::string("hdpubkey"), hdPubKey.extPubKey.pubkey), hdPubKey, false));
 }
 
 bool WalletBatch::IsKeyType(const std::string &strType) {
@@ -507,11 +485,9 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
     LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
     if (wss.nCKeys) {
-        std::string key_list = "";
-        for (const auto& k : pwallet->GetKeys()) key_list += EncodeDestination(k) + "\n";
-        InitWarning(strprintf(_("You have one or more private keys in your wallet that are potentially not backed"
-                                " by your seed phrase. You should send funds stored in these to addresses in your wallet."
-                                "Support for unbacked keys may be removed in the future, these are the addresses :\n %s"), key_list));
+        InitWarning(_("You have one or more private keys in your wallet that are potentially not backed"
+                      " by your seed phrase. You should revert to an older wallet that suppor them as"
+                      " they are not supported by this software version"));
     }
 
 
@@ -796,7 +772,10 @@ bool WalletBatch::WriteHDPubKey(const CHDPubKey& hdPubKey, const CKeyMetadata& k
   if (!WriteIC(std::make_pair(std::string("keymeta"), hdPubKey.extPubKey.pubkey), keyMeta, false))
         return false;
 
-  return WriteIC(std::make_pair(std::string("hdpubkey"), hdPubKey.extPubKey.pubkey), hdPubKey, false);
+  if (!WriteIC(std::make_pair(std::string("hdpubkey"), hdPubKey.extPubKey.pubkey), hdPubKey, false))
+          return false;
+    
+  return true;
 }
 
 bool WalletBatch::WriteCryptedHDChain(const CHDChain& chain)
@@ -808,12 +787,24 @@ bool WalletBatch::WriteCryptedHDChain(const CHDChain& chain)
 }
 
 
-bool WalletBatch::WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey, std::map<CKeyID, CKeyMetadata>& mapKeyMeta) {
+bool WalletBatch::WriteHDPubKeys(const std::vector<CHDPubKey>& hdPubKey,
+                                 std::map<CKeyID, CKeyMetadata>& mapKeyMeta,
+                                 std::map<BKeyID, CKeyMetadata>& mapBLSKeyMeta) {
     bool ok = true;
+    
+    // We will store keys under both "hdpubkey" which is backward compatible and also
+    // "blspubkey" which can be used after we drop support for EC pubkeys in new wallets
+    
     for (const auto& k : hdPubKey) {
-        CKeyID id = k.extPubKey.pubkey.GetKeyID();
-        auto keyMeta = mapKeyMeta[id];
-        if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
+        if (k.extPubKey.IsBLS()) {
+            BKeyID id = k.extPubKey.pubkey.GetBLSKeyID();
+            auto keyMeta = mapBLSKeyMeta[id];
+            if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
+        } else {
+            CKeyID id = k.extPubKey.pubkey.GetKeyID();
+            auto keyMeta = mapKeyMeta[id];
+            if (!batch.Write(std::make_pair(std::string("keymeta"), k.extPubKey.pubkey), keyMeta, false)) ok = false;
+        }
         if (!batch.Write(std::make_pair(std::string("hdpubkey"), k.extPubKey.pubkey), k, false)) ok = false;
     }
     // Not sure flush is useful here or not

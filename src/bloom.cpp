@@ -167,7 +167,7 @@ bool CBloomFilter::MatchAndInsertOutputs(const CTransaction &tx) {
                     txnouttype type;
                     std::vector<std::vector<uint8_t>> vSolutions;
                     if (Solver(txout.scriptPubKey, type, vSolutions) &&
-                        (type == TX_PUBKEY || type == TX_MULTISIG)) {
+                        (type == TX_PUBKEY || type == TX_MULTISIG || type == TX_BLSPUBKEY)) {
                         insert(COutPoint(txid, i));
                     }
                 }

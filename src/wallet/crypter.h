@@ -129,8 +129,6 @@ protected:
     bool DecryptHDChain(CHDChain& hdChainRet) const;
     bool SetCryptedHDChain(const CHDChain& chain);
     bool Unlock(const CKeyingMaterial &vMasterKeyIn);
-
-    CryptedKeyMap mapCryptedKeys;
     
 public:
     CCryptoKeyStore() : fDecryptionThoroughlyChecked(false) {}
@@ -138,12 +136,9 @@ public:
     bool IsLocked() const;
     bool Lock();
 
-    virtual bool AddCryptedKey(const CPubKey &vchPubKey,
-                               const std::vector<uint8_t> &vchCryptedSecret);
-    bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) override;
-    bool HaveKey(const CKeyID &address) const override;
-    bool GetKey(const CKeyID &address, CKey &keyOut) const override;
+    // Watch only
     bool GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const override;
+    bool GetPubKey(const BKeyID &address, CPubKey &vchPubKeyOut) const override;
     std::set<CKeyID> GetKeys() const;
     bool GetCryptedHDChain(CHDChain& hdChainRet) const;
     bool GetDecryptedHDChain(CHDChain& hdChainRet) const;

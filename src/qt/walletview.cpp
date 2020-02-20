@@ -8,6 +8,7 @@
 #include <askpassphrasedialog.h>
 #include <bitcoingui.h>
 #include <clientmodel.h>
+#include <dstencode.h>
 #include <guiutil.h>
 #include <optionsmodel.h>
 #include <overviewpage.h>

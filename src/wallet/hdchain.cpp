@@ -74,9 +74,9 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
   changeKey.Derive(extKeyRet, nChildIndex);
 }
 
-void CHDChain::AddAccount() {
+void CHDChain::AddAccount(uint32_t nAccountIndex) {
   LOCK(cs_accounts);
-  mapAccounts.insert(std::pair<uint32_t, CHDAccount>(mapAccounts.size(), CHDAccount()));
+  mapAccounts.insert(std::pair<uint32_t, CHDAccount>(nAccountIndex, CHDAccount()));
 }
 
 bool CHDChain::GetAccount(uint32_t nAccountIndex, CHDAccount &hdAccountRet) {
@@ -92,7 +92,6 @@ bool CHDChain::GetAccount(uint32_t nAccountIndex, CHDAccount &hdAccountRet) {
 bool CHDChain::SetAccount(uint32_t nAccountIndex, const CHDAccount &hdAccount) {
   LOCK(cs_accounts);
   // can only replace existing accounts
-  if (nAccountIndex > mapAccounts.size() - 1) return false;
   mapAccounts[nAccountIndex] = hdAccount;
   return true;
 }
