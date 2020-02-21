@@ -775,6 +775,7 @@ public:
 
     // Map from Key ID to key metadata.
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata;
+    std::map<BKeyID, CKeyMetadata> mapBLSKeyMetadata; // not used yet
 
     // Map from Script ID to key metadata (for watch-only keys).
     std::map<CScriptID, CKeyMetadata> m_script_metadata;
@@ -784,6 +785,7 @@ public:
     unsigned int nMasterKeyMaxID = 0;
 
     std::map<CKeyID, CHDPubKey> mapHdPubKeys; //<! memory map of HD extended pubkeys
+    std::map<BKeyID, CHDPubKey> mapBLSPubKeys; // not used yet
 
 
     // Create wallet with dummy database handle
