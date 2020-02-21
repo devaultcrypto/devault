@@ -154,5 +154,6 @@ CPubKey ExtractBLSPubKey(const CScript & scr);
 // Get BLS Public Key & Aggregate BLS Signature from Script
 std::tuple<CPubKey,std::vector<uint8_t> > ExtractBLSPubKeyAndSig(const CScript & scr);
 std::vector<uint8_t> ExtractBLSSig(const CScript & scr);
+std::tuple<std::vector<std::vector<uint8_t>>,std::vector<uint8_t> > ExtractBLSPubKeysAndSig(const CScript & scr, int rand_keys);
 
 #endif // BITCOIN_SCRIPT_STANDARD_H
