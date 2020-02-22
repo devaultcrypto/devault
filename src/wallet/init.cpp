@@ -41,7 +41,7 @@ public:
 
     //! Load wallet databases.
     bool Open(const CChainParams &chainParams, const SecureString& walletPassphrase,
-              const std::vector<std::string>& words) const override;
+              const std::vector<std::string>& words, bool use_bls) const override;
 
     //! Complete startup of wallets.
     void Start(CScheduler &scheduler) const override;
@@ -447,7 +447,7 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
 }
 
 bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walletPassphrase,
-                      const std::vector<std::string>& words
+                      const std::vector<std::string>& words, bool use_bls
                       ) const {
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         LogPrintf("Wallet disabled!\n");
@@ -465,7 +465,7 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
     // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
       CWallet *const pwallet =
-        CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, words);
+        CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, words, use_bls);
       if (!pwallet) {
         return false;
       }
