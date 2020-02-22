@@ -92,6 +92,7 @@ public Q_SLOTS:
     /** Show word phrase */
     void revealPhrase();
     /** Sweep private key */
+    void sweeplegacy();
     void sweep();
 
     /** Show used sending addresses */

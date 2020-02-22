@@ -309,8 +309,12 @@ void BitcoinGUI::createActions() {
     revealPhraseAction->setStatusTip(tr("Reward 12 or 24 word phrase for wallet"));
 
     sweepAction = new QAction(platformStyle->TextColorIcon(":/icons/eye2"),
-                    tr("&Sweep Private Key.."), this);
+                    tr("&Sweep Legacy Private Key.."), this);
     sweepAction->setStatusTip(tr("Sweeps funds from private key into this wallet"));
+
+    sweepBLSAction = new QAction(platformStyle->TextColorIcon(":/icons/eye2"),
+                    tr("&Sweep BLS Private Key.."), this);
+    sweepBLSAction->setStatusTip(tr("Sweeps funds from BLS private key into this wallet"));
 
     signMessageAction =
         new QAction(platformStyle->TextColorIcon(":/icons/edit"),
@@ -384,8 +388,8 @@ void BitcoinGUI::createActions() {
       connect(lockWalletAction, &QAction::triggered, walletFrame,  &WalletFrame::lockWallet);
       connect(revealPhraseAction, &QAction::triggered, walletFrame,
               &WalletFrame::revealPhrase);
-      connect(sweepAction, &QAction::triggered, walletFrame,
-              &WalletFrame::sweep);
+      connect(sweepAction, &QAction::triggered, walletFrame,  &WalletFrame::sweeplegacy);
+      connect(sweepBLSAction, &QAction::triggered, walletFrame,  &WalletFrame::sweep);
 
       connect(signMessageAction, &QAction::triggered,
               [this] { gotoSignMessageTab(); });
@@ -441,6 +445,8 @@ void BitcoinGUI::createMenuBar() {
         settings->addAction(revealPhraseAction);
         settings->addSeparator();
         settings->addAction(sweepAction);
+        settings->addSeparator();
+        settings->addAction(sweepBLSAction);
         settings->addSeparator();
     }
     settings->addAction(optionsAction);
@@ -671,6 +677,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     changePassphraseAction->setEnabled(enabled);
     revealPhraseAction->setEnabled(enabled);
     sweepAction->setEnabled(enabled);
+    sweepBLSAction->setEnabled(enabled);
     signMessageAction->setEnabled(enabled);
     verifyMessageAction->setEnabled(enabled);
     usedSendingAddressesAction->setEnabled(enabled);
@@ -1191,6 +1198,7 @@ void BitcoinGUI::setWalletStatus(int status) {
     changePassphraseAction->setEnabled(true);
     revealPhraseAction->setEnabled(true);
     sweepAction->setEnabled(true);
+    sweepBLSAction->setEnabled(true);
 }
 
 void BitcoinGUI::updateWalletStatus() {
