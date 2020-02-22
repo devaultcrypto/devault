@@ -73,7 +73,7 @@ bool AppInitMain(Config &config,
                  RPCServer &rpcServer,
                  HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                  const SecureString& walletPassphrase,
-                 const std::vector<std::string>& words);
+                 const std::vector<std::string>& words, bool use_bls);
 
 /**
  * Setup the arguments for gArgs.
