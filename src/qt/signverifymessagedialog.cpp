@@ -117,8 +117,21 @@ void SignVerifyMessageDialog::on_signMessageButton_SM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-    const CKeyID *keyID = &std::get<CKeyID>(destination);
-    if (!keyID) {
+
+    CKeyID keyID1;
+    BKeyID keyID2;
+    bool is_key = false;
+    bool is_legacy = true;
+    if (std::holds_alternative<CKeyID>(destination)) {
+      keyID1 = std::get<CKeyID>(destination);
+      is_key = true;
+    } else if  (std::holds_alternative<BKeyID>(destination)) {
+      keyID2 = std::get<BKeyID>(destination);
+      is_key = true;
+      is_legacy = false;
+    }      
+    
+    if (!is_key) {
         ui->addressIn_SM->setValid(false);
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_SM->setText(
@@ -135,11 +148,20 @@ void SignVerifyMessageDialog::on_signMessageButton_SM_clicked() {
     }
 
     CKey key;
-    if (!model->wallet().getPrivKey(*keyID, key)) {
+    if (is_legacy) {
+      if (!model->wallet().getPrivKey(keyID1, key)) {
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_SM->setText(
-            tr("Private key for the entered address is not available."));
+                                    tr("Private key for the entered address is not available."));
         return;
+      }
+    } else {
+      if (!model->wallet().getPrivKey(keyID2, key)) {
+        ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
+        ui->statusLabel_SM->setText(
+                                    tr("Private key for the entered address is not available."));
+        return;
+      }
     }
 
     CHashWriter ss(SER_GETHASH, 0);
@@ -147,17 +169,26 @@ void SignVerifyMessageDialog::on_signMessageButton_SM_clicked() {
     ss << ui->messageIn_SM->document()->toPlainText().toStdString();
 
     std::vector<uint8_t> vchSig;
-    if (!key.SignCompact(ss.GetHash(), vchSig)) {
+    if (is_legacy) {
+      if (!key.SignCompact(ss.GetHash(), vchSig)) {
         ui->statusLabel_SM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_SM->setText(QString("<nobr>") +
                                     tr("Message signing failed.") +
                                     QString("</nobr>"));
         return;
-    }
+      }
+    } else {
+      if (!key.SignBLS(ss.GetHash(), vchSig)) {
+        ui->statusLabel_SM->setStyleSheet("QLabel { color: green; }");
+        ui->statusLabel_SM->setText(QString("<nobr>") + tr("Message signed.") +
+                                    QString("</nobr>"));
+        return;
+      }
 
-    ui->statusLabel_SM->setStyleSheet("QLabel { color: green; }");
-    ui->statusLabel_SM->setText(QString("<nobr>") + tr("Message signed.") +
-                                QString("</nobr>"));
+      // Now append Public Key to Signature
+      auto app = ToByteVector(key.GetPubKeyForBLS());
+      std::copy (app.begin(), app.end(), std::back_inserter(vchSig));
+    }
 
     ui->signatureOut_SM->setText(
         QString::fromStdString(EncodeBase64(&vchSig[0], vchSig.size())));
@@ -188,8 +219,7 @@ void SignVerifyMessageDialog::on_addressBookButton_VM_clicked() {
 }
 
 void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
-    CTxDestination destination = DecodeDestination(
-        ui->addressIn_VM->text().toStdString(), model->getChainParams());
+    CTxDestination destination = DecodeDestination(ui->addressIn_VM->text().toStdString(), model->getChainParams());
     if (!IsValidDestination(destination)) {
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(
@@ -197,8 +227,20 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
             tr("Please check the address and try again."));
         return;
     }
-    CKeyID *keyID = &std::get<CKeyID>(destination);
-    if (!keyID) {
+    CKeyID keyID1;
+    BKeyID keyID2;
+    bool is_key = false;
+    bool is_legacy = true;
+    if (std::holds_alternative<CKeyID>(destination)) {
+      keyID1 = std::get<CKeyID>(destination);
+      is_key = true;
+    } else if  (std::holds_alternative<BKeyID>(destination)) {
+      keyID2 = std::get<BKeyID>(destination);
+      is_key = true;
+      is_legacy = false;
+    }      
+
+    if (!is_key) {
         ui->addressIn_VM->setValid(false);
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(
@@ -207,8 +249,7 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
         return;
     }
     bool fInvalid = false;
-    std::vector<uint8_t> vchSig = DecodeBase64(
-        ui->signatureIn_VM->text().toStdString().c_str(), &fInvalid);
+    std::vector<uint8_t> vchSig = DecodeBase64(ui->signatureIn_VM->text().toStdString().c_str(), &fInvalid);
 
     if (fInvalid) {
         ui->signatureIn_VM->setValid(false);
@@ -223,24 +264,57 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
     ss << strMessageMagic;
     ss << ui->messageIn_VM->document()->toPlainText().toStdString();
 
-    CPubKey pubkey;
-    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+
+    if (is_legacy) {
+      CPubKey pubkey;
+      if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
         ui->signatureIn_VM->setValid(false);
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(
-            tr("The signature did not match the message digest.") +
-            QString(" ") + tr("Please check the signature and try again."));
+                                    tr("The signature did not match the message digest.") +
+                                    QString(" ") + tr("Please check the signature and try again."));
         return;
-    }
+      }
 
-    if (!(CTxDestination(pubkey.GetKeyID()) == destination)) {
+      if (!(CTxDestination(pubkey.GetKeyID()) == destination)) {
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(QString("<nobr>") +
                                     tr("Message verification failed.") +
                                     QString("</nobr>"));
         return;
-    }
+      }
+      
+    } else {
+      
+      if (vchSig.size() != (CPubKey::BLS_PUBLIC_KEY_SIZE + CPubKey::BLS_SIGNATURE_SIZE)) {
+        ui->signatureIn_VM->setValid(false);
+        ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
+        ui->statusLabel_VM->setText(
+                                    tr("The signature length was too short, must be 144 characters long.") +
+                                    QString(" ") + tr("Please check the signature and try again."));
+    
+      }
+        
+      // For BLS Signature we have Signature + Pubkey at the end
+      // Thus we must extract/separate them for verification
+      std::vector<uint8_t> vchPubKey(CPubKey::BLS_PUBLIC_KEY_SIZE);
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) {
+        vchPubKey[i] = vchSig[CPubKey::BLS_SIGNATURE_SIZE+i];
+      }
+      // remove Pubkey from Sig
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) vchSig.pop_back();
 
+      CPubKey blspubkey(vchPubKey);
+      
+      if (!blspubkey.VerifyBLS(ss.GetHash(), vchSig)) {
+        ui->signatureIn_VM->setValid(false);
+        ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
+        ui->statusLabel_VM->setText(
+                                    tr("The signature did not match the message digest.") +
+                                    QString(" ") + tr("Please check the signature and try again."));
+      }
+    }
+        
     ui->statusLabel_VM->setStyleSheet("QLabel { color: green; }");
     ui->statusLabel_VM->setText(QString("<nobr>") + tr("Message verified.") +
                                 QString("</nobr>"));
