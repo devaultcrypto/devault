@@ -4674,7 +4674,7 @@ CWallet::GetDestValues(const std::string &prefix) const {
 CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                                        const std::string walletFile,
                                        const SecureString& walletPassphrase,
-                                       const mnemonic::WordList& words
+                                       const mnemonic::WordList& words, bool use_bls
                                        ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
@@ -4703,7 +4703,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     CWallet *walletInstance = new CWallet(chainParams, std::move(database));
     
     // Used for switching at various places
-    walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false);
+    walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false) | use_bls;
     
     DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun);
     if (nLoadWalletRet != DBErrors::LOAD_OK) {
