@@ -1048,7 +1048,7 @@ public:
                           double minPercent,
                           CTransactionRef &tx, 
                           std::string &strFailReason);
-    bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason);
+    bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, bool from_bls, std::string &strFailReason);
 
     CValidationState CommitConsolidate(CTransactionRef tx, CConnman *connman);
     CValidationState CommitSweep(CTransactionRef tx, CConnman *connman);

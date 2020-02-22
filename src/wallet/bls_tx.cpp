@@ -21,7 +21,18 @@ static uint256 VoutHash(const CTxOut &vin) {
     CHashWriter ss(SER_GETHASH, 0);
     ss << vin;
     return ss.GetHash();
+
+    
 }
+
+// TBD
+auto CreatePrivateTxWithSig(const CWallet *pwallet, CMutableTransaction &txNew) -> std::optional<std::string> {
+  std::vector<CKey> keys;
+  CTransaction txNewConst(txNew);
+  
+  return std::nullopt;
+}
+
 
 auto CreatePrivateTxWithSig(const CWallet *pwallet,
                             const std::set<CInputCoin> &setCoins,

@@ -19,3 +19,4 @@ class CMutableTransaction;
 
 auto CreatePrivateTxWithSig(const CWallet *pwallet, const std::set<CInputCoin> &setCoins, CMutableTransaction &txNew)
     -> std::optional<std::string>;
+auto CreatePrivateTxWithSig(const CWallet *pwallet, CMutableTransaction &txNew) -> std::optional<std::string>;

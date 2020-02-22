@@ -3513,7 +3513,9 @@ bool CWallet::ConsolidateCoins(const CTxDestination &recipient,
 }
  
 bool CWallet::SweepCoinsToWallet(const CKey& key,
-                                 CTransactionRef &tx, std::string &strFailReason) {
+                                 CTransactionRef &tx,
+                                 bool from_bls,
+                                 std::string &strFailReason) {
 
     // 1. Get all the UTXOs for the Key/Address
     // 2. Get a (new) key from wallet to send to
@@ -3522,8 +3524,12 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     // 5. Call CommitSweep to add to Memory pool/Relay
     // 6. Notify
 
-    
-    CTxDestination source = key.GetPubKey().GetKeyID();
+    CTxDestination source;
+    if (from_bls) {
+        source = key.GetPubKey().GetBLSKeyID();
+    } else {
+        source = key.GetPubKey().GetKeyID();
+    }
     CScript coinscript =  GetScriptForDestination(source);
 
     if (::IsMine(*this, coinscript)) {
@@ -3572,7 +3578,12 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     }
 
     // vouts to the payees
-    CTxDestination recipient = newKey.GetKeyID();
+    CTxDestination recipient;
+    if (UseBLSKeys()) {
+        recipient = newKey.GetBLSKeyID();
+    } else {
+        recipient = newKey.GetKeyID();
+    }
     CScript scriptPub = GetScriptForDestination(recipient);
     CTxOut txout(nAmount, scriptPub);
     // add for sizing, replace later after fee subtracted
@@ -3585,22 +3596,18 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     }
 
     CTransaction txNewConst(txNew);
-    
-    // We create a temporary keystore and then add this key to it for signing purposes
-    CBasicKeyStore keystore;
-    keystore.AddKey(key);
-    
+
     int nBytes;
     {
-        std::vector<CTxOut> vtx;
-        // resize to same size at vins since seems to be required for
-        // Calc function below to work
-        for (size_t i=0;i<coins_to_use.size();i++) vtx.push_back(txout);
-        nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
-        if (nBytes < 0) {
-            strFailReason = _("Signing transaction failed");
-            return false;
-        }
+      std::vector<CTxOut> vtx;
+      // resize to same size at vins since seems to be required for
+      // Calc function below to work
+      for (size_t i=0;i<coins_to_use.size();i++) vtx.push_back(txout);
+      nBytes = CalculateMaximumSignedTxSize(txNewConst, this, vtx);
+      if (nBytes < 0) {
+        strFailReason = _("Signing transaction failed");
+        return false;
+      }
     }
 
     // for now
@@ -3614,20 +3621,38 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
 
     SigHashType sigHashType = SigHashType().withForkId();
     int nIn = 0;
-    for (const auto &coin : coins_to_use) {
+
+    if (UseBLSKeys()) {
+
+      // BLS only inputs
+      auto strFail = CreatePrivateTxWithSig(this, txNew);
+      if (strFail) {
+        strFailReason = strFail.value();
+        return false;
+      }
+  
+    } else {
+      // We create a temporary keystore and then add this key to it for signing purposes
+      CBasicKeyStore keystore;
+      keystore.AddKey(key);
+      
+
+      for (const auto &coin : coins_to_use) {
         const CScript &scriptPubKey = coin.second.GetTxOut().scriptPubKey;
         SignatureData sigdata;
         amount = coin.second.GetTxOut().nValue;
         ProduceSignature(MutableTransactionSignatureCreator(
                                                             &keystore, &txNew, nIn, amount, sigHashType),
                          scriptPubKey, sigdata);
-
+        
         sigdata = CombineSignatures(
                                     scriptPubKey, TransactionSignatureChecker(&txRedoNewConst, nIn, amount),
                                     sigdata, DataFromTransaction(txNew, nIn));
 
         UpdateTransaction(txNew, nIn, sigdata);
         nIn++;
+      }
+
     }
     
     // Return the constructed transaction data.
@@ -3646,8 +3671,6 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
 
     return true;
 }
- 
-
  
 void CWallet::ListAccountCreditDebit(const std::string &strAccount,
                                      std::list<CAccountingEntry> &entries) {
