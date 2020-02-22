@@ -20,6 +20,7 @@
 #include <startoptionsrevealed.h>
 #include <revealphrase.h>
 #include <sweep.h>
+#include <sweepbls.h>
 #include <transactiontablemodel.h>
 #include <transactionview.h>
 #include <walletmodel.h>
@@ -327,7 +328,7 @@ void WalletView::revealPhrase() {
     }
 }
 
-void WalletView::sweep() {
+void WalletView::sweeplegacy() {
     if (walletModel->getWalletStatus() == WalletModel::Locked) {
         AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
         dlg.setModel(walletModel);
@@ -346,7 +347,7 @@ void WalletView::sweep() {
         CKey key = DecodeSecret(secret);
         std::string strFailReason;
         CTransactionRef tx;
-        ok = walletModel->wallet().SweepCoinsToWallet(key, tx, strFailReason);
+        ok = walletModel->wallet().SweepCoinsToWallet(key, tx, false, strFailReason);
         if (!ok) {
             Q_EMIT message(
                            tr("Sweep Failed"),
@@ -358,6 +359,36 @@ void WalletView::sweep() {
     }
 }
 
+void WalletView::sweep() {
+    if (walletModel->getWalletStatus() == WalletModel::Locked) {
+        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+    if (walletModel->getWalletStatus() == WalletModel::Unlocked) {
+        bool ok;
+        SweepBLS dlg(this);
+        dlg.exec();
+
+        std::string secret = dlg.getSecretAddress();
+
+        // Skip
+        if (secret == "") return;
+        
+        CKey key = DecodeSecret(secret);
+        std::string strFailReason;
+        CTransactionRef tx;
+        ok = walletModel->wallet().SweepCoinsToWallet(key, tx, true, strFailReason);
+        if (!ok) {
+            Q_EMIT message(
+                           tr("Sweep Failed"),
+                           tr("Error sweeping fund to wallet, reason:  %1.")
+                           .arg(QString::fromUtf8(strFailReason.c_str())),
+                           CClientUIInterface::MSG_ERROR);
+        }
+        walletModel->setWalletLocked(true, "");
+    }
+}
 void WalletView::unlockWallet() {
     if (!walletModel) {
         return;

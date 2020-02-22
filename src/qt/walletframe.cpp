@@ -161,6 +161,11 @@ void WalletFrame::revealPhrase() {
     if (walletView) walletView->revealPhrase();
 }
 
+void WalletFrame::sweeplegacy() {
+    WalletView *walletView = currentWalletView();
+    if (walletView) walletView->sweeplegacy();
+}
+
 void WalletFrame::sweep() {
     WalletView *walletView = currentWalletView();
     if (walletView) walletView->sweep();
