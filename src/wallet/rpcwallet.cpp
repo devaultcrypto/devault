@@ -588,7 +588,7 @@ static UniValue sendtoaddress(const Config &config,
 }
 
 
-UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
+UniValue sweeplegacyprivkey(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
@@ -596,16 +596,16 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "sweepprivkey \"privkey\"\n"
-            "\nSend funds from entered private key to a key in your wallet (HD chain). "
+            "sweeplegacyprivkey \"privkey\"\n"
+            "\nSend funds from entered legacy (i.e devault: associated) private key to a key in your wallet (HD chain). "
             "\nArguments:\n"
             "1. \"DeVaultprivkey\"   (string, required) The private key (see "
             "dumpprivkey)\n"
             "\nExamples:\n"
             "\nSweep a private key\n" +
-            HelpExampleCli("Sweepprivkey", "\"myaddress\"") +
-            "\nSweep the private key\n" +
-            HelpExampleRpc("importprivkey", R"("mykey")"));
+            HelpExampleCli("sweeplegacyprivkey", "\"myaddress\"") +
+            "\nSweep a legacy private key\n" +
+            HelpExampleRpc("sweeplegacyprivkey", R"("mykey")"));
 
     {
         LOCK2(cs_main, pwallet->cs_wallet);
@@ -624,7 +624,50 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
         std::string strFailReason;
         CTransactionRef tx;
-        bool ok = pwallet->SweepCoinsToWallet(key, tx, strFailReason);
+        bool ok = pwallet->SweepCoinsToWallet(key, tx, false, strFailReason);
+        if (!ok) {
+            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+        } 
+        return tx->GetId().GetHex();
+    }
+}
+UniValue sweepblsprivkey(const Config &config, const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "sweepblsprivkey \"privkey\"\n"
+            "\nSend funds from entered private key (associated with dvt: address) to a key in your wallet (HD chain). "
+            "\nArguments:\n"
+            "1. \"DeVaultprivkey\"   (string, required) The private key (see "
+            "dumpprivkey)\n"
+            "\nExamples:\n"
+            "\nSweep a private key\n" +
+            HelpExampleCli("sweepblsprivkey", "\"myaddress\"") +
+            "\nSweep the private key\n" +
+            HelpExampleRpc("sweepblsprivkey", R"("mykey")"));
+
+    {
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        EnsureWalletIsUnlocked(pwallet);
+
+        std::string strSecret = request.params[0].get_str();
+        CKey key = DecodeSecret(strSecret);
+        //std::string p = EncodeDestination(key.GetPubKey().GetKeyID());
+        
+        if (!key.IsValid()) { 
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+        }
+
+        FlushStateToDisk();
+
+        std::string strFailReason;
+        CTransactionRef tx;
+        bool ok = pwallet->SweepCoinsToWallet(key, tx, true, strFailReason);
         if (!ok) {
             throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
         } 
@@ -4085,7 +4128,8 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
     { "wallet",             "sendtoaddress",                sendtoaddress,                {"address","amount","comment","comment_to","subtractfeefromamount"} },
     { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
-    { "wallet",             "sweepprivkey",                 sweepprivkey,                 {"privkey"} },
+    { "wallet",             "sweeplegacyprivkey",           sweeplegacyprivkey,           {"privkey"} },
+    { "wallet",             "sweepblsprivkey",              sweepblsprivkey,              {"privkey"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
     { "wallet",             "signmessage",                  signmessage,                  {"address","message"} },
