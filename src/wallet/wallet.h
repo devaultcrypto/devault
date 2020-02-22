@@ -1223,7 +1223,7 @@ public:
     static CWallet *CreateWalletFromFile(const CChainParams &chainParams,
                                          const std::string walletFile,
                                          const SecureString& walletPassphrase,
-                                         const std::vector<std::string>& words
+                                         const std::vector<std::string>& words, bool use_bls
                                          );
 
     /**
