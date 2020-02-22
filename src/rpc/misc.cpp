@@ -150,39 +150,54 @@ static UniValue verifymessage(const Config &config,
     }
     CKeyID keyID;
     BKeyID keyID1;
-    try {
-        keyID = std::get<CKeyID>(destination);
+    bool use_ec = false;
+    bool use_bls = false;
+    if (std::holds_alternative<CKeyID>(destination)) {
+      use_ec = true;
+    } else if (std::holds_alternative<BKeyID>(destination)) {
+      use_bls = true;
     }
-    catch (...) {  keyID.SetNull(); }
-    try {
-        keyID1 = std::get<BKeyID>(destination);
-    }
-    catch (...) { keyID1.SetNull(); }
 
-    if (keyID.IsNull() && keyID1.IsNull()) {
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+    if (!use_ec || !use_bls) {
+      throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
 
     bool fInvalid = false;
     std::vector<uint8_t> vchSig = DecodeBase64(strSign.c_str(), &fInvalid);
-
+    
     if (fInvalid) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                           "Malformed base64 encoding");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                         "Malformed base64 encoding");
     }
-
+    
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << strMessage;
+    
 
-    CPubKey pubkey;
-    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+    if (use_ec) {
+      keyID = std::get<CKeyID>(destination);
+      CPubKey pubkey;
+      if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
         return false;
-    }
-    if (!keyID.IsNull()) {
-        return (pubkey.GetKeyID() == keyID);
+      }
+      return (pubkey.GetKeyID() == keyID);
+
     } else {
-        return (pubkey.GetBLSKeyID() == keyID1);
+      keyID1 = std::get<BKeyID>(destination);
+      // For BLS Signature we have Signature + Pubkey at the end
+      // Thus we must extract/separate them for verification
+      std::vector<uint8_t> vchPubKey(CPubKey::BLS_PUBLIC_KEY_SIZE);
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) {
+        vchPubKey[i] = vchSig[CPubKey::BLS_SIGNATURE_SIZE+i];
+      }
+      // remove Pubkey from Sig
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) vchSig.pop_back();
+      CPubKey blspubkey(vchPubKey);
+      if (!blspubkey.VerifyBLS(ss.GetHash(), vchSig)) {
+        return false;
+      }
+      return (blspubkey.GetBLSKeyID() == keyID1);
     }
 }
 
