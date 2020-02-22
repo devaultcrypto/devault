@@ -57,6 +57,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="RestoreLegacyWallet">
+       <property name="text">
+        <string>Restore Legacy Wallet</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="NewWallet">
        <property name="text">
         <string>Create New Wallet</string>

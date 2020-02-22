@@ -18,10 +18,12 @@ class StartOptionsRestore : public QWidget {
     Q_OBJECT
 
 public:
-    explicit StartOptionsRestore(QStringList wordList, int rows,
+    explicit StartOptionsRestore(QStringList wordList, int rows, bool bls_mode,
                                  QWidget *parent = nullptr);
     ~StartOptionsRestore();
     std::vector<std::string> getOrderedStrings();
+    bool is_bls() { return bls; }                                                
+                                                
 
 private Q_SLOTS:
     void textChanged(const QString &text);
@@ -31,4 +33,5 @@ private:
     std::list<QLineEdit *> editList;
 
     QStringList wordList;
+    bool bls;
 };
