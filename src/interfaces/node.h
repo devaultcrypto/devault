@@ -80,7 +80,7 @@ public:
                              RPCServer &rpcServer,
                              HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                              const SecureString& walletPassphrase,
-                             const std::vector<std::string>& words) = 0;
+                             const std::vector<std::string>& words, bool use_bls) = 0;
 
     //! Stop node.
     virtual void appShutdown() = 0;
