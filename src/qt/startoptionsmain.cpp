@@ -48,6 +48,7 @@ StartOptionsMain::StartOptionsMain(QWidget *parent)
     startOptions = new StartOptions(this);
     ui->QStackTutorialContainer->addWidget(startOptions);
     ui->QStackTutorialContainer->setCurrentWidget(startOptions);
+    bls = true;
 }
 
 StartOptionsMain::~StartOptionsMain() {
@@ -58,6 +59,7 @@ void StartOptionsMain::on_NewWallet_clicked() {
     pageNum = CreateOrRestorePage;
     ui->NewWallet->setVisible(false);
     ui->RestoreWallet->setVisible(false);
+    ui->RestoreLegacyWallet->setVisible(false);
     ui->Back->setVisible(true);
     ui->Next->setVisible(true);
     rows = startOptions->getRows();
@@ -72,17 +74,33 @@ void StartOptionsMain::on_NewWallet_clicked() {
     startOptionsRevealed = new StartOptionsRevealed(words, rows, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRevealed);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRevealed);
+    bls = true;
 }
 
 void StartOptionsMain::on_RestoreWallet_clicked() {
     pageNum = CheckWordsPage;
     ui->NewWallet->setVisible(false);
+    ui->RestoreLegacyWallet->setVisible(false);
     ui->RestoreWallet->setVisible(false);
     ui->Back->setVisible(true);
     ui->Next->setVisible(true);
     rows = startOptions->getRows();
 
-    startOptionsRestore = new StartOptionsRestore(qWordList, rows, this);
+    startOptionsRestore = new StartOptionsRestore(qWordList, rows, true, this);
+    ui->QStackTutorialContainer->addWidget(startOptionsRestore);
+    ui->QStackTutorialContainer->setCurrentWidget(startOptionsRestore);
+}
+
+void StartOptionsMain::on_RestoreLegacyWallet_clicked() {
+    pageNum = CheckWordsPage;
+    ui->NewWallet->setVisible(false);
+    ui->RestoreLegacyWallet->setVisible(false);
+    ui->RestoreWallet->setVisible(false);
+    ui->Back->setVisible(true);
+    ui->Next->setVisible(true);
+    rows = startOptions->getRows();
+
+    startOptionsRestore = new StartOptionsRestore(qWordList, rows, false, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRestore);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRestore);
 }
@@ -104,6 +122,7 @@ void StartOptionsMain::on_Back_clicked() {
             pageNum = StartPage;
             ui->NewWallet->setVisible(true);
             ui->RestoreWallet->setVisible(true);
+            ui->RestoreLegacyWallet->setVisible(true);
             ui->Back->setVisible(false);
             ui->Next->setVisible(false);
             ui->QStackTutorialContainer->setCurrentWidget(startOptions);
@@ -119,6 +138,7 @@ void StartOptionsMain::on_Back_clicked() {
             pageNum = StartPage;
             ui->NewWallet->setVisible(true);
             ui->RestoreWallet->setVisible(true);
+            ui->RestoreLegacyWallet->setVisible(true);
             ui->Back->setVisible(false);
             ui->Next->setVisible(false);
             ui->QStackTutorialContainer->setCurrentWidget(startOptions);
@@ -189,6 +209,7 @@ void StartOptionsMain::on_Next_clicked() {
         }
         case CheckWordsPage: {
             std::vector<std::string> word_str = startOptionsRestore->getOrderedStrings();
+            bls = startOptionsRestore->is_bls();
 
             std::string seedphrase = "";
             for (std::string &q_word : word_str) {
