@@ -146,7 +146,7 @@ XXXXX - Partial upgrade of wallet stuff
      Sanity check for mempool acceptance when doing standardness checks
      Merge #13656: Remove the boost/algorithm/string/predicate.hpp dependency
      Daemonize bitcoind in test-seeds.sh rather than run in a background process
-     Merge #13667: wallet: Fix backupwallet for multiwallets
+XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      refactor: replace qLowerBound & qUpperBound with std:: upper_bound & lower_bound
      Merge #13633: Drop dead code from Stacks
      [CI] Migrate the CI to use cmake and ninja
@@ -510,7 +510,7 @@ XXXXX - Partial upgrade of wallet stuff
 #     mempool: remove unused magic number from consistency check
 #     Merge #13258: uint256: Remove unnecessary crypto/common.h dependency
       Merge #11491: [gui] Add proxy icon in statusbar
-      bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
+XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
       ui: Support wallets unloaded dynamically
       rpc: Add unloadwallet RPC, release notes, and tests
       rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
