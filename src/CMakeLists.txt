@@ -98,7 +98,6 @@ remove_compiler_flags(-DNDEBUG)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	# Ensure that WINDRES_PREPROC is enabled when using windres.
 	list(APPEND CMAKE_RC_FLAGS "-DWINDRES_PREPROC")
-
 	# Build all static so there is no dll file to distribute.
 	add_compiler_flags(-static)
 endif()
@@ -573,6 +572,11 @@ endif()
 
 # Wallet
 if(BUILD_WALLET)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(BUILD_WALLETTOOL OFF)
+  else()
+    set(BUILD_WALLETTOOL ON)
+  endif()
 	add_subdirectory(wallet)
 	target_link_libraries(server wallet)
 else()

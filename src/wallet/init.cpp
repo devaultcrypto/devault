@@ -351,20 +351,9 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
                                          "characters in -wallet filename."),
                                        walletFile));
         }
-#ifdef NO_BOOST_FILESYSTEM
-        fs::path wallet_path = GetWalletDir() / walletFile;
-#else
-        fs::path wallet_path = fs::absolute(walletFile, GetWalletDir());
-#endif
+        WalletLocation location(walletFile);
         
-        if (fs::exists(wallet_path) && (!fs::is_regular_file(wallet_path) ||
-                                        fs::is_symlink(wallet_path))) {
-            return InitError(strprintf(_("Error loading wallet %s. -wallet "
-                                         "filename must be a regular file."),
-                                       walletFile));
-        }
-
-        if (!wallet_paths.insert(wallet_path).second) {
+        if (!wallet_paths.insert(location.GetPath()).second) {
             return InitError(strprintf(_("Error loading wallet %s. Duplicate "
                                          "-wallet filename specified."),
                                        walletFile));
@@ -465,7 +454,7 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
     // We loop here as before, but only use the 1st wallet file
     for (const std::string &walletFile : gArgs.GetArgs("-wallet")) {
       CWallet *const pwallet =
-        CWallet::CreateWalletFromFile(chainParams, walletFile, walletPassphrase, words, use_bls);
+        CWallet::CreateWalletFromFile(chainParams, WalletLocation(walletFile), walletPassphrase, words, use_bls);
       if (!pwallet) {
         return false;
       }

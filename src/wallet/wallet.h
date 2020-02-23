@@ -19,6 +19,7 @@
 #include <wallet/crypter.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/walletdb.h>
+#include <wallet/walletutil.h>
 
 #include <algorithm>
 #include <atomic>
@@ -766,16 +767,14 @@ public:
      */
     WalletDatabase &GetDBHandle() { return *database; }
 
+    WalletLocation m_location;
+    const WalletLocation &GetLocation() const { return m_location; }
+  
     /**
      * Get a name for this wallet for logging/debugging purposes.
      */
-    std::string GetName() const {
-        if (database) {
-            return database->GetName();
-        } else {
-            return "dummy";
-        }
-    }
+
+    const std::string &GetName() const { return m_location.GetName(); }
 
     void LoadKeyPool(int64_t nIndex, const CKeyPool &keypool)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
@@ -801,9 +800,9 @@ public:
     }
 
     // Create wallet with passed-in database handle
-    CWallet(const CChainParams &chainParamsIn,
+    CWallet(const CChainParams &chainParamsIn, const WalletLocation &location,
             std::unique_ptr<WalletDatabase> database_in)
-        : database(std::move(database_in)), chainParams(chainParamsIn) {
+      : database(std::move(database_in)), chainParams(chainParamsIn), m_location(location) {
     }
 
     ~CWallet() override {}
@@ -1221,7 +1220,7 @@ public:
      * in case of an error.
      */
     static CWallet *CreateWalletFromFile(const CChainParams &chainParams,
-                                         const std::string walletFile,
+                                         const WalletLocation &location,
                                          const SecureString& walletPassphrase,
                                          const std::vector<std::string>& words, bool use_bls
                                          );
