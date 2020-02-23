@@ -6,25 +6,44 @@ project(catch-tests)
 # Process json files.
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/data")
 
-find_program(PYTHON2 python) # Python 3 had issues on Linux
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_program(PYTHON3 python) 
+ELSE()
+  find_program(PYTHON2 python) # Python 3 had issues on Linux
+ENDIF()
+
 function(gen_json_header NAME)
 	set(HEADERS "")
 	foreach(f ${ARGN})
 		set(h "${CMAKE_CURRENT_BINARY_DIR}/${f}.h")
 
 #Get the proper name for the test variable.
-		get_filename_component(TEST_NAME ${f} NAME_WE)
-		add_custom_command(OUTPUT ${h}
-			COMMAND ${PYTHON2}
-			ARGS
-				"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header.py"
-				"${TEST_NAME}"
-				"${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
-			MAIN_DEPENDENCY ${f}
-			DEPENDS
-				"data/generate_header.py"
-			VERBATIM
+get_filename_component(TEST_NAME ${f} NAME_WE)
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	add_custom_command(OUTPUT ${h}
+		COMMAND ${PYTHON3}
+		ARGS
+		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header3.py"
+		"${TEST_NAME}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
+		MAIN_DEPENDENCY ${f}
+		DEPENDS
+		"data/generate_header.py"
+		VERBATIM
 		)
+ELSE()
+	add_custom_command(OUTPUT ${h}
+		COMMAND ${PYTHON2}
+		ARGS
+		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header.py"
+		"${TEST_NAME}"
+		"${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
+		MAIN_DEPENDENCY ${f}
+		DEPENDS
+		"data/generate_header.py"
+		VERBATIM
+		)
+ENDIF()
 		list(APPEND HEADERS ${h})
 	endforeach(f)
 	set(${NAME} "${HEADERS}" PARENT_SCOPE)
