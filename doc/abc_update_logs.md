@@ -1,7 +1,7 @@
 XXXXX - Partial upgrade of wallet stuff
      
-   [CMAKE] Move the upgrade activated tests out of the TestSuite module
-   [CMAKE] Make the list of tests a property of the test suite
+      [CMAKE] Move the upgrade activated tests out of the TestSuite module
+      [CMAKE] Make the list of tests a property of the test suite
       [CMAKE] Factorize the test suite target name construction
       lcov: filter depends from coverage report
       Failing functional tests stop lcov
@@ -15,6 +15,7 @@ XXXXX - Partial upgrade of wallet stuff
       Move github-release to appropriate contrib sub-directory
       Move build_* wrapper scripts to devtools
       lcov: filter /usr/lib/ from coverage reports
+21.0      
       Update manpages for 0.21.0 release
       Add missing items to release-notes + formatting fixups
       Bump automatic replay protection to Nov 2020 upgrade
@@ -170,6 +171,7 @@ XXXXX - Partial upgrade of wallet stuff
       add sigChecks value to script cache
       [CMAKE] Make Qt protobuf an object library
       Add braces to unit tests files
+20.12
       Update manpages for 0.20.12 release
       Update chainparams
       Added some release notes
@@ -254,6 +256,7 @@ XXXXX - Partial upgrade of wallet stuff
       Merge #14413: tests: Allow closed rpc handler in assert_start_raises_init_error
       Merge #14105: util: Report parse errors in configuration file
       Merge #14146: wallet: Remove trailing separators from -walletdir arg
+20.11
       [CMAKE] Fix static linkage when building for Windows
       Fix type mismatch for GetVirtualSizeWith<Descendants|Ancerstors>
       simplify ATMP standard flag computation [2/2] - move computation to another function
@@ -377,8 +380,6 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 ##### [wallet] Reopen CDBEnv after encryption instead of shutting down
       Make ECM error message more helpful
 ##### wallet: Reset BerkeleyDB handle after connection fails
-
-20.11
       Use best-fit strategy in Arena, now O(log(n)) instead O(n)
       Nits in rpcdump
       Various formating fix in validation.h
