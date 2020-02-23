@@ -62,5 +62,5 @@ endif()
 
 # check if using tests here...
 if (BUILD_CTESTS)
-  add_subdirectory(test)
+  #add_subdirectory(test)
 endif()
