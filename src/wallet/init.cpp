@@ -395,11 +395,7 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
     for (const auto& wallet_file : wallet_files) {
 
         fs::path added_dir = BaseParams().DataDir();
-#ifdef NO_BOOST_FILESYSTEM
-        fs::path wallet_path = GetWalletDirNoCreate(added_dir) / wallet_file;
-#else
-        fs::path wallet_path = fs::absolute(wallet_file, GetWalletDirNoCreate(added_dir));
-#endif
+        fs::path wallet_path = GetWalletPathNoCreate(added_dir, wallet_file);
         
         if (fs::exists(wallet_path)) {
           return true;
