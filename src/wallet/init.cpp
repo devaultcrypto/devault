@@ -360,8 +360,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
         }
 
         std::string strError;
-        if (!WalletBatch::VerifyEnvironment(walletFile, GetWalletDir().string(),
-                                          strError)) {
+        if (!WalletBatch::VerifyEnvironment(walletFile, strError)) {
             return InitError(strError);
         }
 
@@ -377,8 +376,7 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
         }
 
         std::string strWarning;
-        bool dbV = WalletBatch::VerifyDatabaseFile(
-            walletFile, GetWalletDir().string(), strWarning, strError);
+        bool dbV = WalletBatch::VerifyDatabaseFile(walletFile, strWarning, strError);
         if (!strWarning.empty()) {
             InitWarning(strWarning);
         }

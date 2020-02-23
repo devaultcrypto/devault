@@ -50,6 +50,9 @@ class CWalletTx;
 class uint160;
 class uint256;
 
+/** Backend-agnostic database type. */
+using WalletDatabase = BerkeleyDatabase;
+
 /** Error statuses for the wallet database */
 enum class DBErrors {
     LOAD_OK,
@@ -62,16 +65,15 @@ enum class DBErrors {
 
 /**
  * Access to the wallet database.
- * This should really be named WalletBatchBatch, as it represents a single
- * transaction at the database. It will be committed when the object goes out of
- * scope.
- * Optionally (on by default) it will flush to disk as well.
+ * This represents a single transaction at the database. It will be committed
+ * when the object goes out of scope. Optionally (on by default) it will flush
+ * to disk as well.
  */
 class WalletBatch {
 private:
     template <typename K, typename T>
     bool WriteIC(const K &key, const T &value, bool fOverwrite = true) {
-        if (!batch.Write(key, value, fOverwrite)) {
+        if (!m_batch.Write(key, value, fOverwrite)) {
             return false;
         }
         m_database.IncrementUpdateCounter();
@@ -79,7 +81,7 @@ private:
     }
 
     template <typename K> bool EraseIC(const K &key) {
-        if (!batch.Erase(key)) {
+        if (!m_batch.Erase(key)) {
             return false;
         }
         m_database.IncrementUpdateCounter();
@@ -88,8 +90,8 @@ private:
 
 public:
     explicit WalletBatch(WalletDatabase &database, const char *pszMode = "r+",
-                       bool _fFlushOnClose = true)
-        : batch(database, pszMode, _fFlushOnClose), m_database(database) {}
+                         bool _fFlushOnClose = true)
+        : m_batch(database, pszMode, _fFlushOnClose), m_database(database) {}
     WalletBatch(const WalletBatch &) = delete;
     WalletBatch &operator=(const WalletBatch &) = delete;
 
@@ -157,14 +159,14 @@ public:
     
     /* Try to (very carefully!) recover wallet database (with a possible key
      * type filter) */
-    static bool Recover(const std::string &filename, void *callbackDataIn,
+    static bool Recover(const fs::path &wallet_path, void *callbackDataIn,
                         bool (*recoverKVcallback)(void *callbackData,
                                                   CDataStream ssKey,
                                                   CDataStream ssValue),
                         std::string &out_backup_filename);
     /* Recover convenience-function to bypass the key filter callback, called
      * when verify fails, recovers everything */
-    static bool Recover(const std::string &filename,
+    static bool Recover(const fs::path &wallet_path,
                         std::string &out_backup_filename);
     /* Recover filter (used as callback), will only let keys (cryptographical
      * keys) as KV/key-type pass through */
@@ -174,12 +176,10 @@ public:
      * key) type */
     static bool IsKeyType(const std::string &strType);
     /* verifies the database environment */
-    static bool VerifyEnvironment(const std::string &walletFile,
-                                  const fs::path &walletDir,
+    static bool VerifyEnvironment(const fs::path &wallet_path,
                                   std::string &errorStr);
     /* verifies the database file */
-    static bool VerifyDatabaseFile(const std::string &walletFile,
-                                   const fs::path &walletDir,
+    static bool VerifyDatabaseFile(const fs::path &wallet_path,
                                    std::string &warningStr,
                                    std::string &errorStr);
 
@@ -199,7 +199,7 @@ public:
     bool WriteVersion(int nVersion);
 
 private:
-    BerkeleyBatch batch;
+    BerkeleyBatch m_batch;
     WalletDatabase &m_database;
 };
 
