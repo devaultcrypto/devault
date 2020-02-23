@@ -1,3 +1,5 @@
+XXXXX - Partial upgrade of wallet stuff
+
 20.11
       Use best-fit strategy in Arena, now O(log(n)) instead O(n)
       Nits in rpcdump
@@ -546,7 +548,7 @@
       [LINTER] Check for header guard closure comment
       Merge #13058: [wallet] `createwallet` RPC - create new wallet at runtime
       Update Seeder to use fsbridge::fopen() instead of fopen()
-      Make objects in range declarations immutable by default. Avoid unnecessary copying of objects in range declarations.
+XXXXX Make objects in range declarations immutable by default. Avoid unnecessary copying of objects in range declarations.
 #     cli: Ignore libevent warnings
       Merge #13252: Wallet: Refactor ReserveKeyFromKeyPool for safety
       [build-configurations] Resurface the more informative error message when ABC_BUILD_NAME is not set
@@ -1343,7 +1345,7 @@ XXXXX Merge #11480: [ui] Add toggle for unblinding password fields
 ##### Merge #8498: Near-Bugfix: Optimization: Minimize the number of times it is checked that no money...
 ##### Merge #10196: Bugfix: PrioritiseTransaction updates the mempool tx counter
 ##### Merge #10228: build: regenerate bitcoin-config.h as necessary
-      Remove unecessary include of boost/version
+XXXXX Remove unecessary include of boost/version
       Merge #10162: [trivial] Log calls to getblocktemplate
       Merge #10088: Trivial: move several relay options into the relay help group
       Merge #11237: qt: Fixing division by zero in time remaining
@@ -1444,7 +1446,7 @@ XXXXX Merge #11480: [ui] Add toggle for unblinding password fields
       [qa] util: Remove unused sync_chain
       Merge #10568: Remove unnecessary forward class declarations in header files
       Merge #9909: tests: Add FindEarliestAtLeast test for edge cases
-      Merge #10522: [wallet] Remove unused variables
+XXXXX Merge #10522: [wallet] Remove unused variables
       Merge #11198: [Qt] Fix display of package name on 'open config file' tooltip
       Merge #9890: Add a button to open the config file in a text editor
       Cleanup remaining boost includes
@@ -1540,21 +1542,21 @@ GIT SHA e1029deba1b8 [CMAKE] update miniupnpc build (#173) - corresponds to this
 ##### Merge #10056: [zmq] Call va_end() on va_start()ed args.
 ##### Backport current GetDifficulty logic (& tests) from Core
 ##### remove chain.h dependency from txdb.h
-      Create new wallet databases as directories rather than files
+XXXXX Create new wallet databases as directories rather than files
       Remove SCRIPT_VERIFY_CHECKDATASIG_SIGOPS flag from script tests
 ##### index: Move index DBs into index/ directory.
 ##### MOVEONLY: Move BaseIndex to its own file.
 ##### index: Generalize logged statements in BaseIndex.
 ##### index: Extract logic from TxIndex into reusable base class.
 ##### db: Make reusable base class for index databases.
-      Allow wallet files not in -walletdir directory
+XXXXX Allow wallet files not in -walletdir directory
       Support downgrading after recovered keypool witness keys
       SegWit wallet support
 ##### [CMAKE] Fix Miniupnpc error message
 ##### Remove IsSolvable
 ##### Simplify "bool x = y ? true : false". Remove unused function and trailing semicolon.
 ##### Extend validateaddress information for P2SH-embedded witness
-      Allow wallet files in multiple directories
+XXXXX Allow wallet files in multiple directories
       Bump wallet version to 190700 and remove the `usehd` option
 ##### [CMAKE] Add support for Miniupnpc
 ##### Implicitly know about P2WPKH redeemscripts

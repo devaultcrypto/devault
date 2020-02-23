@@ -20,7 +20,7 @@ static std::shared_ptr<CWallet> LoadWallet(const fs::path &wallet_path) {
     return nullptr;
   }
 
-  std::unique_ptr<WalletDatabase> database(new WalletDatabase(&bitdb, "wallet.dat"));
+  std::unique_ptr<WalletDatabase> database(new WalletDatabase(wallet_path));
   auto &config = const_cast<Config &>(GetConfig());
   auto &chainParams = config.GetChainParams();
   // dummy chain interface
@@ -205,7 +205,7 @@ bool GetWalletInfo() {
     return false;
   }
   std::string error;
-  if (!BerkeleyBatch::VerifyEnvironment(walletFile, wallet_dir, error)) {
+  if (!BerkeleyBatch::VerifyEnvironment(wallet_dir, error)) {
       tfm::format(std::cerr, "Error loading %s. Is wallet being used by other process?\n", wallet_path.string());
       return false;
   }
