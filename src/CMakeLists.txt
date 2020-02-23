@@ -572,10 +572,10 @@ endif()
 
 # Wallet
 if(BUILD_WALLET)
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(BUILD_WALLETTOOL OFF)
-  else()
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(BUILD_WALLETTOOL ON)
+  else()
+    set(BUILD_WALLETTOOL OFF)
   endif()
 	add_subdirectory(wallet)
 	target_link_libraries(server wallet)
