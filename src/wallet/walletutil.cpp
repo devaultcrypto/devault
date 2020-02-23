@@ -23,6 +23,7 @@ fs::path GetWalletDir() {
 
     return path;
 }
+
 fs::path GetWalletDirNoCreate(fs::path& added_dir) {
   fs::path path;
   
@@ -46,6 +47,14 @@ fs::path GetWalletDirNoCreate(fs::path& added_dir) {
   }
   
   return path;
+}
+
+fs::path GetWalletPathNoCreate(fs::path& added, const std::string& file) {
+#ifdef NO_BOOST_FILESYSTEM
+  return GetWalletDirNoCreate(added) / file;
+#else
+  return fs::absolute(file, GetWalletDirNoCreate(added));
+#endif
 }
 
 

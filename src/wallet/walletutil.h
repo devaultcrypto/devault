@@ -9,6 +9,7 @@
 //! Get the path of the wallet directory.
 fs::path GetWalletDir();
 fs::path GetWalletDirNoCreate(fs::path& added_dir);
+fs::path GetWalletPathNoCreate(fs::path& added, const std::string& file);
 
 //! The WalletLocation class provides wallet information.
 class WalletLocation final {
