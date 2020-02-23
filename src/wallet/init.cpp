@@ -333,56 +333,39 @@ bool WalletInit::Verify(const CChainParams &chainParams) const {
 
     uiInterface.InitMessage(_("Verifying wallet(s)..."));
 
+    std::vector<std::string> wallet_files = gArgs.GetArgs("-wallet");
+
+    // Parameter interaction code should have thrown an error if -salvagewallet
+    // was enabled with more than wallet file, so the wallet_files size check
+    // here should have no effect.
+    bool salvage_wallet =
+        gArgs.GetBoolArg("-salvagewallet", false) && wallet_files.size() <= 1;
+
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
-    // We no longer loop here as before, but only use the 1st wallet file
-    std::string walletFile = gArgs.GetArg("-wallet",DEFAULT_WALLET_DAT);
-    {
-        if (fs::path(walletFile).filename() != walletFile) {
-            return InitError(
-                strprintf(_("Error loading wallet %s. -wallet parameter must "
-                            "only specify a filename (not a path)."),
-                          walletFile));
-        }
-
-        if (SanitizeString(walletFile, SAFE_CHARS_FILENAME) != walletFile) {
-            return InitError(strprintf(_("Error loading wallet %s. Invalid "
-                                         "characters in -wallet filename."),
-                                       walletFile));
-        }
-        WalletLocation location(walletFile);
+    for (const auto& wallet_file : wallet_files) {
+        WalletLocation location(wallet_file);
         
         if (!wallet_paths.insert(location.GetPath()).second) {
             return InitError(strprintf(_("Error loading wallet %s. Duplicate "
                                          "-wallet filename specified."),
-                                       walletFile));
+                                       wallet_file));
         }
 
-        std::string strError;
-        if (!WalletBatch::VerifyEnvironment(walletFile, strError)) {
-            return InitError(strError);
+        std::string error_string;
+        std::string warning_string;
+        bool verify_success =
+          CWallet::Verify(chainParams, location, salvage_wallet,
+                          error_string, warning_string);
+        if (!error_string.empty()) {
+          InitError(error_string);
         }
-
-        if (gArgs.GetBoolArg("-salvagewallet", false)) {
-            // Recover readable keypairs:
-            CWallet dummyWallet(chainParams);
-            std::string backup_filename;
-            if (!WalletBatch::Recover(walletFile, (void *)&dummyWallet,
-                                    WalletBatch::RecoverKeysOnlyFilter,
-                                    backup_filename)) {
-                return false;
-            }
+        if (!warning_string.empty()) {
+          InitWarning(warning_string);
         }
-
-        std::string strWarning;
-        bool dbV = WalletBatch::VerifyDatabaseFile(walletFile, strWarning, strError);
-        if (!strWarning.empty()) {
-            InitWarning(strWarning);
-        }
-        if (!dbV) {
-            InitError(strError);
-            return false;
+        if (!verify_success) {
+          return false;
         }
     }
 
@@ -408,21 +391,14 @@ bool WalletInit::CheckIfWalletExists(const CChainParams &chainParams) const {
     // Keep track of each wallet absolute path to detect duplicates.
     std::set<fs::path> wallet_paths;
 
-    // We no longer loop here as before, but only use the 1st wallet file
-    std::string walletFile = gArgs.GetArg("-wallet",DEFAULT_WALLET_DAT);
-    {
-        if (fs::path(walletFile).filename() != walletFile) {
-          return false;
-        }
+    std::vector<std::string> wallet_files = gArgs.GetArgs("-wallet");
+    for (const auto& wallet_file : wallet_files) {
 
-        if (SanitizeString(walletFile, SAFE_CHARS_FILENAME) != walletFile) {
-          return false;
-        }
         fs::path added_dir = BaseParams().DataDir();
 #ifdef NO_BOOST_FILESYSTEM
-        fs::path wallet_path = GetWalletDirNoCreate(added_dir) / walletFile;
+        fs::path wallet_path = GetWalletDirNoCreate(added_dir) / wallet_file;
 #else
-        fs::path wallet_path = fs::absolute(walletFile, GetWalletDirNoCreate(added_dir));
+        fs::path wallet_path = fs::absolute(wallet_file, GetWalletDirNoCreate(added_dir));
 #endif
         
         if (fs::exists(wallet_path)) {
