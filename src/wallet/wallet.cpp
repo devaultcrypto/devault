@@ -4700,20 +4700,22 @@ CWallet::GetDestValues(const std::string &prefix) const {
 }
 
 CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
-                                       const std::string walletFile,
+                                       const WalletLocation &location,
                                        const SecureString& walletPassphrase,
                                        const mnemonic::WordList& words, bool use_bls
                                        ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
+    const std::string &walletFile = location.GetName();
+    
     if (gArgs.GetBoolArg("-zapwallettxes", false)) {
         uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
 
         std::unique_ptr<WalletDatabase> database(
             new WalletDatabase(&bitdb, walletFile));
         std::unique_ptr<CWallet> tempWallet =
-            std::make_unique<CWallet>(chainParams, std::move(database));
+          std::make_unique<CWallet>(chainParams, location, std::move(database));
         DBErrors nZapWalletRet = tempWallet->ZapWalletTx(vWtx);
         if (nZapWalletRet != DBErrors::LOAD_OK) {
             InitError(
@@ -4728,7 +4730,7 @@ CWallet *CWallet::CreateWalletFromFile(const CChainParams &chainParams,
     bool fFirstRun = true;
     std::unique_ptr<WalletDatabase> database(
         new WalletDatabase(&bitdb, walletFile));
-    CWallet *walletInstance = new CWallet(chainParams, std::move(database));
+    CWallet *walletInstance = new CWallet(chainParams, location, std::move(database));
     
     // Used for switching at various places
     walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false) | use_bls;

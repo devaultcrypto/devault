@@ -124,7 +124,7 @@
      Add test-seeds CI configs
      Fetch and check signature and sha256sum of debian ISO instead of comparing against a hardcoded hash
      [DOC] Update build documentation and contributing to use cmake and ninja
-     Merge #14350: Add WalletLocation class
+#    Merge #14350: Add WalletLocation class
      [CI] Always move the Gitian install and build log
      Update Debian 10.x ISO link in the Gitian setup docs
      We assume uint8_t is an alias of unsigned char.

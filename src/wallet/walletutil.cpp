@@ -47,3 +47,21 @@ fs::path GetWalletDirNoCreate(fs::path& added_dir) {
   
   return path;
 }
+
+
+WalletLocation::WalletLocation(const std::string &name)
+  : m_name(name) {
+#ifdef NO_BOOST_FILESYSTEM
+  m_path = fs::absolute( GetWalletDir() / name );
+#else
+  m_path = fs::absolute( name, GetWalletDir() );
+#endif
+}
+
+bool WalletLocation::Exists() const {
+#ifdef NO_BOOST_FILESYSTEM
+  return fs::symlink_status(m_path).type() != fs::file_type::not_found;
+#else
+  return fs::symlink_status(m_path).type() != fs::file_not_found;
+#endif
+}
