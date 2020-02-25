@@ -3409,32 +3409,29 @@ static UniValue listwallets(const Config &config,
 }
 
 UniValue loadwallet(const Config &config, const JSONRPCRequest &request) {
-    if (request.fHelp || request.params.size() != 1) {
+    if (request.fHelp || request.params.size() > 2 || request.params.size() < 1) {
         throw std::runtime_error(
             "loadwallet \"filename\"\n"
             "\nLoads a wallet from a wallet file or directory."
-            "\nNote that all wallet command-line options used when starting "
-            "bitcoind will be"
-            "\napplied to the new wallet (eg -zapwallettxes, upgradewallet, "
-            "rescan, etc).\n"
+            "\nNote that all wallet command-line options used when starting bitcoind will be"
+            "\napplied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).\n"
             "\nArguments:\n"
-            "1. \"filename\"    (string, required) The wallet directory or "
-            ".dat file.\n"
+            "1. \"filename\"    (string, required) The wallet directory or .dat file.\n"
+            "2. \"password\"    (string, required) The wallet password or empty for none.\n"
             "\nResult:\n"
             "{\n"
-            "  \"name\" :    <wallet_name>,        (string) The wallet name if "
-            "loaded successfully.\n"
-            "  \"warning\" : <warning>,            (string) Warning message if "
-            "wallet was not loaded cleanly.\n"
+            "  \"name\" :    <wallet_name>,        (string) The wallet name if loaded successfully.\n"
+            "  \"warning\" : <warning>,            (string) Warning message if wallet was not loaded cleanly.\n"
             "}\n"
             "\nExamples:\n" +
-            HelpExampleCli("loadwallet", "\"test.dat\"") +
-            HelpExampleRpc("loadwallet", "\"test.dat\""));
+            HelpExampleCli("loadwallet", "\"test.dat\" \"password\"") +
+            HelpExampleRpc("loadwallet", "\"test.dat\" \"password\""));
     }
 
     const CChainParams &chainParams = config.GetChainParams();
 
     std::string wallet_file = request.params[0].get_str();
+    std::string password = request.params[1].get_str();
     std::string error;
     WalletLocation location(wallet_file);
     
@@ -3449,7 +3446,9 @@ UniValue loadwallet(const Config &config, const JSONRPCRequest &request) {
                            "Wallet file verification failed: " + error);
     }
 
-    SecureString pass;
+    SecureString pass(password);
+
+    // Since Wallet should exist, then `words` are not used
     std::vector<std::string> words;
     bool use_bls = false;
     
