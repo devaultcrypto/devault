@@ -87,6 +87,7 @@ bool GetWalletAddressesForKey(const Config &config, CWallet *const pwallet,
 
 static const int64_t TIMESTAMP_MIN = 0;
 
+#ifdef NOT_USED_YET
 static void RescanWallet(CWallet &wallet, const WalletRescanReserver &reserver,
                          int64_t time_begin = TIMESTAMP_MIN,
                          bool update = true) {
@@ -99,6 +100,7 @@ static void RescanWallet(CWallet &wallet, const WalletRescanReserver &reserver,
                            "Some transactions may be missing.");
     }
 }
+#endif
 
 UniValue abortrescan(const Config &config, const JSONRPCRequest &request) {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);

@@ -1220,6 +1220,13 @@ public:
                        std::string &error_string, std::string &warning_string);
 
     /**
+     * Load the wallet from a file assuming it exists, returns a new CWallet instance or a null pointer
+     * in case of an error.
+     */
+    static std::shared_ptr<CWallet>
+    LoadWalletFromFile(const CChainParams &chainParams,
+                                const WalletLocation &location);
+    /**
      * Initializes the wallet, returns a new CWallet instance or a null pointer
      * in case of an error.
      */
@@ -1235,7 +1242,7 @@ public:
      * Gives the wallet a chance to register repetitive tasks and complete
      * post-init tasks
      */
-    void postInitProcess(CScheduler &scheduler);
+    void postInitProcess();
 
     bool BackupWallet(const std::string &strDest);
 
