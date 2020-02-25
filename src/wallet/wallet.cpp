@@ -4842,10 +4842,10 @@ void CWallet::MarkPreSplitKeys() {
 
 std::shared_ptr<CWallet>
 CWallet::CreateWalletFromFile(const CChainParams &chainParams,
-                                       const WalletLocation &location,
-                                       const SecureString& walletPassphrase,
-                                       const mnemonic::WordList& words, bool use_bls
-                                       ) {
+                              const WalletLocation &location,
+                              const SecureString& walletPassphrase,
+                              const mnemonic::WordList& words, bool use_bls
+                              ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
 
