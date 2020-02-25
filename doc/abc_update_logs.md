@@ -1010,7 +1010,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     Merge #13079: Fix rescanblockchain rpc to properly report progress
       Merge #13012: [doc] Add comments for chainparams.h, validation.cpp
       Merge #12716: Fix typos and cleanup in various files
-      wallet: Use shared pointer to retain wallet instance
+#     wallet: Use shared pointer to retain wallet instance
 #     scripted-diff: Replace boost::bind with std::bind
 #     refactor: Use boost::scoped_connection in signal/slot, also prefer range-based loop instead of std::transform
       Use TxId where apropriate in wallettests.cpp
@@ -1139,7 +1139,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     Increase LevelDB max_open_files unless on 32-bit Unix.
       Remove extra newline that leads to linter warning
 #     Added a script to generate chainparams intermediate files
-      wallet: Catch filesystem_error and raise InitError
+#     wallet: Catch filesystem_error and raise InitError
 #     During IBD, when doing pruning, prune 10% extra to avoid pruning again soon after
 #     Merge #13081: wallet: Add compile time checking for cs_wallet runtime locking assertions
 #     Merge #11044: [wallet] Keypool topup cleanups
@@ -1475,7 +1475,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     Rename wallet database classes
 #     wallet: Initialize m_last_block_processed to nullptr. Initialize fields where defined.
 #     Merge #10728: fix typo in help text for removeprunedfunds
-      wallet: Make vpwallets usage thread safe
+#     wallet: Make vpwallets usage thread safe
       Regenerate timing.json
       Merge #14985: test: Remove thread_local from test_bitcoin
       Rename wallet_accounts.py test
@@ -1601,10 +1601,10 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
 #     Merge #14554: qt: Remove unused `adjustedTime` parameter
 #     Merge #13452: rpc: have verifytxoutproof check the number of txns in proof structure
       Merge #11024: tests: Remove OldSetKeyFromPassphrase/OldEncrypt/OldDecrypt
-      wallet: Add HasWallets
+#     wallet: Add HasWallets
       qa: Prepare functional tests for Windows
       Fix a-vs-an typos
-      wallet: Add AddWallet, RemoveWallet, GetWallet and GetWallets
+#     wallet: Add AddWallet, RemoveWallet, GetWallet and GetWallets
       wallet: Disallow abandon of conflicted txes
       Fix a shadow warning in askpassphrasedialog.cpp
       Add documentation on how to display python deprecation warnings
@@ -1713,7 +1713,7 @@ XXXXX Merge #11480: [ui] Add toggle for unblinding password fields
       Actually disable BnB when there are preset inputs
       Fix Clang Static Analyzer warnings
       wallet: Make fee settings non-static members
-      wallet: Add input bytes to CInputCoin
+#     wallet: Add input bytes to CInputCoin
       moveonly: CoinElegibilityFilter into coinselection.h
 ##### utils: Add insert() convenience templates
       add gdb attach process to doc/functional-tests.md
@@ -2030,8 +2030,8 @@ XXXXX Allow wallet files in multiple directories
 ##### [docs] Reformat -help output for help2man
 ##### Fix braces in warnings.cpp
       Bump version number to 0.19.7
-      wallet: Refactor g_wallet_init_interface to const reference
-      wallet: Make WalletInitInterface members const
+#     wallet: Refactor g_wallet_init_interface to const reference
+#     wallet: Make WalletInitInterface members const
       Move RPC registration out of AppInitParameterInteraction
       Fix D2181 by including DumpRPC
       [CMAKE] Allow to use sanitizers with cmake
