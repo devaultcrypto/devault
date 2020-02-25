@@ -25,6 +25,7 @@ add_library(wallet
   fees.cpp
   finaltx.cpp
   init.cpp
+  ../outputtype.cpp
   rpcdump.cpp
   rpcwallet.cpp
   wallet.cpp
