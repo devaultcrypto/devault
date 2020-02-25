@@ -4754,7 +4754,7 @@ bool CWallet::Verify(const CChainParams &chainParams,
     // 2. Path to an existing directory.
     // 3. Path to a symlink to a directory.
     // 4. For backwards compatibility, the name of a data file in -walletdir.
-  // LOCK(cs_wallet); -- HACK CHECK LATER
+    // LOCK(cs_wallet);  -- not yet since static
     const fs::path &wallet_path = location.GetPath();
     fs::file_type path_type = fs::symlink_status(wallet_path).type();
 #ifdef NO_BOOST_FILESYSTEM
@@ -4840,6 +4840,16 @@ void CWallet::MarkPreSplitKeys() {
 }
 #endif
 
+std::shared_ptr<CWallet>
+CWallet::LoadWalletFromFile(const CChainParams &chainParams,
+                            const WalletLocation &location) {
+
+     auto ret = CreateWalletFromFile(chainParams, location, SecureString(""),
+                                     std::vector<std::string>(), false);
+     return ret;
+ }
+
+     
 std::shared_ptr<CWallet>
 CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                               const WalletLocation &location,
@@ -5104,20 +5114,10 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
 std::atomic<bool> CWallet::fFlushScheduled(false);
 
-void CWallet::postInitProcess(CScheduler &scheduler) {
+void CWallet::postInitProcess() {
     // Add wallet transactions that aren't already in a block to mempool.
     // Do this here as mempool requires genesis block to be loaded.
     ReacceptWalletTransactions();
-
-    // Run a thread to flush wallet periodically.
-    if (!CWallet::fFlushScheduled.exchange(true)) {
-        scheduler.scheduleEvery(
-            []() {
-                MaybeCompactWalletDB();
-                return true;
-            },
-            500);
-    }
 }
 
 bool CWallet::BackupWallet(const std::string &strDest) {

@@ -442,7 +442,7 @@ bool WalletInit::Open(const CChainParams &chainParams, const SecureString& walle
 
 void WalletInit::Start(CScheduler &scheduler) const {
     for (const std::shared_ptr<CWallet> &pwallet : GetWallets()) {
-        pwallet->postInitProcess(scheduler);
+        pwallet->postInitProcess();
     }
 }
 
