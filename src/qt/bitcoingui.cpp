@@ -473,8 +473,9 @@ void BitcoinGUI::createMenuBar() {
 void BitcoinGUI::createToolBars() {
     if (walletFrame) {
         QToolBar* toolbar = new QToolBar(tr("Tabs toolbar"), this);
+        appToolBar = toolbar;
         addToolBar(Qt::LeftToolBarArea, toolbar);
-        toolbar->setObjectName("toolbar");
+        //toolbar->setObjectName("toolbar");
         toolbar->setOrientation(Qt::Vertical);
         toolbar->setContextMenuPolicy(Qt::PreventContextMenu); 
         toolbar->setMovable(false);
