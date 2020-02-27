@@ -251,6 +251,11 @@ static UniValue getnewaddress(const Config &config,
             HelpExampleRpc("getnewaddress", ""));
     }
 
+    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Error: Private keys are disabled for this wallet");
+    }
+
     LOCK2(cs_main, pwallet->cs_wallet);
 
     // Parse the label first so we don't generate a key if there's an error
@@ -347,6 +352,11 @@ static UniValue getrawchangeaddress(const Config &config,
             "\nExamples:\n" +
             HelpExampleCli("getrawchangeaddress", "") +
             HelpExampleRpc("getrawchangeaddress", ""));
+    }
+
+    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Error: Private keys are disabled for this wallet");
     }
 
     LOCK2(cs_main, pwallet->cs_wallet);
@@ -2861,7 +2871,12 @@ static UniValue keypoolrefill(const Config &config,
       }
     */
     auto locked_chain = pwallet->chain().lock();
-    LOCK(pwallet->cs_wallet);
+    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Error: Private keys are disabled for this wallet");
+    }
+
+    LOCK2(cs_main, pwallet->cs_wallet);
 
     // 0 is interpreted by TopUpKeyPool() as the default keypool size given by
     // -keypool
@@ -3390,6 +3405,9 @@ static UniValue getwalletinfo(const Config &config,
             "/kB\n"
             "  \"hdchainid\": \"<hash160>\"     (string) "
             "the Hash160 of the HD master pubkey\n"
+            "  \"private_keys_enabled\": true|false (boolean) false if "
+            "privatekeys are disabled for this wallet (enforced watch-only "
+            "wallet)\n"
             "}\n"
             "\nExamples:\n" +
             HelpExampleCli("getwalletinfo", "") +
@@ -3437,6 +3455,8 @@ static UniValue getwalletinfo(const Config &config,
     obj.push_back(Pair("hdaccounts", accounts));
     obj.pushKV("unlocked_until", pwallet->nRelockTime);
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
+    obj.pushKV("private_keys_enabled",
+               !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
     return obj;
 }
 
@@ -3527,14 +3547,18 @@ static UniValue loadwallet(const Config &config,
 
 static UniValue createwallet(const Config &config,
                              const JSONRPCRequest &request) {
-    if (request.fHelp || request.params.size() != 1) {
+    if (request.fHelp || request.params.size() < 1 ||
+        request.params.size() > 2) {
         throw std::runtime_error(
-            "createwallet \"wallet_name\"\n"
+            "createwallet \"wallet_name\" ( disable_private_keys )\n"
             "\nCreates and loads a new wallet.\n"
             "\nArguments:\n"
             "1. \"wallet_name\"    (string, required) The name for the new wallet. "
             "If this is a path, the wallet will be created at the path location.\n"
             "2. \"password\"    (string, optional) The password for the encrypted wallet or blank if empty. "
+            "3. disable_private_keys   (boolean, optional, default: false) "
+            "Disable the possibility of private keys (only watchonlys are "
+            "possible in this mode).\n"
             "\nResult:\n"
             "{\n"
             "  \"name\" :    <wallet_name>,        (string) The wallet name if "
@@ -3554,6 +3578,10 @@ static UniValue createwallet(const Config &config,
     std::string password = request.params[1].get_str();
     std::string error;
     std::string warning;
+    bool disable_privatekeys = false;
+    if (!request.params[1].isNull()) {
+        disable_privatekeys = request.params[1].get_bool();
+    }
 
     WalletLocation location(wallet_name);
 
@@ -3576,7 +3604,8 @@ static UniValue createwallet(const Config &config,
     std::shared_ptr<CWallet> const wallet = CWallet::CreateWalletFromFile(
                                                                           chainParams,
                                                                           *g_rpc_interfaces->chain, 
-                                                                          location, passphrase, words, use_bls);
+                                                                          location, passphrase, words, use_bls,
+                                                                          (disable_privatekeys ? uint64_t(WALLET_FLAG_DISABLE_PRIVATE_KEYS) : 0));
     if (!wallet) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Wallet creation failed.");
     }
@@ -4439,9 +4468,9 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "createwallet",                 createwallet,                 {"wallet_name"} },
     { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
     { "wallet",             "getaddressesbylabels",         getaddressesbylabels,         {} },
+    { "wallet",             "createwallet",                 createwallet,                 {"wallet_name", "password", "disable_private_keys"} },
     { "wallet",             "getbalance",                   getbalance,                   {"account","minconf","include_watchonly"} },
     { "wallet",             "getnewaddress",                getnewaddress,                {"label|account"} },
     { "wallet",             "getrawchangeaddress",          getrawchangeaddress,          {} },

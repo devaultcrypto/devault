@@ -387,6 +387,14 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 strErr = "Error reading wallet database: LoadHDPubKey failed";
                 return false;
             }
+        } else if (strType == "flags") {
+            uint64_t flags;
+            ssValue >> flags;
+            if (!pwallet->SetWalletFlags(flags, true)) {
+                strErr = "Error reading wallet database: Unknown non-tolerable "
+                         "wallet flags found";
+                return false;
+            }
         }
     } catch (...) {
         return false;
@@ -449,6 +457,10 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
                 // we assume the user can live with:
                 if (IsKeyType(strType) || strType == "defaultkey") {
                     result = DBErrors::CORRUPT;
+                } else if (strType == "flags") {
+                    // Reading the wallet flags can only fail if unknown flags
+                    // are present.
+                    result = DBErrors::TOO_NEW;
                 } else {
                     // Leave other errors alone, if we try to fix them we might
                     // make things worse. But do warn the user there is
@@ -744,6 +756,10 @@ bool WalletBatch::EraseDestData(const CTxDestination &address,
     return EraseIC(std::make_pair(
         std::string("destdata"),
         std::make_pair(EncodeDestination(address), key)));
+}
+
+bool WalletBatch::WriteWalletFlags(const uint64_t flags) {
+    return WriteIC(std::string("flags"), flags);
 }
 
 bool WalletBatch::TxnBegin() {
