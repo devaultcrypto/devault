@@ -446,7 +446,7 @@ bool WalletModel::isWalletEnabled() {
 }
 
 bool WalletModel::privateKeysDisabled() const {
-    return m_wallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
+    return !m_wallet->IsWalletPrivate();
 }
 
 bool WalletModel::canGetAddresses() const {

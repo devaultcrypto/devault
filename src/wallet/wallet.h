@@ -96,16 +96,12 @@ constexpr OutputType DEFAULT_ADDRESS_TYPE{OutputType::LEGACY};
 //! Default for -changetype
 constexpr OutputType DEFAULT_CHANGE_TYPE{OutputType::CHANGE_AUTO};
 
-enum WalletFlags : uint64_t {
-    // Wallet flags in the upper section (> 1 << 31) will lead to not opening
-    // the wallet if flag is unknown.
-    // Unknown wallet flags in the lower section <= (1 << 31) will be tolerated.
+class WalletFlag {
+    // Will enforce the rule that the wallet can contain private keys
+    // (otherwise watch-only/pubkeys).
+    bool allow_private_keys{false};
 
-    // Will enforce the rule that the wallet can't contain any private keys
-    // (only watch-only/pubkeys).
-    WALLET_FLAG_DISABLE_PRIVATE_KEYS = (1ULL << 32),
-
-    //! Flag set when a wallet contains no HD seed and no private keys, scripts,
+    //! set when a wallet contains no HD seed and no private keys, scripts,
     //! addresses, and other watch only things, and is therefore "blank."
     //!
     //! The only function this flag serves is to distinguish a blank wallet from
@@ -115,11 +111,24 @@ enum WalletFlags : uint64_t {
     //! This flag is also a mandatory flag to prevent previous versions of
     //! bitcoin from opening the wallet, thinking it was newly created, and
     //! then improperly reinitializing it.
-    WALLET_FLAG_BLANK_WALLET = (1ULL << 33),
-};
+    bool blank{false};
 
-static constexpr uint64_t g_known_wallet_flags =
-    WALLET_FLAG_DISABLE_PRIVATE_KEYS | WALLET_FLAG_BLANK_WALLET;
+public:    
+    void SetBlank() { blank = true; }
+    void UnsetBlank() { blank = false; }
+    void SetPrivate() { allow_private_keys = true; }
+    void UnsetPrivate() { allow_private_keys = false; }
+    bool GetBlank() const { return blank; }
+    bool GetPrivate() const { return allow_private_keys; }
+    
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action) {
+        READWRITE(allow_private_keys);
+        READWRITE(blank);
+    }
+};
 
 /** A key pool entry */
 class CKeyPool {
@@ -756,7 +765,8 @@ private:
     int64_t m_max_keypool_index = 0;
     std::map<CKeyID, int64_t> m_pool_key_to_index;
     std::map<BKeyID, int64_t> m_pool_blskey_to_index;
-    std::atomic<uint64_t> m_wallet_flags{0};
+    //std::atomic<WalletFlag> m_wallet_flags;
+    WalletFlag m_wallet_flags;
 
     int64_t nTimeFirstKey = 0;
 
@@ -1310,7 +1320,7 @@ public:
                          const WalletLocation &location,
                          const SecureString& walletPassphrase,
                          const std::vector<std::string>& words, bool use_bls,
-                         uint64_t flags
+                         const WalletFlag& flags
                          );
 
     /**
@@ -1354,26 +1364,19 @@ public:
     void LearnAllRelatedScripts(const CPubKey &key);
 
     /**
-     * Set a single wallet flag.
+     * wallet flag stuff
      */
-    void SetWalletFlag(uint64_t flags);
-
-    /**
-     * Unsets a single wallet flag.
-     */
-    void UnsetWalletFlag(uint64_t flag);
+    void SetWalletBlank();
+    void SetWalletPrivate();
+    void UnsetWalletBlank();
+    void UnsetWalletPrivate();
+    void SetWalletFlags(const WalletFlag& f) { m_wallet_flags = f; }
 
     /**
      * Check if a certain wallet flag is set.
      */
-    bool IsWalletFlagSet(uint64_t flag);
-
-    /**
-     * Overwrite all flags by the given uint64_t.
-     * Returns false if unknown, non-tolerable flags are present.
-     */
-    bool SetWalletFlags(uint64_t overwriteFlags, bool memOnly);
-
+    bool IsWalletBlank();
+    bool IsWalletPrivate();
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
     bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const override;

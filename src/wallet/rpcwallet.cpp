@@ -251,18 +251,15 @@ static UniValue getnewaddress(const Config &config,
             HelpExampleRpc("getnewaddress", ""));
     }
 
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-        throw JSONRPCError(RPC_WALLET_ERROR,
-                           "Error: Private keys are disabled for this wallet");
-    }
-
     LOCK2(cs_main, pwallet->cs_wallet);
-
     // Belt and suspenders check for disabled private keys
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    
+    if (!pwallet->IsWalletPrivate()) {
         throw JSONRPCError(RPC_WALLET_ERROR,
                            "Error: Private keys are disabled for this wallet");
     }
+
+
 
     //LOCK(pwallet->cs_wallet);
 
@@ -367,14 +364,9 @@ static UniValue getrawchangeaddress(const Config &config,
             HelpExampleRpc("getrawchangeaddress", ""));
     }
 
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-        throw JSONRPCError(RPC_WALLET_ERROR,
-                           "Error: Private keys are disabled for this wallet");
-    }
-
     LOCK2(cs_main, pwallet->cs_wallet);
     // Belt and suspenders check for disabled private keys
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!pwallet->IsWalletPrivate()) {
         throw JSONRPCError(RPC_WALLET_ERROR,
                            "Error: Private keys are disabled for this wallet");
     }
@@ -2887,14 +2879,8 @@ static UniValue keypoolrefill(const Config &config,
             HelpExampleRpc("keypoolrefill", ""));
     }
 
-    /*
-      if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-      throw JSONRPCError(RPC_WALLET_ERROR,
-      "Error: Private keys are disabled for this wallet");
-      }
-    */
     auto locked_chain = pwallet->chain().lock();
-    if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!pwallet->IsWalletPrivate()) {
         throw JSONRPCError(RPC_WALLET_ERROR,
                            "Error: Private keys are disabled for this wallet");
     }
@@ -3478,8 +3464,7 @@ static UniValue getwalletinfo(const Config &config,
     obj.push_back(Pair("hdaccounts", accounts));
     obj.pushKV("unlocked_until", pwallet->nRelockTime);
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
-    obj.pushKV("private_keys_enabled",
-               !pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
+    obj.pushKV("private_keys_enabled", pwallet->IsWalletPrivate());
     return obj;
 }
 
@@ -3597,7 +3582,7 @@ static UniValue createwallet(const Config &config,
     const CChainParams &chainParams = config.GetChainParams();
 
     std::string wallet_name = request.params[0].get_str();
-    std::string password = request.params[1].get_str();
+    std::string password(""); // blank unless option is present
     std::string error;
     std::string warning;
     bool disable_privatekeys = false;
@@ -3606,9 +3591,9 @@ static UniValue createwallet(const Config &config,
     }
 
     WalletLocation location(wallet_name);
-    uint64_t flags = 0;
+    WalletFlag flags;
     if (!request.params[2].isNull() && request.params[2].get_bool()) {
-        flags |= WALLET_FLAG_BLANK_WALLET;
+        flags.SetBlank();
     }
 
     if (location.Exists()) {
@@ -3624,6 +3609,10 @@ static UniValue createwallet(const Config &config,
                            "Wallet file verification failed: " + error);
     }
 
+    if (!request.params[1].isNull()) {
+        password = request.params[1].get_str();
+    };
+    
     std::vector<std::string> words;
     bool use_bls = false;
     SecureString passphrase(password);
