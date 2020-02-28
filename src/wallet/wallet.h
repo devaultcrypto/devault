@@ -1336,6 +1336,7 @@ public:
     void SetWalletBLS();
     void SetWalletPrivate();
     void UnsetWalletBlank();
+    void UnsetWalletLEGACY();
     void UnsetWalletPrivate();
     void SetWalletFlags(const WalletFlag& f) { m_wallet_flags = f; }
 

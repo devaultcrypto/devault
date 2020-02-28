@@ -20,6 +20,7 @@ class WalletFlag {
   void SetLEGACY() { has_legacy = true; }
 
   void UnsetBlank() { blank = false; }
+  void UnsetLEGACY() { has_legacy = false; }
   void UnsetPrivate() { allow_private_keys = false; }
 
   bool HasBLS() const { return has_bls; }
