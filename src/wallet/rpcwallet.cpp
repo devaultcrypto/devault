@@ -3614,12 +3614,12 @@ static UniValue createwallet(const Config &config,
     };
     
     std::vector<std::string> words;
-    bool use_bls = false;
+    flags.SetLEGACY();
     SecureString passphrase(password);
     std::shared_ptr<CWallet> const wallet = CWallet::CreateWalletFromFile(
                                                                           chainParams,
                                                                           *g_rpc_interfaces->chain, 
-                                                                          location, passphrase, words, use_bls,
+                                                                          location, passphrase, words,
                                                                           flags);
     if (!wallet) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Wallet creation failed.");

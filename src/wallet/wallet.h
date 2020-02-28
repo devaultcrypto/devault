@@ -22,6 +22,7 @@
 #include <wallet/rpcwallet.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
+#include <wallet/walletflag.h>
 
 #include <algorithm>
 #include <atomic>
@@ -83,7 +84,7 @@ enum WalletFeature {
     // the earliest version new wallets supports (only useful for getinfo's clientversion output)
     FEATURE_BASE = 190000,
     FEATURE_START = 1000000,
-    FEATURE_BLANK = 1500000,
+    FEATURE_BLANK = 1500000, // TBD
     FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
 };
 
@@ -95,40 +96,6 @@ constexpr OutputType DEFAULT_ADDRESS_TYPE{OutputType::LEGACY};
 
 //! Default for -changetype
 constexpr OutputType DEFAULT_CHANGE_TYPE{OutputType::CHANGE_AUTO};
-
-class WalletFlag {
-    // Will enforce the rule that the wallet can contain private keys
-    // (otherwise watch-only/pubkeys).
-    bool allow_private_keys{false};
-
-    //! set when a wallet contains no HD seed and no private keys, scripts,
-    //! addresses, and other watch only things, and is therefore "blank."
-    //!
-    //! The only function this flag serves is to distinguish a blank wallet from
-    //! a newly created wallet when the wallet database is loaded, to avoid
-    //! initialization that should only happen on first run.
-    //!
-    //! This flag is also a mandatory flag to prevent previous versions of
-    //! bitcoin from opening the wallet, thinking it was newly created, and
-    //! then improperly reinitializing it.
-    bool blank{false};
-
-public:    
-    void SetBlank() { blank = true; }
-    void UnsetBlank() { blank = false; }
-    void SetPrivate() { allow_private_keys = true; }
-    void UnsetPrivate() { allow_private_keys = false; }
-    bool GetBlank() const { return blank; }
-    bool GetPrivate() const { return allow_private_keys; }
-    
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream &s, Operation ser_action) {
-        READWRITE(allow_private_keys);
-        READWRITE(blank);
-    }
-};
 
 /** A key pool entry */
 class CKeyPool {
@@ -726,7 +693,6 @@ private:
     int64_t nNextResend = 0;
     int64_t nLastResend = 0;
     bool fBroadcastTransactions = false;
-    bool fUpgradeBLSKeys = false; // for new key stuff
 
     /**
      * Used to keep track of spent outpoints, and detect and report conflicts
@@ -931,7 +897,7 @@ public:
     void UnlockAllCoins()  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     void ListLockedCoins(std::vector<COutPoint> &vOutpts) const  EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     bool HasBLSKeys() const { return !mapBLSPubKeys.empty(); }
-    bool UseBLSKeys() const { return HasBLSKeys() || fUpgradeBLSKeys; }
+    bool UseBLSKeys() const { return HasBLSKeys() || IsWalletBLS(); }
 
     /*
      * Rescan abort properties
@@ -1319,7 +1285,7 @@ public:
                          interfaces::Chain &chain,
                          const WalletLocation &location,
                          const SecureString& walletPassphrase,
-                         const std::vector<std::string>& words, bool use_bls,
+                         const std::vector<std::string>& words, 
                          const WalletFlag& flags
                          );
 
@@ -1367,6 +1333,7 @@ public:
      * wallet flag stuff
      */
     void SetWalletBlank();
+    void SetWalletBLS();
     void SetWalletPrivate();
     void UnsetWalletBlank();
     void UnsetWalletPrivate();
@@ -1375,8 +1342,9 @@ public:
     /**
      * Check if a certain wallet flag is set.
      */
-    bool IsWalletBlank();
-    bool IsWalletPrivate();
+    bool IsWalletBlank() const;
+    bool IsWalletBLS() const;
+    bool IsWalletPrivate() const;
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
     bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const override;

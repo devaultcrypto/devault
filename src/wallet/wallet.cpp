@@ -1588,6 +1588,13 @@ void CWallet::SetWalletBlank() {
         throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
     }
 }
+void CWallet::SetWalletBLS() {
+    LOCK(cs_wallet);
+    m_wallet_flags.SetBLS();
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
+    }
+}
 void CWallet::SetWalletPrivate() {
     LOCK(cs_wallet);
     m_wallet_flags.SetPrivate();
@@ -1610,8 +1617,9 @@ void CWallet::UnsetWalletPrivate() {
     }
 }
 
-bool CWallet::IsWalletBlank() { return (m_wallet_flags.GetBlank()); }
-bool CWallet::IsWalletPrivate() { return (m_wallet_flags.GetPrivate()); }
+bool CWallet::IsWalletBlank() const { return (m_wallet_flags.GetBlank()); }
+bool CWallet::IsWalletBLS() const { return (m_wallet_flags.HasBLS()); }
+bool CWallet::IsWalletPrivate() const { return (m_wallet_flags.GetPrivate()); }
 
 /*
 bool CWallet::SetWalletFlags(uint64_t overwriteFlags, bool memonly) {
@@ -5039,7 +5047,7 @@ CWallet::LoadWalletFromFile(const CChainParams &chainParams,
 
     WalletFlag flag;
     auto ret = CreateWalletFromFile(chainParams, chain, location, SecureString(""),
-                                    std::vector<std::string>(), false, flag);
+                                    std::vector<std::string>(), flag);
     return ret;
  }
 
@@ -5048,7 +5056,7 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                               interfaces::Chain &chain,
                               const WalletLocation &location,
                               const SecureString& walletPassphrase,
-                              const mnemonic::WordList& words, bool use_bls,
+                              const mnemonic::WordList& words,
                               const WalletFlag& wallet_creation_flags // just used if fFirstRun
                               ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
@@ -5082,8 +5090,10 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                     WalletDatabase::Create(location.GetPath())),
         ReleaseWallet);
 
-    // Used for switching at various places
-    walletInstance->fUpgradeBLSKeys = gArgs.GetBoolArg("-upgradebls",false) | use_bls;
+    // Can happen on any run
+    if (gArgs.GetBoolArg("-upgradebls",false)) {
+        walletInstance->SetWalletBLS();
+    }
     
     DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun);
     if (nLoadWalletRet != DBErrors::LOAD_OK) {
@@ -5203,20 +5213,17 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
         // If Upgrading from Non-BLS wallet, Remove Old Key pool and Replace
         // Maybe should be part of Wallet upgrade - check LATER XXX
         // Currently will skip if wallet is locked....
-        if (walletInstance->fUpgradeBLSKeys && !walletInstance->HasBLSKeys()) {
-
-
-            {
-                // Should Add BLS Account to hdChain here.... and then re save
-                CHDChain hdChainCrypted;
-                walletInstance->GetCryptedHDChain(hdChainCrypted);
-                assert(!hdChainCrypted.IsNull());
+        if (walletInstance->IsWalletBLS() && !walletInstance->HasBLSKeys()) {
+            
+            // Should Add BLS Account to hdChain here.... and then re save
+            CHDChain hdChainCrypted;
+            walletInstance->GetCryptedHDChain(hdChainCrypted);
+            assert(!hdChainCrypted.IsNull());
                 
-                hdChainCrypted.AddAccount(BLS_ACCOUNT);
-                
-                bool ok = walletInstance->StoreCryptedHDChain(hdChainCrypted);
-                assert(ok);
-            }
+            hdChainCrypted.AddAccount(BLS_ACCOUNT);
+            
+            bool ok = walletInstance->StoreCryptedHDChain(hdChainCrypted);
+            assert(ok);
             
             walletInstance->NewKeyPool();
         }
