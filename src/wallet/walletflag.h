@@ -28,6 +28,14 @@ class WalletFlag {
   bool GetBlank() const { return blank; }
   bool GetPrivate() const { return allow_private_keys; }
 
+  // For Wallet before this class was added
+  void SetLegacyWallet() {
+      blank = false;
+      allow_private_keys = true;
+      has_bls = false;
+      has_legacy = true;
+  }
+    
   ADD_SERIALIZE_METHODS;
 
   template <typename Stream, typename Operation> inline void SerializationOp(Stream &s, Operation ser_action) {

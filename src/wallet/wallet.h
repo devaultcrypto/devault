@@ -84,7 +84,7 @@ enum WalletFeature {
     // the earliest version new wallets supports (only useful for getinfo's clientversion output)
     FEATURE_BASE = 190000,
     FEATURE_START = 1000000,
-    FEATURE_BLANK = 1500000, // TBD
+    FEATURE_FLAGS = 1200000, // This version, so < this implies Legacy only
     FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
 };
 
@@ -1338,6 +1338,7 @@ public:
     void UnsetWalletBlank();
     void UnsetWalletLEGACY();
     void UnsetWalletPrivate();
+    void SetLegacyWalletFlags() { m_wallet_flags.SetLegacyWallet(); }
     void SetWalletFlags(const WalletFlag& f) { m_wallet_flags = f; }
 
     /**
