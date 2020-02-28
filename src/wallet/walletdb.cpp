@@ -388,13 +388,9 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
                 return false;
             }
         } else if (strType == "flags") {
-            uint64_t flags;
+            WalletFlag flags;
             ssValue >> flags;
-            if (!pwallet->SetWalletFlags(flags, true)) {
-                strErr = "Error reading wallet database: Unknown non-tolerable "
-                         "wallet flags found";
-                return false;
-            }
+            pwallet->SetWalletFlags(flags);
         }
     } catch (...) {
         return false;
@@ -758,7 +754,7 @@ bool WalletBatch::EraseDestData(const CTxDestination &address,
         std::make_pair(EncodeDestination(address), key)));
 }
 
-bool WalletBatch::WriteWalletFlags(const uint64_t flags) {
+bool WalletBatch::WriteWalletFlags(const WalletFlag& flags) {
     return WriteIC(std::string("flags"), flags);
 }
 

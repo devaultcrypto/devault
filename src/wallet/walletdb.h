@@ -49,6 +49,7 @@ class CWallet;
 class CWalletTx;
 class uint160;
 class uint256;
+class WalletFlag;
 
 /** Backend-agnostic database type. */
 using WalletDatabase = BerkeleyDatabase;
@@ -187,7 +188,7 @@ public:
     bool WriteCryptedHDChain(const CHDChain& chain);
     bool WriteHDPubKey(const CHDPubKey& hdPubKey, const CKeyMetadata& keyMeta);
 
-    bool WriteWalletFlags(const uint64_t flags);
+    bool WriteWalletFlags(const WalletFlag& flags);
     //! Begin a new transaction
     bool TxnBegin();
     //! Commit current transaction

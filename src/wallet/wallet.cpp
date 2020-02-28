@@ -229,8 +229,8 @@ const CWalletTx *CWallet::GetWalletTx(const TxId &txid) const {
 }
 
 std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, bool internal) {
-    //assert(!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS));
-    //assert(!IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET));
+    //assert(!IsWalletPrivate());
+    //assert(IsWalletBlank());
     // mapKeyMetadata
     AssertLockHeld(cs_wallet);
 
@@ -391,7 +391,7 @@ bool CWallet::AddWatchOnly(const CScript &dest) {
     UpdateTimeFirstKey(meta.nCreateTime);
     NotifyWatchonlyChanged(true);
     if (WalletBatch(*database).WriteWatchOnly(dest, meta)) {
-        UnsetWalletFlag(WALLET_FLAG_BLANK_WALLET);
+        UnsetWalletBlank();
         return true;
     }
     return false;
@@ -1560,22 +1560,6 @@ Amount CWallet::GetChange(const CTransaction &tx) const {
     return nChange;
 }
 
-#ifdef NEEDED
-void CWallet::SetHDChain(const CHDChain &chain, bool memonly) {
-    LOCK(cs_wallet);
-    if (!memonly && !WalletBatch(*database).WriteHDChain(chain)) {
-        throw std::runtime_error(std::string(__func__) +
-                                 ": writing chain failed");
-    }
-
-    hdChain = chain;
-}
-
-bool CWallet::IsHDEnabled() const {
-    return !hdChain.seed_id.IsNull();
-}
-#endif
-
 bool CWallet::CanGenerateKeys() {
     LOCK(cs_wallet);
     return true;
@@ -1597,28 +1581,39 @@ bool CWallet::CanGetAddresses(bool internal) {
     return keypool_has_keys;
 }
 
-void CWallet::SetWalletFlag(uint64_t flags) {
+void CWallet::SetWalletBlank() {
     LOCK(cs_wallet);
-    m_wallet_flags |= flags;
+    m_wallet_flags.SetBlank();
     if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
-        throw std::runtime_error(std::string(__func__) +
-                                 ": writing wallet flags failed");
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
+    }
+}
+void CWallet::SetWalletPrivate() {
+    LOCK(cs_wallet);
+    m_wallet_flags.SetPrivate();
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
+    }
+}
+void CWallet::UnsetWalletBlank() {
+    LOCK(cs_wallet);
+    m_wallet_flags.UnsetBlank();
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
+    }
+}
+void CWallet::UnsetWalletPrivate() {
+    LOCK(cs_wallet);
+    m_wallet_flags.UnsetPrivate();
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
     }
 }
 
-void CWallet::UnsetWalletFlag(uint64_t flag) {
-    LOCK(cs_wallet);
-    m_wallet_flags &= ~flag;
-    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
-        throw std::runtime_error(std::string(__func__) +
-                                 ": writing wallet flags failed");
-    }
-}
+bool CWallet::IsWalletBlank() { return (m_wallet_flags.GetBlank()); }
+bool CWallet::IsWalletPrivate() { return (m_wallet_flags.GetPrivate()); }
 
-bool CWallet::IsWalletFlagSet(uint64_t flag) {
-    return (m_wallet_flags & flag);
-}
-
+/*
 bool CWallet::SetWalletFlags(uint64_t overwriteFlags, bool memonly) {
     LOCK(cs_wallet);
     m_wallet_flags = overwriteFlags;
@@ -1634,6 +1629,7 @@ bool CWallet::SetWalletFlags(uint64_t overwriteFlags, bool memonly) {
 
     return true;
 }
+*/
 
 int64_t CWalletTx::GetTxTime() const {
     int64_t n = nTimeSmart;
@@ -3198,7 +3194,7 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock &locked_chainIn,
             //  with keys of ours to recover post-backup change.
 
             // Reserve a new key pair from key pool
-            if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+            if (!IsWalletPrivate()) {
                 strFailReason =
                     _("Can't generate a change-address key. Private keys "
                       "are disabled for this wallet.");
@@ -3954,11 +3950,7 @@ DBErrors CWallet::LoadWallet(bool &fFirstRunRet) {
         fFirstRunRet = mapKeys.empty() && mapScripts.empty() &&
             mapWatchKeys.empty() && setWatchOnly.empty() &&
             mapHdPubKeys.empty() && mapBLSPubKeys.empty() &&
-            mapKeyMetadata.empty() && !IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
-
-        //HACK
-        //!IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS) &&
-        //!IsWalletFlagSet(WALLET_FLAG_BLANK_WALLET);
+            mapKeyMetadata.empty() && IsWalletPrivate() && !IsWalletBlank();
     }
         
     if (nLoadWalletRet != DBErrors::LOAD_OK) {
@@ -4100,7 +4092,7 @@ const std::string &CWallet::GetLabelName(const CScript &scriptPubKey) const {
  * Mark old keypool keys as used, and generate all new keys.
  */
 bool CWallet::NewKeyPool() {
-    if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!IsWalletPrivate()) {
         return false;
     }
     LOCK(cs_wallet);
@@ -4225,7 +4217,7 @@ void CWallet::LoadKeyPool(int64_t nIndex, const CKeyPool &keypool) {
 }
 
 bool CWallet::TopUpKeyPool(unsigned int kpSize) {
-    if (IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+    if (!IsWalletPrivate()) {
         return false;
     }
     LOCK(cs_wallet);
@@ -5045,9 +5037,10 @@ CWallet::LoadWalletFromFile(const CChainParams &chainParams,
                             interfaces::Chain &chain,
                             const WalletLocation &location) {
 
-     auto ret = CreateWalletFromFile(chainParams, chain, location, SecureString(""),
-                                     std::vector<std::string>(), false, 0);
-     return ret;
+    WalletFlag flag;
+    auto ret = CreateWalletFromFile(chainParams, chain, location, SecureString(""),
+                                    std::vector<std::string>(), false, flag);
+    return ret;
  }
 
 std::shared_ptr<CWallet>
@@ -5056,7 +5049,7 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                               const WalletLocation &location,
                               const SecureString& walletPassphrase,
                               const mnemonic::WordList& words, bool use_bls,
-                              uint64_t wallet_creation_flags
+                              const WalletFlag& wallet_creation_flags // just used if fFirstRun
                               ) {
     // Needed to restore wallet transaction meta data after -zapwallettxes
     std::vector<CWalletTx> vWtx;
@@ -5147,10 +5140,8 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       mnemonic::WordList cwords;
       std::vector<uint8_t> hashWords;
 
-      if ((wallet_creation_flags & WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
-          // selective allow to set flags
-          walletInstance->SetWalletFlag(WALLET_FLAG_DISABLE_PRIVATE_KEYS);
-      }
+      // selective allow to set flags
+      walletInstance->SetWalletFlags(wallet_creation_flags);
 
      // Create MasterKey and store to mapMasterKeys
       LogPrintf("%s : Creating MasterKey for wallet\n", __func__);
@@ -5172,7 +5163,7 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
       LogPrintf("%s : Generating HD keys, please don't interrupt til' done\n", __func__);
       // Top up the keypool
-      if (!walletInstance->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS) &&  !walletInstance->TopUpKeyPool()) {
+      if (walletInstance->IsWalletPrivate() &&  !walletInstance->TopUpKeyPool()) {
             InitError(_("Unable to generate initial keys") += "\n");
             return nullptr;
       }
@@ -5199,13 +5190,7 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
 
     if (!fFirstRun) {
 
-        if (wallet_creation_flags & WALLET_FLAG_DISABLE_PRIVATE_KEYS) {
-            // Make it impossible to disable private keys after creation
-            InitError(strprintf(_("Error loading %s: Private keys can only be "
-                                  "disabled during creation"),
-                                walletFile));
-            return nullptr;
-        } else if (walletInstance->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
+        if (!walletInstance->IsWalletPrivate()) {
             LOCK(walletInstance->cs_KeyStore);
             if (!walletInstance->mapKeys.empty()) {
                 InitWarning(strprintf(_("Warning: Private keys detected in wallet "

@@ -123,8 +123,7 @@ namespace {
 
     class WalletImpl : public Wallet {
     public:
-        WalletImpl(const std::shared_ptr<CWallet> &wallet)
-            : m_shared_wallet(wallet), m_wallet(*wallet.get()) {}
+        WalletImpl(const std::shared_ptr<CWallet> &wallet) : m_shared_wallet(wallet), m_wallet(*wallet.get()) {}
 
         SecureVector getWords() override { return m_wallet.getWords(); }
         bool lock() override { return m_wallet.Lock(); }
@@ -425,9 +424,8 @@ namespace {
         }
 
         bool canGetAddresses() override { return m_wallet.CanGetAddresses(); }
-        bool IsWalletFlagSet(uint64_t flag) override {
-            return m_wallet.IsWalletFlagSet(flag);
-        }
+        bool IsWalletBlank() override {  return m_wallet.IsWalletBlank(); }
+        bool IsWalletPrivate() override {  return m_wallet.IsWalletPrivate(); }
         
         OutputType getDefaultChangeType() override {
             return m_wallet.m_default_change_type;

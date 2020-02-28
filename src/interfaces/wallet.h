@@ -214,7 +214,8 @@ public:
     virtual bool canGetAddresses() = 0;
 
     // Check if a certain wallet flag is set.
-    virtual bool IsWalletFlagSet(uint64_t flag) = 0;
+    virtual bool IsWalletBlank() = 0;
+    virtual bool IsWalletPrivate() = 0;
 
     // Get default address type.
     virtual OutputType getDefaultAddressType() = 0;
