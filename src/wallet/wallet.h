@@ -1346,6 +1346,7 @@ public:
      */
     bool IsWalletBlank() const;
     bool IsWalletBLS() const;
+    bool IsWalletLegacy() const;
     bool IsWalletPrivate() const;
 
     //! GetPubKey implementation that also checks the mapHdPubKeys
