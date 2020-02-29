@@ -262,6 +262,10 @@ std::string CRPCTable::help(Config &config, const std::string &strCommand,
             }
             strRet += strHelp + "\n";
         }
+        catch (...) {
+          std::cout << strMethod << "\n";
+          std::cout << " Waht happened? \n";
+        }
     }
     if (strRet == "") {
         strRet = strprintf("help: unknown command: %s\n", strCommand);
