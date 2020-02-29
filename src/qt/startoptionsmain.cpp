@@ -48,7 +48,7 @@ StartOptionsMain::StartOptionsMain(QWidget *parent)
     startOptions = new StartOptions(this);
     ui->QStackTutorialContainer->addWidget(startOptions);
     ui->QStackTutorialContainer->setCurrentWidget(startOptions);
-    bls = true;
+    bls = false;
 }
 
 StartOptionsMain::~StartOptionsMain() {
@@ -74,7 +74,7 @@ void StartOptionsMain::on_NewWallet_clicked() {
     startOptionsRevealed = new StartOptionsRevealed(words, rows, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRevealed);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRevealed);
-    bls = true;
+    bls = false;
 }
 
 void StartOptionsMain::on_RestoreWallet_clicked() {

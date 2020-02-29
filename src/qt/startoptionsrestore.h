@@ -33,5 +33,5 @@ private:
     std::list<QLineEdit *> editList;
 
     QStringList wordList;
-    bool bls;
+    bool bls{false};
 };

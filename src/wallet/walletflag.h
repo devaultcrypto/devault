@@ -8,7 +8,7 @@
 #include <serialize.h>
 
 class WalletFlag {
-  bool allow_private_keys{false};
+  bool allow_private_keys{true};
   bool blank{false};
   bool has_bls{false};
   bool has_legacy{true}; // Later will make default false
