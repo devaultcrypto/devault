@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0 FATAL_ERROR)
 
+project(bls)
+
 #------------------- ------------------- ------------------- ------------------- -------------------
 # For Relic
 #------------------- ------------------- ------------------- ------------------- -------------------
@@ -27,6 +29,33 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/relic/include/relic_conf.h.in ${CMAKE
 message(STATUS "Configured ${CMAKE_CURRENT_SOURCE_DIR}/include/relic_conf.h.in")
 string(TOLOWER ${ARITH} ARITH)
 
+
+# THIS IS ONLY DEFINED FOR STANDALONE BUILDS
+if (BUILD_BLS)
+
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
+  
+  # Add path for custom modules
+  set(CMAKE_MODULE_PATH
+	  ${CMAKE_MODULE_PATH}
+	  ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/modules
+    )
+  
+  include(AddCompilerFlags)
+  check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
+  if (HAVE_FLAG_STD_CXX17)
+    set(CMAKE_CXX_STANDARD 17)
+    message(STATUS "Compiler supports C++17")
+  else()
+    message(ERROR "Compiler must at least support C++17")
+  endif()
+
+  add_compiler_flags(-Wno-cpp -Wno-unused-function -Wno-nonnull-compare -Wno-implicit-fallthrough)
+
+  add_subdirectory(config)
+endif()
+
+  
 add_subdirectory(relic)
 
 file(GLOB BLS_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
