@@ -1996,14 +1996,16 @@ static UniValue getrewardinfo(const Config &config, const JSONRPCRequest &reques
       }
     }
     Amount median;
-    sort(all_rewards_amounts.begin(),all_rewards_amounts.end());
-    int mid_point = (all_rewards_amounts.size()/2);
-    if (all_rewards_amounts.size() % 2 == 1) {
-      median = all_rewards_amounts[mid_point];
-    } else  {
-      median = (all_rewards_amounts[mid_point] + all_rewards_amounts[mid_point+1])/2;
-    }      
-
+    if (all_rewards_amounts.size() > 0) {
+      sort(all_rewards_amounts.begin(),all_rewards_amounts.end());
+      int mid_point = (all_rewards_amounts.size()/2);
+      if (all_rewards_amounts.size() % 2 == 1) {
+        median = all_rewards_amounts[mid_point];
+      } else  {
+        median = (all_rewards_amounts[mid_point] + all_rewards_amounts[mid_point+1])/2;
+      }      
+    }
+    
     UniValue reply(UniValue::VOBJ);
     reply.pushKV("Current number of viable rewards", count);
     reply.pushKV("Current number of unique addresses with viable rewards", int(addresses.size()));
