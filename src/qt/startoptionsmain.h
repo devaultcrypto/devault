@@ -43,7 +43,7 @@ private:
     Ui::StartOptionsMain *ui;
     Pages pageNum = StartPage;
     int rows;
-    bool bls;
+    bool bls{false};
     QStringList qWordList;
     mnemonic::WordList wordsList;
     mnemonic::WordList words;
