@@ -1,4 +1,5 @@
-// Copyright (c) 2011-2016 The Bitcoin Core developers
+// Copyright (c) 2011-2019 The Bitcoin Core developers
+// Copyright (c) 2020 The DeVault developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -123,8 +124,15 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
         /** Create wallet frame and make it the central widget */
         walletFrame = new WalletFrame(_platformStyle, config, this);
         setCentralWidget(walletFrame);
+    } else {
+      /**
+       * When compiled without wallet or -disablewallet is provided,  the
+       * central widget is the rpc console.
+       */
+      setCentralWidget(rpcConsole);
+      //Q_EMIT consoleShown(rpcConsole);      
     }
-
+    
     // Accept D&D of URIs
     setAcceptDrops(true);
 
@@ -474,7 +482,7 @@ void BitcoinGUI::createMenuBar() {
 
 void BitcoinGUI::createToolBars() {
     if (walletFrame) {
-        QToolBar* toolbar = new QToolBar(tr("Tabs toolbar"), this);
+        QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
         appToolBar = toolbar;
         addToolBar(Qt::LeftToolBarArea, toolbar);
         //toolbar->setObjectName("toolbar");
@@ -562,9 +570,10 @@ void BitcoinGUI::createToolBars() {
         toolbar->addWidget(spacer1);
 
         m_wallet_selector = new QComboBox();
-
-        connect(m_wallet_selector, SIGNAL(currentIndexChanged(int)), this,
-                SLOT(setCurrentWalletBySelectorIndex(int)));
+        connect(m_wallet_selector,
+                static_cast<void (QComboBox::*)(int)>(
+                    &QComboBox::currentIndexChanged),
+                this, &BitcoinGUI::setCurrentWalletBySelectorIndex);
 
         m_wallet_selector_label = new QLabel();
         m_wallet_selector_label->setText(tr("Wallet:") + " ");
@@ -676,18 +685,17 @@ void BitcoinGUI::addWallet(WalletModel *walletModel) {
     rpcConsole->addWallet(walletModel);
     walletFrame->addWallet(walletModel);
     m_wallet_selector->addItem(display_name, QVariant::fromValue(walletModel));
-    if (m_wallet_selector->count() == 2) {
+ //   if (m_wallet_selector->count() == 2) {
         m_wallet_selector_label_action->setVisible(true);
         m_wallet_selector_action->setVisible(true);
-    }
+//    }
 }
 
 void BitcoinGUI::removeWallet(WalletModel *walletModel) {
     if (!walletFrame) {
         return;
     }
-    QString name = walletModel->getWalletName();
-    int index = m_wallet_selector->findData(name);
+    int index = m_wallet_selector->findData(QVariant::fromValue(walletModel));
     m_wallet_selector->removeItem(index);
     if (m_wallet_selector->count() == 0) {
         setWalletActionsEnabled(false);
@@ -1121,8 +1129,9 @@ void BitcoinGUI::message(const QString &title, const QString &message,
         // Check for buttons, use OK as default, if none was supplied
         QMessageBox::StandardButton buttons;
         if (!(buttons = (QMessageBox::StandardButton)(
-                  style & CClientUIInterface::BTN_MASK)))
+                  style & CClientUIInterface::BTN_MASK))) {
             buttons = QMessageBox::Ok;
+        }
 
         showNormalIfMinimized();
         QMessageBox mBox(static_cast<QMessageBox::Icon>(nMBoxIcon), strTitle,
@@ -1131,9 +1140,10 @@ void BitcoinGUI::message(const QString &title, const QString &message,
         if (ret != nullptr) {
             *ret = r == QMessageBox::Ok;
         }
-    } else
+    } else {
         notificator->notify(static_cast<Notificator::Class>(nNotifyIcon),
                             strTitle, message);
+    }
 }
 
 void BitcoinGUI::changeEvent(QEvent *e) {
@@ -1440,8 +1450,8 @@ void UnitDisplayStatusBarControl::createContextMenu() {
         menuAction->setData(QVariant(u));
         menu->addAction(menuAction);
     }
-    connect(menu, SIGNAL(triggered(QAction *)), this,
-            SLOT(onMenuSelection(QAction *)));
+    connect(menu, &QMenu::triggered, this,
+            &UnitDisplayStatusBarControl::onMenuSelection);
 }
 
 /** Lets the control know about the Options Model (and its signals) */
@@ -1451,8 +1461,8 @@ void UnitDisplayStatusBarControl::setOptionsModel(OptionsModel *_optionsModel) {
 
         // be aware of a display unit change reported by the OptionsModel
         // object.
-        connect(_optionsModel, SIGNAL(displayUnitChanged(int)), this,
-                SLOT(updateDisplayUnit(int)));
+        connect(_optionsModel, &OptionsModel::displayUnitChanged, this,
+                &UnitDisplayStatusBarControl::updateDisplayUnit);
 
         // initialize the display units label with the current value in the
         // model.

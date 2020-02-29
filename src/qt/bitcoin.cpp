@@ -733,7 +733,7 @@ int main(int argc, char *argv[]) {
     std::string error;
     if (!node->parseParameters(argc, argv, error)) {
         QMessageBox::critical(
-            0, QObject::tr(PACKAGE_NAME),
+            nullptr, QObject::tr(PACKAGE_NAME),
             QObject::tr("Error parsing command line arguments: %1.")
                 .arg(QString::fromStdString(error)));
         return EXIT_FAILURE;
@@ -787,7 +787,7 @@ int main(int argc, char *argv[]) {
     /// - Do not call GetDataDir(true) before this step finishes.
     if (!fs::is_directory(GetDataDir(false))) {
         QMessageBox::critical(
-            0, QObject::tr(PACKAGE_NAME),
+            nullptr, QObject::tr(PACKAGE_NAME),
             QObject::tr(
                 "Error: Specified data directory \"%1\" does not exist.")
                 .arg(QString::fromStdString(gArgs.GetArg("-datadir", ""))));
@@ -795,7 +795,7 @@ int main(int argc, char *argv[]) {
     }
     if (!node->readConfigFiles(error)) {
         QMessageBox::critical(
-            0, QObject::tr(PACKAGE_NAME),
+            nullptr, QObject::tr(PACKAGE_NAME),
             QObject::tr("Error: Cannot parse configuration file: %1.")
                 .arg(QString::fromStdString(error)));
         return EXIT_FAILURE;
