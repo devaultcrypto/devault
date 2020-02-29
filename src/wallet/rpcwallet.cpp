@@ -3373,6 +3373,8 @@ static UniValue getwalletinfo(const Config &config,
         return NullUniValue;
     }
 
+    EnsureWalletIsUnlocked(pwallet);
+
     if (request.fHelp || request.params.size() != 0) {
         throw std::runtime_error(
             "getwalletinfo\n"
@@ -3432,7 +3434,10 @@ static UniValue getwalletinfo(const Config &config,
 
     UniValue obj(UniValue::VOBJ);
     CHDChain hdChain;
-    pwallet->GetDecryptedHDChain(hdChain);
+    if (!pwallet->GetDecryptedHDChain(hdChain)) {
+           throw JSONRPCError(RPC_WALLET_ERROR,
+                           "Failed to decrypt Wallet.");
+     }
 
     size_t kpExternalSize = pwallet->KeypoolCountExternalKeys();
     obj.pushKV("walletname", pwallet->GetName());
@@ -3449,22 +3454,28 @@ static UniValue getwalletinfo(const Config &config,
     obj.push_back(Pair("hdchainid", hdChain.GetID().GetHex()));
     obj.push_back(Pair("hdaccountcount", (int64_t)hdChain.CountAccounts()));
     UniValue accounts(UniValue::VARR);
-    for (size_t i = 0; i < hdChain.CountAccounts(); ++i) {
+    int i = 0;
+    int found=0;
+    do {
         CHDAccount acc;
-        UniValue account(UniValue::VOBJ);
-        account.push_back(Pair("hdaccountindex", (int64_t)i));
         if(hdChain.GetAccount(i, acc)) {
+            UniValue account(UniValue::VOBJ);
+            account.push_back(Pair("hdaccountindex", (int64_t)i));
             account.push_back(Pair("hdexternalkeyindex", (int64_t)acc.nExternalChainCounter));
             account.push_back(Pair("hdinternalkeyindex", (int64_t)acc.nInternalChainCounter));
-        } else {
-            account.push_back(Pair("error", strprintf("account %d is missing", i)));
+            accounts.push_back(account);
+            found++;
         }
-        accounts.push_back(account);
-    }
+        i++;
+    } while (found < hdChain.CountAccounts());
+    
     obj.push_back(Pair("hdaccounts", accounts));
     obj.pushKV("unlocked_until", pwallet->nRelockTime);
     obj.pushKV("paytxfee", ValueFromAmount(payTxFee.GetFeePerK()));
     obj.pushKV("private_keys_enabled", pwallet->IsWalletPrivate());
+    obj.pushKV("has bls keys", pwallet->IsWalletBLS());
+    obj.pushKV("has legacy keys", pwallet->IsWalletLegacy());
+    obj.pushKV("is blank", pwallet->IsWalletBlank());
     return obj;
 }
 

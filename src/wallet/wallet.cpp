@@ -1626,6 +1626,7 @@ void CWallet::UnsetWalletPrivate() {
 
 bool CWallet::IsWalletBlank() const { return (m_wallet_flags.GetBlank()); }
 bool CWallet::IsWalletBLS() const { return (m_wallet_flags.HasBLS()); }
+bool CWallet::IsWalletLegacy() const { return (m_wallet_flags.HasLEGACY()); }
 bool CWallet::IsWalletPrivate() const { return (m_wallet_flags.GetPrivate()); }
 
 /*
@@ -5097,11 +5098,7 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
                     WalletDatabase::Create(location.GetPath())),
         ReleaseWallet);
 
-    // Can happen on any run
-    if (gArgs.GetBoolArg("-upgradebls",false)) {
-        walletInstance->SetWalletBLS();
-    }
-    
+   
     DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun);
     if (nLoadWalletRet != DBErrors::LOAD_OK) {
         if (nLoadWalletRet == DBErrors::CORRUPT) {
@@ -5130,13 +5127,20 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
             return nullptr;
         }
     }
-
+  
+  
     // If old wallet and version doesn't have wallet flags,
     // set walletInstance wallet flags to a default with EC keys but no BLS,blank,etc
     {
         if (walletInstance->nWalletMaxVersion < FEATURE_FLAGS) {
             walletInstance->SetLegacyWalletFlags();
         }
+      
+        // Can happen on any run - do after loading WalletFlag from DB file & after potentially setting as Legacy
+        if (gArgs.GetBoolArg("-upgradebls",false)) {
+            walletInstance->SetWalletBLS();
+        }
+
     }
 
     if (gArgs.GetBoolArg("-upgradewallet", fFirstRun)) {
