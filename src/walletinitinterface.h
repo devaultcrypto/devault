@@ -11,6 +11,7 @@
 
 class CScheduler;
 class CRPCTable;
+struct InitInterfaces;
 
 namespace interfaces {
 class Chain;
@@ -25,23 +26,11 @@ public:
     //virtual std::string GetHelpString(bool showDebug) const = 0;
     /** Check wallet parameter interaction */
     virtual bool ParameterInteraction() const = 0;
-    /** Register wallet RPC*/
-    virtual void RegisterRPC(CRPCTable &) const = 0;
-    /** Verify wallets */
-    virtual bool Verify(const CChainParams &chainParams,
-                        interfaces::Chain &chain) const = 0;
     /** Check if wallet exists already */
     virtual bool CheckIfWalletExists(const CChainParams &chainParams) const = 0;
-    /** Open wallets*/
-    virtual bool Open(const CChainParams &chainParams, interfaces::Chain &chain, const SecureString& walletPassphrase,
-                      const std::vector<std::string>& words, bool use_bls) const = 0;
-    /** Start wallets*/
-    virtual void Start(CScheduler &scheduler) const = 0;
-    /** Flush Wallets*/
-    virtual void Flush() const = 0;
-    /** Stop Wallets*/
-    virtual void Stop() const = 0;
-
+    /** Add wallets that should be opened to list of init interfaces. */
+    virtual void Construct(InitInterfaces &interfaces) const = 0;
+ 
     virtual ~WalletInitInterface() = default;
 };
 
