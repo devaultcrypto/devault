@@ -11,21 +11,23 @@ public:
     void AddWalletOptions() const override {}
     bool HasWalletSupport() const override { return false; }
     bool ParameterInteraction() const override { return true; }
-    void RegisterRPC(CRPCTable &) const override {}
-    bool Open(const CChainParams &chainParams, interfaces::Chain &chain, const SecureString& walletPassphrase,
-              const std::vector<std::string>& words) const override {
-        LogPrintf("No wallet support compiled in!\n");
-        return true; }
     bool CheckIfWalletExists(const CChainParams &chainParams) const override { return false; }
-    bool Verify(const CChainParams &chainParams,
-                interfaces::Chain &chain) const override {
-        return true;
+    void Construct(InitInterfaces &interfaces) const override {
+        LogPrintf("No wallet support compiled in!\n");
     }
-    void Start(CScheduler &scheduler) const override {}
-    void Flush() const override {}
-    void Stop() const override {}
-    void Close() const override {}
 };
+
+void DummyWalletInit::AddWalletOptions() const {
+    std::vector<std::string> opts = {
+        "-avoidpartialspends", "-disablewallet", "-fallbackfee=<amt>",
+        "-keypool=<n>", "-maxtxfee=<amt>", "-mintxfee=<amt>", "-paytxfee=<amt>",
+        "-rescan", "-salvagewallet", "-spendzeroconfchange", "-upgradewallet",
+        "-wallet=<path>", "-walletbroadcast", "-walletdir=<dir>",
+        "-walletnotify=<cmd>", "-zapwallettxes=<mode>",
+        // Wallet debug options
+        "-dblogsize=<n>", "-flushwallet", "-privdb", "-walletrejectlongchains"};
+    gArgs.AddHiddenArgs(opts);
+}
 
 const WalletInitInterface &g_wallet_init_interface = DummyWalletInit();
 

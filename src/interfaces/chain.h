@@ -8,6 +8,10 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <support/allocators/secure.h>
+
+class CChainParams;
+class CScheduler;
 
 namespace interfaces {
 
@@ -41,6 +45,25 @@ public:
 class ChainClient {
 public:
     virtual ~ChainClient() {}
+
+    //! Register rpcs.
+    virtual void registerRpcs() = 0;
+
+    //! Check for errors before loading.
+    virtual bool verify(const CChainParams &chainParams) = 0;
+
+    /** Open wallets*/    
+    virtual bool open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+                      const std::vector<std::string>& words, bool use_bls) = 0;
+  
+    //! Start client execution and provide a scheduler.
+    virtual void start(CScheduler &scheduler) = 0;
+
+    //! Save state to disk.
+    virtual void flush() = 0;
+
+    //! Shut down client.
+    virtual void stop() = 0;
 };
 
 //! Return implementation of Chain interface.

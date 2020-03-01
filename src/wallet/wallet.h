@@ -39,14 +39,15 @@
 //  This function will perform salvage on the wallet if requested, as long as
 //  only one wallet is being loaded (WalletParameterInteraction forbids
 //  -salvagewallet, -zapwallettxes or -upgradewallet with multiwallet).
-/*
 bool VerifyWallets(const CChainParams &chainParams, interfaces::Chain &chain,
                    const std::vector<std::string> &wallet_files);
 
 //! Load wallet databases.
 bool LoadWallets(const CChainParams &chainParams, interfaces::Chain &chain,
-                 const std::vector<std::string> &wallet_files);
-*/
+               const std::vector<std::string> &wallet_files,
+               const SecureString& walletPassphrase,
+               const std::vector<std::string>& words, bool use_bls);
+
 //! Complete startup of wallets.
 void StartWallets(CScheduler &scheduler);
 
@@ -1279,6 +1280,9 @@ public:
 
     /** Watch-only address added */
     boost::signals2::signal<void(bool fHaveWatchOnly)> NotifyWatchonlyChanged;
+
+       /** Keypool has new keys */
+    boost::signals2::signal<void()> NotifyCanGetAddressesChanged;
 
     /** Inquire whether this wallet broadcasts transactions. */
     bool GetBroadcastTransactions() const { return fBroadcastTransactions; }

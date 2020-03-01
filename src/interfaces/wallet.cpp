@@ -12,6 +12,7 @@
 #include <net.h>
 #include <policy/policy.h>
 #include <primitives/transaction.h>
+#include <rpc/server.h>
 #include <script/ismine.h>
 #include <script/standard.h>
 #include <support/allocators/secure.h>
@@ -21,6 +22,7 @@
 #include <validation.h>
 #include <wallet/finaltx.h>
 #include <wallet/wallet.h>
+#include <wallet/rpcdump.h>
 
 #include <memory>
 
@@ -201,6 +203,9 @@ namespace {
                                     item.second.name, item.second.purpose);
             }
             return result;
+        }
+        void learnRelatedScripts(const CPubKey &key, OutputType type) {
+          m_wallet.LearnRelatedScripts(key, type);
         }
         bool addDestData(const CTxDestination &dest, const std::string &key,
                          const std::string &value) override {
@@ -460,9 +465,26 @@ namespace {
         }
         std::unique_ptr<Handler>
         handleWatchOnlyChanged(WatchOnlyChangedFn fn) override {
-            return MakeHandler(m_wallet.NotifyWatchonlyChanged.connect(fn));
+          return MakeHandler(m_wallet.NotifyWatchonlyChanged.connect(fn));
         }
-
+        std::unique_ptr<Handler> handleCanGetAddressesChanged(CanGetAddressesChangedFn fn) override {
+          return MakeHandler(m_wallet.NotifyCanGetAddressesChanged.connect(fn));
+        }
+      /* later
+        Amount getRequiredFee(unsigned int tx_bytes) override {
+            return GetRequiredFee(m_wallet, tx_bytes);
+        }
+        Amount getMinimumFee(unsigned int tx_bytes,
+                             const CCoinControl &coin_control) override {
+            return GetMinimumFee(m_wallet, tx_bytes, coin_control, g_mempool);
+        }
+      */
+      bool open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+                const std::vector<std::string>& words, bool use_bls) {
+        return true;
+      }
+  
+ 
         std::shared_ptr<CWallet> m_shared_wallet;
         CWallet &m_wallet;
     };
@@ -472,6 +494,27 @@ namespace {
         WalletClientImpl(Chain &chain,
                          std::vector<std::string> wallet_filenames)
             : m_chain(chain), m_wallet_filenames(std::move(wallet_filenames)) {}
+
+        void registerRpcs() override {
+            RegisterWalletRPCCommands(::tableRPC);
+            RegisterDumpRPCCommands(::tableRPC);
+        }
+        bool verify(const CChainParams &chainParams) override {
+          return VerifyWallets(chainParams, m_chain, m_wallet_filenames);
+        }
+        
+        void start(CScheduler &scheduler) override {
+            StartWallets(scheduler);
+        }
+
+        bool open(const CChainParams &chainParams, const SecureString& walletPassphrase,
+                  const std::vector<std::string>& words, bool use_bls) override {
+          return LoadWallets(chainParams, m_chain, m_wallet_filenames,
+                             walletPassphrase,words,use_bls);
+        }
+        void flush() override { return FlushWallets(); }
+        void stop() override { return StopWallets(); }
+        ~WalletClientImpl() override { UnloadWallets(); }
 
         Chain &m_chain;
         std::vector<std::string> m_wallet_filenames;
