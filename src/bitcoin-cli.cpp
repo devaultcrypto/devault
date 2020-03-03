@@ -37,72 +37,72 @@ static void SetupCliArgs() {
     const auto testnetBaseParams =
         CreateBaseChainParams(CBaseChainParams::TESTNET);
 
-    gArgs.AddArg("-?", _("This help message"), false, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-?", "This help message", false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-version", "Print version and exit", false,
                  OptionsCategory::OPTIONS);
     gArgs.AddArg("-conf=<file>",
-                 strprintf(_("Specify configuration file (default: %s)"),
+                 strprintf("Specify configuration file (default: %s)",
                            BITCOIN_CONF_FILENAME),
                  false, OptionsCategory::OPTIONS);
-    gArgs.AddArg("-datadir=<dir>", _("Specify data directory"), false,
+    gArgs.AddArg("-datadir=<dir>", "Specify data directory", false,
                  OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-getinfo",
-        _("Get general information from the remote server. Note that unlike "
+        "Get general information from the remote server. Note that unlike "
           "server-side RPC calls, the results of -getinfo is the result of "
           "multiple non-atomic requests. Some entries in the result may "
           "represent results from different states (e.g. wallet balance may be "
-          "as of a different block from the chain state reported)"),
+          "as of a different block from the chain state reported)",
         false, OptionsCategory::OPTIONS);
     SetupChainParamsBaseOptions();
     gArgs.AddArg(
         "-named",
-        strprintf(_("Pass named instead of positional arguments (default: %s)"),
+        strprintf("Pass named instead of positional arguments (default: %s)",
                   DEFAULT_NAMED),
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-rpcconnect=<ip>",
-        strprintf(_("Send commands to node running on <ip> (default: %s)"),
+        strprintf("Send commands to node running on <ip> (default: %s)",
                   DEFAULT_RPCCONNECT),
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-rpccookiefile=<loc>",
-        _("Location of the auth cookie. Relative paths will be prefixed by a "
-          "net-specific datadir location. (default: data dir)"),
+        "Location of the auth cookie. Relative paths will be prefixed by a "
+          "net-specific datadir location. (default: data dir)",
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-rpcport=<port>",
         strprintf(
-            _("Connect to JSON-RPC on <port> (default: %u or testnet: %u)"),
+            "Connect to JSON-RPC on <port> (default: %u or testnet: %u)",
             defaultBaseParams->RPCPort(), testnetBaseParams->RPCPort()),
         false, OptionsCategory::OPTIONS);
-    gArgs.AddArg("-rpcwait", _("Wait for RPC server to start"), false,
+    gArgs.AddArg("-rpcwait", "Wait for RPC server to start", false,
                  OptionsCategory::OPTIONS);
-    gArgs.AddArg("-rpcuser=<user>", _("Username for JSON-RPC connections"),
+    gArgs.AddArg("-rpcuser=<user>", "Username for JSON-RPC connections",
                  false, OptionsCategory::OPTIONS);
-    gArgs.AddArg("-rpcpassword=<pw>", _("Password for JSON-RPC connections"),
+    gArgs.AddArg("-rpcpassword=<pw>", "Password for JSON-RPC connections",
                  false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-rpcclienttimeout=<n>",
-                 strprintf(_("Timeout in seconds during HTTP requests, or 0 "
-                             "for no timeout. (default: %d)"),
+                 strprintf("Timeout in seconds during HTTP requests, or 0 "
+                             "for no timeout. (default: %d)",
                            DEFAULT_HTTP_CLIENT_TIMEOUT),
                  false, OptionsCategory::OPTIONS);
 
     gArgs.AddArg(
         "-stdinrpcpass",
-        strprintf(_("Read RPC password from standard input as a single line. "
+        strprintf("Read RPC password from standard input as a single line. "
                     "When combined with -stdin, the first line from standard "
-                    "input is used for the RPC password.")),
+                    "input is used for the RPC password."),
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-stdin",
-                 _("Read extra arguments from standard input, one per line "
+                 "Read extra arguments from standard input, one per line "
                    "until EOF/Ctrl-D (recommended for sensitive information "
-                   "such as passphrases)"),
+                   "such as passphrases)",
                  false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-rpcwallet=<walletname>",
-                 _("Send RPC for non-default wallet on RPC server (argument is "
+                 "Send RPC for non-default wallet on RPC server (argument is "
                    "wallet filename in bitcoind directory, required if "
-                   "bitcoind/-Qt runs with multiple wallets)"),
+                   "bitcoind/-Qt runs with multiple wallets)",
                  false, OptionsCategory::OPTIONS);
     // Hidden
     gArgs.AddArg("-h", "", false, OptionsCategory::HIDDEN);
