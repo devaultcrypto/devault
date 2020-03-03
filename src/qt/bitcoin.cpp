@@ -610,33 +610,27 @@ WId BitcoinApplication::getMainWinId() const {
 static void SetupUIArgs() {
     gArgs.AddArg(
         "-choosedatadir",
-        strprintf(QObject::tr("Choose data directory on startup (default: %d)")
-                      .toStdString(),
+        strprintf("Choose data directory on startup (default: %d)",
                   DEFAULT_CHOOSE_DATADIR),
         false, OptionsCategory::GUI);
     gArgs.AddArg(
         "-lang=<lang>",
-        QObject::tr(
-            "Set language, for example \"de_DE\" (default: system locale)")
-            .toStdString(),
+            "Set language, for example \"de_DE\" (default: system locale)",
         false, OptionsCategory::GUI);
-    gArgs.AddArg("-min", QObject::tr("Start minimized").toStdString(), false,
+    gArgs.AddArg("-min", "Start minimized", false,
                  OptionsCategory::GUI);
     gArgs.AddArg(
         "-rootcertificates=<file>",
-        QObject::tr(
-            "Set SSL root certificates for payment request (default: -system-)")
-            .toStdString(),
+            "Set SSL root certificates for payment request (default: -system-)",
         false, OptionsCategory::GUI);
     gArgs.AddArg(
         "-splash",
-        strprintf(QObject::tr("Show splash screen on startup (default: %d)")
-                      .toStdString(),
+        strprintf("Show splash screen on startup (default: %d)",
                   DEFAULT_SPLASHSCREEN),
         false, OptionsCategory::GUI);
     gArgs.AddArg(
         "-resetguisettings",
-        QObject::tr("Reset all settings changed in the GUI").toStdString(),
+        "Reset all settings changed in the GUI",
         false, OptionsCategory::GUI);
     gArgs.AddArg("-uiplatform",
                  strprintf("Select platform to customize UI for (one of "
