@@ -1140,6 +1140,7 @@ public:
     const std::string &GetLabelName(const CScript &scriptPubKey) const;
 
     void GetScriptForMining(std::shared_ptr<CReserveScript> &script);
+    CScript GetScriptForMining(CPubKey& pubkey);
 
     unsigned int GetKeyPoolSize() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet) {
         // set{Ex,In}ternalKeyPool
