@@ -4487,6 +4487,19 @@ void CWallet::GetScriptForMining(std::shared_ptr<CReserveScript> &script) {
     script->reserveScript = CScript() << ToByteVector(pubkey) << OP_CHECKSIG;
 }
 
+CScript CWallet::GetScriptForMining(CPubKey& pubkey) {
+      std::vector<uint8_t> vchHash(20);
+      CHash160()
+        .Write(pubkey.begin(), pubkey.size())
+        .Finalize(vchHash.data());
+
+  CScript script;
+  script = CScript() << ToByteVector(pubkey) << OP_CHECKSIG;
+  return script;
+}
+
+
+
 void CWallet::LockCoin(const COutPoint &output) {
     // setLockedCoins
     AssertLockHeld(cs_wallet);

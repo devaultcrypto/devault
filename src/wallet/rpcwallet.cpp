@@ -154,7 +154,7 @@ std::string LabelFromValue(const UniValue &value) {
 }
 
 
-std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
+std::string generateOneBlock(const Config &config, CScript& coinbaseScript) {
   {
     // keep cs_main locked.
     LOCK(cs_main);
@@ -162,7 +162,7 @@ std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScrip
     unsigned int nExtraNonce = 0;
     std::unique_ptr<CBlockTemplate> pblocktemplate(
                                                    BlockAssembler(config, g_mempool)
-                                                   .CreateNewBlock(coinbaseScript->reserveScript));
+                                                   .CreateNewBlock(coinbaseScript));
     
     if (!pblocktemplate.get()) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
@@ -184,13 +184,27 @@ std::string generateOneBlock(const Config &config, std::shared_ptr<CReserveScrip
   }
 }
 
-void generateBlocksUntilShutdown(const Config &config, std::shared_ptr<CReserveScript> coinbaseScript) {
+void generateBlocksUntilShutdown(CWallet* pwallet) {
 
     unsigned blockCount=0;
     stop_generate = false;
-    
+
     while (!ShutdownRequested() && !stop_generate) {
-        std::string hex = generateOneBlock(config, coinbaseScript);
+        if (!pwallet->IsLocked()) {
+            pwallet->TopUpKeyPool();
+        }
+        
+        // Generate a new key that is added to wallet
+        CPubKey newKey;
+        if (!pwallet->GetKeyFromPool(newKey, false)) {
+            throw JSONRPCError(
+                               RPC_WALLET_KEYPOOL_RAN_OUT,
+                               "Error: Keypool ran out, please call keypoolrefill first");
+        }
+
+        CScript coinbaseScript = pwallet->GetScriptForMining(newKey);
+        
+        std::string hex = generateOneBlock(GetConfig(), coinbaseScript);
         // Sleep for 10 seconds between blocks to prevent too many
         LogPrintf("Block [%d], hash = %s\n",blockCount++, hex);
         MilliSleep(10000);
@@ -3991,7 +4005,7 @@ static UniValue generateuntilshutdown(const Config &config, const JSONRPCRequest
     }
 
     try {
-        auto gen_bind = std::bind(generateBlocksUntilShutdown, std::ref(config), coinbase_script);
+        auto gen_bind = std::bind(generateBlocksUntilShutdown, pwallet);
         generate_thread = std::thread(&TraceThread<decltype(gen_bind)>, "devault-genrepeat", std::move(gen_bind));
         generate_thread.detach();
     } catch (...) {
