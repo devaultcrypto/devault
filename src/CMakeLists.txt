@@ -155,7 +155,7 @@ add_compiler_flags(
 	-Wall
 	-Wextra
 	-Wformat
-	-Wvla
+#	-Wvla
 	-Wformat-security
 	-Wcast-align
 	-Wunused-parameter
