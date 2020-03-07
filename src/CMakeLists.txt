@@ -27,7 +27,7 @@ option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" OFF)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
 option(ENABLE_REDUCE_EXPORTS "Reduce the amount of exported symbols" OFF)
-option(ENABLE_QRCODE "Enable QR code display" ON)
+option(ENABLE_QRCODE "Enable QR code display" OFF)
 option(BUILD_STD_FILESYSTEM "Enable trying to use std::filesystem" OFF)
 option(ENABLE_UPNP "Enable UPnP support" ON)
 option(START_WITH_UPNP "Make UPnP the default to map ports" OFF)
@@ -51,9 +51,10 @@ add_feature_info(WITH_STD_FILESYSTEM BUILD_STD_FILESYSTEM "Enable trying to use 
 
 set(CMAKE_REQUIRED_QUIET true)
 
+include(AddCompilerFlags)
 if (LINK_STATIC_LIBS)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib")
-  add_linker_flag(-static-libstdc++)
+  add_linker_flags(-static-libstdc++)
 endif()
 
 # Allow usage of sanitizers by setting ECM_ENABLE_SANITIZERS
@@ -75,7 +76,6 @@ endif()
 # all the releases types set NDEBUG which is unwanted as it disables the assert
 # completely.
 # Remove the -DNDEBUG flag from the CFLAGS/CXXFLAGS in all the configurations
-include(AddCompilerFlags)
 remove_compiler_flags(-DNDEBUG)
 
 # Overrides the flags for the Debug build type
@@ -395,7 +395,7 @@ if (Filesystem_FOUND)
   target_link_libraries(util univalue crypto sodium std::filesystem)
 else()
   set(Boost_USE_STATIC_LIBS On)
-  set(Boost_USE_STATIC_RUNTIME Off)
+  set(Boost_USE_STATIC_RUNTIME On)
   prepend(BOOST_LIBRARIES "Boost::" ${BOOST_PACKAGES_REQUIRED})
   if (TOOLCHAIN_PREFIX) 
     find_package(Boost CONFIG 1.65 REQUIRED COMPONENTS ${BOOST_PACKAGES_REQUIRED})
