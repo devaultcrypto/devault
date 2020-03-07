@@ -40,22 +40,9 @@ Build Devault
 2.  Build DeVault:
 
     Configure and build the headless devault binaries as well as the GUI (if Qt is found).
-
-    You can disable the GUI build by passing `--without-gui` to configure.
+    You can disable the GUI build by passing `-DBUILD_QT=0` to cmake
 
     It is recommended to create a build directory to build out-of-tree.
-
-    Option 1 - Autotools
-    ---------------------
-
-        ./autogen.sh
-        mkdir build
-        cd build
-        ../configure
-        make
-
-   Option 2 - Cmake
-   ---------------------
 
       cd ../
       mkdir build
@@ -64,18 +51,13 @@ Build Devault
       make
 
 
-3.  It is recommended to build and run the unit tests:
-
-        make check
-
+3.  It is recommended to build and run the unit tests (TBD)
 4.  You can also create a .dmg that contains the .app bundle (optional):
-
-        make deploy
 
 Running
 -------
 
-Devault is now available at `./src/devaultd` or `./build/devaultd` if using cmake
+Devault is now available at `./build/devaultd` if using cmake
 
 Before running, it's recommended you create an RPC configuration file.
 
@@ -103,18 +85,17 @@ Download and install the community edition of [Qt Creator](https://www.qt.io/dow
 Uncheck everything except Qt Creator during the installation process.
 
 1. Make sure you installed everything through Homebrew mentioned above
-2. Do a proper ./configure --enable-debug
-3. In Qt Creator do "New Project" -> Import Project -> Import Existing Project
-4. Enter "devault-qt" as project name, enter src/qt as location
-5. Leave the file selection as it is
-6. Confirm the "summary page"
-7. In the "Projects" tab select "Manage Kits..."
-8. Select the default "Desktop" kit and select "Clang (x86 64bit in /usr/bin)" as compiler
-9. Select LLDB as debugger (you might need to set the path to your installation)
-10. Start debugging with Qt Creator
+2. In Qt Creator do "New Project" -> Import Project -> Import Existing Project
+3. Enter "devault-qt" as project name, enter src/qt as location
+4. Leave the file selection as it is
+5. Confirm the "summary page"
+6. In the "Projects" tab select "Manage Kits..."
+7. Select the default "Desktop" kit and select "Clang (x86 64bit in /usr/bin)" as compiler
+8. Select LLDB as debugger (you might need to set the path to your installation)
+9. Start debugging with Qt Creator
 
 Notes
 -----
 
-* Tested on OS X 10.11 through 10.14 on 64-bit Intel processors only.
+* Tested on OS X 10.11 through 10.15 on 64-bit Intel processors only.
 * Building with downloaded Qt binaries is not officially supported. 

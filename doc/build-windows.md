@@ -110,9 +110,8 @@ Once the source code is ready the build steps are below.
     cd depends
     make HOST=x86_64-w64-mingw32
     cd ..
-    ./autogen.sh # not required when building from tarball
-    CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/ --with-seeder=false # seeder not supported in Windows yet
-    make
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win64.cmake  -DBUILD_SEEDER=OFF -DENABLE_REDUCE_EXPORTS=ON -DCCACHE=OFF -DBUILD_STD_FILESYSTEM=OFF -DBUILD_QT=0 -DBUILD_CTESTS=0 -DLINK_STATIC_LIBS=1 -GNinja ..
+    ninja
 
 ## Building for 32-bit Windows
 
@@ -138,10 +137,9 @@ Then build using:
     cd depends
     make HOST=i686-w64-mingw32
     cd ..
-    ./autogen.sh # not required when building from tarball
-    CONFIG_SITE=$PWD/depends/i686-w64-mingw32/share/config.site ./configure --prefix=/ --with-seeder=false # seeder not supported in Windows
-    make
-
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win32.cmake  -DBUILD_SEEDER=OFF -DENABLE_REDUCE_EXPORTS=ON -DCCACHE=OFF -DBUILD_STD_FILESYSTEM=OFF -DBUILD_QT=0 -DBUILD_CTESTS=0 -DLINK_STATIC_LIBS=1 -GNinja ..
+    ninja
+    
 ## Depends system
 
 For further documentation on the depends system see [README.md](../depends/README.md) in the depends directory.
