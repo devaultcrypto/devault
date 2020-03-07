@@ -4,30 +4,10 @@ Some notes on how to build DeVault in Unix.
 
 (for OpenBSD specific instructions, see [build-openbsd.md](build-openbsd.md))
 
-Note
----------------------
-Always use absolute paths to configure and compile devault and the dependencies,
-for example, when specifying the path of the dependency:
-
-	../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
-
-Here BDB_PREFIX must be an absolute path - it is defined using $(pwd) which ensures
-the usage of the absolute path.
-
 To Build
 ---------------------
 
 It is recommended to create a build directory to build out-of-tree.
-
-```bash
-./autogen.sh
-mkdir build
-cd build
-../configure
-make
-make install # optional
-```
-
 This will build devault-qt as well if the dependencies are met.
 
 Building with cmake
@@ -69,11 +49,7 @@ Memory Requirements
 --------------------
 
 C++ compilers are memory-hungry. It is recommended to have at least 1.5 GB of
-memory available when compiling DeVault. On systems with less, gcc can be
-tuned to conserve memory with additional CXXFLAGS:
-
-
-    ./configure CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768"
+memory available when compiling DeVault. 
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
@@ -83,7 +59,7 @@ Build requirements:
 
 Options when installing required Boost library files:
 
-1. On Ubuntu 16.04+ and Debian 7+ there are generic names for the individual boost development packages, so the following can be used to only install necessary parts of boost:
+1. On Ubuntu 18.04+ and Debian 8+ there are generic names for the individual boost development packages, so the following can be used to only install necessary parts of boost:
 
         sudo apt-get install libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev
 
@@ -181,16 +157,43 @@ The release is built with GCC and then "strip devaultd" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
 
+Options
+------
+
+There are a number of options that can either be enabled or disabled for builds
+
+ * WITH_WALLET, Activate the wallet functionality
+ * WITH_CLI, Build devault-cli
+ * WITH_TX, Build devault-tx
+ * WITH_QT, Build devault-qt
+ * WITH_CTESTS, Build cmake unit tests
+ * WITH_QRCODE, Enable QR code display
+ * WITH_MULTISET, Build libsecp256k1's MULTISET module
+ * WITH_MODULE_RECOVERY, Build libsecp256k1's recovery module
+ * WITH_WALLETTOOL, Build bdb-check for checking wallet
+ * WITH_ZMQ, Activate the ZeroMQ functionalities
+ * WITH_SEEDER, Build devault-seeder
+ * WITH_ROCKSDB, Build with RocksDB (blockchain restart needed if switched
+ * WITH_HARD, Harden the executables
+ * WITH_STATIC, Build with static linking
+ * WITH_BENCH, Build benchmark code
+ * WITH_BUNDLE, For MacOS build MacOS Application
+ * WITH_REDUCED_EXPORTS, Reduce amount of exported symbols
+ * WITH_STD_FILESYSTEM, Enable trying to use std::filesystem
+ * WITH_WARNINGS, Enable extra warnings
+ * WITH_LEVELDB_BUILD_TESTS, Build LevelDB's unit tests
+ * WITH_ECHD_MODULE, Build libsecp256k1's ECDH module
+ * WITH_SCHNORR, Build libsecp256k1's Schnorr module
+ * WITH_SECP256K1_TESTS, Build secp256k1's unit tests
+ * WITH_SECP256K1_BENCH, Build secp256k1's benchmarks
+ * WITH_UNIVALUE_TESTS, Enable univalue's unit tests
+
 miniupnpc
 ---------
 
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  See the configure options for upnp behavior desired:
-
-	--without-miniupnpc      No UPnP support miniupnp not required
-	--disable-upnp-default   (the default) UPnP support turned off by default at runtime
-	--enable-upnp-default    UPnP support turned on by default at runtime
 
 Boost
 -----
@@ -200,13 +203,6 @@ Security
 --------
 To help make your devault installation more secure by making certain attacks impossible to
 exploit even if a vulnerability is found, binaries are hardened by default.
-This can be disabled with:
-
-Hardening Flags:
-
-	./configure --enable-hardening
-	./configure --disable-hardening
-
 
 Hardening enables the following features:
 
@@ -248,39 +244,20 @@ Hardening enables the following features:
 Disable-wallet mode
 --------------------
 When the intention is to run only a P2P node without a wallet, devault may be compiled in
-disable-wallet mode with:
+disable-wallet mode with cmake option
 
-    ./configure --disable-wallet --without-gui
+   -DBUILD_WALLET=0
+   and
+   -DBUILD_QT=0 to disable GUI
     
 > Note: The --disable-wallet option is a daemon only feature not compatible with QT.
-
-or if using cmake, then during cmake step
-
-   cmake ../devault -DBUILD_WALLET=0 -DBUILD_QT=0
-   
-> Note: The --disable-wallet option is a daemon only feature not compatible with QT.
-
 
 Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
 call not `getwork`.
 
-Additional Configure Flags
+Additional Build Flags
 --------------------------
-A list of additional configure flags can be displayed with:
-
-    ./configure --help
-
-
-Setup and Build Example: Arch Linux
------------------------------------
-This example lists the steps necessary to setup and build a command line only, non-wallet distribution of the latest changes on Arch Linux:
-
-    pacman -S git base-devel boost libevent python libsodium
-    git clone https://github.com/devaultcrypto/devault.git
-    cd devault/
-    ./autogen.sh
-    ./configure --disable-wallet --without-gui --without-miniupnpc
-    make check
+TBD
 
 
 ARM Cross-compilation
@@ -299,7 +276,9 @@ To build executables for ARM:
     cd depends
     make HOST=arm-linux-gnueabihf NO_QT=1
     cd ..
-    ./configure --prefix=$PWD/depends/arm-linux-gnueabihf --enable-glibc-back-compat --enable-reduce-exports LDFLAGS=-static-libstdc++
+    mkdir build
+    cd build
+    cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/LinuxARM.cmake  -DBUILD_SEEDER=OFF -DENABLE_REDUCE_EXPORTS=ON -DCCACHE=OFF -DBUILD_STD_FILESYSTEM=OFF -DBUILD_QT=0 -DBUILD_CTESTS=0 -DLINK_STATIC_LIBS=1 -GNinja ..
     make
 
 
