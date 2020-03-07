@@ -56,6 +56,10 @@ else()
   cmake_policy(SET CMP0071 OLD)
 endif()
 
+if (TOOLCHAIN_PREFIX)
+  set(Qt5_DIR /home/vagrant/devault/depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
+endif()
+
 include(BrewHelper)
 find_brew_prefix(QT5_PREFIX qt5)
 
