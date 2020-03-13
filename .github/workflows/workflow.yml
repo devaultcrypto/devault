@@ -9,7 +9,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.0.0
     - name: Install Devault Dependencies
-      run: sudo apt-get install build-essential libtool autotools-dev automake libdb-dev libdb++-dev pkg-config libsodium-dev libevent-dev libboost-all-dev bsdmainutils libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libqrencode-dev
+      run: sudo apt-get install build-essential libminiupnpc-dev libzmq3-dev libtool autotools-dev automake libdb-dev libdb++-dev pkg-config libsodium-dev libevent-dev libboost-all-dev bsdmainutils libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libqrencode-dev
     - name: Build project
       uses: nicledomaS/cmake_build_action@v1
       with:
