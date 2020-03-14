@@ -330,7 +330,6 @@ add_library(util
 	clientversion.cpp
 	compat/glibc_sanity.cpp
 	compat/glibcxx_sanity.cpp
-	fs.cpp
 	logging.cpp
 	random.cpp # needs libsodium
 	rcu.cpp

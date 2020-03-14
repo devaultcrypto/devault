@@ -25,7 +25,7 @@ namespace fs = boost::filesystem;
 
 /** Bridge operations to C stdio */
 namespace fsbridge {
-FILE *fopen(const fs::path &p, const char *mode);
+inline FILE *fopen(const fs::path &p, const char *mode) {   return ::fopen(p.string().c_str(), mode);}
 }; // namespace fsbridge
 
 // clang-format on
