@@ -427,7 +427,6 @@ add_library(common
 	compressor.cpp
 	dstencode.cpp
 	feerate.cpp
-	globals.cpp
 	core_read.cpp
 	core_write.cpp
 	key.cpp
@@ -475,18 +474,17 @@ add_library(server
 	addrman.cpp
 	addrdb.cpp
 	avalanche.cpp
-  banman.cpp
+    banman.cpp
 	bloom.cpp
 	blockencodings.cpp
 	blockfilter.cpp
 	chain.cpp
 	checkpoints.cpp
-  checksigs.cpp
+    checksigs.cpp
 	config.cpp
 	consensus/activation.cpp
 	consensus/tx_verify.cpp
-  flatfile.cpp
-	globals.cpp
+    flatfile.cpp
 	httprpc.cpp
 	httpserver.cpp
 	index/base.cpp
@@ -501,7 +499,7 @@ add_library(server
 	net.cpp
 	net_processing.cpp
 	noui.cpp
-  outputtype.cpp
+    outputtype.cpp
 	policy/fees.cpp
 	policy/policy.cpp
 	pow.cpp
@@ -522,8 +520,8 @@ add_library(server
 	torcontrol.cpp
 	txdb.cpp
 	txmempool.cpp
-  upgrade_check.cpp
-  utxo_functions.cpp
+    upgrade_check.cpp
+    utxo_functions.cpp
 	validation.cpp
 	validationinterface.cpp
 )
@@ -543,8 +541,8 @@ target_link_libraries(server
 	${EVENT_LIBRARY}
 	${EVENT_PTHREAD_LIBRARY}
 	devaultconsensus
-  ${DB_LIBRARIES}
-  ${MINIUPNP_LIBRARY}
+    ${DB_LIBRARIES}
+    ${MINIUPNP_LIBRARY}
 	Threads::Threads
 )
 
