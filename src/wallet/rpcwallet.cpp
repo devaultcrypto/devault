@@ -203,15 +203,14 @@ void generateBlocksUntilShutdown(CWallet* pwallet) {
 
     while (!ShutdownRequested() && !stop_generate) {
         if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
+            pwallet->TopUpKeyPool(100);
         }
         
         // Generate a new key that is added to wallet
         CPubKey newKey;
         if (!pwallet->GetKeyFromPool(newKey, false)) {
-            throw JSONRPCError(
-                               RPC_WALLET_KEYPOOL_RAN_OUT,
-                               "Error: Keypool ran out, please call keypoolrefill first");
+          // Avoid "throw to stop crash"
+          return; // "Error: Keypool ran out, please call keypoolrefill first");
         }
 
         CScript coinbaseScript = pwallet->GetScriptForMining(newKey);
@@ -4335,6 +4334,8 @@ static UniValue generateuntilshutdown(const Config &config, const JSONRPCRequest
         return NullUniValue;
     }
 
+    EnsureWalletIsUnlocked(pwallet);
+        
     if (config.GetChainParams().NetworkIDString() != CBaseChainParams::TESTNET) {
         return "Function only available on Testnet";
     }
