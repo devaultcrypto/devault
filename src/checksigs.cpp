@@ -28,6 +28,7 @@ std::vector<uint8_t> ExtractPubKeyFromBLSScript(const CScript &scriptPubKey) {
 bool CheckPrivateSigs(const CTransaction &tx, const CCoinsViewCache &inputs) {
 
     std::map<std::vector<uint8_t>, CPubKey> mapPubKeys;
+    
     std::vector<std::vector<uint8_t>> input_pubkeys;
     std::vector<uint256> input_hashes;
     std::vector<std::vector<uint8_t>> rand_pubkeys;
