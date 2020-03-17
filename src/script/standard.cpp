@@ -60,6 +60,7 @@ bool MatchPayToBLSPubkey(const CScript &script, valtype &pubkey) {
                     script.begin() + CPubKey::BLS_PUBLIC_KEY_SIZE + 1);
         return true;
     }
+    //std::cout << "Script size in MatchPay = " << script.size() << "\n";
     return false;
 }
 
@@ -116,15 +117,24 @@ static bool MatchMultisig(const CScript &script, unsigned int &required,
 }
 
 bool IsValidBLSScriptSize(const CScript &script) {
-   //std::cout << "Solver size = " << script.size() << "\n";
-   return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
-           (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+CPubKey::BLS_SIGNATURE_SIZE+4) ||
-           (script.size() == 0) ||
-           (script.size() == CPubKey::BLS_SIGNATURE_SIZE+3));
+  // for all inputs except final, should only be either 0, BLS_PUBLIC_KEY_SIZE + 1, BLS_PUBLIC_KEY_SIZE + 2
+  // Last input will be BLS_SIGNATURE_SIZE + 1 + n*(BLS_PUBLIC_KEY_SIZE+2)
+  auto script_size = script.size();
+  //std::cout << "Script size = << " << script_size << "\n";
+  if (script_size > CPubKey::BLS_PUBLIC_KEY_SIZE+2) {
+    script_size -= (CPubKey::BLS_SIGNATURE_SIZE + 4);
+    return ((script_size % (CPubKey::BLS_PUBLIC_KEY_SIZE+1) == 0));
+  } else {
+    return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+1) ||
+            (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
+            (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE) ||
+            (script.size() == 0));
+  }
 }
 
 bool IsValidBLSPubKeySize(const CScript &script) {
    return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
+           (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+1) ||
            (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+CPubKey::BLS_SIGNATURE_SIZE+4));
 }
 
