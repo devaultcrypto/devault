@@ -9,6 +9,9 @@
 
 #include <tinyformat.h>
 
+// New Minimum possible fee
+static const Amount MIN_FEE(2*COIN);
+
 CFeeRate::CFeeRate(const Amount nFeePaid, size_t nBytes_) {
     assert(nBytes_ <= uint64_t(std::numeric_limits<int64_t>::max()));
     int64_t nSize = int64_t(nBytes_);
@@ -26,14 +29,8 @@ static Amount GetFee(size_t nBytes_, Amount nSatoshisPerK) {
 
     // fee is always rounded up
     Amount nFee = nSize * nSatoshisPerK / 1000;
-  
-    if (nFee == Amount::zero() && nSize != 0) {
-        if (nSatoshisPerK > Amount::zero()) {
-            nFee = Amount::min_amount();
-        }
-        else {
-            nFee = Amount();
-        }
+    if (nSize != 0) {
+      nFee = std::max(nFee, MIN_FEE);
     }
 
     return nFee;

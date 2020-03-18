@@ -60,13 +60,13 @@ static const bool DEFAULT_WHITELISTRELAY = true;
 /** Default for DEFAULT_WHITELISTFORCERELAY. */
 static const bool DEFAULT_WHITELISTFORCERELAY = true;
 /** Default for -minrelaytxfee, minimum relay fee for transactions */
-static const Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(Amount::min_amount());
+static const Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(5*COIN);
 /** Default for -excessutxocharge for transactions transactions */
-static const Amount DEFAULT_UTXO_FEE = Amount::zero();
+static const Amount DEFAULT_UTXO_FEE = 2*COIN;
 //! -maxtxfee default
-static const Amount DEFAULT_TRANSACTION_MAXFEE(COIN / 10);
+static const Amount DEFAULT_TRANSACTION_MAXFEE(2000*COIN);
 //! Discourage users to set fees higher than this amount (in satoshis) per kB
-static const Amount HIGH_TX_FEE_PER_KB(COIN / 100);
+static const Amount HIGH_TX_FEE_PER_KB(100*COIN);
 /**
  * -maxtxfee will warn if called with a higher fee than this amount (in satoshis
  */
