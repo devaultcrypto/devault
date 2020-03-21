@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include <wallet/wallet.h>
 
 #include <chainparams.h>
@@ -97,157 +96,156 @@ TEST_CASE("coin_selection_tests") {
         empty_wallet();
 
         // with an empty wallet we can't even pay one cent
-        REQUIRE(!wallet.SelectCoinsMinConf(1 * CENT, 1, 6, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(1 * COIN, 1, 6, 0, vCoins,
                                            setCoinsRet, nValueRet));
         // add a new 1 cent coin
-        add_coin(wallet, 1 * CENT, 4);
+        add_coin(wallet, 1 * COIN, 4);
 
         // with a new 1 cent coin, we still can't find a mature 1 cent
-        REQUIRE(!wallet.SelectCoinsMinConf(1 * CENT, 1, 6, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(1 * COIN, 1, 6, 0, vCoins,
                                            setCoinsRet, nValueRet));
 
         // but we can find a new 1 cent
-        REQUIRE(wallet.SelectCoinsMinConf(1 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(1 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 1 * CENT);
+        REQUIRE(nValueRet == 1 * COIN);
         // add a mature 2 cent coin
-        add_coin(wallet, 2 * CENT);
+        add_coin(wallet, 2 * COIN);
 
         // we can't make 3 cents of mature coins
-        REQUIRE(!wallet.SelectCoinsMinConf(3 * CENT, 1, 6, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(3 * COIN, 1, 6, 0, vCoins,
                                            setCoinsRet, nValueRet));
 
         // we can make 3 cents of new coins
-        REQUIRE(wallet.SelectCoinsMinConf(3 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(3 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 3 * CENT);
+        REQUIRE(nValueRet == 3 * COIN);
 
         // add a mature 5 cent coin,
-        add_coin(wallet, 5 * CENT);
+        add_coin(wallet, 5 * COIN);
         // a new 10 cent coin sent from one of our own addresses
-        add_coin(wallet, 10 * CENT, 3, true);
+        add_coin(wallet, 10 * COIN, 3, true);
         // and a mature 20 cent coin
-        add_coin(wallet, 20 * CENT);
+        add_coin(wallet, 20 * COIN);
 
         // now we have new: 1+10=11 (of which 10 was self-sent), and mature:
         // 2+5+20=27.  total = 38
 
         // we can't make 38 cents only if we disallow new coins:
-        REQUIRE(!wallet.SelectCoinsMinConf(38 * CENT, 1, 6, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(38 * COIN, 1, 6, 0, vCoins,
                                            setCoinsRet, nValueRet));
         // we can't even make 37 cents if we don't allow new coins even if
         // they're from us
-        REQUIRE(!wallet.SelectCoinsMinConf(38 * CENT, 6, 6, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(38 * COIN, 6, 6, 0, vCoins,
                                            setCoinsRet, nValueRet));
         // but we can make 37 cents if we accept new coins from ourself
-        REQUIRE(wallet.SelectCoinsMinConf(37 * CENT, 1, 6, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(37 * COIN, 1, 6, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 37 * CENT);
+        REQUIRE(nValueRet == 37 * COIN);
         // and we can make 38 cents if we accept all new coins
-        REQUIRE(wallet.SelectCoinsMinConf(38 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(38 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 38 * CENT);
+        REQUIRE(nValueRet == 38 * COIN);
 
         // try making 34 cents from 1,2,5,10,20 - we can't do it exactly
-        REQUIRE(wallet.SelectCoinsMinConf(34 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(34 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        // but 35 cents is closest
-        REQUIRE(nValueRet == 35 * CENT);
-        // the best should be 20+10+5.  it's incredibly unlikely the 1 or 2 got
-        // included (but possible)
-        REQUIRE(setCoinsRet.size() == 3U);
+        // but 36 cents is closest because of MIN_CHANGE==2 DVT
+        REQUIRE(nValueRet == 36 * COIN);
+        // the best should be 20+10+5+1.
+        REQUIRE(setCoinsRet.size() == 4U);
 
         // when we try making 7 cents, the smaller coins (1,2,5) are enough.  We
         // should see just 2+5
-        REQUIRE(wallet.SelectCoinsMinConf(7 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(7 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 7 * CENT);
+        REQUIRE(nValueRet == 7 * COIN);
         REQUIRE(setCoinsRet.size() == 2U);
 
         // when we try making 8 cents, the smaller coins (1,2,5) are exactly
         // enough.
-        REQUIRE(wallet.SelectCoinsMinConf(8 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(8 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 8 * CENT);
+        REQUIRE(nValueRet == 8 * COIN);
         REQUIRE(setCoinsRet.size() == 3U);
 
         // when we try making 9 cents, no subset of smaller coins is enough, and
-        // we get the next bigger coin (10)
-        REQUIRE(wallet.SelectCoinsMinConf(9 * CENT, 1, 1, 0, vCoins,
+        // we get 11 due to min change of 2
+        REQUIRE(wallet.SelectCoinsMinConf(9 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 10 * CENT);
-        REQUIRE(setCoinsRet.size() == 1U);
+        REQUIRE(nValueRet == 11 * COIN);
+        REQUIRE(setCoinsRet.size() == 2U);
 
         // now clear out the wallet and start again to test choosing between
         // subsets of smaller coins and the next biggest coin
         empty_wallet();
 
-        add_coin(wallet, 6 * CENT);
-        add_coin(wallet, 7 * CENT);
-        add_coin(wallet, 8 * CENT);
-        add_coin(wallet, 20 * CENT);
+        add_coin(wallet, 6 * COIN);
+        add_coin(wallet, 7 * COIN);
+        add_coin(wallet, 8 * COIN);
+        add_coin(wallet, 20 * COIN);
         // now we have 6+7+8+20+30 = 71 cents total
-        add_coin(wallet, 30 * CENT);
+        add_coin(wallet, 30 * COIN);
 
         // check that we have 71 and not 72
-        REQUIRE(wallet.SelectCoinsMinConf(71 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(71 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(!wallet.SelectCoinsMinConf(72 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(!wallet.SelectCoinsMinConf(72 * COIN, 1, 1, 0, vCoins,
                                            setCoinsRet, nValueRet));
 
         // now try making 16 cents.  the best smaller coins can do is 6+7+8 =
         // 21; not as good at the next biggest coin, 20
-        REQUIRE(wallet.SelectCoinsMinConf(16 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
         // we should get 20 in one coin
-        REQUIRE(nValueRet == 20 * CENT);
+        REQUIRE(nValueRet == 20 * COIN);
         REQUIRE(setCoinsRet.size() == 1U);
 
         // now we have 5+6+7+8+20+30 = 75 cents total
-        add_coin(wallet, 5 * CENT);
+        add_coin(wallet, 5 * COIN);
 
         // now if we try making 16 cents again, the smaller coins can make 5+6+7
         // = 18 cents, better than the next biggest coin, 20
-        REQUIRE(wallet.SelectCoinsMinConf(16 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
         // we should get 18 in 3 coins
-        REQUIRE(nValueRet == 18 * CENT);
+        REQUIRE(nValueRet == 18 * COIN);
         REQUIRE(setCoinsRet.size() == 3U);
 
         // now we have 5+6+7+8+18+20+30
-        add_coin(wallet, 18 * CENT);
+        add_coin(wallet, 18 * COIN);
 
         // and now if we try making 16 cents again, the smaller coins can make
         // 5+6+7 = 18 cents, the same as the next biggest coin, 18
-        REQUIRE(wallet.SelectCoinsMinConf(16 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
         // we should get 18 in 1 coin
-        REQUIRE(nValueRet == 18 * CENT);
+        REQUIRE(nValueRet == 18 * COIN);
         // because in the event of a tie, the biggest coin wins
         REQUIRE(setCoinsRet.size() == 1U);
 
         // now try making 11 cents.  we should get 5+6
-        REQUIRE(wallet.SelectCoinsMinConf(11 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(11 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 11 * CENT);
+        REQUIRE(nValueRet == 11 * COIN);
         REQUIRE(setCoinsRet.size() == 2U);
 
         // check that the smallest bigger coin is used
-        add_coin(wallet, 1 * COIN);
-        add_coin(wallet, 2 * COIN);
-        add_coin(wallet, 3 * COIN);
+        add_coin(wallet, 100 * COIN);
+        add_coin(wallet, 200 * COIN);
+        add_coin(wallet, 300 * COIN);
         // now we have 5+6+7+8+18+20+30+100+200+300+400 = 1094 cents
-        add_coin(wallet, 4 * COIN);
-        REQUIRE(wallet.SelectCoinsMinConf(95 * CENT, 1, 1, 0, vCoins,
+        add_coin(wallet, 400 * COIN);
+        REQUIRE(wallet.SelectCoinsMinConf(95 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        // we should get 1 BCH in 1 coin
-        REQUIRE(nValueRet == 1 * COIN);
+        // we should get 100 DVT in 1 coins
+        REQUIRE(nValueRet == 100 * COIN);
         REQUIRE(setCoinsRet.size() == 1U);
 
-        REQUIRE(wallet.SelectCoinsMinConf(195 * CENT, 1, 1, 0, vCoins,
+        REQUIRE(wallet.SelectCoinsMinConf(195 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        // we should get 2 BCH in 1 coin
-        REQUIRE(nValueRet == 2 * COIN);
+        // we should get 200 BCH in 1 coin
+        REQUIRE(nValueRet == 200 * COIN);
         REQUIRE(setCoinsRet.size() == 1U);
 
         // empty the wallet and start again, now with fractions of a cent, to
@@ -411,20 +409,20 @@ TEST_CASE("coin_selection_tests") {
             // add 75 cents in small change.  not enough to make 90 cents, then
             // try making 90 cents.  there are multiple competing "smallest
             // bigger" coins, one of which should be picked at random
-            add_coin(wallet, 5 * CENT);
-            add_coin(wallet, 10 * CENT);
-            add_coin(wallet, 15 * CENT);
-            add_coin(wallet, 20 * CENT);
-            add_coin(wallet, 25 * CENT);
+            add_coin(wallet, 5 * COIN);
+            add_coin(wallet, 10 * COIN);
+            add_coin(wallet, 15 * COIN);
+            add_coin(wallet, 20 * COIN);
+            add_coin(wallet, 25 * COIN);
 
             fails = 0;
             for (int j = 0; j < RANDOM_REPEATS; j++) {
                 // selecting 1 from 100 identical coins depends on the shuffle;
                 // this test will fail 1% of the time run the test
                 // RANDOM_REPEATS times and only complain if all of them fail
-                REQUIRE(wallet.SelectCoinsMinConf(90 * CENT, 1, 6, 0, vCoins,
+                REQUIRE(wallet.SelectCoinsMinConf(90 * COIN, 1, 6, 0, vCoins,
                                                   setCoinsRet, nValueRet));
-                REQUIRE(wallet.SelectCoinsMinConf(90 * CENT, 1, 6, 0, vCoins,
+                REQUIRE(wallet.SelectCoinsMinConf(90 * COIN, 1, 6, 0, vCoins,
                                                   setCoinsRet2, nValueRet));
                 if (equal_sets(setCoinsRet, setCoinsRet2)) {
                     fails++;
