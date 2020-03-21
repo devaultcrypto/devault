@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 project(devault
-	VERSION 1.1.4
+	VERSION 1.1.5
 #	DESCRIPTION "DeVault is a full node implementation of the DeVault protocol."
 #	HOMEPAGE_URL "https://www.devault.cc"
 )
@@ -13,7 +13,7 @@ enable_testing()
 # Package information
 set(PACKAGE_NAME "DeVault Core")
 # Copyright
-set(COPYRIGHT_YEAR 2019)
+set(COPYRIGHT_YEAR 2019 - 2020)
 
 # Add path for custom modules
 set(CMAKE_MODULE_PATH

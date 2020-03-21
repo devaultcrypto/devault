@@ -1037,7 +1037,7 @@ std::string LicenseInfo() {
                strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR) +
                " ") +
            "\n" + "\n" +
-	       strprintf(_("Copyright (C) 2019") +
+	       strprintf(_("Copyright (C) 2019-2020") +
                "  The DeVault Developers ") +
            "\n" + "\n" +
            strprintf(_("Please contribute if you find DeVault-Core useful. "
