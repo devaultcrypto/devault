@@ -9,9 +9,6 @@
 
 #include <tinyformat.h>
 
-// New Minimum possible fee
-static const Amount MIN_FEE(2*COIN);
-
 CFeeRate::CFeeRate(const Amount nFeePaid, size_t nBytes_) {
     assert(nBytes_ <= uint64_t(std::numeric_limits<int64_t>::max()));
     int64_t nSize = int64_t(nBytes_);

@@ -17,37 +17,37 @@ TEST_CASE("GetFeeTest") {
   feeRate = CFeeRate(Amount::zero());
   // Must always return 0
   BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(1e5), Amount::zero());
+  BOOST_CHECK_EQUAL(feeRate.GetFee(1e5), MIN_FEE);
 
   feeRate = CFeeRate(Amount::min_amount());
   // Must always just return the arg
   BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
   // BOOST_CHECK_EQUAL(feeRate.GetFee(1), SATOSHI);
-  BOOST_CHECK_EQUAL(feeRate.GetFee(121 * 1000), 121 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(999 * 1000), 999 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(1000 * 1000), 1000 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(9000 * 1000), 9000 * Amount::min_amount());
+  BOOST_CHECK_EQUAL(feeRate.GetFee(121 * 1000), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(999 * 1000), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(1000 * 1000), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(9000 * 1000), Amount(900000000));
 
   feeRate = CFeeRate(3 * Amount::min_amount());
   // Truncates the result, if not integer
   BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
   // Special case: returns 1 instead of 0
-  BOOST_CHECK_EQUAL(feeRate.GetFee(8), Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(9), Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(121), Amount(14));
-  BOOST_CHECK_EQUAL(feeRate.GetFee(122), Amount(15));
+  BOOST_CHECK_EQUAL(feeRate.GetFee(8), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(9), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(121), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(122), MIN_FEE);
 
-  BOOST_CHECK_EQUAL(feeRate.GetFee(999), 3 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 3 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(9000), 27 * Amount::min_amount());
+  BOOST_CHECK_EQUAL(feeRate.GetFee(999), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(1000), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(9000), MIN_FEE);
 
   // Check ceiling results
   feeRate = CFeeRate(18 * Amount::min_amount());
   // Truncates the result, if not integer
   BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(100), 2 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(200), 4 * Amount::min_amount());
-  BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 18 * Amount::min_amount());
+  BOOST_CHECK_EQUAL(feeRate.GetFee(100), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(200), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(1000), MIN_FEE);
 
   // Check alternate constructor
   feeRate = CFeeRate(1000 * Amount::min_amount());
