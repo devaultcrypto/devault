@@ -559,7 +559,7 @@ TEST_CASE("test_IsStandard") {
   t.vin[0].prevout = COutPoint(dummyTransactions[0].GetId(), 1);
   t.vin[0].scriptSig << std::vector<uint8_t>(65, 0);
   t.vout.resize(1);
-  t.vout[0].nValue = 90 * CENT;
+  t.vout[0].nValue = 90 * COIN;
   CKey key;
   key.MakeNewKey();
   t.vout[0].scriptPubKey = GetScriptForDestination(key.GetPubKey().GetID());
@@ -569,7 +569,7 @@ TEST_CASE("test_IsStandard") {
 
   // Check dust with default relay fee:
   Amount nDustThreshold = 3 * 182 * dustRelayFee.GetFeePerK() / 1000;
-  BOOST_CHECK_EQUAL(nDustThreshold, Amount(546));
+  BOOST_CHECK_EQUAL(nDustThreshold, Amount(109200000));
   // dust:
   t.vout[0].nValue = nDustThreshold - Amount::min_amount();
   BOOST_CHECK(!IsStandardTx(CTransaction(t), reason));
