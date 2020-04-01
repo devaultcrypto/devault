@@ -168,7 +168,8 @@ public:
   
     bool IsNull() const { return nValue == Amount::null(); }
     bool IsZero() const { return nValue == Amount(0); }
-    bool IsBLS() const { return ((scriptPubKey[1] == OP_BLSKEYHASH) || IsValidBLSScriptSize(scriptPubKey)); }
+    // was Pay2BLS Public Key or Pay2 BLS Public Key Hash
+    bool IsBLS() const { return ((scriptPubKey[1] == OP_BLSKEYHASH) || (scriptPubKey[0] == CPubKey::BLS_PUBLIC_KEY_SIZE)); }
 
     friend bool operator==(const CTxOut &a, const CTxOut &b) {
         return (a.nValue == b.nValue && a.scriptPubKey == b.scriptPubKey);
