@@ -47,7 +47,7 @@ static const Amount DEFAULT_FALLBACK_FEE(2*COIN);
 //! minimum recommended increment for BIP 125 replacement txs
 static const Amount WALLET_INCREMENTAL_RELAY_FEE(2*COIN);
 //! target minimum change amount
-static const Amount MIN_CHANGE = 2*COIN;
+static const Amount MIN_CHANGE = 6*COIN;
 //! final minimum change amount after paying for fees
 static const Amount MIN_FINAL_CHANGE = MIN_CHANGE / 2;
 //! Default for -spendzeroconfchange
