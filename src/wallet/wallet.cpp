@@ -2902,7 +2902,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
         size_t change_prototype_size =
             GetSerializeSize(change_prototype_txout);
 
-        nFeeRet = Amount::zero();
+        nFeeRet = MIN_FEE;
         bool pick_new_inputs = true;
         Amount nValueIn = Amount::zero();
         // Start with no fee and loop until there is enough fee
