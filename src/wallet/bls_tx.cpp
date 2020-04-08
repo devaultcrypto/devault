@@ -3,27 +3,9 @@
 // Distributed under the MIT software license, see the accompanying
 
 #include <bls/bls_functions.h>
+#include <primitives/create_bls_transaction.h>
 #include <wallet/bls_tx.h>
 #include <wallet/wallet.h>
-
-static uint256 VinHash(const CTxIn &vin) {
-    CHashWriter ss(SER_GETHASH, 0);
-    CTxIn v(vin);
-
-    // Null out the scriptsig from the Vins
-    CScript c;
-    v.scriptSig = c;
-
-    ss << v;
-    return ss.GetHash();
-}
-static uint256 VoutHash(const CTxOut &vin) {
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << vin;
-    return ss.GetHash();
-
-    
-}
 
 // TBD
 auto CreatePrivateTxWithSig(const CWallet *pwallet, CMutableTransaction &txNew) -> std::optional<std::string> {
@@ -97,7 +79,7 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet,
         pubkeys.push_back(ToByteVector(pubkey));
         rand_pubkeys.push_back(ToByteVector(pubkey));
 
-        uint256 hash = VoutHash(out);
+        uint256 hash = VoutHash(out, ToByteVector(pubkey));
 
         input_keys_and_hashes.emplace(hash, key);
         input_hashes.push_back(hash);
@@ -127,5 +109,6 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet,
       return "BLS Verify check failed in CreateTransaction";
     }
 
+    txNew.nVersion = CTransaction::BLS_ONLY_VERSION;
     return std::nullopt;
 }
