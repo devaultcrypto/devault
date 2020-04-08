@@ -222,6 +222,7 @@ private:
     int UpdatePackagesForAdded(const CTxMemPool::setEntries &alreadyAdded,
                                indexed_modified_transaction_set &mapModifiedTx)
         EXCLUSIVE_LOCKS_REQUIRED(mempool->cs);
+    void combineEntries();
 };
 
 /** Modify the extranonce in a block */
