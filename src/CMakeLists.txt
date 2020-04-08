@@ -450,6 +450,8 @@ add_library(devaultconsensus
 	arith_uint256.cpp
 	hash.cpp
 	primitives/transaction.cpp
+    primitives/create_bls_transaction.cpp
+	combine_transactions.cpp
 	pubkey.cpp
 	script/devaultconsensus.cpp
 	script/bitfield.cpp

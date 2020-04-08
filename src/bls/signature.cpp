@@ -317,7 +317,7 @@ bool Signature::Verify() const {
             bn_new(exponent);
             try {
                 GetAggregationInfo()->GetExponent(&exponent, kv.first, pk);
-            } catch (std::out_of_range) {
+            } catch (std::out_of_range& ) {
                 for (auto &p : dedupMap) {
                     delete[] p.first;
                 }
@@ -643,7 +643,7 @@ Signature Signature::DivideBy(std::vector<Signature> const &divisorSigs) const {
             try {
                 aggregationInfo.GetExponent(&dividend, messageHashes[i],
                                             pks[i]);
-            } catch (std::out_of_range e) {
+            } catch (std::out_of_range& e) {
                 throw std::logic_error("Signature is not a subset.");
             }
 
