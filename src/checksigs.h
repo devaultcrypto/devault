@@ -4,6 +4,7 @@
 
 #pragma once
 #include <vector>
+#include <cstdint>
 
 class CTransaction;
 class CCoinsViewCache;
