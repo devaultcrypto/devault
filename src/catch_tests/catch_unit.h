@@ -10,6 +10,7 @@
 #define BOOST_CHECK_NO_THROW CHECK_NOTHROW
 
 #define BOOST_CHECK_MESSAGE(A,B) CHECK(A); if (!(A)) std::cout << B << "\n";
+#define BOOST_ERROR_MESSAGE(B) CHECK(0); std::cout << B << "\n";
 
 #define BOOST_ERROR(A) std::cout << (A) << "\n";
 
