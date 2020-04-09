@@ -72,6 +72,7 @@ set(UNIT_CTESTS
   checkdatasig
   checkpoints 
   checkqueue
+  combine
   coins
   core_io
   crypto
@@ -117,6 +118,7 @@ set(UNIT_CTESTS
   sync
   torcontrol
   transaction
+  bls_transaction
   txindex
   txvalidation
   txvalidationcache
