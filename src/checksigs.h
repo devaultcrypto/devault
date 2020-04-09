@@ -16,9 +16,3 @@ bool CheckPrivateSigs(const CTransaction &tx, const CCoinsViewCache &inputs);
 // assumes coins already checked for not spent
 bool CheckPrivateSigs(const CTransaction &tx);
 
-bool SetupCheckPrivateSigs(const CTransaction &tx, const std::vector<CScript>& scripts,
-                           std::vector<uint256>& input_hashes,
-                           std::vector<std::vector<uint8_t>>& input_pubkeys,
-                           std::vector<uint8_t>& aggSig
-                           );
-
