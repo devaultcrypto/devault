@@ -83,9 +83,8 @@ namespace {
                     RPCServer &rpcServer,
                     HTTPRPCRequestProcessor &httpRPCRequestProcessor,
                     const SecureString& walletPassphrase,
-                    const std::vector<std::string>& words,
-                    bool use_bls) override {
-            return AppInitMain(config, rpcServer, httpRPCRequestProcessor, walletPassphrase, words, use_bls);
+                    const std::vector<std::string>& words) override {
+            return AppInitMain(config, rpcServer, httpRPCRequestProcessor, walletPassphrase, words);
         }
         void appShutdown() override {
             Interrupt();
