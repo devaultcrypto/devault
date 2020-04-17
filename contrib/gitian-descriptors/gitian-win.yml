@@ -1,7 +1,6 @@
 ---
 name: "devault-win"
 enable_cache: true
-distro: "debian"
 suites:
 - "bionic"
 architectures:

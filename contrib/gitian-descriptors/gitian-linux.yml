@@ -1,7 +1,6 @@
 ---
 name: "devault-linux"
 enable_cache: true
-distro: "debian"
 suites:
 - "bionic"
 architectures:
