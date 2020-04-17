@@ -183,7 +183,7 @@ class DeVault : public QObject {
     Q_OBJECT
 public:
     explicit DeVault(interfaces::Node& node, SecureString& strWalletPassphrase,
-                     std::vector<std::string>& wordlist, bool& _bls);
+                     std::vector<std::string>& wordlist);
 
     /**
      * Basic initialization, before starting initialization/shutdown thread.
@@ -208,7 +208,6 @@ private:
     // TODO: Set this for it for be used
     std::vector<std::string> words;
     interfaces::Node &m_node;
-    bool use_bls;
 };
 
 /** Main Bitcoin application object */
@@ -231,7 +230,7 @@ public:
     bool setupPassword(SecureString& password);
 
     /// Get mnemonic words on first startup
-    bool setupMnemonicWords(std::vector<std::string>& wordlist, bool& use_bls);
+    bool setupMnemonicWords(std::vector<std::string>& wordlist);
 
     /// Request core initialization
     void requestInitialize(Config &config, RPCServer &rpcServer,
@@ -274,7 +273,6 @@ private:
 #endif
     SecureString pss;
     std::vector<std::string> wordlist;
-    bool use_bls;
     int returnValue;
     const PlatformStyle *platformStyle;
     std::unique_ptr<QWidget> shutdownWindow;
@@ -284,8 +282,8 @@ private:
 
 #include <bitcoin.moc>
 
-DeVault::DeVault(interfaces::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist, bool& _bls)
-    : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist), m_node(node), use_bls(_bls) {}
+DeVault::DeVault(interfaces::Node &node, SecureString& strWalletPassphrase, std::vector<std::string>& wordlist)
+    : QObject(), walletPassphrase(strWalletPassphrase), words(wordlist), m_node(node) {}
 
 void DeVault::handleRunawayException(const std::exception *e) {
     PrintExceptionContinue(e, "Runaway exception");
@@ -312,7 +310,7 @@ void DeVault::initialize(Config *config, RPCServer *rpcServer,
                             HTTPRPCRequestProcessor *httpRPCRequestProcessor) {
     try {
         qDebug() << __func__ << ": Running initialization in thread";
-        bool rv = m_node.appInitMain(*config, *rpcServer, *httpRPCRequestProcessor, walletPassphrase, words, use_bls);
+        bool rv = m_node.appInitMain(*config, *rpcServer, *httpRPCRequestProcessor, walletPassphrase, words);
         walletPassphrase.clear();
         Q_EMIT initializeResult(rv);
     } catch (const std::exception &e) {
@@ -407,7 +405,7 @@ bool BitcoinApplication::setupPassword(SecureString& password) {
 }
 
 // this will be used to get mnemonic words
-bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& seedwords, bool& bls) {
+bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& seedwords) {
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         LogPrintf("Wallet disabled!\n");
     } else {
@@ -420,7 +418,6 @@ bool BitcoinApplication::setupMnemonicWords(std::vector<std::string>& seedwords,
     StartOptionsMain dlg(nullptr);
     dlg.exec();
     seedwords = dlg.getWords();
-    bls = dlg.is_bls();
     return false;
 }
 
@@ -432,7 +429,7 @@ bool BitcoinApplication::createWindow(const Config *config,
     if (!setupPassword(pss)) {
         if (pss.empty()) return false;
     }
-    if (!setupMnemonicWords(wordlist, use_bls)) {
+    if (!setupMnemonicWords(wordlist)) {
         if (wordlist.empty()) return false;
     }
   }
@@ -461,7 +458,7 @@ void BitcoinApplication::startThread() {
         return;
     }
     coreThread = new QThread(this);
-    DeVault *executor = new DeVault(m_node, pss, wordlist, use_bls);
+    DeVault *executor = new DeVault(m_node, pss, wordlist);
     executor->moveToThread(coreThread);
 
     /*  communication to and from thread */
