@@ -30,11 +30,9 @@ public:
     ~StartOptionsMain();
 
     std::vector<std::string> getWords() { return wordsDone; }
-    bool is_bls() { return bls;}
 
 public slots:
     void on_RestoreWallet_clicked();
-    void on_RestoreLegacyWallet_clicked();
     void on_Next_clicked();
     void on_Back_clicked();
     void on_NewWallet_clicked();
@@ -43,7 +41,6 @@ private:
     Ui::StartOptionsMain *ui;
     Pages pageNum = StartPage;
     int rows;
-    bool bls;
     QStringList qWordList;
     mnemonic::WordList wordsList;
     mnemonic::WordList words;
