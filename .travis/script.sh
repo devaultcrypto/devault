@@ -46,7 +46,6 @@ then
 else
       # Run gitian builder code
       git clone https://github.com/akshaynexus/docker-based-gitian-builder
-      git clone $repo
       cd docker-based-gitian-builder
       bash ./build_builder.sh # installs the base virtual machine (ubuntu 18 bionic) and dependencies, takes 5-10 minutes
       sdate=`date +%s`
