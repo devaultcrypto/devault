@@ -11,9 +11,9 @@
 QString editLineCorrectCss = "QLineEdit{border-bottom:1px solid #00aeff;}";
 QString editLineInvalidCss = "QLineEdit{border-bottom:1px solid red;}";
 
-StartOptionsRestore::StartOptionsRestore(QStringList _wordList, int rows, bool _bls,
+StartOptionsRestore::StartOptionsRestore(QStringList _wordList, int rows,
                                          QWidget *parent)
-    : QWidget(parent), ui(new Ui::StartOptionsRestore), wordList(_wordList), bls(_bls) {
+    : QWidget(parent), ui(new Ui::StartOptionsRestore), wordList(_wordList) {
     ui->setupUi(this);
     if (DVTUI::customThemeIsSet()) {
         QString appstyle = "fusion";
