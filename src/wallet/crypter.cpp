@@ -148,23 +148,6 @@ static bool DecryptSecret(const CKeyingMaterial &vMasterKey,
                                *((CKeyingMaterial *)&vchPlaintext));
 }
 
-static bool DecryptKey(const CKeyingMaterial &vMasterKey,
-                       const std::vector<uint8_t> &vchCryptedSecret,
-                       const CPubKey &vchPubKey, CKey &key) {
-    CKeyingMaterial vchSecret;
-    if (!DecryptSecret(vMasterKey, vchCryptedSecret, vchPubKey.GetHash(),
-                       vchSecret)) {
-        return false;
-    }
-
-    if (vchSecret.size() != 32) {
-        return false;
-    }
-
-    key.Set(vchSecret.begin(), vchSecret.end());
-    return key.VerifyPubKey(vchPubKey);
-}
-
 bool CCryptoKeyStore::IsLocked() const {
     LOCK(cs_KeyStore);
     return vMasterKey.empty();
@@ -183,28 +166,6 @@ bool CCryptoKeyStore::Lock() {
 bool CCryptoKeyStore::Unlock(const CKeyingMaterial &vMasterKeyIn) {
     {
         LOCK(cs_KeyStore);
-
-        bool keyPass = false;
-        bool keyFail = false;
-        for (const auto& k : mapCryptedKeys) {
-            CKey key;
-            if (!DecryptKey(vMasterKeyIn, k.second.second, k.second.first, key)) {
-                keyFail = true;
-                break;
-            }
-            keyPass = true;
-            if (fDecryptionThoroughlyChecked) {
-                break;
-            }
-        }
-        if (keyPass && keyFail) {
-            LogPrintf("The wallet is probably corrupted: Some keys decrypt but "
-                      "not all.\n");
-            assert(false);
-        }
-        if (keyFail || (!keyPass & cryptedHDChain.IsNull())) {
-            return false;
-        }
         vMasterKey = vMasterKeyIn;
         if(!cryptedHDChain.IsNull()) {
           bool chainPass = false;
@@ -225,73 +186,21 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial &vMasterKeyIn) {
     return true;
 }
 
-bool CCryptoKeyStore::AddKeyPubKey(const CKey &key, const CPubKey &pubkey) {
-    LOCK(cs_KeyStore);
-
-    if (IsLocked()) {
-        return false;
-    }
-
-    std::vector<uint8_t> vchCryptedSecret;
-    CKeyingMaterial vchSecret(key.begin(), key.end());
-    if (!EncryptSecret(vMasterKey, vchSecret, pubkey.GetHash(),
-                       vchCryptedSecret)) {
-        return false;
-    }
-
-    if (!AddCryptedKey(pubkey, vchCryptedSecret)) {
-        return false;
-    }
-    return true;
-}
-
-bool CCryptoKeyStore::AddCryptedKey(
-    const CPubKey &vchPubKey, const std::vector<uint8_t> &vchCryptedSecret) {
-    LOCK(cs_KeyStore);
-
-    mapCryptedKeys[vchPubKey.GetKeyID()] = make_pair(vchPubKey, vchCryptedSecret);
-    ImplicitlyLearnRelatedKeyScripts(vchPubKey);
-    return true;
-}
-
-bool CCryptoKeyStore::HaveKey(const CKeyID &address) const {
-    LOCK(cs_KeyStore);
-    return mapCryptedKeys.count(address) > 0;
-}
-
-bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey &keyOut) const {
-    LOCK(cs_KeyStore);
-    auto mi = mapCryptedKeys.find(address);
-    if (mi != mapCryptedKeys.end()) {
-        const CPubKey &vchPubKey = (*mi).second.first;
-        const std::vector<uint8_t> &vchCryptedSecret = (*mi).second.second;
-        return DecryptKey(vMasterKey, vchCryptedSecret, vchPubKey, keyOut);
-    }
-    return false;
-}
-
-bool CCryptoKeyStore::GetPubKey(const CKeyID &address,
-                                CPubKey &vchPubKeyOut) const {
+bool CCryptoKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const {
     {
         LOCK(cs_KeyStore);
-        auto mi = mapCryptedKeys.find(address);
-        if (mi != mapCryptedKeys.end()) {
-            vchPubKeyOut = (*mi).second.first;
-            return true;
-        }
+        // Check for watch-only pubkeys
+        return CBasicKeyStore::GetPubKey(address, vchPubKeyOut);
+    }
+}
+bool CCryptoKeyStore::GetPubKey(const BKeyID &address, CPubKey &vchPubKeyOut) const {
+    {
+        LOCK(cs_KeyStore);
         // Check for watch-only pubkeys
         return CBasicKeyStore::GetPubKey(address, vchPubKeyOut);
     }
 }
 
-std::set<CKeyID> CCryptoKeyStore::GetKeys() const {
-    LOCK(cs_KeyStore);
-    std::set<CKeyID> set_address;
-    for (const auto &mi : mapCryptedKeys) {
-        set_address.insert(mi.first);
-    }
-    return set_address;
-}
 
 bool CCryptoKeyStore::EncryptHDChain(const CKeyingMaterial& vMasterKeyIn, const CHDChain& hdc)
 {  

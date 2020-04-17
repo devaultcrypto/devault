@@ -5,7 +5,6 @@
 
 #include <rpc/util.h>
 #include <core_io.h>
-#include <dstencode.h>
 #include <clientversion.h>
 #include <config.h>
 #include <chain.h>
@@ -149,37 +148,65 @@ static UniValue verifymessage(const Config &config,
     if (!IsValidDestination(destination)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
-    const CKeyID *keyID = &std::get<CKeyID>(destination);
-    if (!keyID) {
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+    CKeyID keyID;
+    BKeyID keyID1;
+    bool use_ec = false;
+    bool use_bls = false;
+    if (std::holds_alternative<CKeyID>(destination)) {
+      use_ec = true;
+    } else if (std::holds_alternative<BKeyID>(destination)) {
+      use_bls = true;
+    }
+
+    if (!use_ec || !use_bls) {
+      throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
 
     bool fInvalid = false;
     std::vector<uint8_t> vchSig = DecodeBase64(strSign.c_str(), &fInvalid);
-
+    
     if (fInvalid) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                           "Malformed base64 encoding");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                         "Malformed base64 encoding");
     }
-
+    
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << strMessage;
+    
 
-    CPubKey pubkey;
-    if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
+    if (use_ec) {
+      keyID = std::get<CKeyID>(destination);
+      CPubKey pubkey;
+      if (!pubkey.RecoverCompact(ss.GetHash(), vchSig)) {
         return false;
-    }
+      }
+      return (pubkey.GetKeyID() == keyID);
 
-    return (pubkey.GetKeyID() == *keyID);
+    } else {
+      keyID1 = std::get<BKeyID>(destination);
+      // For BLS Signature we have Signature + Pubkey at the end
+      // Thus we must extract/separate them for verification
+      std::vector<uint8_t> vchPubKey(CPubKey::BLS_PUBLIC_KEY_SIZE);
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) {
+        vchPubKey[i] = vchSig[CPubKey::BLS_SIGNATURE_SIZE+i];
+      }
+      // remove Pubkey from Sig
+      for (unsigned i=0;i<CPubKey::BLS_PUBLIC_KEY_SIZE;i++) vchSig.pop_back();
+      CPubKey blspubkey(vchPubKey);
+      if (!blspubkey.VerifyBLS(ss.GetHash(), vchSig)) {
+        return false;
+      }
+      return (blspubkey.GetBLSKeyID() == keyID1);
+    }
 }
 
-static UniValue signmessagewithprivkey(const Config &config,
+static UniValue signmessagewithblsprivkey(const Config &config,
                                        const JSONRPCRequest &request) {
     if (request.fHelp || request.params.size() != 2) {
         throw std::runtime_error(
-            "signmessagewithprivkey \"privkey\" \"message\"\n"
-            "\nSign a message with the private key of an address\n"
+            "signmessagewithblsprivkey \"privkey\" \"message\"\n"
+            "\nSign a message with a BLS (associated) private key of an address\n"
             "\nArguments:\n"
             "1. \"privkey\"         (string, required) The private key to sign "
             "the message with.\n"
@@ -190,14 +217,66 @@ static UniValue signmessagewithprivkey(const Config &config,
             "encoded in base 64\n"
             "\nExamples:\n"
             "\nCreate the signature\n" +
-            HelpExampleCli("signmessagewithprivkey",
+            HelpExampleCli("signmessagewithblsprivkey",
                            R"("privkey" "my message")") +
             "\nVerify the signature\n" +
             HelpExampleCli("verifymessage", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4"
                                             "XX\" \"signature\" \"my "
                                             "message\"") +
             "\nAs json rpc\n" +
-            HelpExampleRpc("signmessagewithprivkey",
+            HelpExampleRpc("signmessagewithblsprivkey",
+                           R"("privkey", "my message")"));
+    }
+
+    std::string strPrivkey = request.params[0].get_str();
+    std::string strMessage = request.params[1].get_str();
+
+    CKey key = DecodeSecret(strPrivkey);
+    if (!key.IsValid()) {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                         "Private key invalid or outside allowed range");
+    }
+    CHashWriter ss(SER_GETHASH, 0);
+    ss << strMessageMagic;
+    ss << strMessage;
+
+    std::vector<uint8_t> vchSig;
+
+    if (!key.SignBLS(ss.GetHash(), vchSig)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+    }
+
+    // Now append Public Key to Signature
+    auto app = ToByteVector(key.GetPubKeyForBLS());
+    std::copy (app.begin(), app.end(), std::back_inserter(vchSig));
+
+    return EncodeBase64(&vchSig[0], vchSig.size());
+}
+
+static UniValue signmessagewithlegacyprivkey(const Config &config,
+                                       const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 2) {
+        throw std::runtime_error(
+            "signmessagewithlegacyprivkey \"privkey\" \"message\"\n"
+            "\nSign a message with a legacy private key of an address\n"
+            "\nArguments:\n"
+            "1. \"privkey\"         (string, required) The private key to sign "
+            "the message with.\n"
+            "2. \"message\"         (string, required) The message to create a "
+            "signature of.\n"
+            "\nResult:\n"
+            "\"signature\"          (string) The signature of the message "
+            "encoded in base 64\n"
+            "\nExamples:\n"
+            "\nCreate the signature\n" +
+            HelpExampleCli("signmessagewithlegacyprivkey",
+                           R"("privkey" "my message")") +
+            "\nVerify the signature\n" +
+            HelpExampleCli("verifymessage", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4"
+                                            "XX\" \"signature\" \"my "
+                                            "message\"") +
+            "\nAs json rpc\n" +
+            HelpExampleRpc("signmessagewithlegacyprivkey",
                            R"("privkey", "my message")"));
     }
 
@@ -550,7 +629,8 @@ static const ContextFreeRPCCommand commands[] = {
 #endif
     { "control",            "getmemoryinfo",          getmemoryinfo,          {"mode"} },
     { "util",               "verifymessage",          verifymessage,          {"address","signature","message"} },
-    { "util",               "signmessagewithprivkey", signmessagewithprivkey, {"privkey","message"} },
+    { "util",               "signmessagewithlegacyprivkey", signmessagewithlegacyprivkey, {"privkey","message"} },
+    { "util",               "signmessagewithblsprivkey", signmessagewithblsprivkey, {"privkey","message"} },
     /* Address index */
     { "addressindex",       "getaddressbalance",      getaddressbalance,      {} },
     { "util",       "getutxobalance",         getutxobalance,      {"address"} },

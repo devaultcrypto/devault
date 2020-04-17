@@ -6,7 +6,6 @@
 #include <rpc/mining.h>
 #include <amount.h>
 #include <blockvalidity.h>
-#include <dstencode.h> // GetAddrFromTxOut for getblocktemplate
 #include <chain.h>
 #include <chainparams.h>
 #include <config.h>

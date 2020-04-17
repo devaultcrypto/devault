@@ -450,6 +450,8 @@ add_library(devaultconsensus
 	arith_uint256.cpp
 	hash.cpp
 	primitives/transaction.cpp
+    primitives/create_bls_transaction.cpp
+	combine_transactions.cpp
 	pubkey.cpp
 	script/devaultconsensus.cpp
 	script/bitfield.cpp
@@ -478,6 +480,7 @@ add_library(server
 	blockfilter.cpp
 	chain.cpp
 	checkpoints.cpp
+  checksigs.cpp
 	config.cpp
 	consensus/activation.cpp
 	consensus/tx_verify.cpp
@@ -516,8 +519,8 @@ add_library(server
 	torcontrol.cpp
 	txdb.cpp
 	txmempool.cpp
-    upgrade_check.cpp
-    utxo_functions.cpp
+  upgrade_check.cpp
+  utxo_functions.cpp
 	validation.cpp
 	validationinterface.cpp
 )

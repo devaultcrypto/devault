@@ -84,9 +84,11 @@ public:
 
     //! Get public key.
     virtual bool getPubKey(const CKeyID &address, CPubKey &pub_key) = 0;
+    virtual bool getPubKey(const BKeyID &address, CPubKey &pub_key) = 0;
 
     //! Get private key.
     virtual bool getPrivKey(const CKeyID &address, CKey &key) = 0;
+    virtual bool getPrivKey(const BKeyID &address, CKey &key) = 0;
 
     //! Return whether wallet has private key.
     virtual bool isSpendable(const CTxDestination &dest) = 0;
@@ -155,7 +157,7 @@ public:
     //! Get list of all wallet transactions.
     virtual std::vector<WalletTx> getWalletTxs() = 0;
 
-    virtual bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason) = 0;
+    virtual bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, bool from_bls, std::string &strFailReason) = 0;
 
     //! Try to get updated status for a particular transaction, if possible
     //! without blocking.

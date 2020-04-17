@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 os: linux
 language: minimal
 cache:
@@ -68,4 +68,3 @@ jobs:
         DOCKER_NAME_TAG=ubuntu:18.04
         BUILD_GITIAN=true
         BUILD_OS=win
-

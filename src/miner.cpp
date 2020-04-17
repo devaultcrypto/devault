@@ -29,6 +29,7 @@
 #include <validationinterface.h>
 #include <devault/rewards.h>
 #include <devault/budget.h>
+#include <combine_transactions.h>
 
 #include <algorithm>
 #include <memory>
@@ -172,6 +173,8 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
     int nDescendantsUpdated = 0;
     addPackageTxs(nPackagesSelected, nDescendantsUpdated);
 
+    combineEntries();
+    
     {
         // If magnetic anomaly is enabled, we make sure transaction are
         // canonically ordered.
@@ -728,4 +731,49 @@ void IncrementExtraNonce(const Config &config, CBlock *pblock,
 
     pblock->vtx[0] = MakeTransactionRef(std::move(txCoinbase));
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+}
+
+void BlockAssembler::combineEntries() {
+
+  std::vector<CBlockTemplateEntry> new_entries;
+  std::vector<CMutableTransaction> bls_copies;
+  std::vector<CBlockTemplateEntry> legacy_copies;
+
+  Amount txFee = Amount();
+  int txSize = 0;
+  int txSigOps = 0;
+
+  int i=0;
+  for (const auto& e : pblocktemplate->entries) {
+    // skip Coinbase
+    if (i++ > 0) {
+      txFee += e.txFee;
+      txSize += e.txSize;
+      txSigOps += e.txSigOps;
+      CMutableTransaction mtx(*e.tx);
+      if (mtx.nVersion == CTransaction::BLS_ONLY_VERSION)
+        bls_copies.push_back(mtx);
+      else
+        legacy_copies.push_back(e);
+    };
+  } 
+  
+  if (bls_copies.size() > 1) {
+    CMutableTransaction combined_tx = combine_transactions(bls_copies);
+    CTransactionRef txRef = MakeTransactionRef(combined_tx);
+
+    CBlockTemplateEntry sum(txRef, txFee, txSize, txSigOps);
+
+    // now remove all txes except coinbase
+    pblocktemplate->entries.erase(pblocktemplate->entries.begin()+1, pblocktemplate->entries.end());
+
+    // Add combined transaction
+    pblocktemplate->entries.push_back(sum);
+    
+    // Add back Legacy transactions
+    for (const auto& leg : legacy_copies) {
+      pblocktemplate->entries.push_back(leg);
+    }
+  }
+
 }

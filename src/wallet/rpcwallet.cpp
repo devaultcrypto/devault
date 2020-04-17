@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <amount.h>
-#include <dstencode.h>
 #include <chain.h>
 #include <chainparams.h> // for GetConsensus.
 #include <config.h>
@@ -243,11 +242,16 @@ static UniValue getnewaddress(const Config &config,
             RPC_WALLET_KEYPOOL_RAN_OUT,
             "Error: Keypool ran out, please call keypoolrefill first");
     }
-    CKeyID keyID = newKey.GetKeyID();
 
-    pwallet->SetAddressBook(keyID, label, "receive");
-
-    return EncodeDestination(keyID);
+    if (pwallet->UseBLSKeys()) {
+        BKeyID keyID = newKey.GetBLSKeyID();
+        pwallet->SetAddressBook(keyID, label, "receive");
+        return EncodeDestination(keyID);
+    } else {
+        CKeyID keyID = newKey.GetKeyID();
+        pwallet->SetAddressBook(keyID, label, "receive");
+        return EncodeDestination(keyID);
+    }
 }
 
 std::string GetLabelDestination(CWallet *const pwallet, const std::string &label) {
@@ -584,7 +588,7 @@ static UniValue sendtoaddress(const Config &config,
 }
 
 
-UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
+UniValue sweeplegacyprivkey(const Config &config, const JSONRPCRequest &request) {
     CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
@@ -592,16 +596,16 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "sweepprivkey \"privkey\"\n"
-            "\nSend funds from entered private key to a key in your wallet (HD chain). "
+            "sweeplegacyprivkey \"privkey\"\n"
+            "\nSend funds from entered legacy (i.e devault: associated) private key to a key in your wallet (HD chain). "
             "\nArguments:\n"
             "1. \"DeVaultprivkey\"   (string, required) The private key (see "
             "dumpprivkey)\n"
             "\nExamples:\n"
             "\nSweep a private key\n" +
-            HelpExampleCli("Sweepprivkey", "\"myaddress\"") +
-            "\nSweep the private key\n" +
-            HelpExampleRpc("importprivkey", R"("mykey")"));
+            HelpExampleCli("sweeplegacyprivkey", "\"myaddress\"") +
+            "\nSweep a legacy private key\n" +
+            HelpExampleRpc("sweeplegacyprivkey", R"("mykey")"));
 
     {
         LOCK2(cs_main, pwallet->cs_wallet);
@@ -620,7 +624,50 @@ UniValue sweepprivkey(const Config &config, const JSONRPCRequest &request) {
 
         std::string strFailReason;
         CTransactionRef tx;
-        bool ok = pwallet->SweepCoinsToWallet(key, tx, strFailReason);
+        bool ok = pwallet->SweepCoinsToWallet(key, tx, false, strFailReason);
+        if (!ok) {
+            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+        } 
+        return tx->GetId().GetHex();
+    }
+}
+UniValue sweepblsprivkey(const Config &config, const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "sweepblsprivkey \"privkey\"\n"
+            "\nSend funds from entered private key (associated with dvt: address) to a key in your wallet (HD chain). "
+            "\nArguments:\n"
+            "1. \"DeVaultprivkey\"   (string, required) The private key (see "
+            "dumpprivkey)\n"
+            "\nExamples:\n"
+            "\nSweep a private key\n" +
+            HelpExampleCli("sweepblsprivkey", "\"myaddress\"") +
+            "\nSweep the private key\n" +
+            HelpExampleRpc("sweepblsprivkey", R"("mykey")"));
+
+    {
+        LOCK2(cs_main, pwallet->cs_wallet);
+
+        EnsureWalletIsUnlocked(pwallet);
+
+        std::string strSecret = request.params[0].get_str();
+        CKey key = DecodeSecret(strSecret);
+        //std::string p = EncodeDestination(key.GetPubKey().GetKeyID());
+        
+        if (!key.IsValid()) { 
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+        }
+
+        FlushStateToDisk();
+
+        std::string strFailReason;
+        CTransactionRef tx;
+        bool ok = pwallet->SweepCoinsToWallet(key, tx, true, strFailReason);
         if (!ok) {
             throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
         } 
@@ -784,7 +831,7 @@ static UniValue signmessage(const Config &config,
                 "signmessage",
                 R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u" "my message")") +
             "\nVerify the signature\n" +
-            HelpExampleCli("verifymessage", "\"devault:qplxfq6jfqappmgemvgqup64mg592rh2ssyv8zcze7"
+            HelpExampleCli("signmessage", "\"devault:qplxfq6jfqappmgemvgqup64mg592rh2ssyv8zcze7"
                                             "XX\" \"signature\" \"my "
                                             "message\"") +
             "\nAs json rpc\n" +
@@ -800,30 +847,41 @@ static UniValue signmessage(const Config &config,
     std::string strAddress = request.params[0].get_str();
     std::string strMessage = request.params[1].get_str();
 
-    CTxDestination dest =
-        DecodeDestination(strAddress, config.GetChainParams());
+    CTxDestination dest =  DecodeDestination(strAddress, config.GetChainParams());
     if (!IsValidDestination(dest)) {
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
     }
-    const CKeyID *keyID = &std::get<CKeyID>(dest);
-    if (!keyID) {
-        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-    }
-
+    std::vector<uint8_t> vchSig;
     CKey key;
-    if (!pwallet->GetKey(*keyID, key)) {
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-    }
+    CKeyID keyID;
+    BKeyID keyID1;
 
     CHashWriter ss(SER_GETHASH, 0);
     ss << strMessageMagic;
     ss << strMessage;
 
-    std::vector<uint8_t> vchSig;
-    if (!key.SignCompact(ss.GetHash(), vchSig)) {
+    if (std::holds_alternative<CKeyID>(dest)) {
+      keyID = std::get<CKeyID>(dest);
+      if (!pwallet->GetKey(keyID, key)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+      }
+      if (!key.SignCompact(ss.GetHash(), vchSig)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      }
+    } else if (std::holds_alternative<BKeyID>(dest)) {
+      keyID1 = std::get<BKeyID>(dest);
+      if (!pwallet->GetKey(keyID1, key)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+      }
+      if (!key.SignBLS(ss.GetHash(), vchSig)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      }
+      // Now append Public Key to Signature
+      auto app = ToByteVector(key.GetPubKeyForBLS());
+      std::copy (app.begin(), app.end(), std::back_inserter(vchSig));
+    } else {
+      throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
-
     return EncodeBase64(&vchSig[0], vchSig.size());
 }
 
@@ -4081,7 +4139,8 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
     { "wallet",             "sendtoaddress",                sendtoaddress,                {"address","amount","comment","comment_to","subtractfeefromamount"} },
     { "wallet",             "consolidaterewards",           consolidaterewards,           {"address","days","minAmount"} },
-    { "wallet",             "sweepprivkey",                 sweepprivkey,                 {"privkey"} },
+    { "wallet",             "sweeplegacyprivkey",           sweeplegacyprivkey,           {"privkey"} },
+    { "wallet",             "sweepblsprivkey",              sweepblsprivkey,              {"privkey"} },
     { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
     { "wallet",             "settxfee",                     settxfee,                     {"amount"} },
     { "wallet",             "signmessage",                  signmessage,                  {"address","message"} },

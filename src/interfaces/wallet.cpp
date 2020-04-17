@@ -149,6 +149,13 @@ namespace {
         bool getPrivKey(const CKeyID &address, CKey &key) override {
             return m_wallet.GetKey(address, key);
         }
+        bool getPrivKey(const BKeyID &address, CKey &key) override {
+            return m_wallet.GetKey(address, key);
+        }
+        bool getPubKey(const BKeyID &address, CPubKey &pub_key) override {
+            return m_wallet.GetPubKey(address, pub_key);
+        }
+
         bool isSpendable(const CTxDestination &dest) override {
             return IsMine(m_wallet, dest) & ISMINE_SPENDABLE;
         }
@@ -231,8 +238,8 @@ namespace {
             }
             return pending;
         }
-        bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, std::string &strFailReason) override {
-            return m_wallet.SweepCoinsToWallet(key, tx, strFailReason);
+        bool SweepCoinsToWallet(const CKey& key, CTransactionRef &tx, bool from_bls, std::string &strFailReason) override {
+            return m_wallet.SweepCoinsToWallet(key, tx, from_bls, strFailReason);
         }
         
         bool transactionCanBeAbandoned(const TxId &txid) override {
