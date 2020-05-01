@@ -27,7 +27,7 @@ def setup():
     subprocess.check_call(['sudo', 'apt-get', 'install', '-qq'] + programs)
     if not os.path.isdir('gitian-builder'):
         subprocess.check_call(
-            ['git', 'clone', 'https://github.com/devrandom/gitian-builder.git'])
+            ['git', 'clone', 'https://github.com/jonspock/gitian-builder.git'])
     if not os.path.isdir('devault'):
         subprocess.check_call(
             ['git', 'clone', 'https://github.com/devaultcrypto/devault.git'])
