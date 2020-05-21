@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "bls/bls.hpp"
 #include "bls/publickey.hpp"
 #include "bls/util.hpp"
 #include <map>
@@ -69,7 +70,7 @@ class AggregationInfo {
     friend bool operator<(AggregationInfo const &a, AggregationInfo const &b);
     friend bool operator==(AggregationInfo const &a, AggregationInfo const &b);
     friend bool operator!=(AggregationInfo const &a, AggregationInfo const &b);
-    friend std::ostream &operator<<(std::ostream &os, AggregationInfo const &a);
+  //friend std::ostream &operator<<(std::ostream &os, AggregationInfo const &a);
     AggregationInfo& operator=(const AggregationInfo& rhs);
 
     AggregationInfo();

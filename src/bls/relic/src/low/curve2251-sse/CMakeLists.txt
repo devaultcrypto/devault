@@ -1,0 +1,5 @@
+include(${RELIC_SOURCE_DIR}/cmake/gmp.cmake)
+if(GMP_FOUND)
+  include_directories(${GMP_INCLUDE_DIR})
+  set(ARITH_LIBS ${GMP_LIBRARIES})
+endif(GMP_FOUND)
