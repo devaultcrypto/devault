@@ -17,6 +17,10 @@
 #include "relic_conf.h"
 #include <gmp.h>
 
+class InsecureSignature;
+class Signature;
+class PrependSignature;
+
 #include "bls/publickey.hpp"
 #include "bls/relic/include/relic.h"
 #include "bls/signature.hpp"

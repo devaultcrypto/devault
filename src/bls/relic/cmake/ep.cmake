@@ -50,6 +50,7 @@ option(EP_SUPER "Support for supersingular curves" off)
 option(EP_MIXED "Use mixed coordinates" on)
 option(EP_ENDOM "Support for ordinary curves with endomorphisms" on)
 option(EP_PRECO "Build precomputation table for generator" on)
+option(EP_CTMAP "USe constant-time SSWU and isogeny map for hashing" on)
 
 # Choose the arithmetic methods.
 if (NOT EP_METHD)

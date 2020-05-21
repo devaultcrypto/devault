@@ -197,7 +197,7 @@ PrivateKey PrivateKey::Mul(const bn_t n) const {
 }
 
 bool operator==(const PrivateKey& a, const PrivateKey& b) {
-    return bn_cmp(*a.keydata, *b.keydata) == CMP_EQ;
+    return bn_cmp(*a.keydata, *b.keydata) == RLC_EQ;
 }
 
 bool operator!=(const PrivateKey& a, const PrivateKey& b) {
