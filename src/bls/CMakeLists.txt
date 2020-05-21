@@ -6,13 +6,19 @@ project(bls)
 # For Relic
 #------------------- ------------------- ------------------- ------------------- -------------------
 ##SET(CMAKE_VERBOSE_MAKEFILE OFF)
-set(WORD 64)
+set(WSIZE 64)
 set(AFLAGS "-m64")
 set(ALIGN 1)
 set(ARITH "GMP")
 set(ALLOC "AUTO")
 set(STBIN "OFF" CACHE STRING "")
+set(FP_PRIME 381 CACHE INTEGER "")
+set(RELICRAND "HASH")
+set(EC_CUR "PRIME")
 
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  add_definitions("-DWIND_VER")
+ENDIF()
 
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(DSEED "UDEV" CACHE STRING "")
@@ -54,6 +60,7 @@ if (BUILD_BLS)
 
   add_subdirectory(config)
 endif()
+
 
   
 add_subdirectory(relic)

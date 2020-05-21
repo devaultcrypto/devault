@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_BLSSIGNATURE_HPP_
-#define SRC_BLSSIGNATURE_HPP_
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -22,9 +21,11 @@
 
 #include <gmp.h>
 
-#include "util.hpp"
-#include "aggregationinfo.hpp"
+#include "bls/util.hpp"
+#include "bls/bls.hpp"
+#include "bls/aggregationinfo.hpp"
 namespace bls {
+
 /**
  * An insecure BLS signature.
  * A Signature is a group element of g2
@@ -238,4 +239,3 @@ class PrependSignature {
 
 } // end namespace bls
 
-#endif  // SRC_BLSSIGNATURE_HPP_
