@@ -1,23 +1,24 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2017 RELIC Authors
+ * Copyright (C) 2007-2019 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
  * for contact information.
  *
- * RELIC is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * RELIC is free software; you can redistribute it and/or modify it under the
+ * terms of the version 2.1 (or later) of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; or version 2.0 of the Apache
+ * License as published by the Apache Software Foundation. See the LICENSE files
+ * for more details.
  *
- * RELIC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * RELIC is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the LICENSE files for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with RELIC. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public or the
+ * Apache License along with RELIC. If not, see <https://www.gnu.org/licenses/>
+ * or <https://www.apache.org/licenses/>.
  */
 
 /**
@@ -43,6 +44,41 @@
 #endif
 
 /*============================================================================*/
+/* Private definitions                                                        */
+/*============================================================================*/
+
+/**
+ * Buffer to hold printed messages.
+ */
+#if ARCH == AVR
+
+#ifndef QUIET
+volatile char print_buf[128 + 1];
+volatile char *util_print_ptr;
+
+#if OPSYS == DUINO
+/**
+ * Send byte to serial port.
+ */
+void uart_putchar(char c, FILE *stream) {
+	if (c == '\n') {
+		uart_putchar('\r', stream);
+	}
+	loop_until_bit_is_set(UCSR0A, UDRE0);
+	UDR0 = c;
+}
+
+/**
+ * Stream for serial port.
+ */
+FILE uart_output = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+
+#endif
+#endif
+
+#endif /* QUIET */
+
+/*============================================================================*/
 /* Public definitions                                                         */
 /*============================================================================*/
 
@@ -53,7 +89,8 @@ uint32_t util_conv_endian(uint32_t i) {
 	i3 = (i >> 16) & 0xFF;
 	i4 = (i >> 24) & 0xFF;
 
-	return ((uint32_t)i1 << 24) | ((uint32_t)i2 << 16) | ((uint32_t)i3 << 8) | i4;
+	return ((uint32_t) i1 << 24) | ((uint32_t) i2 << 16) | ((uint32_t) i3 << 8)
+			| i4;
 }
 
 uint32_t util_conv_big(uint32_t i) {
@@ -73,7 +110,7 @@ uint32_t util_conv_little(uint32_t i) {
 }
 
 char util_conv_char(dig_t i) {
-#if WORD == 8 || WORD == 16
+#if WSIZE == 8 || WSIZE == 16
 	/* Avoid tables to save up some memory. This is not performance-critical. */
 	if (i < 10) {
 		return i + '0';
@@ -97,20 +134,28 @@ char util_conv_char(dig_t i) {
 #endif
 }
 
+int hasLZCHW = 0;
+int checkedLZC = 0;
+int has_lzcnt_hard();
+unsigned int lzcnt32_soft(unsigned int x);
+unsigned int lzcnt32_hard(unsigned int x);
+unsigned int lzcnt64_soft(unsigned long long x);
+unsigned int lzcnt64_hard(unsigned long long x);
+
 int util_bits_dig(dig_t a) {
-#if WORD == 8 || WORD == 16
+#if WSIZE == 8 || WSIZE == 16
 	static const uint8_t table[16] = {
 		0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4
 	};
 #endif
-#if WORD == 8
+#if WSIZE == 8
 	if (a >> 4 == 0) {
 		return table[a & 0xF];
 	} else {
 		return table[a >> 4] + 4;
 	}
 	return 0;
-#elif WORD == 16
+#elif WSIZE == 16
 	int offset;
 
 	if (a >= ((dig_t)1 << 8)) {
@@ -125,16 +170,26 @@ int util_bits_dig(dig_t a) {
 		return table[a >> 4] + 4 + offset;
 	}
 	return 0;
-#elif WORD == 32
-	return DIGIT - __builtin_clz(a);
-#elif WORD == 64
-	return DIGIT - __builtin_clzll(a);
+#else // WSIZE == 32 or WSIZE == 64
+    if (checkedLZC == 0) {
+        hasLZCHW = has_lzcnt_hard();
+        checkedLZC = 1;
+    }
+#if WSIZE == 32
+    if (hasLZCHW!=0)
+        return RLC_DIG - lzcnt32_hard(a);
+    return RLC_DIG - lzcnt32_soft(a);
+#else // WSIZE == 64
+    if (hasLZCHW!=0)
+        return RLC_DIG - lzcnt64_hard(a);
+    return RLC_DIG - lzcnt64_soft(a);
+#endif
 #endif
 }
 
-int util_cmp_const(const void * a, const void *b, int size) {
-	const uint8_t *_a = (const uint8_t *) a;
-	const uint8_t *_b = (const uint8_t *) b;
+int util_cmp_const(const void *a, const void *b, int size) {
+	const uint8_t *_a = (const uint8_t *)a;
+	const uint8_t *_b = (const uint8_t *)b;
 	uint8_t result = 0;
 	int i;
 
@@ -142,12 +197,12 @@ int util_cmp_const(const void * a, const void *b, int size) {
 		result |= _a[i] ^ _b[i];
 	}
 
-	return (result == 0 ? CMP_EQ : CMP_NE);
+	return (result == 0 ? RLC_EQ : RLC_NE);
 }
-
-void util_printf(const char *format, ...) {
+/*
+void util_print(const char *format, ...)  {
 #ifndef QUIET
-#if ARCH == AVR && OPSYS == RELIC_NONE
+#if ARCH == AVR && !defined(OPSYS)
 	util_print_ptr = print_buf + 1;
 	va_list list;
 	va_start(list, format);
@@ -161,7 +216,7 @@ void util_printf(const char *format, ...) {
 	vsnprintf_P((char *)print_buf, sizeof(print_buf), format, list);
 	printf("%s", (char *)print_buf);
 	va_end(list);
-#elif ARCH == MSP && OPSYS == RELIC_NONE
+#elif ARCH == MSP && !defined(OPSYS)
 	va_list list;
 	va_start(list, format);
 	vprintf(format, list);
@@ -180,25 +235,26 @@ void util_printf(const char *format, ...) {
 #endif
 #endif
 }
+*/
 
 void util_print_dig(dig_t a, int pad) {
-#if DIGIT == 64
+#if RLC_DIG == 64
 	if (pad) {
-		util_print("%.16" PRIX64, (uint64_t)a);
+		util_print("%.16" PRIX64, (uint64_t) a);
 	} else {
-		util_print("%" PRIX64, (uint64_t)a);
+		util_print("%" PRIX64, (uint64_t) a);
 	}
-#elif DIGIT == 32
+#elif RLC_DIG == 32
 	if (pad) {
-		util_print("%.8" PRIX32, (uint32_t)a);
+		util_print("%.8" PRIX32, (uint32_t) a);
 	} else {
-		util_print("%" PRIX32, (uint32_t)a);
+		util_print("%" PRIX32, (uint32_t) a);
 	}
-#elif DIGIT == 16
+#elif RLC_DIG == 16
 	if (pad) {
-		util_print("%.4" PRIX16, (uint16_t)a);
+		util_print("%.4" PRIX16, (uint16_t) a);
 	} else {
-		util_print("%" PRIX16, (uint16_t)a);
+		util_print("%" PRIX16, (uint16_t) a);
 	}
 #else
 	if (pad) {
