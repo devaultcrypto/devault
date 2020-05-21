@@ -6,12 +6,12 @@ endif()
 project(RELIC C CXX)
 
 set(PROJECT_VERSION_MAJOR "0")
-set(PROJECT_VERSION_MINOR "4")
-set(PROJECT_VERSION_PATCH "1")
+set(PROJECT_VERSION_MINOR "5")
+set(PROJECT_VERSION_PATCH "0")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(VERSION ${PROJECT_VERSION})
 
-set(INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/low)
+set(INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/low ${CMAKE_CURRENT_SOURCE_DIR}/src/tmpl)
 include_directories(${include_directories} ${CMAKE_BINARY_DIR} ${INCLUDE})
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -25,7 +25,7 @@ option(TRACE "Build with tracing support" off)
 option(OVERH "Build with overhead estimation" off)
 option(DOCUM "Build documentation" off)
 option(STRIP "Build only the selected algorithms" off)
-option(QUIET "Build with printing disabled" off)
+option(QUIET "Build with printing disabled" on)
 option(COLOR "Build with colored output" on)
 option(BIGED "Build with big-endian support" off)
 option(STLIB "Build static library" on)
@@ -120,6 +120,7 @@ include(cmake/fp.cmake)
 include(cmake/fpx.cmake)
 include(cmake/ep.cmake)
 include(cmake/pp.cmake)
+include(cmake/cp.cmake)
 include(cmake/md.cmake)
 include(cmake/rand.cmake)
 
@@ -149,6 +150,9 @@ set(WITH_PB 1)
 
 # Check if support for hash functions is required.
 set(WITH_MD 1)
+
+set(WITH_CP 1)
+set(WITH_PC 1)
 
 # Compiler flags.
 # set(COMP "-O3 -Wno-unused-function -funroll-loops -fomit-frame-pointer -march=native -mtune=native")

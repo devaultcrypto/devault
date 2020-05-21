@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "bls/aggregationinfo.hpp"
+// order is important!!!
 #include "bls/bls.hpp"
+#include "bls/aggregationinfo.hpp"
 #include <algorithm>
 #include <cstring>
 #include <set>
 #include <string>
 #include <utility>
+
 namespace bls {
 
 // Creates a new object, copying the messageHash and pk
@@ -211,10 +213,10 @@ bool operator<(AggregationInfo const&a, AggregationInfo const&b) {
         auto aExp = a.tree.find(bufferA);
         auto bExp = b.tree.find(bufferB);
         int cmpRes = bn_cmp(*aExp->second, *bExp->second);
-        if (cmpRes == CMP_LT) {
+        if (cmpRes == RLC_LT) {
             lessThan = true;
             break;
-        } else if (cmpRes == CMP_GT) {
+        } else if (cmpRes == RLC_GT) {
             lessThan = false;
             break;
         }
@@ -230,17 +232,18 @@ bool operator==(AggregationInfo const&a, AggregationInfo const&b) {
 bool operator!=(AggregationInfo const&a, AggregationInfo const&b) {
     return (a < b) || (b < a);
 }
-
+  /*
 std::ostream &operator<<(std::ostream &os, AggregationInfo const &a) {
     for (auto &kv : a.tree) {
         os << Util::HexStr(kv.first, 80) << ".." << ":" << std::endl;
-        uint8_t str[RELIC_BN_BYTES * 3 + 1];
+        uint8_t str[RLC_BN_SIZE * 3 + 1];
         bn_write_bin(str, sizeof(str), *kv.second);
-        os << Util::HexStr(str + RELIC_BN_BYTES * 3 + 1 - 5, 5)
+        os << Util::HexStr(str + RLC_BN_SIZE * 3 + 1 - 5, 5)
            << std::endl;
     }
     return os;
-}
+    }
+*/
 
 AggregationInfo& AggregationInfo::operator=(const AggregationInfo &rhs) {
     Clear();
