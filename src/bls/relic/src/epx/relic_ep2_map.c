@@ -38,158 +38,261 @@
 /* Private definitions                                                        */
 /*============================================================================*/
 
-// #ifdef EP_CTMAP
-// /**
-//  * Evaluate a polynomial represented by its coefficients using Horner's rule.
-//  *
-//  * @param[out] c			- the result.
-//  * @param[in] a				- the input value.
-//  * @param[in] coeffs		- the vector of coefficients in the polynomial.
-//  * @param[in] len			- the degree of the polynomial.
-//  */
-// TMPL_MAP_HORNER(fp2, fp2_t)
+#ifdef EP_CTMAP
+/**
+ * Evaluate a polynomial represented by its coefficients using Horner's rule.
+ *
+ * @param[out] c			- the result.
+ * @param[in] a				- the input value.
+ * @param[in] coeffs		- the vector of coefficients in the polynomial.
+ * @param[in] len			- the degree of the polynomial.
+ */
+TMPL_MAP_HORNER(fp2, fp2_t)
 
-// /**
-//  * Generic isogeny map evaluation for use with SSWU map.
-//  */
-// TMPL_MAP_ISOGENY_MAP(2)
-// #endif /* EP_CTMAP */
+/**
+ * Generic isogeny map evaluation for use with SSWU map.
+ */
+TMPL_MAP_ISOGENY_MAP(2)
+#endif /* EP_CTMAP */
 
-// /**
-//  * Simplified SWU mapping.
-//  */
-// #define EP2_MAP_COPY_COND(O, I, C)                                                       \
-// 	do {                                                                                 \
-// 		dv_copy_cond(O[0], I[0], RLC_FP_DIGS, C);                                        \
-// 		dv_copy_cond(O[1], I[1], RLC_FP_DIGS, C);                                        \
-// 	} while (0)
-// TMPL_MAP_SSWU(2,fp_t,EP2_MAP_COPY_COND)
+/**
+ * Simplified SWU mapping.
+ */
+#define EP2_MAP_COPY_COND(O, I, C)                                                       \
+	do {                                                                                 \
+		dv_copy_cond(O[0], I[0], RLC_FP_DIGS, C);                                        \
+		dv_copy_cond(O[1], I[1], RLC_FP_DIGS, C);                                        \
+	} while (0)
+TMPL_MAP_SSWU(2,fp_t,EP2_MAP_COPY_COND)
 
-// /**
-//  * Shallue--van de Woestijne map.
-//  */
-// TMPL_MAP_SVDW(2,fp_t,EP2_MAP_COPY_COND)
-// #undef EP2_MAP_COPY_COND
+/**
+ * Shallue--van de Woestijne map.
+ */
+TMPL_MAP_SVDW(2,fp_t,EP2_MAP_COPY_COND)
+#undef EP2_MAP_COPY_COND
 
-// /* caution: this function overwrites k, which it uses as an auxiliary variable */
-// static inline int fp2_sgn0(const fp2_t t, bn_t k) {
-// 	const int t_0_zero = fp_is_zero(t[0]);
+/**
+ * Multiplies a point by the cofactor in a Barreto-Naehrig curve.
+ *
+ * @param[out] r			- the result.
+ * @param[in] p				- the point to multiply.
+ */
+static void ep2_mul_cof_bn(ep2_t r, ep2_t p) {
+	bn_t x;
+	ep2_t t0, t1, t2;
 
-// 	fp_prime_back(k, t[0]);
-// 	const int t_0_neg = bn_get_bit(k, 0);
+	ep2_null(t0);
+	ep2_null(t1);
+	ep2_null(t2);
+	bn_null(x);
 
-// 	fp_prime_back(k, t[1]);
-// 	const int t_1_neg = bn_get_bit(k, 0);
+	TRY {
+		ep2_new(t0);
+		ep2_new(t1);
+		ep2_new(t2);
+		bn_new(x);
 
-// 	/* t[0] == 0 ? sgn0(t[1]) : sgn0(t[0]) */
-// 	return t_0_neg | (t_0_zero & t_1_neg);
-// }
+		fp_prime_get_par(x);
 
-// void ep2_map_impl(ep2_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len) {
-// 	bn_t k;
-// 	fp2_t t;
-// 	ep2_t q;
-// 	int neg;
-// 	/* enough space for two extension field elements plus extra bytes for uniformity */
-// 	const int len_per_elm = (FP_PRIME + ep_param_level() + 7) / 8;
-// 	uint8_t *pseudo_random_bytes = RLC_ALLOCA(uint8_t, 4 * len_per_elm);
+		/* Compute t0 = xP. */
+		ep2_mul_basic(t0, p, x);
 
-// 	bn_null(k);
-// 	fp2_null(t);
-// 	ep2_null(q);
+		/* Compute t1 = \psi(3xP). */
+		ep2_dbl(t1, t0);
+		ep2_add(t1, t1, t0);
+		ep2_norm(t1, t1);
+		ep2_frb(t1, t1, 1);
 
-// 	TRY {
-// 		bn_new(k);
-// 		fp2_new(t);
-// 		ep2_new(q);
+		/* Compute t2 = \psi^3(P) + t0 + t1 + \psi^2(xP). */
+		ep2_frb(t2, p, 2);
+		ep2_frb(t2, t2, 1);
+		ep2_add(t2, t2, t0);
+		ep2_add(t2, t2, t1);
+		ep2_frb(t1, t0, 2);
+		ep2_add(t2, t2, t1);
 
-// 		/* which hash function should we use? */
-// 		const int abNeq0 = (ep2_curve_opt_a() != RLC_ZERO) && (ep2_curve_opt_b() != RLC_ZERO);
-// 		void (*const map_fn)(ep2_t, fp2_t) = (ep2_curve_is_ctmap() || abNeq0) ? ep2_map_sswu : ep2_map_svdw;
+		ep2_norm(r, t2);
+	}
+	CATCH_ANY {
+		THROW(ERR_CAUGHT);
+	}
+	FINALLY {
+		ep2_free(t0);
+		ep2_free(t1);
+		ep2_free(t2);
+		bn_free(x);
+	}
+}
 
-// 		/* XXX(rsw) See note in ep/relic_ep_map.c about using MD_MAP. */
-// 		/* hash to a pseudorandom string using md_xmd */
-// 		md_xmd(pseudo_random_bytes, 4 * len_per_elm, msg, len, dst, dst_len);
+/**
+ * Multiplies a point by the cofactor in a Barreto-Lynn-Scott curve.
+ *
+ * @param[out] r			- the result.
+ * @param[in] p				- the point to multiply.
+ */
+static void ep2_mul_cof_b12(ep2_t r, ep2_t p) {
+	bn_t x;
+	ep2_t t0, t1, t2, t3;
 
-// #define EP2_MAP_CONVERT_BYTES(IDX)                                                       \
-// 	do {                                                                                 \
-// 		bn_read_bin(k, pseudo_random_bytes + 2 * IDX * len_per_elm, len_per_elm);        \
-// 		fp_prime_conv(t[0], k);                                                          \
-// 		bn_read_bin(k, pseudo_random_bytes + (2 * IDX + 1) * len_per_elm, len_per_elm);  \
-// 		fp_prime_conv(t[1], k);                                                          \
-// 	} while (0)
+	ep2_null(t0);
+	ep2_null(t1);
+	ep2_null(t2);
+	ep2_null(t3);
+	bn_null(x);
 
-// #define EP2_MAP_APPLY_MAP(PT)                                                            \
-// 	do {                                                                                 \
-// 		/* sign of t */                                                                  \
-// 		neg = fp2_sgn0(t, k);                                                            \
-// 		/* convert */                                                                    \
-// 		map_fn(PT, t);                                                                   \
-// 		/* compare sign of y to sign of t; fix if necessary */                           \
-// 		neg = neg != fp2_sgn0(PT->y, k);                                                 \
-// 		fp2_neg(t, PT->y);                                                               \
-// 		dv_copy_cond(PT->y[0], t[0], RLC_FP_DIGS, neg);                                  \
-// 		dv_copy_cond(PT->y[1], t[1], RLC_FP_DIGS, neg);                                  \
-// 	} while (0)
+	TRY {
+		ep2_new(t0);
+		ep2_new(t1);
+		ep2_new(t2);
+		ep2_new(t3);
+		bn_new(x);
 
-// 		/* first map invocation */
-// 		EP2_MAP_CONVERT_BYTES(0);
-// 		EP2_MAP_APPLY_MAP(p);
-// 		TMPL_MAP_CALL_ISOMAP(2,p);
+		fp_prime_get_par(x);
 
-// 		/* second map invocation */
-// 		EP2_MAP_CONVERT_BYTES(1);
-// 		EP2_MAP_APPLY_MAP(q);
-// 		TMPL_MAP_CALL_ISOMAP(2,q);
+		/* Compute t0 = xP. */
+		ep2_mul_basic(t0, p, x);
+		/* Compute t1 = [x^2]P. */
+		ep2_mul_basic(t1, t0, x);
 
-// 		/* XXX(rsw) could add p and q and then apply isomap,
-// 		 * but need ep_add to support addition on isogeny curves */
+		/* t2 = (x^2 - x - 1)P = x^2P - x*P - P. */
+		ep2_sub(t2, t1, t0);
+		ep2_sub(t2, t2, p);
+		/* t3 = \psi(x - 1)P. */
+		ep2_sub(t3, t0, p);
+		ep2_frb(t3, t3, 1);
+		ep2_add(t2, t2, t3);
+		/* t3 = \psi^2(2P). */
+		ep2_dbl(t3, p);
+		ep2_frb(t3, t3, 2);
+		ep2_add(t2, t2, t3);
+		ep2_norm(r, t2);
+	}
+	CATCH_ANY {
+		THROW(ERR_CAUGHT);
+	}
+	FINALLY {
+		ep2_free(t0);
+		ep2_free(t1);
+		ep2_free(t2);
+		ep2_free(t3);
+		bn_free(x);
+	}
+}
 
-// #undef EP2_MAP_CONVERT_BYTES
-// #undef EP2_MAP_APPLY_MAP
+static inline int fp2_sgn0(const fp2_t t, bn_t k, const bn_t pm1o2) {
+	const int t_0_zero = fp_is_zero(t[0]);
 
-// 		/* sum the result */
-// 		ep2_add(p, p, q);
-// 		ep2_norm(p, p);
+	fp_prime_back(k, t[0]);
+	const int t_0_neg = bn_cmp(k, pm1o2);
 
-// 		/* clear cofactor */
-// 		switch (ep_curve_is_pairf()) {
-// 			case EP_BN:
-// 				ep2_mul_cof_bn(p, p);
-// 				break;
-// 			case EP_B12:
-// 				ep2_mul_cof_b12(p, p);
-// 				break;
-// 			default:
-// 				/* Now, multiply by cofactor to get the correct group. */
-// 				ep2_curve_get_cof(k);
-// 				if (bn_bits(k) < RLC_DIG) {
-// 					ep2_mul_dig(p, p, k->dp[0]);
-// 				} else {
-// 					ep2_mul_basic(p, p, k);
-// 				}
-// 				break;
-// 		}
-// 	}
-// 	CATCH_ANY {
-// 		THROW(ERR_CAUGHT);
-// 	}
-// 	FINALLY {
-// 		bn_free(k);
-// 		fp2_free(t);
-// 		ep2_free(q);
-// 		RLC_FREE(pseudo_random_bytes);
-// 	}
-// }
+	fp_prime_back(k, t[1]);
+	const int t_1_neg = bn_cmp(k, pm1o2);
 
-/*============================================================================*/
-/* Public definitions                                                         */
-/*============================================================================*/
+	/* t[0] == 0 ? sgn0(t[1]) : sgn0(t[0]) */
+	return (!t_0_zero) * t_0_neg + t_0_zero * t_1_neg;
+}
 
-// void ep2_map(ep2_t p, const uint8_t *msg, int len) {
-// 	ep2_map_impl(p, msg, len, (const uint8_t *)"RELIC", 5);
-// }
+void ep2_map_impl(ep2_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len) {
+	bn_t k, pm1o2;
+	fp2_t t;
+	ep2_t q;
+	int neg;
+	/* enough space for two extension field elements plus extra bytes for uniformity */
+	const int len_per_elm = (FP_PRIME + ep_param_level() + 7) / 8;
+	uint8_t *pseudo_random_bytes = RLC_ALLOCA(uint8_t, 4 * len_per_elm);
 
+	bn_null(k);
+	bn_null(pm1o2);
+	fp2_null(t);
+	ep2_null(q);
+
+	TRY {
+		bn_new(k);
+		bn_new(pm1o2);
+		fp2_new(t);
+		ep2_new(q);
+
+		/* which hash function should we use? */
+		const int abNeq0 = (ep2_curve_opt_a() != RLC_ZERO) && (ep2_curve_opt_b() != RLC_ZERO);
+		void (*const map_fn)(ep2_t, fp2_t) = (ep2_curve_is_ctmap() || abNeq0) ? ep2_map_sswu : ep2_map_svdw;
+
+		/* XXX(rsw) See note in ep/relic_ep_map.c about sgn0 variants. */
+		/* (p-1)/2 for detecting sign of y */
+		pm1o2->sign = RLC_POS;
+		pm1o2->used = RLC_FP_DIGS;
+		dv_copy(pm1o2->dp, fp_prime_get(), RLC_FP_DIGS);
+		bn_hlv(pm1o2, pm1o2);
+
+		/* XXX(rsw) See note in ep/relic_ep_map.c about using MD_MAP. */
+		/* hash to a pseudorandom string using md_xmd */
+		md_xmd(pseudo_random_bytes, 4 * len_per_elm, msg, len, dst, dst_len);
+
+#define EP2_MAP_CONVERT_BYTES(IDX)                                                       \
+	do {                                                                                 \
+		bn_read_bin(k, pseudo_random_bytes + 2 * IDX * len_per_elm, len_per_elm);        \
+		fp_prime_conv(t[0], k);                                                          \
+		bn_read_bin(k, pseudo_random_bytes + (2 * IDX + 1) * len_per_elm, len_per_elm);  \
+		fp_prime_conv(t[1], k);                                                          \
+	} while (0)
+
+#define EP2_MAP_APPLY_MAP(PT)                                                            \
+	do {                                                                                 \
+		/* sign of t */                                                                  \
+		neg = fp2_sgn0(t, k, pm1o2);                                                     \
+		/* convert */                                                                    \
+		map_fn(PT, t);                                                                   \
+		/* compare sign of y to sign of t; fix if necessary */                           \
+		neg = neg != fp2_sgn0(PT->y, k, pm1o2);                                          \
+		fp2_neg(t, PT->y);                                                               \
+		dv_copy_cond(PT->y[0], t[0], RLC_FP_DIGS, neg);                                  \
+		dv_copy_cond(PT->y[1], t[1], RLC_FP_DIGS, neg);                                  \
+	} while (0)
+
+		/* first map invocation */
+		EP2_MAP_CONVERT_BYTES(0);
+		EP2_MAP_APPLY_MAP(p);
+
+		/* second map invocation */
+		EP2_MAP_CONVERT_BYTES(1);
+		EP2_MAP_APPLY_MAP(q);
+
+#undef EP2_MAP_CONVERT_BYTES
+#undef EP2_MAP_APPLY_MAP
+
+		/* sum the result */
+		ep2_add(p, p, q);
+		ep2_norm(p, p);
+
+		/* clear cofactor */
+		switch (ep_curve_is_pairf()) {
+			case EP_BN:
+				ep2_mul_cof_bn(p, p);
+				break;
+			case EP_B12:
+				ep2_mul_cof_b12(p, p);
+				break;
+			default:
+				/* Now, multiply by cofactor to get the correct group. */
+				ep2_curve_get_cof(k);
+				if (bn_bits(k) < RLC_DIG) {
+					ep2_mul_dig(p, p, k->dp[0]);
+				} else {
+					ep2_mul_basic(p, p, k);
+				}
+				break;
+		}
+	}
+	CATCH_ANY {
+		THROW(ERR_CAUGHT);
+	}
+	FINALLY {
+		bn_free(k);
+		bn_free(pm1o2);
+		fp2_free(t);
+		ep2_free(q);
+		RLC_FREE(pseudo_random_bytes);
+	}
+}
 
 /**
  * Based on the rust implementation of pairings, zkcrypto/pairing.
@@ -214,6 +317,7 @@ void ep2_sw_encode(ep2_t p, fp2_t t) {
 
 	fp2_new(nt);
 	fp2_new(w);
+	fp2_new(b);
 	bn_new(s_n3);
 	bn_new(s_n3m1o2);
 	fp2_new(x1);
@@ -242,14 +346,6 @@ void ep2_sw_encode(ep2_t p, fp2_t t) {
 		if (parity) {
 			ep2_neg(p, p);
 		}
-		fp2_free(nt);
-		fp2_free(w);
-		bn_free(s_n3);
-		bn_free(s_n3m1o2);
-		fp2_free(x1);
-		fp2_free(x2);
-		fp2_free(x3);
-		fp2_free(rhs);
 		return;
 	}
 
@@ -334,162 +430,27 @@ void ep2_sw_encode(ep2_t p, fp2_t t) {
 		ep2_neg(p, p);
 	}
 
-	fp2_free(nt);
+	fp_free(nt);
 	fp2_free(w);
+	fp2_free(b);
 	bn_free(s_n3);
 	bn_free(s_n3m1o2);
 	fp2_free(x1);
 	fp2_free(x2);
 	fp2_free(x3);
 	fp2_free(rhs);
-
-	fp2_free(s_n3p);
-	fp2_free(s_n3m1o2p);
-	fp2_free(ny);
-}
-
-
-/**
- * Multiplies a point by the cofactor in a Barreto-Naehrig curve.
- *
- * @param[out] r			- the result.
- * @param[in] p				- the point to multiply.
- */
-void ep2_mul_cof_bn(ep2_t r, ep2_t p) {
-	bn_t x;
-	ep2_t t0, t1, t2;
-
-	ep2_null(t0);
-	ep2_null(t1);
-	ep2_null(t2);
-	bn_null(x);
-
-	TRY {
-		ep2_new(t0);
-		ep2_new(t1);
-		ep2_new(t2);
-		bn_new(x);
-
-		fp_prime_get_par(x);
-
-		/* Compute t0 = xP. */
-		ep2_mul_basic(t0, p, x);
-
-		/* Compute t1 = \psi(3xP). */
-		ep2_dbl(t1, t0);
-		ep2_add(t1, t1, t0);
-		ep2_norm(t1, t1);
-		ep2_frb(t1, t1, 1);
-
-		/* Compute t2 = \psi^3(P) + t0 + t1 + \psi^2(xP). */
-		ep2_frb(t2, p, 2);
-		ep2_frb(t2, t2, 1);
-		ep2_add(t2, t2, t0);
-		ep2_add(t2, t2, t1);
-		ep2_frb(t1, t0, 2);
-		ep2_add(t2, t2, t1);
-
-		ep2_norm(r, t2);
-	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	}
-	FINALLY {
-		ep2_free(t0);
-		ep2_free(t1);
-		ep2_free(t2);
-		bn_free(x);
-	}
-}
-
-/**
- * Multiplies a point by the cofactor in a Barreto-Lynn-Soctt.
- *
- * @param[out] r			- the result.
- * @param[in] p				- the point to multiply.
- */
-void ep2_mul_cof_b12(ep2_t r, ep2_t p) {
-	bn_t x;
-	ep2_t t0, t1, t2, t3;
-
-	ep2_null(t0);
-	ep2_null(t1);
-	ep2_null(t2);
-	ep2_null(t3);
-	bn_null(x);
-
-	TRY {
-		ep2_new(t0);
-		ep2_new(t1);
-		ep2_new(t2);
-		ep2_new(t3);
-		bn_new(x);
-
-		fp_prime_get_par(x);
-
-		/* Compute t0 = xP. */
-		ep2_mul_basic(t0, p, x);
-		/* Compute t1 = [x^2]P. */
-		ep2_mul_basic(t1, t0, x);
-
-		/* t2 = (x^2 - x - 1)P = x^2P - x*P - P. */
-		ep2_sub(t2, t1, t0);
-		ep2_sub(t2, t2, p);
-		/* t3 = \psi(x - 1)P. */
-		ep2_sub(t3, t0, p);
-		ep2_norm(t3, t3);
-		ep2_frb(t3, t3, 1);
-		ep2_add(t2, t2, t3);
-		/* t3 = \psi^2(2P). */
-		ep2_dbl(t3, p);
-		ep2_norm(t3, t3);
-		ep2_frb(t3, t3, 2);
-		ep2_add(t2, t2, t3);
-		ep2_norm(r, t2);
-	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	}
-	FINALLY {
-		ep2_free(t0);
-		ep2_free(t1);
-		ep2_free(t2);
-		ep2_free(t3);
-		bn_free(x);
-	}
 }
 
 /*============================================================================*/
 /* Public definitions                                                         */
 /*============================================================================*/
 
-void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash) {
-	bn_t t00;
-	bn_t t01;
-	bn_t t10;
-	bn_t t11;
-	fp_t t00p;
-	fp_t t01p;
-	fp_t t10p;
-	fp_t t11p;
-	fp2_t t0p;
-	fp2_t t1p;
-	ep2_t p0;
-	ep2_t p1;
+void ep2_map(ep2_t p, const uint8_t *msg, int len) {
+	ep2_map_impl(p, msg, len, (const uint8_t *)"RELIC", 5);
+}
 
-	bn_null(t00);
-	bn_null(t01);
-	bn_null(t10);
-	bn_null(t11);
-	fp_null(t00p);
-	fp_null(t01p);
-	fp_null(t10p);
-	fp_null(t11p);
-	fp2_null(t0p);
-	fp2_null(t1p);
-	ep2_null(p1);
-	ep2_null(p0);
-
+void ep2_map_ft(ep2_t p, const uint8_t *msg, int len) {
+    int performHash = 0;
 	TRY {
 		uint8_t input[RLC_MD_LEN + 8];
 		if (performHash) {
@@ -508,6 +469,19 @@ void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash) {
 		input[RLC_MD_LEN + 4] = 0x5f; // _
 		input[RLC_MD_LEN + 5] = 0x63; // c
 		input[RLC_MD_LEN + 6] = 0x30; // 0
+
+		bn_t t00;
+		bn_t t01;
+		bn_t t10;
+		bn_t t11;
+		fp_t t00p;
+		fp_t t01p;
+		fp_t t10p;
+		fp_t t11p;
+		fp2_t t0p;
+		fp2_t t1p;
+		ep2_t p0;
+		ep2_t p1;
 
 		bn_new(t00);
 		bn_new(t01);
@@ -601,7 +575,7 @@ void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash) {
 				} else {
 					ep2_mul(p, p0, x);
 				}
-				bn_free(x);
+				bn_free(k);
 				break;
 			}
 		}
@@ -610,6 +584,8 @@ void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash) {
 		THROW(ERR_CAUGHT);
 	}
 	FINALLY {
+		ep_free(p0);
+		ep_free(p1);
 		fp2_free(t0p);
 		fp2_free(t1p);
 		fp_free(t00p);

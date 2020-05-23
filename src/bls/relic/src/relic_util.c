@@ -43,6 +43,10 @@
 #include <android/log.h>
 #endif
 
+#if defined(MSC_VER) || defined(WIND_VER)
+#include <intrin.h>
+#endif
+
 /*============================================================================*/
 /* Private definitions                                                        */
 /*============================================================================*/
@@ -134,14 +138,6 @@ char util_conv_char(dig_t i) {
 #endif
 }
 
-int hasLZCHW = 0;
-int checkedLZC = 0;
-int has_lzcnt_hard();
-unsigned int lzcnt32_soft(unsigned int x);
-unsigned int lzcnt32_hard(unsigned int x);
-unsigned int lzcnt64_soft(unsigned long long x);
-unsigned int lzcnt64_hard(unsigned long long x);
-
 int util_bits_dig(dig_t a) {
 #if WSIZE == 8 || WSIZE == 16
 	static const uint8_t table[16] = {
@@ -170,19 +166,17 @@ int util_bits_dig(dig_t a) {
 		return table[a >> 4] + 4 + offset;
 	}
 	return 0;
-#else // WSIZE == 32 or WSIZE == 64
-    if (checkedLZC == 0) {
-        hasLZCHW = has_lzcnt_hard();
-        checkedLZC = 1;
-    }
-#if WSIZE == 32
-    if (hasLZCHW!=0)
-        return RLC_DIG - lzcnt32_hard(a);
-    return RLC_DIG - lzcnt32_soft(a);
-#else // WSIZE == 64
-    if (hasLZCHW!=0)
-        return RLC_DIG - lzcnt64_hard(a);
-    return RLC_DIG - lzcnt64_soft(a);
+#elif WSIZE == 32
+#if defined(MSC_VER)
+    return RLC_DIG - __lzcnt(a);
+#else
+	return RLC_DIG - __builtin_clz(a);
+#endif
+#elif WSIZE == 64
+#if defined(MSC_VER)
+    return RLC_DIG - __lzcnt64(a);
+#else
+	return RLC_DIG - __builtin_clzll(a);
 #endif
 #endif
 }
@@ -199,8 +193,9 @@ int util_cmp_const(const void *a, const void *b, int size) {
 
 	return (result == 0 ? RLC_EQ : RLC_NE);
 }
+
 /*
-void util_print(const char *format, ...)  {
+void util_print(const char *format, ...) {
 #ifndef QUIET
 #if ARCH == AVR && !defined(OPSYS)
 	util_print_ptr = print_buf + 1;
