@@ -252,7 +252,7 @@ BlockAssembler::CreateNewBlock(const CScript &scriptPubKeyIn) {
     }
     int64_t nTime2 = GetTimeMicros();
 
-    LogPrint(BCLog::BENCH,
+    LogPrint(BCLog::BENCHM,
              "CreateNewBlock() packages: %.2fms (%d packages, %d updated "
              "descendants), validity: %.2fms (total %.2fms)\n",
              0.001 * (nTime1 - nTimeStart), nPackagesSelected,
