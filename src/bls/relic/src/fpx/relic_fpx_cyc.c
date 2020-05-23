@@ -105,7 +105,7 @@ void fp2_exp_cyc(fp2_t c, fp2_t a, bn_t b) {
 #if FP_WIDTH > 2
 		fp2_sqr(t[0], a);
 		fp2_mul(t[1], t[0], a);
-		for (int i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
+		for (i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
 			fp2_mul(t[i], t[i - 1], t[0]);
 		}
 #endif
@@ -216,7 +216,7 @@ void fp8_exp_cyc(fp8_t c, fp8_t a, bn_t b) {
 #if FP_WIDTH > 2
 		fp8_sqr_cyc(t[0], a);
 		fp8_mul(t[1], t[0], a);
-		for (int i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
+		for (i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
 			fp8_mul(t[i], t[i - 1], t[0]);
 		}
 #endif
@@ -636,17 +636,17 @@ void fp12_exp_cyc(fp12_t c, fp12_t a, bn_t b) {
 			}
 		}
 	} else {
-		fp12_t t, *u = RLC_ALLOCA(fp12_t, w);
+		fp12_t t, *uu = RLC_ALLOCA(fp12_t, w);
 
 		fp12_null(t);
 
 		TRY {
-			if (u == NULL) {
+			if (uu == NULL) {
 				THROW(ERR_NO_MEMORY);
 			}
 			for (i = 0; i < w; i++) {
-				fp12_null(u[i]);
-				fp12_new(u[i]);
+				fp12_null(uu[i]);
+				fp12_new(uu[i]);
 			}
 			fp12_new(t);
 
@@ -655,7 +655,7 @@ void fp12_exp_cyc(fp12_t c, fp12_t a, bn_t b) {
 			for (i = 1; i < bn_bits(b); i++) {
 				fp12_sqr_pck(t, t);
 				if (bn_get_bit(b, i)) {
-					fp12_copy(u[j++], t);
+					fp12_copy(uu[j++], t);
 				}
 			}
 
@@ -667,16 +667,16 @@ void fp12_exp_cyc(fp12_t c, fp12_t a, bn_t b) {
 				k = w;
 			}
 
-			fp12_back_cyc_sim(u, u, k);
+			fp12_back_cyc_sim(uu, uu, k);
 
 			if (!bn_is_even(b)) {
 				fp12_copy(c, a);
 			} else {
-				fp12_copy(c, u[0]);
+				fp12_copy(c, uu[0]);
 			}
 
 			for (i = j; i < k; i++) {
-				fp12_mul(c, c, u[i]);
+				fp12_mul(c, c, uu[i]);
 			}
 
 			if (bn_sign(b) == RLC_NEG) {
@@ -688,10 +688,10 @@ void fp12_exp_cyc(fp12_t c, fp12_t a, bn_t b) {
 		}
 		FINALLY {
 			for (i = 0; i < w; i++) {
-				fp12_free(u[i]);
+				fp12_free(uu[i]);
 			}
 			fp12_free(t);
-			RLC_FREE(u);
+			RLC_FREE(uu);
 		}
 	}
 }
