@@ -57,7 +57,7 @@
 #define RAND_SIZE		(sizeof(int))
 #elif RAND == CALL
 #define RAND_SIZE		(sizeof(void (*)(uint8_t *, int)))
-#else
+#elif RAND == RDRND
 #define RAND_SIZE      0
 #endif
 

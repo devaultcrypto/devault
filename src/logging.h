@@ -33,7 +33,7 @@ enum LogFlags : uint32_t {
     TOR = (1 << 1),
     MEMPOOL = (1 << 2),
     HTTP = (1 << 3),
-    BENCH = (1 << 4),
+    BENCHM = (1 << 4),
     ZMQ = (1 << 5),
     DB = (1 << 6),
     RPC = (1 << 7),

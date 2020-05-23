@@ -46,41 +46,6 @@
 		}                                                                                \
 	}
 
-/* conditionally normalize result of isogeny map when not using projective coords */
-#if EP_ADD == PROJC
-#define TMPL_MAP_ISOMAP_NORM(EXTDEG)                                                     \
-	do {                                                                                 \
-		/* Y = Ny * Dx * Z^2. */                                                         \
-		fp##EXTDEG##_mul(q->y, p->y, t1);                                                \
-		fp##EXTDEG##_mul(q->y, q->y, t3);                                                \
-		/* Z = Dx * Dy, t1 = Z^2. */                                                     \
-		fp##EXTDEG##_mul(q->z, t2, t3);                                                  \
-		fp##EXTDEG##_sqr(t1, q->z);                                                      \
-		fp##EXTDEG##_mul(q->y, q->y, t1);                                                \
-		/* X = Nx * Dy * Z. */                                                           \
-		fp##EXTDEG##_mul(q->x, t0, t2);                                                  \
-		fp##EXTDEG##_mul(q->x, q->x, q->z);                                              \
-		q->norm = 0;                                                                     \
-	} while (0)
-#else
-#define TMPL_MAP_ISOMAP_NORM(EXTDEG)                                                     \
-	do {                                                                                 \
-		/* when working with affine coordinates, clear denominator */                    \
-		fp##EXTDEG##_mul(q->z, t2, t3);                                                  \
-		fp##EXTDEG##_inv(q->z, q->z);                                                    \
-		/* y coord */                                                                    \
-		fp##EXTDEG##_mul(q->y, p->y, q->z);                                              \
-		fp##EXTDEG##_mul(q->y, q->y, t3);                                                \
-		fp##EXTDEG##_mul(q->y, q->y, t1);                                                \
-		/* x coord */                                                                    \
-		fp##EXTDEG##_mul(q->x, t2, q->z);                                                \
-		fp##EXTDEG##_mul(q->x, q->x, t0);                                                \
-		/* z coord == 1 */                                                               \
-		fp##EXTDEG##_set_dig(q->z, 1);                                                   \
-		q->norm = 1;                                                                     \
-	} while (0)
-#endif
-
 /**
  * Generic isogeny map evaluation for use with SSWU map.
  */
@@ -118,8 +83,17 @@
 			fp##EXTDEG##_eval(t2, p->x, coeffs->yd, coeffs->deg_yd);                     \
 			fp##EXTDEG##_eval(t3, p->x, coeffs->xd, coeffs->deg_xd);                     \
                                                                                          \
-			/* normalize if necessary */                                                 \
-			TMPL_MAP_ISOMAP_NORM(EXTDEG);                                                \
+			/* Y = Ny * Dx * Z^2. */                                                     \
+			fp##EXTDEG##_mul(q->y, p->y, t1);                                            \
+			fp##EXTDEG##_mul(q->y, q->y, t3);                                            \
+			/* Z = Dx * Dy, t1 = Z^2. */                                                 \
+			fp##EXTDEG##_mul(q->z, t2, t3);                                              \
+			fp##EXTDEG##_sqr(t1, q->z);                                                  \
+			fp##EXTDEG##_mul(q->y, q->y, t1);                                            \
+			/* X = Nx * Dy * Z. */                                                       \
+			fp##EXTDEG##_mul(q->x, t0, t2);                                              \
+			fp##EXTDEG##_mul(q->x, q->x, q->z);                                          \
+			q->norm = 0;                                                                 \
 		}                                                                                \
 		CATCH_ANY { THROW(ERR_CAUGHT); }                                                 \
 		FINALLY {                                                                        \
@@ -132,14 +106,14 @@
 
 /* Conditionally call isogeny mapping function depending on whether EP_CTMAP is defined */
 #ifdef EP_CTMAP
-#define TMPL_MAP_CALL_ISOMAP(EXTDEG,PT)                                                     \
+#define TMPL_MAP_CALL_ISOMAP(EXTDEG)                                                     \
 	do {                                                                                 \
 		if (ep##EXTDEG##_curve_is_ctmap()) {                                             \
-			ep##EXTDEG##_iso(PT, PT);                                                      \
+			ep##EXTDEG##_iso(p, p);                                                      \
 		}                                                                                \
 	} while (0)
 #else
-#define TMPL_MAP_CALL_ISOMAP(EXTDEG,PT)  /* No isogeny map call in this case. */
+#define TMPL_MAP_CALL_ISOMAP(EXTDEG)  /* No isogeny map call in this case. */
 #endif
 
 /**
@@ -208,6 +182,8 @@
 			}                                                                                      \
 			fp##EXTDEG##_set_dig(p->z, 1);                                                         \
 			p->norm = 1;                                                                           \
+                                                                                                   \
+			TMPL_MAP_CALL_ISOMAP(EXTDEG);                                                          \
 		}                                                                                          \
 		CATCH_ANY { THROW(ERR_CAUGHT); }                                                           \
 		FINALLY {                                                                                  \
@@ -289,8 +265,7 @@
 			fp##EXTDEG##_set_dig(p->z, 1);                                                         \
 			p->norm = 1;                                                                           \
 		}                                                                                          \
-		CATCH_ANY { THROW(ERR_CAUGHT); }                                                           \
-		FINALLY {                                                                                  \
+		CATCH_ANY{THROW(ERR_CAUGHT)} FINALLY {                                                     \
 			fp##EXTDEG##_free(t1);                                                                 \
 			fp##EXTDEG##_free(t2);                                                                 \
 			fp##EXTDEG##_free(t3);                                                                 \

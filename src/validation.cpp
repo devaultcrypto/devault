@@ -1746,7 +1746,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
     int64_t nTime1 = GetTimeMicros();
     nTimeCheck += nTime1 - nTimeStart;
-    LogPrint(BCLog::BENCH, "    - Sanity checks: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "    - Sanity checks: %.2fms [%.2fs (%.2fms/blk)]\n",
              MILLI * (nTime1 - nTimeStart), nTimeCheck * MICRO,
              nTimeCheck * MILLI / nBlocksTotal);
 
@@ -1782,7 +1782,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
     int64_t nTime2 = GetTimeMicros();
     nTimeForks += nTime2 - nTime1;
-    LogPrint(BCLog::BENCH, "    - Fork checks: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "    - Fork checks: %.2fms [%.2fs (%.2fms/blk)]\n",
              MILLI * (nTime2 - nTime1), nTimeForks * MICRO,
              nTimeForks * MILLI / nBlocksTotal);
 
@@ -1923,7 +1923,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
     int64_t nTime3 = GetTimeMicros();
     nTimeConnect += nTime3 - nTime2;
-    LogPrint(BCLog::BENCH,
+    LogPrint(BCLog::BENCHM,
              "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) "
              "[%.2fs (%.2fms/blk)]\n",
              (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2),
@@ -1974,7 +1974,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     int64_t nTime4 = GetTimeMicros();
     nTimeVerify += nTime4 - nTime2;
     LogPrint(
-        BCLog::BENCH,
+        BCLog::BENCHM,
         "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs (%.2fms/blk)]\n",
         nInputs - 1, MILLI * (nTime4 - nTime2),
         nInputs <= 1 ? 0 : MILLI * (nTime4 - nTime2) / (nInputs - 1),
@@ -2009,13 +2009,13 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
     int64_t nTime5 = GetTimeMicros();
     nTimeIndex += nTime5 - nTime4;
-    LogPrint(BCLog::BENCH, "    - Index writing: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "    - Index writing: %.2fms [%.2fs (%.2fms/blk)]\n",
              MILLI * (nTime5 - nTime4), nTimeIndex * MICRO,
              nTimeIndex * MILLI / nBlocksTotal);
 
     int64_t nTime6 = GetTimeMicros();
     nTimeCallbacks += nTime6 - nTime5;
-    LogPrint(BCLog::BENCH, "    - Callbacks: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "    - Callbacks: %.2fms [%.2fs (%.2fms/blk)]\n",
              MILLI * (nTime6 - nTime5), nTimeCallbacks * MICRO,
              nTimeCallbacks * MILLI / nBlocksTotal);
 
@@ -2274,7 +2274,7 @@ static bool DisconnectTip(const Config &config, CValidationState &state,
         assert(flushed);
     }
 
-    LogPrint(BCLog::BENCH, "- Disconnect block: %.2fms\n",
+    LogPrint(BCLog::BENCHM, "- Disconnect block: %.2fms\n",
              (GetTimeMicros() - nStart) * MILLI);
 
     // Write the chain state to disk, if necessary.
@@ -2502,7 +2502,7 @@ static bool ConnectTip(const Config &config, CValidationState &state,
     int64_t nTime2 = GetTimeMicros();
     nTimeReadFromDisk += nTime2 - nTime1;
     int64_t nTime3;
-    LogPrint(BCLog::BENCH, "  - Load block from disk: %.2fms [%.2fs]\n",
+    LogPrint(BCLog::BENCHM, "  - Load block from disk: %.2fms [%.2fs]\n",
              (nTime2 - nTime1) * MILLI, nTimeReadFromDisk * MICRO);
     {
         CCoinsViewCache view(pcoinsTip.get());
@@ -2531,7 +2531,7 @@ static bool ConnectTip(const Config &config, CValidationState &state,
 
         nTime3 = GetTimeMicros();
         nTimeConnectTotal += nTime3 - nTime2;
-        LogPrint(BCLog::BENCH,
+        LogPrint(BCLog::BENCHM,
                  "  - Connect total: %.2fms [%.2fs (%.2fms/blk)]\n",
                  (nTime3 - nTime2) * MILLI, nTimeConnectTotal * MICRO,
                  nTimeConnectTotal * MILLI / nBlocksTotal);
@@ -2541,7 +2541,7 @@ static bool ConnectTip(const Config &config, CValidationState &state,
 
     int64_t nTime4 = GetTimeMicros();
     nTimeFlush += nTime4 - nTime3;
-    LogPrint(BCLog::BENCH, "  - Flush: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "  - Flush: %.2fms [%.2fs (%.2fms/blk)]\n",
              (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO,
              nTimeFlush * MILLI / nBlocksTotal);
 
@@ -2553,7 +2553,7 @@ static bool ConnectTip(const Config &config, CValidationState &state,
 
     int64_t nTime5 = GetTimeMicros();
     nTimeChainState += nTime5 - nTime4;
-    LogPrint(BCLog::BENCH,
+    LogPrint(BCLog::BENCHM,
              "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n",
              (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO,
              nTimeChainState * MILLI / nBlocksTotal);
@@ -2579,11 +2579,11 @@ static bool ConnectTip(const Config &config, CValidationState &state,
     int64_t nTime6 = GetTimeMicros();
     nTimePostConnect += nTime6 - nTime5;
     nTimeTotal += nTime6 - nTime1;
-    LogPrint(BCLog::BENCH,
+    LogPrint(BCLog::BENCHM,
              "  - Connect postprocess: %.2fms [%.2fs (%.2fms/blk)]\n",
              (nTime6 - nTime5) * MILLI, nTimePostConnect * MICRO,
              nTimePostConnect * MILLI / nBlocksTotal);
-    LogPrint(BCLog::BENCH, "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n",
+    LogPrint(BCLog::BENCHM, "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n",
              (nTime6 - nTime1) * MILLI, nTimeTotal * MICRO,
              nTimeTotal * MILLI / nBlocksTotal);
 
