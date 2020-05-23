@@ -649,6 +649,7 @@
 #define UDEV     3
 /** Override library generator with the callback. */
 #define CALL     4
+#define RAND     @RAND@
 
 /** Standard C library generator. */
 #define LIBC     1

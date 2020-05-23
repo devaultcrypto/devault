@@ -40,7 +40,7 @@
 /* Public definitions                                                         */
 /*============================================================================*/
 
-#if RELICRAND == RDRND
+#if RAND == RDRND
 
 void rand_bytes(uint8_t *buf, int size) {
 	int i = 0, j;
