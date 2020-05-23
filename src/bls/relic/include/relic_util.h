@@ -83,8 +83,7 @@
  *
  * @param[in] B			- the number of bits to isolate.
  */
-#define RLC_MASK(B)															\
-	((-(dig_t)((B) >= WSIZE)) | (((dig_t)1 << ((B) % WSIZE)) - 1))
+#define RLC_MASK(B)				(((dig_t)1 << (B)) - 1)
 
 /**
  * Returns a bit mask to isolate the lowest half of a digit.
@@ -167,7 +166,11 @@
  *
  * @param[in] F			- the format string.
  */
+#ifndef QUIET
+#define util_print(F, ...)		util_printf(RLC_STR(F), ##__VA_ARGS__)
+#else
 #define util_print(F, ...)		/* empty */
+#endif
 
 /**
  * Prints a standard label.

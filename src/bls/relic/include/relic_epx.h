@@ -977,8 +977,29 @@ void ep2_norm(ep2_t r, ep2_t p);
 void ep2_norm_sim(ep2_t *r, ep2_t *t, int n);
 
 /**
- * Maps a byte array to a point in a prime elliptic curve. The
- * algorithm implemented is the Fouque-Tibouchi algorithm from the
+ * Maps a byte array to a point in an elliptic curve over a quadratic extension.
+ *
+ * @param[out] p			- the result.
+ * @param[in] msg			- the byte array to map.
+ * @param[in] len			- the array length in bytes.
+ */
+void ep2_map(ep2_t p, const uint8_t *msg, int len);
+
+/**
+ * Maps a byte array to a point in an elliptic curve over a quadratic extension,
+ * using a domain separation tag.
+ *
+ * @param[out] p			- the result.
+ * @param[in] msg			- the byte array to map.
+ * @param[in] len			- the array length in bytes.
+ * @param[in] dst			- the domain separation tag.
+ * @param[in] dst_len		- the domain separation tag length, in bytes.
+ */
+void ep2_map_impl(ep2_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len);
+
+/**
+ * Maps a byte array to a point in an elliptic curve over a quadratic extension.
+ * The algorithm implemented is the Fouque-Tibouchi algorithm from the
  * paper "Indifferentiable Hashing to Barreto-Naehrig curves" for
  * the BLS12-381 curve.
  *
@@ -986,7 +1007,7 @@ void ep2_norm_sim(ep2_t *r, ep2_t *t, int n);
  * @param[in] msg			- the byte array to map.
  * @param[in] len			- the array length in bytes.
  */
-void ep2_map(ep2_t p, const uint8_t *msg, int len, int performHash);
+void ep2_map_ft(ep2_t p, const uint8_t *msg, int len);
 
 /**
  * Computes a power of the Gailbraith-Lin-Scott homomorphism of a point

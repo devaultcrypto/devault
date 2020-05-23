@@ -68,7 +68,7 @@ const CLogCategoryDesc LogCategories[] = {
     {BCLog::TOR, "tor"},
     {BCLog::MEMPOOL, "mempool"},
     {BCLog::HTTP, "http"},
-    {BCLog::BENCH, "bench"},
+    {BCLog::BENCHM, "bench"},
     {BCLog::ZMQ, "zmq"},
     {BCLog::DB, "db"},
     {BCLog::RPC, "rpc"},
