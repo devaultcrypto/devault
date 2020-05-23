@@ -188,11 +188,12 @@ int core_clean(void) {
 }
 
 ctx_t *core_get(void) {
-	#if MULTI != RELIC_NONE
+#if MULTI != RELIC_NONE
     if (core_ctx == NULL && core_thread_initializer != NULL) {
         core_thread_initializer(core_init_ptr);
     }
-	#endif
+#endif
+
 	return core_ctx;
 }
 

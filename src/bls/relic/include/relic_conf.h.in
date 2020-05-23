@@ -61,6 +61,11 @@
 /** Build static library. */
 #cmakedefine STLIB
 
+/** Number of times each test is ran. */
+#define TESTS    @TESTS@
+/** Number of times each benchmark is ran. */
+#define BENCH    @BENCH@
+
 /** Number of available cores. */
 #define CORES    @CORES@
 
@@ -471,7 +476,7 @@
 
 /** Binary point multiplication. */
 #define BASIC	 1
-/** López-Dahab point multiplication. */
+/** L�pez-Dahab point multiplication. */
 #define LODAH	 2
 /** Halving. */
 #define HALVE    3
@@ -649,6 +654,7 @@
 #define UDEV     3
 /** Override library generator with the callback. */
 #define CALL     4
+/** Chosen random generator. */
 #define RAND     @RAND@
 
 /** Standard C library generator. */
@@ -660,7 +666,7 @@
 /** Use Windows' CryptGenRandom. */
 #define WCGR     4
 /** Chosen random generator seeder. */
-#cmakedefine RELICSEED     UDEV
+#cmakedefine SEED     @SEED@
 
 /** GNU/Linux operating system. */
 #define LINUX    1
