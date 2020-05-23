@@ -102,6 +102,8 @@
 #define B12_P381_X1		"13E02B6052719F607DACD3A088274F65596BD0D09920B61AB5DA61BBDC7F5049334CF11213945D57E5AC7D055D042B7E"
 #define B12_P381_Y0		"0CE5D527727D6E118CC9CDC6DA2E351AADFD9BAA8CBDD3A76D429A695160D12C923AC9CC3BACA289E193548608B82801"
 #define B12_P381_Y1		"0606C4A02EA734CC32ACD2B02BC28B99CB3E287E85A763AF267492AB572E99AB3F370D275CEC1DA1AAA9075FF05F79BE"
+#define B12_P381_S3		"BE32CE5FBEED9CA374D38C0ED41EEFD5BB675277CDF12D11BC2FB026C41400045C03FFFFFFFDFFFD"
+#define B12_P381_S32 	"5F19672FDF76CE51BA69C6076A0F77EADDB3A93BE6F89688DE17D813620A00022E01FFFFFFFEFFFE"
 #define B12_P381_R		"73EDA753299D7D483339D80809A1D80553BDA402FFFE5BFEFFFFFFFF00000001"
 #define B12_P381_H		"5D543A95414E7F1091D50792876A202CD91DE4547085ABAA68A205B2E5A7DDFA628F1CB4D9E82EF21537E293A6691AE1616EC6E786F0C70CF1C38E31C7238E5"
 #if defined(EP_CTMAP)
@@ -115,8 +117,6 @@
 #define B12_P381_ISO_YD "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb,1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa8fb;0,1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffa9d3;12,1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaa99;1,0"
 #define B12_P381_MAPU0 "-2"
 #define B12_P381_MAPU1 "-1"
-#define B12_P381_S3 "BE32CE5FBEED9CA374D38C0ED41EEFD5BB675277CDF12D11BC2FB026C41400045C03FFFFFFFDFFFD"
-#define B12_P381_S32 "5F19672FDF76CE51BA69C6076A0F77EADDB3A93BE6F89688DE17D813620A00022E01FFFFFFFEFFFE"
 #else /* !defined(EP_CTMAP) */
 #define B12_P381_MAPU0 "0"
 #define B12_P381_MAPU1 "1"
@@ -284,12 +284,12 @@
 	fp_read_str(g->y[1], str, strlen(str), 16);								\
 	RLC_GET(str, CURVE##_R, sizeof(CURVE##_R));								\
 	bn_read_str(r, str, strlen(str), 16);									\
-	RLC_GET(str, CURVE##_H, sizeof(CURVE##_H));								\
-	bn_read_str(h, str, strlen(str), 16);									\
 	RLC_GET(str, CURVE##_S3, sizeof(CURVE##_S3));							\
 	bn_read_str(s3, str, strlen(str), 16);									\
 	RLC_GET(str, CURVE##_S32, sizeof(CURVE##_S32));							\
 	bn_read_str(s32, str, strlen(str), 16);									\
+	RLC_GET(str, CURVE##_H, sizeof(CURVE##_H));								\
+	bn_read_str(h, str, strlen(str), 16);									\
 	RLC_GET(str, CURVE##_MAPU0, sizeof(CURVE##_MAPU0));						\
 	fp_read_str(u[0], str, strlen(str), 16);								\
 	RLC_GET(str, CURVE##_MAPU1, sizeof(CURVE##_MAPU1));						\
@@ -389,9 +389,6 @@ static inline void ep2_curve_set_ctmap(const char *a0_str, const char *a1_str,
  * Precomputes constants used by the ep2_map function.
  */
 static void ep2_curve_set_map(void) {
-	bn_t t;
-	bn_null(t);
-
 	const int abNeq0 = (ep2_curve_opt_a() != RLC_ZERO) && (ep2_curve_opt_b() != RLC_ZERO);
 
 	ctx_t *ctx = core_get();
@@ -400,75 +397,56 @@ static void ep2_curve_set_map(void) {
 	fp_t *c3 = ctx->ep2_map_c[2];
 	fp_t *c4 = ctx->ep2_map_c[3];
 
-	TRY {
-		bn_new(t);
-
-		if (ep2_curve_is_ctmap() || abNeq0) {
-			/* SSWU map constants */
-			/* constants 3 and 4 are a and b for the curve or isogeny */
+	if (ep2_curve_is_ctmap() || abNeq0) {
+		/* SSWU map constants */
+		/* constants 3 and 4 are a and b for the curve or isogeny */
 #ifdef EP_CTMAP
-			if (ep2_curve_is_ctmap()) {
-				fp2_copy(c3, ctx->ep2_iso.a);
-				fp2_copy(c4, ctx->ep2_iso.b);
-			} else {
-#endif
-				fp2_copy(c3, ctx->ep2_a);
-				fp2_copy(c4, ctx->ep2_b);
-#ifdef EP_CTMAP
-			}
-#endif
-			/* constant 1: -b / a */
-			fp2_neg(c1, c3);     /* c1 = -a */
-			fp2_inv(c1, c1);     /* c1 = -1 / a */
-			fp2_mul(c1, c1, c4); /* c1 = -b / a */
-
-			/* constant 2 is unused in this case */
+		if (ep2_curve_is_ctmap()) {
+			fp2_copy(c3, ctx->ep2_iso.a);
+			fp2_copy(c4, ctx->ep2_iso.b);
 		} else {
-			/* SvdW map constants */
-			/* constant 1: g(u) = u^3 + a * u + b */
-			fp2_sqr(c1, ctx->ep2_map_u);
-			fp2_add(c1, c1, ctx->ep2_a);
-			fp2_mul(c1, c1, ctx->ep2_map_u);
-			fp2_add(c1, c1, ctx->ep2_b);
-
-			/* constant 2: -u / 2 */
-			fp2_set_dig(c2, 2);
-			fp2_neg(c2, c2);                 /* -2 */
-			fp2_inv(c2, c2);                 /* -1 / 2 */
-			fp2_mul(c2, c2, ctx->ep2_map_u); /* -u / 2 */
-
-			/* constant 3: sqrt(-g(u) * (3 * u^2 + 4 * a)) */
-			fp2_sqr(c3, ctx->ep2_map_u);    /* u^2 */
-			fp2_mul_dig(c3, c3, 3);         /* 3 * u^2 */
-			fp2_mul_dig(c4, ctx->ep2_a, 4); /* 4 * a */
-			fp2_add(c4, c3, c4);            /* 3 * u^2 + 4 * a */
-			fp2_neg(c4, c4);                /* -(3 * u^2 + 4 * a) */
-			fp2_mul(c3, c4, c1);            /* -g(u) * (3 * u^2 + 4 * a) */
-			if (!fp2_srt(c3, c3)) {
-				THROW(ERR_NO_VALID);
-			}
-			/* make sure sgn0(c3) == 0 */
-			const int c30_z = fp_is_zero(c3[0]);
-			fp_prime_back(t, c3[0]);
-			const int c30_n = bn_get_bit(t, 0);
-			fp_prime_back(t, c3[1]);
-			const int c31_n = bn_get_bit(t, 0);
-			if (c30_n | (c30_z & c31_n)) {
-				/* set sgn0(c3) == 0 */
-				fp2_neg(c3, c3);
-			}
-
-			/* constant 4: -4 * g(u) / (3 * u^2 + 4 * a) */
-			fp2_inv(c4, c4);        /* -1 / (3 * u^2 + 4 * a */
-			fp2_mul(c4, c4, c1);    /* -g(u) / (3 * u^2 + 4 * a) */
-			fp2_mul_dig(c4, c4, 4); /* -4 * g(u) / (3 * u^2 + 4 * a) */
+#endif
+			fp2_copy(c3, ctx->ep2_a);
+			fp2_copy(c4, ctx->ep2_b);
+#ifdef EP_CTMAP
 		}
-	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	}
-	FINALLY {
-		bn_free(t);
+#endif
+		/* constant 1: -b / a */
+		fp2_neg(c1, c3);     /* c1 = -a */
+		fp2_inv(c1, c1);     /* c1 = -1 / a */
+		fp2_mul(c1, c1, c4); /* c1 = -b / a */
+
+		/* constant 2 is unused in this case */
+	} else {
+		/* SvdW map constants */
+		/* constant 1: g(u) = u^3 + a * u + b */
+		fp2_sqr(c1, ctx->ep2_map_u);
+		fp2_add(c1, c1, ctx->ep2_a);
+		fp2_mul(c1, c1, ctx->ep2_map_u);
+		fp2_add(c1, c1, ctx->ep2_b);
+
+		/* constant 2: -u / 2 */
+		fp2_set_dig(c2, 2);
+		fp2_neg(c2, c2);                 /* -2 */
+		fp2_inv(c2, c2);                 /* -1 / 2 */
+		fp2_mul(c2, c2, ctx->ep2_map_u); /* -u / 2 */
+
+		/* constant 3: sqrt(-g(u) * (3 * u^2 + 4 * a)) */
+		fp2_sqr(c3, ctx->ep2_map_u);    /* u^2 */
+		fp2_mul_dig(c3, c3, 3);         /* 3 * u^2 */
+		fp2_mul_dig(c4, ctx->ep2_a, 4); /* 4 * a */
+		fp2_add(c4, c3, c4);            /* 3 * u^2 + 4 * a */
+		fp2_neg(c4, c4);                /* -(3 * u^2 + 4 * a) */
+		fp2_mul(c3, c4, c1);            /* -g(u) * (3 * u^2 + 4 * a) */
+		if (!fp2_srt(c3, c3)) {
+			THROW(ERR_NO_VALID);
+		}
+		/* XXX(rsw): sgn0(c3) should be set to 1 */
+
+		/* constant 4: -4 * g(u) / (3 * u^2 + 4 * a) */
+		fp2_inv(c4, c4);        /* -1 / (3 * u^2 + 4 * a */
+		fp2_mul(c4, c4, c1);    /* -g(u) / (3 * u^2 + 4 * a) */
+		fp2_mul_dig(c4, c4, 4); /* -4 * g(u) / (3 * u^2 + 4 * a) */
 	}
 }
 
@@ -641,6 +619,14 @@ int ep2_curve_is_twist(void) {
 	return core_get()->ep2_is_twist;
 }
 
+void ep2_curve_get_s3(bn_t s3) {
+	bn_copy(s3, &(core_get()->ep2_s3));
+}
+
+void ep2_curve_get_s32(bn_t s32) {
+	bn_copy(s32, &(core_get()->ep2_s32));
+}
+
 int ep2_curve_is_ctmap(void) {
 	return core_get()->ep2_is_ctmap;
 }
@@ -744,9 +730,7 @@ void ep2_curve_set_twist(int type) {
 	ep2_t g;
 	fp2_t a;
 	fp2_t b, u;
-	bn_t r, h;
-	bn_t s3;
-	bn_t s32;
+	bn_t r, h, s3, s32;
 
 	ep2_null(g);
 	fp2_null(a);
@@ -770,7 +754,6 @@ void ep2_curve_set_twist(int type) {
 		fp2_new(b);
 		fp2_new(u);
 		bn_new(r);
-		bn_new(h);
 		bn_new(h);
 		bn_new(s3);
 		bn_new(s32);
@@ -847,7 +830,7 @@ void ep2_curve_set_twist(int type) {
 		fp2_copy(ctx->ep2_map_u, u);
 		bn_copy(&(ctx->ep2_r), r);
 		bn_copy(&(ctx->ep2_h), h);
-		bn_copy(&(ctx->ep2_s3), s3);
+        bn_copy(&(ctx->ep2_s3), s3);
 		bn_copy(&(ctx->ep2_s32), s32);
 		ctx->ep2_is_ctmap = ctmap;
 		/* I don't have a better place for this. */
@@ -873,14 +856,6 @@ void ep2_curve_set_twist(int type) {
 		bn_free(s3);
 		bn_free(s32);
 	}
-}
-
-void ep2_curve_get_s3(bn_t s3) {
-	bn_copy(s3, &(core_get()->ep2_s3));
-}
-
-void ep2_curve_get_s32(bn_t s32) {
-	bn_copy(s32, &(core_get()->ep2_s32));
 }
 
 void ep2_curve_set(fp2_t a, fp2_t b, ep2_t g, bn_t r, bn_t h) {
