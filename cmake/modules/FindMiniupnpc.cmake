@@ -35,7 +35,7 @@ if(NOT MINIUPNPC_MISSING_HEADER)
 
 	include(FindPackageHandleStandardArgs)
 	find_package_handle_standard_args(
-		MiniUPnPc DEFAULT_MSG
+		Miniupnpc DEFAULT_MSG
 		MINIUPNPC_INCLUDE_DIR
 		MINIUPNPC_LIBRARY
 	)
