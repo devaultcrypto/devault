@@ -45,20 +45,20 @@
 /**
  * Size of the PRNG internal state in bytes.
  */
-#if RELICRAND == HASHD
+#if RAND == HASHD
 
 #if MD_MAP == SH224 || MD_MAP == SH256 || MD_MAP == BLAKE2S_160 || MD_MAP == BLAKE2S_256
-#define RELICRAND_SIZE		(1 + 2*440/8)
+#define RAND_SIZE		(1 + 2*440/8)
 #elif MD_MAP == SH384 || MD_MAP == SH512
-#define RELICRAND_SIZE		(1 + 2*888/8)
+#define RAND_SIZE		(1 + 2*888/8)
 #endif
 
-#elif RELICRAND == UDEV
-#define RELICRAND_SIZE		(sizeof(int))
-#elif RELICRAND == CALL
-#define RELICRAND_SIZE		(sizeof(void (*)(uint8_t *, int)))
+#elif RAND == UDEV
+#define RAND_SIZE		(sizeof(int))
+#elif RAND == CALL
+#define RAND_SIZE		(sizeof(void (*)(uint8_t *, int)))
 #else
-#define RELICRAND_SIZE      0
+#define RAND_SIZE      0
 #endif
 
 /**
@@ -80,7 +80,7 @@ void rand_init(void);
  */
 void rand_clean(void);
 
-#if RELICRAND != CALL
+#if RAND != CALL
 
 /**
  * Sets the initial state of the pseudo-random number generator.

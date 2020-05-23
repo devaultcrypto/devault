@@ -49,7 +49,7 @@
 /* Public definitions                                                         */
 /*============================================================================*/
 
-#if RELICRAND == UDEV
+#if RAND == UDEV
 
 void rand_bytes(uint8_t *buf, int size) {
 	int c, l, *fd = (int *)&(core_get()->rand);

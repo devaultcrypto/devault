@@ -82,7 +82,7 @@
 void rand_init(void) {
 	uint8_t buf[SEED_SIZE];
 
-#if RELICRAND == UDEV
+#if RAND == UDEV
 	int *fd = (int *)&(core_get()->rand);
 
 	*fd = open(RAND_PATH, O_RDONLY);
@@ -166,7 +166,7 @@ void rand_init(void) {
 
 #endif /* RAND == UDEV */
 
-#if RELICRAND != CALL
+#if RAND != CALL
 	core_get()->seeded = 0;
 	rand_seed(buf, SEED_SIZE);
 #else
@@ -176,12 +176,12 @@ void rand_init(void) {
 
 void rand_clean(void) {
 
-#if RELICRAND == UDEV
+#if RAND == UDEV
 	int *fd = (int *)&(core_get()->rand);
 	close(*fd);
 #endif
 
-#if RELICRAND != CALL
+#if RAND != CALL
 	memset(core_get()->rand, 0, sizeof(core_get()->rand));
 #else
 	core_get()->rand_call = NULL;

@@ -122,11 +122,11 @@ static int rand_add(uint8_t *state, uint8_t *hash, int size) {
  */
 static void rand_gen(uint8_t *out, int out_len) {
 	int m = RLC_CEIL(out_len, RLC_MD_LEN);
-	uint8_t hash[RLC_MD_LEN], data[(RELICRAND_SIZE - 1)/2];
+	uint8_t hash[RLC_MD_LEN], data[(RAND_SIZE - 1)/2];
 	ctx_t *ctx = core_get();
 
 	/* data = V */
-	memcpy(data, ctx->rand + 1, (RELICRAND_SIZE - 1)/2);
+	memcpy(data, ctx->rand + 1, (RAND_SIZE - 1)/2);
 	for (int i = 0; i < m; i++) {
 		/* w_i = Hash(data) */
 		md_map(hash, data, sizeof(data));
@@ -135,7 +135,7 @@ static void rand_gen(uint8_t *out, int out_len) {
 		out += RLC_MD_LEN;
 		out_len -= RLC_MD_LEN;
 		/* data = data + 1 mod 2^b. */
-		rand_inc(data, (RELICRAND_SIZE - 1)/2, 1);
+		rand_inc(data, (RAND_SIZE - 1)/2, 1);
 	}
 }
 
@@ -147,7 +147,7 @@ static void rand_gen(uint8_t *out, int out_len) {
 
 void rand_bytes(uint8_t *buf, int size) {
 	uint8_t hash[RLC_MD_LEN];
-	int carry, len  = (RELICRAND_SIZE - 1)/2;
+	int carry, len  = (RAND_SIZE - 1)/2;
 	ctx_t *ctx = core_get();
 
 	if (sizeof(int) > 2 && size > (1 << 16)) {
@@ -169,7 +169,7 @@ void rand_bytes(uint8_t *buf, int size) {
 
 void rand_seed(uint8_t *buf, int size) {
 	ctx_t *ctx = core_get();
-	int len = (RELICRAND_SIZE - 1) / 2;
+	int len = (RAND_SIZE - 1) / 2;
 
 	if (size <= 0) {
 		THROW(ERR_NO_VALID);
