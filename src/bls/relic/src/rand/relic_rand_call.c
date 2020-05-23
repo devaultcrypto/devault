@@ -42,7 +42,7 @@
 /* Private definitions                                                         */
 /*============================================================================*/
 
-#if RELICRAND == CALL
+#if RAND == CALL
 
 static void rand_stub(uint8_t *buf, int size, void *args) {
 	int c, l, fd = open("/dev/urandom", O_RDONLY);
@@ -69,7 +69,7 @@ static void rand_stub(uint8_t *buf, int size, void *args) {
 /* Public definitions                                                         */
 /*============================================================================*/
 
-#if RELICRAND == CALL
+#if RAND == CALL
 
 void rand_bytes(uint8_t *buf, int size) {
 	ctx_t *ctx = core_get();
