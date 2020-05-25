@@ -38,7 +38,8 @@ template <class T> static T *SecAlloc(size_t numTs) { return static_cast<T *>(so
 static void SecFree(void *ptr) { sodium_free(ptr); }
 
 
-PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen) {
+PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen)
+{
   BLS::AssertInitialized();
 
   // "BLS private key seed" in ascii
@@ -53,6 +54,7 @@ PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen) {
   bn_t order;
   bn_new(order);
   g1_get_ord(order);
+  bn_free(order);
 
   // Make sure private key is less than the curve order
   bn_t *skBn = SecAlloc<bn_t>(1);
@@ -66,6 +68,7 @@ PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen) {
 
   SecFree(skBn);
   SecFree(hash);
+  
   return k;
 }
 
@@ -100,14 +103,85 @@ PrivateKey::PrivateKey(const PrivateKey &privateKey) {
     bn_copy(*keydata, *privateKey.keydata);
 }
 
-PrivateKey::PrivateKey(PrivateKey&& k) {
-    std::swap(keydata, k.keydata);
+PrivateKey::PrivateKey(PrivateKey&& k) {    std::swap(keydata, k.keydata);}
+
+PrivateKey::~PrivateKey() {    SecFree(keydata);}
+
+
+G1Element PrivateKey::GetG1Element() const
+{
+    g1_t *p = SecAlloc<g1_t>(1);
+    g1_mul_gen(*p, *keydata);
+
+    const G1Element ret = G1Element::FromNative(p);
+    SecFree(*p);
+    return ret;
 }
 
-PrivateKey::~PrivateKey() {
-    SecFree(keydata);
+G2Element PrivateKey::GetG2Element() const
+{
+    g2_t *q = SecAlloc<g2_t>(1);
+    g2_mul_gen(*q, *keydata);
+
+    const G2Element ret = G2Element::FromNative(q);
+    SecFree(*q);
+    return ret;
 }
 
+G1Element &operator*=(G1Element &a, PrivateKey &k)
+{
+    g1_mul(a.p, a.p, *(k.keydata));
+    return a;
+}
+
+G1Element &operator*=(PrivateKey &k, G1Element &a)
+{
+    a *= k;
+    return a;
+}
+
+G1Element operator*(G1Element &a, PrivateKey &k)
+{
+    g1_t ans;
+    g1_new(ans);
+    g1_mul(ans, a.p, *(k.keydata));
+    return G1Element::FromNative(&ans);
+}
+
+G1Element operator*(PrivateKey &k, G1Element &a) { return a * k; }
+
+G2Element &operator*=(G2Element &a, PrivateKey &k)
+{
+    g2_mul(a.q, a.q, *(k.keydata));
+    return a;
+}
+
+G2Element &operator*=(PrivateKey &k, G2Element &a)
+{
+    a *= k;
+    return a;
+}
+
+G2Element operator*(G2Element &a, PrivateKey &k)
+{
+    g2_t ans;
+    g2_new(ans);
+    g2_mul(ans, a.q, *(k.keydata));
+    return G2Element::FromNative(&ans);
+}
+
+G2Element operator*(PrivateKey &k, G2Element &a) { return a * k; }
+
+G2Element PrivateKey::GetG2Power(g2_t base) const
+{
+    g2_t *q = SecAlloc<g2_t>(1);
+    g2_mul(*q, base, *keydata);
+
+    const G2Element ret = G2Element::FromNative(q);
+    SecFree(*q);
+    return ret;
+}
+  
 PublicKey PrivateKey::GetPublicKey() const {
     g1_t *q = SecAlloc<g1_t>(1);
     g1_mul_gen(*q, *keydata);
@@ -221,6 +295,32 @@ std::vector<uint8_t> PrivateKey::Serialize() const {
     return data;
 }
 
+
+G2Element PrivateKey::SignG2(
+    const uint8_t *msg,
+    size_t len,
+    const uint8_t *dst,
+    size_t dst_len) const
+{
+    uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
+    Util::Hash256(messageHash, msg, len);
+    return SignG2Prehashed(messageHash, dst, dst_len);
+}
+
+G2Element PrivateKey::SignG2Prehashed(
+    const uint8_t *messageHash,
+    const uint8_t *dst,
+    size_t dst_len) const
+{
+    g2_t sig, point;
+
+    g2_map_ft(point, messageHash, BLS::MESSAGE_HASH_LEN);
+    // ep2_map_impl(point, messageHash, BLS::MESSAGE_HASH_LEN, dst, dst_len);
+    g2_mul(sig, point, *keydata);
+
+    return G2Element::FromNative(&sig);
+}
+
 InsecureSignature PrivateKey::SignInsecure(const uint8_t *msg, size_t len) const {
     uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
     Util::Hash256(messageHash, msg, len);
@@ -230,7 +330,7 @@ InsecureSignature PrivateKey::SignInsecure(const uint8_t *msg, size_t len) const
 InsecureSignature PrivateKey::SignInsecurePrehashed(const uint8_t *messageHash) const {
     g2_t sig, point;
 
-    g2_map(point, messageHash, BLS::MESSAGE_HASH_LEN);
+    g2_map_ft(point, messageHash, BLS::MESSAGE_HASH_LEN);
     g2_mul(sig, point, *keydata);
 
     return InsecureSignature::FromG2(&sig);
