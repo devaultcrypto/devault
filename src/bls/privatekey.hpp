@@ -24,11 +24,15 @@ class PrependSignature;
 #include "bls/publickey.hpp"
 #include "bls/relic/include/relic.h"
 #include "bls/signature.hpp"
+#include "bls/elements.hpp"
 
 namespace bls {
 class PrivateKey {
 friend class BLS;
 friend class Threshold;
+friend class G1Element;
+friend class G2Element;
+
  public:
     // Private keys are represented as 32 byte field elements. Note that
     // not all 32 byte integers are valid keys, the private key must be
@@ -54,6 +58,10 @@ friend class Threshold;
     ~PrivateKey();
 
     PublicKey GetPublicKey() const;
+    G1Element GetG1Element() const;
+    G2Element GetG2Element() const;
+
+    G2Element GetG2Power(g2_t base) const;
 
     // Insecurely aggregate multiple private keys into one
     static PrivateKey AggregateInsecure(std::vector<PrivateKey> const& privateKeys);
@@ -67,9 +75,33 @@ friend class Threshold;
     friend bool operator!=(const PrivateKey& a, const PrivateKey& b);
     PrivateKey& operator=(const PrivateKey& rhs);
 
+    // Multiply private key by G1 or G2 elements
+    friend G1Element &operator*=(G1Element &a, PrivateKey &k);
+    friend G1Element &operator*=(PrivateKey &k, G1Element &a);
+    friend G1Element operator*(G1Element &a, PrivateKey &k);
+    friend G1Element operator*(PrivateKey &k, G1Element &a);
+
+    friend G2Element &operator*=(G2Element &a, PrivateKey &k);
+    friend G2Element &operator*=(PrivateKey &k, G2Element &a);
+    friend G2Element operator*(G2Element &a, PrivateKey &k);
+    friend G2Element operator*(PrivateKey &k, G2Element &a);
+
     // Serialize the key into bytes
     void Serialize(uint8_t* buffer) const;
     std::vector<uint8_t> Serialize() const;
+
+    G2Element SignG2(
+        const uint8_t *msg,
+        size_t len,
+        const uint8_t *dst,
+        size_t dst_len
+    ) const;
+
+    G2Element SignG2Prehashed(
+        const uint8_t *messageHash,
+        const uint8_t *dst,
+        size_t dst_len
+    ) const;
 
     // Sign a message without setting aggreagation info.
     InsecureSignature SignInsecure(const uint8_t *msg, size_t len) const;
