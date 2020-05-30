@@ -17,10 +17,10 @@
 #include <set>
 #include <string>
 
-#include "bls.hpp"
-#include "elements.hpp"
-#include "schemes.hpp"
-#include "signature.hpp"
+#include "bls/bls.hpp"
+#include "bls/elements.hpp"
+#include "bls/schemes.hpp"
+#include "bls/signature.hpp"
 
 using std::string;
 using std::vector;
