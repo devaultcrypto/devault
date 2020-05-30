@@ -16,10 +16,10 @@
 #include <cstring>
 #include <string>
 
-#include "bls.hpp"
-#include "elements.hpp"
-#include "privatekey.hpp"
-#include "util.hpp"
+#include "bls/bls.hpp"
+#include "bls/elements.hpp"
+#include "bls/privatekey.hpp"
+#include "bls/util.hpp"
 
 namespace bls {
 G1Element G1Element::FromBytes(const uint8_t* key)
