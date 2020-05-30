@@ -20,13 +20,11 @@
 
 #include "relic_conf.h"
 
-#if defined GMP && ARITH == GMP
 #include <gmp.h>
-#endif
 
-#include "elements.hpp"
-#include "privatekey.hpp"
-#include "util.hpp"
+#include "bls/elements.hpp"
+#include "bls/privatekey.hpp"
+#include "bls/util.hpp"
 // #include "publickey.hpp"
 
 using std::vector;
