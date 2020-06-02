@@ -11,11 +11,16 @@ namespace bls {
 
     bool SignBLS(const CKey &key, const uint256 &hash, Signature& sig);
     bool SignBLS(const CKey& key, const uint256 &hash, std::vector<uint8_t> &vchSig);
+    bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig);
     auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>>;
     std::vector<uint8_t> AggregateSigs(std::vector<Signature*> &vpSigs);
 
-  // for test routine
-  std::vector<uint8_t> AggregatePubKeys(std::vector<std::vector<uint8_t>> &vPubKeys);
+
+    // for test routine
+    std::vector<uint8_t> AggregatePubKeys(std::vector<std::vector<uint8_t>> &vPubKeys);
+
+    std::vector<uint8_t> Aggregate(std::vector<std::vector<uint8_t>> &vSigs);
+
 
     // More Generic interfaces - need
     std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<uint256> &msgs,
@@ -31,6 +36,10 @@ namespace bls {
     std::vector<uint8_t> AggregateSigForMessages(std::map<uint256,CKey>& keys_plus_hash);
     bool VerifySigForMessages(const std::vector<uint256>& msgs,
                               const std::vector<uint8_t> &aggSigs, 
+                              const std::vector<std::vector<uint8_t>> &aggPubKeys);
+
+
+    bool VerifySigForMessages(const std::vector<std::vector<uint8_t>> &msgs, const std::vector<uint8_t> &aggSigs,
                               const std::vector<std::vector<uint8_t>> &aggPubKeys);
 
 
