@@ -150,31 +150,32 @@ TEST_CASE("bls agg sig test") {
 
   for (int n = 0; n < 1; n++) { // 1 for NOW
 
-    std::vector<bls::Signature> sigs;
     std::vector<std::vector<uint8_t>> pubkeys;
+    std::vector<std::vector<uint8_t>> vecsigs;
 
     std::string strMsg = "Very secret message"; // strprintf("Very secret message %i: 11", n);
     std::vector<uint8_t> message(strMsg.begin(), strMsg.end());
-    uint256 hash;
-    bls::Util::Hash256(hash.begin(), message.data(), message.size());
+    std::vector<std::vector<uint8_t> > messages;
 
-    bls::Signature sign1;
-    bls::Signature sign2;
+    std::vector<uint8_t> sign1;
+    std::vector<uint8_t> sign2;
 
-    BOOST_CHECK(bls::SignBLS(key1, hash, sign1));
+    BOOST_CHECK(bls::SignBLS(key1, message, sign1));
 
-    sigs.push_back(sign1);
+    vecsigs.push_back(sign1);
+    messages.push_back(message);
     pubkeys.push_back(ToByteVector(pubkey1));
 
     // std::cout << "key1 = " << HexStr(ToByteVector(pubkey1)) << "\n";
     // std::cout << "sig1 = " << HexStr(sign1) << "\n";
 
-    BOOST_CHECK(bls::SignBLS(key2, hash, sign2));
+    BOOST_CHECK(bls::SignBLS(key2, message, sign2));
 
     // std::cout << "key2 = " << HexStr(ToByteVector(pubkey2)) << "\n";
     // std::cout << "sig2 = " << HexStr(sign2) << "\n";
 
-    sigs.push_back(sign2);
+    vecsigs.push_back(sign2);
+    messages.push_back(message);
     pubkeys.push_back(ToByteVector(pubkey2));
 
     //BOOST_CHECK(pubkey1.VerifyBLS(hashMsg, sign1));
@@ -187,20 +188,9 @@ TEST_CASE("bls agg sig test") {
     std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys); // breaks for even 1 key
 
     bls::PublicKey Pk = bls::PublicKey::FromBytes(aggKeys.data());
-    bls::Signature aggSig = bls::Signature::Aggregate(sigs);
-    aggSig.SetAggregationInfo(bls::AggregationInfo::FromMsgHash(Pk, hash.begin()));
-      
+    auto aggSig = bls::Aggregate(vecsigs);
 
-    bool ok = aggSig.Verify();
-
-    BOOST_CHECK(ok);
-      
-    // Now Serialize the Aggregate Signatures and re-try
-    auto SigSer = aggSig.Serialize();
-    bls::Signature newSig = bls::Signature::FromBytes(SigSer.data());
-    newSig.SetAggregationInfo(bls::AggregationInfo::FromMsgHash(Pk, hash.begin()));
-
-    bool ok2 = newSig.Verify();
+    bool ok2 = bls::VerifySigForMessages(messages, aggSig, pubkeys);
     BOOST_CHECK(ok2);
 
   }
