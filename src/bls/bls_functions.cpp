@@ -113,7 +113,12 @@ bool VerifySigForMessages(const std::vector<uint256> &msgs, const std::vector<ui
     std::vector<uint8_t> ms(m.begin(),m.end());
     messages.push_back(ms);
   }
-  return AugScheme::AggregateVerify(pubkeys, messages, aggSigs);
+  bool ok = false;
+  try {
+    ok = AugScheme::AggregateVerify(pubkeys, messages, aggSigs);
+  }
+  catch (...) { ; }
+  return ok;
 }
   
 bool VerifySigForMessages(const std::vector<std::vector<uint8_t>> &msgs, const std::vector<uint8_t> &aggSigs,
