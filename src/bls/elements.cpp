@@ -35,7 +35,7 @@ G1Element G1Element::FromBytes(const uint8_t* key)
     }
     g1_read_bin(ele.p, uncompressed, G1Element::SIZE + 1);
     if (g1_is_valid(*(g1_t*)&ele) == 0)
-        throw;
+        throw std::runtime_error("Problem deserializing G1Element from bytes");
 
     // check if inside subgroup
     g1_t point, unity;
@@ -209,7 +209,7 @@ G2Element G2Element::FromBytes(const uint8_t* data)
     }
     g2_read_bin(ele.q, uncompressed, G2Element::SIZE + 1);
     if (g2_is_valid(*(g2_t*)&ele) == 0)
-        throw;
+        throw std::runtime_error("Problem deserializing G2Element from bytes");
 
     // check if inside subgroup
     g2_t point, unity;

@@ -77,12 +77,16 @@ bool Core::Verify(
     const uint8_t *dst,
     int dst_len)
 {
+  try {
     return Core::Verify(
         G1Element::FromBytes(pubkey.data()),
         message,
         G2Element::FromBytes(signature.data()),
         dst,
         dst_len);
+  } catch (...) {
+    return false;
+  }
 }
 
 bool Core::Verify(
@@ -141,16 +145,21 @@ bool Core::AggregateVerify(
     const uint8_t *dst,
     int dst_len)
 {
-    int n = pubkeys.size();
+    size_t n = pubkeys.size();
     if (n != messages.size() || n <= 0)
         return false;
     vector<G1Element> pubkeyElements(n);
-    for (int i = 0; i < n; ++i) {
-        pubkeyElements[i] = G1Element::FromBytes(pubkeys[i].data());
-    }
-    G2Element signatureElement = G2Element::FromBytes(signature.data());
-    return Core::AggregateVerify(
+    try {
+      for (size_t i = 0; i < n; ++i) {
+         pubkeyElements[i] = G1Element::FromBytes(pubkeys[i].data());
+      }
+      G2Element signatureElement = G2Element::FromBytes(signature.data());
+      return Core::AggregateVerify(
         pubkeyElements, messages, signatureElement, dst, dst_len);
+    } catch (...) {
+      throw std::runtime_error("Problem in Core::AggregateVerify");
+      return false;
+    }
 }
 
 bool Core::AggregateVerify(
@@ -359,13 +368,18 @@ bool AugScheme::AggregateVerify(
         aug.insert(aug.end(), messages[i].begin(), messages[i].end());
         augMessages[i] = aug;
     }
-
+    try {
     return Core::AggregateVerify(
         pubkeys,
         const_cast<const vector<vector<uint8_t>> &>(augMessages),
         signature,
         AugScheme::CIPHERSUITE_ID,
         AugScheme::CIPHERSUITE_ID_LEN);
+    }
+  catch (...) {
+    throw std::runtime_error("Problem in AugScheme::AggregateVerify");
+  }
+  return false;
 }
 
 bool AugScheme::AggregateVerify(
