@@ -16,7 +16,7 @@
 #include <type_traits>
 
 // New Minimum possible fee
-static const Amount MIN_FEE(2*COIN);
+static const Amount MIN_FEE(COIN / 5);
 
 /**
  * Fee rate in satoshis per kilobyte: Amount / kB

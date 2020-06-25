@@ -41,11 +41,11 @@ extern bool bSpendZeroConfChange;
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
-static const Amount DEFAULT_TRANSACTION_FEE = 2*COIN;
+static const Amount DEFAULT_TRANSACTION_FEE = COIN / 5;
 //! -fallbackfee default
-static const Amount DEFAULT_FALLBACK_FEE(2*COIN);
+static const Amount DEFAULT_FALLBACK_FEE(COIN / 5);
 //! minimum recommended increment for BIP 125 replacement txs
-static const Amount WALLET_INCREMENTAL_RELAY_FEE(2*COIN);
+static const Amount WALLET_INCREMENTAL_RELAY_FEE(COIN / 5);
 //! target minimum change amount
 static const Amount MIN_CHANGE = 6*COIN;
 //! final minimum change amount after paying for fees
