@@ -91,7 +91,7 @@ TEST_CASE("sign") {
     txTo[i].vin.resize(1);
     txTo[i].vout.resize(1);
     txTo[i].vin[0].prevout = COutPoint(txFrom.GetId(), i);
-    txTo[i].vout[0].nValue = 2*COIN;
+    txTo[i].vout[0].nValue = COIN / 5;
     BOOST_CHECK_MESSAGE(IsMine(keystore, txFrom.vout[i].scriptPubKey), strprintf("IsMine %d", i));
   }
 
