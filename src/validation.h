@@ -60,7 +60,7 @@ static const bool DEFAULT_WHITELISTRELAY = true;
 /** Default for DEFAULT_WHITELISTFORCERELAY. */
 static const bool DEFAULT_WHITELISTFORCERELAY = true;
 /** Default for -minrelaytxfee, minimum relay fee for transactions */
-static const Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(5*COIN);
+static const Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(COIN / 2);
 /** Default for -excessutxocharge for transactions transactions */
 static const Amount DEFAULT_UTXO_FEE = 2*COIN;
 //! -maxtxfee default

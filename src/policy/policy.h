@@ -31,7 +31,7 @@ static const uint64_t DEFAULT_BLOCK_PRIORITY_PERCENTAGE = 5;
  * Default for -blockmintxfee, which sets the minimum feerate for a transaction
  * in blocks created by mining code.
  */
-static const Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(5*COIN);
+static const Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(COIN / 2);
 /**
  * The maximum size for transactions we're willing to relay/mine.
  */
@@ -63,7 +63,7 @@ static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 360;
  * Default for -incrementalrelayfee, which sets the minimum feerate increase for
  * mempool limiting or BIP 125 replacement.
  */
-static const CFeeRate MEMPOOL_FULL_FEE_INCREMENT(5*COIN);
+static const CFeeRate MEMPOOL_FULL_FEE_INCREMENT(COIN / 2);
 /**
  * Default for -bytespersigop .
  */
