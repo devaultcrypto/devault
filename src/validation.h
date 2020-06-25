@@ -62,7 +62,7 @@ static const bool DEFAULT_WHITELISTFORCERELAY = true;
 /** Default for -minrelaytxfee, minimum relay fee for transactions */
 static const Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(COIN / 2);
 /** Default for -excessutxocharge for transactions transactions */
-static const Amount DEFAULT_UTXO_FEE = 2*COIN;
+static const Amount DEFAULT_UTXO_FEE = COIN / 5;
 //! -maxtxfee default
 static const Amount DEFAULT_TRANSACTION_MAXFEE(2000*COIN);
 //! Discourage users to set fees higher than this amount (in satoshis) per kB

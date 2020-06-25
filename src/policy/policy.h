@@ -75,7 +75,7 @@ static const unsigned int DEFAULT_BYTES_PER_SIGOP = 20;
  * only increase the dust limit after prior releases were already not creating
  * outputs below the new threshold.
  */
-static const Amount DUST_RELAY_TX_FEE(2*COIN);
+static const Amount DUST_RELAY_TX_FEE(COIN / 5);
 
 /**
  * Standard script verification flags that standard transactions will comply
