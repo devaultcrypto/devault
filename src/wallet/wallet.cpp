@@ -207,7 +207,7 @@ std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, boo
       hdChainDec.DeriveChildExtKey(nAccountIndex, internal, nChildIndex, childKey);
       // increment childkey index
       nChildIndex++;
-      if (UseBLSKeys()) cont = HaveKey(childKey.key.GetPubKey().GetBLSKeyID());
+      if (UseBLSKeys()) cont = HaveKey(childKey.key.GetPubKeyForBLS().GetBLSKeyID());
       else cont = HaveKey(childKey.key.GetPubKey().GetKeyID());
     } while (cont);
         
