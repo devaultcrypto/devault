@@ -119,8 +119,8 @@ vector<uint8_t> Core::Aggregate(vector<vector<uint8_t>> const &signatures)
     g2_new(ans);
     g2_copy(ans, G2Element::FromBytes(signatures[0].data()).q);
 
-    for (int i = 1; i < signatures.size(); ++i) {
-        g2_add(ans, ans, G2Element::FromBytes(signatures[i].data()).q);
+    for (size_t i = 1; i < signatures.size(); ++i) {
+      g2_add(ans, ans, G2Element::FromBytes(signatures[i].data()).q);
     }
     return G2Element::FromNative(&ans).Serialize();
 }
@@ -132,9 +132,8 @@ G2Element Core::Aggregate(vector<G2Element> const &signatures)
     g2_new(ans);
     g2_copy(ans, *(g2_t *)&signatures[0].q);
 
-    for (int i = 1; i < signatures.size(); ++i) {
+    for (size_t i = 1; i < signatures.size(); ++i) 
         g2_add(ans, ans, *(g2_t *)&signatures[i].q);
-    }
     return G2Element::FromNative(&ans);
 }
 
@@ -169,7 +168,7 @@ bool Core::AggregateVerify(
     const uint8_t *dst,
     int dst_len)
 {
-    int n = pubkeys.size();
+    size_t n = pubkeys.size();
     if (n != messages.size() || n <= 0)
         return false;
 
@@ -179,7 +178,7 @@ bool Core::AggregateVerify(
     G1Element geninverse = G1Element::Generator().Inverse();
     g1_copy(g1s[0], *(g1_t *)&geninverse.p);
     g2_copy(g2s[0], *(g2_t *)&signature.q);
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         g1_copy(g1s[i + 1], *(g1_t *)&pubkeys[i].p);
         g2_copy(
             g2s[i + 1], G2Element::FromMessage(messages[i], dst, dst_len).q);
@@ -263,7 +262,7 @@ bool BasicScheme::AggregateVerify(
     const vector<vector<uint8_t>> &messages,
     const vector<uint8_t> &signature)
 {
-    int n = messages.size();
+    size_t n = messages.size();
     if (n <= 0)
         return false;
     std::set<vector<uint8_t>> s(messages.begin(), messages.end());
@@ -282,7 +281,7 @@ bool BasicScheme::AggregateVerify(
     const vector<vector<uint8_t>> &messages,
     const G2Element &signature)
 {
-    int n = messages.size();
+    size_t n = messages.size();
     if (n <= 0)
         return false;
     std::set<vector<uint8_t>> s(messages.begin(), messages.end());
