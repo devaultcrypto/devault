@@ -24,8 +24,8 @@ TEST_CASE("GetFeeTest") {
   BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
   // BOOST_CHECK_EQUAL(feeRate.GetFee(1), SATOSHI);
   BOOST_CHECK_EQUAL(feeRate.GetFee(121 * 1000), MIN_FEE);
-  BOOST_CHECK_EQUAL(feeRate.GetFee(999 * 1000), MIN_FEE);
-  BOOST_CHECK_EQUAL(feeRate.GetFee(1000 * 1000), MIN_FEE);
+  BOOST_CHECK_EQUAL(feeRate.GetFee(999 * 1000), 999 * Amount::min_amount());
+  BOOST_CHECK_EQUAL(feeRate.GetFee(1000 * 1000), 1000 * Amount::min_amount());
   BOOST_CHECK_EQUAL(feeRate.GetFee(9000 * 1000), Amount(900000000));
 
   feeRate = CFeeRate(3 * Amount::min_amount());
