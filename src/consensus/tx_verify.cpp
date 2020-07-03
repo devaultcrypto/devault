@@ -196,8 +196,14 @@ static bool CheckTransactionCommon(const CTransaction &tx,
     }
 
     // Size limit
-    if (::GetSerializeSize(tx, PROTOCOL_VERSION) > MAX_TX_SIZE) {
-        return state.DoS(100, false, REJECT_INVALID, "bad-txns-oversize");
+    if (tx.nVersion == CTransaction::BLS_BLOCK_VERSION) {
+        if (::GetSerializeSize(tx, PROTOCOL_VERSION) > MAX_COMBINED_TX_SIZE) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-block-tx-oversize");
+        }
+    } else {
+        if (::GetSerializeSize(tx, PROTOCOL_VERSION) > MAX_TX_SIZE) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-oversize");
+        }
     }
 
     // Check for negative or overflow output values
