@@ -221,6 +221,7 @@ public:
     // Default transaction version.
     static const int32_t CURRENT_VERSION = 2;
     static const int32_t BLS_ONLY_VERSION = 3;
+    static const int32_t BLS_BLOCK_VERSION = 4;
 
     // Changing the default transaction version requires a two step process:
     // first adapting relay policy by bumping MAX_STANDARD_VERSION, and then
