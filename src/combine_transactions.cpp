@@ -148,7 +148,7 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
     vin.scriptSig = cfinal;
     txNew.vin.push_back(vin);
 
-    txNew.nVersion = CTransaction::BLS_ONLY_VERSION;
+    txNew.nVersion = CTransaction::BLS_BLOCK_VERSION;
 
     
     {
