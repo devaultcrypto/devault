@@ -173,8 +173,8 @@ TEST_CASE("coin_selection_tests") {
         // we get 15 due to min change of 6
         REQUIRE(wallet.SelectCoinsMinConf(9 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        REQUIRE(nValueRet == 15 * COIN);
-        REQUIRE(setCoinsRet.size() == 2U);
+        REQUIRE(nValueRet == 10 * COIN);
+        REQUIRE(setCoinsRet.size() == 1U);
 
         // now clear out the wallet and start again to test choosing between
         // subsets of smaller coins and the next biggest coin
@@ -197,8 +197,8 @@ TEST_CASE("coin_selection_tests") {
         REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
         // we should get 20 in one coin
-        REQUIRE(nValueRet == 26 * COIN);
-        REQUIRE(setCoinsRet.size() == 2U);
+        REQUIRE(nValueRet == 20 * COIN);
+        REQUIRE(setCoinsRet.size() == 1U);
 
         // now we have 5+6+7+8+20+30 = 75 cents total
         add_coin(wallet, 5 * COIN);
@@ -206,9 +206,9 @@ TEST_CASE("coin_selection_tests") {
         // now if we try making 16 again,
         REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        // we should get 25 in 2 coins
-        REQUIRE(nValueRet == 25 * COIN);
-        REQUIRE(setCoinsRet.size() == 2U);
+        // we should get 18 in 3 coins
+        REQUIRE(nValueRet == 18 * COIN);
+        REQUIRE(setCoinsRet.size() == 3U);
 
         // now we have 5+6+7+8+18+20+30
         add_coin(wallet, 18 * COIN);
@@ -218,9 +218,9 @@ TEST_CASE("coin_selection_tests") {
         REQUIRE(wallet.SelectCoinsMinConf(16 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
 
-        REQUIRE(nValueRet == 23 * COIN);
+        REQUIRE(nValueRet == 18 * COIN);
         // because in the event of a tie, the biggest coin wins
-        REQUIRE(setCoinsRet.size() == 2U);
+        REQUIRE(setCoinsRet.size() == 1U);
 
         // now try making 11 cents.  we should get 5+6
         REQUIRE(wallet.SelectCoinsMinConf(11 * COIN, 1, 1, 0, vCoins,
@@ -237,14 +237,14 @@ TEST_CASE("coin_selection_tests") {
         REQUIRE(wallet.SelectCoinsMinConf(95 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
         // we should get 105 DVT in 2 coins
-        REQUIRE(nValueRet == 105 * COIN);
-        REQUIRE(setCoinsRet.size() == 2U);
+        REQUIRE(nValueRet == 100 * COIN);
+        REQUIRE(setCoinsRet.size() == 1U);
 
         REQUIRE(wallet.SelectCoinsMinConf(195 * COIN, 1, 1, 0, vCoins,
                                           setCoinsRet, nValueRet));
-        // we should get 205 BCH in 2 coin
-        REQUIRE(nValueRet == 205 * COIN);
-        REQUIRE(setCoinsRet.size() == 2U);
+        // we should get 200 BCH in 1 coin
+        REQUIRE(nValueRet == 200 * COIN);
+        REQUIRE(setCoinsRet.size() == 1U);
 
         // empty the wallet and start again, now with fractions of a cent, to
         // test small change avoidance
