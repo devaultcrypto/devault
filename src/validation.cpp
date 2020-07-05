@@ -1167,7 +1167,7 @@ bool CheckInputs(const CTransaction &tx, CValidationState &state,
     }
 
     // Check for BLS only Transaction
-    if (tx.nVersion == CTransaction::BLS_ONLY_VERSION) {
+    if (tx.nVersion == CTransaction::BLS_ONLY_VERSION || tx.nVersion == CTransaction::BLS_BLOCK_VERSION) {
       bool check = CheckPrivateSigs(tx, inputs);
       if (!check) {
         // Refine this/do more flag checks?
