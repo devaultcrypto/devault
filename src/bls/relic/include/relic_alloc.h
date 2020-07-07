@@ -50,6 +50,8 @@
 #define RLC_ALLOCA(T, S)		(T*) _alloca((S) * sizeof(T))
 #endif
 
+#define RLC_MALLOC(T, S)    (T*) calloc((S) * sizeof(T))
+
 #else /* _MSC_VER */
 
 #include <alloca.h>
