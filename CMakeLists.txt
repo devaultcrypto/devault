@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 project(devault
-	VERSION 1.1.6
+	VERSION 1.1.7
 #	DESCRIPTION "DeVault is a full node implementation of the DeVault protocol."
 #	HOMEPAGE_URL "https://www.devault.cc"
 )
