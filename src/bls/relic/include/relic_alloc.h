@@ -69,6 +69,8 @@
 #define RLC_ALLOCA(T, S)		(T*) alloca((S) * sizeof(T))
 #endif
 
+#define RLC_MALLOC(T, S)    (T*) malloc((S) * sizeof(T))
+
 #endif
 
 /*
