@@ -87,7 +87,7 @@ void OptionsModel::Init(bool resetSettings) {
     strThirdPartyTxUrls = settings.value("strThirdPartyTxUrls", "").toString();
 
     if (!settings.contains("fCoinControlFeatures")) {
-        settings.setValue("fCoinControlFeatures", false);
+        settings.setValue("fCoinControlFeatures", true);
     }
     fCoinControlFeatures =
         settings.value("fCoinControlFeatures", false).toBool();
