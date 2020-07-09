@@ -86,7 +86,6 @@ private Q_SLOTS:
     void removeEntry(RewardsEntry *entry);
     void useAvailableBalance(RewardsEntry *entry);
     void updateDisplayUnit();
-    void rewardControlFeatureChanged(bool);
     void rewardControlButtonClicked();
     void rewardControlUpdateLabels();
 
