@@ -188,7 +188,7 @@ public:
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetSpacing = 2 * 15; // 30 seconds
-        consensus.nBlocksPerYear = 2400; // 30 * 24 * 365.25; 
+        consensus.nBlocksPerYear = 30 * 24 * 365.25; 
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -216,11 +216,11 @@ public:
         nPruneAfterHeight = 1000;
 
         genesis =
-            CreateGenesisBlock(1574791246, 1307665623, 0x1d00ffff, 1, 50 * COIN);
+            CreateGenesisBlock(1570974562, 3551570310, 0x1d00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock ==
-               uint256S("000000009872b048e9d7e2ab472caea626d829c3cddde3a45028ff"
-                        "dc7410f117"));
+               uint256S("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
+                        "53891eeed9"));
         assert(genesis.hashMerkleRoot ==
                uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
                         "dda326f35b"));
@@ -228,7 +228,7 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         // DeVault seeder
-        vSeeds.emplace_back("66.172.27.49");
+        vSeeds.emplace_back("69.172.229.236");
         nExtCoinType = 1;
         cashaddrPrefix = "dvtest";
         cashaddrSecretPrefix = "testpriv"; // Shouldn't matter that "dv" isn't indicated
@@ -249,8 +249,8 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {0, uint256S("000000009872b048e9d7e2ab472caea626d829c3cddde3a45028ff"
-                               "dc7410f117")},
+                {0, uint256S("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
+                               "53891eeed9")},
             }};
 
         // Data as of block
