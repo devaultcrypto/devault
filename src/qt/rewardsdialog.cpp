@@ -115,10 +115,7 @@ void RewardsDialog::setModel(WalletModel *_model) {
         // Coin Control
         connect(_model->getOptionsModel(), &OptionsModel::displayUnitChanged,
                 this, &RewardsDialog::rewardControlUpdateLabels);
-        connect(_model->getOptionsModel(),
-                &OptionsModel::coinControlFeaturesChanged, this,
-                &RewardsDialog::rewardControlFeatureChanged);
-        ui->frameCoinControl->setVisible(_model->getOptionsModel()->getCoinControlFeatures());
+        ui->frameCoinControl->setVisible(true);
         rewardControlUpdateLabels();
     }
 }
@@ -166,10 +163,7 @@ void RewardsDialog::on_sendButton_clicked() {
 
     // Always use a CRewardControl instance, use the RewardControlDialog instance if
     // RewardControl has been enabled
-    CCoinControl ctrl;
-    if (model->getOptionsModel()->getCoinControlFeatures()) {
-        ctrl = *RewardControlDialog::coinControl();
-    }
+    CCoinControl ctrl = *RewardControlDialog::coinControl();
 
     updateRewardControlState(ctrl);
 
@@ -507,10 +501,7 @@ void RewardsDialog::on_buttonMinimizeFee_clicked() {
 
 void RewardsDialog::useAvailableBalance(RewardsEntry *entry) {
     // Get CRewardControl instance if RewardControl is enabled or create a new one.
-    CCoinControl coin_control;
-    if (model->getOptionsModel()->getCoinControlFeatures()) {
-        coin_control = *RewardControlDialog::coinControl();
-    }
+    CCoinControl coin_control = *RewardControlDialog::coinControl();
 
     // Calculate available amount to send.
     Amount amount = model->wallet().getAvailableBalance(coin_control);
@@ -531,18 +522,6 @@ void RewardsDialog::useAvailableBalance(RewardsEntry *entry) {
 
 void RewardsDialog::updateRewardControlState(CCoinControl &ctrl) {
     ctrl.m_feerate.reset();
-}
-
-// Coin Control: settings menu - coin control enabled/disabled by user
-void RewardsDialog::rewardControlFeatureChanged(bool checked) {
-    ui->frameCoinControl->setVisible(checked);
-
-    // coin control features disabled
-    if (!checked && model) {
-        RewardControlDialog::coinControl()->SetNull();
-    }
-
-    rewardControlUpdateLabels();
 }
 
 // Coin Control: button inputs -> show actual coin control dialog
