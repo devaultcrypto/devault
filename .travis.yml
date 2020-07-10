@@ -18,7 +18,7 @@ env:
     - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
     - SDK_URL=https://proteanx.com/sdk
     - WINEDEBUG=fixme-all
-    - DOCKER_PACKAGES="build-essential libtool cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache g++-mingw-w64-x86-64 gcc-mingw-w64-base gcc-mingw-w64-x86-64"
+    - DOCKER_PACKAGES="build-essential libtool cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache libgmp-dev"
 before_install:
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/pyenv/d' | tr "\n" ":" | sed "s|::|:|g")
@@ -40,7 +40,7 @@ jobs:
       env: >-
         HOST=x86_64-linux-gnu
         DOCKER_NAME_TAG=ubuntu:18.04
-        PACKAGES="g++-7 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev cmake gperf"
+        PACKAGES="g++-8 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev gperf"
         GOAL="install"
         CMAKE_OPT="Linux64.cmake"
 
@@ -48,7 +48,7 @@ jobs:
       env: >-
         HOST=x86_64-w64-mingw32
         DOCKER_NAME_TAG=debian:10.3
-        PACKAGES="cmake python3 nsis wine-binfmt wine64"
+        PACKAGES="python3 nsis wine-binfmt wine64 g++-mingw-w64-x86-64 gcc-mingw-w64-base gcc-mingw-w64-x86-64"
         GOAL="deploy"
         CMAKE_OPT="Win64.cmake"
 
@@ -56,7 +56,7 @@ jobs:
       env: >-
         HOST=x86_64-apple-darwin14
         DOCKER_NAME_TAG=ubuntu:18.04
-        PACKAGES="cmake imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git ninja-build"
+        PACKAGES="imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git ninja-build"
         OSX_SDK=10.14
         GOAL="deploy"
         CMAKE_OPT="OSX.cmake"
