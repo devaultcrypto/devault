@@ -41,12 +41,21 @@ QRImageWidget::QRImageWidget(QWidget *parent) : QLabel(parent), contextMenu(null
 }
 
 QImage QRImageWidget::exportImage() {
-    if (!pixmap()) return QImage();
-    return pixmap()->toImage();
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+  if (!pixmap(Qt::ReturnByValue)) return QImage();
+  return pixmap(Qt::ReturnByValue).toImage();
+#else
+  if (!pixmap()) return QImage();
+  return pixmap()->toImage();
+#endif
 }
 
 void QRImageWidget::mousePressEvent(QMouseEvent *event) {
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+    if (event->button() == Qt::LeftButton && pixmap(Qt::ReturnByValue).isNull()) {
+#else
     if (event->button() == Qt::LeftButton && pixmap()) {
+#endif
         event->accept();
         QMimeData *mimeData = new QMimeData;
         mimeData->setImageData(exportImage());
@@ -60,7 +69,11 @@ void QRImageWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QRImageWidget::saveImage() {
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+    if (!pixmap(Qt::ReturnByValue)) return;
+#else
     if (!pixmap()) return;
+#endif
     QString fn = GUIUtil::getSaveFileName(this, tr("Save QR Code"), QString(),
                                           tr("PNG Image (*.png)"), nullptr);
     if (!fn.isEmpty()) {
@@ -69,12 +82,20 @@ void QRImageWidget::saveImage() {
 }
 
 void QRImageWidget::copyImage() {
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+    if (!pixmap(Qt::ReturnByValue)) return;
+#else
     if (!pixmap()) return;
+#endif
     QApplication::clipboard()->setImage(exportImage());
 }
 
 void QRImageWidget::contextMenuEvent(QContextMenuEvent *event) {
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+    if (!pixmap(Qt::ReturnByValue)) return;
+#else
     if (!pixmap()) return;
+#endif
     contextMenu->exec(event->globalPos());
 }
 
