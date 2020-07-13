@@ -1214,6 +1214,11 @@ void CWallet::MarkConflicted(const uint256 &hashBlock, const TxId &txid) {
                     it2->second.MarkDirty();
                 }
             }
+        } else {
+          LogPrintf("Conflicted Transaction %s in wallet removed since it's replaced with Tx in block\n", now.ToString());
+          batch.EraseTx(now);
+          MarkDirty();
+          NotifyTransactionChanged(this, wtx.GetId(), CT_DELETED);
         }
     }
 }
