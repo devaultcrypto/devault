@@ -261,9 +261,11 @@ void TransactionView::setModel(WalletModel *_model) {
 
         if (_model->getOptionsModel()) {
             // Add third party transaction URLs to context menu
-            QStringList listUrls =
-                _model->getOptionsModel()->getThirdPartyTxUrls().split(
-                    "|", QString::SkipEmptyParts);
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+            QStringList listUrls = _model->getOptionsModel()->getThirdPartyTxUrls().split("|", Qt::SkipEmptyParts);
+#else
+            QStringList listUrls = _model->getOptionsModel()->getThirdPartyTxUrls().split("|", QString::SkipEmptyParts);
+#endif
             for (int i = 0; i < listUrls.size(); ++i) {
                 QString host =
                     QUrl(listUrls[i].trimmed(), QUrl::StrictMode).host();
@@ -303,29 +305,51 @@ void TransactionView::chooseDate(int idx) {
             break;
         case Today:
             transactionProxyModel->setDateRange(
-                QDateTime(current), TransactionFilterProxy::MAX_DATE);
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                                                current.startOfDay(), TransactionFilterProxy::MAX_DATE);
+#else
+            QDateTime(current), TransactionFilterProxy::MAX_DATE);
+#endif
             break;
         case ThisWeek: {
             // Find last Monday
             QDate startOfWeek = current.addDays(-(current.dayOfWeek() - 1));
             transactionProxyModel->setDateRange(
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                                                startOfWeek.startOfDay(), TransactionFilterProxy::MAX_DATE);
+#else
                 QDateTime(startOfWeek), TransactionFilterProxy::MAX_DATE);
+#endif
 
         } break;
         case ThisMonth:
             transactionProxyModel->setDateRange(
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                QDate(current.year(), current.month(), 1).startOfDay(),
+#else
                 QDateTime(QDate(current.year(), current.month(), 1)),
+#endif
                 TransactionFilterProxy::MAX_DATE);
             break;
         case LastMonth:
             transactionProxyModel->setDateRange(
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                QDate(current.year(), current.month(), 1).addMonths(-1).startOfDay(),
+                QDate(current.year(), current.month(), 1).startOfDay());
+#else
                 QDateTime(
                     QDate(current.year(), current.month(), 1).addMonths(-1)),
                 QDateTime(QDate(current.year(), current.month(), 1)));
+
+#endif
             break;
         case ThisYear:
             transactionProxyModel->setDateRange(
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                QDate(current.year(), 1, 1).startOfDay(),
+#else
                 QDateTime(QDate(current.year(), 1, 1)),
+#endif
                 TransactionFilterProxy::MAX_DATE);
             break;
         case Range:
@@ -609,8 +633,13 @@ void TransactionView::dateRangeChanged() {
         return;
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+    transactionProxyModel->setDateRange(dateFrom->date().startOfDay(),
+                                        dateTo->date().addDays(1).startOfDay());
+#else    
     transactionProxyModel->setDateRange(QDateTime(dateFrom->date()),
                                         QDateTime(dateTo->date()).addDays(1));
+#endif
 }
 
 void TransactionView::focusTransaction(const QModelIndex &idx) {
