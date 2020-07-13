@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <stdexcept>
 
 namespace mnemonic {
 class MnemonicException : public std::runtime_error {
