@@ -194,12 +194,18 @@ void SendCoinsDialog::setModel(WalletModel *_model) {
 
         // fee section
         connect(ui->groupFee,
-                static_cast<void (QButtonGroup::*)(int)>(
-                                                         &QButtonGroup::buttonClicked),
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::idClicked),
+#else
+                static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
+#endif                
                 this, &SendCoinsDialog::updateFeeSectionControls);
         connect(ui->groupFee,
-                static_cast<void (QButtonGroup::*)(int)>(
-                    &QButtonGroup::buttonClicked),
+#if QT_VERSION >= QT_VERSION_CHECK(5,15,0)
+                static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::idClicked),
+#else
+                static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked),
+#endif                
                 this, &SendCoinsDialog::coinControlUpdateLabels);
         connect(ui->customFee, &BitcoinAmountField::valueChanged, this,  &SendCoinsDialog::coinControlUpdateLabels);
         //        connect(ui->groupCustomFee, &QButtonGroup::buttonClicked, this,  &SendCoinsDialog::coinControlUpdateLabels);
