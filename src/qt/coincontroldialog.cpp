@@ -505,10 +505,9 @@ void CoinControlDialog::updateLabels(WalletModel *model, QDialog *dialog) {
         CTxDestination address;
         if (ExtractDestination(out.txout.scriptPubKey, address)) {
             CPubKey pubkey;
-            bool has_bls = true;
             BKeyID keyid1;
             try { keyid1 = std::get<BKeyID>(address); }
-            catch (...) { has_bls = false;}
+            catch (...) { }
             if (!keyid1.IsNull() && model->wallet().getPubKey(keyid1, pubkey)) {
                 nBytesInputs += 180; // HACK TBD
             } else {
