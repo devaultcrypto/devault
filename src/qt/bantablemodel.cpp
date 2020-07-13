@@ -129,7 +129,7 @@ QVariant BanTableModel::headerData(int section, Qt::Orientation orientation,
 }
 
 Qt::ItemFlags BanTableModel::flags(const QModelIndex &index) const {
-    if (!index.isValid()) return nullptr;
+    if (!index.isValid()) return Qt::ItemFlags();
 
     Qt::ItemFlags retval = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     return retval;

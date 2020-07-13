@@ -180,7 +180,7 @@ protected:
             return StepUpEnabled;
         }
 
-        StepEnabled rv = nullptr;
+        StepEnabled rv;
         bool valid = false;
         Amount val = value(&valid);
         if (valid) {
