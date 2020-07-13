@@ -11,6 +11,7 @@
 #include <uint256.h>
 #include <cstdint>
 #include <string>
+#include <limits>
 
 // Functions to gather random data
 void GetRandBytes(uint8_t *buf, int num);
