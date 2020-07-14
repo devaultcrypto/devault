@@ -164,8 +164,11 @@ add_compiler_flags(
 	-Wshadow
 	-Wrange-loop-analysis
 	-Wredundant-decls
-	-Wredundant-move
 )
+
+# Just applies to C++ code
+add_cxx_compiler_flags(-Wredundant-move)
+
 
 option(EXTRA_WARNINGS "Enable extra warnings" OFF)
 if(EXTRA_WARNINGS)
