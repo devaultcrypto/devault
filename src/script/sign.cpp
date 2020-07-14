@@ -224,7 +224,7 @@ bool ProduceSignature(const BaseSignatureCreator &creator,
     // Test solution
     return solved &&
            VerifyScript(sigdata.scriptSig, fromPubKey,
-                        STANDARD_SCRIPT_VERIFY_FLAGS, creator.Checker());
+                        STANDARD_SCRIPT_VERIFY_FLAGS | SCRIPT_ENABLE_BLS, creator.Checker());
 }
 
 SignatureData DataFromTransaction(const CMutableTransaction &tx,
