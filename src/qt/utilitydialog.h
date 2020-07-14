@@ -43,7 +43,7 @@ class ShutdownWindow : public QWidget {
     Q_OBJECT
 
 public:
-    explicit ShutdownWindow(QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
+    explicit ShutdownWindow(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     static QWidget *showShutdownWindow(BitcoinGUI *window);
 
 protected:
