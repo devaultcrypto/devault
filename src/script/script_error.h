@@ -65,6 +65,9 @@ enum class ScriptError {
     MINIMALIF,
     SIG_NULLFAIL,
 
+    /* BLS upgrade issue */
+    PRE_BLS,
+    
     /* Schnorr */
     SIG_BADLENGTH,
     SIG_NONSCHNORR,

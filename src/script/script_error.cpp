@@ -100,6 +100,8 @@ const char *ScriptErrorString(const ScriptError serror) {
             return "Illegal use of SIGHASH_FORKID";
         case ScriptError::MUST_USE_FORKID:
             return "Signature must use SIGHASH_FORKID";
+        case ScriptError::PRE_BLS:
+            return "BLS upgrade not in sync";
         case ScriptError::UNKNOWN:
         case ScriptError::ERROR_COUNT:
         default:
