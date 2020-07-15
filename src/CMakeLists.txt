@@ -22,7 +22,7 @@ option(BUILD_CLI "Build devault-cli" ON)
 option(BUILD_TX "Build devault-tx" ON)
 option(BUILD_QT "Build devault-qt" ON)
 option(BUILD_BENCH "Build benchmark code" OFF)
-option(BUILD_CTESTS "Build cmake unit tests" ON)
+option(BUILD_CTESTS "Build cmake unit tests" OFF)
 option(BUILD_ROCKSDB "Use Rocksdb instead of LevelDb" OFF)
 option(ENABLE_HARDENING "Harden the executables" OFF)
 option(BUILD_BUNDLE "For MacOS build MacOS Application" OFF)
@@ -567,12 +567,6 @@ endif()
 if (BUILD_BENCH)
   add_subdirectory(bench)
 endif()
-
-if (CMAKE_GENERATOR STREQUAL Ninja)
-  message(STATUS "Disabling BUILD_CTESTS since using Ninja")
-  SET(BUILD_CTESTS OFF)
-endif()
-
 
 # Wallet
 if(BUILD_WALLET)
