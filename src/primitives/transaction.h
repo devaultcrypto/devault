@@ -128,6 +128,12 @@ public:
                 a.nSequence == b.nSequence);
     }
 
+    friend bool operator<(const CTxIn &a, const CTxIn &b) {
+      int cmp = a.prevout < b.prevout;
+      return cmp < 0;
+   }
+
+  
     friend bool operator!=(const CTxIn &a, const CTxIn &b) { return !(a == b); }
 
     std::string ToString() const;

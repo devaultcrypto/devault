@@ -50,26 +50,21 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
       view.SetBackend(viewDummy);
     }
     
-    std::vector<std::vector<uint8_t>> pubkeys;
     std::vector<std::vector<uint8_t>> rand_pubkeys;
     std::vector<std::vector<uint8_t>> aggSigs;
-    std::vector<uint256> msgs;
-    std::vector<uint256> out_msgs;
 
-    CScript cfinal;
+    std::vector<CTxIn> vins;
+
+    std::map<std::vector<uint8_t>, CTxOut> output_keys_and_vouts;
+
     CTxIn vin;
 
-    auto j = txVariants.size() - 1;
     for (const auto &txv : txVariants) {
-      //auto enc = EncodeHexTx(CTransaction(txv));
-        //std::cout << "Tx : " << enc << "\n";
-        for (const auto &vout : txv.vout) txNew.vout.push_back(vout);
       
         for (size_t i = 0; i < txv.vin.size(); i++) {
             vin = txv.vin[i];
+            
             auto scr = vin.scriptSig;
-            uint256 in_hash = VinHash(vin);
-            msgs.push_back(in_hash);
             
             if (check_coins) {
               const Coin &coin = view.AccessCoin(vin.prevout);
@@ -78,8 +73,6 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
               }
             }
 
-            // const CScript &prevPubKey = coin.GetTxOut().scriptPubKey;
-            // const Amount &amount = coin.GetTxOut().nValue;
             if (i == txv.vin.size() - 1) {
                 std::vector<std::vector<uint8_t>> pkeys;
                 std::vector<uint8_t> aggSig;
@@ -88,56 +81,52 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
                 std::tie(pkeys, aggSig) =   ExtractBLSPubKeysAndSig(scr, txv.vout.size());
 
                 auto pubk = pkeys[0];
-                pubkeys.push_back(pubk);
                 pkeys.erase(pkeys.begin());
 
                 aggSig.pop_back();
                 aggSigs.push_back(aggSig);
                 for (const auto &p : pkeys) rand_pubkeys.push_back(p);
 
-                if (j-- == 0) {
-                    cfinal << pubk;
-                    // CScript c; c already has the last pubkey of the input
-                    for (const auto &pub : rand_pubkeys)
-                        cfinal << ToByteVector(pub); // Add random pubkeys to the last input
-
-                } else {
-                    CScript c;
-                    c << pubk;
-                    vin.scriptSig = c;
-                    txNew.vin.push_back(vin);
-                }
+                CScript c;
+                // replace with just public key of input
+                c << pubk;
+                vin.scriptSig = c;
+                vins.push_back(vin);
 
             } else {
                 // simply add
-                txNew.vin.push_back(vin);
-                // gather pubkeys
-                auto pubkey = ExtractBLSPubKey(scr);
-                pubkeys.push_back(ToByteVector(pubkey));
-            }
+                vins.push_back(vin);
+           }
         }
     }
 
+    // Now get combined Sig 
+    std::vector<uint8_t> combined_sigs = bls::MakeAggregateSigsForMessages(aggSigs);
+
+    // Gathered outputs are sorted by the random pubkey addresses due to natural std::map sorting
     int jj=0;
     for (const auto &txv : txVariants) {
       for (const auto &vout : txv.vout) {
-        auto& pk = rand_pubkeys[jj++];
-        out_msgs.push_back(VoutHash(vout,pk));
+        output_keys_and_vouts.emplace(rand_pubkeys[jj++],vout);
       }
     }
 
+    // Sort Vins and then add to txNew vins
+    std::sort(vins.begin(),vins.end());
+    for (const auto& v : vins) txNew.vin.push_back(v);
 
-    msgs.insert(msgs.end(), out_msgs.begin(),out_msgs.end());
-    pubkeys.insert(pubkeys.end(), rand_pubkeys.begin(),rand_pubkeys.end());
+    // Need to modify the script for the last entry,
+    // so pop off, modify and then add back to txNew.vin
+    vin = txNew.vin.back();
+    txNew.vin.pop_back();
+    // 
+    // Put the last pubkey of the input first
+    CScript cfinal = vin.scriptSig;
+    for (const auto &k : output_keys_and_vouts) {
+      cfinal << ToByteVector(k.first); // Add random pubkeys to the last input
+      txNew.vout.push_back(k.second);
+    }
 
-    // Now get combined Sig 
-    std::vector<uint8_t> combined_sigs = bls::MakeAggregateSigsForMessages(
-                                                                           msgs,
-                                                                           aggSigs,
-                                                                           pubkeys);
-
-    //std::cout << "combined sig is " << HexStr(combined_sigs) << "\n";
-    
     // for Script serialization
     SigHashType sigHashType;
     combined_sigs.push_back(uint8_t(sigHashType.getRawSigHashType()));
@@ -145,6 +134,7 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
     cfinal << combined_sigs;
     cfinal << OP_CHECKSIG; // do we need this?, check later
 
+    // Push back vin now with new script
     vin.scriptSig = cfinal;
     txNew.vin.push_back(vin);
 

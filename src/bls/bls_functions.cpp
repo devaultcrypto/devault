@@ -156,10 +156,7 @@ bool VerifySigForMessages(const std::vector<std::vector<uint8_t>> &msgs, const s
   return AugSchemeMPL::AggregateVerify(pubkeys, msgs, aggSigs);
 }
 
-std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<uint256> &msgs,
-                                                  const std::vector<std::vector<uint8_t>> &aggSigs,
-                                                  const std::vector<std::vector<uint8_t>> &pubkeys) {
-
+std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<std::vector<uint8_t>> &aggSigs) {                             
   auto Agg = AugSchemeMPL::Aggregate(aggSigs);
   return Agg;
 }
