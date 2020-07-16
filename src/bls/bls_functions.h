@@ -20,11 +20,7 @@ namespace bls {
 
     std::vector<uint8_t> Aggregate(std::vector<std::vector<uint8_t>> &vSigs);
 
-
-    // More Generic interfaces - need
-    std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<uint256> &msgs,
-                                                      const std::vector<std::vector<uint8_t>> &aggSigs,
-                                                      const std::vector<std::vector<uint8_t>> &pubkeys);
+    std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<std::vector<uint8_t>> &aggSigs);
 
     bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t* vch);
     CPubKey GetBLSPublicKey(const CKey &key);
