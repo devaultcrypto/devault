@@ -49,7 +49,7 @@ CMutableTransaction SetupBLSTx(const CChainParams &chainParams, const std::vecto
     COutPoint outpoint(prevId, i);
     CScript scriptPubKey;
     if (!p2pub[i]) {
-      scriptPubKey << OP_DUP << OP_BLSKEYHASH << 20
+      scriptPubKey << OP_DUP << OP_BLSKEYHASH
                    << ToByteVector(input_keys[i].GetPubKeyForBLS().GetKeyID())
                    << OP_EQUALVERIFY << OP_CHECKSIG;
     } else {

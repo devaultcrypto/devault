@@ -203,7 +203,10 @@ bool CheckPrivateSigs(const CTransaction &tx, const std::vector<CScript>& script
                       pubk = ExtractPubKeyFromBLSScript(scr);
                     }
                     // need to get Public Key for this PKH
-                    if (pubk.size() != CPubKey::BLS_PUBLIC_KEY_SIZE) return false;
+                    if (pubk.size() != CPubKey::BLS_PUBLIC_KEY_SIZE) {
+                      LogPrintf("Wrong key size of %d for BLS Tx input %d\n",pubk.size(),i);
+                      return false;
+                    }
                     input_pubkeys.push_back(pubk);
                 }
             } else {

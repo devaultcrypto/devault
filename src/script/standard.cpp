@@ -116,6 +116,7 @@ static bool MatchMultisig(const CScript &script, unsigned int &required,
     return (it + 1 == script.end());
 }
 
+// Just used for debug stuff. BLS P2PKH (25) would be same size as a legacy P2PKH
 bool IsValidBLSScriptSize(const CScript &script) {
   // for all inputs except final, should only be either 0, BLS_PUBLIC_KEY_SIZE + 1, BLS_PUBLIC_KEY_SIZE + 2
   // Last input will be BLS_SIGNATURE_SIZE + 1 + n*(BLS_PUBLIC_KEY_SIZE+2)
@@ -128,6 +129,7 @@ bool IsValidBLSScriptSize(const CScript &script) {
     return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+1) ||
             (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+2) ||
             (script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE) ||
+            (script.size() == 25) || // B2PKH
             (script.size() == 0));
   }
 }

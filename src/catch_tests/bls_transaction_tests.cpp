@@ -49,7 +49,7 @@ CMutableTransaction SetupBLSTx(const CChainParams &chainParams, const std::vecto
     COutPoint outpoint(prevId, i);
     CScript scriptPubKey;
     if (!p2pub[i]) {
-      scriptPubKey << OP_DUP << OP_BLSKEYHASH << 20
+      scriptPubKey << OP_DUP << OP_BLSKEYHASH
                    << ToByteVector(input_keys[i].GetPubKeyForBLS().GetKeyID())
                    << OP_EQUALVERIFY << OP_CHECKSIG;
     } else {
@@ -412,8 +412,7 @@ TEST_CASE("Check bls transaction and signatures, 6 input, 1 output, inputs using
   for (const auto &v : t0.vout) BOOST_CHECK(v.IsBLS());
 }
 
-
-TEST_CASE("Check bls transaction and signatures, 200-1 inputs, 2 outputs, inputs using public key") {
+TEST_CASE("Check bls transaction and signatures, for variety of input sizes and 2 outputs") {
   BasicTestingSetup setup("test");
   std::vector<CKey> input_keys;
   std::vector<bool> p2pub;
@@ -425,44 +424,65 @@ TEST_CASE("Check bls transaction and signatures, 200-1 inputs, 2 outputs, inputs
 
   //const int sizes[] = {501,401,301,201,101,40,20,10,4,3,2,1};
   const int sizes[] = {10,4,3,2,1};
-  
-  for (int k=0;k<2;k++) {
+
+  // K==0 All Public
+  // K==1 All PKH
+  // K==2 Public + then PKH
+  // K==3 PKH + then PKH
+
+  for (int k=0;k<4;k++) {
     // Do for a variety of input sizes
     for (auto& i : sizes) {
-      input_keys.clear();
-      p2pub.clear();
-      make_public_input_keys(i, input_keys, p2pub);
+      for (int r=0;r<i-1;r++) {
+        input_keys.clear();
+        p2pub.clear();
+        make_public_input_keys(i, input_keys, p2pub);
+        
+        if (k==1) {
+          for (int kk=0;kk<i;kk++) p2pub[kk] = false;
+          std::cout << "For " << input_keys.size() << " PKH inputs with " << out_addresses.size() << " outputs, ";
+        } else if (k==2) {
+          for (int kk=0;kk<i/2;kk++) p2pub[kk] = false;
+          std::cout << "For " << i/2 << " PKH inputs"
+                    << " and " << i-i/2 << " public inputs and " << out_addresses.size() << " outputs, ";
+        } else if (k==3) {
+          for (int kk=i/2;kk<i;kk++) p2pub[kk] = false;
+          std::cout << "For " << i/2 << " Public inputs"
+                    << " and " << i-i/2 << " PKH input and " << out_addresses.size() << " outputs, ";
+        } else {
+          std::cout << "For " << input_keys.size() << " public key inputs with " << out_addresses.size() << " outputs, ";
+        }
 
-      if (k==1) for (int kk=0;kk<i;kk++) p2pub[kk] = false;
+        if (r>0) {
+          for (int rr=0;rr<r;rr++) input_keys[i-1-rr] = input_keys[0];
+          //input_keys[i-1] = input_keys[0];
+          std::cout << " with " << r << " repeated keys ";
+        }
       
-      amounts.clear();
-      for (size_t j=0;j<out_addresses.size();j++) { amounts.push_back( int(j+1) * COIN ); }
+        amounts.clear();
+        for (size_t j=0;j<out_addresses.size();j++) { amounts.push_back( int(j+1) * COIN ); }
 
-      if (k == 0) {
-        std::cout << "For " << input_keys.size() << " public key inputs with " << out_addresses.size() << " outputs, ";
-      } else {
-        std::cout << "For " << input_keys.size() << " PKH inputs with " << out_addresses.size() << " outputs, ";
+        const Config &config = GetConfig();
+        const CChainParams &chainParams = config.GetChainParams();
+        CMutableTransaction t0 = SetupBLSTx(chainParams, input_keys, p2pub, out_addresses, amounts);
+      
+        try {
+          auto strFail = CreatePrivateTxWithSig(input_keys, p2pub, t0);
+          if (strFail) { BOOST_ERROR_MESSAGE("Exception creating transactions\n"); }
+          CValidationState state;
+          BOOST_CHECK_MESSAGE((CheckRegularTransaction(CTransaction(t0), state) && state.IsValid()),
+                              "Simple deserialized transaction should be valid.");
+        } catch (...) { BOOST_ERROR_MESSAGE("Exception creating transactions\n"); }
+      
+        CTransaction rx(t0);
+        bool check = CheckPrivateSigs(rx);
+        BOOST_CHECK(check);
+        
+        for (const auto &v : t0.vin)  BOOST_CHECK(IsValidBLSScriptSize(v.scriptSig));
+        for (const auto &v : t0.vout)  BOOST_CHECK(v.IsBLS());
+        //std::cout << "last vin script size = " << t0.vin[input_keys.size() - 1].scriptSig.size() << " ";
+        std::cout << "Transaction size = " << rx.GetTotalSize() << "\n";
       }
-      const Config &config = GetConfig();
-      const CChainParams &chainParams = config.GetChainParams();
-      CMutableTransaction t0 = SetupBLSTx(chainParams, input_keys, p2pub, out_addresses, amounts);
-      
-      try {
-        auto strFail = CreatePrivateTxWithSig(input_keys, p2pub, t0);
-        if (strFail) { BOOST_ERROR_MESSAGE("Exception creating transactions\n"); }
-        CValidationState state;
-        BOOST_CHECK_MESSAGE((CheckRegularTransaction(CTransaction(t0), state) && state.IsValid()),
-                            "Simple deserialized transaction should be valid.");
-      } catch (...) { BOOST_ERROR_MESSAGE("Exception creating transactions\n"); }
-      
-      CTransaction rx(t0);
-      bool check = CheckPrivateSigs(rx);
-      BOOST_CHECK(check);
-      
-      for (const auto &v : t0.vin)  BOOST_CHECK(IsValidBLSScriptSize(v.scriptSig));
-      for (const auto &v : t0.vout)  BOOST_CHECK(v.IsBLS());
-      //std::cout << "last vin script size = " << t0.vin[input_keys.size() - 1].scriptSig.size() << " ";
-      std::cout << "Transaction size = " << rx.GetTotalSize() << "\n";
     }
   }
 }

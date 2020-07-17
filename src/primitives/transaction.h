@@ -294,15 +294,6 @@ public:
         return (vin.size() == 1 && vin[0].prevout.IsNull());
     }
 
-    bool IsBLSOnly() const {
-      // Check for BLS only Transaction
-      for (const auto& v : vin) {
-        if (!IsValidBLSScriptSize(v.scriptSig)) return false;
-      }
-      return true;
-    }
-
-
     friend bool operator==(const CTransaction &a, const CTransaction &b) {
         return a.hash == b.hash;
     }
