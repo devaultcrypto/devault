@@ -187,8 +187,10 @@ void Shutdown() {
     RenameThread("devault-shutoff");
     g_mempool.AddTransactionsUpdated(1);
   
+    /* Disable this unless issues show up again
     LogPrintf("%s: Dumping rewards for debug\n", __func__);
     prewards->DumpOrderedRewards(); // temporarily for debug
+    */
     
     StopHTTPRPC();
     StopREST();
