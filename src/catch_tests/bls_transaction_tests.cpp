@@ -430,6 +430,8 @@ TEST_CASE("Check bls transaction and signatures, for variety of input sizes and 
   // K==2 Public + then PKH
   // K==3 PKH + then PKH
 
+  std::vector<CMutableTransaction> Txes;
+
   for (int k=0;k<4;k++) {
     // Do for a variety of input sizes
     for (auto& i : sizes) {
@@ -482,9 +484,24 @@ TEST_CASE("Check bls transaction and signatures, for variety of input sizes and 
         for (const auto &v : t0.vout)  BOOST_CHECK(v.IsBLS());
         //std::cout << "last vin script size = " << t0.vin[input_keys.size() - 1].scriptSig.size() << " ";
         std::cout << "Transaction size = " << rx.GetTotalSize() << "\n";
+        Txes.push_back(t0);
       }
     }
   }
+  try {
+    std::cout << "Combining all " << Txes.size() << " transactions ";
+
+    auto combined = combine_transactions(Txes);
+    CValidationState state;
+    BOOST_CHECK_MESSAGE((CheckRegularTransaction(CTransaction(combined), state) && state.IsValid()),
+                        "Simple deserialized transaction should be valid.");
+
+    CTransaction c(combined);
+    bool check_combined = CheckPrivateSigs(c);
+    BOOST_CHECK(check_combined);
+    std::cout << "Transaction size = " << c.GetTotalSize() << "\n";
+  } catch (...) { BOOST_ERROR_MESSAGE("Exception combining transactions\n"); }
+  
 }
 
 TEST_CASE("Check bls transaction and signatures, 1 input, 1-16 outputs, inputs using public key") {
