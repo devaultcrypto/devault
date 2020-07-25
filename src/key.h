@@ -40,6 +40,7 @@ private:
 
     //! Check whether the 32-byte array pointed to by vch is valid keydata.
     static bool Check(const uint8_t *vch);
+    static bool CheckBLS(const uint8_t *vch);
 
 public:
     //! Construct an invalid private key.
@@ -76,6 +77,9 @@ public:
 
     //! Generate a new private key using a cryptographic PRNG.
     void MakeNewKey();
+  
+    //! Generate a new private BLS key using a cryptographic PRNG.
+    void MakeNewBLSKey();
 
     /**
      * Compute the public key from a private key.

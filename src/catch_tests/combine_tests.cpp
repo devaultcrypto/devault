@@ -29,7 +29,7 @@ void make_public_input_keys(int vals, std::vector<CKey> &input_keys, std::vector
   p2pub.clear();
   for (int i = 0; i < vals; i++) {
     CKey k;
-    k.MakeNewKey();
+    k.MakeNewBLSKey();
     input_keys.push_back(k);
     p2pub.push_back(true);
   }

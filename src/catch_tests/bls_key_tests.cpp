@@ -21,25 +21,22 @@
 #include "catch_unit.h"
 
 /*
-testpriv:zzjeqe4uk6jrk7m9xgv3uvsn4pl8uz6hucm8vgsvhcmsfhzaxmm35d3pjszfc 2019-11-26T03:04:09Z reserve=1 #
-    addr=blstest:rrw43xma6fqg76s2ru8c433sghd3kynypqay89cwn3,hdkeypath=m/44'/1'/0'/0/32
-testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k 2019-11-26T03:04:09Z reserve=1 #
-    addr=blstest:rqw2h6gw5j9as7n53u6zt350057dq8js2cpvvsz00p,hdkeypath=m/44'/1'/0'/0/33
-testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh 2019-11-26T03:04:09Z reserve=1 #
-    addr=blstest:rz099tn2lv5jg895gnm6j26ghf5h9ux9fgfdl49w3d,hdkeypath=m/44'/1'/0'/0/34
+testpriv:zqcruq3qe2r75w87xgm253e4jye3smq28uutz6npd62zp04yxkzzq5hmt3fpn 2020-07-25T06:11:35Z reserve=1 # 
+addr=blstest:dzyk0nk9xl2cufd958rgdsx4uzzjwpql5quvnkxma6,hdkeypath=m/44'/1'/1'/0/0
+testpriv:zqf4rtsl344wcdnd9l6ke8m9sts7at34pyqh36jj3fg6pezw4yt6zvce6gex2 2020-07-25T06:12:29Z reserve=1 # 
+addr=blstest:drj0mmla4raxh2eqlxz3tz7qwqk0xgau55jyjrq2kf,hdkeypath=m/44'/1'/1'/0/1
+testpriv:zqkwdedurxrs6gu3gme7500qtc9af3rulaxdjg7as97x05vvsexgshlfnpee9 2020-07-25T06:12:39Z reserve=1 # 
+addr=blstest:dp3etlfddmzutjufm6c7x8ayg7nc9v05vct2pxpl2n,hdkeypath=m/44'/1'/1'/0/2
 */
 
 // 32/33 from HD chain
-static const std::string strSecret1 = "testpriv:zzjeqe4uk6jrk7m9xgv3uvsn4pl8uz6hucm8vgsvhcmsfhzaxmm35d3pjszfc";
-static const std::string strSecret2 = "testpriv:zzxr3dnaadc733gtyeq04tl08hspp52xrmkwa6g3997yhw27zddzk06ee8m4k";
-static const std::string strSecret3 = "testpriv:zq96llmh3qm29a0ufmjglh6r3jh8fuqhg5ucu5g2lygnzpmmx0w9jnwvwnenh";
+static const std::string strSecret1 = "testpriv:zqcruq3qe2r75w87xgm253e4jye3smq28uutz6npd62zp04yxkzzq5hmt3fpn";
+static const std::string strSecret2 = "testpriv:zqf4rtsl344wcdnd9l6ke8m9sts7at34pyqh36jj3fg6pezw4yt6zvce6gex2";
+static const std::string strSecret3 = "testpriv:zqkwdedurxrs6gu3gme7500qtc9af3rulaxdjg7as97x05vvsexgshlfnpee9";
 
-//static const std::string addr1 = "blstest:dp8xwhskqe7n03rxkxtee5nulf3gfaeg2v3vqt27m4";
-static const std::string addr1 = "blstest:drw43xma6fqg76s2ru8c433sghd3kynypqgm9dmuun";
-//static const std::string addr2 = "blstest:dp8nw8hsxhaza5y50j5q6j3unauss28f9ytmdnss38";
-static const std::string addr2 = "blstest:dqw2h6gw5j9as7n53u6zt350057dq8js2c5nwcpaqr";
-//static const std::string addr3 = "blstest:dp9jzxnyd8n2v2jda9um7sq2wse208sgpyv250vgyx";
-static const std::string addr3 = "blstest:dz099tn2lv5jg895gnm6j26ghf5h9ux9fgujaaxu70";
+static const std::string addr1 = "blstest:dzyk0nk9xl2cufd958rgdsx4uzzjwpql5quvnkxma6";
+static const std::string addr2 = "blstest:drj0mmla4raxh2eqlxz3tz7qwqk0xgau55jyjrq2kf";
+static const std::string addr3 = "blstest:dp3etlfddmzutjufm6c7x8ayg7nc9v05vct2pxpl2n";
 
 static const std::string strAddressBad = "=blstest:rpwqz8mgp97ak2a369q7t0hczvpt05upa5alt22rj8";
 
@@ -73,11 +70,11 @@ TEST_CASE("bls_key_test1") {
 
   const Config &config = GetConfig();
   const CChainParams &chainParams = config.GetChainParams();
-/*
+
   BOOST_CHECK(DecodeDestination(addr1, chainParams) == CTxDestination(pubkey1.GetBLSKeyID()));
   BOOST_CHECK(DecodeDestination(addr2, chainParams) == CTxDestination(pubkey2.GetBLSKeyID()));
   BOOST_CHECK(DecodeDestination(addr3, chainParams) == CTxDestination(pubkey3.GetBLSKeyID()));
-*/
+
   for (int n = 0; n < 16; n++) {
     std::string strMsg = strprintf("Very secret message %i: 11", n);
     uint256 hashMsg = Hash(strMsg.begin(), strMsg.end());
@@ -120,12 +117,8 @@ TEST_CASE("bls_key_test1") {
 }
 
 
-// 32/33 from HD chain
-//static const std::string Secret1 = "testpriv:zp8fm0ydzhdy83g25m2udmg3xwzd3rrwkfwvr6u6fcaahhvcn737ukkjhwcyn";
-//static const std::string Secret2 = "testpriv:zp9jl2xe822rtf898rpuda4xj23xhtnglnfsnmhflrmln8lvn5jlc94grsrwc";
-
-static const std::string Public1 = addr1;//"blstest:rzqz6nsxn9l2aqx8mgml3vcr3750vxcpdc46h4d0ax";
-static const std::string Public2 = addr2;//"blstest:rrteymuq2vp8y76z0ludfz9j7ftgva5ensgnm4jy9f";
+static const std::string Public1 = addr1;
+static const std::string Public2 = addr2;
 
 TEST_CASE("bls agg sig test") {
   BasicTestingSetup setup(CBaseChainParams::TESTNET);
@@ -144,8 +137,8 @@ TEST_CASE("bls agg sig test") {
   const CChainParams &chainParams = config.GetChainParams();
   
   
-  //  BOOST_CHECK(DecodeDestination(Public1, chainParams) == CTxDestination(pubkey1.GetBLSKeyID()));
-  //  BOOST_CHECK(DecodeDestination(Public2, chainParams) == CTxDestination(pubkey2.GetBLSKeyID()));
+  BOOST_CHECK(DecodeDestination(Public1, chainParams) == CTxDestination(pubkey1.GetBLSKeyID()));
+  BOOST_CHECK(DecodeDestination(Public2, chainParams) == CTxDestination(pubkey2.GetBLSKeyID()));
 
   for (int n = 0; n < 1; n++) { // 1 for NOW
 
