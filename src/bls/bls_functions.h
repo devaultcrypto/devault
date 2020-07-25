@@ -7,13 +7,9 @@
 #include <key.h>
 
 namespace bls {
-    class Signature; // Forward Declaration
-
-    bool SignBLS(const CKey &key, const uint256 &hash, Signature& sig);
     bool SignBLS(const CKey& key, const uint256 &hash, std::vector<uint8_t> &vchSig);
     bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig);
     auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>>;
-    std::vector<uint8_t> AggregateSigs(std::vector<Signature*> &vpSigs);
 
 
     // for test routine

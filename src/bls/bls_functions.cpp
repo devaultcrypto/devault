@@ -3,7 +3,6 @@
 
 #include "bls/bls.hpp"
 #include "bls/privatekey.hpp"
-#include "bls/signature.hpp"
 #include "bls/schemes.hpp"
 #include "util/strencodings.h"
 #include <bls/bls_functions.h>
@@ -32,14 +31,6 @@ auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<
   std::vector<uint8_t> message(hash.begin(),hash.end());
   auto vchSig = AugScheme::Sign(PK, message);
   return vchSig;
-}
-  
-bool SignBLS(const CKey &key, const uint256 &hash, Signature &sig) {
-  auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
-  std::vector<uint8_t> message(hash.begin(),hash.end());
-  auto vchSig = AugScheme::Sign(PK, message);
-  sig = bls::Signature::FromBytes(vchSig.data());
-  return true; // for now
 }
   
 bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t *vch) {
