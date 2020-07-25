@@ -178,7 +178,8 @@ PublicKey PrivateKey::GetPublicKey() const {
     return ret;
 }
 
-PrivateKey PrivateKey::AggregateInsecure(std::vector<PrivateKey> const& privateKeys) {
+PrivateKey PrivateKey::Aggregate(std::vector<PrivateKey> const &privateKeys)
+{
     if (privateKeys.empty()) {
         throw std::length_error("Number of private keys must be at least 1");
     }
@@ -195,57 +196,10 @@ PrivateKey PrivateKey::AggregateInsecure(std::vector<PrivateKey> const& privateK
     return ret;
 }
 
-PrivateKey PrivateKey::Aggregate(std::vector<PrivateKey> const& privateKeys,
-                                 std::vector<PublicKey> const& pubKeys) {
-    if (pubKeys.size() != privateKeys.size()) {
-        throw std::length_error("Number of public keys must equal number of private keys");
-    }
-    if (privateKeys.empty()) {
-        throw std::length_error("Number of keys must be at least 1");
-    }
+bool PrivateKey::IsZero() { return (bn_is_zero(*keydata)); }
 
-    std::vector<uint8_t*> serPubKeys(pubKeys.size());
-    for (size_t i = 0; i < pubKeys.size(); i++) {
-        serPubKeys[i] = new uint8_t[PublicKey::PUBLIC_KEY_SIZE];
-        pubKeys[i].Serialize(serPubKeys[i]);
-    }
-
-    // Sort the public keys and private keys by public key
-    std::vector<size_t> keysSorted(privateKeys.size());
-    for (size_t i = 0; i < privateKeys.size(); i++) {
-        keysSorted[i] = i;
-    }
-
-    std::sort(keysSorted.begin(), keysSorted.end(), [&serPubKeys](size_t a, size_t b) {
-        return memcmp(serPubKeys[a], serPubKeys[b], PublicKey::PUBLIC_KEY_SIZE) < 0;
-    });
-
-
-    bn_t *computedTs = new bn_t[keysSorted.size()];
-    for (size_t i = 0; i < keysSorted.size(); i++) {
-        bn_new(computedTs[i]);
-    }
-    BLS::HashPubKeys(computedTs, keysSorted.size(), serPubKeys, keysSorted);
-
-    // Raise all keys to power of the corresponding t's and aggregate the results into aggKey
-    std::vector<PrivateKey> expKeys;
-    expKeys.reserve(keysSorted.size());
-    for (size_t i = 0; i < keysSorted.size(); i++) {
-        auto& k = privateKeys[keysSorted[i]];
-        expKeys.emplace_back(k.Mul(computedTs[i]));
-    }
-    PrivateKey aggKey = PrivateKey::AggregateInsecure(expKeys);
-
-    for (auto p : serPubKeys) {
-        delete[] p;
-    }
-    delete[] computedTs;
-
-    BLS::CheckRelicErrors();
-    return aggKey;
-}
-
-PrivateKey PrivateKey::Mul(const bn_t n) const {
+PrivateKey PrivateKey::Mul(const bn_t n) const
+{
     bn_t order;
     bn_new(order);
     g2_get_ord(order);
