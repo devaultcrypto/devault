@@ -627,9 +627,6 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     SecureVector vchSeed = hdChain.GetSeed();
     file << "# HD seed: " << HexStr(vchSeed) << "\n\n";
 
-    CExtKey masterKey;
-    masterKey.SetMaster(&vchSeed[0], vchSeed.size());
-
     CHDAccount acc;
     
     if (pwallet->HasBLSKeys()) {

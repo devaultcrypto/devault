@@ -108,7 +108,7 @@ public:
     
   uint256 GetID() const { return id; }
 
-  void DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey &extKeyRet);
+  void DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey &extKeyRet, bool bls);
 
   void AddAccount(uint32_t nAccountIndex);
   bool GetAccount(uint32_t nAccountIndex, CHDAccount &hdAccountRet);

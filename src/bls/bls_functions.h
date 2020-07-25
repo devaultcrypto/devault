@@ -9,6 +9,7 @@
 #include <key.h>
 
 namespace bls {
+  
     bool SignBLS(const CKey& key, const uint256 &hash, std::vector<uint8_t> &vchSig);
     bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig);
     auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>>;
@@ -27,6 +28,9 @@ namespace bls {
 
     bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t* vch);
     CPubKey GetBLSPublicKey(const CKey &key);
+    CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex);
+    CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen);
+    CKey GetBLSChild(const CKey& master, uint32_t childIndex);
 
 
     // For Distinct Messages
