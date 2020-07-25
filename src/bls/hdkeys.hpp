@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_BLSHDKEYS_HPP_
-#define SRC_BLSHDKEYS_HPP_
+#pragma once
 
 #include "relic_conf.h"
 #include <math.h>
 
-#if defined GMP && ARITH == GMP
 #include <gmp.h>
-#endif
 
 #include "util.hpp"
 #include "privatekey.hpp"
@@ -86,4 +83,3 @@ class HDKeys {
     }
 };
 } // end namespace bls
-#endif  // SRC_BLSHDKEYS_HPP_

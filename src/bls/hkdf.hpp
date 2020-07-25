@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_BLSHKDF_HPP_
-#define SRC_BLSHKDF_HPP_
+#pragma once
 
 #include "relic_conf.h"
+#include <cassert>
 #include <math.h>
-
-#if defined GMP && ARITH == GMP
 #include <gmp.h>
-#endif
 
 #include "util.hpp"
 
@@ -90,4 +87,3 @@ class HKDF256 {
     }
 };
 } // end namespace bls
-#endif  // SRC_BLSHKDF_HPP_
