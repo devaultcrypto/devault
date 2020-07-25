@@ -13,30 +13,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define CATCH_CONFIG_RUNNER
+////#define CATCH_CONFIG_RUNNER
 #include <thread>
+#include <catch_tests/test_bitcoin.h>
+#include "catch_unit.h"
 
-#include "bls.hpp"
-#include "catch.hpp"
-#include "relic.h"
-#include "relic_test.h"
-#include "schemes.hpp"
-#include "test-utils.hpp"
-#include "hkdf.hpp"
-#include "hdkeys.hpp"
+#include "bls/bls.hpp"
+//#include "catch.hpp"
+//#include "relic.h"
+//#include "relic_test.h"
+#include "bls/schemes.hpp"
+///#include "test-utils.hpp"
+#include "bls/hkdf.hpp"
+#include "bls/hdkeys.hpp"
+
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
 
 using namespace bls;
+/*
+ * Converts one hex character to an int.
+ */
+static uint8_t char2int(const char input) {
+  if(input >= '0' && input <= '9')
+    return input - '0';
+  if(input >= 'A' && input <= 'F')
+    return input - 'A' + 10;
+  if(input >= 'a' && input <= 'f')
+    return input - 'a' + 10;
+  throw std::invalid_argument("Invalid input string");
+}
+/*
+ * Converts a hex string into a vector of bytes.
+ */
+static std::vector<uint8_t> HexToBytes(const std::string hex) {
+  if (hex.size() % 2 != 0) {
+    throw std::invalid_argument("Invalid input string, length must be multple of 2");
+  }
+  std::vector<uint8_t> ret = std::vector<uint8_t>();
+  size_t start_at = 0;
+  if (hex.rfind("0x", 0) == 0 || hex.rfind("0x", 0) == 0) {
+    start_at = 2;
+  }
+  
+  for (size_t i = start_at; i < hex.size(); i += 2) {
+    ret.push_back(char2int(hex[i]) * 16 + char2int(hex[i+1]));
+  }
+  return ret;
+}
 
 void TestHKDF(string ikm_hex, string salt_hex, string info_hex, string prk_expected_hex, string okm_expected_hex, int L) {
-    vector<uint8_t> ikm = Util::HexToBytes(ikm_hex);
-    vector<uint8_t> salt = Util::HexToBytes(salt_hex);
-    vector<uint8_t> info = Util::HexToBytes(info_hex);
-    vector<uint8_t> prk_expected = Util::HexToBytes(prk_expected_hex);
-    vector<uint8_t> okm_expected = Util::HexToBytes(okm_expected_hex);
+    vector<uint8_t> ikm = HexToBytes(ikm_hex);
+    vector<uint8_t> salt = HexToBytes(salt_hex);
+    vector<uint8_t> info = HexToBytes(info_hex);
+    vector<uint8_t> prk_expected = HexToBytes(prk_expected_hex);
+    vector<uint8_t> okm_expected = HexToBytes(okm_expected_hex);
     uint8_t prk[32];
     HKDF256::Extract(prk, salt.data(), salt.size(), ikm.data(), ikm.size());
     uint8_t okm[L];
@@ -48,7 +81,7 @@ void TestHKDF(string ikm_hex, string salt_hex, string info_hex, string prk_expec
     for (size_t i=0; i < 32; i++) {
         REQUIRE(prk[i] == prk_expected[i]);
     }
-    for (size_t i=0; i < L; i++) {
+    for (int i=0; i < L; i++) {
         REQUIRE(okm[i] == okm_expected[i]);
     }
 }
@@ -113,9 +146,9 @@ TEST_CASE("HKDF") {
 }
 
 void TestEIP2333(string seedHex, string masterSkHex, string childSkHex, uint32_t childIndex) {
-    auto seed = Util::HexToBytes(seedHex);
-    auto masterSk = Util::HexToBytes(masterSkHex);
-    auto childSk = Util::HexToBytes(childSkHex);
+    auto seed = HexToBytes(seedHex);
+    auto masterSk = HexToBytes(masterSkHex);
+    auto childSk = HexToBytes(childSkHex);
 
     PrivateKey master = PrivateKey::FromSeed(seed.data(), seed.size());
     PrivateKey child = HDKeys::DeriveChildSk(master, childIndex);
@@ -316,8 +349,3 @@ TEST_CASE("Schemes")
     }
 }
 
-int main(int argc, char* argv[])
-{
-    int result = Catch::Session().run(argc, argv);
-    return result;
-}

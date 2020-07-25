@@ -130,6 +130,7 @@ set(UNIT_CTESTS
 
 set(UNIT_BLS
   bls_key
+  bls_hkdf
 )  
 
 set(UNIT_STESTS

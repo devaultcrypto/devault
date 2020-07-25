@@ -5,7 +5,6 @@
 #include <key.h>
 
 #include <bls/bls_functions.h>
-#include <bls/signature.hpp>
 
 #include <catch_tests/test_bitcoin.h>
 #include <chainparams.h>
@@ -187,7 +186,6 @@ TEST_CASE("bls agg sig test") {
     // Verify Aggregate Signature here
     std::vector<uint8_t> aggKeys = bls::AggregatePubKeys(pubkeys); // breaks for even 1 key
 
-    bls::PublicKey Pk = bls::PublicKey::FromBytes(aggKeys.data());
     auto aggSig = bls::Aggregate(vecsigs);
 
     bool ok2 = bls::VerifySigForMessages(messages, aggSig, pubkeys);
