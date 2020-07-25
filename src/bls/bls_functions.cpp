@@ -15,6 +15,18 @@
 
 namespace bls {
 
+bool CheckValidBLSPrivateKey(const uint8_t* bytes) {
+  try {
+    auto priv = PrivateKey::FromBytes(bytes);
+  }
+  catch(...) {
+    return false;
+  }
+  return true;
+}
+  
+    
+
 CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex) {
   PrivateKey master = PrivateKey::FromSeed(seed, seedLen);
   PrivateKey child = HDKeys::DeriveChildSk(master, childIndex);

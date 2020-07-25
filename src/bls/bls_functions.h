@@ -31,6 +31,7 @@ namespace bls {
     CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex);
     CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen);
     CKey GetBLSChild(const CKey& master, uint32_t childIndex);
+    bool CheckValidBLSPrivateKey(const uint8_t* bytes);
 
 
     // For Distinct Messages

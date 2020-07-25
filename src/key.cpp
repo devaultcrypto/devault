@@ -92,10 +92,21 @@ bool CKey::Check(const uint8_t *vch) {
     return secp256k1_ec_seckey_verify(secp256k1_context_sign, vch);
 }
 
+bool CKey::CheckBLS(const uint8_t *vch) {
+  return bls::CheckValidBLSPrivateKey(vch);
+}
+
 void CKey::MakeNewKey() {
     do {
         GetStrongRandBytes(keydata.data(), keydata.size());
     } while (!Check(keydata.data()));
+    fValid = true;
+}
+
+void CKey::MakeNewBLSKey() {
+    do {
+        GetStrongRandBytes(keydata.data(), keydata.size());
+    } while (!CheckBLS(keydata.data()));
     fValid = true;
 }
 

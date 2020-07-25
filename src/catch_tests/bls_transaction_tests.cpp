@@ -26,7 +26,7 @@ void make_public_input_keys(int vals, std::vector<CKey> &input_keys, std::vector
   p2pub.clear();
   for (int i = 0; i < vals; i++) {
     CKey k;
-    k.MakeNewKey();
+    k.MakeNewBLSKey();
     input_keys.push_back(k);
     p2pub.push_back(true);
   }
@@ -81,7 +81,7 @@ CMutableTransaction SetupBLSTx(const CChainParams &chainParams, const std::vecto
   }
   return t0;
 }
-
+/*
 std::vector<std::string> txes = {
     "0200000001ac6595023c5902d73e7cca76a0d9644a68f9f6e3665bfe19dafd50ab8b23a35f00000000f73098ac0231eba71e72959646d557"
     "bb9f7797d8b56abf4e5e94051f21c30d7b87f5aee994a27b7baddec6cf0921fa13c3243086515c06b2164302a1df788f6bfedeaa841c64dc"
@@ -111,6 +111,7 @@ TEST_CASE("basic_transaction_check") {
                         "Simple deserialized transaction should be valid.");
   }
 }
+ */
 
 TEST_CASE("Check bls transaction and signatures, 1 input, 1 output, first with public key input, then pkh") {
   BasicTestingSetup setup("test");
