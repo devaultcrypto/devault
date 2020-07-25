@@ -308,54 +308,6 @@ G2Element PrivateKey::SignG2Prehashed(
     return G2Element::FromNative(&sig);
 }
 
-InsecureSignature PrivateKey::SignInsecure(const uint8_t *msg, size_t len) const {
-    uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
-    Util::Hash256(messageHash, msg, len);
-    return SignInsecurePrehashed(messageHash);
-}
-
-InsecureSignature PrivateKey::SignInsecurePrehashed(const uint8_t *messageHash) const {
-    g2_t sig, point;
-
-    g2_map_ft(point, messageHash, BLS::MESSAGE_HASH_LEN);
-    g2_mul(sig, point, *keydata);
-
-    return InsecureSignature::FromG2(&sig);
-}
-
-Signature PrivateKey::Sign(const uint8_t *msg, size_t len) const {
-    uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
-    Util::Hash256(messageHash, msg, len);
-    return SignPrehashed(messageHash);
-}
-
-Signature PrivateKey::SignPrehashed(const uint8_t *messageHash) const {
-    InsecureSignature insecureSig = SignInsecurePrehashed(messageHash);
-    Signature ret = Signature::FromInsecureSig(insecureSig);
-
-    ret.SetAggregationInfo(AggregationInfo::FromMsgHash(GetPublicKey(),
-            messageHash));
-
-    return ret;
-}
-
-PrependSignature PrivateKey::SignPrepend(const uint8_t *msg, size_t len) const {
-    uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
-    Util::Hash256(messageHash, msg, len);
-    return SignPrependPrehashed(messageHash);
-}
-
-PrependSignature PrivateKey::SignPrependPrehashed(const uint8_t *messageHash) const {
-    uint8_t finalMessage[PublicKey::PUBLIC_KEY_SIZE + BLS::MESSAGE_HASH_LEN];
-    GetPublicKey().Serialize(finalMessage);
-    memcpy(finalMessage + PublicKey::PUBLIC_KEY_SIZE, messageHash, BLS::MESSAGE_HASH_LEN);
-
-    uint8_t finalMessageHash[BLS::MESSAGE_HASH_LEN];
-    Util::Hash256(finalMessageHash, finalMessage, PublicKey::PUBLIC_KEY_SIZE + BLS::MESSAGE_HASH_LEN);
-
-    return PrependSignature::FromInsecureSig(SignInsecurePrehashed(finalMessageHash));
-}
-
 void PrivateKey::AllocateKeyData() {
     keydata = SecAlloc<bn_t>(1);
     bn_new(*keydata);  // Freed in destructor

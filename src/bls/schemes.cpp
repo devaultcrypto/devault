@@ -20,7 +20,6 @@
 #include "bls/bls.hpp"
 #include "bls/elements.hpp"
 #include "bls/schemes.hpp"
-#include "bls/signature.hpp"
 
 using std::string;
 using std::vector;
