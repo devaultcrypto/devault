@@ -19,44 +19,74 @@
 #include "bls/bls.hpp"
 #include "bls/privatekey.hpp"
 #include "bls/util.hpp"
-#include <crypto/hmac_sha256.h>
-
+#include "bls/hkdf.hpp"
 
 namespace bls {
-
-
 PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen)
 {
-  BLS::AssertInitialized();
+    // KeyGen
+    // 1. PRK = HKDF-Extract("BLS-SIG-KEYGEN-SALT-", IKM || I2OSP(0, 1))
+    // 2. OKM = HKDF-Expand(PRK, keyInfo || I2OSP(L, 2), L)
+    // 3. SK = OS2IP(OKM) mod r
+    // 4. return SK
 
-  // "BLS private key seed" in ascii
-  const uint8_t hmacKey[] = {66,  76, 83,  32,  112, 114, 105, 118, 97,  116,
-                             101, 32, 107, 101, 121, 32,  115, 101, 101, 100};
+    const uint8_t info[1] = {0};
+    const size_t infoLen = 0;
 
-  uint8_t *hash = SecAlloc<uint8_t>(PrivateKey::PRIVATE_KEY_SIZE);
+    // Required by the ietf spec to be at least 32 bytes
+    assert(seedLen >= 32);
 
-  // Hash the seed into sk
-  CHMAC_SHA256(hmacKey, sizeof(hmacKey)).Write(seed, seedLen).Finalize(hash);
+    // "BLS-SIG-KEYGEN-SALT-" in ascii
+    const uint8_t saltHkdf[20] = {66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
+                                  89, 71, 69, 78, 45, 83, 65, 76, 84, 45};
 
-  bn_t order;
-  bn_new(order);
-  g1_get_ord(order);
-  bn_free(order);
+    uint8_t *prk = SecAlloc<uint8_t>(32);
+    uint8_t *ikmHkdf = SecAlloc<uint8_t>(seedLen + 1);
+    memcpy(ikmHkdf, seed, seedLen);
+    ikmHkdf[seedLen] = 0;
 
-  // Make sure private key is less than the curve order
-  bn_t *skBn = SecAlloc<bn_t>(1);
-  bn_new(*skBn);
-  bn_read_bin(*skBn, hash, PrivateKey::PRIVATE_KEY_SIZE);
-  bn_mod_basic(*skBn, *skBn, order);
+    const uint8_t L = 48;  // `ceil((3 * ceil(log2(r))) / 16)`, where `r` is the
+                           // order of the BLS 12-381 curve
 
-  PrivateKey k;
-  k.AllocateKeyData();
-  bn_copy(*k.keydata, *skBn);
+    uint8_t *okmHkdf = SecAlloc<uint8_t>(L);
 
-  SecFree(skBn);
-  SecFree(hash);
-  
-  return k;
+    uint8_t keyInfoHkdf[infoLen + 2];
+    memcpy(keyInfoHkdf, info, infoLen);
+    keyInfoHkdf[infoLen] = 0;  // Two bytes for L, 0 and 48
+    keyInfoHkdf[infoLen + 1] = L;
+
+    HKDF256::ExtractExpand(
+        okmHkdf,
+        L,
+        ikmHkdf,
+        seedLen + 1,
+        saltHkdf,
+        20,
+        keyInfoHkdf,
+        infoLen + 2);
+
+    bn_t order;
+    bn_new(order);
+    g1_get_ord(order);
+
+    // Make sure private key is less than the curve order
+    bn_t *skBn = SecAlloc<bn_t>(1);
+    bn_new(*skBn);
+    bn_read_bin(*skBn, okmHkdf, L);
+    bn_mod_basic(*skBn, *skBn, order);
+
+    PrivateKey k;
+    k.AllocateKeyData();
+    bn_copy(*k.keydata, *skBn);
+
+    bn_free(order);
+    bn_free(skBn);
+    SecFree(prk);
+    SecFree(ikmHkdf);
+    SecFree(skBn);
+    SecFree(okmHkdf);
+
+    return k;
 }
 
 // Construct a private key from a bytearray.
@@ -267,4 +297,4 @@ void PrivateKey::AllocateKeyData() {
     bn_new(*keydata);  // Freed in destructor
     bn_zero(*keydata);
 }
-} // end namespace bls
+}  // end namespace bls

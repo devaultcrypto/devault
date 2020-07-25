@@ -48,9 +48,9 @@ class HKDF256 {
         size_t N = ceil((double)L / HASH_LEN);
         size_t bytesWritten = 0;
 
-        uint8_t* T = Util::SecAlloc<uint8_t>(HASH_LEN);
-        uint8_t* hmacInput1 = Util::SecAlloc<uint8_t>(infoLen + 1);
-        uint8_t* hmacInput = Util::SecAlloc<uint8_t>(HASH_LEN + infoLen + 1);
+        uint8_t* T = SecAlloc<uint8_t>(HASH_LEN);
+        uint8_t* hmacInput1 = SecAlloc<uint8_t>(infoLen + 1);
+        uint8_t* hmacInput = SecAlloc<uint8_t>(HASH_LEN + infoLen + 1);
 
         assert(N >= 1 && N <= 255);
 
@@ -73,9 +73,9 @@ class HKDF256 {
             memcpy(okm + bytesWritten, T, to_write);
             bytesWritten += to_write;
         }
-        Util::SecFree(T);
-        Util::SecFree(hmacInput1);
-        Util::SecFree(hmacInput);
+        SecFree(T);
+        SecFree(hmacInput1);
+        SecFree(hmacInput);
         assert(bytesWritten == L);
     }
 
@@ -83,10 +83,10 @@ class HKDF256 {
                               const uint8_t* key, size_t keyLen,
                               const uint8_t* salt, size_t saltLen,
                               const uint8_t* info, size_t infoLen) {
-        uint8_t* prk = Util::SecAlloc<uint8_t>(HASH_LEN);
+        uint8_t* prk = SecAlloc<uint8_t>(HASH_LEN);
         HKDF256::Extract(prk, salt, saltLen, key, keyLen);
         HKDF256::Expand(output, outputLen, prk, info, infoLen);
-        Util::SecFree(prk);
+        SecFree(prk);
     }
 };
 } // end namespace bls

@@ -42,11 +42,11 @@ class HDKeys {
     }
 
     static void ParentSkToLamportPK(uint8_t* outputLamportPk, PrivateKey& parentSk, uint32_t index) {
-        uint8_t* salt = Util::SecAlloc<uint8_t>(4);
-        uint8_t* ikm = Util::SecAlloc<uint8_t>(32);
-        uint8_t* notIkm = Util::SecAlloc<uint8_t>(32);
-        uint8_t* lamport0 = Util::SecAlloc<uint8_t>(32 * 255);
-        uint8_t* lamport1 = Util::SecAlloc<uint8_t>(32 * 255);
+        uint8_t* salt = SecAlloc<uint8_t>(4);
+        uint8_t* ikm = SecAlloc<uint8_t>(32);
+        uint8_t* notIkm = SecAlloc<uint8_t>(32);
+        uint8_t* lamport0 = SecAlloc<uint8_t>(32 * 255);
+        uint8_t* lamport1 = SecAlloc<uint8_t>(32 * 255);
 
         Util::IntToFourBytes(salt, index);
         parentSk.Serialize(ikm);
@@ -58,7 +58,7 @@ class HDKeys {
         HDKeys::IKMToLamportSk(lamport0, ikm, 32, salt, 4);
         HDKeys::IKMToLamportSk(lamport1, notIkm, 32, salt, 4);
 
-        uint8_t* lamportPk = Util::SecAlloc<uint8_t>(32 * 255 * 2);
+        uint8_t* lamportPk = SecAlloc<uint8_t>(32 * 255 * 2);
 
         for (size_t i = 0; i < 255; i++) {
             Util::Hash256(lamportPk + i * 32, lamport0 + i * 32, 32);
@@ -69,19 +69,19 @@ class HDKeys {
         }
         Util::Hash256(outputLamportPk, lamportPk, 32 * 255 * 2);
 
-        Util::SecFree(salt);
-        Util::SecFree(ikm);
-        Util::SecFree(notIkm);
-        Util::SecFree(lamport0);
-        Util::SecFree(lamport1);
-        Util::SecFree(lamportPk);
+        SecFree(salt);
+        SecFree(ikm);
+        SecFree(notIkm);
+        SecFree(lamport0);
+        SecFree(lamport1);
+        SecFree(lamportPk);
     }
 
     static PrivateKey DeriveChildSk(PrivateKey& parentSk, uint32_t index) {
-        uint8_t* lamportPk = Util::SecAlloc<uint8_t>(32);
+        uint8_t* lamportPk = SecAlloc<uint8_t>(32);
         HDKeys::ParentSkToLamportPK(lamportPk, parentSk, index);
         PrivateKey child = PrivateKey::FromSeed(lamportPk, 32);
-        Util::SecFree(lamportPk);
+        SecFree(lamportPk);
         return child;
     }
 };
