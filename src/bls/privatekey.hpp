@@ -36,8 +36,7 @@ friend class G2Element;
 
     // Generates a private key from a seed, similar to HD key generation
     // (hashes the seed), and reduces it mod the group order.
-    static PrivateKey FromSeed(
-            const uint8_t* seed, size_t seedLen);
+    static PrivateKey FromSeed(const uint8_t *seed, size_t seedLen);
 
     // Construct a private key from a bytearray.
     static PrivateKey FromBytes(const uint8_t* bytes, bool modOrder = false);
