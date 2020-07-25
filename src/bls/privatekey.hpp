@@ -17,13 +17,8 @@
 #include "relic_conf.h"
 #include <gmp.h>
 
-class InsecureSignature;
-class Signature;
-class PrependSignature;
-
 #include "bls/publickey.hpp"
 #include "bls/relic/include/relic.h"
-#include "bls/signature.hpp"
 #include "bls/elements.hpp"
 
 namespace bls {
@@ -102,21 +97,6 @@ friend class G2Element;
         const uint8_t *dst,
         size_t dst_len
     ) const;
-
-    // Sign a message without setting aggreagation info.
-    InsecureSignature SignInsecure(const uint8_t *msg, size_t len) const;
-    InsecureSignature SignInsecurePrehashed(const uint8_t *hash) const;
-
-    // The secure Signing variants, which also set and return appropriate aggregation info.
-    Signature Sign(const uint8_t *msg, size_t len) const;
-    Signature SignPrehashed(const uint8_t *hash) const;
-
-    // Helper methods to prepend the public key to the message, allowing secure
-    // aggregation by proof of posession of public key. These must be verified using
-    // VerifyPrepend. These signatures are identical to Insecure signatures, but are generated
-    // and verified by prepending the pulic keys: Sign(H(pk + H(m))).
-    PrependSignature SignPrepend(const uint8_t *msg, size_t len) const;
-    PrependSignature SignPrependPrehashed(const uint8_t *msg) const;
 
     // NEW ADDITIONS ***** DEVAULT
     PrivateKey() = default;

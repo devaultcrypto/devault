@@ -23,7 +23,6 @@
 
 #include "bls/privatekey.hpp"
 #include "bls/publickey.hpp"
-#include "bls/signature.hpp"
 #include "bls/aggregationinfo.hpp"
 #include "bls/relic/include/relic.h"
 

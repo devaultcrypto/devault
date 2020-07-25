@@ -74,7 +74,6 @@ source_group("BlsHeaders" FILES ${BLS_HEADERS} ${OTHER_HEADERS})
 
 add_library(bls ${BLS_HEADERS} ${OTHER_HEADERS}
   ${CMAKE_CURRENT_SOURCE_DIR}/privatekey.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/signature.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/publickey.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/bls.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/bls_functions.cpp
