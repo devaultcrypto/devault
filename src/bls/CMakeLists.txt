@@ -77,7 +77,6 @@ add_library(bls ${BLS_HEADERS} ${OTHER_HEADERS}
   ${CMAKE_CURRENT_SOURCE_DIR}/publickey.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/bls.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/bls_functions.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/aggregationinfo.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/elements.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/schemes.cpp
