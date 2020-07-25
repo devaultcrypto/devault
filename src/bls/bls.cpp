@@ -27,6 +27,9 @@ const char BLS::GROUP_ORDER[] = "73EDA753299D7D483339D80809A1D80553BDA402FFFE5BF
 
 bool BLSInitResult = BLS::Init();
 
+SecureAllocCallback Util::secureAllocCallback;
+SecureFreeCallback Util::secureFreeCallback;
+
 bool BLS::Init() {
   if (ALLOC != AUTO) {
     std::cout << "Must have ALLOC == AUTO";
@@ -47,6 +50,13 @@ bool BLS::Init() {
     std::cout << "libsodium init failed";
     return false;
   }
+#if BLSALLOC_SODIUM
+    SetSecureAllocator(libsodium::sodium_malloc, libsodium::sodium_free);
+#else
+    SetSecureAllocator(malloc, free);
+#endif
+
+  
   return true;
 }
 
@@ -56,6 +66,15 @@ void BLS::AssertInitialized() {
 }
 
 void BLS::Clean() { core_clean(); }
+
+  
+void BLS::SetSecureAllocator(
+                             SecureAllocCallback allocCb,
+                             SecureFreeCallback freeCb)
+{
+    Util::secureAllocCallback = allocCb;
+    Util::secureFreeCallback = freeCb;
+}
 
 void BLS::HashPubKeys(bn_t *output, size_t numOutputs, std::vector<uint8_t *> const &serPubKeys,
                       std::vector<size_t> const &sortedIndices) {

@@ -21,21 +21,8 @@
 #include "bls/util.hpp"
 #include <crypto/hmac_sha256.h>
 
-#include "sodium/core.h"
-#include "sodium/utils.h"
 
 namespace bls {
-
-/*
- * Securely allocates a portion of memory, using libsodium. This prevents
- * paging to disk, and zeroes out the memory when it's freed.
- */
-template <class T> static T *SecAlloc(size_t numTs) { return static_cast<T *>(sodium_malloc(sizeof(T) * numTs)); }
-
-/*
- * Frees memory allocated using SecAlloc.
- */
-static void SecFree(void *ptr) { sodium_free(ptr); }
 
 
 PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen)

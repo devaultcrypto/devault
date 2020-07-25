@@ -41,6 +41,7 @@ class BLS {
 
   // Initializes the BLS library manually
   static bool Init();
+  static void SetSecureAllocator(SecureAllocCallback allocCb, SecureFreeCallback freeCb);
   // Asserts the BLS library is initialized
   static void AssertInitialized();
   // Cleans the BLS library
