@@ -33,9 +33,9 @@ using std::vector;
 namespace bls {
 
 class Core {
-    friend class BasicScheme;
-    friend class AugScheme;
-    friend class PopScheme;
+    friend class BasicSchemeMPL;
+    friend class AugSchemeMPL;
+    friend class PopSchemeMPL;
 
 public:
     // static PrivateKey KeyGen(... ikm);  TODO
@@ -91,7 +91,7 @@ private:
     static bool NativeVerify(g1_t *pubKeys, g2_t *mappedHashes, size_t length);
 };
 
-class BasicScheme {
+class BasicSchemeMPL {
     friend class Core;
 
 public:
@@ -149,7 +149,7 @@ public:
         const G2Element &signature);
 };
 
-class AugScheme {
+class AugSchemeMPL {
     friend class Core;
 
 public:
@@ -186,6 +186,12 @@ public:
         const PrivateKey &seckey,
         const vector<uint8_t> &message);
 
+    // Custom prepended pk
+    static G2Element SignNative(
+        const PrivateKey &seckey,
+        const vector<uint8_t> &message,
+        const G1Element &prepend_pk);
+
     static bool Verify(
         const vector<uint8_t> &pubkey,
         const vector<uint8_t> &message,
@@ -207,7 +213,7 @@ public:
         const G2Element &signature);
 };
 
-class PopScheme {
+class PopSchemeMPL {
     friend class Core;
 
 public:

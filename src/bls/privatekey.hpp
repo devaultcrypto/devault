@@ -58,8 +58,10 @@ friend class G2Element;
 
     G2Element GetG2Power(g2_t base) const;
 
+    bool IsZero();
+
     // Insecurely aggregate multiple private keys into one
-    static PrivateKey AggregateInsecure(std::vector<PrivateKey> const& privateKeys);
+    static PrivateKey Aggregate(std::vector<PrivateKey> const& privateKeys);
 
     // Securely aggregate multiple private keys into one by exponentiating the keys with the pubKey hashes first
     static PrivateKey Aggregate(std::vector<PrivateKey> const& privateKeys,

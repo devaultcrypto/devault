@@ -15,13 +15,13 @@ namespace bls {
 bool SignBLS(const CKey &key, const uint256 &hash, std::vector<uint8_t> &vchSig) {
   auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  vchSig = AugScheme::Sign(PK, message);
+  vchSig = AugSchemeMPL::Sign(PK, message);
   // Then Verify
   return true; // for now True - sig.Verify();
 }
 bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig) {
   auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
-  vchSig = AugScheme::Sign(PK, message);
+  vchSig = AugSchemeMPL::Sign(PK, message);
   // Then Verify
   return true; // for now True - sig.Verify();
 }
@@ -29,7 +29,7 @@ bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<u
 auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>> {
   auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  auto vchSig = AugScheme::Sign(PK, message);
+  auto vchSig = AugSchemeMPL::Sign(PK, message);
   return vchSig;
 }
   
@@ -38,7 +38,7 @@ bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const ui
   auto pub = bls::PublicKey::FromBytes(vch); //???
   auto pubkey = pub.Serialize();
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  return AugScheme::Verify(pubkey,message,vchSig);
+  return AugSchemeMPL::Verify(pubkey,message,vchSig);
   
 }
 
@@ -59,7 +59,7 @@ CPubKey GetBLSPublicKey(const CKey &key) {
 }
 
 std::vector<uint8_t> Aggregate(std::vector<std::vector<uint8_t>> &vSigs) {
-  auto aggSig = AugScheme::Aggregate(vSigs);
+  auto aggSig = AugSchemeMPL::Aggregate(vSigs);
   return aggSig;
 }
 
@@ -91,7 +91,7 @@ std::vector<uint8_t> AggregateSigForMessages(std::map<uint256, CKey> &keys_plus_
   }
   if (!sigsok) return std::vector<uint8_t>();
 
-  std::vector<uint8_t> aggSig = AugScheme::Aggregate(sigs);
+  std::vector<uint8_t> aggSig = AugSchemeMPL::Aggregate(sigs);
   return aggSig;
 }
 
@@ -106,7 +106,7 @@ bool VerifySigForMessages(const std::vector<uint256> &msgs, const std::vector<ui
   }
   bool ok = false;
   try {
-    ok = AugScheme::AggregateVerify(pubkeys, messages, aggSigs);
+    ok = AugSchemeMPL::AggregateVerify(pubkeys, messages, aggSigs);
   }
   catch (...) { ; }
   return ok;
@@ -115,14 +115,14 @@ bool VerifySigForMessages(const std::vector<uint256> &msgs, const std::vector<ui
 bool VerifySigForMessages(const std::vector<std::vector<uint8_t>> &msgs, const std::vector<uint8_t> &aggSigs,
                          const std::vector<std::vector<uint8_t>> &pubkeys) {
 
-  return AugScheme::AggregateVerify(pubkeys, msgs, aggSigs);
+  return AugSchemeMPL::AggregateVerify(pubkeys, msgs, aggSigs);
 }
 
 std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<uint256> &msgs,
                                                   const std::vector<std::vector<uint8_t>> &aggSigs,
                                                   const std::vector<std::vector<uint8_t>> &pubkeys) {
 
-  auto Agg = AugScheme::Aggregate(aggSigs);
+  auto Agg = AugSchemeMPL::Aggregate(aggSigs);
   return Agg;
 }
     
