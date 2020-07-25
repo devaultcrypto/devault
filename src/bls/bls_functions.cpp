@@ -6,13 +6,40 @@
 #include "bls/bls.hpp"
 #include "bls/privatekey.hpp"
 #include "bls/schemes.hpp"
-#include "util/strencodings.h"
+#include "bls/hdkeys.hpp"
 #include <bls/bls_functions.h>
+#include "util/strencodings.h"
 #include <cstring>
 //#include <dstencode.h>
 //#include <script/script.h>
 
 namespace bls {
+
+CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex) {
+  PrivateKey master = PrivateKey::FromSeed(seed, seedLen);
+  PrivateKey child = HDKeys::DeriveChildSk(master, childIndex);
+  auto calculatedChild = child.Serialize();
+  CKey k;
+  k.Set(calculatedChild.begin(),calculatedChild.end());
+  return k;
+}
+  
+CKey GetBLSChild(const CKey& key, uint32_t childIndex) {
+  PrivateKey master = PrivateKey::FromBytes(key.begin());
+  PrivateKey child = HDKeys::DeriveChildSk(master, childIndex);
+  auto calculatedChild = child.Serialize();
+  CKey k;
+  k.Set(calculatedChild.begin(),calculatedChild.end());
+  return k;
+}
+  
+CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen) {
+  PrivateKey master = PrivateKey::FromSeed(seed, seedLen);
+  auto bytes = master.Serialize();
+  CKey k;
+  k.Set(bytes.begin(),bytes.end());
+  return k;
+}
 
 bool SignBLS(const CKey &key, const uint256 &hash, std::vector<uint8_t> &vchSig) {
   auto PK = bls::PrivateKey::FromBytes(key.begin());

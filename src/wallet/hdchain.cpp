@@ -46,7 +46,7 @@ bool CHDChain::SetSeed(const SecureVector &vchSeedIn, bool fUpdateID) {
   return !IsNull();
 }
 
-void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey &extKeyRet) {
+void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_t nChildIndex, CExtKey &extKeyRet, bool bls) {
   // Use BIP44 keypath scheme i.e. m / purpose' / coin_type' / account' /
   // change / address_index
   CExtKey masterKey;   // hd master key
@@ -56,12 +56,17 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
   CExtKey changeKey;   // key at m/purpose'/coin_type'/account'/change
   CExtKey childKey;    // key at m/purpose'/coin_type'/account'/change/address_index
 
-  masterKey.SetMaster(&vchSeed[0], vchSeed.size());
+  masterKey.SetMaster(&vchSeed[0], vchSeed.size(), bls);
 
   const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
   // Use hardened derivation for purpose, coin_type and account
   // (keys >= 0x80000000 are hardened after bip32)
 
+  if (bls) {
+    masterKey.Derive(extKeyRet, nChildIndex);
+    return;
+  }
+    
   // derive m/purpose'
   masterKey.Derive(purposeKey, 44 | BIP32_HARDENED_KEY_LIMIT);
   // derive m/purpose'/coin_type'

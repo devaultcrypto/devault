@@ -39,7 +39,7 @@ friend class G2Element;
     static PrivateKey FromSeed(const uint8_t *seed, size_t seedLen);
 
     // Construct a private key from a bytearray.
-    static PrivateKey FromBytes(const uint8_t* bytes, bool modOrder = true);
+    static PrivateKey FromBytes(const uint8_t* bytes, bool modOrder = false);
 
     // Construct a private key from a native bn element.
     static PrivateKey FromBN(bn_t sk);
@@ -51,7 +51,7 @@ friend class G2Element;
 
     ~PrivateKey();
 
-    G1Element GetPublicKey() const { return GetG1Element(); }
+    //G1Element GetPublicKey() const { return GetG1Element(); }
     G1Element GetG1Element() const;
     G2Element GetG2Element() const;
 

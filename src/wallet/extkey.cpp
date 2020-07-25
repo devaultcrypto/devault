@@ -10,30 +10,46 @@
 #include <crypto/common.h>
 #include <crypto/hmac_sha512.h>
 
+#include "bls/bls_functions.h"
+
 
 bool CExtKey::Derive(CExtKey &out, unsigned int _nChild) const {
     out.nDepth = nDepth + 1;
-    CKeyID id = key.GetPubKey().GetKeyID(); // doesn't matter than it's only EC
-    memcpy(&out.vchFingerprint[0], &id, 4);
-    out.nChild = _nChild;
-    return key.Derive(out.key, out.chaincode, _nChild, chaincode);
+    if (is_bls) {
+      // Ignores nDepths, chaincode and FingerPrint....
+      out.key = bls::GetBLSChild(key, _nChild);
+      out.nChild = _nChild;
+      out.is_bls = true;
+      return true;
+    } else {
+      CKeyID id = key.GetPubKey().GetKeyID(); // doesn't matter than it's only EC
+      memcpy(&out.vchFingerprint[0], &id, 4);
+      out.nChild = _nChild;
+      return key.Derive(out.key, out.chaincode, _nChild, chaincode);
+    }
 }
 
-void CExtKey::SetMaster(const uint8_t *seed, unsigned int nSeedLen) {
+void CExtKey::SetMaster(const uint8_t *seed, unsigned int nSeedLen, bool bls) {
     static const uint8_t hashkey[] = {'B', 'i', 't', 'c', 'o', 'i',
                                       'n', ' ', 's', 'e', 'e', 'd'};
     std::vector<uint8_t, secure_allocator<uint8_t>> vout(64);
     CHMAC_SHA512(hashkey, sizeof(hashkey))
         .Write(seed, nSeedLen)
         .Finalize(vout.data());
-    key.Set(vout.data(), vout.data() + 32);
+    if (bls) {
+      key = bls::GetBLSMasterKey(seed, nSeedLen);
+    } else {
+      key.Set(vout.data(), vout.data() + 32);
+    }
     memcpy(chaincode.begin(), vout.data() + 32, 32);
     nDepth = 0;
     nChild = 0;
     memset(vchFingerprint, 0, sizeof(vchFingerprint));
+    is_bls = bls;
 }
 
 CExtPubKey CExtKey::Neuter() const {
+    if (is_bls) return NeuterBLS();
     CExtPubKey ret;
     ret.nDepth = nDepth;
     memcpy(&ret.vchFingerprint[0], &vchFingerprint[0], 4);

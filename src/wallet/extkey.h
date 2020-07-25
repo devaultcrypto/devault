@@ -29,12 +29,14 @@ struct CExtKey {
     unsigned int nChild;
     ChainCode chaincode;
     CKey key;
+    bool is_bls = false;
 
     friend bool operator==(const CExtKey &a, const CExtKey &b) {
         return a.nDepth == b.nDepth &&
                memcmp(&a.vchFingerprint[0], &b.vchFingerprint[0],
                       sizeof(vchFingerprint)) == 0 &&
                a.nChild == b.nChild && a.chaincode == b.chaincode &&
+               a.is_bls == b.is_bls && 
                a.key == b.key;
     }
 
@@ -43,7 +45,7 @@ struct CExtKey {
     bool Derive(CExtKey &out, unsigned int nChild) const;
     CExtPubKey Neuter() const;
     CExtPubKey NeuterBLS() const;
-    void SetMaster(const uint8_t *seed, unsigned int nSeedLen);
+    void SetMaster(const uint8_t *seed, unsigned int nSeedLen, bool bls);
     template <typename Stream> void Serialize(Stream &s) const {
         unsigned int len = BIP32_EXTKEY_SIZE;
         ::WriteCompactSize(s, len);

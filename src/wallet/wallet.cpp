@@ -204,7 +204,7 @@ std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, boo
     uint32_t nChildIndex = internal ? acc.nInternalChainCounter : acc.nExternalChainCounter;
     bool cont = true;
     do {
-      hdChainDec.DeriveChildExtKey(nAccountIndex, internal, nChildIndex, childKey);
+      hdChainDec.DeriveChildExtKey(nAccountIndex, internal, nChildIndex, childKey, UseBLSKeys());
       // increment childkey index
       nChildIndex++;
       if (UseBLSKeys()) cont = HaveKey(childKey.key.GetPubKeyForBLS().GetBLSKeyID());
@@ -5075,7 +5075,7 @@ bool CWallet::GetKey(const CKeyID &address, CKey& keyOut) const
           throw std::runtime_error(std::string(__func__) + ": GetDecryptedHDChain failed");
 
         CExtKey extkey;
-        hdChainCurrent.DeriveChildExtKey(hdPubKey.nAccountIndex, hdPubKey.nChangeIndex != 0, hdPubKey.extPubKey.nChild, extkey);
+        hdChainCurrent.DeriveChildExtKey(hdPubKey.nAccountIndex, hdPubKey.nChangeIndex != 0, hdPubKey.extPubKey.nChild, extkey, false);
         keyOut = extkey.key;
 
         return true;
@@ -5099,7 +5099,7 @@ bool CWallet::GetKey(const BKeyID &address, CKey& keyOut) const
           throw std::runtime_error(std::string(__func__) + ": GetDecryptedHDChain failed");
 
         CExtKey extkey;
-        hdChainCurrent.DeriveChildExtKey(hdPubKey.nAccountIndex, hdPubKey.nChangeIndex != 0, hdPubKey.extPubKey.nChild, extkey);
+        hdChainCurrent.DeriveChildExtKey(hdPubKey.nAccountIndex, hdPubKey.nChangeIndex != 0, hdPubKey.extPubKey.nChild, extkey, true);
         keyOut = extkey.key;
 
         return true;
