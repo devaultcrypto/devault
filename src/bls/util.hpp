@@ -21,7 +21,12 @@
 #include <sstream>
 #include <string>
 
+#include "sodium/core.h"
+#include "sodium/utils.h"
+
 namespace bls {
+  typedef void *(*SecureAllocCallback)(size_t);
+  typedef void (*SecureFreeCallback)(void*);
 
 class Util {
   public:
@@ -61,5 +66,25 @@ class Util {
     }
     return sum;
   }
+  //private:
+    static SecureAllocCallback secureAllocCallback;
+    static SecureFreeCallback secureFreeCallback;
+
 };
+
+  /*
+   * Securely allocates a portion of memory, using libsodium. This prevents
+   * paging to disk, and zeroes out the memory when it's freed.
+   */
+  template<class T> T* SecAlloc(size_t numTs) {
+    return static_cast<T*>(Util::secureAllocCallback(sizeof(T) * numTs));
+  }
+
+  /*
+   * Frees memory allocated using SecAlloc.
+   */
+  static void SecFree(void* ptr) {
+    Util::secureFreeCallback(ptr);
+  }
+
 } // end namespace bls
