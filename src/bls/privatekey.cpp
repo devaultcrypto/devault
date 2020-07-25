@@ -34,7 +34,7 @@ PrivateKey PrivateKey::FromSeed(const uint8_t *seed, size_t seedLen)
     const size_t infoLen = 0;
 
     // Required by the ietf spec to be at least 32 bytes
-    assert(seedLen >= 32);
+    // assert(seedLen >= 32);
 
     // "BLS-SIG-KEYGEN-SALT-" in ascii
     const uint8_t saltHkdf[20] = {66, 76, 83, 45, 83, 73, 71, 45, 75, 69,
@@ -199,15 +199,6 @@ G2Element PrivateKey::GetG2Power(g2_t base) const
     return ret;
 }
   
-PublicKey PrivateKey::GetPublicKey() const {
-    g1_t *q = SecAlloc<g1_t>(1);
-    g1_mul_gen(*q, *keydata);
-
-    const PublicKey ret = PublicKey::FromG1(q);
-    SecFree(*q);
-    return ret;
-}
-
 PrivateKey PrivateKey::Aggregate(std::vector<PrivateKey> const &privateKeys)
 {
     if (privateKeys.empty()) {

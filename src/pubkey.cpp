@@ -198,7 +198,7 @@ bool CPubKey::VerifyECDSA(const uint256 &hash,
 
 
 bool CPubKey::VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig) const {
-    return bls::VerifyBLS(hash, vchSig, &vch[0]);
+    return bls::VerifyBLS(hash, vchSig, vch);
 }
 
 bool CPubKey::RecoverCompact(const uint256 &hash,

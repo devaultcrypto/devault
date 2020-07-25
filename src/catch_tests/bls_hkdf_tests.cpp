@@ -19,11 +19,7 @@
 #include "catch_unit.h"
 
 #include "bls/bls.hpp"
-//#include "catch.hpp"
-//#include "relic.h"
-//#include "relic_test.h"
 #include "bls/schemes.hpp"
-///#include "test-utils.hpp"
 #include "bls/hkdf.hpp"
 #include "bls/hdkeys.hpp"
 

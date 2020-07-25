@@ -15,46 +15,43 @@
 namespace bls {
 
 bool SignBLS(const CKey &key, const uint256 &hash, std::vector<uint8_t> &vchSig) {
-  auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
+  auto PK = bls::PrivateKey::FromBytes(key.begin());
   std::vector<uint8_t> message(hash.begin(),hash.end());
   vchSig = AugSchemeMPL::Sign(PK, message);
   // Then Verify
   return true; // for now True - sig.Verify();
 }
 bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig) {
-  auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
+  auto PK = bls::PrivateKey::FromBytes(key.begin());
   vchSig = AugSchemeMPL::Sign(PK, message);
   // Then Verify
   return true; // for now True - sig.Verify();
 }
 
 auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>> {
-  auto PK = bls::PrivateKey::FromSeed(key.begin(), PrivateKey::PRIVATE_KEY_SIZE);
+  auto PK = bls::PrivateKey::FromBytes(key.begin());
   std::vector<uint8_t> message(hash.begin(),hash.end());
   auto vchSig = AugSchemeMPL::Sign(PK, message);
   return vchSig;
 }
   
 bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t *vch) {
-
-  auto pub = bls::PublicKey::FromBytes(vch); //???
-  auto pubkey = pub.Serialize();
+  std::vector<uint8_t> v(bls::PublicKey::PUBLIC_KEY_SIZE);
+  for (size_t i=0;i<v.size();i++) v[i] = vch[i];
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  return AugSchemeMPL::Verify(pubkey,message,vchSig);
-  
+  return AugSchemeMPL::Verify(v,message,vchSig);
 }
 
 CPubKey GetBLSPublicKey(const CKey &key) {
   bls::BLS::AssertInitialized();
   bls::PrivateKey priv;
   try {
-    priv = bls::PrivateKey::FromSeed(key.begin(), bls::PrivateKey::PRIVATE_KEY_SIZE);
+    priv = bls::PrivateKey::FromBytes(key.begin());
   } catch (...) { throw std::runtime_error("Problem creating bls private key"); }
   try {
     // Get PublicKey and then Serialize bytes to CPubKey
-    bls::PublicKey pub = priv.GetPublicKey();
-    auto b = pub.Serialize();
-    CPubKey k(b);
+    auto pub = AugSchemeMPL::SkToPk(priv);
+    CPubKey k(pub);
     return k;
   } catch (...) { throw std::runtime_error("Problem creating bls public key"); }
   return (CPubKey());
