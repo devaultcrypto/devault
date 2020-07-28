@@ -202,8 +202,8 @@ public:
             "000000000000030bee568d677b6b99ee7d2d00b25d1fe95df5e73b484f00c322");
 
         // Date July 11, 2020, 4:00:00 pm GMT
-        consensus.blsActivationTime = 1594483200;
-
+        //consensus.blsActivationTime = 1594483200;
+        consensus.blsActivationTime = 1595895427;
         diskMagic[0] = 0x0d;
         diskMagic[1] = 0x08;
         diskMagic[2] = 0x13;
