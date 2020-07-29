@@ -18,7 +18,7 @@
 
 typedef uint256 ChainCode;
 
-static constexpr unsigned int BLS_ACCOUNT = 1; // 0 would mean secret keys same as default EC Account/Keys
+static constexpr unsigned int BLS_ACCOUNT = 1; // Used to switch between EC and BLS HD keys
 
 
 /** An encapsulated public key. */
