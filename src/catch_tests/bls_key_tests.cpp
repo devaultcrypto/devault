@@ -21,22 +21,20 @@
 #include "catch_unit.h"
 
 /*
-testpriv:zqcruq3qe2r75w87xgm253e4jye3smq28uutz6npd62zp04yxkzzq5hmt3fpn 2020-07-25T06:11:35Z reserve=1 # 
-addr=blstest:dzyk0nk9xl2cufd958rgdsx4uzzjwpql5quvnkxma6,hdkeypath=m/44'/1'/1'/0/0
-testpriv:zqf4rtsl344wcdnd9l6ke8m9sts7at34pyqh36jj3fg6pezw4yt6zvce6gex2 2020-07-25T06:12:29Z reserve=1 # 
-addr=blstest:drj0mmla4raxh2eqlxz3tz7qwqk0xgau55jyjrq2kf,hdkeypath=m/44'/1'/1'/0/1
-testpriv:zqkwdedurxrs6gu3gme7500qtc9af3rulaxdjg7as97x05vvsexgshlfnpee9 2020-07-25T06:12:39Z reserve=1 # 
-addr=blstest:dp3etlfddmzutjufm6c7x8ayg7nc9v05vct2pxpl2n,hdkeypath=m/44'/1'/1'/0/2
+testpriv:zq22jyaar8jevm7jc3qtszpq9htps386tssms7rtpgsdq6f7kylm2zxz2raup 2020-07-29T02:03:02Z change=1 # addr=blstest:dpwcnj2udrmkrrwz9jnr3zmrqj4p2tf0x5723yqwlq,hdkeypath=m/44'/1'/1'/0/0
+testpriv:zqudn85w5ldwk2katapm0gamw4se5ga2a2a2sekcyaj8u8svrdkjxklhse8k7 2020-07-29T02:03:02Z change=1 # addr=blstest:dql46rkc4lu9zmsallyy92urchjzelkz3s829w75cp,hdkeypath=m/44'/1'/1'/0/1
+testpriv:zp5jmcx4mzguywgkcew77a6safl6rehxgtfxkflvnlcvn52s3etfy83y3890u 2020-07-29T02:03:02Z change=1 # addr=blstest:dp4daszrhql3zhyuksatlqt5yhn9l6yvfvl0kwghf0,hdkeypath=m/44'/1'/1'/0/2
+testpriv:zp3j3lelhqc68h844jxdlqxjtqvwaswh7mvk42gfx805z6awjwsxxa59hd7v4 2020-07-29T02:03:02Z change=1 # addr=blstest:dq7elxaqtj7m8gys7jg9x6styc50mg9r2vy7j4e4c9,hdkeypath=m/44'/1'/1'/0/3
 */
 
 // 32/33 from HD chain
-static const std::string strSecret1 = "testpriv:zqcruq3qe2r75w87xgm253e4jye3smq28uutz6npd62zp04yxkzzq5hmt3fpn";
-static const std::string strSecret2 = "testpriv:zqf4rtsl344wcdnd9l6ke8m9sts7at34pyqh36jj3fg6pezw4yt6zvce6gex2";
-static const std::string strSecret3 = "testpriv:zqkwdedurxrs6gu3gme7500qtc9af3rulaxdjg7as97x05vvsexgshlfnpee9";
+static const std::string strSecret1 = "testpriv:zq22jyaar8jevm7jc3qtszpq9htps386tssms7rtpgsdq6f7kylm2zxz2raup";
+static const std::string strSecret2 = "testpriv:zqudn85w5ldwk2katapm0gamw4se5ga2a2a2sekcyaj8u8svrdkjxklhse8k7";
+static const std::string strSecret3 = "testpriv:zp5jmcx4mzguywgkcew77a6safl6rehxgtfxkflvnlcvn52s3etfy83y3890u";
 
-static const std::string addr1 = "blstest:dzyk0nk9xl2cufd958rgdsx4uzzjwpql5quvnkxma6";
-static const std::string addr2 = "blstest:drj0mmla4raxh2eqlxz3tz7qwqk0xgau55jyjrq2kf";
-static const std::string addr3 = "blstest:dp3etlfddmzutjufm6c7x8ayg7nc9v05vct2pxpl2n";
+static const std::string addr1 = "blstest:dpwcnj2udrmkrrwz9jnr3zmrqj4p2tf0x5723yqwlq";
+static const std::string addr2 = "blstest:dql46rkc4lu9zmsallyy92urchjzelkz3s829w75cp";
+static const std::string addr3 = "blstest:dp4daszrhql3zhyuksatlqt5yhn9l6yvfvl0kwghf0";
 
 static const std::string strAddressBad = "=blstest:rpwqz8mgp97ak2a369q7t0hczvpt05upa5alt22rj8";
 
