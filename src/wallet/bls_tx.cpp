@@ -73,7 +73,7 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet,
 
     for (const auto &out : txNew.vout) {
         CKey key;
-        key.MakeNewKey(); // A random private/pub key pair that is disposable
+        key.MakeNewBLSKey(); // A random private/pub key pair that is disposable
                           // and used just once
         pubkey = key.GetPubKeyForBLS();
         pubkeys.push_back(ToByteVector(pubkey));
