@@ -43,12 +43,12 @@
 
 #include "relic_err.h"
 #include "relic_bn.h"
-#include "relic_eb.h"
+//#include "relic_eb.h"
 #include "relic_epx.h"
-#include "relic_ed.h"
+//#include "relic_ed.h"
 #include "relic_pc.h"
 #include "relic_conf.h"
-#include "relic_bench.h"
+//#include "relic_bench.h"
 #include "relic_rand.h"
 #include "relic_label.h"
 #include "relic_alloc.h"
@@ -385,7 +385,7 @@ typedef struct _ctx_t {
 #endif /* WITH_PP */
 
 #if defined(WITH_PC)
-	gt_t gt_g;
+  gt_t gt_g;
 #endif
 
 #if BENCH > 0

@@ -264,26 +264,16 @@ G2Element PrivateKey::SignG2(
     const uint8_t *dst,
     size_t dst_len) const
 {
-    uint8_t messageHash[BLS::MESSAGE_HASH_LEN];
-    Util::Hash256(messageHash, msg, len);
-    return SignG2Prehashed(messageHash, dst, dst_len);
+    g2_t pt;
+    g2_new(pt);
+
+    ep2_map_dst(pt, msg, len, dst, dst_len);
+    g2_mul(pt, pt, *keydata);
+    return G2Element::FromNative(&pt);
 }
 
-G2Element PrivateKey::SignG2Prehashed(
-    const uint8_t *messageHash,
-    const uint8_t *dst,
-    size_t dst_len) const
+void PrivateKey::AllocateKeyData()
 {
-    g2_t sig, point;
-
-    g2_map_ft(point, messageHash, BLS::MESSAGE_HASH_LEN);
-    // ep2_map_impl(point, messageHash, BLS::MESSAGE_HASH_LEN, dst, dst_len);
-    g2_mul(sig, point, *keydata);
-
-    return G2Element::FromNative(&sig);
-}
-
-void PrivateKey::AllocateKeyData() {
     keydata = SecAlloc<bn_t>(1);
     bn_new(*keydata);  // Freed in destructor
     bn_zero(*keydata);
