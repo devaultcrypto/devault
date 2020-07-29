@@ -50,8 +50,8 @@
  */
 static void pp_mil_k12(fp12_t r, ep2_t *t, ep2_t *q, ep_t *p, int m, bn_t a) {
 	fp12_t l;
-	ep_t *_p = RLC_ALLOCA(ep_t, m);
-	ep2_t *_q = RLC_ALLOCA(ep2_t, m);
+	ep_t *_p = RLC_MALLOC(ep_t, m);
+	ep2_t *_q = RLC_MALLOC(ep2_t, m);
 	int i, j, len = bn_bits(a) + 1;
 	int8_t s[RLC_FP_BITS + 1];
 
@@ -130,6 +130,8 @@ static void pp_mil_k12(fp12_t r, ep2_t *t, ep2_t *q, ep_t *p, int m, bn_t a) {
 		RLC_FREE(_p);
 		RLC_FREE(_q);
 	}
+  free(_p);
+  free(_q);
 }
 
 /**
@@ -521,8 +523,8 @@ void pp_map_oatep_k12(fp12_t r, ep_t p, ep2_t q) {
 }
 
 void pp_map_sim_oatep_k12(fp12_t r, ep_t *p, ep2_t *q, int m) {
-	ep_t *_p = RLC_ALLOCA(ep_t, m);
-	ep2_t *t = RLC_ALLOCA(ep2_t, m), *_q = RLC_ALLOCA(ep2_t, m);
+	ep_t *_p = RLC_MALLOC(ep_t, m);
+	ep2_t *t = RLC_MALLOC(ep2_t, m), *_q = RLC_MALLOC(ep2_t, m);
 	bn_t a;
 	int i, j;
 
@@ -596,6 +598,9 @@ void pp_map_sim_oatep_k12(fp12_t r, ep_t *p, ep2_t *q, int m) {
 		RLC_FREE(_q);
 		RLC_FREE(t);
 	}
+  free(_p);
+  free(_q);
+  free(t);
 }
 
 #endif
