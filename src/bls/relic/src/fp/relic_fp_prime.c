@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -51,7 +51,7 @@ static void fp_prime_set(const bn_t p) {
 	ctx_t *ctx = core_get();
 
 	if (p->used != RLC_FP_DIGS) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
 	dv_null(s);
@@ -59,7 +59,7 @@ static void fp_prime_set(const bn_t p) {
 	dv_null(q);
 	fp_null(r);
 
-	TRY {
+	RLC_TRY {
 		dv_new(s);
 		bn_new(t);
 		dv_new(q);
@@ -68,19 +68,21 @@ static void fp_prime_set(const bn_t p) {
 		bn_copy(&(ctx->prime), p);
 
 		#if FP_RDC == MONTY || !defined(STRIP)
-				bn_mod_pre_monty(t, &(ctx->prime));
-				ctx->u = t->dp[0];
-				dv_zero(s, 2 * RLC_FP_DIGS);
-				s[2 * RLC_FP_DIGS] = 1;
-				dv_zero(q, 2 * RLC_FP_DIGS + 1);
-				dv_copy(q, ctx->prime.dp, RLC_FP_DIGS);
-				bn_divn_low(t->dp, ctx->conv.dp, s, 2 * RLC_FP_DIGS + 1, q, RLC_FP_DIGS);
-				ctx->conv.used = RLC_FP_DIGS;
-				bn_trim(&(ctx->conv));
-				bn_set_dig(&(ctx->one), 1);
-				bn_lsh(&(ctx->one), &(ctx->one), ctx->prime.used * RLC_DIG);
-				bn_mod(&(ctx->one), &(ctx->one), &(ctx->prime));
-		#endif
+
+		bn_mod_pre_monty(t, &(ctx->prime));
+		ctx->u = t->dp[0];
+		dv_zero(s, 2 * RLC_FP_DIGS);
+		s[2 * RLC_FP_DIGS] = 1;
+		dv_zero(q, 2 * RLC_FP_DIGS + 1);
+		dv_copy(q, ctx->prime.dp, RLC_FP_DIGS);
+		bn_divn_low(t->dp, ctx->conv.dp, s, 2 * RLC_FP_DIGS + 1, q, RLC_FP_DIGS);
+		ctx->conv.used = RLC_FP_DIGS;
+		bn_trim(&(ctx->conv));
+		bn_set_dig(&(ctx->one), 1);
+		bn_lsh(&(ctx->one), &(ctx->one), ctx->prime.used * RLC_DIG);
+		bn_mod(&(ctx->one), &(ctx->one), &(ctx->prime));
+
+		#endif /* FP_RDC == MONTY */
 
 		/* Now look for proper quadratic/cubic non-residues. */
 		ctx->qnr = ctx->cnr = 0;
@@ -117,7 +119,7 @@ static void fp_prime_set(const bn_t p) {
 		}
 #ifdef FP_QNRES
 		if (ctx->mod8 != 3) {
-			THROW(ERR_NO_VALID);
+			RLC_THROW(ERR_NO_VALID);
 		}
 #endif
 
@@ -130,10 +132,10 @@ static void fp_prime_set(const bn_t p) {
 
 		fp_prime_calc();
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(t);
 		dv_free(s);
 		dv_free(q);
@@ -161,16 +163,18 @@ void fp_prime_init(void) {
 
 void fp_prime_clean(void) {
 	ctx_t *ctx = core_get();
-	ctx->fp_id = 0;
+	if (ctx != NULL) {
+		ctx->fp_id = 0;
 #if FP_RDC == QUICK || !defined(STRIP)
-	ctx->sps_len = 0;
-	memset(ctx->sps, 0, sizeof(ctx->sps));
+		ctx->sps_len = 0;
+		memset(ctx->sps, 0, sizeof(ctx->sps));
 #endif
 #if FP_RDC == MONTY || !defined(STRIP)
-	bn_clean(&(ctx->one));
-	bn_clean(&(ctx->conv));
+		bn_clean(&(ctx->one));
+		bn_clean(&(ctx->conv));
 #endif
-	bn_clean(&(ctx->prime));
+		bn_clean(&(ctx->prime));
+	}
 }
 
 const dig_t *fp_prime_get(void) {
@@ -245,7 +249,7 @@ int fp_prime_get_2ad(void) {
 void fp_prime_set_dense(const bn_t p) {
 	fp_prime_set(p);
 #if FP_RDC == QUICK
-	THROW(ERR_NO_CONFIG);
+	RLC_THROW(ERR_NO_CONFIG);
 #endif
 }
 
@@ -259,7 +263,7 @@ void fp_prime_set_pairf(const bn_t x, int pairf) {
 	bn_null(t0);
 	bn_null(t1);
 
-	TRY {
+	RLC_TRY {
 		bn_new(p);
 		bn_new(t0);
 		bn_new(t1);
@@ -390,11 +394,11 @@ void fp_prime_set_pairf(const bn_t x, int pairf) {
 			}
 		}
 		if (ctx->par_len == RLC_TERMS) {
-			THROW(ERR_NO_VALID);
+			RLC_THROW(ERR_NO_VALID);
 		}
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
 		bn_free(p);
 		bn_free(t0);
 		bn_free(t1);
@@ -407,12 +411,12 @@ void fp_prime_set_pmers(const int *f, int len) {
 	bn_null(p);
 	bn_null(t);
 
-	TRY {
+	RLC_TRY {
 		bn_new(p);
 		bn_new(t);
 
 		if (len >= RLC_TERMS) {
-			THROW(ERR_NO_VALID);
+			RLC_THROW(ERR_NO_VALID);
 		}
 
 		bn_set_2b(p, f[len - 1]);
@@ -442,43 +446,24 @@ void fp_prime_set_pmers(const int *f, int len) {
 
 		fp_prime_set(p);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(p);
 		bn_free(t);
 	}
 }
 
 void fp_prime_calc(void) {
-	fp_t t;
-
-	fp_null(t);
-
-	TRY {
-		fp_new(t);
-
-		#ifdef WITH_ED
-			fp_set_dig(t, 1);
-			fp_neg(t, t);
-			fp_srt(core_get()->srm1, t);
-		#endif
-
-		#ifdef WITH_FPX
-			if (fp_prime_get_qnr() != 0) {
-				fp2_field_init();
-			}
-			if (fp_prime_get_cnr() != 0) {
-				fp3_field_init();
-			}
-		#endif
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
+#ifdef WITH_FPX
+	if (fp_prime_get_qnr() != 0) {
+		fp2_field_init();
 	}
-	FINALLY {
-		fp_free(t);
+	if (fp_prime_get_cnr() != 0) {
+		fp3_field_init();
 	}
+#endif
 }
 
 void fp_prime_conv(fp_t c, const bn_t a) {
@@ -486,7 +471,7 @@ void fp_prime_conv(fp_t c, const bn_t a) {
 
 	bn_null(t);
 
-	TRY {
+	RLC_TRY {
 		bn_new(t);
 
 		bn_mod(t, a, &(core_get()->prime));
@@ -509,10 +494,10 @@ void fp_prime_conv(fp_t c, const bn_t a) {
 		(void)t;
 #endif
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(t);
 	}
 }
@@ -523,7 +508,7 @@ void fp_prime_conv_dig(fp_t c, dig_t a) {
 
 	bn_null(t);
 
-	TRY {
+	RLC_TRY {
 		dv_new(t);
 
 #if FP_RDC == MONTY
@@ -540,10 +525,10 @@ void fp_prime_conv_dig(fp_t c, dig_t a) {
 		c[0] = a;
 #endif
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		dv_free(t);
 	}
 }
@@ -554,7 +539,7 @@ void fp_prime_back(bn_t c, const fp_t a) {
 
 	dv_null(t);
 
-	TRY {
+	RLC_TRY {
 		dv_new(t);
 
 		bn_grow(c, RLC_FP_DIGS);
@@ -570,10 +555,10 @@ void fp_prime_back(bn_t c, const fp_t a) {
 		c->sign = RLC_POS;
 		bn_trim(c);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		dv_free(t);
 	}
 }

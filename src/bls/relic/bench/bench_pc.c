@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -168,7 +168,7 @@ static void arith1(void) {
 	bn_new(n);
 	bn_new(l);
 
-	g1_get_ord(n);
+	pc_get_ord(n);
 
 	BENCH_BEGIN("g1_add") {
 		g1_rand(p);
@@ -403,13 +403,13 @@ static void util2(void) {
 }
 
 static void arith2(void) {
-	g2_t p, q, r, t[RLC_G1_TABLE];
+	g2_t p, q, r, t[RLC_G2_TABLE];
 	bn_t k, l, n;
 
 	g2_null(p);
 	g2_null(q);
 	g2_null(r);
-	for (int i = 0; i < RLC_G1_TABLE; i++) {
+	for (int i = 0; i < RLC_G2_TABLE; i++) {
 		g2_null(t[i]);
 	}
 
@@ -420,7 +420,7 @@ static void arith2(void) {
 	bn_new(n);
 	bn_new(l);
 
-	g2_get_ord(n);
+	pc_get_ord(n);
 
 	BENCH_BEGIN("g2_add") {
 		g2_rand(p);
@@ -649,13 +649,14 @@ static void util(void) {
 
 static void arith(void) {
 	gt_t a, b, c;
-	bn_t d, e;
+	bn_t d, e, f;
 
 	gt_new(a);
 	gt_new(b);
 	gt_new(c);
 	bn_new(d);
 	bn_new(e);
+	bn_new(f);
 
 	BENCH_BEGIN("gt_mul") {
 		gt_rand(a);
@@ -679,15 +680,25 @@ static void arith(void) {
 
 	BENCH_BEGIN("gt_exp") {
 		gt_rand(a);
-		gt_get_ord(d);
+		pc_get_ord(d);
 		bn_rand_mod(e, d);
 		BENCH_ADD(gt_exp(c, a, e));
 	}
 	BENCH_END;
 
+	BENCH_BEGIN("gt_exp_sim") {
+		gt_rand(a);
+		gt_rand(b);
+		gt_get_ord(d);
+		bn_rand_mod(e, d);
+		bn_rand_mod(f, d);
+		BENCH_ADD(gt_exp_sim(c, a, e, b, f));
+	}
+	BENCH_END;
+
 	BENCH_BEGIN("gt_exp_dig") {
 		gt_rand(a);
-		gt_get_ord(d);
+		pc_get_ord(d);
 		bn_rand(e, RLC_POS, bn_bits(d));
 		BENCH_ADD(gt_exp_dig(c, a, e->dp[0]));
 	}
@@ -698,6 +709,7 @@ static void arith(void) {
 	gt_free(c);
 	bn_free(d);
 	bn_free(e);
+	bn_free(f);
 }
 
 static void pairing(void) {
@@ -748,7 +760,7 @@ int main(void) {
 	util_banner("Benchmarks for the PC module:", 0);
 
 	if (pc_param_set_any() != RLC_OK) {
-		THROW(ERR_NO_CURVE);
+		RLC_THROW(ERR_NO_CURVE);
 		core_clean();
 		return 0;
 	}

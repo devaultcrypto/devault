@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -37,6 +37,10 @@
 /*============================================================================*/
 
 int bn_cmp_abs(const bn_t a, const bn_t b) {
+	if (bn_is_zero(a) && bn_is_zero(b)) {
+		return RLC_EQ;
+	}
+
 	if (a->used > b->used) {
 		return RLC_GT;
 	}
@@ -69,6 +73,10 @@ int bn_cmp_dig(const bn_t a, dig_t b) {
 }
 
 int bn_cmp(const bn_t a, const bn_t b) {
+	if (bn_is_zero(a) && bn_is_zero(b)) {
+		return RLC_EQ;
+	}
+
 	if (a->sign == RLC_POS && b->sign == RLC_NEG) {
 		return RLC_GT;
 	}

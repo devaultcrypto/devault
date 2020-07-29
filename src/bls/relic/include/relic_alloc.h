@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -31,7 +31,7 @@
 
 #include "relic_conf.h"
 
-#ifdef WIND_VER
+#ifdef _MSC_VER
 
 #include <malloc.h>
 
@@ -49,8 +49,6 @@
 #else
 #define RLC_ALLOCA(T, S)		(T*) _alloca((S) * sizeof(T))
 #endif
-
-#define RLC_MALLOC(T, S)    (T*) calloc((S), sizeof(T))
 
 #else /* _MSC_VER */
 
@@ -70,8 +68,6 @@
 #else
 #define RLC_ALLOCA(T, S)		(T*) alloca((S) * sizeof(T))
 #endif
-
-#define RLC_MALLOC(T, S)    (T*) malloc((S) * sizeof(T))
 
 #endif
 

@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -30,6 +30,8 @@
  */
 
 #include "relic_types.h"
+
+#include "lzcnt.inc"
 
 /**
  * Renames the inline assembly macro to a prettier name.
@@ -100,4 +102,12 @@ ull_t arch_cycles(void) {
 #endif /* TIMER = CYCLE */
 
 	return value;
+}
+
+unsigned int arch_lzcnt(unsigned int x) {
+#ifdef WSIZE == 32
+	return lzcnt32_gcc_arm(x);
+#elif WSIZE == 64
+	return lzcnt64_gcc_arm(x);
+#endif
 }

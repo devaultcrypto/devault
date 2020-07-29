@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -41,16 +41,16 @@ static int memory(void) {
 
 	eb_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			eb_new(a);
 			eb_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -69,7 +69,7 @@ static int util(void) {
 	eb_null(b);
 	eb_null(c);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -101,11 +101,15 @@ static int util(void) {
 		}
 		TEST_END;
 
-		TEST_BEGIN("negation is consistent") {
+		TEST_BEGIN("negation and comparison are consistent") {
 			eb_rand(a);
 			eb_neg(b, a);
 			TEST_ASSERT(eb_cmp(a, b) != RLC_EQ, end);
 			eb_neg(b, b);
+			TEST_ASSERT(eb_cmp(a, b) == RLC_EQ, end);
+			eb_neg(b, a);
+			eb_add(a, a, b);
+			eb_set_infty(b);
 			TEST_ASSERT(eb_cmp(a, b) == RLC_EQ, end);
 		}
 		TEST_END;
@@ -126,13 +130,19 @@ static int util(void) {
 
 		TEST_BEGIN("validity test is correct") {
 			eb_set_infty(a);
-			TEST_ASSERT(eb_is_valid(a), end);
+			TEST_ASSERT(eb_on_curve(a), end);
 			eb_rand(a);
-			TEST_ASSERT(eb_is_valid(a), end);
+			TEST_ASSERT(eb_on_curve(a), end);
 			fb_rand(a->x);
-			TEST_ASSERT(!eb_is_valid(a), end);
+			TEST_ASSERT(!eb_on_curve(a), end);
 		}
 		TEST_END;
+
+		TEST_BEGIN("blinding is consistent") {
+			eb_rand(a);
+			eb_blind(a, a);
+			TEST_ASSERT(eb_on_curve(a), end);
+		} TEST_END;
 
 		TEST_BEGIN("reading and writing a point are consistent") {
 			for (int j = 0; j < 2; j++) {
@@ -157,8 +167,9 @@ static int util(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		util_print("FATAL ERROR!\n");
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -178,7 +189,7 @@ static int addition(void) {
 	eb_null(d);
 	eb_null(e);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -225,7 +236,6 @@ static int addition(void) {
 			eb_rand(a);
 			eb_rand(b);
 			eb_add(d, a, b);
-			eb_norm(d, d);
 			eb_add_basic(e, a, b);
 			TEST_ASSERT(eb_cmp(e, d) == RLC_EQ, end);
 		} TEST_END;
@@ -236,52 +246,43 @@ static int addition(void) {
 		TEST_BEGIN("point addition in projective coordinates is correct") {
 			eb_rand(a);
 			eb_rand(b);
-			eb_add_projc(a, a, b);
-			eb_rand(b);
 			eb_rand(c);
+			eb_add_projc(a, a, b);
 			eb_add_projc(b, b, c);
 			/* a and b in projective coordinates. */
 			eb_add_projc(d, a, b);
-			eb_norm(d, d);
+			/* normalize before mixing coordinates. */
 			eb_norm(a, a);
 			eb_norm(b, b);
 			eb_add(e, a, b);
-			eb_norm(e, e);
-			TEST_ASSERT(eb_cmp(e, d) == RLC_EQ, end);
+			TEST_ASSERT(eb_cmp(d, e) == RLC_EQ, end);
 		} TEST_END;
 #endif
 
 		TEST_BEGIN("point addition in mixed coordinates (z2 = 1) is correct") {
 			eb_rand(a);
 			eb_rand(b);
+			/* a in projective, b in affine coordinates. */
 			eb_add_projc(a, a, b);
-			eb_rand(b);
-			/* a and b in projective coordinates. */
 			eb_add_projc(d, a, b);
-			eb_norm(d, d);
 			/* a in affine coordinates. */
 			eb_norm(a, a);
 			eb_add(e, a, b);
-			eb_norm(e, e);
-			TEST_ASSERT(eb_cmp(e, d) == RLC_EQ, end);
+			TEST_ASSERT(eb_cmp(d, e) == RLC_EQ, end);
 		} TEST_END;
 
 		TEST_BEGIN("point addition in mixed coordinates (z1,z2 = 1) is correct") {
 			eb_rand(a);
 			eb_rand(b);
-			eb_norm(a, a);
-			eb_norm(b, b);
 			/* a and b in affine coordinates. */
 			eb_add(d, a, b);
-			eb_norm(d, d);
 			eb_add_projc(e, a, b);
-			eb_norm(e, e);
-			TEST_ASSERT(eb_cmp(e, d) == RLC_EQ, end);
+			TEST_ASSERT(eb_cmp(d, e) == RLC_EQ, end);
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -302,7 +303,7 @@ static int subtraction(void) {
 	eb_null(c);
 	eb_null(d);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -395,8 +396,8 @@ static int subtraction(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -415,7 +416,7 @@ static int doubling(void) {
 	eb_null(b);
 	eb_null(c);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -425,7 +426,6 @@ static int doubling(void) {
 			eb_add(b, a, a);
 			eb_norm(b, b);
 			eb_dbl(c, a);
-			eb_norm(c, c);
 			TEST_ASSERT(eb_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 
@@ -433,7 +433,6 @@ static int doubling(void) {
 		TEST_BEGIN("point doubling in affine coordinates is correct") {
 			eb_rand(a);
 			eb_dbl(b, a);
-			eb_norm(b, b);
 			eb_dbl_basic(c, a);
 			TEST_ASSERT(eb_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
@@ -442,13 +441,11 @@ static int doubling(void) {
 #if EB_ADD == PROJC || !defined(STRIP)
 		TEST_BEGIN("point doubling in projective coordinates is correct") {
 			eb_rand(a);
-			eb_dbl_projc(a, a);
 			/* a in projective coordinates. */
+			eb_dbl_projc(a, a);
 			eb_dbl_projc(b, a);
-			eb_norm(b, b);
 			eb_norm(a, a);
 			eb_dbl(c, a);
-			eb_norm(c, c);
 			TEST_ASSERT(eb_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 
@@ -457,13 +454,12 @@ static int doubling(void) {
 			eb_dbl_projc(b, a);
 			eb_norm(b, b);
 			eb_dbl(c, a);
-			eb_norm(c, c);
 			TEST_ASSERT(eb_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -481,7 +477,7 @@ static int halving(void) {
 	eb_null(b);
 	eb_null(c);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -495,8 +491,8 @@ static int halving(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -514,7 +510,7 @@ static int frobenius(void) {
 	eb_null(b);
 	eb_null(c);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -567,8 +563,8 @@ static int frobenius(void) {
 	(void)b;
 	(void)c;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -589,7 +585,7 @@ static int multiplication(void) {
 	eb_null(q);
 	eb_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		eb_new(p);
@@ -600,7 +596,7 @@ static int multiplication(void) {
 		eb_curve_get_ord(n);
 
 		TEST_BEGIN("generator has the right order") {
-			TEST_ASSERT(eb_is_valid(p), end);
+			TEST_ASSERT(eb_on_curve(p), end);
 			eb_mul(r, p, n);
 			TEST_ASSERT(eb_is_infty(r) == 1, end);
 		} TEST_END;
@@ -749,9 +745,9 @@ static int multiplication(void) {
 		TEST_END;
 
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -778,7 +774,7 @@ static int fixed(void) {
 		eb_null(t[i]);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		eb_new(p);
@@ -921,9 +917,9 @@ static int fixed(void) {
 		}
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -947,7 +943,7 @@ static int simultaneous(void) {
 	eb_null(q);
 	eb_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		bn_new(l);
@@ -976,14 +972,12 @@ static int simultaneous(void) {
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(k, k);
 			eb_mul_sim(r, p, k, q, l);
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(l, l);
 			eb_mul_sim(r, p, k, q, l);
@@ -1011,14 +1005,12 @@ static int simultaneous(void) {
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(k, k);
 			eb_mul_sim_basic(r, p, k, q, l);
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(l, l);
 			eb_mul_sim_basic(r, p, k, q, l);
@@ -1047,14 +1039,12 @@ static int simultaneous(void) {
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(k, k);
 			eb_mul_sim_trick(r, p, k, q, l);
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(l, l);
 			eb_mul_sim_trick(r, p, k, q, l);
@@ -1083,14 +1073,12 @@ static int simultaneous(void) {
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(k, k);
 			eb_mul_sim_inter(r, p, k, q, l);
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(l, l);
 			eb_mul_sim_inter(r, p, k, q, l);
@@ -1119,14 +1107,12 @@ static int simultaneous(void) {
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(k, k);
 			eb_mul_sim_joint(r, p, k, q, l);
 			eb_mul(p, p, k);
 			eb_mul(q, q, l);
 			eb_add(q, q, p);
-			eb_norm(q, q);
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 			bn_neg(l, l);
 			eb_mul_sim_joint(r, p, k, q, l);
@@ -1166,9 +1152,9 @@ static int simultaneous(void) {
 			TEST_ASSERT(eb_cmp(q, r) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1189,7 +1175,7 @@ static int compression(void) {
 	eb_null(b);
 	eb_null(c);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		eb_new(b);
 		eb_new(c);
@@ -1203,8 +1189,8 @@ static int compression(void) {
 		TEST_END;
 
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1223,7 +1209,7 @@ static int hashing(void) {
 	eb_null(a);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		eb_new(a);
 		bn_new(n);
 
@@ -1238,8 +1224,8 @@ static int hashing(void) {
 		TEST_END;
 
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1337,7 +1323,7 @@ int main(void) {
 
 	if (r0 == RLC_ERR && r1 == RLC_ERR) {
 		if (eb_param_set_any() == RLC_ERR) {
-			THROW(ERR_NO_CURVE);
+			RLC_THROW(ERR_NO_CURVE);
 			core_clean();
 			return 0;
 		} else {

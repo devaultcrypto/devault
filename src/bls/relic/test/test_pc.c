@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -41,16 +41,16 @@ static int memory1(void) {
 
 	g1_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			g1_new(a);
 			g1_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -69,7 +69,7 @@ int util1(void) {
 	g1_null(b);
 	g1_null(c);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 		g1_new(b);
 		g1_new(c);
@@ -105,6 +105,10 @@ int util1(void) {
 			g1_dbl(a, a);
 			TEST_ASSERT(g1_cmp(c, a) == RLC_EQ, end);
 			TEST_ASSERT(g1_cmp(a, c) == RLC_EQ, end);
+			g1_neg(b, a);
+			g1_add(a, a, b);
+			g1_set_infty(b);
+			TEST_ASSERT(g1_cmp(a, b) == RLC_EQ, end);
 		}
 		TEST_END;
 
@@ -154,9 +158,9 @@ int util1(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -177,7 +181,7 @@ int addition1(void) {
 	g1_null(d);
 	g1_null(e);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 		g1_new(b);
 		g1_new(c);
@@ -216,11 +220,12 @@ int addition1(void) {
 			g1_rand(a);
 			g1_neg(d, a);
 			g1_add(e, a, d);
+			TEST_ASSERT(g1_is_valid(e), end);
 			TEST_ASSERT(g1_is_infty(e), end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -241,7 +246,7 @@ int subtraction1(void) {
 	g1_null(c);
 	g1_null(d);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 		g1_new(b);
 		g1_new(c);
@@ -268,12 +273,13 @@ int subtraction1(void) {
 		TEST_BEGIN("point subtraction has inverse") {
 			g1_rand(a);
 			g1_sub(c, a, a);
+			TEST_ASSERT(g1_is_valid(c), end);
 			TEST_ASSERT(g1_is_infty(c), end);
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -292,7 +298,7 @@ int doubling1(void) {
 	g1_null(b);
 	g1_null(c);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 		g1_new(b);
 		g1_new(c);
@@ -304,8 +310,8 @@ int doubling1(void) {
 			TEST_ASSERT(g1_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -326,7 +332,7 @@ static int multiplication1(void) {
 	g1_null(q);
 	g1_null(r);
 
-	TRY {
+	RLC_TRY {
 		g1_new(p);
 		g1_new(q);
 		g1_new(r);
@@ -334,7 +340,7 @@ static int multiplication1(void) {
 		bn_new(k);
 
 		g1_get_gen(p);
-		g1_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("generator has the right order") {
 			g1_mul(r, p, n);
@@ -364,9 +370,9 @@ static int multiplication1(void) {
 			TEST_ASSERT(g1_is_infty(r) == 1, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -394,7 +400,7 @@ static int fixed1(void) {
 		g1_null(t[i]);
 	}
 
-	TRY {
+	RLC_TRY {
 		g1_new(p);
 		g1_new(q);
 		g1_new(r);
@@ -402,7 +408,7 @@ static int fixed1(void) {
 		bn_new(k);
 
 		g1_get_gen(p);
-		g1_get_ord(n);
+		pc_get_ord(n);
 
 		for (int i = 0; i < RLC_G1_TABLE; i++) {
 			g1_new(t[i]);
@@ -430,9 +436,9 @@ static int fixed1(void) {
 			g1_free(t[i]);
 		}
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -456,7 +462,7 @@ static int simultaneous1(void) {
 	g1_null(q);
 	g1_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		bn_new(l);
@@ -465,7 +471,7 @@ static int simultaneous1(void) {
 		g1_new(r);
 
 		g1_get_gen(p);
-		g1_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("simultaneous point multiplication is correct") {
 			bn_zero(k);
@@ -528,9 +534,9 @@ static int simultaneous1(void) {
 			TEST_ASSERT(g1_cmp(q, r) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -549,18 +555,25 @@ static int validity1(void) {
 
 	g1_null(a);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 
-		TEST_BEGIN("validity check is correct") {
+		TEST_BEGIN("validity test is correct") {
+			g1_set_infty(a);
+			TEST_ASSERT(g1_is_valid(a), end);
 			g1_rand(a);
-			TEST_ASSERT(g1_is_valid(a) == 1, end);
+			TEST_ASSERT(g1_is_valid(a), end);
 		}
 		TEST_END;
 
+		TEST_BEGIN("blinding is consistent") {
+			g1_rand(a);
+			g1_blind(a, a);
+			TEST_ASSERT(g1_is_valid(a), end);
+		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -577,11 +590,11 @@ static int hashing1(void) {
 	g1_null(a);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		g1_new(a);
 		bn_new(n);
 
-		g1_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("point hashing is correct") {
 			rand_bytes(msg, sizeof(msg));
@@ -591,8 +604,8 @@ static int hashing1(void) {
 		TEST_END;
 
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -608,16 +621,16 @@ static int memory2(void) {
 
 	g2_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			g2_new(a);
 			g2_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -636,7 +649,7 @@ int util2(void) {
 	g2_null(b);
 	g2_null(c);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 		g2_new(b);
 		g2_new(c);
@@ -679,6 +692,10 @@ int util2(void) {
 			g2_rand(a);
 			g2_neg(b, a);
 			TEST_ASSERT(g2_cmp(a, b) != RLC_EQ, end);
+			g2_neg(b, a);
+			g2_add(a, a, b);
+			g2_set_infty(b);
+			TEST_ASSERT(g2_cmp(a, b) == RLC_EQ, end);
 		}
 		TEST_END;
 
@@ -721,9 +738,9 @@ int util2(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -744,7 +761,7 @@ int addition2(void) {
 	g2_null(d);
 	g2_null(e);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 		g2_new(b);
 		g2_new(c);
@@ -783,11 +800,12 @@ int addition2(void) {
 			g2_rand(a);
 			g2_neg(d, a);
 			g2_add(e, a, d);
+			TEST_ASSERT(g2_is_valid(e), end);
 			TEST_ASSERT(g2_is_infty(e), end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -808,7 +826,7 @@ int subtraction2(void) {
 	g2_null(c);
 	g2_null(d);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 		g2_new(b);
 		g2_new(c);
@@ -835,12 +853,13 @@ int subtraction2(void) {
 		TEST_BEGIN("point subtraction has inverse") {
 			g2_rand(a);
 			g2_sub(c, a, a);
+			TEST_ASSERT(g2_is_valid(c), end);
 			TEST_ASSERT(g2_is_infty(c), end);
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -859,7 +878,7 @@ int doubling2(void) {
 	g2_null(b);
 	g2_null(c);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 		g2_new(b);
 		g2_new(c);
@@ -871,8 +890,8 @@ int doubling2(void) {
 			TEST_ASSERT(g2_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -893,7 +912,7 @@ static int multiplication2(void) {
 	g2_null(q);
 	g2_null(r);
 
-	TRY {
+	RLC_TRY {
 		g2_new(p);
 		g2_new(q);
 		g2_new(r);
@@ -901,7 +920,7 @@ static int multiplication2(void) {
 		bn_new(k);
 
 		g2_get_gen(p);
-		g2_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("generator has the right order") {
 			g2_mul(r, p, n);
@@ -931,9 +950,9 @@ static int multiplication2(void) {
 			TEST_ASSERT(g2_is_infty(r) == 1, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -961,7 +980,7 @@ static int fixed2(void) {
 		g2_null(t[i]);
 	}
 
-	TRY {
+	RLC_TRY {
 		g2_new(p);
 		g2_new(q);
 		g2_new(r);
@@ -969,7 +988,7 @@ static int fixed2(void) {
 		bn_new(k);
 
 		g2_get_gen(p);
-		g2_get_ord(n);
+		pc_get_ord(n);
 
 		for (int i = 0; i < RLC_G2_TABLE; i++) {
 			g2_new(t[i]);
@@ -997,9 +1016,9 @@ static int fixed2(void) {
 			g2_free(t[i]);
 		}
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1023,7 +1042,7 @@ static int simultaneous2(void) {
 	g2_null(q);
 	g2_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		bn_new(l);
@@ -1032,7 +1051,7 @@ static int simultaneous2(void) {
 		g2_new(r);
 
 		g2_get_gen(p);
-		g2_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("simultaneous point multiplication is correct") {
 			bn_zero(k);
@@ -1095,9 +1114,9 @@ static int simultaneous2(void) {
 			TEST_ASSERT(g2_cmp(q, r) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1116,18 +1135,25 @@ static int validity2(void) {
 
 	g2_null(a);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 
-		TEST_BEGIN("validity check is correct") {
+		TEST_BEGIN("validity test is correct") {
+			g2_set_infty(a);
+			TEST_ASSERT(g2_is_valid(a), end);
 			g2_rand(a);
-			TEST_ASSERT(g2_is_valid(a) == 1, end);
+			TEST_ASSERT(g2_is_valid(a), end);
 		}
 		TEST_END;
 
+		TEST_BEGIN("blinding is consistent") {
+			g2_rand(a);
+			g2_blind(a, a);
+			TEST_ASSERT(g2_is_valid(a), end);
+		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1144,11 +1170,11 @@ static int hashing2(void) {
 	g2_null(a);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		g2_new(a);
 		bn_new(n);
 
-		g2_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("point hashing is correct") {
 			rand_bytes(msg, sizeof(msg));
@@ -1158,8 +1184,8 @@ static int hashing2(void) {
 		TEST_END;
 
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1175,16 +1201,16 @@ static int memory(void) {
 
 	gt_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			gt_new(a);
 			gt_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -1202,7 +1228,7 @@ int util(void) {
 	gt_null(b);
 	gt_null(c);
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 		gt_new(b);
 		gt_new(c);
@@ -1252,9 +1278,9 @@ int util(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1275,7 +1301,7 @@ int multiplication(void) {
 	gt_null(d);
 	gt_null(e);
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 		gt_new(b);
 		gt_new(c);
@@ -1310,8 +1336,8 @@ int multiplication(void) {
 			TEST_ASSERT(gt_cmp(e, a) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1331,7 +1357,7 @@ int squaring(void) {
 	gt_null(b);
 	gt_null(c);
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 		gt_new(b);
 		gt_new(c);
@@ -1343,8 +1369,8 @@ int squaring(void) {
 			TEST_ASSERT(gt_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1358,7 +1384,7 @@ static int inversion(void) {
 	int code = RLC_ERR;
 	gt_t a, b, c;
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 		gt_new(b);
 		gt_new(c);
@@ -1371,9 +1397,9 @@ static int inversion(void) {
 			TEST_ASSERT(gt_cmp(c, b) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1386,51 +1412,72 @@ static int inversion(void) {
 int exponentiation(void) {
 	int code = RLC_ERR;
 	gt_t a, b, c;
-	bn_t n, d;
+	bn_t n, d, e;
 
 	gt_null(a);
+	gt_null(b);
 	gt_null(c);
+	bn_null(d);
+	bn_null(e);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 		gt_new(b);
 		gt_new(c);
 		bn_new(d);
+		bn_new(e);
 		bn_new(n);
 
 		gt_get_gen(a);
-		gt_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("generator has the right order") {
 			gt_exp(c, a, n);
 			TEST_ASSERT(gt_is_unity(c), end);
 		} TEST_END;
 
-		TEST_BEGIN("exponentiation is correct") {
-			gt_rand(a);
+		TEST_BEGIN("generator exponentiation is correct") {
 			bn_zero(d);
-			gt_exp(c, a, d);
+			gt_exp_gen(c, d);
 			TEST_ASSERT(gt_is_unity(c), end);
 			bn_set_dig(d, 1);
-			gt_exp(c, a, d);
+			gt_exp_gen(c, d);
 			TEST_ASSERT(gt_cmp(c, a) == RLC_EQ, end);
 			bn_add_dig(d, n, 1);
-			gt_exp(c, a, d);
+			gt_exp_gen(c, d);
 			TEST_ASSERT(gt_cmp(c, a) == RLC_EQ, end);
-			gt_exp(c, a, n);
+			gt_exp_gen(c, n);
 			TEST_ASSERT(gt_is_unity(c), end);
 			bn_rand_mod(d, n);
-			gt_exp(b, a, d);
+			gt_exp_gen(b, d);
 			bn_neg(d, d);
-			gt_exp(c, a, d);
+			gt_exp_gen(c, d);
 			gt_inv(c, c);
 			TEST_ASSERT(gt_cmp(b, c) == RLC_EQ, end);
 		} TEST_END;
+
+		TEST_BEGIN("random element has the right order") {
+			gt_rand(a);
+			gt_exp(c, a, n);
+			TEST_ASSERT(gt_is_unity(c) == 1, end);
+		} TEST_END;
+
+		TEST_BEGIN("exponentiation is correct") {
+			gt_rand(a);
+			gt_rand(b);
+			bn_rand_mod(d, n);
+			bn_rand_mod(e, n);
+			gt_exp_sim(c, a, d, b, e);
+			gt_exp(a, a, d);
+			gt_exp(b, b, e);
+			gt_mul(b, a, b);
+			TEST_ASSERT(gt_cmp(b, c) == RLC_EQ, end);
+		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1438,6 +1485,7 @@ int exponentiation(void) {
 	gt_free(b);
 	gt_free(c);
 	bn_free(d);
+	bn_free(e);
 	bn_free(n);
 	return code;
 }
@@ -1448,7 +1496,7 @@ static int validity(void) {
 
 	gt_null(a);
 
-	TRY {
+	RLC_TRY {
 		gt_new(a);
 
 		TEST_BEGIN("validity check is correct") {
@@ -1456,10 +1504,9 @@ static int validity(void) {
 			TEST_ASSERT(gt_is_valid(a) == 1, end);
 		}
 		TEST_END;
-
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1469,21 +1516,19 @@ static int validity(void) {
 
 static int pairing(void) {
 	int j, code = RLC_ERR;
-	gt_t e1, e2;
 	g1_t p[2];
-	g2_t q[2], r;
+	g2_t q[2];
+	gt_t e1, e2;
 	bn_t k, n;
 
 	gt_null(e1);
 	gt_null(e2);
-	g2_null(r);
 	bn_null(k);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		gt_new(e1);
 		gt_new(e2);
-		g2_new(r);
 		bn_new(k);
 		bn_new(n);
 
@@ -1494,19 +1539,19 @@ static int pairing(void) {
 			g2_new(q[j]);
 		}
 
-		g1_get_ord(n);
+		pc_get_ord(n);
 
 		TEST_BEGIN("pairing non-degeneracy is correct") {
 			g1_rand(p[0]);
-			g2_rand(r);
-			pc_map(e1, p[0], r);
+			g2_rand(q[0]);
+			pc_map(e1, p[0], q[0]);
 			TEST_ASSERT(gt_cmp_dig(e1, 1) != RLC_EQ, end);
 			g1_set_infty(p[0]);
-			pc_map(e1, p[0], r);
+			pc_map(e1, p[0], q[0]);
 			TEST_ASSERT(gt_cmp_dig(e1, 1) == RLC_EQ, end);
 			g1_rand(p[0]);
-			g2_set_infty(r);
-			pc_map(e1, p[0], r);
+			g2_set_infty(q[0]);
+			pc_map(e1, p[0], q[0]);
 			TEST_ASSERT(gt_cmp_dig(e1, 1) == RLC_EQ, end);
 		} TEST_END;
 
@@ -1514,8 +1559,8 @@ static int pairing(void) {
 			g1_rand(p[0]);
 			g2_rand(q[0]);
 			bn_rand_mod(k, n);
-			g2_mul(r, q[0], k);
-			pc_map(e1, p[0], r);
+			g2_mul(q[1], q[0], k);
+			pc_map(e1, p[0], q[1]);
 			pc_map(e2, p[0], q[0]);
 			gt_exp(e2, e2, k);
 			TEST_ASSERT(gt_cmp(e1, e2) == RLC_EQ, end);
@@ -1558,15 +1603,14 @@ static int pairing(void) {
 			TEST_ASSERT(gt_cmp(e1, e2) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
 	gt_free(e1);
 	gt_free(e2);
-	g2_free(r);
 	bn_free(k);
 	bn_free(n);
 	for (j = 0; j < 2; j++) {
@@ -1724,7 +1768,7 @@ int main(void) {
 	util_banner("Tests for the PC module:", 0);
 
 	if (pc_param_set_any() != RLC_OK) {
-		THROW(ERR_NO_CURVE);
+		RLC_THROW(ERR_NO_CURVE);
 		core_clean();
 		return 0;
 	}

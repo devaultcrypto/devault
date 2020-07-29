@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -45,13 +45,13 @@
  * @param[in] A				- the first digit to multiply.
  * @param[in] B				- the second digit to multiply.
  */
-#define COMBA_STEP_FP_MUL_LOW(R2, R1, R0, A, B)								\
+#define COMBA_STEP_MUL(R2, R1, R0, A, B)									\
 	dbl_t r = (dbl_t)(A) * (dbl_t)(B);										\
 	dig_t _r = (R1);														\
 	(R0) += (dig_t)(r);														\
 	(R1) += (R0) < (dig_t)(r);												\
 	(R2) += (R1) < _r;														\
-	(R1) += (dig_t)((r) >> (dbl_t)RLC_DIG);								\
+	(R1) += (dig_t)((r) >> (dbl_t)RLC_DIG);									\
 	(R2) += (R1) < (dig_t)((r) >> (dbl_t)RLC_DIG);							\
 
 /*============================================================================*/
@@ -104,7 +104,7 @@ void fp_muln_low(dig_t *c, const dig_t *a, const dig_t *b) {
 		tmpa = a;
 		tmpb = b + i;
 		for (j = 0; j <= i; j++, tmpa++, tmpb--) {
-			COMBA_STEP_FP_MUL_LOW(r2, r1, r0, *tmpa, *tmpb);
+			COMBA_STEP_MUL(r2, r1, r0, *tmpa, *tmpb);
 		}
 		*c = r0;
 		r0 = r1;
@@ -115,7 +115,7 @@ void fp_muln_low(dig_t *c, const dig_t *a, const dig_t *b) {
 		tmpa = a + i + 1;
 		tmpb = b + (RLC_FP_DIGS - 1);
 		for (j = 0; j < RLC_FP_DIGS - (i + 1); j++, tmpa++, tmpb--) {
-			COMBA_STEP_FP_MUL_LOW(r2, r1, r0, *tmpa, *tmpb);
+			COMBA_STEP_MUL(r2, r1, r0, *tmpa, *tmpb);
 		}
 		*c = r0;
 		r0 = r1;

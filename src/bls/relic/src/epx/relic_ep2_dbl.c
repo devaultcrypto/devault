@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -53,7 +53,7 @@ static void ep2_dbl_basic_imp(ep2_t r, fp2_t s, ep2_t p) {
 	fp2_null(t1);
 	fp2_null(t2);
 
-	TRY {
+	RLC_TRY {
 		fp2_new(t0);
 		fp2_new(t1);
 		fp2_new(t2);
@@ -93,12 +93,12 @@ static void ep2_dbl_basic_imp(ep2_t r, fp2_t s, ep2_t p) {
 		fp2_copy(r->x, t0);
 		fp2_copy(r->z, p->z);
 
-		r->norm = 1;
+		r->coord = BASIC;
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		fp2_free(t0);
 		fp2_free(t1);
 		fp2_free(t2);
@@ -126,7 +126,7 @@ static void ep2_dbl_projc_imp(ep2_t r, ep2_t p) {
 	fp2_null(t4);
 	fp2_null(t5);
 
-	TRY {
+	RLC_TRY {
 		if (ep_curve_opt_a() == RLC_ZERO) {
 			fp2_new(t0);
 			fp2_new(t1);
@@ -164,7 +164,7 @@ static void ep2_dbl_projc_imp(ep2_t r, ep2_t p) {
 			fp2_sqr(t1, p->y);
 			fp2_sqr(t2, t1);
 
-			if (!p->norm) {
+			if (p->coord != BASIC) {
 				/* t3 = z1^2. */
 				fp2_sqr(t3, p->z);
 
@@ -194,7 +194,7 @@ static void ep2_dbl_projc_imp(ep2_t r, ep2_t p) {
 			/* t5 = M = 3 * x1^2 + a * z1^4. */
 			fp2_dbl(t5, t0);
 			fp2_add(t5, t5, t0);
-			if (!p->norm) {
+			if (p->coord != BASIC) {
 				fp2_sqr(t3, t3);
 				fp2_mul(t1, t3, ep2_curve_get_a());
 				fp2_add(t5, t5, t1);
@@ -216,15 +216,12 @@ static void ep2_dbl_projc_imp(ep2_t r, ep2_t p) {
 			fp2_sub(r->y, t5, t2);
 		}
 
-		r->norm = 0;
-
-
-		r->norm = 0;
+		r->coord = PROJC;
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		fp2_free(t0);
 		fp2_free(t1);
 		fp2_free(t2);

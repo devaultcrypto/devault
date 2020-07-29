@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -54,9 +54,11 @@ void dv_print(dig_t *a, int digits) {
 void dv_zero(dig_t *a, int digits) {
 	int i;
 
+#if ALLOC != DYNAMIC
 	if (digits > RLC_DV_DIGS) {
-		THROW(ERR_NO_PRECI);
+		RLC_THROW(ERR_NO_PRECI);
 	}
+#endif
 
 	for (i = 0; i < digits; i++, a++) {
 		(*a) = 0;

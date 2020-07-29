@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -33,12 +33,10 @@
 #include "relic_core.h"
 
 /*============================================================================*/
-	/* Public definitions                                                         */
+/* Public definitions                                                         */
 /*============================================================================*/
 
-#if EP_ADD == BASIC || !defined(STRIP)
-
-void ep2_neg_basic(ep2_t r, ep2_t p) {
+void ep2_neg(ep2_t r, ep2_t p) {
 	if (ep2_is_infty(p)) {
 		ep2_set_infty(r);
 		return;
@@ -51,27 +49,5 @@ void ep2_neg_basic(ep2_t r, ep2_t p) {
 
 	fp2_neg(r->y, p->y);
 
-	r->norm = 1;
+	r->coord = p->coord;
 }
-
-#endif
-
-#if EP_ADD == PROJC || !defined(STRIP)
-
-void ep2_neg_projc(ep2_t r, ep2_t p) {
-	if (ep2_is_infty(p)) {
-		ep2_set_infty(r);
-		return;
-	}
-
-	if (r != p) {
-		fp2_copy(r->x, p->x);
-		fp2_copy(r->z, p->z);
-	}
-
-	fp2_neg(r->y, p->y);
-
-	r->norm = p->norm;
-}
-
-#endif

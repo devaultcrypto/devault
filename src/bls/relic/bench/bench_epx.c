@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -126,9 +126,14 @@ static void util(void) {
 	}
 	BENCH_END;
 
-	BENCH_BEGIN("ep2_is_valid") {
+	BENCH_BEGIN("ep2_blind") {
+		BENCH_ADD(ep2_blind(p, p));
+	}
+	BENCH_END;
+
+	BENCH_BEGIN("ep2_on_curve") {
 		ep2_rand(p);
-		BENCH_ADD(ep2_is_valid(p));
+		BENCH_ADD(ep2_on_curve(p));
 	} BENCH_END;
 
 	BENCH_BEGIN("ep2_size_bin (0)") {
@@ -268,47 +273,6 @@ static void arith(void) {
 	}
 	BENCH_END;
 
-#if EP_ADD == BASIC || !defined(STRIP)
-	BENCH_BEGIN("ep2_sub_basic") {
-		ep2_rand(p);
-		ep2_rand(q);
-		BENCH_ADD(ep2_sub_basic(r, p, q));
-	}
-	BENCH_END;
-#endif
-
-#if EP_ADD == PROJC || !defined(STRIP)
-	BENCH_BEGIN("ep2_sub_projc") {
-		ep2_rand(p);
-		ep2_rand(q);
-		ep2_add_projc(p, p, q);
-		ep2_rand(q);
-		ep2_rand(p);
-		ep2_add_projc(q, q, p);
-		BENCH_ADD(ep2_sub_projc(r, p, q));
-	}
-	BENCH_END;
-
-	BENCH_BEGIN("ep2_sub_projc (z2 = 1)") {
-		ep2_rand(p);
-		ep2_rand(q);
-		ep2_add_projc(p, p, q);
-		ep2_rand(q);
-		ep2_norm(q, q);
-		BENCH_ADD(ep2_sub_projc(r, p, q));
-	}
-	BENCH_END;
-
-	BENCH_BEGIN("ep2_sub_projc (z1,z2 = 1)") {
-		ep2_rand(p);
-		ep2_norm(p, p);
-		ep2_rand(q);
-		ep2_norm(q, q);
-		BENCH_ADD(ep2_sub_projc(r, p, q));
-	}
-	BENCH_END;
-#endif
-
 	BENCH_BEGIN("ep2_dbl") {
 		ep2_rand(p);
 		ep2_rand(q);
@@ -355,24 +319,6 @@ static void arith(void) {
 		BENCH_ADD(ep2_neg(r, p));
 	}
 	BENCH_END;
-
-#if EP_ADD == BASIC || !defined(STRIP)
-	BENCH_BEGIN("ep2_neg_basic") {
-		ep2_rand(p);
-		BENCH_ADD(ep2_neg_basic(r, p));
-	}
-	BENCH_END;
-#endif
-
-#if EP_ADD == PROJC || !defined(STRIP)
-	BENCH_BEGIN("ep2_neg_projc") {
-		ep2_rand(p);
-		ep2_rand(q);
-		ep2_add_projc(p, p, q);
-		BENCH_ADD(ep2_neg_projc(r, p));
-	}
-	BENCH_END;
-#endif
 
 	BENCH_BEGIN("ep2_mul") {
 		bn_rand_mod(k, n);
@@ -616,13 +562,13 @@ int main(void) {
 	util_banner("Benchmarks for the EPX module:", 0);
 
 	if (ep_param_set_any_pairf() != RLC_OK) {
-		THROW(ERR_NO_CURVE);
+		RLC_THROW(ERR_NO_CURVE);
 		core_clean();
 		return 0;
 	}
 
 	if (ep2_curve_is_twist() == 0) {
-		THROW(ERR_NO_CURVE);
+		RLC_THROW(ERR_NO_CURVE);
 		core_clean();
 		return 0;
 	}

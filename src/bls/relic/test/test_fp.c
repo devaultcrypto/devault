@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -42,16 +42,16 @@ static int memory(void) {
 
 	fp_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			fp_new(a);
 			fp_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -74,7 +74,7 @@ static int util(void) {
 	fp_null(b);
 	bn_null(c);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		bn_new(c);
@@ -90,6 +90,9 @@ static int util(void) {
 		TEST_END;
 
 		TEST_BEGIN("negation is consistent") {
+			fp_zero(a);
+			fp_neg(b, a);
+			TEST_ASSERT(dv_cmp(a, b, RLC_FP_DIGS) == RLC_EQ, end);
 			fp_rand(a);
 			fp_neg(b, a);
 			if (fp_cmp(a, b) != RLC_EQ) {
@@ -139,11 +142,12 @@ static int util(void) {
 		TEST_END;
 
 		TEST_BEGIN("reading and writing a prime field element are consistent") {
-			fp_rand(a);
 			for (int j = 2; j <= 64; j++) {
+				fp_rand(a);
 				bits = fp_size_str(a, j);
 				fp_write_str(str, bits, a, j);
 				fp_read_str(b, str, strlen(str), j);
+				TEST_ASSERT(fp_cmp(a, b) == RLC_EQ, end);
 				/* Test also negative integers. */
 				memmove(str + 1, str, strlen(str) + 1);
 				str[0] = '-';
@@ -164,8 +168,8 @@ static int util(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -185,7 +189,7 @@ static int addition(void) {
 	fp_null(d);
 	fp_null(e);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -245,8 +249,8 @@ static int addition(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -267,7 +271,7 @@ static int subtraction(void) {
 	fp_null(c);
 	fp_null(d);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -336,8 +340,8 @@ static int subtraction(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -359,7 +363,7 @@ static int multiplication(void) {
 	fp_null(e);
 	fp_null(f);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -456,8 +460,8 @@ static int multiplication(void) {
 		TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -478,7 +482,7 @@ static int squaring(void) {
 	fp_null(b);
 	fp_null(c);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -526,8 +530,8 @@ static int squaring(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -545,7 +549,7 @@ static int doubling_halving(void) {
 	fp_null(b);
 	fp_null(c);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -601,9 +605,9 @@ static int doubling_halving(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -621,7 +625,7 @@ static int shifting(void) {
 	fp_null(b);
 	fp_null(c);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -676,8 +680,8 @@ static int shifting(void) {
 			TEST_ASSERT(fp_cmp(c, a) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -696,7 +700,7 @@ static int reduction(void) {
 	fp_null(b);
 	dv_null(t);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		dv_new(t);
@@ -740,8 +744,8 @@ static int reduction(void) {
 		}
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -761,7 +765,7 @@ static int inversion(void) {
 	fp_null(d[0]);
 	fp_null(d[1]);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -858,8 +862,8 @@ static int inversion(void) {
 					fp_cmp(d[1], b) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -881,7 +885,7 @@ static int exponentiation(void) {
 	fp_null(c);
 	bn_null(d);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -942,8 +946,8 @@ static int exponentiation(void) {
 		TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -962,7 +966,7 @@ static int square_root(void) {
 	fp_null(b);
 	fp_null(c);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -981,8 +985,8 @@ static int square_root(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1002,7 +1006,7 @@ static int digit(void) {
 	fp_null(c);
 	fp_null(d);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(c);
@@ -1044,8 +1048,8 @@ static int digit(void) {
 			TEST_ASSERT(fp_cmp(c, d) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1064,10 +1068,10 @@ int main(void) {
 
 	util_banner("Tests for the FP module", 0);
 
-	TRY {
+	RLC_TRY {
 		fp_param_set_any();
 		fp_param_print();
-	} CATCH_ANY {
+	} RLC_CATCH_ANY {
 		core_clean();
 		return 0;
 	}

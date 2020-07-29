@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -124,6 +124,10 @@ static void util(void) {
 		BENCH_ADD(ep_rand(p));
 	} BENCH_END;
 
+	BENCH_BEGIN("ep_blind") {
+		BENCH_ADD(ep_blind(p, p));
+	} BENCH_END;
+
 	BENCH_BEGIN("ep_rhs") {
 		ep_rand(p);
 		BENCH_ADD(ep_rhs(q->x, p));
@@ -134,9 +138,9 @@ static void util(void) {
 		BENCH_ADD(ep_tab(t, p, 4));
 	} BENCH_END;
 
-	BENCH_BEGIN("ep_is_valid") {
+	BENCH_BEGIN("ep_on_curve") {
 		ep_rand(p);
-		BENCH_ADD(ep_is_valid(p));
+		BENCH_ADD(ep_on_curve(p));
 	} BENCH_END;
 
 	BENCH_BEGIN("ep_size_bin (0)") {
@@ -249,6 +253,35 @@ static void arith(void) {
 	} BENCH_END;
 #endif
 
+#if EP_ADD == JACOB || !defined(STRIP)
+	BENCH_BEGIN("ep_add_jacob") {
+		ep_rand(p);
+		ep_rand(q);
+		ep_add_jacob(p, p, q);
+		ep_rand(q);
+		ep_rand(p);
+		ep_add_jacob(q, q, p);
+		BENCH_ADD(ep_add_jacob(r, p, q));
+	} BENCH_END;
+
+	BENCH_BEGIN("ep_add_jacob (z2 = 1)") {
+		ep_rand(p);
+		ep_rand(q);
+		ep_add_jacob(p, p, q);
+		ep_rand(q);
+		ep_norm(q, q);
+		BENCH_ADD(ep_add_jacob(r, p, q));
+	} BENCH_END;
+
+	BENCH_BEGIN("ep_add_jacob (z1,z2 = 1)") {
+		ep_rand(p);
+		ep_norm(p, p);
+		ep_rand(q);
+		ep_norm(q, q);
+		BENCH_ADD(ep_add_jacob(r, p, q));
+	} BENCH_END;
+#endif
+
 	BENCH_BEGIN("ep_sub") {
 		ep_rand(p);
 		ep_rand(q);
@@ -258,43 +291,6 @@ static void arith(void) {
 		ep_add(q, q, p);
 		BENCH_ADD(ep_sub(r, p, q));
 	} BENCH_END;
-
-#if EP_ADD == BASIC || !defined(STRIP)
-	BENCH_BEGIN("ep_sub_basic") {
-		ep_rand(p);
-		ep_rand(q);
-		BENCH_ADD(ep_sub_basic(r, p, q));
-	} BENCH_END;
-#endif
-
-#if EP_ADD == PROJC || !defined(STRIP)
-	BENCH_BEGIN("ep_sub_projc") {
-		ep_rand(p);
-		ep_rand(q);
-		ep_add_projc(p, p, q);
-		ep_rand(q);
-		ep_rand(p);
-		ep_add_projc(q, q, p);
-		BENCH_ADD(ep_sub_projc(r, p, q));
-	} BENCH_END;
-
-	BENCH_BEGIN("ep_sub_projc (z2 = 1)") {
-		ep_rand(p);
-		ep_rand(q);
-		ep_add_projc(p, p, q);
-		ep_rand(q);
-		ep_norm(q, q);
-		BENCH_ADD(ep_sub_projc(r, p, q));
-	} BENCH_END;
-
-	BENCH_BEGIN("ep_sub_projc (z1,z2 = 1)") {
-		ep_rand(p);
-		ep_norm(p, p);
-		ep_rand(q);
-		ep_norm(q, q);
-		BENCH_ADD(ep_sub_projc(r, p, q));
-	} BENCH_END;
-#endif
 
 	BENCH_BEGIN("ep_dbl") {
 		ep_rand(p);
@@ -325,28 +321,27 @@ static void arith(void) {
 	} BENCH_END;
 #endif
 
+#if EP_ADD == JACOB || !defined(STRIP)
+	BENCH_BEGIN("ep_dbl_jacob") {
+		ep_rand(p);
+		ep_rand(q);
+		ep_add_jacob(p, p, q);
+		BENCH_ADD(ep_dbl_jacob(r, p));
+	} BENCH_END;
+
+	BENCH_BEGIN("ep_dbl_jacob (z1 = 1)") {
+		ep_rand(p);
+		ep_norm(p, p);
+		BENCH_ADD(ep_dbl_jacob(r, p));
+	} BENCH_END;
+#endif
+
 	BENCH_BEGIN("ep_neg") {
 		ep_rand(p);
 		ep_rand(q);
 		ep_add(p, p, q);
 		BENCH_ADD(ep_neg(r, p));
 	} BENCH_END;
-
-#if EP_ADD == BASIC || !defined(STRIP)
-	BENCH_BEGIN("ep_neg_basic") {
-		ep_rand(p);
-		BENCH_ADD(ep_neg_basic(r, p));
-	} BENCH_END;
-#endif
-
-#if EP_ADD == PROJC || !defined(STRIP)
-	BENCH_BEGIN("ep_neg_projc") {
-		ep_rand(p);
-		ep_rand(q);
-		ep_add_projc(p, p, q);
-		BENCH_ADD(ep_neg_projc(r, p));
-	} BENCH_END;
-#endif
 
 	BENCH_BEGIN("ep_mul") {
 		bn_rand_mod(k, n);
@@ -629,7 +624,7 @@ int main(void) {
 
 	if (r0 == RLC_ERR && r1 == RLC_ERR && r2 == RLC_ERR && r3 == RLC_ERR) {
 		if (ep_param_set_any() == RLC_ERR) {
-			THROW(ERR_NO_CURVE);
+			RLC_THROW(ERR_NO_CURVE);
 		}
 	}
 

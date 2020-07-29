@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -41,10 +41,6 @@
 
 #if ARCH == ARM && OPSYS == DROID
 #include <android/log.h>
-#endif
-
-#if defined(MSC_VER) || defined(WIND_VER)
-#include <intrin.h>
 #endif
 
 /*============================================================================*/
@@ -139,46 +135,7 @@ char util_conv_char(dig_t i) {
 }
 
 int util_bits_dig(dig_t a) {
-#if WSIZE == 8 || WSIZE == 16
-	static const uint8_t table[16] = {
-		0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4
-	};
-#endif
-#if WSIZE == 8
-	if (a >> 4 == 0) {
-		return table[a & 0xF];
-	} else {
-		return table[a >> 4] + 4;
-	}
-	return 0;
-#elif WSIZE == 16
-	int offset;
-
-	if (a >= ((dig_t)1 << 8)) {
-		offset = 8;
-	} else {
-		offset = 0;
-	}
-	a = a >> offset;
-	if (a >> 4 == 0) {
-		return table[a & 0xF] + offset;
-	} else {
-		return table[a >> 4] + 4 + offset;
-	}
-	return 0;
-#elif WSIZE == 32
-#if defined(MSC_VER)
-    return RLC_DIG - __lzcnt(a);
-#else
-	return RLC_DIG - __builtin_clz(a);
-#endif
-#elif WSIZE == 64
-#if defined(MSC_VER)
-    return RLC_DIG - __lzcnt64(a);
-#else
-	return RLC_DIG - __builtin_clzll(a);
-#endif
-#endif
+    return RLC_DIG - arch_lzcnt(a);
 }
 
 int util_cmp_const(const void *a, const void *b, int size) {
@@ -194,7 +151,7 @@ int util_cmp_const(const void *a, const void *b, int size) {
 	return (result == 0 ? RLC_EQ : RLC_NE);
 }
 
-/*
+/* [!CHIA_EDIT_START]
 void util_print(const char *format, ...) {
 #ifndef QUIET
 #if ARCH == AVR && !defined(OPSYS)
@@ -230,7 +187,7 @@ void util_print(const char *format, ...) {
 #endif
 #endif
 }
-*/
+[!CHIA_EDIT_END] */
 
 void util_print_dig(dig_t a, int pad) {
 #if RLC_DIG == 64

@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -50,7 +50,7 @@ static int addition2(void) {
 	fp2_null(e1);
 	fp2_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -90,7 +90,7 @@ static int addition2(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller addition in projective coordinates is correct") {
 			ep_rand(p);
 			ep_rand(q);
@@ -134,9 +134,9 @@ static int addition2(void) {
 #endif
 #endif /* EP_ADD = PROJC */
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -166,7 +166,7 @@ static int doubling2(void) {
 	fp2_null(e1);
 	fp2_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -204,7 +204,7 @@ static int doubling2(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller doubling in projective coordinates is correct") {
 			ep_rand(p);
 			ep_rand(q);
@@ -245,9 +245,9 @@ static int doubling2(void) {
 #endif
 #endif /* EP_ADD = PROJC */
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -274,7 +274,7 @@ static int pairing2(void) {
 	fp2_null(e1);
 	fp2_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(r);
@@ -480,9 +480,9 @@ static int pairing2(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -516,7 +516,7 @@ static int doubling8(void) {
 	fp8_null(e1);
 	fp8_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -560,7 +560,7 @@ static int doubling8(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller doubling in projective coordinates is correct") {
 			ep_rand(p);
 			ep2_curve_get_gen(q);
@@ -608,9 +608,9 @@ static int doubling8(void) {
 #endif
 #endif /* EP_ADD = PROJC */
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -641,7 +641,7 @@ static int addition8(void) {
 	fp8_null(e1);
 	fp8_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -694,7 +694,7 @@ static int addition8(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller addition in projective coordinates is correct") {
 			ep_rand(p);
 			ep2_curve_get_gen(q);
@@ -721,9 +721,9 @@ static int addition8(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -751,7 +751,7 @@ static int pairing8(void) {
 	fp8_null(e2);
 	ep2_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		fp8_new(e1);
@@ -803,9 +803,9 @@ static int pairing8(void) {
 			TEST_ASSERT(fp8_cmp(e1, e2) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -838,7 +838,7 @@ static int doubling12(void) {
 	fp12_null(e1);
 	fp12_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -871,7 +871,7 @@ static int doubling12(void) {
 			fp_neg(p->y, p->y);
 			pp_dbl_k12_basic(e2, r, q, p);
 			pp_exp_k12(e2, e2);
-#if EP_ADD == PROJC
+#if EP_ADD == PROJC || EP_ADD == JACOB
 			/* Precompute. */
 			fp_dbl(p->z, p->x);
 			fp_add(p->x, p->z, p->x);
@@ -882,7 +882,7 @@ static int doubling12(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller doubling in projective coordinates is correct") {
 			ep_rand(p);
 			ep2_rand(q);
@@ -931,9 +931,9 @@ static int doubling12(void) {
 #endif
 #endif /* EP_ADD = PROJC */
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -964,7 +964,7 @@ static int addition12(void) {
 	fp12_null(e1);
 	fp12_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -1004,7 +1004,7 @@ static int addition12(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller addition in projective coordinates is correct") {
 			ep_rand(p);
 			ep2_rand(q);
@@ -1048,9 +1048,9 @@ static int addition12(void) {
 #endif
 #endif /* EP_ADD = PROJC */
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1078,7 +1078,7 @@ static int pairing12(void) {
 	fp12_null(e2);
 	ep2_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		fp12_new(e1);
@@ -1347,9 +1347,9 @@ static int pairing12(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1404,7 +1404,7 @@ static int doubling48(void) {
 	fp48_null(e1);
 	fp48_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -1477,7 +1477,7 @@ static int doubling48(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller doubling in projective coordinates is correct") {
 			ep_rand(p);
 			fp8_copy(rx, qx);
@@ -1504,9 +1504,9 @@ static int doubling48(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1543,7 +1543,7 @@ static int addition48(void) {
 	fp48_null(e1);
 	fp48_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -1650,9 +1650,9 @@ static int addition48(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1686,7 +1686,7 @@ static int pairing48(void) {
 	fp48_null(e1);
 	fp48_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -1741,9 +1741,9 @@ static int pairing48(void) {
 			TEST_ASSERT(fp48_cmp(e1, e2) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1798,7 +1798,7 @@ static int doubling54(void) {
 	fp54_null(e1);
 	fp54_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -1873,7 +1873,7 @@ static int doubling54(void) {
 		} TEST_END;
 #endif
 
-#if EP_ADD == PROJC || !defined(STRIP)
+#if EP_ADD == PROJC || EP_ADD == JACOB || !defined(STRIP)
 		TEST_BEGIN("miller doubling in projective coordinates is correct") {
 			ep_rand(p);
 			fp9_copy(rx, qx);
@@ -1900,9 +1900,9 @@ static int doubling54(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1939,7 +1939,7 @@ static int addition54(void) {
 	fp54_null(e1);
 	fp54_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -2048,9 +2048,9 @@ static int addition54(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -2084,7 +2084,7 @@ static int pairing54(void) {
 	fp54_null(e1);
 	fp54_null(e2);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ep_new(p);
@@ -2141,9 +2141,9 @@ static int pairing54(void) {
 			TEST_ASSERT(fp54_cmp(e1, e2) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -2167,7 +2167,7 @@ int main(void) {
 	util_banner("Tests for the PP module", 0);
 
 	if (ep_param_set_any_pairf() == RLC_ERR) {
-		THROW(ERR_NO_CURVE);
+		RLC_THROW(ERR_NO_CURVE);
 		core_clean();
 		return 0;
 	}
