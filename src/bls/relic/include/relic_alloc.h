@@ -31,7 +31,7 @@
 
 #include "relic_conf.h"
 
-#ifdef _MSC_VER
+#ifdef WIND_VER
 
 #include <malloc.h>
 
