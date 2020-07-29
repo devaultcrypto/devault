@@ -8,18 +8,17 @@ if(TEMP GREATER -1)
 	set(WITH_FPX 1)
 	set(WITH_FB 1)
 	set(WITH_FBX 1)
-	set(WITH_FT 1)
 	set(WITH_EP 1)
 	set(WITH_EPX 1)
 	set(WITH_EB 1)
 	set(WITH_ED 1)
 	set(WITH_EC 1)
 	set(WITH_PP 1)
-	set(WITH_PB 1)
 	set(WITH_PC 1)
 	set(WITH_BC 1)
 	set(WITH_MD 1)
 	set(WITH_CP 1)
+	set(WITH_MPC 1)
 endif(TEMP GREATER -1)
 
 # Check if multiple precision integer arithmetic is required.
@@ -118,8 +117,14 @@ if(TEMP GREATER -1)
 	set(WITH_MD 1)
 endif(TEMP GREATER -1)
 
-# Check if support for crptographic protocols is required.
+# Check if support for cryptographic protocols is required.
 list(FIND WITH "CP" TEMP)
 if(TEMP GREATER -1)
 	set(WITH_CP 1)
+endif(TEMP GREATER -1)
+
+# Check if support for cryptographic protocols is required.
+list(FIND WITH "MPC" TEMP)
+if(TEMP GREATER -1)
+	set(WITH_MPC 1)
 endif(TEMP GREATER -1)

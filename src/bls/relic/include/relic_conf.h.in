@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -65,7 +65,6 @@
 #define TESTS    @TESTS@
 /** Number of times each benchmark is ran. */
 #define BENCH    @BENCH@
-
 /** Number of available cores. */
 #define CORES    @CORES@
 
@@ -116,6 +115,8 @@
 #cmakedefine WITH_MD
 /** Build cryptographic protocols. */
 #cmakedefine WITH_CP
+/** Build Multi-party computation primitives. */
+#cmakedefine WITH_MPC
 
 /** Easy C-only backend. */
 #define EASY	 1
@@ -410,6 +411,8 @@
 #define BASIC	 1
 /** Projective coordinates. */
 #define PROJC	 2
+/** Jacobian coordinates. */
+#define JACOB	 3
 /** Chosen prime elliptic curve coordinate method. */
 #define EP_ADD	 @EP_ADD@
 
@@ -614,6 +617,8 @@
 /** Choice of hash function. */
 #define MD_METHD "@MD_METHD@"
 
+/** Chosen RSA method. */
+#cmakedefine CP_CRT
 /** RSA without padding. */
 #define BASIC    1
 /** RSA PKCS#1 v1.5 padding. */
@@ -622,20 +627,6 @@
 #define PKCS2    3
 /** Chosen RSA padding method. */
 #define CP_RSAPD @CP_RSAPD@
-
-/** Slow RSA decryption/signature. */
-#define BASIC    1
-/** Fast RSA decryption/signature with CRT. */
-#define QUICK    2
-/** Chosen RSA method. */
-#define CP_RSA   @CP_RSA@
-
-/** Standard ECDSA. */
-#define BASIC    1
-/** ECDSA with fast verification. */
-#define QUICK    2
-/** Chosen ECDSA method. */
-#define CP_ECDSA @CP_ECDSA@
 
 /** Automatic memory allocation. */
 #define AUTO     1

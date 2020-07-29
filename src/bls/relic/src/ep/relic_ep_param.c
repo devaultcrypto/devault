@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -58,7 +58,7 @@
  * Parameters for the SECG P-160 prime elliptic curve.
  */
 /** @{ */
-#define SECG_P160_A		"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFC"
+#define SECG_P160_A		"-3"
 #define SECG_P160_B		"1C97BEFC54BD7A8B65ACF89F81D4D4ADC565FA45"
 #define SECG_P160_X		"4A96B5688EF573284664698968C38BB913CBFC82"
 #define SECG_P160_Y		"23A628553168947D59DCC912042351377AC5FB32"
@@ -90,7 +90,7 @@
  * Parameters for the NIST P-192 prime elliptic curve.
  */
 /** @{ */
-#define NIST_P192_A		"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFC"
+#define NIST_P192_A		"-3"
 #define NIST_P192_B		"64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1"
 #define NIST_P192_X		"188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012"
 #define NIST_P192_Y		"07192B95FFC8DA78631011ED6B24CDD573F977A11E794811"
@@ -137,7 +137,7 @@
  * Parameters for the NIST P-224 prime elliptic curve.
  */
 /** @{ */
-#define NIST_P224_A		"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFE"
+#define NIST_P224_A		"-3"
 #define NIST_P224_B		"B4050A850C04B3ABF54132565044B0B7D7BFD8BA270B39432355FFB4"
 #define NIST_P224_X		"B70E0CBD6BB4BF7F321390B94A03C1D356C21122343280D6115C1D21"
 #define NIST_P224_Y		"BD376388B5F723FB4C22DFE6CD4375A05A07476444D5819985007E34"
@@ -214,7 +214,7 @@
  * Parameters for the NIST P-256 prime elliptic curve.
  */
 /** @{ */
-#define NIST_P256_A		"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC"
+#define NIST_P256_A		"-3"
 #define NIST_P256_B		"5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B"
 #define NIST_P256_X		"6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296"
 #define NIST_P256_Y		"4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5"
@@ -291,7 +291,7 @@
  * Parameters for the NIST P-384 prime elliptic curve.
  */
 /** @{ */
-#define NIST_P384_A		"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC"
+#define NIST_P384_A		"-3"
 #define NIST_P384_B		"B3312FA7E23EE7E4988E056BE3F82D19181D9C6EFE8141120314088F5013875AC656398D8A2ED19D2A85C8EDD3EC2AEF"
 #define NIST_P384_X		"AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7"
 #define NIST_P384_Y		"3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F"
@@ -321,7 +321,7 @@
  * Parameters for the NIST P-192 prime elliptic curve.
  */
 /** @{ */
-#define NIST_P521_A		"1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC"
+#define NIST_P521_A		"-3"
 #define NIST_P521_B		"51953EB9618E1C9A1F929A21A0B68540EEA2DA725B99B315F3B8B489918EF109E156193951EC7E937B1652C0BD3BB1BF073573DF883D2C34F1EF451FD46B503F00"
 #define NIST_P521_X		"C6858E06B70404E9CD9E3ECB662395B4429C648139053FB521F828AF606B4D3DBAA14B5E77EFE75928FE1DC127A2FFA8DE3348B3C1856A429BF97E7E31C2E5BD66"
 #define NIST_P521_Y		"11839296A789A3BC0045C8A5FB42C7D1BD998F54449579B446817AFBD17273E662C97EE72995EF42640C550B9013FAD0761353C7086A272C24088BE94769FD16650"
@@ -689,7 +689,7 @@
 static int ep_param_get_coeffs(fp_st *coeffs, const char *str) {
 	if (str[0] == '\0') {
 		/* need nonzero strlen */
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 	int degree = 0;
 	unsigned offset = 0;
@@ -706,7 +706,7 @@ static int ep_param_get_coeffs(fp_st *coeffs, const char *str) {
 	}
 	if (degree == RLC_EP_CTMAP_MAX) {
 		/* ran out of space before converting all coeffs */
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 	return degree;
 }
@@ -762,7 +762,7 @@ void ep_param_set(int param) {
 	bn_null(r);
 	bn_null(h);
 
-	TRY {
+	RLC_TRY {
 		fp_new(a);
 		fp_new(b);
 		fp_new(beta);
@@ -995,7 +995,7 @@ void ep_param_set(int param) {
 #endif
 			default:
 				(void)str;
-				THROW(ERR_NO_VALID);
+				RLC_THROW(ERR_NO_VALID);
 				break;
 		}
 
@@ -1008,7 +1008,7 @@ void ep_param_set(int param) {
 		(void)ctmap;
 
 		fp_set_dig(g->z, 1);
-		g->norm = 1;
+		g->coord = BASIC;
 
 #if defined(EP_PLAIN)
 		if (plain) {
@@ -1032,10 +1032,10 @@ void ep_param_set(int param) {
 		}
 #endif
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		fp_free(a);
 		fp_free(b);
 		fp_free(beta);
@@ -1168,70 +1168,70 @@ int ep_param_set_any_pairf(void) {
 #if defined(EP_ENDOM)
 #if FP_PRIME == 158
 	ep_param_set(BN_P158);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 254
 	ep_param_set(BN_P254);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 256
 	ep_param_set(BN_P256);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 381
 	ep_param_set(B12_P381);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 2;
 #elif FP_PRIME == 382
 	ep_param_set(BN_P382);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 446
 #ifdef FP_QNRES
 	ep_param_set(B12_P446);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 2;
 #else
 	ep_param_set(BN_P446);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #endif
 #elif FP_PRIME == 455
 	ep_param_set(B12_P455);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 477
 	ep_param_set(B24_P477);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 4;
 #elif FP_PRIME == 508
 	ep_param_set(KSS_P508);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 3;
 #elif FP_PRIME == 511
 	ep_param_set(OT8_P511);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #elif FP_PRIME == 544
 	ep_param_set(CP8_P544);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 2;
 #elif FP_PRIME == 569
 	ep_param_set(K54_P569);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 9;
 #elif FP_PRIME == 575
 	ep_param_set(B48_P575);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 8;
 #elif FP_PRIME == 638
 #ifdef FP_QNRES
 	ep_param_set(B12_P638);
-	type = EP_MTYPE;
+	type = RLC_EP_MTYPE;
 	degree = 2;
 #else
 	ep_param_set(BN_P638);
-	type = EP_DTYPE;
+	type = RLC_EP_DTYPE;
 	degree = 2;
 #endif
 #elif FP_PRIME == 1536

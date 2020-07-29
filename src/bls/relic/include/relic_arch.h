@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -89,6 +89,11 @@ void arch_clean(void);
  * Return the number of elapsed cycles.
  */
 ull_t arch_cycles(void);
+
+/**
+ * Return the number of leading zeros in an integer.
+ */
+uint_t arch_lzcnt(dig_t);
 
 #if ARCH == AVR
 

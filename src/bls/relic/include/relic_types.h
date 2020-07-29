@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -121,6 +121,11 @@ typedef __uint128_t dbl_t;
  * Represents the unsigned integer with maximum precision.
  */
 typedef unsigned long long ull_t;
+
+/*
+ * Represents the unsigned integer with maximum precision.
+ */
+typedef unsigned int uint_t;
 
 /*============================================================================*/
 /* Macro definitions                                                          */

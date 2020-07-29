@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -35,22 +35,43 @@
 /* Public definitions                                                         */
 /*============================================================================*/
 
+//[!CHIA_EDIT_START]
 void ep_pck(ep_t r, const ep_t p) {
-	int b = fp_get_bit(p->y, 0);
+	bn_t halfQ;
+	bn_null(halfQ);
+	bn_new(halfQ);
+	halfQ->used = RLC_FP_DIGS;
+	dv_copy(halfQ->dp, fp_prime_get(), RLC_FP_DIGS);
+	bn_hlv(halfQ, halfQ);
+
+	bn_t yValue;
+	bn_null(yValue);
+	bn_new(yValue);
+	fp_prime_back(yValue, p->y);
+
+	int b = bn_cmp(yValue, halfQ) == RLC_GT;
+
+	bn_free(yValue);
+	bn_free(halfQ);
+
 	fp_copy(r->x, p->x);
 	fp_zero(r->y);
 	fp_set_bit(r->y, 0, b);
 	fp_set_dig(r->z, 1);
-	r->norm = 1;
+	r->coord = BASIC;
 }
 
 int ep_upk(ep_t r, const ep_t p) {
 	fp_t t;
+	bn_t halfQ;
+	bn_t yValue;
 	int result = 0;
 
 	fp_null(t);
+	bn_null(halfQ);
+	bn_null(yValue);
 
-	TRY {
+	RLC_TRY {
 		fp_new(t);
 
 		ep_rhs(t, p);
@@ -59,22 +80,79 @@ int ep_upk(ep_t r, const ep_t p) {
 		result = fp_srt(t, t);
 
 		if (result) {
-			/* Verify if least significant bit of the result matches the
+			/* Verify whether the y coordinate is the larger one, matches the
 			 * compressed y-coordinate. */
+			bn_new(halfQ);
+			halfQ->used = RLC_FP_DIGS;
+			dv_copy(halfQ->dp, fp_prime_get(), RLC_FP_DIGS);
+			bn_hlv(halfQ, halfQ);
+
+			bn_new(yValue);
+			fp_prime_back(yValue, t);
+			int b = bn_cmp(yValue, halfQ) == RLC_GT;
+
+			if (b != fp_get_bit(p->y, 0)) {
+				fp_neg(t, t);
+			}
+			fp_copy(r->x, p->x);
+			fp_copy(r->y, t);
+			fp_set_dig(r->z, 1);
+			r->coord = BASIC;
+		}
+	}
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	}
+	RLC_FINALLY {
+		fp_free(t);
+		bn_free(yValue);
+		bn_free(halfQ);
+	}
+	return result;
+}
+/*
+void ep_pck(ep_t r, const ep_t p) {
+	int b = fp_get_bit(p->y, 0);
+	fp_copy(r->x, p->x);
+	fp_zero(r->y);
+	fp_set_bit(r->y, 0, b);
+	fp_set_dig(r->z, 1);
+	r->coord = BASIC;
+}
+
+int ep_upk(ep_t r, const ep_t p) {
+	fp_t t;
+	int result = 0;
+
+	fp_null(t);
+
+	RLC_TRY {
+		fp_new(t);
+
+		ep_rhs(t, p);
+
+		// t0 = sqrt(x1^3 + a * x1 + b).
+		result = fp_srt(t, t);
+
+		if (result) {
+			// Verify if least significant bit of the result matches the
+			// compressed y-coordinate.
 			if (fp_get_bit(t, 0) != fp_get_bit(p->y, 0)) {
 				fp_neg(t, t);
 			}
 			fp_copy(r->x, p->x);
 			fp_copy(r->y, t);
 			fp_set_dig(r->z, 1);
-			r->norm = 1;
+			r->coord = BASIC;
 		}
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		fp_free(t);
 	}
 	return result;
 }
+*/
+//[!CHIA_EDIT_END]

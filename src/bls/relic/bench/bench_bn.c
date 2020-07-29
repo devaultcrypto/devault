@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -804,6 +804,13 @@ static void arith(void) {
 	BENCH_ONCE("bn_is_prime_rabin", bn_is_prime_rabin(a));
 
 	BENCH_ONCE("bn_is_prime_solov", bn_is_prime_solov(a));
+
+	/* It should be the case that a is prime here. */
+	BENCH_BEGIN("bn_mod_inv") {
+		bn_rand(b, RLC_POS, RLC_BN_BITS);
+		BENCH_ADD(bn_mod_inv(c, b, a));
+	}
+	BENCH_END;
 
 	bn_rand(a, RLC_POS, RLC_BN_BITS);
 

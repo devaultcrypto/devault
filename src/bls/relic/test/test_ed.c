@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -35,6 +35,49 @@
 #include "relic.h"
 #include "relic_test.h"
 
+/*
+ * test vector inputs and outputs
+ */
+#if FP_PRIME == 255
+const int ed_map_ntst = 4;
+const char *ed_map_input[4] = {
+	"",
+	"abc",
+	"abcdef0123456789",
+	"a64_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+};
+const uint8_t ed_map_output[4][2 * RLC_FP_BYTES + 1] = {
+	{0x04, 0x40, 0x89, 0xf7, 0xb5, 0x05, 0x40, 0xf3, 0x4c, 0xa8, 0xc3,
+	 0x2b, 0x3a, 0x71, 0x6e, 0x86, 0x28, 0x57, 0x81, 0x88, 0xa8, 0x8f,
+	 0x5d, 0x95, 0xce, 0x6b, 0x84, 0x5f, 0x51, 0x83, 0x28, 0x3d, 0xbb,
+	 0x66, 0xa9, 0x22, 0xb2, 0xaa, 0x0e, 0x7f, 0xb6, 0xf5, 0xf4, 0x8a,
+	 0x2e, 0xaf, 0x71, 0xc5, 0xb5, 0x60, 0xd4, 0xbc, 0xa6, 0xb9, 0x06,
+	 0x8e, 0xac, 0x38, 0x89, 0xc9, 0xa4, 0x4f, 0x3a, 0xd2, 0x83},
+	{0x04, 0x18, 0x3f, 0x8b, 0xbb, 0x73, 0x7f, 0x98, 0x0f, 0xb5, 0x20,
+	 0x27, 0x6b, 0xf5, 0x7a, 0x5b, 0xe4, 0x7f, 0x2f, 0x66, 0x3f, 0xca,
+	 0xfe, 0xc4, 0xd8, 0x79, 0x72, 0xf4, 0xba, 0xc4, 0x0f, 0x95, 0x56,
+	 0x4f, 0x6b, 0xfb, 0x7b, 0x97, 0x3d, 0x90, 0x69, 0x48, 0xd0, 0x61,
+	 0x9b, 0x26, 0x74, 0x8b, 0xd1, 0xca, 0x01, 0x8b, 0x8b, 0x9e, 0xf4,
+	 0x07, 0xa4, 0x9b, 0x94, 0xcb, 0x3b, 0x98, 0x1d, 0xe6, 0xbc},
+	{0x04, 0x20, 0xc0, 0xa2, 0xaa, 0x04, 0x69, 0x52, 0x20, 0x19, 0xe9,
+	 0x62, 0xa6, 0x75, 0xfe, 0xf9, 0x69, 0x51, 0x83, 0xe1, 0xd6, 0xec,
+	 0x08, 0x02, 0x5c, 0x1f, 0x1d, 0x78, 0x6f, 0xdd, 0xe9, 0x9c, 0xa6,
+	 0x04, 0x55, 0xfc, 0xcd, 0x2d, 0x6a, 0x54, 0xb9, 0xad, 0x17, 0x87,
+	 0xe4, 0x8e, 0xb3, 0xce, 0x00, 0x5c, 0x6d, 0x05, 0x1b, 0xeb, 0xea,
+	 0xac, 0x96, 0xce, 0x1f, 0x85, 0x9f, 0xb7, 0x5a, 0x44, 0xa9},
+	{0x04, 0x3d, 0x8d, 0x70, 0xb3, 0xd4, 0xde, 0x1d, 0x68, 0xfb, 0x75,
+	 0x95, 0x43, 0x48, 0x02, 0xc6, 0xa5, 0x49, 0xde, 0x02, 0x04, 0x21,
+	 0x41, 0x8a, 0x36, 0x0c, 0x44, 0xfa, 0xfe, 0x0c, 0x88, 0x0f, 0xc7,
+	 0x62, 0xe8, 0x6c, 0xef, 0xbb, 0xfc, 0x6a, 0x48, 0x61, 0xda, 0xc4,
+	 0xfb, 0x46, 0xd5, 0xf5, 0x7f, 0x24, 0x17, 0xd5, 0x23, 0x2e, 0xa3,
+	 0x02, 0xf6, 0xb7, 0xc7, 0xab, 0x4d, 0xad, 0x8f, 0xef, 0x04},
+};
+#else
+const int ed_map_ntst = 0;
+const char **ed_map_input = NULL;
+const uint8_t **ed_map_output = NULL;
+#endif
+
 static int memory(void) {
 	err_t e;
 	int code = RLC_ERR;
@@ -42,16 +85,16 @@ static int memory(void) {
 
 	ed_null(a);
 
-	TRY {
+	RLC_TRY {
 		TEST_BEGIN("memory can be allocated") {
 			ed_new(a);
 			ed_free(a);
 		} TEST_END;
-	} CATCH(e) {
+	} RLC_CATCH(e) {
 		switch (e) {
 			case ERR_NO_MEMORY:
 				util_print("FATAL ERROR!\n");
-				ERROR(end);
+				RLC_ERROR(end);
 				break;
 		}
 	}
@@ -70,7 +113,7 @@ int util(void) {
 	ed_null(b);
 	ed_null(c);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
 		ed_new(b);
 		ed_new(c);
@@ -125,13 +168,19 @@ int util(void) {
 
 		TEST_BEGIN("validity test is correct") {
 			ed_set_infty(a);
-			TEST_ASSERT(ed_is_valid(a), end);
+			TEST_ASSERT(ed_on_curve(a), end);
 			ed_rand(a);
-			TEST_ASSERT(ed_is_valid(a), end);
+			TEST_ASSERT(ed_on_curve(a), end);
 			fp_rand(a->x);
-			TEST_ASSERT(!ed_is_valid(a), end);
+			TEST_ASSERT(!ed_on_curve(a), end);
 		}
 		TEST_END;
+
+		TEST_BEGIN("blinding is consistent") {
+			ed_rand(a);
+			ed_blind(a, a);
+			TEST_ASSERT(ed_on_curve(a), end);
+		} TEST_END;
 
 		TEST_BEGIN("reading and writing a point are consistent") {
 			for (int j = 0; j < 2; j++) {
@@ -156,9 +205,9 @@ int util(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -178,7 +227,7 @@ int addition(void) {
 	ed_null(d);
 	ed_null(e);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
 		ed_new(b);
 		ed_new(c);
@@ -267,8 +316,8 @@ int addition(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -289,7 +338,7 @@ int subtraction(void) {
 	ed_null(c);
 	ed_null(d);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
 		ed_new(b);
 		ed_new(c);
@@ -367,8 +416,8 @@ int subtraction(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -387,7 +436,7 @@ int doubling(void) {
 	ed_null(b);
 	ed_null(c);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
 		ed_new(b);
 		ed_new(c);
@@ -455,8 +504,8 @@ int doubling(void) {
 		} TEST_END;
 #endif
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -477,7 +526,7 @@ static int multiplication(void) {
 	ed_null(q);
 	ed_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		ed_new(p);
@@ -488,7 +537,7 @@ static int multiplication(void) {
 		ed_curve_get_ord(n);
 
 		TEST_BEGIN("generator has the right order") {
-			TEST_ASSERT(ed_is_valid(p), end);
+			TEST_ASSERT(ed_on_curve(p), end);
 			ed_mul(r, p, n);
 			TEST_ASSERT(ed_is_infty(r) == 1, end);
 		} TEST_END;
@@ -556,7 +605,7 @@ static int multiplication(void) {
 #endif
 
 #if ED_MUL == MONTY || !defined(STRIP)
-		TEST_BEGIN("montgomery laddering point multiplication is correct") {
+		TEST_BEGIN("montgomery ladder point multiplication is correct") {
 			bn_zero(k);
 			ed_mul_monty(r, p, k);
 			TEST_ASSERT(ed_is_infty(r), end);
@@ -636,9 +685,9 @@ static int multiplication(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -665,7 +714,7 @@ static int fixed(void) {
 		ed_null(t[i]);
 	}
 
-	TRY {
+	RLC_TRY {
 		ed_new(p);
 		ed_new(q);
 		ed_new(r);
@@ -809,9 +858,9 @@ static int fixed(void) {
 		}
 #endif
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -835,7 +884,7 @@ static int simultaneous(void) {
 	ed_null(q);
 	ed_null(r);
 
-	TRY {
+	RLC_TRY {
 		bn_new(n);
 		bn_new(k);
 		bn_new(l);
@@ -1053,9 +1102,9 @@ static int simultaneous(void) {
 			TEST_ASSERT(ed_cmp(q, r) == RLC_EQ, end);
 		} TEST_END;
 	}
-	CATCH_ANY {
+	RLC_CATCH_ANY {
 		util_print("FATAL ERROR!\n");
-		ERROR(end);
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1076,7 +1125,7 @@ static int compression(void) {
 	ed_null(b);
 	ed_null(c);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
 		ed_new(b);
 		ed_new(c);
@@ -1089,8 +1138,8 @@ static int compression(void) {
 		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
@@ -1103,14 +1152,17 @@ static int compression(void) {
 static int hashing(void) {
 	int code = RLC_ERR;
 	ed_t a;
+	ed_t b;
 	bn_t n;
 	uint8_t msg[5];
 
 	ed_null(a);
+	ed_null(b);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		ed_new(a);
+		ed_new(b);
 		bn_new(n);
 
 		ed_curve_get_ord(n);
@@ -1118,17 +1170,29 @@ static int hashing(void) {
 		TEST_BEGIN("point hashing is correct") {
 			rand_bytes(msg, sizeof(msg));
 			ed_map(a, msg, sizeof(msg));
+			TEST_ASSERT(ed_on_curve(a), end);
+			ed_map_dst(b, msg, sizeof(msg), (const uint8_t *)"RELIC", 5);
+			TEST_ASSERT(ed_cmp(a, b) == RLC_EQ, end);
 			ed_mul(a, a, n);
 			TEST_ASSERT(ed_is_infty(a) == 1, end);
 		}
+		/* test vectors */
+		for (int j = 0; j < ed_map_ntst; ++j) {
+			ed_map(a, (const uint8_t *)ed_map_input[j], strlen(ed_map_input[j]));
+			ed_read_bin(b, ed_map_output[j], 2 * RLC_FP_BYTES + 1);
+			TEST_ASSERT(ed_on_curve(a), end);
+			TEST_ASSERT(ed_on_curve(b), end);
+			TEST_ASSERT(ed_cmp(a, b) == RLC_EQ, end);
+		}
 		TEST_END;
 	}
-	CATCH_ANY {
-		ERROR(end);
+	RLC_CATCH_ANY {
+		RLC_ERROR(end);
 	}
 	code = RLC_OK;
   end:
 	ed_free(a);
+	ed_free(b);
 	bn_free(n);
 	return code;
 }
@@ -1196,7 +1260,7 @@ int main(void) {
 
 	if (r0 == RLC_ERR && r1 == RLC_ERR && r2 == RLC_ERR && r3 == RLC_ERR) {
 		if (ed_param_set_any() == RLC_ERR) {
-			THROW(ERR_NO_CURVE);
+			RLC_THROW(ERR_NO_CURVE);
 			core_clean();
 			return 0;
 		} else {

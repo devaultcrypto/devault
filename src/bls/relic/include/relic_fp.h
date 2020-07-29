@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -1008,15 +1008,6 @@ void fp_inv_monty(fp_t c, const fp_t a);
  * @throw ERR_NO_VALID		- if the field element is not invertible.
  */
 void fp_inv_exgcd(fp_t c, const fp_t a);
-
-/**
- * Inverts a prime field element using the Euclidean Extended Algorithm,
- * using bns and a custom prime modulus.
- *
- * @param[out] c			- the result.
- * @param[in] a				- the prime field element to invert.
- */
-void fp_inv_exgcd_bn(bn_t c, const bn_t u, const bn_t p);
 
 /**
  * Inverts a prime field element using the constant-time division step approach

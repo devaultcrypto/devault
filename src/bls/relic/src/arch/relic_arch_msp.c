@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -90,3 +90,32 @@ ull_t arch_cycles(void) {
 #endif /* __ICC430__ */
 
 #endif /* TIMER = CYCLE */
+
+unsigned int arch_lzcnt() {
+    static const uint8_t table[16] = {
+    	0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4
+    };
+#if WSIZE == 8
+	if (a >> 4 == 0) {
+		return table[a & 0xF];
+	} else {
+		return table[a >> 4] + 4;
+	}
+	return 0;
+#elif WSIZE == 16
+	int offset;
+
+	if (a >= ((dig_t)1 << 8)) {
+		offset = 8;
+	} else {
+		offset = 0;
+	}
+	a = a >> offset;
+	if (a >> 4 == 0) {
+		return table[a & 0xF] + offset;
+	} else {
+		return table[a >> 4] + 4 + offset;
+	}
+	return 0;
+#endif
+}

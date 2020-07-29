@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -83,7 +83,8 @@
  *
  * @param[in] B			- the number of bits to isolate.
  */
-#define RLC_MASK(B)				(((dig_t)1 << (B)) - 1)
+#define RLC_MASK(B)															\
+	((-(dig_t)((B) >= WSIZE)) | (((dig_t)1 << ((B) % WSIZE)) - 1))
 
 /**
  * Returns a bit mask to isolate the lowest half of a digit.

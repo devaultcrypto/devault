@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -24,8 +24,8 @@
 /**
  * @file
  *
- * Implementation of utilities for prime elliptic curves over quadratic
- * extensions.
+ * Implementation of comparison for points on prime elliptic curves over
+ * quadratic extensions.
  *
  * @ingroup epx
  */
@@ -44,58 +44,14 @@ void ep2_set_infty(ep2_t p) {
 	fp2_zero(p->x);
 	fp2_zero(p->y);
 	fp2_zero(p->z);
-	p->norm = 1;
+	p->coord = BASIC;
 }
 
 void ep2_copy(ep2_t r, ep2_t p) {
 	fp2_copy(r->x, p->x);
 	fp2_copy(r->y, p->y);
 	fp2_copy(r->z, p->z);
-	r->norm = p->norm;
-}
-
-int ep2_cmp(ep2_t p, ep2_t q) {
-    ep2_t r, s;
-    int result = RLC_EQ;
-
-    ep2_null(r);
-    ep2_null(s);
-
-    TRY {
-        ep2_new(r);
-        ep2_new(s);
-
-        if ((!p->norm) && (!q->norm)) {
-            /* If the two points are not normalized, it is faster to compare
-             * x1 * z2^2 == x2 * z1^2 and y1 * z2^3 == y2 * z1^3. */
-            fp2_sqr(r->z, p->z);
-            fp2_sqr(s->z, q->z);
-            fp2_mul(r->x, p->x, s->z);
-            fp2_mul(s->x, q->x, r->z);
-            fp2_mul(r->z, r->z, p->z);
-            fp2_mul(s->z, s->z, q->z);
-            fp2_mul(r->y, p->y, s->z);
-            fp2_mul(s->y, q->y, r->z);
-        } else {
-			ep2_norm(r, p);
-            ep2_norm(s, q);
-        }
-
-        if (fp2_cmp(r->x, s->x) != RLC_EQ) {
-            result = RLC_NE;
-        }
-
-        if (fp2_cmp(r->y, s->y) != RLC_EQ) {
-            result = RLC_NE;
-        }
-    } CATCH_ANY {
-        THROW(ERR_CAUGHT);
-    } FINALLY {
-        ep2_free(r);
-        ep2_free(s);
-    }
-
-    return result;
+	r->coord = p->coord;
 }
 
 void ep2_rand(ep2_t p) {
@@ -104,7 +60,7 @@ void ep2_rand(ep2_t p) {
 	bn_null(k);
 	bn_null(n);
 
-	TRY {
+	RLC_TRY {
 		bn_new(k);
 		bn_new(n);
 
@@ -113,12 +69,34 @@ void ep2_rand(ep2_t p) {
 
 		ep2_mul_gen(p, k);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(k);
 		bn_free(n);
+	}
+}
+
+void ep2_blind(ep2_t r, ep2_t p) {
+	fp2_t rand;
+
+	fp2_null(rand);
+
+	RLC_TRY {
+		fp2_new(rand);
+
+		fp2_rand(rand);
+		fp2_mul(r->z, p->z, rand);
+		fp2_mul(r->y, p->y, rand);
+		fp2_sqr(rand, rand);
+		fp2_mul(r->x, r->x, rand);
+		fp2_mul(r->y, r->y, rand);
+		r->coord = PROJC;
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
+		fp2_free(rand);
 	}
 }
 
@@ -127,7 +105,7 @@ void ep2_rhs(fp2_t rhs, ep2_t p) {
 
 	fp2_null(t0);
 
-	TRY {
+	RLC_TRY {
 		fp2_new(t0);
 
 		fp2_sqr(t0, p->x);                  /* x1^2 */
@@ -179,21 +157,21 @@ void ep2_rhs(fp2_t rhs, ep2_t p) {
 		}
 
 		fp2_copy(rhs, t0);
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
 		fp2_free(t0);
 	}
 }
 
 
-int ep2_is_valid(ep2_t p) {
+int ep2_on_curve(ep2_t p) {
 	ep2_t t;
 	int r = 0;
 
 	ep2_null(t);
 
-	TRY {
+	RLC_TRY {
 		ep2_new(t);
 
 		ep2_norm(t, p);
@@ -202,9 +180,9 @@ int ep2_is_valid(ep2_t p) {
 		fp2_sqr(t->y, t->y);
 
 		r = (fp2_cmp(t->x, t->y) == RLC_EQ) || ep2_is_infty(p);
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
 		ep2_free(t);
 	}
 	return r;
@@ -243,7 +221,7 @@ int ep2_size_bin(ep2_t a, int pack) {
 		return 1;
 	}
 
-	TRY {
+	RLC_TRY {
 		ep2_new(t);
 
 		ep2_norm(t, a);
@@ -252,9 +230,9 @@ int ep2_size_bin(ep2_t a, int pack) {
 		if (!pack) {
 			size += 2 * RLC_FP_BYTES;
 		}
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
 		ep2_free(t);
 	}
 
@@ -267,17 +245,17 @@ void ep2_read_bin(ep2_t a, const uint8_t *bin, int len) {
 			ep2_set_infty(a);
 			return;
 		} else {
-			THROW(ERR_NO_BUFFER);
+			RLC_THROW(ERR_NO_BUFFER);
 			return;
 		}
 	}
 
 	if (len != (2 * RLC_FP_BYTES + 1) && len != (4 * RLC_FP_BYTES + 1)) {
-		THROW(ERR_NO_BUFFER);
+		RLC_THROW(ERR_NO_BUFFER);
 		return;
 	}
 
-	a->norm = 1;
+	a->coord = BASIC;
 	fp_set_dig(a->z[0], 1);
 	fp_zero(a->z[1]);
 	fp2_read_bin(a->x, bin + 1, 2 * RLC_FP_BYTES);
@@ -292,7 +270,7 @@ void ep2_read_bin(ep2_t a, const uint8_t *bin, int len) {
 				fp_zero(a->y[1]);
 				break;
 			default:
-				THROW(ERR_NO_VALID);
+				RLC_THROW(ERR_NO_VALID);
 				break;
 		}
 		ep2_upk(a, a);
@@ -302,7 +280,7 @@ void ep2_read_bin(ep2_t a, const uint8_t *bin, int len) {
 		if (bin[0] == 4) {
 			fp2_read_bin(a->y, bin + 2 * RLC_FP_BYTES + 1, 2 * RLC_FP_BYTES);
 		} else {
-			THROW(ERR_NO_VALID);
+			RLC_THROW(ERR_NO_VALID);
 		}
 	}
 }
@@ -314,21 +292,21 @@ void ep2_write_bin(uint8_t *bin, int len, ep2_t a, int pack) {
 
 	if (ep2_is_infty(a)) {
 		if (len < 1) {
-			THROW(ERR_NO_BUFFER);
+			RLC_THROW(ERR_NO_BUFFER);
 		} else {
 			bin[0] = 0;
 			return;
 		}
 	}
 
-	TRY {
+	RLC_TRY {
 		ep2_new(t);
 
 		ep2_norm(t, a);
 
 		if (pack) {
 			if (len < 2 * RLC_FP_BYTES + 1) {
-				THROW(ERR_NO_BUFFER);
+				RLC_THROW(ERR_NO_BUFFER);
 			} else {
 				ep2_pck(t, t);
 				bin[0] = 2 | fp_get_bit(t->y[0], 0);
@@ -336,16 +314,16 @@ void ep2_write_bin(uint8_t *bin, int len, ep2_t a, int pack) {
 			}
 		} else {
 			if (len < 4 * RLC_FP_BYTES + 1) {
-				THROW(ERR_NO_BUFFER);
+				RLC_THROW(ERR_NO_BUFFER);
 			} else {
 				bin[0] = 4;
 				fp2_write_bin(bin + 1, 2 * RLC_FP_BYTES, t->x, 0);
 				fp2_write_bin(bin + 2 * RLC_FP_BYTES + 1, 2 * RLC_FP_BYTES, t->y, 0);
 			}
 		}
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
+	} RLC_FINALLY {
 		ep2_free(t);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -45,10 +45,10 @@ void fp_inv_basic(fp_t c, const fp_t a) {
 	bn_null(e);
 
 	if (fp_is_zero(a)) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(e);
 
 		e->used = RLC_FP_DIGS;
@@ -57,10 +57,10 @@ void fp_inv_basic(fp_t c, const fp_t a) {
 
 		fp_exp(c, a, e);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(e);
 	}
 }
@@ -79,10 +79,10 @@ void fp_inv_binar(fp_t c, const fp_t a) {
 	bn_null(p);
 
 	if (fp_is_zero(a)) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(u);
 		bn_new(v);
 		bn_new(g1);
@@ -169,10 +169,10 @@ void fp_inv_binar(fp_t c, const fp_t a) {
 #endif
 		}
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(u);
 		bn_free(v);
 		bn_free(g1);
@@ -199,10 +199,10 @@ void fp_inv_monty(fp_t c, const fp_t a) {
 	bn_null(x2);
 
 	if (fp_is_zero(a)) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(_a);
 		bn_new(_p);
 		bn_new(u);
@@ -310,10 +310,10 @@ void fp_inv_monty(fp_t c, const fp_t a) {
 #endif
 		(void)flag;
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(_a);
 		bn_free(_p);
 		bn_free(u);
@@ -339,10 +339,10 @@ void fp_inv_exgcd(fp_t c, const fp_t a) {
 	bn_null(r);
 
 	if (fp_is_zero(a)) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(u);
 		bn_new(v);
 		bn_new(g1);
@@ -379,10 +379,10 @@ void fp_inv_exgcd(fp_t c, const fp_t a) {
 		}
 		fp_prime_conv(c, g1);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		bn_free(u);
 		bn_free(v);
 		bn_free(g1);
@@ -406,8 +406,8 @@ void fp_inv_divst(fp_t c, const fp_t a) {
 #else
 	int d = (49 * FP_PRIME + 57)/17;
 #endif
-	int delta = 1, g0, d0;
-	dig_t fs, gs;
+	int g0, d0;
+	dig_t fs, gs, delta = 1;
 	bn_t _t;
 	dv_t f, g, t, u;
 	fp_t precomp, v, r;
@@ -422,10 +422,10 @@ void fp_inv_divst(fp_t c, const fp_t a) {
 	fp_null(precomp);
 
 	if (fp_is_zero(a)) {
-		THROW(ERR_NO_VALID);
+		RLC_THROW(ERR_NO_VALID);
 	}
 
-	TRY {
+	RLC_TRY {
 		bn_new(_t);
 		dv_new(f);
 		dv_new(g);
@@ -451,8 +451,10 @@ void fp_inv_divst(fp_t c, const fp_t a) {
 
 		for (int i = 0; i < d; i++) {
 			g0 = g[0] & 1;
-			d0 = g0 & (delta > 0);
-			delta = RLC_SEL(delta, -delta, d0);
+			d0 = delta >> (RLC_DIG - 1);
+			d0 = g0 & ~d0;
+			/* Conditionally negate delta if d0 is set. */
+			delta = (delta ^ -d0) + d0;
 			/* Conditionally swap based on d0. */
 			dv_swap_cond(r, v, RLC_FP_DIGS, d0);
 			fp_negm_low(t, r);
@@ -485,9 +487,9 @@ void fp_inv_divst(fp_t c, const fp_t a) {
 		fp_neg(t, v);
 		dv_copy_cond(v, t, RLC_FP_DIGS, fs);
 		fp_mul(c, v, precomp);
-	} CATCH_ANY {
-		THROW(ERR_CAUGHT)
-	} FINALLY {
+	} RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT)
+	} RLC_FINALLY {
 		bn_free(_t);
 		dv_free(f);
 		dv_free(g);
@@ -515,9 +517,9 @@ void fp_inv_sim(fp_t *c, const fp_t *a, int n) {
 
 	fp_null(u);
 
-	TRY {
+	RLC_TRY {
 		if (t == NULL) {
-			THROW(ERR_NO_MEMORY);
+			RLC_THROW(ERR_NO_MEMORY);
 		}
 		for (i = 0; i < n; i++) {
 			fp_null(t[i]);
@@ -541,67 +543,14 @@ void fp_inv_sim(fp_t *c, const fp_t *a, int n) {
 		}
 		fp_copy(c[0], u);
 	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
+	RLC_CATCH_ANY {
+		RLC_THROW(ERR_CAUGHT);
 	}
-	FINALLY {
+	RLC_FINALLY {
 		for (i = 0; i < n; i++) {
 			fp_free(t[i]);
 		}
 		fp_free(u);
 		RLC_FREE(t);
 	}
-}
-
-void fp_inv_exgcd_bn(bn_t c, const bn_t u, const bn_t p) {
-	bn_t v, g1, g2, q, r;
-
-	bn_null(v);
-	bn_null(g1);
-	bn_null(g2);
-	bn_null(q);
-	bn_null(r);
-
-	TRY {
-		bn_new(v);
-		bn_new(g1);
-		bn_new(g2);
-		bn_new(q);
-		bn_new(r);
-
-		/* u = a, v = p, g1 = 1, g2 = 0. */
-		bn_copy(v, p);
-		bn_set_dig(g1, 1);
-		bn_zero(g2);
-
-		/* While (u != 1. */
-		while (bn_cmp_dig(u, 1) != RLC_EQ) {
-			/* q = [v/u], r = v mod u. */
-			bn_div_rem(q, r, v, u);
-			/* v = u, u = r. */
-			bn_copy(v, u);
-			bn_copy(u, r);
-			/* r = g2 - q * g1. */
-			bn_mul(r, q, g1);
-			bn_sub(r, g2, r);
-			/* g2 = g1, g1 = r. */
-			bn_copy(g2, g1);
-			bn_copy(g1, r);
-		}
-
-		if (bn_sign(g1) == RLC_NEG) {
-			bn_add(g1, g1, p);
-		}
-		bn_copy(c, g1);
-	}
-	CATCH_ANY {
-		THROW(ERR_CAUGHT);
-	}
-	FINALLY {
-		bn_free(v);
-		bn_free(g1);
-		bn_free(g2);
-		bn_free(q);
-		bn_free(r);
-	};
 }

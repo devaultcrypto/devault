@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -110,6 +110,10 @@ static void util(void) {
 		BENCH_ADD(ed_rand(p));
 	} BENCH_END;
 
+	BENCH_BEGIN("ed_blind") {
+		BENCH_ADD(ed_blind(p, p));
+	} BENCH_END;
+
 	BENCH_BEGIN("ed_rhs") {
 		ed_rand(p);
 		BENCH_ADD(ed_rhs(q->x, p));
@@ -120,9 +124,9 @@ static void util(void) {
 		BENCH_ADD(ed_tab(t, p, 4));
 	} BENCH_END;
 
-	BENCH_BEGIN("ed_is_valid") {
+	BENCH_BEGIN("ed_on_curve") {
 		ed_rand(p);
-		BENCH_ADD(ed_is_valid(p));
+		BENCH_ADD(ed_on_curve(p));
 	} BENCH_END;
 
 	BENCH_BEGIN("ed_size_bin (0)") {
@@ -666,7 +670,7 @@ int main(void) {
 
 	if (r0 == RLC_ERR) {
 		if (ed_param_set_any() == RLC_ERR) {
-			THROW(ERR_NO_CURVE);
+			RLC_THROW(ERR_NO_CURVE);
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -108,8 +108,8 @@ typedef struct {
 	fp2_t y;
 	/** The third coordinate (projective representation). */
 	fp2_t z;
-	/** Flag to indicate that this point is normalized. */
-	int norm;
+	/** Flag to indicate the coordinate system of this point. */
+	int coord;
 } ep2_st;
 
 /**
@@ -186,7 +186,7 @@ typedef iso2_st *iso2_t;
 /*============================================================================*/
 
 /**
- * Initializes a point on a elliptic curve with a null value.
+ * Initializes a point on an elliptic curve with a null value.
  *
  * @param[out] A				- the point to initialize.
  */
@@ -197,7 +197,7 @@ typedef iso2_st *iso2_t;
 #endif
 
 /**
- * Calls a function to allocate a point on a elliptic curve.
+ * Calls a function to allocate a point on an elliptic curve.
  *
  * @param[out] A				- the new point.
  * @throw ERR_NO_MEMORY			- if there is no available memory.
@@ -206,7 +206,7 @@ typedef iso2_st *iso2_t;
 #define ep2_new(A)															\
 	A = (ep2_t)calloc(1, sizeof(ep2_st));									\
 	if (A == NULL) {														\
-		THROW(ERR_NO_MEMORY);												\
+		RLC_THROW(ERR_NO_MEMORY);												\
 	}																		\
 	fp2_null((A)->x);														\
 	fp2_null((A)->y);														\
@@ -228,7 +228,7 @@ typedef iso2_st *iso2_t;
 #endif
 
 /**
- * Calls a function to clean and free a point on a elliptic curve.
+ * Calls a function to clean and free a point on an elliptic curve.
  *
  * @param[out] A				- the point to free.
  */
@@ -249,19 +249,6 @@ typedef iso2_st *iso2_t;
 #endif
 
 /**
- * Negates a point in an elliptic curve over a quadratic extension field.
- * Computes R = -P.
- *
- * @param[out] R				- the result.
- * @param[in] P					- the point to negate.
- */
-#if EP_ADD == BASIC
-#define ep2_neg(R, P)			ep2_neg_basic(R, P)
-#elif EP_ADD == PROJC
-#define ep2_neg(R, P)			ep2_neg_projc(R, P)
-#endif
-
-/**
  * Adds two points in an elliptic curve over a quadratic extension field.
  * Computes R = P + Q.
  *
@@ -271,22 +258,8 @@ typedef iso2_st *iso2_t;
  */
 #if EP_ADD == BASIC
 #define ep2_add(R, P, Q)		ep2_add_basic(R, P, Q);
-#elif EP_ADD == PROJC
+#elif EP_ADD == PROJC || EP_ADD == JACOB
 #define ep2_add(R, P, Q)		ep2_add_projc(R, P, Q);
-#endif
-
-/**
- * Subtracts a point in an elliptic curve over a quadratic extension field from
- * another point in this curve. Computes R = P - Q.
- *
- * @param[out] R				- the result.
- * @param[in] P					- the first point.
- * @param[in] Q					- the second point.
- */
-#if EP_ADD == BASIC
-#define ep2_sub(R, P, Q)		ep2_sub_basic(R, P, Q)
-#elif EP_ADD == PROJC
-#define ep2_sub(R, P, Q)		ep2_sub_projc(R, P, Q)
 #endif
 
 /**
@@ -298,7 +271,7 @@ typedef iso2_st *iso2_t;
  */
 #if EP_ADD == BASIC
 #define ep2_dbl(R, P)			ep2_dbl_basic(R, P);
-#elif EP_ADD == PROJC
+#elif EP_ADD == PROJC || EP_ADD == JACOB
 #define ep2_dbl(R, P)			ep2_dbl_projc(R, P);
 #endif
 
@@ -473,20 +446,6 @@ void ep2_curve_get_ord(bn_t n);
 void ep2_curve_get_cof(bn_t h);
 
 /**
- * Returns the sqrt(-3) mod q in the curve, where q is the prime.
- *
- * @param[out] h			- the returned cofactor.
- */
-void ep2_curve_get_s3(bn_t s3);
-
-/**
- * Returns the (sqrt(-3) - 1) / 2 mod q in the curve, where q is the prime.
- *
- * @param[out] h			- the returned cofactor.
- */
-void ep2_curve_get_s32(bn_t s32);
-
-/**
  * Returns the isogeny map coefficients for use with the SSWU map.
  */
 iso2_t ep2_curve_get_iso(void);
@@ -510,7 +469,7 @@ void ep2_curve_set(fp2_t a, fp2_t b, ep2_t g, bn_t r, bn_t h);
 void ep2_curve_set_twist(int type);
 
 /**
- * Tests if a point on a elliptic curve is at the infinity.
+ * Tests if a point on an elliptic curve is at the infinity.
  *
  * @param[in] p				- the point to test.
  * @return 1 if the point is at infinity, 0 otherise.
@@ -518,7 +477,7 @@ void ep2_curve_set_twist(int type);
 int ep2_is_infty(ep2_t p);
 
 /**
- * Assigns a elliptic curve point to a point at the infinity.
+ * Assigns an elliptic curve point to the point at infinity.
  *
  * @param[out] p			- the point to assign.
  */
@@ -549,6 +508,14 @@ int ep2_cmp(ep2_t p, ep2_t q);
 void ep2_rand(ep2_t p);
 
 /**
+ * Randomizes coordinates of an elliptic curve point.
+ *
+ * @param[out] r			- the blinded prime elliptic curve point.
+ * @param[in] p				- the prime elliptic curve point to blind.
+ */
+void ep2_blind(ep2_t r, ep2_t p);
+
+/**
  * Computes the right-hand side of the elliptic curve equation at a certain
  * elliptic curve point.
  *
@@ -562,7 +529,7 @@ void ep2_rhs(fp2_t rhs, ep2_t p);
  *
  * @param[in] p				- the point to test.
  */
-int ep2_is_valid(ep2_t p);
+int ep2_on_curve(ep2_t p);
 
 /**
  * Builds a precomputation table for multiplying a random prime elliptic point.
@@ -574,7 +541,7 @@ int ep2_is_valid(ep2_t p);
 void ep2_tab(ep2_t *t, ep2_t p, int w);
 
 /**
- * Prints a elliptic curve point.
+ * Prints an elliptic curve point.
  *
  * @param[in] p				- the elliptic curve point to print.
  */
@@ -621,16 +588,7 @@ void ep2_write_bin(uint8_t *bin, int len, ep2_t a, int pack);
  * @param[out] r			- the result.
  * @param[out] p			- the point to negate.
  */
-void ep2_neg_basic(ep2_t r, ep2_t p);
-
-/**
- * Negates a point represented in projective coordinates in an elliptic curve
- * over a quadratic exyension.
- *
- * @param[out] r			- the result.
- * @param[out] p			- the point to negate.
- */
-void ep2_neg_projc(ep2_t r, ep2_t p);
+void ep2_neg(ep2_t r, ep2_t p);
 
 /**
  * Adds to points represented in affine coordinates in an elliptic curve over a
@@ -654,16 +612,6 @@ void ep2_add_basic(ep2_t r, ep2_t p, ep2_t q);
 void ep2_add_slp_basic(ep2_t r, fp2_t s, ep2_t p, ep2_t q);
 
 /**
- * Subtracts a points represented in affine coordinates in an elliptic curve
- * over a quadratic extension from another point.
- *
- * @param[out] r			- the result.
- * @param[in] p				- the first point.
- * @param[in] q				- the point to subtract.
- */
-void ep2_sub_basic(ep2_t r, ep2_t p, ep2_t q);
-
-/**
  * Adds two points represented in projective coordinates in an elliptic curve
  * over a quadratic extension.
  *
@@ -673,15 +621,15 @@ void ep2_sub_basic(ep2_t r, ep2_t p, ep2_t q);
  */
 void ep2_add_projc(ep2_t r, ep2_t p, ep2_t q);
 
-/**
- * Subtracts a points represented in projective coordinates in an elliptic curve
- * over a quadratic extension from another point.
- *
- * @param[out] r			- the result.
- * @param[in] p				- the first point.
- * @param[in] q				- the point to subtract.
- */
-void ep2_sub_projc(ep2_t r, ep2_t p, ep2_t q);
+ /**
+  * Subtracts a point i an elliptic curve over a quadratic extension from
+  * another.
+  *
+  * @param[out] r			- the result.
+  * @param[in] p			- the first point.
+  * @param[in] q			- the point to subtract.
+  */
+ void ep2_sub(ep2_t r, ep2_t p, ep2_t q);
 
 /**
  * Doubles a points represented in affine coordinates in an elliptic curve over
@@ -732,7 +680,7 @@ void ep2_mul_slide(ep2_t r, ep2_t p, const bn_t k);
 
 /**
  * Multiplies a prime elliptic point by an integer using the constant-time
- * Montgomery laddering point multiplication method.
+ * Montgomery ladder point multiplication method.
  *
  * @param[out] r			- the result.
  * @param[in] p				- the point to multiply.
@@ -938,6 +886,16 @@ void ep2_mul_sim_inter(ep2_t r, ep2_t p, bn_t k, ep2_t q, bn_t m);
 void ep2_mul_sim_joint(ep2_t r, ep2_t p, bn_t k, ep2_t q, bn_t m);
 
 /**
+ * Multiplies simultaneously elements from G_2. Computes R = \Sum_i=0..n k_iP_i.
+ *
+ * @param[out] r			- the result.
+ * @param[out] p			- the G_2 elements to multiply.
+ * @param[out] k			- the integer scalars.
+ * @param[out] n			- the number of elements to multiply.
+ */
+void ep2_mul_sim_lot(ep2_t r, ep2_t p[], const bn_t k[], int n);
+
+/**
  * Multiplies and adds the generator and a prime elliptic curve point
  * simultaneously. Computes R = kG + lQ.
  *
@@ -986,28 +944,16 @@ void ep2_norm_sim(ep2_t *r, ep2_t *t, int n);
 void ep2_map(ep2_t p, const uint8_t *msg, int len);
 
 /**
- * Maps a byte array to a point in an elliptic curve over a quadratic extension,
- * using a domain separation tag.
+ * Maps a byte array to a point in an elliptic curve over a quadratic extension
+ * using an explicit domain separation tag.
  *
  * @param[out] p			- the result.
  * @param[in] msg			- the byte array to map.
  * @param[in] len			- the array length in bytes.
- * @param[in] dst			- the domain separation tag.
- * @param[in] dst_len		- the domain separation tag length, in bytes.
+ * @param[in] dst			- the domain separatoin tag.
+ * @param[in] dst_len		- the domain separation tag length in bytes.
  */
-void ep2_map_impl(ep2_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len);
-
-/**
- * Maps a byte array to a point in an elliptic curve over a quadratic extension.
- * The algorithm implemented is the Fouque-Tibouchi algorithm from the
- * paper "Indifferentiable Hashing to Barreto-Naehrig curves" for
- * the BLS12-381 curve.
- *
- * @param[out] p			- the result.
- * @param[in] msg			- the byte array to map.
- * @param[in] len			- the array length in bytes.
- */
-void ep2_map_ft(ep2_t p, const uint8_t *msg, int len);
+void ep2_map_dst(ep2_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len);
 
 /**
  * Computes a power of the Gailbraith-Lin-Scott homomorphism of a point

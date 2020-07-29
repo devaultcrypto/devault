@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -29,32 +29,34 @@
  * @ingroup arch
  */
 
+#include <stdio.h>
+
 #include "relic_types.h"
 #include "relic_arch.h"
 
+#include "lzcnt.inc"
+
+/*============================================================================*/
+/* Private definitions                                                        */
+/*============================================================================*/
+
 /**
- * Renames the inline assembly macro to a prettier name.
+ * Function pointer to underlying lznct implementation.
  */
-#define asm					__asm__ volatile
+static unsigned int (*lzcnt_ptr)(ull_t);
 
 /*============================================================================*/
 /* Public definitions                                                         */
 /*============================================================================*/
 
 void arch_init(void) {
+	lzcnt_ptr = (has_lzcnt_hard() ? lzcnt64_hard : lzcnt64_soft);
 }
 
 void arch_clean(void) {
+	lzcnt_ptr = NULL;
 }
 
-ull_t arch_cycles(void) {
-	unsigned int hi, lo;
-	asm (
-		"cpuid\n\t"/*serialize*/
-		"rdtsc\n\t"/*read the clock*/
-		"mov %%edx, %0\n\t"
-		"mov %%eax, %1\n\t"
-		: "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx"
-	);
-	return ((ull_t) lo) | (((ull_t) hi) << 32);
+unsigned int arch_lzcnt(dig_t x) {
+	return lzcnt_ptr((ull_t)x) - (8 * sizeof(ull_t) - WSIZE);
 }

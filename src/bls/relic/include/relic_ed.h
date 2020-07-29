@@ -1,6 +1,6 @@
 /*
  * RELIC is an Efficient LIbrary for Cryptography
- * Copyright (C) 2007-2019 RELIC Authors
+ * Copyright (C) 2007-2020 RELIC Authors
  *
  * This file is part of RELIC. RELIC is legal property of its developers,
  * whose names are not listed here. Please refer to the COPYRIGHT file
@@ -116,8 +116,8 @@ typedef struct {
     /** The forth coordinate (extended coordinates) */
     fp_st t;
 #endif
-    /** Flag to indicate that this point is normalized. */
-    int norm;
+    /** Flag to indicate the coordinate system of this point. */
+    int coord;
 } ed_st;
 
 /**
@@ -154,7 +154,7 @@ typedef ed_st *ed_t;
 #define ed_new(A)															\
     A = (ed_t)calloc(1, sizeof(ed_st));										\
     if (A == NULL) {														\
-        THROW(ERR_NO_MEMORY);												\
+        RLC_THROW(ERR_NO_MEMORY);												\
     }
 
 #elif ALLOC == AUTO
@@ -317,6 +317,14 @@ void ed_projc_to_extnd(ed_t r, const fp_t x, const fp_t y, const fp_t z);
 void ed_rand(ed_t p);
 
 /**
+ * Randomizes coordinates of a prime elliptic curve point.
+ *
+ * @param[out] r			- the blinded Edwards elliptic curve point.
+ * @param[in] p				- the Edwards elliptic curve point to blind.
+ */
+void ed_blind(ed_t r, const ed_t p);
+
+/**
  * Computes the right-hand side of the elliptic curve equation at a certain
  * Edwards elliptic curve point.
  *
@@ -343,7 +351,7 @@ void ed_copy(ed_t r, const ed_t p);
 int ed_cmp(const ed_t p, const ed_t q);
 
 /**
- * Assigns an Edwards elliptic curve point to a point at the infinity.
+ * Assigns an Edwards elliptic curve point to the point at infinity.
  *
  * @param[out] p	- the point to assign.
  */
@@ -479,6 +487,18 @@ void ed_norm_sim(ed_t *r, const ed_t *t, int n);
  * @param[in] len			- the array length in bytes.
  */
 void ed_map(ed_t p, const uint8_t *msg, int len);
+
+/**
+ * Maps a byte array to a point in an Edwards elliptic curve using
+ * an explicit domain separation tag.
+ *
+ * @param[out] p			- the result.
+ * @param[in] msg			- the byte array to map.
+ * @param[in] len			- the array length in bytes.
+ * @param[in] dst			- the domain separation tag.
+ * @param[in] dst_len		- the domain separation tag length in bytes.
+ */
+void ed_map_dst(ed_t p, const uint8_t *msg, int len, const uint8_t *dst, int dst_len);
 
 /**
  * Multiplies an Edwards elliptic curve point by an integer. Computes R = kP.
@@ -792,7 +812,7 @@ void ed_print(const ed_t p);
  *
  * @param[in] p       - the point to test.
  */
-int ed_is_valid(const ed_t p);
+int ed_on_curve(const ed_t p);
 
 /**
  * Returns the number of bytes necessary to store an Edwards elliptic curve point
@@ -848,7 +868,7 @@ void ed_mul_slide(ed_t r, const ed_t p, const bn_t k);
 
 /**
  * Multiplies an Edwards elliptic point by an integer using the constant-time
- * Montgomery laddering point multiplication method.
+ * Montgomery ladder point multiplication method.
  *
  * @param[out] r			- the result.
  * @param[in] p				- the point to multiply.
