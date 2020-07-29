@@ -83,7 +83,7 @@ class Util {
   /*
    * Frees memory allocated using SecAlloc.
    */
-  static void SecFree(void* ptr) {
+  inline void SecFree(void* ptr) {
     Util::secureFreeCallback(ptr);
   }
 
