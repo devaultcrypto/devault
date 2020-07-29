@@ -14,7 +14,9 @@
 
 #pragma once
 
+#include "relic.h"
 #include "relic_conf.h"
+#include "util.hpp"
 
 #include <gmp.h>
 
@@ -22,6 +24,7 @@ namespace bls {
 class G1Element;
 class G2Element;
 class GTElement;
+class BNWrapper;
 
 class G1Element {
 public:
@@ -34,10 +37,6 @@ public:
     static G1Element Unity();
     static G1Element FromMessage(
         const std::vector<uint8_t> &message,
-        const uint8_t *dst,
-        int dst_len);
-    static G1Element FromMessageHash(
-        const std::vector<uint8_t> &messageHash,
         const uint8_t *dst,
         int dst_len);
 
@@ -63,7 +62,6 @@ public:
     uint32_t GetFingerprint() const;
 
 private:
-    G1Element Exp(const bn_t n) const;
     static void CompressPoint(uint8_t *result, const g1_t *point);
 };
 
@@ -77,10 +75,6 @@ public:
     static G2Element Generator();
     static G2Element FromMessage(
         const std::vector<uint8_t> &message,
-        const uint8_t *dst,
-        int dst_len);
-    static G2Element FromMessageHash(
-        const std::vector<uint8_t> &messageHash,
         const uint8_t *dst,
         int dst_len);
 
@@ -105,7 +99,6 @@ public:
     G2Element &operator=(const G2Element &rhs);
 
 private:
-    G2Element Exp(const bn_t n) const;
     static void CompressPoint(uint8_t *result, const g2_t *point);
 };
 
@@ -131,5 +124,30 @@ public:
 private:
     static void CompressPoint(uint8_t *result, const gt_t *point);
 };
+
+class BNWrapper {
+public:
+    bn_t *b;
+    static BNWrapper FromByteVector(std::vector<uint8_t> &bytes)
+    {
+        BNWrapper bnw;
+        bnw.b = SecAlloc<bn_t>(1);
+        bn_new(*bnw.b);
+        bn_zero(*bnw.b);
+        bn_read_bin(*bnw.b, bytes.data(), bytes.size());
+        return bnw;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, BNWrapper const &bnw)
+    {
+        int length = bn_size_bin(*bnw.b);
+        uint8_t *data = new uint8_t[length];
+        bn_write_bin(data, length, *bnw.b);
+        std::string rst = Util::HexStr(data, length);
+        delete[] data;
+        return os << rst;
+    }
+};
+
 }  // end namespace bls
 

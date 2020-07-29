@@ -24,7 +24,6 @@
 namespace bls {
 class PrivateKey {
 friend class BLS;
-friend class Threshold;
 friend class G1Element;
 friend class G2Element;
 

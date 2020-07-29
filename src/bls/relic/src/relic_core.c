@@ -42,8 +42,8 @@
 #include "relic_fp.h"
 #include "relic_fb.h"
 #include "relic_ep.h"
-#include "relic_eb.h"
-#include "relic_cp.h"
+//#include "relic_eb.h"
+//#include "relic_cp.h"
 #include "relic_pp.h"
 
 /*============================================================================*/
