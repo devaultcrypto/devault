@@ -237,7 +237,7 @@ void fp2_exp_cyc(fp2_t c, fp2_t a, bn_t b) {
 #if FP_WIDTH > 2
 		fp2_sqr(t[0], a);
 		fp2_mul(t[1], t[0], a);
-		for (int i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
+		for (i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
 			fp2_mul(t[i], t[i - 1], t[0]);
 		}
 #endif
@@ -348,7 +348,7 @@ void fp8_exp_cyc(fp8_t c, fp8_t a, bn_t b) {
 #if FP_WIDTH > 2
 		fp8_sqr_cyc(t[0], a);
 		fp8_mul(t[1], t[0], a);
-		for (int i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
+		for (i = 2; i < (1 << (FP_WIDTH - 2)); i++) {
 			fp8_mul(t[i], t[i - 1], t[0]);
 		}
 #endif

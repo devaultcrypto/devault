@@ -690,7 +690,7 @@ void ep2_mul_sim_lot(ep2_t r, ep2_t p[], const bn_t k[], int n) {
 				}
 			}
 
-			for (int i = 0; i < n; i++) {
+			for (i = 0; i < n; i++) {
 				ep2_norm(_p[4*i], p[i]);
 				ep2_frb(_p[4*i + 1], _p[4*i], 1);
 				ep2_frb(_p[4*i + 2], _p[4*i + 1], 1);

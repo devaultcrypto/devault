@@ -122,7 +122,7 @@ static void pp_mil_k54(fp54_t r, fp9_t qx, fp9_t qy, ep_t p, bn_t a) {
 		fp3_mul_nor(sz[0], sz[0]);
 		fp_mul(sz[1][0], sz[0][0], core_get()->fp3_p2[1]);
 
-		for (int i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++) {
 			fp3_mul(ry[i], ry[i], sz[0]);
 			fp3_mul(rx[i], rx[i], sz[1]);
 		}
@@ -130,7 +130,7 @@ static void pp_mil_k54(fp54_t r, fp9_t qx, fp9_t qy, ep_t p, bn_t a) {
 		fp9_frb(sx, qx, 10);
 		fp9_frb(sy, qy, 10);
 		for (int j = 0; j < 10; j++) {
-			for (int i = 0; i < 3; i++) {
+			for (i = 0; i < 3; i++) {
 				fp3_mul(sy[i], sy[i], sz[0]);
 				fp3_mul(sx[i], sx[i], sz[1]);
 			}
