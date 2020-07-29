@@ -41,7 +41,6 @@ class HKDF256 {
 
     static void Expand(uint8_t* okm, size_t L, const uint8_t* prk, const uint8_t* info, const size_t infoLen) {
         assert(L <= 255 * HASH_LEN); // L <= 255 * HashLen
-        assert(infoLen >= 0);
         size_t N = ceil((double)L / HASH_LEN);
         size_t bytesWritten = 0;
 
