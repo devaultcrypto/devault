@@ -3228,7 +3228,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient> &vecSend,
         tx = MakeTransactionRef(std::move(txNew));
 
         // Limit size.
-        LogPrintf("For %d inputs, Tx size for Temporary debug = %d\n",tx->vin.size(), tx->GetTotalSize());
+        //LogPrintf("For %d inputs, Tx size for Temporary debug = %d\n",tx->vin.size(), tx->GetTotalSize());
         if (tx->GetTotalSize() >= MAX_STANDARD_TX_SIZE) {
             strFailReason = _("Transaction too large");
             return false;
