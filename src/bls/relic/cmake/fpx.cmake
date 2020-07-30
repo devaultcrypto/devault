@@ -1,5 +1,5 @@
-message(STATUS "Prime extension field arithmetic configuration (FPX module):\n")
-
+message(STATUS "Prime extension field arithmetic configuration (FPX module):")
+if (SHOW_MESSAGE)
 message("   ** Available bilinear pairing methods (default = BASIC;BASIC;BASIC):")
 
 message("      Quadratic extension arithmetic:")
@@ -13,7 +13,7 @@ message("      FPX_METHD=INTEG    Cubic extension field arithmetic with embedded
 message("      Extension field arithmetic:")
 message("      FPX_METHD=BASIC    Basic extension field arithmetic.")
 message("      FPX_METHD=LAZYR    Lazy-reduced extension field arithmetic.\n")
-
+endif()
 # Choose the arithmetic methods.
 if (NOT FPX_METHD)
 	set(FPX_METHD "INTEG;INTEG;LAZYR")

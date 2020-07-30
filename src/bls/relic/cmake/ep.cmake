@@ -1,5 +1,5 @@
-message(STATUS "Prime elliptic curve arithmetic configuration (EP module):\n")
-
+message(STATUS "Prime elliptic curve arithmetic configuration (EP module):")
+if (SHOW_MESSAGE)
 message("   ** Options for the prime elliptic curve module (default = all on):\n")
 
 message("      EP_PLAIN=[off|on] Support for ordinary curves without endomorphisms.")
@@ -35,7 +35,7 @@ message("      EP_METHD=BASIC    Multiplication-and-addition simultaneous multip
 message("      EP_METHD=TRICK    Shamir's trick for simultaneous multiplication.")
 message("      EP_METHD=INTER    Interleaving of window NAFs (GLV for Koblitz curves).")
 message("      EP_METHD=JOINT    Joint sparse form.\n")
-
+endif()
 if (NOT EP_DEPTH)
 	set(EP_DEPTH 4)
 endif(NOT EP_DEPTH)

@@ -1,5 +1,5 @@
-message(STATUS "Binary field arithmetic configuration (FB module):\n")
-
+message(STATUS "Binary field arithmetic configuration (FB module):")
+if (SHOW_MESSAGE)
 message("   ** Options for the binary elliptic curve module (default = 283,0,on,on,on):\n")
 
 message("      FB_POLYN=n        The irreducible polynomial size in bits.")
@@ -55,7 +55,7 @@ message("      FB_METHD=MONTY    Constant-time Montgomery powering ladder.\n")
 message("      Iterated squaring/square-root:")
 message("      FB_METHD=BASIC    Iterated squaring/square-root by consecutive squaring/square-root.")
 message("      FB_METHD=QUICK    Iterated squaring/square-root by table-based method.\n")
-
+endif()
 # Choose the polynomial size.
 if (NOT FB_POLYN)
 	set(FB_POLYN 283)

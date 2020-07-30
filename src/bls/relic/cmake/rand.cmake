@@ -1,5 +1,5 @@
-message(STATUS "Available pseudo-random number generators (default = HASHD):\n")
-
+message(STATUS "Available pseudo-random number generators (default = HASHD):")
+if (SHOW_MESSAGE)
 message("   RAND=HASHD     Use the HASH-DRBG generator. (recommended)")
 message("   RAND=RDRND     Use Intel RdRand instruction directly.")
 message("   RAND=UDEV      Use the operating system underlying generator.")
@@ -12,7 +12,7 @@ message("   SEED=LIBC      Use rand()/random() functions. (insecure!)")
 message("   SEED=RDRND     Use Intel RdRand instruction directly.")
 message("   SEED=UDEV      Use non-blocking /dev/urandom. (recommended)")
 message("   SEED=WCGR      Use Windows' CryptGenRandom. (recommended)\n")
-
+endif()
 # Choose the pseudo-random number generator.
 set(RAND "HASHD" CACHE STRING "Pseudo-random number generator")
 

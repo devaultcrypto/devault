@@ -1,5 +1,5 @@
-message(STATUS "Prime field arithmetic configuration (FP module):\n")
-
+message(STATUS "Prime field arithmetic configuration (FP module):")
+if (SHOW_MESSAGE)
 message("   ** Arithmetic precision of the prime field module (default = 256,0,off,off):\n")
 
 message("      FP_PRIME=n        The prime modulus size in bits.")
@@ -42,7 +42,7 @@ message("      Field exponentiation")
 message("      FP_METHD=BASIC    Binary exponentiation.")
 message("      FP_METHD=SLIDE    Sliding window exponentiation.")
 message("      FP_METHD=MONTY    Constant-time Montgomery powering ladder.\n")
-
+endif()
 # Choose the prime field size.
 if (NOT FP_PRIME)
 	set(FP_PRIME 256)

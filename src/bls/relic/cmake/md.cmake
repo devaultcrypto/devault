@@ -1,5 +1,5 @@
-message(STATUS "Message digest configuration (MD module):\n")
-
+message(STATUS "Message digest configuration (MD module):")
+if(SHOW_MESSAGE)
 message("   ** Available hash functions (default = SH256):\n")
 message("      MD_METHD=SH224        SHA-224 hash function.")
 message("      MD_METHD=SH256        SHA-256 hash function.")
@@ -7,7 +7,7 @@ message("      MD_METHD=SH384        SHA-384 hash function.")
 message("      MD_METHD=SH512        SHA-512 hash function.")
 message("      MD_METHD=B2S160       BLAKE2s-160 hash function.")
 message("      MD_METHD=B2S256       BLAKE2s-256 hash function.\n")
-
+endif()
 # Choose the arithmetic methods.
 if (NOT MD_METHD)
 	set(MD_METHD "SH256")

@@ -1,5 +1,5 @@
-message(STATUS "Multiple precision arithmetic configuration (BN module):\n")
-
+message(STATUS "Multiple precision arithmetic configuration (BN module):")
+if (SHOW_MESSAGE) 
 message("   ** Options for the multiple precision module (default = 1024,DOUBLE,0):\n")
 
 message("      BN_PRECI=n        The base precision in bits. Let w be n in words.")
@@ -39,6 +39,7 @@ message("      Prime generation:")
 message("      BN_METHD=BASIC    Basic prime generation.")
 message("      BN_METHD=SAFEP    Safe prime generation.")
 message("      BN_METHD=STRON    Strong prime generation.\n")
+endif()
 
 # Choose the arithmetic precision.
 if (NOT BN_PRECI)

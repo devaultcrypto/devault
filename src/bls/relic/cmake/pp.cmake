@@ -1,5 +1,5 @@
-message(STATUS "Bilinear pairings arithmetic configuration (PP module):\n")
-
+message(STATUS "Bilinear pairings arithmetic configuration (PP module):")
+if (SHOW_MESSAGE)
 message("   ** Available bilinear pairing methods (default = BASIC;OATEP):\n")
 
 message("      Extension field arithmetic:")
@@ -10,7 +10,7 @@ message("      Pairing computation:")
 message("      PP_METHD=TATEP    Tate pairing.")
 message("      PP_METHD=WEILP    Weil pairing.")
 message("      PP_METHD=OATEP    Optimal ate pairing.\n")
-
+endif()
 # Choose the arithmetic methods.
 if (NOT PP_METHD)
 	set(PP_METHD "LAZYR;OATEP")

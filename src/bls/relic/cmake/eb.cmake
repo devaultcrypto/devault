@@ -1,5 +1,5 @@
-message(STATUS "Binary elliptic curve arithmetic configuration (EB module):\n")
-
+message(STATUS "Binary elliptic curve arithmetic configuration (EB module):")
+if (SHOW_MESSAGE)
 message("   ** Options for the binary elliptic curve module (default = on, w = 4):\n")
 
 message("      EB_PLAIN=[off|on] Support for ordinary curves without endomorphisms.")
@@ -33,6 +33,7 @@ message("      EB_METHD=BASIC    Multiplication-and-addition simultaneous multip
 message("      EB_METHD=TRICK    Shamir's trick for simultaneous multiplication.")
 message("      EB_METHD=INTER    Interleaving of window (T)NAFs.")
 message("      EB_METHD=JOINT    Joint sparse form.\n")
+endif()
 
 if (NOT EB_DEPTH)
 	set(EB_DEPTH 4)
