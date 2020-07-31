@@ -8,6 +8,8 @@
 #include <util/strencodings.h>
 #include <iostream>
 
+const uint32_t BLS_PURPOSE = 12381;
+
 void CHDChain::Setup(const mnemonic::WordList& words, const std::vector<uint8_t>& hashWords) {
     SecureString securewords(join(words," "));
     vchMnemonic = SecureVector(securewords.begin(), securewords.end());
@@ -58,17 +60,13 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
 
   masterKey.SetMaster(vchSeed, bls);
 
-  const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
+  const uint32_t purpose = (bls) ? BLS_PURPOSE : 44;
+  const uint32_t BIP32_HARDENED_KEY_LIMIT = (bls) ? 0 : 0x80000000;
   // Use hardened derivation for purpose, coin_type and account
   // (keys >= 0x80000000 are hardened after bip32)
 
-  if (bls) {
-    masterKey.Derive(extKeyRet, nChildIndex);
-    return;
-  }
-    
   // derive m/purpose'
-  masterKey.Derive(purposeKey, 44 | BIP32_HARDENED_KEY_LIMIT);
+  masterKey.Derive(purposeKey, purpose | BIP32_HARDENED_KEY_LIMIT);
   // derive m/purpose'/coin_type'
   purposeKey.Derive(cointypeKey, Params().ExtCoinType() | BIP32_HARDENED_KEY_LIMIT);
   // derive m/purpose'/coin_type'/account'
@@ -107,5 +105,9 @@ size_t CHDChain::CountAccounts() {
 }
 
 std::string CHDPubKey::GetKeyPath() const {
-  return strprintf("m/44'/%d'/%d'/%d/%d", Params().ExtCoinType(), nAccountIndex, nChangeIndex, extPubKey.nChild);
+  if (extPubKey.IsBLS()) {
+    return strprintf("m/%d/%d/%d/%d/%d", BLS_PURPOSE, Params().ExtCoinType(), nAccountIndex, nChangeIndex, extPubKey.nChild);
+  } else {
+    return strprintf("m/44'/%d'/%d'/%d/%d", Params().ExtCoinType(), nAccountIndex, nChangeIndex, extPubKey.nChild);
+  }
 }
