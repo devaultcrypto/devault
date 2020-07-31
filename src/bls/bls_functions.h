@@ -21,8 +21,6 @@ namespace bls {
 
     std::vector<uint8_t> Aggregate(std::vector<std::vector<uint8_t>> &vSigs);
 
-    std::vector<uint8_t> MakeAggregateSigsForMessages(const std::vector<std::vector<uint8_t>> &aggSigs);
-
     bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t* vch);
     CPubKey GetBLSPublicKey(const CKey &key);
     CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex);

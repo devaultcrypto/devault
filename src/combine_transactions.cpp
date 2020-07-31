@@ -101,7 +101,7 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
     }
 
     // Now get combined Sig 
-    std::vector<uint8_t> combined_sigs = bls::MakeAggregateSigsForMessages(aggSigs);
+    std::vector<uint8_t> combined_sigs = bls::Aggregate(aggSigs);
 
     // Gathered outputs are sorted by the random pubkey addresses due to natural std::map sorting
     int jj=0;
