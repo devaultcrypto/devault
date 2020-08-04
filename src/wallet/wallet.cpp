@@ -5714,7 +5714,14 @@ CHDPubKey CWallet::AddHDPubKeyWithoutDB(const CExtPubKey &extPubKey, bool fInter
     
     return hdPubKey;
   }
-  
+
+bool CWallet::WriteBLSRandomKey(const CKey &key) const {
+  auto nID = key.GetPubKeyForBLS();
+  if (!WalletBatch(*database).WriteRandomKey(nID, key.GetBLSPrivateKey())) {
+      throw std::runtime_error(std::string(__func__) + ": WriteRandomKey failed");
+    }
+    return true;
+}
 
 bool CWallet::StoreCryptedHDChain(const CHDChain& chain) {
     LOCK(cs_wallet);

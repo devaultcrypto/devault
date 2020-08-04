@@ -15,6 +15,14 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet, CMutableTransaction &txNew) 
   return std::nullopt;
 }
 
+auto hashFromOutPoint(const COutPoint& out, uint32_t count) {
+  CHashWriter ss(SER_GETHASH, 0);
+  ss << out;
+  ss << count;
+  auto hash = ss.GetHash();
+  std::vector<uint8_t> message(hash.begin(),hash.end());
+  return message;
+}
 
 auto CreatePrivateTxWithSig(const CWallet *pwallet,
                             const std::set<CInputCoin> &setCoins,
@@ -37,6 +45,8 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet,
 
     CScript c;
     bool was_public = false;
+    COutPoint reference_outpoint;
+
     for (const auto &coin : setCoins) {
         CKey key;
         bool got_key;
@@ -69,12 +79,17 @@ auto CreatePrivateTxWithSig(const CWallet *pwallet,
 
         input_hashes.push_back(in_hash);
         input_keys_and_hashes.emplace(in_hash, key);
+        // just use the 1st coin found for this
+        if (reference_outpoint.GetN() == uint32_t(-1)) reference_outpoint = coin.outpoint;
     }
 
+    uint32_t output_number = 0;
     for (const auto &out : txNew.vout) {
         CKey key;
-        key.MakeNewBLSKey(); // A random private/pub key pair that is disposable
-                          // and used just once
+        auto random_input = hashFromOutPoint(reference_outpoint, output_number++);
+        key.MakeNewDeterministicBLSKey(random_input); // A deterministically random private/pub key pair that is used just once
+        // Save key to wallet DB for future?
+        pwallet->WriteBLSRandomKey(key); // TBD
         pubkey = key.GetPubKeyForBLS();
         pubkeys.push_back(ToByteVector(pubkey));
         rand_pubkeys.push_back(ToByteVector(pubkey));

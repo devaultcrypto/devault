@@ -81,6 +81,10 @@ public:
     //! Generate a new private BLS key using a cryptographic PRNG.
     void MakeNewBLSKey();
 
+    //! Generate a new private BLS key using a deterministic source
+    void MakeNewDeterministicBLSKey(const std::vector<uint8_t>& hash);
+    CPrivKey GetBLSPrivateKey() const;
+
     /**
      * Compute the public key from a private key.
      * This is expensive.

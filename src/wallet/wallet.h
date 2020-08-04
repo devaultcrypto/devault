@@ -1407,6 +1407,7 @@ public:
     bool SetCryptedHDChain(const CHDChain& chain);
     bool StoreCryptedHDChain(const CHDChain& chain);
     bool StoreCryptedHDChain();
+    bool WriteBLSRandomKey(const CKey &key) const;
     bool GetMnemonic(CHDChain &hdChain, SecureString& securewords) const;
     SecureVector getWords() const;
   
