@@ -168,7 +168,7 @@ macro(LINK_LIBS LIBRARY)
 endmacro(LINK_LIBS)
 
 add_compile_options(-pipe)
-message(STATUS "Compiler flags: ${CMAKE_C_FLAGS}")
+#message(STATUS "Compiler flags: ${CMAKE_C_FLAGS}")
 
 add_library(${RELIC_S} STATIC ${RELIC_SRCS} ${ARITH_OBJS})
 add_dependencies(${RELIC_S} arith_objs)

@@ -174,8 +174,7 @@ if(GMP_FOUND)
 	set(ARITH_LIBS ${GMP_LIBRARIES})
 endif(GMP_FOUND)
 
-
-message(STATUS "Compiler flags: ${CMAKE_C_FLAGS}")
+#message(STATUS "Compiler flags: ${CMAKE_C_FLAGS}")
 
 string(TOUPPER ${ARITH} ARITH)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/relic_conf.h.in ${CMAKE_BINARY_DIR}/relic_conf.h @ONLY)
