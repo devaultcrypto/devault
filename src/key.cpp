@@ -110,9 +110,35 @@ void CKey::MakeNewBLSKey() {
     fValid = true;
 }
 
+void CKey::MakeNewDeterministicBLSKey(const std::vector<uint8_t>& hash) {
+  uint8_t rand[CHash256::OUTPUT_SIZE];
+  uint8_t count = 0;
+  do {
+    CHash256()
+      .Write((uint8_t *)hash.data(), hash.size())
+      .Write(&count,1)
+      .Finalize(rand);
+    count++;
+    if (count == 255) {
+      fValid = false;
+      return;
+    }
+  } while (!CheckBLS(rand));
+  Set(rand,&rand[CHash256::OUTPUT_SIZE]);
+  fValid = true;
+}
+
 CPubKey CKey::GetPubKeyForBLS() const {
     return bls::GetBLSPublicKey(*this);
 }
+
+CPrivKey CKey::GetBLSPrivateKey() const {
+    assert(fValid);
+    CPrivKey privkey(keydata.size());
+    for (size_t i=0;i<keydata.size();i++)  privkey[i] = keydata[i];
+    return privkey;
+}
+
 
 CPubKey CKey::GetPubKey() const {
     assert(fValid);

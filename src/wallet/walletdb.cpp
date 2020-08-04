@@ -82,6 +82,10 @@ bool WalletBatch::WriteMasterKey(unsigned int nID, const CMasterKey &kMasterKey)
     return WriteIC(std::make_pair(std::string("mkey"), nID), kMasterKey, true);
 }
 
+bool WalletBatch::WriteRandomKey(const CPubKey &pubk, const CPrivKey &kRandomKey) {
+    return WriteIC(std::make_pair(std::string("rkey"), pubk), kRandomKey, true);
+}
+
 bool WalletBatch::WriteCScript(const uint160 &hash, const CScript &redeemScript) {
     return WriteIC(std::make_pair(std::string("cscript"), hash), redeemScript,
                    false);

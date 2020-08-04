@@ -109,6 +109,7 @@ public:
     bool EraseTx(uint256 hash);
 
     bool WriteMasterKey(unsigned int nID, const CMasterKey &kMasterKey);
+    bool WriteRandomKey(const CPubKey& nID, const CPrivKey &kRandomKey);
 
     bool WriteCScript(const uint160 &hash, const CScript &redeemScript);
 
