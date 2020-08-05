@@ -188,6 +188,9 @@ bool CTxMemPool::CalculateMemPoolAncestors(
     setEntries parentHashes;
     const CTransaction &tx = entry.GetTx();
 
+    uint64_t ancestorCountLimit =  (tx.nVersion >= BLS_ONLY_VERSION) ? 0 : limitAncestorCount;
+    uint64_t descendantCounntLimit =  (tx.nVersion >= BLS_ONLY_VERSION) ? 0 : limitDescendantCount;
+
     if (fSearchForParents) {
         // Get parents of this transaction that are in the mempool
         // GetMemPoolParents() is only valid for entries in the mempool, so we
@@ -198,10 +201,10 @@ bool CTxMemPool::CalculateMemPoolAncestors(
                 continue;
             }
             parentHashes.insert(piter);
-            if (parentHashes.size() + 1 > limitAncestorCount) {
+            if (parentHashes.size() + 1 > ancestorCountLimit) {
                 errString =
                     strprintf("too many unconfirmed parents [limit: %u]",
-                              limitAncestorCount);
+                              ancestorCountLimit);
                 return false;
             }
         }
@@ -229,10 +232,10 @@ bool CTxMemPool::CalculateMemPoolAncestors(
             return false;
         }
 
-        if (stageit->GetCountWithDescendants() + 1 > limitDescendantCount) {
+        if (stageit->GetCountWithDescendants() + 1 > descendantCountLimit) {
             errString = strprintf("too many descendants for tx %s [limit: %u]",
                                   stageit->GetTx().GetId().ToString(),
-                                  limitDescendantCount);
+                                  descendantCountLimit);
             return false;
         }
 
@@ -249,10 +252,10 @@ bool CTxMemPool::CalculateMemPoolAncestors(
                 parentHashes.insert(phash);
             }
             if (parentHashes.size() + setAncestors.size() + 1 >
-                limitAncestorCount) {
+                ancestorCountLimit) {
                 errString =
                     strprintf("too many unconfirmed ancestors [limit: %u]",
-                              limitAncestorCount);
+                              ancestorCountLimit);
                 return false;
             }
         }
