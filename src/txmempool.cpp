@@ -188,8 +188,8 @@ bool CTxMemPool::CalculateMemPoolAncestors(
     setEntries parentHashes;
     const CTransaction &tx = entry.GetTx();
 
-    uint64_t ancestorCountLimit =  (tx.nVersion >= CTransaction::BLS_ONLY_VERSION) ? 0 : limitAncestorCount;
-    uint64_t descendantCountLimit =  (tx.nVersion >= CTransaction::BLS_ONLY_VERSION) ? 0 : limitDescendantCount;
+    uint64_t ancestorCountLimit =  (tx.nVersion >= BLS_ONLY_VERSION) ? 0 : limitAncestorCount;
+    uint64_t descendantCounntLimit =  (tx.nVersion >= BLS_ONLY_VERSION) ? 0 : limitDescendantCount;
 
     if (fSearchForParents) {
         // Get parents of this transaction that are in the mempool
