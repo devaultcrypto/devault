@@ -45,7 +45,7 @@ struct CExtKey {
     bool Derive(CExtKey &out, unsigned int nChild) const;
     CExtPubKey Neuter() const;
     CExtPubKey NeuterBLS() const;
-    void SetMaster(const uint8_t *seed, unsigned int nSeedLen, bool bls);
+    void SetMaster(const SecureVector& seed, bool bls);
     template <typename Stream> void Serialize(Stream &s) const {
         unsigned int len = BIP32_EXTKEY_SIZE;
         ::WriteCompactSize(s, len);

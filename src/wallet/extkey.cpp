@@ -29,15 +29,15 @@ bool CExtKey::Derive(CExtKey &out, unsigned int _nChild) const {
     }
 }
 
-void CExtKey::SetMaster(const uint8_t *seed, unsigned int nSeedLen, bool bls) {
+void CExtKey::SetMaster(const SecureVector& seed, bool bls) {
     static const uint8_t hashkey[] = {'B', 'i', 't', 'c', 'o', 'i',
                                       'n', ' ', 's', 'e', 'e', 'd'};
     std::vector<uint8_t, secure_allocator<uint8_t>> vout(64);
     CHMAC_SHA512(hashkey, sizeof(hashkey))
-        .Write(seed, nSeedLen)
+        .Write(&seed[0], seed.size())
         .Finalize(vout.data());
     if (bls) {
-      key = bls::GetBLSMasterKey(seed, nSeedLen);
+      key = bls::GetBLSMasterKey(seed);
     } else {
       key.Set(vout.data(), vout.data() + 32);
     }
