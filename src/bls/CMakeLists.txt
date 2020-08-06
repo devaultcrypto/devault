@@ -6,7 +6,7 @@ project(bls)
 # For Relic
 #------------------- ------------------- ------------------- ------------------- -------------------
 ##SET(CMAKE_VERBOSE_MAKEFILE OFF)
-if (TOOLCHAIN_PREFIX MATCHES "arm-linux-gnueabihf")
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
    set(WSIZE 32)
    set(AFLAGS "-m32")
 else()
