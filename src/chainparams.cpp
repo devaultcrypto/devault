@@ -98,8 +98,8 @@ public:
         consensus.defaultAssumeValid = uint256S(
             "000000000000000003aadeae9dee37b8cb4838a866dae19b54854a0f039b03e0");
 
-        // Date and time (GMT): Saturday, September 5, 2020 4:00:00 PM
-        consensus.blsActivationTime = 1599321600;
+        // Date and time (GMT): Saturday, October 10, 2020 4:00:00 PM
+        consensus.blsActivationTime = 1602345600;
 
         /**
          * The message start string is designed to be unlikely to occur in
