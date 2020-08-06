@@ -60,7 +60,8 @@ G1Element G1Element::FromBytes(const uint8_t* bytes)
     g1_read_bin(ele.p, buffer, G1Element::SIZE + 1);
 
     if (g1_is_valid(*(g1_t*)&ele) == 0)
-        throw std::runtime_error("Problem deserializing G1Element from bytes");
+        throw std::invalid_argument(
+            "Given G1 element failed g1_is_valid check");
 
     // check if inside subgroup
     g1_t point, unity;
@@ -74,11 +75,11 @@ G1Element G1Element::FromBytes(const uint8_t* bytes)
     g1_mul(point, ele.p, order);
     ep_set_infty(unity);
     if (g1_cmp(point, unity) != RLC_EQ)
-        throw("Given G1 element failed in_subgroup check");
+        throw std::invalid_argument("Given G1 element failed in_subgroup check");
     try {
         BLS::CheckRelicErrorsInvalidArgument();
     } catch (...) {
-        throw("Relic reports invalid argument given");
+        throw std::invalid_argument("Relic reports invalid argument given");
     }
 
     return ele;
@@ -142,14 +143,15 @@ G1Element& G1Element::operator=(const G1Element& pubKey)
     return *this;
 }
 
-G1Element G1Element::Inverse()
+G1Element G1Element::Inverse() const
 {
+    G1Element thisCpy(*this);
     G1Element ans = G1Element();
     bn_t ordMinus1;
     bn_new(ordMinus1);
     g1_get_ord(ordMinus1);
     bn_sub_dig(ordMinus1, ordMinus1, 1);
-    g1_mul(ans.p, this->p, ordMinus1);
+    g1_mul(ans.p, thisCpy.p, ordMinus1);
     return ans;
 }
 
@@ -162,27 +164,27 @@ std::vector<uint8_t> G1Element::Serialize() const
     return data;
 }
 
-bool operator==(G1Element const& a, G1Element const& b)
+bool operator==(const G1Element & a, const G1Element &b)
 {
     return g1_cmp(a.p, b.p) == RLC_EQ;
 }
 
-bool operator!=(G1Element const& a, G1Element const& b) { return !(a == b); }
+bool operator!=(const G1Element & a, const G1Element & b) { return !(a == b); }
 
-std::ostream& operator<<(std::ostream& os, G1Element const& ele)
+std::ostream& operator<<(std::ostream& os, const G1Element &ele)
 {
     uint8_t data[G1Element::SIZE];
     ele.Serialize(data);
     return os << Util::HexStr(data, G1Element::SIZE);
 }
 
-G1Element& operator+=(G1Element& a, G1Element& b)
+G1Element& operator+=(G1Element& a, const G1Element& b)
 {
     g1_add(a.p, a.p, b.p);
     return a;
 }
 
-G1Element operator+(G1Element& a, G1Element& b)
+G1Element operator+(const G1Element& a, const G1Element& b)
 {
     g1_t ans;
     g1_new(ans);
@@ -190,23 +192,34 @@ G1Element operator+(G1Element& a, G1Element& b)
     return G1Element::FromNative(&ans);
 }
 
-G1Element& operator*=(G1Element& a, bn_t& k)
+G1Element& operator*=(G1Element& a, const bn_t& k)
 {
-    g1_mul(a.p, a.p, k);
+    // Remove constness from k, since relic is not const complete yet
+    // Use secure memory since k might have sensitive data
+    bn_t* nonConstK = SecAlloc<bn_t>(1);
+    bn_new(nonConstK[0]);
+    bn_copy(nonConstK[0], k);
+    g1_mul(a.p, a.p, nonConstK[0]);
+    SecFree(nonConstK);
     return a;
 }
 
-G1Element operator*(G1Element& a, bn_t& k)
+G1Element operator*(const G1Element& a, const bn_t& k)
 {
+    G1Element nonConstA(a);
+    bn_t* nonConstK = SecAlloc<bn_t>(1);
+    bn_new(nonConstK[0]);
+    bn_copy(nonConstK[0], k);
     g1_t ans;
     g1_new(ans);
-    g1_mul(ans, a.p, k);
+    g1_mul(ans, nonConstA.p, nonConstK[0]);
+    SecFree(nonConstK);
     return G1Element::FromNative(&ans);
 }
 
-G1Element operator*(bn_t& k, G1Element& a) { return a * k; }
+G1Element operator*(const bn_t& k, const G1Element& a) { return a * k; }
 
-GTElement G1Element::pair(G2Element& b) { return (*this) & b; }
+GTElement G1Element::Pair(const G2Element& b) const { return (*this) & b; }
 
 uint32_t G1Element::GetFingerprint() const
 {
@@ -275,7 +288,8 @@ G2Element G2Element::FromBytes(const uint8_t* bytes)
 
     g2_read_bin(ele.q, buffer, G2Element::SIZE + 1);
     if (g2_is_valid(*(g2_t*)&ele) == 0)
-        throw std::runtime_error("Problem deserializing G2Element from bytes");
+        throw std::invalid_argument(
+            "Given G2 element failed g2_is_valid check");
 
     // check if inside subgroup
     g2_t point, unity;
@@ -286,11 +300,11 @@ G2Element G2Element::FromBytes(const uint8_t* bytes)
     g2_mul(point, ele.q, order);
     ep2_set_infty(unity);
     if (g2_cmp(point, unity) != RLC_EQ)
-        throw("Given G2 element failed in_subgroup check");
+        throw std::invalid_argument("Given G2 element failed in_subgroup check");
     try {
         BLS::CheckRelicErrorsInvalidArgument();
     } catch (...) {
-        throw("Relic reports invalid argument given");
+        throw std::invalid_argument("Relic reports invalid argument given");
     }
     return ele;
 }
@@ -321,14 +335,15 @@ G2Element G2Element::Generator()
     return ele;
 }
 
-G2Element G2Element::Inverse()
+G2Element G2Element::Inverse() const
 {
+    G2Element thisCpy(*this);
     G2Element ans = G2Element();
     bn_t ordMinus1;
     bn_new(ordMinus1);
     g2_get_ord(ordMinus1);
     bn_sub_dig(ordMinus1, ordMinus1, 1);
-    g2_mul(ans.q, this->q, ordMinus1);
+    g2_mul(ans.q, thisCpy.q, ordMinus1);
     return ans;
 }
 
@@ -364,44 +379,56 @@ bool operator==(G2Element const& a, G2Element const& b)
 
 bool operator!=(G2Element const& a, G2Element const& b) { return !(a == b); }
 
-std::ostream& operator<<(std::ostream& os, G2Element const& s)
+std::ostream& operator<<(std::ostream& os, const G2Element & s)
 {
     uint8_t data[G2Element::SIZE];
     s.Serialize(data);
     return os << Util::HexStr(data, G2Element::SIZE);
 }
 
-G2Element& operator+=(G2Element& a, G2Element& b)
+G2Element& operator+=(G2Element& a, const G2Element& b)
 {
-    g2_add(a.q, a.q, b.q);
+    G2Element nonConstB(b);
+    g2_add(a.q, a.q, nonConstB.q);
     return a;
 }
 
-G2Element operator+(G2Element& a, G2Element& b)
+G2Element operator+(const G2Element& a, const G2Element& b)
 {
+    G2Element nonConstA(a);
+    G2Element nonConstB(b);
     g2_t ans;
     g2_new(ans);
-    g2_add(ans, a.q, b.q);
+    g2_add(ans, nonConstA.q, nonConstB.q);
     return G2Element::FromNative(&ans);
 }
 
-G2Element& operator*=(G2Element& a, bn_t& k)
+G2Element& operator*=(G2Element& a, const bn_t& k)
 {
-    g2_mul(a.q, a.q, k);
+    bn_t* nonConstK = SecAlloc<bn_t>(1);
+    bn_new(nonConstK[0]);
+    bn_copy(nonConstK[0], k);
+    g2_mul(a.q, a.q, nonConstK[0]);
+    SecFree(nonConstK);
     return a;
 }
 
-G2Element operator*(G2Element& a, bn_t& k)
+G2Element operator*(const G2Element& a, const bn_t& k)
 {
+    G2Element nonConstA(a);
     g2_t ans;
     g2_new(ans);
-    g2_mul(ans, a.q, k);
+    bn_t* nonConstK = SecAlloc<bn_t>(1);
+    bn_new(nonConstK[0]);
+    bn_copy(nonConstK[0], k);
+    g2_mul(ans, nonConstA.q, nonConstK[0]);
+    SecFree(nonConstK);
     return G2Element::FromNative(&ans);
 }
 
-G2Element operator*(bn_t& k, G2Element& a) { return a * k; }
+G2Element operator*(const bn_t& k, const G2Element& a) { return a * k; }
 
-GTElement G2Element::pair(G1Element& a) { return a & (*this); }
+GTElement G2Element::Pair(const G1Element& a) const { return a & (*this); }
 
 G2Element& G2Element::operator=(const G2Element& rhs)
 {
@@ -475,11 +502,13 @@ std::ostream& operator<<(std::ostream& os, GTElement const& ele)
     return os << Util::HexStr(data, GTElement::SIZE);
 }
 
-GTElement operator&(G1Element& a, G2Element& b)
+GTElement operator&(const G1Element& a, const G2Element& b)
 {
+    G1Element nonConstA(a);
+    G2Element nonConstB(b);
     gt_t ans;
     gt_new(ans);
-    pp_map_oatep_k12(ans, a.p, b.q);
+    pp_map_oatep_k12(ans, nonConstA.p, nonConstB.q);
     return GTElement::FromNative(&ans);
 }
 

@@ -56,7 +56,7 @@ void CHDChain::DeriveChildExtKey(uint32_t nAccountIndex, bool fInternal, uint32_
   CExtKey changeKey;   // key at m/purpose'/coin_type'/account'/change
   CExtKey childKey;    // key at m/purpose'/coin_type'/account'/change/address_index
 
-  masterKey.SetMaster(&vchSeed[0], vchSeed.size(), bls);
+  masterKey.SetMaster(vchSeed, bls);
 
   const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
   // Use hardened derivation for purpose, coin_type and account

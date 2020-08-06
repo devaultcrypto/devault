@@ -17,40 +17,40 @@
 #include "relic_conf.h"
 #include <gmp.h>
 
-#include "bls/publickey.hpp"
-#include "bls/relic/include/relic.h"
 #include "bls/elements.hpp"
 
 namespace bls {
 class PrivateKey {
-friend class BLS;
-friend class G1Element;
-friend class G2Element;
+    friend class BLS;
+    friend class G1Element;
+    friend class G2Element;
+    friend class HDKeys;
 
- public:
+public:
     // Private keys are represented as 32 byte field elements. Note that
     // not all 32 byte integers are valid keys, the private key must be
     // less than the group order (which is in bls.hpp).
     static const size_t PRIVATE_KEY_SIZE = 32;
 
-    // Generates a private key from a seed, similar to HD key generation
-    // (hashes the seed), and reduces it mod the group order.
-    static PrivateKey FromSeed(const uint8_t *seed, size_t seedLen);
+    // Construct a private key from a bytearray.
+    static PrivateKey FromBytes(const uint8_t *bytes, bool modOrder = false);
 
     // Construct a private key from a bytearray.
-    static PrivateKey FromBytes(const uint8_t* bytes, bool modOrder = false);
+    static PrivateKey FromByteVector(const std::vector<uint8_t> bytes, bool modOrder = false);
 
     // Construct a private key from a native bn element.
-    static PrivateKey FromBN(bn_t sk);
+    static PrivateKey FromBN(bn_t sk, bool modOrder = false);
+
+    // Aggregate many private keys into one (sum of keys mod order)
+    static PrivateKey Aggregate(std::vector<PrivateKey> const &privateKeys);
 
     // Construct a private key from another private key. Allocates memory in
     // secure heap, and copies keydata.
-    PrivateKey(const PrivateKey& k);
-    PrivateKey(PrivateKey&& k);
+    PrivateKey(const PrivateKey &k);
+    PrivateKey(PrivateKey &&k);
 
     ~PrivateKey();
 
-    //G1Element GetPublicKey() const { return GetG1Element(); }
     G1Element GetG1Element() const;
     G2Element GetG2Element() const;
 
@@ -58,60 +58,46 @@ friend class G2Element;
 
     bool IsZero();
 
-    // Insecurely aggregate multiple private keys into one
-    static PrivateKey Aggregate(std::vector<PrivateKey> const& privateKeys);
-
-    // Securely aggregate multiple private keys into one by exponentiating the keys with the pubKey hashes first
-    static PrivateKey Aggregate(std::vector<PrivateKey> const& privateKeys,
-                                   std::vector<PublicKey> const& pubKeys);
-
     // Compare to different private key
-    friend bool operator==(const PrivateKey& a, const PrivateKey& b);
-    friend bool operator!=(const PrivateKey& a, const PrivateKey& b);
-    PrivateKey& operator=(const PrivateKey& rhs);
+    friend bool operator==(const PrivateKey &a, const PrivateKey &b);
+    friend bool operator!=(const PrivateKey &a, const PrivateKey &b);
+    PrivateKey &operator=(const PrivateKey &rhs);
 
     // Multiply private key by G1 or G2 elements
-    friend G1Element &operator*=(G1Element &a, PrivateKey &k);
-    friend G1Element &operator*=(PrivateKey &k, G1Element &a);
-    friend G1Element operator*(G1Element &a, PrivateKey &k);
-    friend G1Element operator*(PrivateKey &k, G1Element &a);
+    friend G1Element &operator*=(G1Element &a, const PrivateKey &k);
+    friend G1Element operator*(const G1Element &a, const PrivateKey &k);
+    friend G1Element operator*(const PrivateKey &k, const G1Element &a);
 
-    friend G2Element &operator*=(G2Element &a, PrivateKey &k);
-    friend G2Element &operator*=(PrivateKey &k, G2Element &a);
-    friend G2Element operator*(G2Element &a, PrivateKey &k);
-    friend G2Element operator*(PrivateKey &k, G2Element &a);
+    friend G2Element &operator*=(G2Element &a, const PrivateKey &k);
+    friend G2Element operator*(const G2Element &a, const PrivateKey &k);
+    friend G2Element operator*(const PrivateKey &k, const G2Element &a);
 
     // Serialize the key into bytes
-    void Serialize(uint8_t* buffer) const;
+    void Serialize(uint8_t *buffer) const;
     std::vector<uint8_t> Serialize() const;
 
     G2Element SignG2(
         const uint8_t *msg,
         size_t len,
         const uint8_t *dst,
-        size_t dst_len
-    ) const;
+        size_t dst_len) const;
 
     G2Element SignG2Prehashed(
         const uint8_t *messageHash,
         const uint8_t *dst,
-        size_t dst_len
-    ) const;
+        size_t dst_len) const;
 
-    // NEW ADDITIONS ***** DEVAULT
-    PrivateKey() = default;
-    bool valid() const { return !(keydata == nullptr); } 
- 
+
 private:
-
-    // Multiply private key with n
-    PrivateKey Mul(const bn_t n) const;
+    // Don't allow public construction, force static methods
+    PrivateKey() {}
 
     // Allocate memory for private key
     void AllocateKeyData();
 
-public: // DEVAULT HACK
+private:
     // The actual byte data
     bn_t *keydata{nullptr};
 };
-} // end namespace bls
+}  // end namespace bls
+

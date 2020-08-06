@@ -23,8 +23,8 @@ namespace bls {
 
     bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const uint8_t* vch);
     CPubKey GetBLSPublicKey(const CKey &key);
-    CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex);
-    CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen);
+    CKey GetBLSPrivateKey(const std::vector<uint8_t>& seed, uint32_t childIndex);
+    CKey GetBLSMasterKey(const SecureVector& seed);
     CKey GetBLSChild(const CKey& master, uint32_t childIndex);
     bool CheckValidBLSPrivateKey(const uint8_t* bytes);
 

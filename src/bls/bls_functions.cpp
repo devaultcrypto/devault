@@ -25,10 +25,8 @@ bool CheckValidBLSPrivateKey(const uint8_t* bytes) {
   return true;
 }
   
-    
-
-CKey GetBLSPrivateKey(const uint8_t *seed, size_t seedLen, uint32_t childIndex) {
-  PrivateKey master = PrivateKey::FromSeed(seed, seedLen);
+CKey GetBLSPrivateKey(const std::vector<uint8_t>& seed, uint32_t childIndex) {
+  PrivateKey master = HDKeys::KeyGen(seed);
   PrivateKey child = HDKeys::DeriveChildSk(master, childIndex);
   auto calculatedChild = child.Serialize();
   CKey k;
@@ -45,8 +43,9 @@ CKey GetBLSChild(const CKey& key, uint32_t childIndex) {
   return k;
 }
   
-CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen) {
-  PrivateKey master = PrivateKey::FromSeed(seed, seedLen);
+CKey GetBLSMasterKey(const SecureVector& seed) {
+  std::vector<uint8_t> vSeed(seed.begin(),seed.end());
+  PrivateKey master = HDKeys::KeyGen(vSeed);
   auto bytes = master.Serialize();
   CKey k;
   k.Set(bytes.begin(),bytes.end());
@@ -56,13 +55,13 @@ CKey GetBLSMasterKey(const uint8_t *seed, size_t seedLen) {
 bool SignBLS(const CKey &key, const uint256 &hash, std::vector<uint8_t> &vchSig) {
   auto PK = bls::PrivateKey::FromBytes(key.begin());
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  vchSig = AugSchemeMPL::Sign(PK, message);
+  vchSig = AugSchemeMPL::Sign(PK, message).Serialize();
   // Then Verify
   return true; // for now True - sig.Verify();
 }
 bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<uint8_t> &vchSig) {
   auto PK = bls::PrivateKey::FromBytes(key.begin());
-  vchSig = AugSchemeMPL::Sign(PK, message);
+  vchSig = AugSchemeMPL::Sign(PK, message).Serialize();
   // Then Verify
   return true; // for now True - sig.Verify();
 }
@@ -70,7 +69,7 @@ bool SignBLS(const CKey& key, const std::vector<uint8_t> &message, std::vector<u
 auto SignBLS(const CKey &key, const uint256 &hash) -> std::optional<std::vector<uint8_t>> {
   auto PK = bls::PrivateKey::FromBytes(key.begin());
   std::vector<uint8_t> message(hash.begin(),hash.end());
-  auto vchSig = AugSchemeMPL::Sign(PK, message);
+  auto vchSig = AugSchemeMPL::Sign(PK, message).Serialize();
   return vchSig;
 }
   
@@ -83,16 +82,13 @@ bool VerifyBLS(const uint256 &hash, const std::vector<uint8_t> &vchSig, const ui
 
 CPubKey GetBLSPublicKey(const CKey &key) {
   bls::BLS::AssertInitialized();
-  bls::PrivateKey priv;
   try {
-    priv = bls::PrivateKey::FromBytes(key.begin());
-  } catch (...) { throw std::runtime_error("Problem creating bls private key"); }
-  try {
+    bls::PrivateKey priv = bls::PrivateKey::FromBytes(key.begin());
     // Get PublicKey and then Serialize bytes to CPubKey
     auto pub = AugSchemeMPL::SkToPk(priv);
     CPubKey k(pub);
     return k;
-  } catch (...) { throw std::runtime_error("Problem creating bls public key"); }
+  } catch (...) { throw std::runtime_error("Problem creating bls private or public key"); }
   return (CPubKey());
 }
 
