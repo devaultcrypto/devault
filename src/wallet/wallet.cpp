@@ -4942,8 +4942,9 @@ bool CWallet::AddDestData(const CTxDestination &dest, const std::string &key,
                           const std::string &value) {
   try {
     std::get<CNoDestination>(dest);
-  } catch (std::bad_variant_access&) { return false; }
- 
+    return false;
+  } catch (std::bad_variant_access&) {  }
+  // Must be a CKeyID, BKeyID or CScriptID if we got here
   mapAddressBook[dest].destdata.insert(std::make_pair(key, value));
   return WalletBatch(*database).WriteDestData(dest, key, value);
 }
