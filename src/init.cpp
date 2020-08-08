@@ -409,9 +409,6 @@ void SetupServerArgs() {
                  false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-datadir=<dir>", "Specify data directory", false,
                  OptionsCategory::OPTIONS);
-  
-    gArgs.AddArg("-seedphrase=<words>", "Specify 12-word seed phrase for wallet on 1st run (only)",
-                 false,OptionsCategory::OPTIONS);
     
     gArgs.AddArg(
         "-dbbatchsize",
