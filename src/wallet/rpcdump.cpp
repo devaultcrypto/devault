@@ -813,6 +813,39 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
     return reply;
 }
 
+UniValue dumpphrase(const Config &config, const JSONRPCRequest &request) {
+    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp)
+        throw std::runtime_error(
+            "dumpphrase\n"
+            "\nShows 12 word phrase - wallet must be unlocked first - WARNING DO NOT SHARE This output\n"
+            "\nExamples:\n" +
+            HelpExampleCli("dumpphrase","") +
+            HelpExampleRpc("dumpphrase",""));
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    // add the base58check encoded extended master if the wallet uses HD
+    CHDChain hdChain;
+    SecureString ssMnemonic;
+    pwallet->GetDecryptedHDChain(hdChain);
+     
+    if (!pwallet->GetMnemonic(hdChain, ssMnemonic))
+        throw std::runtime_error(std::string(__func__) + ": Get Mnemonic failed");
+
+    std::string phrase(ssMnemonic);
+    UniValue reply(UniValue::VOBJ);
+    reply.pushKV("WARNING: DO NOT SHARE THIS PHRASE WITH ANYONE", phrase);
+
+    return reply;
+}
+
 int64_t GetImportTimestamp(const UniValue &data, int64_t now) {
     if (data.exists("timestamp")) {
         const UniValue &timestamp = data["timestamp"];
@@ -924,6 +957,7 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abortrescan",              abortrescan,              {} },
     { "wallet",             "dumpprivkey",              dumpprivkey,              {"address"}  },
     { "wallet",             "dumpwallet",               dumpwallet,               {"filename"} },
+    { "wallet",             "dumpphrase",               dumpphrase,               {} },
     { "wallet",             "importaddress",            importaddress,            {"address","label","rescan","p2sh"} },
     { "wallet",             "importprunedfunds",        importprunedfunds,        {"rawtransaction","txoutproof"} },
     { "wallet",             "importpubkey",             importpubkey,             {"pubkey","label","rescan"} },
