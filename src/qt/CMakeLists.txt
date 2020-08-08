@@ -12,8 +12,8 @@ endif()
 
 
 # Project Info
-SET(APP_NAME DeVault-Core)
-SET(PROJECT_NAME_SHORT   "DeVault-Core")
+SET(APP_NAME devault-qt)
+SET(PROJECT_NAME_SHORT   "devault-qt")
 SET(PROJECT_NAME_LONG    "CMake DeVault Qt project")
 SET(PROJECT_DESCRIPTION  "CMake build system template for Qt based projects")
 SET(PROJECT_COPYRIGHT    "Copyright (C) 2019 DeVault Developers")
@@ -400,15 +400,15 @@ if (BUILD_BUNDLE)
   # Libraries are bundled directly
   SET(CPACK_COMPONENT_LIBRARIES_HIDDEN TRUE)
   SET(MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
-  SET(MACOSX_BUNDLE_INFO_STRING "DeVault-Core")
-  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.DeVault-Core")
+  SET(MACOSX_BUNDLE_INFO_STRING "devault-qt")
+  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.devault-qt")
   SET(MACOSX_BUNDLE_COPYRIGHT "(c) DeVault 2019")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
   SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION})
   SET(MACOSX_BUNDLE_LONG_VERSION_STRING "Version ${PROJECT_VERSION}")
   # Bundle Properties
   
-  SET(CPACK_PACKAGE_EXECUTABLES "DeVault-Core" "devault-qt")
+  SET(CPACK_PACKAGE_EXECUTABLES "devault-qt" "devault-qt")
   INCLUDE(CPack)
   INSTALL(TARGETS ${APP_NAME} DESTINATION .)
 endif()
