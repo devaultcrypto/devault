@@ -455,8 +455,8 @@ void BitcoinGUI::createMenuBar() {
         settings->addSeparator();
         settings->addAction(sweepAction);
         settings->addSeparator();
-        //settings->addAction(sweepBLSAction);
-        //settings->addSeparator();
+        settings->addAction(sweepBLSAction);
+        settings->addSeparator();
     }
     settings->addAction(optionsAction);
 
@@ -750,7 +750,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     changePassphraseAction->setEnabled(enabled);
     revealPhraseAction->setEnabled(enabled);
     sweepAction->setEnabled(enabled);
-    //sweepBLSAction->setEnabled(enabled);
+    sweepBLSAction->setEnabled(enabled);
     signMessageAction->setEnabled(enabled);
     verifyMessageAction->setEnabled(enabled);
     usedSendingAddressesAction->setEnabled(enabled);
@@ -1275,7 +1275,7 @@ void BitcoinGUI::setWalletStatus(int status) {
     changePassphraseAction->setEnabled(true);
     revealPhraseAction->setEnabled(true);
     sweepAction->setEnabled(true);
-    //sweepBLSAction->setEnabled(true);
+    sweepBLSAction->setEnabled(true);
 }
 
 void BitcoinGUI::updateWalletStatus() {
