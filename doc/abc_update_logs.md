@@ -188,7 +188,7 @@ XXXXX - Partial upgrade of wallet stuff
       Merge #13913: qa: Remove redundant checkmempool/checkblockindex extra_args
       Merge #13948: trivial: Removes unsed `CBloomFilter` constructor.
       Use virtualsize for mining/mempool priority
-      rpc: Make unloadwallet wait for complete wallet unload
+#     rpc: Make unloadwallet wait for complete wallet unload
       [SECP256K1] CMake: add an install target
       [CMAKE] Allow for component based installation
       [CMAKE] Minor improvements to the install_shared_library function
@@ -199,7 +199,7 @@ XXXXX - Partial upgrade of wallet stuff
       Fix autotools build failure
       gui: Defer removeAndDeleteWallet when no modal widget is active
 ##### wallet: Releases dangling files on BerkeleyEnvironment::Close
-      Remove direct node->wallet calls in init.cpp
+#     Remove direct node->wallet calls in init.cpp
       [SECP256K1] CMake: add an option to enable endomorphism
       [SECP256K1] Travis : run a 64 bits ninja for building 32 bits targets
       always unpark even when -parkdeepreorg=0
@@ -212,7 +212,7 @@ XXXXX - Partial upgrade of wallet stuff
       add test that coinbase sigops are limited
       Pass chain locked variables where needed
       Remove uses of cs_main in wallet code
-      Pass chain and client variables where needed
+#     Pass chain and client variables where needed
       Add skeleton chain and client classes
       Remove ENABLE_WALLET from libbitcoin_server.a
       Prevent shared conf files from failing with different available options in different binaries
@@ -333,7 +333,7 @@ XXXXX - Partial upgrade of wallet stuff
       Release cs_main during InvalidateBlock iterations
       Call InvalidateBlock without cs_main held
       Call RewindBlockIndex without cs_main held
-      [wallet] Support creating a blank wallet
+#     [wallet] Support creating a blank wallet
       add a flag that restricts sigChecks per-input
       save ScriptExecutionMetrics during CScriptCheck
       parameterize ecmult_const over input size
@@ -713,7 +713,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       Make SigningProvider expose key origin information
       [MOVEONLY] Move ParseHDKeypath to utilstrencodings
       Introduce KeyOriginInfo for fingerprint + path
-      Merge #9662: Add createwallet "disableprivatekeys" option: a sane mode for watchonly-wallets
+#     Merge #9662: Add createwallet "disableprivatekeys" option: a sane mode for watchonly-wallets
       Use local instance of ArgsManager in getarg_tests
       [CMAKE] Add DBus support to bitcoin-qt
       qt: All tray menu actions call showNormalIfMinimized
@@ -890,7 +890,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
 #     Merge #13258: uint256: Remove unnecessary crypto/common.h dependency
       Merge #11491: [gui] Add proxy icon in statusbar
 XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in WalletFrame::removeWallet
-      ui: Support wallets unloaded dynamically
+#     ui: Support wallets unloaded dynamically
 #     rpc: Add unloadwallet RPC, release notes, and tests
 #     rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
 #     [mempool] Mark mempool import fails that were found in mempool as 'already there'
