@@ -752,7 +752,7 @@ std::string ArgsManager::GetChainName() const {
     if (fTestNet) {
         return CBaseChainParams::TESTNET;
     }
-    return CBaseChainParams::MAIN;
+    return CBaseChainParams::TESTNET;
 }
 
 /**
