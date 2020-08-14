@@ -50,8 +50,15 @@ class CWallet;
 fs::path GetWalletDir();
 std::vector<fs::path> ListWalletDir();
 std::vector<std::shared_ptr<CWallet>> GetWallets();
+std::shared_ptr<CWallet> LoadWallet(const CChainParams &chainParams,
+                                    interfaces::Chain &chain,
+                                    const std::string &name, std::string &error,
+                                    std::string &warning);
 
 namespace interfaces {
+
+class Wallet;
+
 namespace {
 
     class NodeImpl : public Node {
@@ -279,6 +286,13 @@ namespace {
                 "Node::getWallets() called in non-wallet build.");
 #endif
         }
+        std::unique_ptr<Wallet>
+        loadWallet(const CChainParams &params, const std::string &name,
+                   std::string &error, std::string &warning) const override {
+          return MakeWallet(
+                            LoadWallet(params, *m_interfaces.chain, name, error, warning));
+        }
+
         std::unique_ptr<Handler> handleInitMessage(InitMessageFn fn) override {
             return MakeHandler(::uiInterface.InitMessage.connect(fn));
         }
