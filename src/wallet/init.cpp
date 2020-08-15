@@ -54,7 +54,7 @@ void WalletInit::AddWalletOptions() const {
                  false, OptionsCategory::WALLET);
     gArgs.AddArg("-upgradebls",
                "Upgrade wallet to use BLS Keys/Signatures for key generation in future)",
-                 false, OptionsCategory::WALLET);
+                 true, OptionsCategory::WALLET);
     gArgs.AddArg("-keypool=<n>",
                  strprintf("Set key pool size to <n> (default: %u)",
                            DEFAULT_KEYPOOL_SIZE),
