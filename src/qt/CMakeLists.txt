@@ -57,7 +57,7 @@ else()
 endif()
 
 if (TOOLCHAIN_PREFIX)
-  set(Qt5_DIR /home/vagrant/devault/depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
+  set(Qt5_DIR $PWD/depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
 endif()
 
 include(BrewHelper)
@@ -117,47 +117,6 @@ macro(CONVERT_PRL_LIBS_TO_CMAKE _qt_component)
 	endif()
 endmacro()
 
-if(QT_STATIC_BUILD)
-	foreach(qt_module ${QT_REQUIRED_COMPONENTS})
-		CONVERT_PRL_LIBS_TO_CMAKE(${qt_module})
-	endforeach()
-	# HACK: We must explicitly add LIB path of the Qt installation
-	# to correctly find qtpcre
-	link_directories("${QT5_LIB_DIR}")
-
-	# Now that we generated the dependencies, import them.
-	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CONVERT_PRL_PATH}")
-	if(NOT EXISTS ${STATIC_DEPENDENCIES_CMAKE_FILE})
-		message(FATAL_ERROR "Unable to find ${STATIC_DEPENDENCIES_CMAKE_FILE}")
-	endif()
-	include(${STATIC_DEPENDENCIES_CMAKE_FILE})
-	list(REMOVE_DUPLICATES STATIC_LIB_DEPENDENCIES)
-endif()
-
-# Localisation
-add_subdirectory(locale)
-
-add_custom_command(OUTPUT temp_bitcoin_locale.qrc
-	COMMAND cmake
-	ARGS
-		-E copy
-		"${CMAKE_CURRENT_SOURCE_DIR}/bitcoin_locale.qrc"
-		temp_bitcoin_locale.qrc
-	MAIN_DEPENDENCY bitcoin_locale.qrc
-	VERBATIM
-)
-
-add_custom_command(OUTPUT qrc_bitcoin_locale.cpp
-	COMMAND Qt5::rcc
-	ARGS
-		temp_bitcoin_locale.qrc
-		-name bitcoin_locale
-		-o qrc_bitcoin_locale.cpp
-	MAIN_DEPENDENCY temp_bitcoin_locale.qrc
-	DEPENDS locales
-	VERBATIM
-)
-
 # UI elements
 qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/addressbookpage.ui
@@ -197,14 +156,6 @@ set(CMAKE_AUTOMOC ON)
 
 # Handle qrc resources
 qt5_add_resources(QRC_BITCOIN_CPP bitcoin.qrc)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-if(BUILD_WALLET)
-  file(GLOB QT_BASE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-  source_group("BaseHeaders" FILES ${QT_BASE_HEADERS})
-endif()
-endif()
-
 
 add_library(bitcoin-qt-base
   ${QT_BASE_HEADERS}
@@ -256,6 +207,110 @@ add_library(bitcoin-qt-base
 	qrc_bitcoin_locale.cpp
 
   )
+
+# Linux support
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	list(APPEND QT_PLUGIN_COMPONENTS QXcbIntegrationPlugin)
+	list(APPEND QT_PLUGIN_PLATFORM_DEFINITIONS -DQT_QPA_PLATFORM_XCB=1)
+endif()
+
+# Windows support
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	list(APPEND QT_PLUGIN_COMPONENTS QWindowsIntegrationPlugin)
+	list(APPEND QT_PLUGIN_PLATFORM_DEFINITIONS -DQT_QPA_PLATFORM_WINDOWS=1)
+
+	target_sources(bitcoin-qt-base PRIVATE winshutdownmonitor.cpp)
+endif()
+
+# OSX support
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	list(APPEND QT_PLUGIN_COMPONENTS QCocoaIntegrationPlugin)
+	list(APPEND QT_PLUGIN_PLATFORM_DEFINITIONS -DQT_QPA_PLATFORM_COCOA=1)
+
+	target_sources(bitcoin-qt-base PRIVATE
+		macdockiconhandler.mm
+		macnotificationhandler.mm
+	)
+
+	set_property(TARGET bitcoin-qt-base PROPERTY AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
+
+	target_link_libraries(bitcoin-qt-base
+		"-framework Foundation"
+		"-framework ApplicationServices"
+		"-framework AppKit"
+	)
+endif()
+
+if(QT_STATIC_BUILD)
+	list(APPEND QT_REQUIRED_COMPONENTS ${QT_PLUGIN_COMPONENTS})
+	foreach(qt_module ${QT_REQUIRED_COMPONENTS})
+		CONVERT_PRL_LIBS_TO_CMAKE(${qt_module})
+	endforeach()
+	# HACK: We must explicitly add LIB path of the Qt installation
+	# to correctly find qtpcre
+	link_directories("${QT5_LIB_DIR}")
+
+	# Now that we generated the dependencies, import them.
+	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CONVERT_PRL_PATH}")
+	if(NOT EXISTS ${STATIC_DEPENDENCIES_CMAKE_FILE})
+		message(FATAL_ERROR "Unable to find ${STATIC_DEPENDENCIES_CMAKE_FILE}")
+	endif()
+	include(${STATIC_DEPENDENCIES_CMAKE_FILE})
+	list(REMOVE_DUPLICATES STATIC_LIB_DEPENDENCIES)
+
+	# According to Qt documentation (https://doc.qt.io/qt-5/plugins-howto.html):
+	# "Plugins can be linked statically into your application.
+	# If you build the static version of Qt, this is the only option for
+	# including Qt's predefined plugins."
+	# So if the Qt build is static, the plugins should also be static and we
+	# need to define QT_STATICPLUGIN to tell the code to import <QTPlugin>.
+	target_compile_definitions(bitcoin-qt-base PUBLIC -DQT_STATICPLUGIN=1)
+
+	# Add the platform plugin definition if required
+	# Setting this definition tells the code what is the target for Q_IMPORT_PLUGIN().
+	foreach(qt_platform_definition ${QT_PLUGIN_PLATFORM_DEFINITIONS})
+		target_compile_definitions(bitcoin-qt-base PUBLIC "${qt_platform_definition}")
+	endforeach()
+
+	# Link the required plugins
+	foreach(qt_plugin ${QT_PLUGIN_COMPONENTS})
+		target_link_libraries(bitcoin-qt-base Qt5::${qt_plugin})
+	endforeach()
+endif()
+
+# Localisation
+add_subdirectory(locale)
+
+add_custom_command(OUTPUT temp_bitcoin_locale.qrc
+	COMMAND cmake
+	ARGS
+		-E copy
+		"${CMAKE_CURRENT_SOURCE_DIR}/bitcoin_locale.qrc"
+		temp_bitcoin_locale.qrc
+	MAIN_DEPENDENCY bitcoin_locale.qrc
+	VERBATIM
+)
+
+add_custom_command(OUTPUT qrc_bitcoin_locale.cpp
+	COMMAND Qt5::rcc
+	ARGS
+		temp_bitcoin_locale.qrc
+		-name bitcoin_locale
+		-o qrc_bitcoin_locale.cpp
+	MAIN_DEPENDENCY temp_bitcoin_locale.qrc
+	DEPENDS locales
+	VERBATIM
+)
+
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(BUILD_WALLET)
+  file(GLOB QT_BASE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+  source_group("BaseHeaders" FILES ${QT_BASE_HEADERS})
+endif()
+endif()
+
+
 
 target_compile_definitions(bitcoin-qt-base PUBLIC OBJC_OLD_DISPATCH_PROTOTYPES)
 
