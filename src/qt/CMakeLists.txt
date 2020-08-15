@@ -57,7 +57,7 @@ else()
 endif()
 
 if (TOOLCHAIN_PREFIX)
-  set(Qt5_DIR $PWD/depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
+  set(Qt5_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
 endif()
 
 include(BrewHelper)
