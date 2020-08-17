@@ -1,128 +1,62 @@
 # Copyright (c) 2018 The Bitcoin developers
-# Copyright (c) 2019 DeVault developers
-# Copyright (c) 2019 Jon Spock
 
 project(devault-qt)
-cmake_minimum_required(VERSION 3.5)
-
-if (CMAKE_GENERATOR STREQUAL Xcode)
-  message(STATUS "Setting DEV_DEBUG for Xcode debugging")
-  add_compiler_flags(-DDEV_DEBUG)
-endif()
-
-
-# Project Info
-SET(APP_NAME devault-qt)
-SET(PROJECT_NAME_SHORT   "devault-qt")
-SET(PROJECT_NAME_LONG    "CMake DeVault Qt project")
-SET(PROJECT_DESCRIPTION  "CMake build system template for Qt based projects")
-SET(PROJECT_COPYRIGHT    "Copyright (C) 2019 DeVault Developers")
-SET(PROJECT_CONTACT      "jonspock@protonmail.com")
-SET(PROJECT_VENDOR       "Jon Spock")
-SET(ORG_WEBSITE          "https://devault.cc")
-
-SET(PROJECT_VERSION_PATCH ${PATCH_OUT})
-
-SET(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_REVISION "${VERSION_REVISION}")
-
-if (VERSION_SUFFIX)
-  SET(CPACK_PACKAGE_VERSION_PATCH "${VERSION_SUFFIX}")
-  SET(PROJECT_VERSION_MAJOR ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_REVISION})
-  SET(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_REVISION}.${CPACK_PACKAGE_VERSION_PATCH})
-else()
-  SET(CPACK_PACKAGE_VERSION "${VERSION_DESC}")
-endif()
-  
-SET(PROJECT_VERSION ${CPACK_PACKAGE_VERSION})
-
-MESSAGE(STATUS "QT Version: ${PROJECT_VERSION}")
-
-STRING(TOLOWER ${PROJECT_NAME_SHORT} PROJECT_NAME_SHORT_LOWER)
-PROJECT(${PROJECT_NAME_SHORT_LOWER}-${PROJECT_VERSION})
-
-# System on which project is built
-SITE_NAME(HOSTNAME)
-SET(SYSNAME ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_PROCESSOR})
-
-# CMake Settings
-SET(CMAKE_COLOR_MAKEFILE ON)
 
 # This ensure that AUTOMOC doesn't run on generated files.
-if (CMAKE_VERSION VERSION_LESS 3.10)
-  message("Not setting CMP0071")
-else()
-  cmake_policy(SET CMP0071 OLD)
-endif()
-
-if (TOOLCHAIN_PREFIX)
-  set(Qt5_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
-endif()
+cmake_policy(SET CMP0071 OLD)
 
 include(BrewHelper)
 find_brew_prefix(QT5_PREFIX qt5)
 
-set(QT_REQUIRED_COMPONENTS Core Widgets Network Test DBus)
-find_package(Qt5 COMPONENTS ${QT_REQUIRED_COMPONENTS} REQUIRED HINTS "${QT5_PREFIX}")
-
-# Find out more about Qt. This is similar to
-# http://code.qt.io/cgit/qt/qtwebkit.git/tree/Source/cmake/OptionsQt.cmake
-get_target_property(QT_CORE_TYPE Qt5::Core TYPE)
-if(QT_CORE_TYPE MATCHES STATIC)
-	set(QT_STATIC_BUILD ON)
+set(QT_REQUIRED_COMPONENTS Core Widgets Network Test)
+if(ENABLE_DBUS_NOTIFICATIONS)
+	list(APPEND QT_REQUIRED_COMPONENTS DBus)
 endif()
 
+find_package(Qt5 5.5.1 COMPONENTS ${QT_REQUIRED_COMPONENTS} REQUIRED HINTS "${QT5_PREFIX}")
 
-find_package(Qt5DBus)
-if (Qt5DBus_FOUND)
-  add_compile_options("-DUSE_DBUS")
-endif()
+# Localisation
+add_subdirectory(locale)
 
-find_package(QREncode)
-if (QREncode_FOUND)
-  if (ENABLE_QRCODE)
-    add_definitions(-DUSE_QRCODE)
-    message(STATUS "Found QREncode")
-    set(QR_LIB ${QRENCODE_LIBRARY})
-  else()
-    set(ENABLE_QRCODE false)
-  endif()
-else()
-    message(STATUS " QREncode NOT FOUND ")
-    set(ENABLE_QRCODE false)
-endif()
- 
+add_custom_command(OUTPUT temp_bitcoin_locale.qrc
+	COMMAND cmake
+	ARGS
+		-E copy
+		"${CMAKE_CURRENT_SOURCE_DIR}/bitcoin_locale.qrc"
+		temp_bitcoin_locale.qrc
+	MAIN_DEPENDENCY bitcoin_locale.qrc
+	VERBATIM
+)
 
-# Determine the Qt libraries directory from the QT5::Core library location
-get_target_property(QT_CORE_LIB_LOCATION Qt5::Core LOCATION)
-get_filename_component(QT5_LIB_DIR "${QT_CORE_LIB_LOCATION}" DIRECTORY)
-
-set(STATIC_DEPENDENCIES_CMAKE_FILE "${CMAKE_BINARY_DIR}/QtStaticDependencies.cmake")
-if(EXISTS ${STATIC_DEPENDENCIES_CMAKE_FILE})
-	file(REMOVE ${STATIC_DEPENDENCIES_CMAKE_FILE})
-endif()
-
-set(CONVERT_PRL_PATH "${CONTRIB_PATH}/qt/convert-prl-libs-to-cmake.pl")
-macro(CONVERT_PRL_LIBS_TO_CMAKE _qt_component)
-	if(TARGET Qt5::${_qt_component})
-		get_target_property(_lib_location Qt5::${_qt_component} LOCATION)
-		execute_process(COMMAND ${PERL_EXECUTABLE} "${CONVERT_PRL_PATH}"
-			--lib "${_lib_location}"
-			--qt_lib_install_dir "${QT5_LIB_DIR}"
-			--out "${STATIC_DEPENDENCIES_CMAKE_FILE}"
-			--component "${_qt_component}"
-			--compiler "${CMAKE_CXX_COMPILER_ID}"
-		)
-	endif()
-endmacro()
+add_custom_command(OUTPUT qrc_bitcoin_locale.cpp
+	COMMAND Qt5::rcc
+	ARGS
+		temp_bitcoin_locale.qrc
+		-name bitcoin_locale
+		-o qrc_bitcoin_locale.cpp
+	MAIN_DEPENDENCY temp_bitcoin_locale.qrc
+	DEPENDS locales
+	VERBATIM
+)
 
 # UI elements
+# qt5_wrap_ui() generates the files in the CMAKE_CURRENT_BINARY_DIR. As there
+# is no option to change the output directory, moving the files to the forms
+# subdirectory requires to override the variable. It is reset to its actual
+# value after the call so it does not impact the other sections of this
+# CMakeLists.txt file.
+set(SAVE_CMAKE_CURRENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/forms")
+
+# It seems that some generators (at least the Unix Makefiles one) doesn't create
+# the build directory required  by a custom command, so do it manually.
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/addressbookpage.ui
 	forms/askpassphrasedialog.ui
-	forms/setpassphrasedialog.ui
 	forms/coincontroldialog.ui
+	forms/createwalletdialog.ui
 	forms/editaddressdialog.ui
 	forms/helpmessagedialog.ui
 	forms/intro.ui
@@ -135,11 +69,9 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/debugwindow.ui
 	forms/sendcoinsdialog.ui
 	forms/sendcoinsentry.ui
-	forms/rewardcontroldialog.ui
-	forms/rewardsdialog.ui
-	forms/rewardsentry.ui
 	forms/signverifymessagedialog.ui
 	forms/transactiondescdialog.ui
+
 	forms/startoptionsdialog.ui
 	forms/startoptions.ui
 	forms/startoptionsrestore.ui
@@ -149,7 +81,14 @@ qt5_wrap_ui(UI_GENERATED_HEADERS
 	forms/revealphrase.ui
 	forms/sweep.ui
 	forms/sweepbls.ui
+	forms/rewardcontroldialog.ui
+	forms/rewardsdialog.ui
+	forms/rewardsentry.ui
+	forms/askpassphrasedialog.ui
+	forms/setpassphrasedialog.ui
+
 )
+set(CMAKE_CURRENT_BINARY_DIR ${SAVE_CMAKE_CURRENT_BINARY_DIR})
 
 # Qt MOC
 set(CMAKE_AUTOMOC ON)
@@ -158,16 +97,14 @@ set(CMAKE_AUTOMOC ON)
 qt5_add_resources(QRC_BITCOIN_CPP bitcoin.qrc)
 
 add_library(bitcoin-qt-base
-  ${QT_BASE_HEADERS}
 	bantablemodel.cpp
+	bitcoin.cpp
 	bitcoinaddressvalidator.cpp
 	bitcoinamountfield.cpp
 	bitcoingui.cpp
 	bitcoinunits.cpp
 	clientmodel.cpp
-	checkcoins.cpp
 	csvmodelwriter.cpp
-    dvtui.cpp
 	guiutil.cpp
 	intro.cpp
 	modaloverlay.cpp
@@ -183,18 +120,8 @@ add_library(bitcoin-qt-base
 	splashscreen.cpp
 	trafficgraphwidget.cpp
 	utilitydialog.cpp
-	setpassphrasedialog.cpp
-	dvtui.cpp
-	revealphrase.cpp
-	sweep.cpp
-	sweepbls.cpp
 
-	startoptionsdialog.cpp
-	startoptions.cpp
-	startoptionsrestore.cpp
-	startoptionssort.cpp
-	startoptionsrevealed.cpp
-	startoptionsmain.cpp
+	dvtui.cpp
 
 	# Handle ui files
 	${UI_GENERATED_HEADERS}
@@ -205,8 +132,12 @@ add_library(bitcoin-qt-base
 	# Handle qrc files
 	${QRC_BITCOIN_CPP}
 	qrc_bitcoin_locale.cpp
+)
 
-  )
+# Add the minimal integration plugin, and other plugins according to the target
+# platform.
+set(QT_PLUGIN_COMPONENTS QMinimalIntegrationPlugin)
+set(QT_PLUGIN_PLATFORM_DEFINITIONS -DQT_QPA_PLATFORM_MINIMAL=1)
 
 # Linux support
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -241,11 +172,51 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	)
 endif()
 
+target_compile_definitions(bitcoin-qt-base PUBLIC OBJC_OLD_DISPATCH_PROTOTYPES)
+target_include_directories(bitcoin-qt-base
+	PUBLIC
+		.
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}/forms
+)
+
+# Find out more about Qt. This is similar to
+# http://code.qt.io/cgit/qt/qtwebkit.git/tree/Source/cmake/OptionsQt.cmake
+get_target_property(QT_CORE_TYPE Qt5::Core TYPE)
+if(QT_CORE_TYPE MATCHES STATIC)
+	set(QT_STATIC_BUILD ON)
+endif()
+
+# Determine the Qt libraries directory from the QT5::Core library location
+get_target_property(QT_CORE_LIB_LOCATION Qt5::Core LOCATION)
+get_filename_component(QT5_LIB_DIR "${QT_CORE_LIB_LOCATION}" DIRECTORY)
+
+set(STATIC_DEPENDENCIES_CMAKE_FILE "${CMAKE_BINARY_DIR}/QtStaticDependencies.cmake")
+if(EXISTS ${STATIC_DEPENDENCIES_CMAKE_FILE})
+	file(REMOVE ${STATIC_DEPENDENCIES_CMAKE_FILE})
+endif()
+
+set(CONVERT_PRL_PATH "${CONTRIB_PATH}/qt/convert-prl-libs-to-cmake.pl")
+macro(CONVERT_PRL_LIBS_TO_CMAKE _qt_component)
+	if(TARGET Qt5::${_qt_component})
+		get_target_property(_lib_location Qt5::${_qt_component} LOCATION)
+		execute_process(COMMAND ${PERL_EXECUTABLE} "${CONVERT_PRL_PATH}"
+			--lib "${_lib_location}"
+			--qt_lib_install_dir "${QT5_LIB_DIR}"
+			--out "${STATIC_DEPENDENCIES_CMAKE_FILE}"
+			--component "${_qt_component}"
+			--compiler "${CMAKE_CXX_COMPILER_ID}"
+		)
+	endif()
+endmacro()
+
 if(QT_STATIC_BUILD)
 	list(APPEND QT_REQUIRED_COMPONENTS ${QT_PLUGIN_COMPONENTS})
+
 	foreach(qt_module ${QT_REQUIRED_COMPONENTS})
 		CONVERT_PRL_LIBS_TO_CMAKE(${qt_module})
 	endforeach()
+
 	# HACK: We must explicitly add LIB path of the Qt installation
 	# to correctly find qtpcre
 	link_directories("${QT5_LIB_DIR}")
@@ -278,75 +249,14 @@ if(QT_STATIC_BUILD)
 	endforeach()
 endif()
 
-# Localisation
-add_subdirectory(locale)
-
-add_custom_command(OUTPUT temp_bitcoin_locale.qrc
-	COMMAND cmake
-	ARGS
-		-E copy
-		"${CMAKE_CURRENT_SOURCE_DIR}/bitcoin_locale.qrc"
-		temp_bitcoin_locale.qrc
-	MAIN_DEPENDENCY bitcoin_locale.qrc
-	VERBATIM
-)
-
-add_custom_command(OUTPUT qrc_bitcoin_locale.cpp
-	COMMAND Qt5::rcc
-	ARGS
-		temp_bitcoin_locale.qrc
-		-name bitcoin_locale
-		-o qrc_bitcoin_locale.cpp
-	MAIN_DEPENDENCY temp_bitcoin_locale.qrc
-	DEPENDS locales
-	VERBATIM
-)
-
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-if(BUILD_WALLET)
-  file(GLOB QT_BASE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-  source_group("BaseHeaders" FILES ${QT_BASE_HEADERS})
-endif()
-endif()
-
-
-
-target_compile_definitions(bitcoin-qt-base PUBLIC OBJC_OLD_DISPATCH_PROTOTYPES)
-
-
-# Windows support
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	target_sources(bitcoin-qt-base PRIVATE winshutdownmonitor.cpp)
-endif()
-
-target_include_directories(bitcoin-qt-base
-	PUBLIC
-		.
-		${CMAKE_CURRENT_BINARY_DIR}
-		${CMAKE_CURRENT_BINARY_DIR}/forms
-)
-
-# OSX support
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	target_sources(bitcoin-qt-base PRIVATE 
-		macdockiconhandler.mm
-		macnotificationhandler.mm
-	)
-endif()
-
 target_link_libraries(bitcoin-qt-base
-  server
-  rpcclient
-  Qt5::Widgets
-  Qt5::Network
-  ${QR_LIB}
-  bls
-  relic_s
+	server
+	rpcclient
+	Qt5::Widgets
+	Qt5::Network
 )
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set_property(TARGET bitcoin-qt-base PROPERTY AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
+if(ENABLE_DBUS_NOTIFICATIONS)
+	target_link_libraries(bitcoin-qt-base Qt5::DBus)
 endif()
 
 # Wallet
@@ -362,18 +272,16 @@ if(BUILD_WALLET)
 			askpassphrasedialog.cpp
 			coincontroldialog.cpp
 			coincontroltreewidget.cpp
+			#createwalletdialog.cpp
 			editaddressdialog.cpp
 			openuridialog.cpp
 			overviewpage.cpp
+			#paymentserver.cpp
 			receivecoinsdialog.cpp
 			receiverequestdialog.cpp
 			recentrequeststablemodel.cpp
 			sendcoinsdialog.cpp
 			sendcoinsentry.cpp
-			rewardcontroldialog.cpp
-			rewardcontroltreewidget.cpp
-			rewardsdialog.cpp
-			rewardsentry.cpp
 			signverifymessagedialog.cpp
 			transactiondesc.cpp
 			transactiondescdialog.cpp
@@ -386,88 +294,324 @@ if(BUILD_WALLET)
 			walletmodel.cpp
 			walletmodeltransaction.cpp
 			walletview.cpp
+
+      setpassphrasedialog.cpp
+	    revealphrase.cpp
+			rewardcontroldialog.cpp
+			rewardcontroltreewidget.cpp
+			rewardsdialog.cpp
+			rewardsentry.cpp
+	    sweep.cpp
+	    sweepbls.cpp
+        
+	    startoptionsdialog.cpp
+	    startoptions.cpp
+	    startoptionsrestore.cpp
+	    startoptionssort.cpp
+	    startoptionsrevealed.cpp
+	    startoptionsmain.cpp
+
 	)
 
 	target_link_libraries(bitcoin-qt-base wallet)
 
 	if(ENABLE_QRCODE)
-		target_include_directories(bitcoin-qt-base PUBLIC ${QRENCODE_INCLUDE_DIR})
-		target_link_libraries(bitcoin-qt-base ${QR_LIB})
+		find_package(QREncode REQUIRED)
+		target_link_libraries(bitcoin-qt-base QREncode::qrencode)
 	endif()
 endif()
 
 # The executable
-if (DO_PACKAGING)
-  add_executable(${APP_NAME} MACOSX_BUNDLE bitcoin.cpp)
-else()
-  add_executable(${APP_NAME} WIN32 bitcoin.cpp)
+add_executable(bitcoin-qt WIN32 bitcoin.cpp)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	target_sources(bitcoin-qt PRIVATE res/bitcoin-qt-res.rc)
 endif()
+target_link_libraries(bitcoin-qt bitcoin-qt-base)
+
+#include(BinaryTest)
+#add_to_symbols_check(bitcoin-qt)
+#add_to_security_check(bitcoin-qt)
+
+include(InstallationHelper)
+install_target(bitcoin-qt)
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(${APP_NAME} bitcoin-qt-base "-framework Foundation" "-framework CoreServices" "-framework AppKit")
-else()
-  target_link_libraries(${APP_NAME} bitcoin-qt-base)
+	set(BITCOINQT_BUNDLE_ICON "res/icons/devault.icns")
+	get_filename_component(BITCOINQT_BUNDLE_ICON_NAME
+		"${BITCOINQT_BUNDLE_ICON}"
+		NAME
+	)
+
+	set(INFO_PLIST_STRINGS_FILE "Base.lproj/InfoPlist.strings")
+	set(INFO_PLIST_STRINGS_PATH "${CMAKE_CURRENT_BINARY_DIR}/${INFO_PLIST_STRINGS_FILE}")
+	file(WRITE
+		"${INFO_PLIST_STRINGS_PATH}"
+		"{	CFBundleDisplayName = \"${PACKAGE_NAME}\"; CFBundleName = \"${PACKAGE_NAME}\"; }"
+	)
+
+	set(EMPTY_LPROJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/empty.lproj")
+	file(TOUCH "${EMPTY_LPROJ_FILE}")
+
+	target_sources(bitcoin-qt PRIVATE
+		"${BITCOINQT_BUNDLE_ICON}"
+		"${INFO_PLIST_STRINGS_PATH}"
+		"${EMPTY_LPROJ_FILE}"
+	)
+
+	string(JOIN ";" BITCOINQT_BUNDLE_RESOURCES
+		"${BITCOINQT_BUNDLE_ICON}"
+		"${EMPTY_LPROJ_FILE}"
+	)
+
+	set(BITCOIN_QT_OSX_BUNDLE_NAME "devault-qt")
+	set_target_properties(bitcoin-qt PROPERTIES
+		MACOSX_BUNDLE ON
+		OUTPUT_NAME "${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/share/qt/Info.plist.cmake.in"
+		MACOSX_BUNDLE_BUNDLE_NAME "${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		MACOSX_BUNDLE_BUNDLE_VERSION "${bitcoin-abc_VERSION}"
+		MACOSX_BUNDLE_GUI_IDENTIFIER "org.bitcoinabc.${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		MACOSX_BUNDLE_ICON_FILE "${BITCOINQT_BUNDLE_ICON_NAME}"
+		MACOSX_BUNDLE_INFO_STRING "${bitcoin-abc_VERSION}, Copyright © 2009-${COPYRIGHT_YEAR} ${COPYRIGHT_HOLDERS_FINAL}"
+		MACOSX_BUNDLE_LONG_VERSION_STRING "${bitcoin-abc_VERSION}"
+		MACOSX_BUNDLE_SHORT_VERSION_STRING "${bitcoin-abc_VERSION}"
+		RESOURCE "${BITCOINQT_BUNDLE_RESOURCES}"
+	)
+	# The InfoPlist.strings files should be located in a resource subdirectory.
+	# This is not supported by the RESOURCE property and require the use of the
+	# MACOSX_PACKAGE_LOCATION property instead. The RESOURCE documentation has
+	# an example demonstrating this behavior (see the appres.txt file):
+	# https://cmake.org/cmake/help/latest/prop_tgt/RESOURCE.html
+	set_source_files_properties(
+		"${INFO_PLIST_STRINGS_PATH}"
+		PROPERTIES
+			MACOSX_PACKAGE_LOCATION "Resources/${INFO_PLIST_STRINGS_FILE}"
+	)
+
+	# Create a stripped version of the application bundle to be used in the DMG.
+	# Since the LOCATION property and the BundleUtilities package are deprecated
+	# by cmake, only generator expressions can be used to determine the path to
+	# the bundle and its executable. However the generator expressions are
+	# solved at build time, making them unusable to do path computation at
+	# configuration time.
+	# The paths here are then hard-coded, which is safe since the structure of
+	# an application bundle is well-known and specified by Apple. Note that this
+	# will only work for building MacOS application bundle as the IOS structure
+	# is slightly different.
+	set(STRIPPED_BUNDLE "${CMAKE_CURRENT_BINARY_DIR}/stripped/${BITCOIN_QT_OSX_BUNDLE_NAME}.app")
+	add_custom_command(
+		OUTPUT
+			"${STRIPPED_BUNDLE}"
+		COMMAND
+			${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:bitcoin-qt>" "${STRIPPED_BUNDLE}"
+		COMMAND
+			${CMAKE_STRIP} -u -r "${STRIPPED_BUNDLE}/Contents/MacOS/${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		DEPENDS
+			bitcoin-qt
+	)
+
+	include(DoOrFail)
+	find_program_or_fail(CMAKE_INSTALL_NAME_TOOL "install_name_tool")
+	find_program_or_fail(CMAKE_OTOOL "otool")
+
+	set(QT_INSTALLER_SUPPORTED_LANGUAGES
+		"da"
+		"de"
+		"es"
+		"hu"
+		"ru"
+		"uk"
+		"zh_CN"
+		"zh_TW"
+	)
+	string(JOIN "," QT_LOCALES ${QT_INSTALLER_SUPPORTED_LANGUAGES})
+
+	get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+	execute_process(
+		COMMAND
+			"${QMAKE_EXECUTABLE}"
+			-query QT_INSTALL_TRANSLATIONS
+		OUTPUT_VARIABLE
+			QT_TRANSLATION_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+
+	function(get_qt_translation_dir QT_TRANSLATION_DIR)
+		foreach(_locale ${ARGN})
+			find_path(_qt_translation_dir
+				"qt_${_locale}.qm"
+				HINTS
+					"${QT_TRANSLATION_DIR}"
+				PATH_SUFFIXES
+					"translations"
+			)
+
+			# Ensure that all the translation files are found, and are located
+			# in the same directory.
+			if(NOT _qt_translation_dir OR (_qt_translation_dir_previous AND (NOT _qt_translation_dir_previous STREQUAL _qt_translation_dir)))
+				return()
+			endif()
+
+			set(_qt_translation_dir_previous _qt_translation_dir)
+		endforeach()
+
+		set(QT_TRANSLATION_DIR ${_qt_translation_dir} PARENT_SCOPE)
+	endfunction()
+
+	get_qt_translation_dir(QT_TRANSLATION_DIR ${QT_INSTALLER_SUPPORTED_LANGUAGES})
+	if(NOT QT_TRANSLATION_DIR)
+		message(FATAL_ERROR "Qt translation files are not found")
+	endif()
+
+	set(MACDEPLOY_DIR "${CMAKE_SOURCE_DIR}/contrib/macdeploy")
+	set(MACDEPLOYQTPLUS "${MACDEPLOY_DIR}/macdeployqtplus")
+	set(DMG_DIST "${CMAKE_BINARY_DIR}/dist")
+	add_custom_command(
+		OUTPUT
+			"${DMG_DIST}"
+		COMMAND
+			"INSTALLNAMETOOL=${CMAKE_INSTALL_NAME_TOOL}"
+			"OTOOL=${CMAKE_OTOOL}"
+			"STRIP=${CMAKE_STRIP}"
+			"${Python_EXECUTABLE}"
+			"${MACDEPLOYQTPLUS}"
+			"${STRIPPED_BUNDLE}"
+			-translations-dir "${QT_TRANSLATION_DIR}"
+			-add-qt-tr "${QT_LOCALES}"
+		WORKING_DIRECTORY
+			"${CMAKE_BINARY_DIR}"
+		DEPENDS
+			"${STRIPPED_BUNDLE}"
+	)
+
+	# Building the DMG background image requires several steps:
+	#   1/ The SVG file must be edited to display the package name
+	#   2/ The SVG file should be transformed into a couple PNG files, on for
+	#      low resolution screens and one for high resolution screens.
+	#   3/ The PNG files must be transformed into a multi-resolution TIFF file.
+	#      The names are not set arbitrarily, they follow Apple's guidelines for
+	#      resolution independent bitmap images (see `man tiffutil`).
+	set(BACKGROUND_SVG "background.svg")
+	#configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in""${BACKGROUND_SVG}"	)
+
+	include(ImageHelper)
+	set(BACKGROUND_PNG_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.png")
+	set(BACKGROUND_PNG_HIRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp@2x.png")
+	set(BACKGROUND_TIFF_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.tiff")
+	set(BACKGROUND_TIFF_HIRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp@2x.tiff")
+	set(BACKGROUND_TIFF_NAME "background.tiff")
+	set(BACKGROUND_TIFF_MULTIRES "${CMAKE_BINARY_DIR}/${BACKGROUND_TIFF_NAME}")
+	convert_svg_to_png("${BACKGROUND_SVG}" "${BACKGROUND_PNG_LOWRES}" 36)
+	convert_svg_to_png("${BACKGROUND_SVG}" "${BACKGROUND_PNG_HIRES}" 72)
+	convert_png_to_tiff("${BACKGROUND_PNG_LOWRES}" "${BACKGROUND_TIFF_LOWRES}")
+	convert_png_to_tiff("${BACKGROUND_PNG_HIRES}" "${BACKGROUND_TIFF_HIRES}")
+	cat_multi_resolution_tiff("${BACKGROUND_TIFF_MULTIRES}" "${BACKGROUND_TIFF_LOWRES}" "${BACKGROUND_TIFF_HIRES}")
+
+	set(BACKGROUND_DIST_DIR "${DMG_DIST}/.background")
+	set(BACKGROUND_DIST_TIFF "${BACKGROUND_DIST_DIR}/${BACKGROUND_TIFF_NAME}")
+	add_custom_command(
+		OUTPUT
+			"${BACKGROUND_DIST_TIFF}"
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory "${BACKGROUND_DIST_DIR}"
+		COMMAND
+			${CMAKE_COMMAND} -E copy "${BACKGROUND_TIFF_MULTIRES}" "${BACKGROUND_DIST_TIFF}"
+		DEPENDS
+			"${BACKGROUND_TIFF_MULTIRES}"
+			"${DMG_DIST}"
+	)
+
+	string(REPLACE " " "-" OSX_VOLNAME "${PACKAGE_NAME}")
+	file(WRITE "${CMAKE_BINARY_DIR}/osx_volname" "${OSX_VOLNAME}")
+
+	set(DMG_DSSTORE "${DMG_DIST}/.DS_Store")
+	set(GEN_DSSTORE "${MACDEPLOY_DIR}/custom_dsstore.py")
+	add_custom_command(
+		OUTPUT
+			"${DMG_DSSTORE}"
+		COMMAND
+			"${Python_EXECUTABLE}"
+			"${GEN_DSSTORE}"
+			"${DMG_DSSTORE}"
+			"${OSX_VOLNAME}"
+		DEPENDS
+			"${GEN_DSSTORE}"
+			"${DMG_DIST}"
+	)
+
+	set(OSX_APPLICATION_DIR "Applications")
+	set(OSX_APPLICATION_SYMLINK "${DMG_DIST}/${OSX_APPLICATION_DIR}")
+	add_custom_command(
+		OUTPUT
+			"${OSX_APPLICATION_SYMLINK}"
+		COMMAND
+			${CMAKE_COMMAND} -E create_symlink "/${OSX_APPLICATION_DIR}" "${OSX_APPLICATION_SYMLINK}"
+		DEPENDS
+			"${DMG_DIST}"
+	)
+
+	add_custom_target(osx-deploydir
+		DEPENDS
+			"${OSX_APPLICATION_SYMLINK}"
+			"${DMG_DSSTORE}"
+			"${BACKGROUND_DIST_TIFF}"
+	)
+
+	if(CMAKE_CROSSCOMPILING)
+		find_program_or_fail(GENISOIMAGE_EXECUTABLE genisoimage)
+
+		add_custom_target(osx-dmg
+			COMMAND
+				"${GENISOIMAGE_EXECUTABLE}"
+				-no-cache-inodes
+				-D
+				-l
+				-probe
+				-V "${OSX_VOLNAME}"
+				-no-pad
+				-r
+				-dir-mode 0755
+				-apple
+				-o "${OSX_VOLNAME}.dmg"
+				"${DMG_DIST}"
+			WORKING_DIRECTORY
+				"${CMAKE_BINARY_DIR}"
+		)
+		add_dependencies(osx-dmg osx-deploydir)
+	else()
+		add_custom_target(osx-dmg
+			COMMAND
+				"${Python_EXECUTABLE}"
+				"${MACDEPLOYQTPLUS}"
+				"${STRIPPED_BUNDLE}"
+				-translations-dir "${QT_TRANSLATION_DIR}"
+				-add-qt-tr "${QT_LOCALES}"
+				-dmg
+				-fancy "${MACDEPLOY_DIR}/fancy.plist"
+				-volname "${OSX_VOLNAME}"
+			WORKING_DIRECTORY
+				"${CMAKE_BINARY_DIR}"
+			DEPENDS
+				"${STRIPPED_BUNDLE}"
+				"${BACKGROUND_TIFF_MULTIRES}"
+		)
+	endif()
 endif()
 
-QT5_USE_Modules(${APP_NAME} Gui)
-QT5_USE_Modules(${APP_NAME} Core)
-QT5_USE_Modules(${APP_NAME} Widgets)
-QT5_USE_Modules(${APP_NAME} Test)
-QT5_USE_Modules(${APP_NAME} PrintSupport)
-QT5_USE_Modules(${APP_NAME} Network)
-if (Qt5DBus_FOUND)
-  QT5_USE_Modules(${APP_NAME} DBus)
-endif()
+if (USE_TR_CONFIG)
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/utils/translate.sh.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	@ONLY
+)
 
-set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
-
-
-if (BUILD_BUNDLE)
-  #############################################################
-  # Enable packaging
-  INCLUDE(InstallRequiredSystemLibraries)
-  
-  SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/../../share/qt/Info.plist.in")
-  SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE TRUE)
-  
-  set(APPS "${APP_NAME}.app")
-  
-  
-  SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
-  SET(CPACK_PACKAGE_NAME ${PROJECT_NAME_SHORT})
-  SET(CPACK_PACKAGE_DESCRIPTION "${PROJECT_NAME_LONG}")
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME_SHORT} - ${PROJECT_DESCRIPTION}")
-  SET(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
-  SET(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT})
-  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-  SET(CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/README.md)
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-  
-  SET(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CPACK_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-  
-
-  add_custom_command(TARGET ${APP_NAME}
-    POST_BUILD
-    COMMAND macdeployqt ${APPS}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-  
-  
-  SET(CPACK_GENERATOR "DragNDrop")
-  # Libraries are bundled directly
-  SET(CPACK_COMPONENT_LIBRARIES_HIDDEN TRUE)
-  SET(MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
-  SET(MACOSX_BUNDLE_INFO_STRING "devault-qt")
-  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.devault-qt")
-  SET(MACOSX_BUNDLE_COPYRIGHT "(c) DeVault 2019")
-  SET(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
-  SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION})
-  SET(MACOSX_BUNDLE_LONG_VERSION_STRING "Version ${PROJECT_VERSION}")
-  # Bundle Properties
-  
-  SET(CPACK_PACKAGE_EXECUTABLES "devault-qt" "devault-qt")
-  INCLUDE(CPack)
-  INSTALL(TARGETS ${APP_NAME} DESTINATION .)
+add_custom_target(translate
+	COMMENT "Updating the translations..."
+	COMMAND "${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  )
 endif()
 
 # Test tests
-# add_subdirectory(test)
+add_subdirectory(test)
