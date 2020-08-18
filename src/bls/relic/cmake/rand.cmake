@@ -16,7 +16,7 @@ endif()
 # Choose the pseudo-random number generator.
 set(RAND "HASHD" CACHE STRING "Pseudo-random number generator")
 
-if(MSVC)
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # Choose the pseudo-random number generator.
     set(SEED "WCGR" CACHE STRING "Random number generator seeder")
