@@ -3596,10 +3596,12 @@ static UniValue createwallet(const Config &config,
     std::string password(""); // blank unless option is present
     std::string error;
     std::string warning;
+    /* not used yet
     bool disable_privatekeys = false;
     if (!request.params[1].isNull()) {
         disable_privatekeys = request.params[1].get_bool();
     }
+    */
 
     WalletLocation location(wallet_name);
     WalletFlag flags;
