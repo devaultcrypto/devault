@@ -401,7 +401,7 @@ if (DO_PACKAGING)
   add_executable(${APP_NAME} MACOSX_BUNDLE bitcoin.cpp)
 else()
   add_executable(${APP_NAME} WIN32 bitcoin.cpp)
-endif()-
+endif()
 
 target_link_libraries(${APP_NAME} bitcoin-qt-base)
 
