@@ -177,7 +177,7 @@ set(ENABLE_ZMQ ${BUILD_ZMQ})
 
 # Try to find libqrencode
 # Only used in the wallet GUI
-if(ENABLE_QRCODE AND BUILD_BITCOIN_WALLET AND BUILD_BITCOIN_QT)
+if(ENABLE_QRCODE AND BUILD_WALLET AND BUILD_QT)
 	find_package(QREncode REQUIRED)
 	set(USE_QRCODE 1 CACHE INTERNAL "QR code is enabled")
 endif()
