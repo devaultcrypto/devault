@@ -814,7 +814,8 @@ UniValue dumpwallet(const Config &config, const JSONRPCRequest &request) {
 }
 
 UniValue dumpphrase(const Config &config, const JSONRPCRequest &request) {
-    CWallet *const pwallet = GetWalletForJSONRPCRequest(request);
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
     }
