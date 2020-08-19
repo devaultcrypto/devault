@@ -5183,11 +5183,9 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
         }
       
         // Can happen on any run - do after loading WalletFlag from DB file & after potentially setting as Legacy
-      /*
         if (gArgs.GetBoolArg("-upgradebls",false)) {
             walletInstance->SetWalletBLS();
         }
-       */
 
     }
 

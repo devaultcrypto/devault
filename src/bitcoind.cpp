@@ -250,7 +250,7 @@ bool AppInit(int argc, char *argv[]) {
             return false;
         }
         std::vector<std::string> words;
-        bool use_bls = false;
+        bool use_bls = true;
         fRet = AppInitMain(config, rpcServer, httpRPCRequestProcessor, interfaces, walletPassphrase, words, use_bls);
     } catch (const std::exception &e) {
         PrintExceptionContinue(&e, "AppInit()");

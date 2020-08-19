@@ -52,11 +52,9 @@ void WalletInit::AddWalletOptions() const {
     gArgs.AddArg("-bypasspassword",
                "Set a default password of \"\" to bypass interactively setting it)",
                  false, OptionsCategory::WALLET);
-  /*
     gArgs.AddArg("-upgradebls",
                "Upgrade wallet to use BLS Keys/Signatures for key generation in future)",
                  false, OptionsCategory::WALLET);
-   */
     gArgs.AddArg("-keypool=<n>",
                  strprintf("Set key pool size to <n> (default: %u)",
                            DEFAULT_KEYPOOL_SIZE),

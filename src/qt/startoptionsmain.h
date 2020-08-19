@@ -33,7 +33,7 @@ public:
     bool is_bls() { return bls;}
 
 public slots:
-  //  void on_RestoreWallet_clicked();
+    void on_RestoreWallet_clicked();
     void on_RestoreLegacyWallet_clicked();
     void on_Next_clicked();
     void on_Back_clicked();
