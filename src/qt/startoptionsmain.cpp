@@ -58,7 +58,7 @@ StartOptionsMain::~StartOptionsMain() {
 void StartOptionsMain::on_NewWallet_clicked() {
     pageNum = CreateOrRestorePage;
     ui->NewWallet->setVisible(false);
-    //    ui->RestoreWallet->setVisible(false);
+    ui->RestoreWallet->setVisible(false);
     ui->RestoreLegacyWallet->setVisible(false);
     ui->Back->setVisible(true);
     ui->Next->setVisible(true);
@@ -74,9 +74,9 @@ void StartOptionsMain::on_NewWallet_clicked() {
     startOptionsRevealed = new StartOptionsRevealed(words, rows, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRevealed);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRevealed);
-    bls = false;
+    bls = true;
 }
-/*
+
 void StartOptionsMain::on_RestoreWallet_clicked() {
     pageNum = CheckWordsPage;
     ui->NewWallet->setVisible(false);
@@ -85,20 +85,22 @@ void StartOptionsMain::on_RestoreWallet_clicked() {
     ui->Back->setVisible(true);
     ui->Next->setVisible(true);
     rows = startOptions->getRows();
+    bls = true;
 
     startOptionsRestore = new StartOptionsRestore(qWordList, rows, true, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRestore);
     ui->QStackTutorialContainer->setCurrentWidget(startOptionsRestore);
 }
-*/
+
 void StartOptionsMain::on_RestoreLegacyWallet_clicked() {
     pageNum = CheckWordsPage;
     ui->NewWallet->setVisible(false);
     ui->RestoreLegacyWallet->setVisible(false);
-    //    ui->RestoreWallet->setVisible(false);
+    ui->RestoreWallet->setVisible(false);
     ui->Back->setVisible(true);
     ui->Next->setVisible(true);
     rows = startOptions->getRows();
+    bls = false;
 
     startOptionsRestore = new StartOptionsRestore(qWordList, rows, false, this);
     ui->QStackTutorialContainer->addWidget(startOptionsRestore);
@@ -121,7 +123,7 @@ void StartOptionsMain::on_Back_clicked() {
         case CreateOrRestorePage: {
             pageNum = StartPage;
             ui->NewWallet->setVisible(true);
-            //            ui->RestoreWallet->setVisible(true);
+            ui->RestoreWallet->setVisible(true);
             ui->RestoreLegacyWallet->setVisible(true);
             ui->Back->setVisible(false);
             ui->Next->setVisible(false);
@@ -137,7 +139,7 @@ void StartOptionsMain::on_Back_clicked() {
         case CheckWordsPage: {
             pageNum = StartPage;
             ui->NewWallet->setVisible(true);
-            //            ui->RestoreWallet->setVisible(true);
+            ui->RestoreWallet->setVisible(true);
             ui->RestoreLegacyWallet->setVisible(true);
             ui->Back->setVisible(false);
             ui->Next->setVisible(false);

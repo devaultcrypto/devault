@@ -211,7 +211,7 @@ private:
     // TODO: Set this for it for be used
     std::vector<std::string> words;
     interfaces::Node &m_node;
-    bool use_bls{false};
+    bool use_bls{true};
 };
 
 /** Main Bitcoin application object */
@@ -278,7 +278,7 @@ private:
     #endif
     SecureString pss;
     std::vector<std::string> wordlist;
-    bool use_bls{false};
+    bool use_bls{true};
     int returnValue;
     const PlatformStyle *platformStyle;
     std::unique_ptr<QWidget> shutdownWindow;
