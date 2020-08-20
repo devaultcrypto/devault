@@ -1039,13 +1039,10 @@ void SetupServerArgs() {
     gArgs.AddArg("-blockminsize", "", false, OptionsCategory::HIDDEN);
     gArgs.AddArg("-dbcrashratio", "", false, OptionsCategory::HIDDEN);
     gArgs.AddArg("-forcecompactdb", "", false, OptionsCategory::HIDDEN);
-    gArgs.AddArg("-usehd", "", false, OptionsCategory::HIDDEN);
     gArgs.AddArg("-parkdeepreorg", "", false, OptionsCategory::HIDDEN);
     gArgs.AddArg("-replayprotectionactivationtime", "", false,
                  OptionsCategory::HIDDEN);
 
-    // TODO remove after the Nov 2019 upgrade
-    gArgs.AddArg("-gravitonactivationtime", "", false, OptionsCategory::HIDDEN);
 }
 
 std::string LicenseInfo() {

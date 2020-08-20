@@ -1633,6 +1633,13 @@ void CWallet::SetWalletBLS() {
         throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
     }
 }
+void CWallet::SetWalletLegacy() {
+    LOCK(cs_wallet);
+    m_wallet_flags.SetLegacyWallet();
+    if (!WalletBatch(*database).WriteWalletFlags(m_wallet_flags)) {
+        throw std::runtime_error(std::string(__func__) +  ": writing wallet flags failed");
+    }
+}
 void CWallet::UnsetWalletLEGACY() {
     LOCK(cs_wallet);
     m_wallet_flags.UnsetLEGACY();
@@ -5212,8 +5219,14 @@ CWallet::CreateWalletFromFile(const CChainParams &chainParams,
       std::vector<uint8_t> hashWords;
 
       // selective allow to set flags
-      walletInstance->SetWalletFlags(wallet_creation_flags);
       // On First run if using BLS, disable EC keys
+      // or if -legacy, don't used BLS stuff
+
+      bool legacy = gArgs.GetBoolArg("-legacy",false);
+      if (legacy) walletInstance->SetWalletLegacy();
+      else        walletInstance->SetWalletFlags(wallet_creation_flags);
+
+
       if (walletInstance->IsWalletBLS()) walletInstance->UnsetWalletLEGACY();
 
      // Create MasterKey and store to mapMasterKeys

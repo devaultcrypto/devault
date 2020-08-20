@@ -1373,6 +1373,7 @@ public:
      */
     void SetWalletBlank();
     void SetWalletBLS();
+    void SetWalletLegacy();
     void SetWalletPrivate();
     void UnsetWalletBlank();
     void UnsetWalletLEGACY();

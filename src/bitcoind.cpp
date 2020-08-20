@@ -124,6 +124,9 @@ bool AppInit(int argc, char *argv[]) {
     gArgs.AddArg("-seedphrase=<words>", "Specify 12-word seed phrase for wallet on 1st run (only)",
                  false,OptionsCategory::OPTIONS);
 
+    gArgs.AddArg("-legacy", "When used with seedphrase, restore legacy addresses instead of BLS ones",
+                 false,OptionsCategory::OPTIONS);
+
     std::string error;
     if (!gArgs.ParseParameters(argc, argv, error)) {
         fprintf(stderr, "Error parsing command line arguments: %s\n",
