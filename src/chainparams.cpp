@@ -12,6 +12,7 @@
 #include <util/system.h>
 
 #include <cassert>
+#include <arith_uint256.h>
 
 static CBlock CreateGenesisBlock(const char *pszTimestamp,
                                  const CScript &genesisOutputScript,
@@ -188,7 +189,8 @@ public:
         consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetSpacing = 2 * 15; // 30 seconds
-        consensus.nBlocksPerYear = 30 * 24 * 365.25; 
+        //consensus.nBlocksPerYear = 30 * 24 * 365.25; 
+        consensus.nBlocksPerYear = 3600;
         consensus.nInitialMiningRewardInCoins = 500;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
@@ -215,16 +217,44 @@ public:
         nDefaultPort = 39039;
         nPruneAfterHeight = 1000;
 
-        genesis =
-            CreateGenesisBlock(1570974562, 3551570310, 0x1d00ffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1597883663, 48113, 0x1f00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock ==
-               uint256S("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
-                        "53891eeed9"));
-        assert(genesis.hashMerkleRoot ==
-               uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
-                        "dda326f35b"));
 
+//#define DO_TESTNET_GENESIS
+#ifdef DO_TESTNET_GENESIS        
+        //---------------------------------------------------------------------------------------------------
+        // Automatically calculate values if you change nTimestamp
+        //---------------------------------------------------------------------------------------------------
+        {
+            std::cout << "recalculating params for testnet.\n";
+            // deliberately empty for loop finds nonce value.
+            arith_uint256 bnTarget;
+            bool fNegative;
+            bool fOverflow;
+            bnTarget.SetCompact(genesis.nBits, &fNegative, &fOverflow);
+            if (bnTarget > UintToArith256(consensus.powLimit)) {
+              std::cout << "bnTarget not big enough, change nBits\n";
+              exit(0);
+            }
+            genesis.nNonce--;
+            do {
+              genesis.nNonce++;
+            } while (UintToArith256(genesis.GetHash()) > bnTarget);
+            std::cout << "new testnet genesis merkle root: " << genesis.hashMerkleRoot.ToString() << "\n";
+            std::cout << "new testnet genesis nonce: " <<  genesis.nNonce << "\n";
+            std::cout << "new testnet genesis hash: " <<  genesis.GetHash().ToString() << "\n";
+            std::cout << "please update code with new values and re-run\n";
+            std::cout << "Hash = " << genesis.GetHash().ToString() << "\n";
+            exit(0);
+        }
+#endif
+        //---------------------------------------------------------------------------------------------------
+      
+        assert(consensus.hashGenesisBlock ==
+               uint256S("0000094212f2c4678e08b36188f290b2969f2e429a7f5506764dc11e8894410f"));
+        assert(genesis.hashMerkleRoot ==
+               uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2dda326f35b"));
+        
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         // DeVault seeder
@@ -235,7 +265,7 @@ public:
         blsAddrPrefix = "blstest";
 
         // Rewards
-        consensus.nPerCentPerYear = {1500,1200,900,7,5};
+        consensus.nPerCentPerYear = {1500,1200,900,700,500};
         consensus.nMinRewardBlocks = consensus.nBlocksPerYear/12; // every month
         consensus.vecMinRewardBalances = {std::tuple<int,Amount>(2000, 1000 * COIN),
                                           std::tuple<int,Amount>(std::numeric_limits<int32_t>::max(), 25000 * COIN)};

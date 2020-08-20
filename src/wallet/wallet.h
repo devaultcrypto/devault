@@ -115,10 +115,9 @@ class Coin;
 /** (client) version numbers for particular wallet features */
 enum WalletFeature {
     // the earliest version new wallets supports (only useful for getinfo's clientversion output)
-    FEATURE_BASE = 190000,
-    FEATURE_START = 1000000,
+    FEATURE_BASE =  190000,
     FEATURE_FLAGS = 1200000, // This version, so < this implies Legacy only
-    FEATURE_LATEST = FEATURE_BASE, // switch to FEATURE_START for 1st release
+    FEATURE_LATEST = FEATURE_FLAGS, // switch to FEATURE_START for 1st release
 };
 
 extern OutputType g_address_type;
@@ -717,11 +716,11 @@ private:
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
-    int nWalletVersion = FEATURE_BASE;
+    int nWalletVersion = FEATURE_FLAGS;
 
     //! the maximum wallet format version: memory-only variable that specifies
     //! to what version this wallet may be upgraded
-    int nWalletMaxVersion = FEATURE_BASE;
+    int nWalletMaxVersion = FEATURE_FLAGS;
 
     int64_t nNextResend = 0;
     int64_t nLastResend = 0;
