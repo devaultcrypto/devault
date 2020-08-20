@@ -716,7 +716,7 @@ private:
 
     //! the current wallet version: clients below this version are not able to
     //! load the wallet
-    int nWalletVersion = FEATURE_FLAGS;
+    int nWalletVersion = FEATURE_BASE;
 
     //! the maximum wallet format version: memory-only variable that specifies
     //! to what version this wallet may be upgraded
