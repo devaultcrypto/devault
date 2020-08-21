@@ -45,6 +45,8 @@ CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef &_tx, const Amount _nFee,
     Amount nValueIn = tx->GetValueOut() + nFee;
     assert(inChainInputValue <= nValueIn);
 
+    bls = tx->IsBLS();
+
     feeDelta = Amount::zero();
 
     nCountWithAncestors = 1;
@@ -188,8 +190,8 @@ bool CTxMemPool::CalculateMemPoolAncestors(
     setEntries parentHashes;
     const CTransaction &tx = entry.GetTx();
 
-    uint64_t ancestorCountLimit =  (tx.nVersion >= CTransaction::BLS_ONLY_VERSION) ? 0 : limitAncestorCount;
-    uint64_t descendantCountLimit =  (tx.nVersion >= CTransaction::BLS_ONLY_VERSION) ? 0 : limitDescendantCount;
+    uint64_t ancestorCountLimit =  (tx.IsBLS()) ? 0 : limitAncestorCount;
+    uint64_t descendantCountLimit =  (tx.IsBLS()) ? 0 : limitDescendantCount;
 
     if (fSearchForParents) {
         // Get parents of this transaction that are in the mempool
@@ -1269,8 +1271,13 @@ bool CTxMemPool::TransactionWithinChainLimit(const uint256 &txid,
                                              size_t chainLimit) const {
     LOCK(cs);
     auto it = mapTx.find(txid);
-    return it == mapTx.end() || (it->GetCountWithAncestors() < chainLimit &&
-                                 it->GetCountWithDescendants() < chainLimit);
+    return it == mapTx.end();
+
+    if (!it->IsBLS()) {
+      return (it->GetCountWithAncestors() < chainLimit && it->GetCountWithDescendants() < chainLimit);
+    } else {
+      return (it->GetCountWithAncestors() == 1 && it->GetCountWithDescendants() == 1);
+    }
 }
 
 bool CTxMemPool::IsLoaded() const {

@@ -129,6 +129,7 @@ private:
     uint64_t nSizeWithAncestors;
     Amount nModFeesWithAncestors;
     int64_t nSigOpCountWithAncestors;
+    bool bls{false};
 
 public:
     CTxMemPoolEntry(const CTransactionRef &_tx, const Amount _nFee,
@@ -170,6 +171,7 @@ public:
     Amount GetModFeesWithDescendants() const { return nModFeesWithDescendants; }
 
     bool GetSpendsCoinbase() const { return spendsCoinbase; }
+    bool IsBLS() const { return bls;}
 
     uint64_t GetCountWithAncestors() const { return nCountWithAncestors; }
     uint64_t GetSizeWithAncestors() const { return nSizeWithAncestors; }
