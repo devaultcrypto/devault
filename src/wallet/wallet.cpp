@@ -2605,7 +2605,12 @@ void CWallet::AvailableCoins(interfaces::Chain::Lock &locked_chain,
         if (nDepth < 0) {
             continue;
         }
-
+      
+        // Don't allow user to chain multiple unconfirmed BLS transactions
+        if (nDepth == 0 && pcoin->IsBLS()) {
+          continue;
+        }
+      
         // We should not consider coins which aren't at least in our mempool.
         // It's possible for these to be conflicted via ancestors which we may
         // never be able to detect.

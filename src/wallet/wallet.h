@@ -271,6 +271,7 @@ public:
     TxId GetId() const { return tx->GetId(); }
     bool IsCoinBase() const { return tx->IsCoinBase(); }
     bool IsImmatureCoinBase(interfaces::Chain::Lock &locked_chain) const;
+    bool IsBLS() const { return tx->IsBLS(); }
 };
 
 // Get the marginal bytes of spending the specified output

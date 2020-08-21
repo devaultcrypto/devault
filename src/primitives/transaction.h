@@ -273,6 +273,7 @@ public:
         : CTransaction(CMutableTransaction(deserialize, s)) {}
 
     bool IsNull() const { return vin.empty() && vout.empty(); }
+    bool IsBLS() const { return nVersion >= BLS_ONLY_VERSION;}
 
     const TxId GetId() const { return TxId(hash); }
     const TxHash GetHash() const { return TxHash(hash); }
