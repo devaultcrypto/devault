@@ -93,7 +93,7 @@ static const Amount MIN_FINAL_CHANGE = MIN_CHANGE / 2;
 //! Default for -spendzeroconfchange
 static const bool DEFAULT_SPEND_ZEROCONF_CHANGE = true;
 //! Default for -walletrejectlongchains
-static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS = false;
+static const bool DEFAULT_WALLET_REJECT_LONG_CHAINS = true;
 static const bool DEFAULT_WALLETBROADCAST = true;
 static const bool DEFAULT_DISABLE_WALLET = false;
 
