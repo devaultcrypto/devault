@@ -397,12 +397,7 @@ if(BUILD_WALLET)
 endif()
 
 # The executable
-if (DO_PACKAGING)
-  add_executable(${APP_NAME} MACOSX_BUNDLE bitcoin.cpp)
-else()
-  add_executable(${APP_NAME} WIN32 bitcoin.cpp)
-endif()
-
+add_executable(${APP_NAME} WIN32 bitcoin.cpp)
 target_link_libraries(${APP_NAME} bitcoin-qt-base)
 
 
@@ -422,58 +417,289 @@ endif()
 
 set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
 
-
-if (BUILD_BUNDLE)
-  #############################################################
-  # Enable packaging
-  INCLUDE(InstallRequiredSystemLibraries)
-  
-  SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/../../share/qt/Info.plist.in")
-  SET_PROPERTY(TARGET ${APP_NAME} PROPERTY MACOSX_BUNDLE TRUE)
-  
-  set(APPS "${APP_NAME}.app")
-  
-  
-  SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
-  SET(CPACK_PACKAGE_NAME ${PROJECT_NAME_SHORT})
-  SET(CPACK_PACKAGE_DESCRIPTION "${PROJECT_NAME_LONG}")
-  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME_SHORT} - ${PROJECT_DESCRIPTION}")
-  SET(CPACK_PACKAGE_VENDOR ${PROJECT_VENDOR})
-  SET(CPACK_PACKAGE_CONTACT ${PROJECT_CONTACT})
-  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-  SET(CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/README.md)
-  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-  
-  SET(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CPACK_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-  
-
-  add_custom_command(TARGET ${APP_NAME}
-    POST_BUILD
-    COMMAND macdeployqt ${APPS}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-  
-  
-  SET(CPACK_GENERATOR "DragNDrop")
-  # Libraries are bundled directly
-  SET(CPACK_COMPONENT_LIBRARIES_HIDDEN TRUE)
-  SET(MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
-  SET(MACOSX_BUNDLE_INFO_STRING "devault-qt")
-  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.devault-qt")
-  SET(MACOSX_BUNDLE_COPYRIGHT "(c) DeVault 2019")
-  SET(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
-  SET(MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION})
-  SET(MACOSX_BUNDLE_LONG_VERSION_STRING "Version ${PROJECT_VERSION}")
-  # Bundle Properties
-  
-  SET(CPACK_PACKAGE_EXECUTABLES "devault-qt" "devault-qt")
-  INCLUDE(CPack)
-  INSTALL(TARGETS ${APP_NAME} DESTINATION .)
-endif()
-
-
 include(InstallationHelper)
 install_target(devault-qt)
 
 # Test tests
 # add_subdirectory(test)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(BITCOINQT_BUNDLE_ICON "res/icons/devault.icns")
+	get_filename_component(BITCOINQT_BUNDLE_ICON_NAME
+		"${BITCOINQT_BUNDLE_ICON}"
+		NAME
+	)
+
+	set(INFO_PLIST_STRINGS_FILE "Base.lproj/InfoPlist.strings")
+	set(INFO_PLIST_STRINGS_PATH "${CMAKE_CURRENT_BINARY_DIR}/${INFO_PLIST_STRINGS_FILE}")
+	file(WRITE
+		"${INFO_PLIST_STRINGS_PATH}"
+		"{	CFBundleDisplayName = \"${PACKAGE_NAME}\"; CFBundleName = \"${PACKAGE_NAME}\"; }"
+	)
+
+	set(EMPTY_LPROJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/empty.lproj")
+	file(TOUCH "${EMPTY_LPROJ_FILE}")
+
+	target_sources(devault-qt PRIVATE
+		"${BITCOINQT_BUNDLE_ICON}"
+		"${INFO_PLIST_STRINGS_PATH}"
+		"${EMPTY_LPROJ_FILE}"
+	)
+
+	string(JOIN ";" BITCOINQT_BUNDLE_RESOURCES
+		"${BITCOINQT_BUNDLE_ICON}"
+		"${EMPTY_LPROJ_FILE}"
+	)
+
+	set(BITCOIN_QT_OSX_BUNDLE_NAME "devault-qt")
+	set_target_properties(devault-qt PROPERTIES
+		MACOSX_BUNDLE ON
+		OUTPUT_NAME "${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/share/qt/Info.plist.cmake.in"
+		MACOSX_BUNDLE_BUNDLE_NAME "${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+		MACOSX_BUNDLE_GUI_IDENTIFIER "com.apple.devault-qt"
+		MACOSX_BUNDLE_ICON_FILE "${BITCOINQT_BUNDLE_ICON_NAME}"
+		MACOSX_BUNDLE_INFO_STRING "${bitcoin-abc_VERSION}, Copyright © 2009-${COPYRIGHT_YEAR} ${COPYRIGHT_HOLDERS_FINAL}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+    MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+		RESOURCE "${BITCOINQT_BUNDLE_RESOURCES}"
+	)
+	# The InfoPlist.strings files should be located in a resource subdirectory.
+	# This is not supported by the RESOURCE property and require the use of the
+	# MACOSX_PACKAGE_LOCATION property instead. The RESOURCE documentation has
+	# an example demonstrating this behavior (see the appres.txt file):
+	# https://cmake.org/cmake/help/latest/prop_tgt/RESOURCE.html
+	set_source_files_properties(
+		"${INFO_PLIST_STRINGS_PATH}"
+		PROPERTIES
+			MACOSX_PACKAGE_LOCATION "Resources/${INFO_PLIST_STRINGS_FILE}"
+	)
+
+	# Create a stripped version of the application bundle to be used in the DMG.
+	# Since the LOCATION property and the BundleUtilities package are deprecated
+	# by cmake, only generator expressions can be used to determine the path to
+	# the bundle and its executable. However the generator expressions are
+	# solved at build time, making them unusable to do path computation at
+	# configuration time.
+	# The paths here are then hard-coded, which is safe since the structure of
+	# an application bundle is well-known and specified by Apple. Note that this
+	# will only work for building MacOS application bundle as the IOS structure
+	# is slightly different.
+	set(STRIPPED_BUNDLE "${CMAKE_CURRENT_BINARY_DIR}/stripped/${BITCOIN_QT_OSX_BUNDLE_NAME}.app")
+	add_custom_command(
+		OUTPUT
+			"${STRIPPED_BUNDLE}"
+		COMMAND
+			${CMAKE_COMMAND} -E copy_directory "$<TARGET_BUNDLE_DIR:devault-qt>" "${STRIPPED_BUNDLE}"
+		COMMAND
+			${CMAKE_STRIP} -u -r "${STRIPPED_BUNDLE}/Contents/MacOS/${BITCOIN_QT_OSX_BUNDLE_NAME}"
+		DEPENDS
+			devault-qt
+	)
+
+	include(DoOrFail)
+	find_program_or_fail(CMAKE_INSTALL_NAME_TOOL "install_name_tool")
+	find_program_or_fail(CMAKE_OTOOL "otool")
+
+	set(QT_INSTALLER_SUPPORTED_LANGUAGES
+		"da"
+		"de"
+		"es"
+		"hu"
+		"ru"
+		"uk"
+		"zh_CN"
+		"zh_TW"
+	)
+	string(JOIN "," QT_LOCALES ${QT_INSTALLER_SUPPORTED_LANGUAGES})
+
+	get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+	execute_process(
+		COMMAND
+			"${QMAKE_EXECUTABLE}"
+			-query QT_INSTALL_TRANSLATIONS
+		OUTPUT_VARIABLE
+			QT_TRANSLATION_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+
+	function(get_qt_translation_dir QT_TRANSLATION_DIR)
+		foreach(_locale ${ARGN})
+			find_path(_qt_translation_dir
+				"qt_${_locale}.qm"
+				HINTS
+					"${QT_TRANSLATION_DIR}"
+				PATH_SUFFIXES
+					"translations"
+			)
+
+			# Ensure that all the translation files are found, and are located
+			# in the same directory.
+			if(NOT _qt_translation_dir OR (_qt_translation_dir_previous AND (NOT _qt_translation_dir_previous STREQUAL _qt_translation_dir)))
+				return()
+			endif()
+
+			set(_qt_translation_dir_previous _qt_translation_dir)
+		endforeach()
+
+		set(QT_TRANSLATION_DIR ${_qt_translation_dir} PARENT_SCOPE)
+	endfunction()
+
+	get_qt_translation_dir(QT_TRANSLATION_DIR ${QT_INSTALLER_SUPPORTED_LANGUAGES})
+	if(NOT QT_TRANSLATION_DIR)
+		message(FATAL_ERROR "Qt translation files are not found")
+	endif()
+
+	set(MACDEPLOY_DIR "${CMAKE_SOURCE_DIR}/contrib/macdeploy")
+	set(MACDEPLOYQTPLUS "${MACDEPLOY_DIR}/macdeployqtplus")
+	set(DMG_DIST "${CMAKE_BINARY_DIR}/dist")
+	add_custom_command(
+		OUTPUT
+			"${DMG_DIST}"
+		COMMAND
+			"INSTALLNAMETOOL=${CMAKE_INSTALL_NAME_TOOL}"
+			"OTOOL=${CMAKE_OTOOL}"
+			"STRIP=${CMAKE_STRIP}"
+			"${Python_EXECUTABLE}"
+			"${MACDEPLOYQTPLUS}"
+			"${STRIPPED_BUNDLE}"
+			-translations-dir "${QT_TRANSLATION_DIR}"
+			-add-qt-tr "${QT_LOCALES}"
+		WORKING_DIRECTORY
+			"${CMAKE_BINARY_DIR}"
+		DEPENDS
+			"${STRIPPED_BUNDLE}"
+	)
+
+	# Building the DMG background image requires several steps:
+	#   1/ The SVG file must be edited to display the package name
+	#   2/ The SVG file should be transformed into a couple PNG files, on for
+	#      low resolution screens and one for high resolution screens.
+	#   3/ The PNG files must be transformed into a multi-resolution TIFF file.
+	#      The names are not set arbitrarily, they follow Apple's guidelines for
+	#      resolution independent bitmap images (see `man tiffutil`).
+	set(BACKGROUND_SVG "background.svg")
+	#configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in""${BACKGROUND_SVG}"	)
+
+	include(ImageHelper)
+	set(BACKGROUND_PNG_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.png")
+	set(BACKGROUND_PNG_HIRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp@2x.png")
+	set(BACKGROUND_TIFF_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.tiff")
+	set(BACKGROUND_TIFF_HIRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp@2x.tiff")
+	set(BACKGROUND_TIFF_NAME "background.tiff")
+	set(BACKGROUND_TIFF_MULTIRES "${CMAKE_BINARY_DIR}/${BACKGROUND_TIFF_NAME}")
+	convert_svg_to_png("${BACKGROUND_SVG}" "${BACKGROUND_PNG_LOWRES}" 36)
+	convert_svg_to_png("${BACKGROUND_SVG}" "${BACKGROUND_PNG_HIRES}" 72)
+	convert_png_to_tiff("${BACKGROUND_PNG_LOWRES}" "${BACKGROUND_TIFF_LOWRES}")
+	convert_png_to_tiff("${BACKGROUND_PNG_HIRES}" "${BACKGROUND_TIFF_HIRES}")
+	cat_multi_resolution_tiff("${BACKGROUND_TIFF_MULTIRES}" "${BACKGROUND_TIFF_LOWRES}" "${BACKGROUND_TIFF_HIRES}")
+
+	set(BACKGROUND_DIST_DIR "${DMG_DIST}/.background")
+	set(BACKGROUND_DIST_TIFF "${BACKGROUND_DIST_DIR}/${BACKGROUND_TIFF_NAME}")
+	add_custom_command(
+		OUTPUT
+			"${BACKGROUND_DIST_TIFF}"
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory "${BACKGROUND_DIST_DIR}"
+		COMMAND
+			${CMAKE_COMMAND} -E copy "${BACKGROUND_TIFF_MULTIRES}" "${BACKGROUND_DIST_TIFF}"
+		DEPENDS
+			"${BACKGROUND_TIFF_MULTIRES}"
+			"${DMG_DIST}"
+	)
+
+	string(REPLACE " " "-" OSX_VOLNAME "${PACKAGE_NAME}")
+	file(WRITE "${CMAKE_BINARY_DIR}/osx_volname" "${OSX_VOLNAME}")
+
+	set(DMG_DSSTORE "${DMG_DIST}/.DS_Store")
+	set(GEN_DSSTORE "${MACDEPLOY_DIR}/custom_dsstore.py")
+	add_custom_command(
+		OUTPUT
+			"${DMG_DSSTORE}"
+		COMMAND
+			"${Python_EXECUTABLE}"
+			"${GEN_DSSTORE}"
+			"${DMG_DSSTORE}"
+			"${OSX_VOLNAME}"
+		DEPENDS
+			"${GEN_DSSTORE}"
+			"${DMG_DIST}"
+	)
+
+	set(OSX_APPLICATION_DIR "Applications")
+	set(OSX_APPLICATION_SYMLINK "${DMG_DIST}/${OSX_APPLICATION_DIR}")
+	add_custom_command(
+		OUTPUT
+			"${OSX_APPLICATION_SYMLINK}"
+		COMMAND
+			${CMAKE_COMMAND} -E create_symlink "/${OSX_APPLICATION_DIR}" "${OSX_APPLICATION_SYMLINK}"
+		DEPENDS
+			"${DMG_DIST}"
+	)
+
+	add_custom_target(osx-deploydir
+		DEPENDS
+			"${OSX_APPLICATION_SYMLINK}"
+			"${DMG_DSSTORE}"
+			"${BACKGROUND_DIST_TIFF}"
+	)
+
+	if(CMAKE_CROSSCOMPILING)
+		find_program_or_fail(GENISOIMAGE_EXECUTABLE genisoimage)
+
+		add_custom_target(osx-dmg
+			COMMAND
+				"${GENISOIMAGE_EXECUTABLE}"
+				-no-cache-inodes
+				-D
+				-l
+				-probe
+				-V "${OSX_VOLNAME}"
+				-no-pad
+				-r
+				-dir-mode 0755
+				-apple
+				-o "${OSX_VOLNAME}.dmg"
+				"${DMG_DIST}"
+			WORKING_DIRECTORY
+				"${CMAKE_BINARY_DIR}"
+		)
+		add_dependencies(osx-dmg osx-deploydir)
+	else()
+		add_custom_target(osx-dmg
+			COMMAND
+				"${Python_EXECUTABLE}"
+				"${MACDEPLOYQTPLUS}"
+				"${STRIPPED_BUNDLE}"
+				-translations-dir "${QT_TRANSLATION_DIR}"
+				-add-qt-tr "${QT_LOCALES}"
+				-dmg
+				-fancy "${MACDEPLOY_DIR}/fancy.plist"
+				-volname "${OSX_VOLNAME}"
+			WORKING_DIRECTORY
+				"${CMAKE_BINARY_DIR}"
+			DEPENDS
+				"${STRIPPED_BUNDLE}"
+				"${BACKGROUND_TIFF_MULTIRES}"
+		)
+	endif()
+endif()
+
+if (USE_TR_CONFIG)
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/utils/translate.sh.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	@ONLY
+)
+
+add_custom_target(translate
+	COMMENT "Updating the translations..."
+	COMMAND "${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/translate.sh"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  )
+endif()
+
+# Test tests
+add_subdirectory(test)
