@@ -251,7 +251,7 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
     bool fInvalid = false;
     std::vector<uint8_t> vchSig = DecodeBase64(ui->signatureIn_VM->text().toStdString().c_str(), &fInvalid);
 
-    if (fInvalid) {
+    if (fInvalid || vchSig.size() == 0) {
         ui->signatureIn_VM->setValid(false);
         ui->statusLabel_VM->setStyleSheet("QLabel { color: red; }");
         ui->statusLabel_VM->setText(
