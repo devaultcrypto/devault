@@ -283,7 +283,10 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
                                     QString("</nobr>"));
         return;
       }
-      
+        
+      ui->statusLabel_VM->setStyleSheet("QLabel { color: green; }");
+      ui->statusLabel_VM->setText(QString("<nobr>") + tr("Message verified.") +
+                                    QString("</nobr>"));
     } else {
       
       if (vchSig.size() != (CPubKey::BLS_PUBLIC_KEY_SIZE + CPubKey::BLS_SIGNATURE_SIZE)) {
@@ -312,12 +315,12 @@ void SignVerifyMessageDialog::on_verifyMessageButton_VM_clicked() {
         ui->statusLabel_VM->setText(
                                     tr("The signature did not match the message digest.") +
                                     QString(" ") + tr("Please check the signature and try again."));
+      } else {
+        ui->statusLabel_VM->setStyleSheet("QLabel { color: green; }");
+        ui->statusLabel_VM->setText(QString("<nobr>") + tr("Message verified.") +
+                                QString("</nobr>"));
       }
     }
-        
-    ui->statusLabel_VM->setStyleSheet("QLabel { color: green; }");
-    ui->statusLabel_VM->setText(QString("<nobr>") + tr("Message verified.") +
-                                QString("</nobr>"));
 }
 
 void SignVerifyMessageDialog::on_clearButton_VM_clicked() {
