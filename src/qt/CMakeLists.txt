@@ -420,9 +420,6 @@ set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_C
 include(InstallationHelper)
 install_target(devault-qt)
 
-# Test tests
-# add_subdirectory(test)
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(BITCOINQT_BUNDLE_ICON "res/icons/devault.icns")
 	get_filename_component(BITCOINQT_BUNDLE_ICON_NAME
@@ -702,4 +699,4 @@ add_custom_target(translate
 endif()
 
 # Test tests
-add_subdirectory(test)
+# add_subdirectory(test)
