@@ -438,18 +438,18 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	)
 
 	set(EMPTY_LPROJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/empty.lproj")
-	file(TOUCH "${EMPTY_LPROJ_FILE}")
+#	file(TOUCH "${EMPTY_LPROJ_FILE}")
 
 	target_sources(devault-qt PRIVATE
 		"${BITCOINQT_BUNDLE_ICON}"
 		"${INFO_PLIST_STRINGS_PATH}"
-		"${EMPTY_LPROJ_FILE}"
+#		"${EMPTY_LPROJ_FILE}"
 	)
 
-	string(JOIN ";" BITCOINQT_BUNDLE_RESOURCES
-		"${BITCOINQT_BUNDLE_ICON}"
-		"${EMPTY_LPROJ_FILE}"
-	)
+#	string(JOIN ";" BITCOINQT_BUNDLE_RESOURCES
+#		"${BITCOINQT_BUNDLE_ICON}"
+#		"${EMPTY_LPROJ_FILE}"
+#	)
 
 	set(BITCOIN_QT_OSX_BUNDLE_NAME "devault-qt")
 	set_target_properties(devault-qt PROPERTIES
@@ -463,7 +463,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		MACOSX_BUNDLE_INFO_STRING "${bitcoin-abc_VERSION}, Copyright © 2009-${COPYRIGHT_YEAR} ${COPYRIGHT_HOLDERS_FINAL}"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
     MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
-		RESOURCE "${BITCOINQT_BUNDLE_RESOURCES}"
+		RESOURCE "${BITCOINQT_BUNDLE_ICON}"
 	)
 	# The InfoPlist.strings files should be located in a resource subdirectory.
 	# This is not supported by the RESOURCE property and require the use of the
@@ -512,7 +512,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		"zh_CN"
 		"zh_TW"
 	)
-	string(JOIN "," QT_LOCALES ${QT_INSTALLER_SUPPORTED_LANGUAGES})
+  #string(JOIN "," QT_LOCALES ${QT_INSTALLER_SUPPORTED_LANGUAGES})
 
 	get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
 	execute_process(
