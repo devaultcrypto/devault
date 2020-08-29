@@ -538,11 +538,12 @@ if (NOT RocksDB_FOUND)
 endif()
 
 target_link_libraries(server
+  ${GMP_LIBRARIES}
 	${EVENT_LIBRARY}
 	${EVENT_PTHREAD_LIBRARY}
 	devaultconsensus
-    ${DB_LIBRARIES}
-    ${MINIUPNP_LIBRARY}
+  ${DB_LIBRARIES}
+  ${MINIUPNP_LIBRARY}
 	Threads::Threads
 )
 
