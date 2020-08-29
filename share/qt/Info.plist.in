@@ -29,16 +29,16 @@
   <string>????</string>
 
   <key>CFBundleExecutable</key>
-  <string>DeVault-Core</string>
+  <string>devault-qt</string>
   
   <key>CFBundleName</key>
-  <string>DeVault-Core</string>
+  <string>devault-qt</string>
 
   <key>LSHasLocalizedDisplayName</key>
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>org.devault.DeVault-Core</string>
+  <string>org.devault.devault-qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>

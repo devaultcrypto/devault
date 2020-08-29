@@ -511,6 +511,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	)
   #string(JOIN "," QT_LOCALES ${QT_INSTALLER_SUPPORTED_LANGUAGES})
 
+  # Since JOIN not in older CMake
+  set(QT_LOCALES "da,de,es,hu,ru,uk,zh_CN,zh_TW")
+ 
 	get_target_property(QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
 	execute_process(
 		COMMAND
@@ -577,7 +580,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	#      The names are not set arbitrarily, they follow Apple's guidelines for
 	#      resolution independent bitmap images (see `man tiffutil`).
 	set(BACKGROUND_SVG "background.svg")
-	#configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in""${BACKGROUND_SVG}"	)
+	configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in""${BACKGROUND_SVG}"	)
 
 	include(ImageHelper)
 	set(BACKGROUND_PNG_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.png")
