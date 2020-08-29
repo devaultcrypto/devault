@@ -18,7 +18,7 @@ env:
     - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
     - SDK_URL=https://proteanx.com/sdk
     - WINEDEBUG=fixme-all
-    - DOCKER_PACKAGES="build-essential libtool cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache libgmp-dev"
+    - DOCKER_PACKAGES="build-essential libtool python3 cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache libgmp-dev"
 before_install:
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
   - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/pyenv/d' | tr "\n" ":" | sed "s|::|:|g")
