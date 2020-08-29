@@ -51,6 +51,14 @@ jobs:
         PACKAGES="g++-8 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev gperf"
         GOAL="install"
         CMAKE_OPT="Linux64.cmake"
+        
+    - name: '64-bit Linux (debian buster)'
+      env: >-
+        HOST=x86_64-linux-gnu
+        DOCKER_NAME_TAG=debian:10.3
+        PACKAGES="python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev gperf"
+        GOAL="install"
+        CMAKE_OPT="Linux64.cmake"
 
     - name: 'Win64 (debian buster)'
       env: >-
