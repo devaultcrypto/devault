@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (c) 2013-2016 The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-from __future__ import division, print_function, unicode_literals
 import biplist
 from ds_store import DSStore
 from mac_alias import Alias
@@ -56,7 +55,7 @@ ds['.']['icvp'] = icvp
 ds['.']['vSrn'] = ('long', 1)
 
 ds['Applications']['Iloc'] = (370, 156)
-ds['DeVault-Core.app']['Iloc'] = (128, 156)
+ds['devault-qt.app']['Iloc'] = (128, 156)
 
 ds.flush()
 ds.close()

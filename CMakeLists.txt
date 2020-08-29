@@ -11,7 +11,7 @@ project(devault
 enable_testing()
 
 # Package information
-set(PACKAGE_NAME "DeVault Core")
+set(PACKAGE_NAME "devault-qt")
 # Copyright
 set(COPYRIGHT_YEAR 2019 - 2020)
 
@@ -39,7 +39,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Find the python interpreter. This is required for several targets.
-# not yet .. find_package(PythonInterp 3.5 REQUIRED)
+find_package(Python 3.5 COMPONENTS Interpreter REQUIRED)
 
 # Add the magic targets `check-*`
 add_custom_target(check-all)

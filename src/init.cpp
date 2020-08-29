@@ -1057,7 +1057,7 @@ std::string LicenseInfo() {
 	       strprintf(_("Copyright (C) 2019-2020") +
                "  The DeVault Developers ") +
            "\n" + "\n" +
-           strprintf(_("Please contribute if you find DeVault-Core useful. "
+           strprintf(_("Please contribute if you find devault-qt useful. "
                        "Visit %s for further information about the software."),
                      URL_WEBSITE) +
            "\n" +
@@ -1830,7 +1830,7 @@ bool AppInitSanityChecks() {
     // Sanity check
     if (!InitSanityCheck()) {
         return InitError(strprintf(
-            _("Initialization sanity check failed. DeVault-Core is shutting down.")));
+            _("Initialization sanity check failed. devault-qt is shutting down.")));
     }
 
     // Probe the data directory lock to give an early error message, if possible
