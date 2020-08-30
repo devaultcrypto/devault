@@ -625,7 +625,7 @@ endif()
 
 # bitcoind
 add_executable(devaultd bitcoind.cpp)
-target_link_libraries(devaultd server bls relic_s)
+target_link_libraries(devaultd server bls relic_s ${GMP_LIBRARIES})
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	target_sources(devaultd PRIVATE bitcoind-res.rc)
 endif()
