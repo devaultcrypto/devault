@@ -52,7 +52,16 @@ jobs:
         GOAL="deploy"
         CMAKE_OPT="Win64.cmake"
 
-    - name: 'MacOS (debian buster)'
+    - name: 'MacOS (bionic)'
+      env: >-
+        HOST=x86_64-apple-darwin14
+        DOCKER_NAME_TAG=ubuntu:18.04
+        PACKAGES="python python3 python3-dev imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git ninja-build"
+        OSX_SDK=10.14
+        GOAL="deploy"
+        CMAKE_OPT="OSX.cmake"
+
+    - name: 'DebianMacOS (debian buster)'
       env: >-
         HOST=x86_64-apple-darwin14
         DOCKER_NAME_TAG=debian:10.3
@@ -60,4 +69,12 @@ jobs:
         OSX_SDK=10.14
         GOAL="deploy"
         CMAKE_OPT="OSX.cmake"
+
+    - name: 'ARM (debian buster)'
+      env: >-
+        HOST=arm-linux-gnueabihf
+        DOCKER_NAME_TAG=debian:10.3
+        PACKAGES="g++-8 clang llvm python3-zmq qtbase5-dev qttools5-dev-tools qttools5-dev libevent-dev bsdmainutils libboost-all-dev libdb-dev libdb++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev libsodium-dev gperf g++-arm-linux-gnueabihf gperf"
+        GOAL="install"
+        CMAKE_OPT="LinuxARM.cmake"
 
