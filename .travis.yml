@@ -61,15 +61,6 @@ jobs:
         GOAL="deploy"
         CMAKE_OPT="OSX.cmake"
 
-    - name: 'DebianMacOS (debian buster)'
-      env: >-
-        HOST=x86_64-apple-darwin14
-        DOCKER_NAME_TAG=debian:10.3
-        PACKAGES="python python-dev python3 python3-dev imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python3-setuptools-git ninja-build"
-        OSX_SDK=10.14
-        GOAL="deploy"
-        CMAKE_OPT="OSX.cmake"
-
     - name: 'ARM (debian buster)'
       env: >-
         HOST=arm-linux-gnueabihf
