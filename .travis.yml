@@ -56,7 +56,7 @@ jobs:
       env: >-
         HOST=x86_64-apple-darwin14
         DOCKER_NAME_TAG=ubuntu:18.04
-        PACKAGES="python python3 python3-dev imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev python3-setuptools-git ninja-build"
+        PACKAGES="python3 python3-dev imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python3-setuptools-git ninja-build"
         OSX_SDK=10.14
         GOAL="deploy"
         CMAKE_OPT="OSX.cmake"
