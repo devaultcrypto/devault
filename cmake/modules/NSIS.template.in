@@ -8,7 +8,7 @@ SetCompressor @CPACK_NSIS_COMPRESSOR@
 !define VERSION @CPACK_PACKAGE_VERSION@
 !define COMPANY "@CPACK_PACKAGE_VENDOR@"
 !define URL "@CPACK_NSIS_URL_INFO_ABOUT@"
-!define BITCOIN_GUI_NAME "bitcoin-qt.exe"
+!define BITCOIN_GUI_NAME "devault-qt.exe"
 
 # MUI Symbol Definitions
 !define MUI_ICON "@CPACK_NSIS_MUI_ICON@"
@@ -51,9 +51,9 @@ Var StartMenuGroup
 # Installer attributes
 OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 !if "@CPACK_SYSTEM_NAME@" == "x86_64-w64-mingw32"
-InstallDir $PROGRAMFILES64\Bitcoin-abc
+InstallDir $PROGRAMFILES64\devault-qt
 !else
-InstallDir $PROGRAMFILES\Bitcoin-abc
+InstallDir $PROGRAMFILES\devault-qt
 !endif
 CRCCheck on
 XPStyle on
@@ -78,8 +78,8 @@ Section -Main SEC0000
     File /oname=COPYING.txt "@CPACK_RESOURCE_FILE_LICENSE@"
     File /oname=readme.txt "@CPACK_PACKAGE_DESCRIPTION_FILE@"
     SetOutPath $INSTDIR\daemon
-    File "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/@CPACK_NSIS_EXECUTABLES_DIRECTORY@/bitcoind.exe"
-    File "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/@CPACK_NSIS_EXECUTABLES_DIRECTORY@/bitcoin-cli.exe"
+    File "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/@CPACK_NSIS_EXECUTABLES_DIRECTORY@/devaultd.exe"
+    File "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/@CPACK_NSIS_EXECUTABLES_DIRECTORY@/devault-cli.exe"
     SetOutPath $INSTDIR\doc
     File /r "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/doc\*.md"
     File /r /x bitcoin_logo_doxygen.png "@CPACK_TEMPORARY_INSTALL_DIRECTORY@/doc\*.png"
@@ -107,7 +107,7 @@ Section -post SEC0001
     WriteRegDWORD HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoModify 1
     WriteRegDWORD HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" NoRepair 1
     WriteRegStr HKCR "@CPACK_PACKAGE_NAME@" "URL Protocol" ""
-    WriteRegStr HKCR "@CPACK_PACKAGE_NAME@" "" "URL:Bitcoin-abc"
+    WriteRegStr HKCR "@CPACK_PACKAGE_NAME@" "" "URL:devault-qt"
     WriteRegStr HKCR "@CPACK_PACKAGE_NAME@\DefaultIcon" "" "$INSTDIR\${BITCOIN_GUI_NAME}"
     WriteRegStr HKCR "@CPACK_PACKAGE_NAME@\shell\open\command" "" '"$INSTDIR\${BITCOIN_GUI_NAME}" "%1"'
 SectionEnd
@@ -140,7 +140,7 @@ Section -un.post UNSEC0001
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Uninstall $(^Name).lnk"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\@CPACK_NSIS_DISPLAY_NAME@ (testnet).lnk"
-    Delete /REBOOTOK "$SMSTARTUP\Bitcoin-abc.lnk"
+    Delete /REBOOTOK "$SMSTARTUP\devault-qt.lnk"
     Delete /REBOOTOK "$INSTDIR\uninstall.exe"
     Delete /REBOOTOK "$INSTDIR\debug.log"
     Delete /REBOOTOK "$INSTDIR\db.log"
