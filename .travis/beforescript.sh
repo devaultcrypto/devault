@@ -6,6 +6,9 @@ DOCKER_EXEC echo \> \$HOME/.devault
 
 mkdir -p depends/SDKs depends/sdk-sources
 
+wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc |     DOCKER_EXEC apt-key add -
+DOCKER_EXEC apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+
 if [ -n "$OSX_SDK" -a ! -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
   curl --location --fail $SDK_URL/MacOSX${OSX_SDK}.sdk.tar.gz -o depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz
 fi
