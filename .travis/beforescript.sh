@@ -7,7 +7,7 @@ DOCKER_EXEC echo \> \$HOME/.devault
 mkdir -p depends/SDKs depends/sdk-sources
 
 if [[ $HOST = x86_64-apple-darwin14 ]]; then
-  DOCKER_EXEC apt-add-repository ppa:hnakamur/cmake -y
+  DOCKER_EXEC add-apt-repository ppa:hnakamur/cmake -y
 fi
 
 if [ -n "$OSX_SDK" -a ! -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
