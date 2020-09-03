@@ -27,7 +27,7 @@ struct BudgetPayouts {
 };
 
 // Reward Address & Percentage
-const BudgetPayouts Payouts[2] =
+const BudgetPayouts Payouts[] =
     {
      {
       5, // change on 5th Superblock
@@ -39,11 +39,18 @@ const BudgetPayouts Payouts[2] =
        {"devault:prcljsfamr0hsc2jn4mr5et9xx5u9lm8rvl976n0zm", "dvtest:qpw43t63nxmufurn5qn9jyurc27xntvdz5n7ujhdaq", "Support", 5}},
      },
      {
-      std::numeric_limits<int32_t>::max(), // change if we add more to superblock change
+      15,
       {{"devault:pp2ghv9ya7fs98rvz3gzuqmen608dh6g2y5d5dxrtp", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community",15},
        {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
        {"devault:pqws2sgc2y22x2gkcnmw72edpa0u0kscdsqp29e530", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs/Support", 10},
        {"devault:pzgux6zlzpw45hm45fwcj5d7mf5fn7pa2ydjzx5nxw", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDev/Marketing",10}}
+     },
+     {
+      std::numeric_limits<int32_t>::max(), // change if we add more to superblock change
+      {{"devault:pqqqaf843zj992fkqr483zptyp0r8kfg7g5enjt05d", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community",15},
+       {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
+       {"devault:prgtl5yust3v2m76c3t4vsnuwuufaht0euqm2smja2", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs/Support", 10},
+       {"devault:pz3htku32554kntjvzpwp8nuhmksvp73f5wwmxts8h", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDev/Marketing",10}}
      }
      };
      
