@@ -7,6 +7,9 @@ DOCKER_EXEC echo \> \$HOME/.devault
 mkdir -p depends/SDKs depends/sdk-sources
 
 if [[ $HOST = x86_64-apple-darwin14 ]]; then
+  DOCKER_EXEC apt install software-properties-common -y
+  DOCKER_EXEC add-apt-repository ppa:hnakamur/libarchive -y
+  DOCKER_EXEC add-apt-repository ppa:hnakamur/libzstd -y
   DOCKER_EXEC add-apt-repository ppa:hnakamur/cmake -y
 fi
 
