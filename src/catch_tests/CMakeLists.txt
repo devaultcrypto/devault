@@ -6,44 +6,24 @@ project(catch-tests)
 # Process json files.
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/data")
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  find_program(PYTHON python3) 
-ELSE()
-  find_program(PYTHON python2) # Python 3 had issues on Linux
-ENDIF()
-
 function(gen_json_header NAME)
 	set(HEADERS "")
 	foreach(f ${ARGN})
 		set(h "${CMAKE_CURRENT_BINARY_DIR}/${f}.h")
 
-#Get the proper name for the test variable.
-get_filename_component(TEST_NAME ${f} NAME_WE)
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	add_custom_command(OUTPUT ${h}
-		COMMAND ${PYTHON}
-		ARGS
-		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header3.py"
-		"${TEST_NAME}"
-		"${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
-		MAIN_DEPENDENCY ${f}
-		DEPENDS
-		"data/generate_header.py"
-		VERBATIM
-		)
-ELSE()
-	add_custom_command(OUTPUT ${h}
-		COMMAND ${PYTHON}
-		ARGS
-		"${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header.py"
-		"${TEST_NAME}"
-		"${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
-		MAIN_DEPENDENCY ${f}
-		DEPENDS
-		"data/generate_header.py"
-		VERBATIM
-		)
-ENDIF()
+    #Get the proper name for the test variable.
+    get_filename_component(TEST_NAME ${f} NAME_WE)
+	  add_custom_command(OUTPUT ${h}
+		  COMMAND ${Python_EXECUTABLE}
+		  ARGS
+		  "${CMAKE_CURRENT_SOURCE_DIR}/data/generate_header.py"
+		  "${TEST_NAME}"
+		  "${CMAKE_CURRENT_SOURCE_DIR}/${f}" > ${h}
+		  MAIN_DEPENDENCY ${f}
+		  DEPENDS
+		  "data/generate_header.py"
+		  VERBATIM
+		  )
 		list(APPEND HEADERS ${h})
 	endforeach(f)
 	set(${NAME} "${HEADERS}" PARENT_SCOPE)
@@ -59,6 +39,10 @@ gen_json_header(JSON_HEADERS
 
 #include(TestSuite)
 add_compiler_flags(-Wno-cast-align -Wno-unused-function -Wno-unused-variable)
+
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  add_definitions("-DWIND_VER")
+ENDIF()
 
 add_library(unit
   callrpc.cpp

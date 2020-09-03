@@ -14,16 +14,17 @@ mkdir build
 cd build || (echo "could not enter build directory"; exit 1)
 
 BEGIN_FOLD configure
-if [[ $HOST = *-mingw32 ]]; then
-    DOCKER_EXEC cmake -DCMAKE_TOOLCHAIN_FILE=$TRAVIS_BUILD_DIR/cmake/platforms/$CMAKE_OPT -DBUILD_SEEDER=OFF -DENABLE_REDUCE_EXPORTS=ON -DCCACHE=OFF -DBUILD_STD_FILESYSTEM=OFF ..
-else    
     DOCKER_EXEC cmake -DCMAKE_TOOLCHAIN_FILE=$TRAVIS_BUILD_DIR/cmake/platforms/$CMAKE_OPT -DBUILD_SEEDER=OFF -DENABLE_REDUCE_EXPORTS=ON -DCCACHE=OFF -DBUILD_STD_FILESYSTEM=OFF -DBUILD_CTESTS=ON ..
-fi
 END_FOLD
 
 BEGIN_FOLD build
 DOCKER_EXEC echo $pwd
 DOCKER_EXEC cmake --build . 
+END_FOLD
+
+BEGIN_FOLD package
+DOCKER_EXEC echo $pwd
+DOCKER_EXEC cpack
 END_FOLD
 
 # just runs them if they are setup
