@@ -1271,7 +1271,7 @@ bool CTxMemPool::TransactionWithinChainLimit(const uint256 &txid,
                                              size_t chainLimit) const {
     LOCK(cs);
     auto it = mapTx.find(txid);
-    return it == mapTx.end();
+    if (it == mapTx.end()) return true;
 
     if (!it->IsBLS()) {
       return (it->GetCountWithAncestors() < chainLimit && it->GetCountWithDescendants() < chainLimit);
