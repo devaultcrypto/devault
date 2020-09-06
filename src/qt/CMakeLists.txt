@@ -50,7 +50,7 @@ SET(SYSNAME ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_PROCESSOR})
 SET(CMAKE_COLOR_MAKEFILE ON)
 
 # This ensure that AUTOMOC doesn't run on generated files.
-cmake_policy(SET CMP0071 OLD)
+#cmake_policy(SET CMP0071 OLD)
 
 if (TOOLCHAIN_PREFIX)
   set(Qt5_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
@@ -203,6 +203,9 @@ add_library(bitcoin-qt-base
 	qrc_bitcoin_locale.cpp
 
   )
+
+set_property(SOURCE qrc_bitcoin_locale.cpp PROPERTY SKIP_AUTOMOC ON)
+
 
 # Linux support
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
