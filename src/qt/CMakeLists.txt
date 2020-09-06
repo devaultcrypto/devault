@@ -50,11 +50,7 @@ SET(SYSNAME ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_PROCESSOR})
 SET(CMAKE_COLOR_MAKEFILE ON)
 
 # This ensure that AUTOMOC doesn't run on generated files.
-if (CMAKE_VERSION VERSION_LESS 3.10)
-  message("Not setting CMP0071")
-else()
-  cmake_policy(SET CMP0071 OLD)
-endif()
+cmake_policy(SET CMP0071 OLD)
 
 if (TOOLCHAIN_PREFIX)
   set(Qt5_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../depends/${TOOLCHAIN_PREFIX}/lib/cmake/Qt5/)
@@ -398,21 +394,14 @@ endif()
 
 # The executable
 add_executable(${APP_NAME} WIN32 bitcoin.cpp)
-target_link_libraries(${APP_NAME} bitcoin-qt-base)
-
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	target_sources(devault-qt PRIVATE res/bitcoin-qt-res.rc)
+	target_sources(${APP_NAME} PRIVATE res/bitcoin-qt-res.rc)
 endif()
  
-QT5_USE_Modules(${APP_NAME} Gui)
-QT5_USE_Modules(${APP_NAME} Core)
-QT5_USE_Modules(${APP_NAME} Widgets)
-QT5_USE_Modules(${APP_NAME} Test)
-QT5_USE_Modules(${APP_NAME} PrintSupport)
-QT5_USE_Modules(${APP_NAME} Network)
+target_link_libraries(${APP_NAME} bitcoin-qt-base Qt5::Gui Qt5::Core Qt5::Widgets Qt5::Test Qt5::Network)
 if (Qt5DBus_FOUND)
-  QT5_USE_Modules(${APP_NAME} DBus)
+  target_link_libraries(${APP_NAME} Qt5::DBus)
 endif()
 
 set_target_properties(${APP_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../..")
@@ -437,7 +426,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(EMPTY_LPROJ_FILE "${CMAKE_CURRENT_BINARY_DIR}/empty.lproj")
 #	file(TOUCH "${EMPTY_LPROJ_FILE}")
 
-	target_sources(devault-qt PRIVATE
+	target_sources(${APP_NAME} PRIVATE
 		"${BITCOINQT_BUNDLE_ICON}"
 		"${INFO_PLIST_STRINGS_PATH}"
 #		"${EMPTY_LPROJ_FILE}"
@@ -449,7 +438,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 #	)
 
 	set(BITCOIN_QT_OSX_BUNDLE_NAME "devault-qt")
-	set_target_properties(devault-qt PROPERTIES
+	set_target_properties(${APP_NAME} PROPERTIES
 		MACOSX_BUNDLE ON
 		OUTPUT_NAME "${BITCOIN_QT_OSX_BUNDLE_NAME}"
 		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/share/qt/Info.plist.cmake.in"
@@ -580,7 +569,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	#      The names are not set arbitrarily, they follow Apple's guidelines for
 	#      resolution independent bitmap images (see `man tiffutil`).
 	set(BACKGROUND_SVG "background.svg")
-	configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in""${BACKGROUND_SVG}"	)
+	configure_file("${CMAKE_SOURCE_DIR}/contrib/macdeploy/background.svg.cmake.in" "${BACKGROUND_SVG}")
 
 	include(ImageHelper)
 	set(BACKGROUND_PNG_LOWRES "${CMAKE_CURRENT_BINARY_DIR}/background_temp.png")
