@@ -64,7 +64,7 @@ Also other DeVault specific information is in the ./devault_docs subdirectory
 - Exclusive use of Bech32 style addresses
 - Replace OpenSSL dependency with Libsodium
 - Replace Difficulty with LWMA difficulty calculation
-- Code can be built with either AutoTools or CMake
+- Code must be built with CMake, Autotools setup removed for simplicity
 - Reorg Depth set at 30 blocks
 - Upgraded or added dependencies, QT 5.9.7, libsodium, libgmp, boost 1.69
 - Default # of keys generated is 200 in total, miners may want to use -keypool at 1st startup for additional keys
