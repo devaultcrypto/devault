@@ -11,6 +11,7 @@ This release includes the following features and fixes:
    - Wallet support will be in a future release
  - Compile/build support for Mac versions 10.14 or higher only
    - Autotools build no longer available. CMake must be used for compilation
+   - Minimum Cmake version is 3.12
    
  - Minor bug fixes and improvements.
  - Add a dumpphrase RPC command so devaultd users can easily check 12/24 word phrase
@@ -24,6 +25,7 @@ This release includes the following features and fixes:
    `true` with sub-fields `ancestor`, `base`, `modified` and `descendant`
    denominated in BCH. This new field deprecates previous fee fields, such a
    `fee`, `modifiedfee`, `ancestorfee` and `descendantfee`.
+
 
 Dynamic creation of wallets
 ---------------------------------------
