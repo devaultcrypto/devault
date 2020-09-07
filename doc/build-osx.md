@@ -8,7 +8,7 @@ Preparation
 
 1.  Install Xcode from the app store if you don't have it already (it's a dependency for qt5)
 
-    NOTE: Building with Qt4 is still supported, however, could result in a broken UI. Building with Qt5 is recommended.
+    NOTE: Building with Qt5 is required if using Qt
 
 2.  Install the OS X command line tools:
 
@@ -23,7 +23,7 @@ Dependencies
 
 Install dependencies:
 
-    brew install automake berkeley-db libtool boost miniupnpc openssl pkg-config qt5 libevent libsodium
+    brew install berkeley-db libtool boost miniupnpc pkg-config qt5 libevent libsodium
 
 In case you want to build the disk image with `make deploy` (.dmg / optional), you need RSVG
 
@@ -57,7 +57,7 @@ Build Devault
 Running
 -------
 
-Devault is now available at `./build/devaultd` if using cmake
+Devault is now available at `./build/devaultd` 
 
 Before running, it's recommended you create an RPC configuration file.
 
@@ -97,5 +97,5 @@ Uncheck everything except Qt Creator during the installation process.
 Notes
 -----
 
-* Tested on OS X 10.11 through 10.15 on 64-bit Intel processors only.
+* Minimum OS X is 10.14 on 64-bit Intel processors only.
 * Building with downloaded Qt binaries is not officially supported. 
