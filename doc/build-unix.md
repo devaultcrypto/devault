@@ -40,7 +40,7 @@ Optional dependencies:
  libdb       | Berkeley DB      | Wallet storage (only needed when wallet enabled)
  qt          | GUI              | GUI toolkit (only needed when GUI enabled)
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
- univalue    | Utility          | JSON parsing and encoding (bundled version will be used unless --with-system-univalue passed to configure)
+ univalue    | Utility          | JSON parsing and encoding 
  libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.x)
 
 For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
@@ -98,10 +98,8 @@ Now for both Ubuntu versions Xenial (16.04) & below + Debian versions Stretch (9
 
         sudo apt-get install g++-7 -y
 
-Now you will need to either update your default gcc compiler to gcc-7/g++-7 or
-specify it in your configure like below (when you reach the configure step after running autogen.sh) -
+Now you will need to either update your default gcc compiler to gcc-7/g++-7 or specify them to cmake
 
-        ./configure CC=gcc-7 CXX=g++-7
 
 -----------------------------------------
 
@@ -130,7 +128,7 @@ libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
 
-Once these are installed, they will be found by configure and a devault-qt executable will be
+Once these are installed, they will be found by cmake and a devault-qt executable will be
 built by default.
 
 Dependency Build Instructions: Fedora
@@ -193,7 +191,7 @@ miniupnpc
 
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
-turned off by default.  See the configure options for upnp behavior desired:
+turned off by default.  See the cmake options for upnp behavior desired:
 
 Boost
 -----
