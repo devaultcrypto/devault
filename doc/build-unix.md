@@ -15,7 +15,7 @@ Building with cmake
 ```bash
 mkdir build
 cd build
-cmake ../devault
+cmake ..
 make
 make install # optional
 ```

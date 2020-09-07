@@ -47,7 +47,7 @@ Build Devault
       cd ../
       mkdir build
       cd build
-      cmake ../devault
+      cmake ..
       make
 
 
