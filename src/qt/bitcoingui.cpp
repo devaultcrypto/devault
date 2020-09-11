@@ -551,29 +551,14 @@ void BitcoinGUI::createToolBars() {
         toolbar->addAction(actProgressBar);
         toolbar->addAction(actProgressBarLabel);
 
-        
-        QWidget* spacerWidget2 = new QWidget(this);
-        spacerWidget2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        spacerWidget2->setFixedHeight(15);
-        spacerWidget2->setVisible(true);
-        spacerWidget2->setStyleSheet("background: transparent;");
-        toolbar->addWidget(spacerWidget2);
-
         overviewAction->setChecked(true);
-        QWidget *spacer = new QWidget();
-        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        toolbar->addWidget(spacer);
-
         rewardAction->setChecked(false);
-        QWidget *spacer1 = new QWidget();
-        spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        toolbar->addWidget(spacer1);
 
         m_wallet_selector = new QComboBox();
         connect(m_wallet_selector,
                 static_cast<void (QComboBox::*)(int)>(
                     &QComboBox::currentIndexChanged),
-                this, &BitcoinGUI::setCurrentWalletBySelectorIndex);
+               this, &BitcoinGUI::setCurrentWalletBySelectorIndex);
 
         m_wallet_selector_label = new QLabel();
         m_wallet_selector_label->setText(tr("Wallet:") + " ");
