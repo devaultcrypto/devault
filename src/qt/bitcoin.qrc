@@ -60,7 +60,7 @@
         <file alias="down_arrow">res/icons/down_arrow.png</file>
         <file alias="up_arrow-off">res/icons/up_arrow_off.png</file>
         <file alias="down_arrow_off">res/icons/down_arrow_off.png</file>
-        <file alias="dvt_header">res/icons/dvt_header.png</file>
+        <file alias="terraform">res/icons/terraform.png</file>
         <file alias="balance">res/icons/balance.png</file>
         <file alias="pending">res/icons/pending.png</file>
         <file alias="total">res/icons/total.png</file>

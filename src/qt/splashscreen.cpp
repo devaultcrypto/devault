@@ -42,12 +42,12 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
     QString font            = QApplication::font().toString();
 
     // create a bitmap according to device pixelratio
-    QSize splashSize(873*devicePixelRatio,480*devicePixelRatio);
+    QSize splashSize(1440*devicePixelRatio,720*devicePixelRatio);
     pixmap = QPixmap(splashSize);
 
     // set reference point, paddings relative to size
     int vSpace                  = 10;
-    int paddingTop              = 480*0.85 - vSpace;
+    int paddingTop              = 720*0.85 - vSpace;
 
     // change to HiDPI if it makes sense
     pixmap.setDevicePixelRatio(devicePixelRatio);
@@ -58,8 +58,8 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
     pixPaint.setPen(QColor(211,211,211));
 
     // draw the devault header.
-    QRect rectHeader(QPoint(0,0), QSize(873,480));
-    QPixmap header(":/icons/dvt_header");  
+    QRect rectHeader(QPoint(0,0), QSize(1440,720));
+    QPixmap header(":/icons/terraform");  
     pixPaint.drawPixmap(rectHeader, header);
 
     // check font size and drawing with
@@ -70,11 +70,11 @@ SplashScreen::SplashScreen(interfaces::Node &node, Qt::WindowFlags f,
 #else
     int titleTextWidth = fm.width(titleText);
 #endif
-    if (titleTextWidth > 176) {
-        fontFactor = fontFactor * 176 / titleTextWidth;
+    if (titleTextWidth > 480) {
+        fontFactor = fontFactor * 480 / titleTextWidth;
     }
 
-    pixPaint.setFont(QFont(font, 20*fontFactor));
+    pixPaint.setFont(QFont(font, 24*fontFactor));
     fm = pixPaint.fontMetrics();
 #if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
     titleTextWidth = fm.horizontalAdvance(titleText);
