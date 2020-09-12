@@ -176,10 +176,10 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
     if (enableWallet) {
       connect(walletFrame, &WalletFrame::requestedSyncWarningInfo, this,
               &BitcoinGUI::showModalOverlay);
-      connect(labelBlocksIcon, SIGNAL(clicked(QPoint)), this,
-              SLOT(showModalOverlay()));
-      connect(progressBar, SIGNAL(clicked(QPoint)), this,
-              SLOT(showModalOverlay()));
+      connect(labelBlocksIcon, &GUIUtil::ClickableLabel::clicked, this,
+              &BitcoinGUI::showModalOverlay);
+      connect(progressBar, &GUIUtil::ClickableProgressBar::clicked, this,
+              &BitcoinGUI::showModalOverlay);
     }
 }
 

@@ -52,6 +52,11 @@ class QProgressBar;
 class QProgressDialog;
 QT_END_NAMESPACE
 
+namespace GUIUtil {
+class ClickableLabel;
+class ClickableProgressBar;
+}
+
 /**
  * Bitcoin GUI main class. This class represents the main window of the Bitcoin
  * UI. It communicates with both the client and wallet models to give the user
@@ -109,10 +114,10 @@ private:
 
     UnitDisplayStatusBarControl *unitDisplayControl = nullptr;
     QLabel *labelWalletEncryptionIcon = nullptr;
-    QLabel *connectionsControl = nullptr;
-    QLabel *labelBlocksIcon = nullptr;
+    GUIUtil::ClickableLabel *connectionsControl = nullptr;
+    GUIUtil::ClickableLabel *labelBlocksIcon = nullptr;
     QLabel *progressBarLabel = nullptr;
-    QProgressBar *progressBar = nullptr;
+    GUIUtil::ClickableProgressBar *progressBar = nullptr;
     QProgressDialog *progressDialog = nullptr;
 
     QMenuBar *appMenuBar = nullptr;
