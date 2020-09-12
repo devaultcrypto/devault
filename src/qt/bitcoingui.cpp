@@ -262,7 +262,7 @@ void BitcoinGUI::createActions() {
     connect(receiveCoinsAction, &QAction::triggered, this, &BitcoinGUI::gotoReceiveCoinsPage);
     connect(receiveCoinsMenuAction, &QAction::triggered,  [this] { showNormalIfMinimized(); });
     connect(receiveCoinsMenuAction, &QAction::triggered, this, &BitcoinGUI::gotoReceiveCoinsPage);
-    connect(dvtLogoAction, SIGNAL(triggered()), this,  SLOT(openDVT_global()));
+    connect(dvtLogoAction, &QAction::triggered, this,  &BitcoinGUI::openDVT_global);
 
     quitAction = new QAction(platformStyle->TextColorIcon(":/icons/quit"),
                              tr("E&xit"), this);
