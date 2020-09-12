@@ -169,9 +169,6 @@ BitcoinGUI::BitcoinGUI(interfaces::Node &node, const Config *configIn,
     // Subscribe to notifications from core
     subscribeToCoreSignals();
 
-    connect(connectionsControl, SIGNAL(clicked(QPoint)), this,
-            SLOT(toggleNetworkActive()));
-
     // connect(connectionsControl, &QAction::clicked, this,
     //       &BitcoinGUI::toggleNetworkActive);
   
@@ -518,7 +515,11 @@ void BitcoinGUI::createToolBars() {
         labelWalletEncryptionIcon = new QLabel();
         connectionsControl = new GUIUtil::ClickableLabel();
         labelBlocksIcon = new GUIUtil::ClickableLabel();
-
+        
+        
+        connect(connectionsControl, &GUIUtil::ClickableLabel::clicked,
+                [this] { m_node.setNetworkActive(!m_node.getNetworkActive()); });
+        
         if (enableWallet) {
             frameBlocksLayout->addStretch();
             frameBlocksLayout->addWidget(labelWalletEncryptionIcon);
