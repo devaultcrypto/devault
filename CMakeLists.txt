@@ -12,7 +12,7 @@ project(devault
 enable_testing()
 
 # Package information
-set(PACKAGE_NAME "devault-qt")
+set(PACKAGE_NAME "DeVault Core")
 # Copyright
 set(COPYRIGHT_YEAR 2019 - 2020)
 
