@@ -1,10 +1,10 @@
 # Package options
 set(CPACK_PACKAGE_VENDOR "${COPYRIGHT_HOLDERS_FINAL}")
-set(CPACK_PACKAGE_DESCRIPTION "devault-qt is a Devault full node implementation.")
+set(CPACK_PACKAGE_DESCRIPTION "DeVault Core is a Devault full node implementation.")
 set(CPACK_PACKAGE_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
 set(CPACK_PACKAGE_CONTACT "jonspock@protonmail.com")
 
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "devault-qt")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "DeVault-Core")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/doc/README_windows.txt")
 
@@ -57,7 +57,7 @@ macro(add_start_menu_link LINK_NAME EXE PARAMETERS ICON_EXE ICON_INDEX)
 	)
 endmacro()
 
-set(CPACK_NSIS_MENU_LINKS "${CMAKE_INSTALL_BINDIR}/${_nsis_bitcoin_qt}" "devault-qt")
+set(CPACK_NSIS_MENU_LINKS "${CMAKE_INSTALL_BINDIR}/${_nsis_bitcoin_qt}" "DeVault Core")
 add_start_menu_link("${PACKAGE_NAME} (testnet)"
 	"${_nsis_bitcoin_qt}"
 	"-testnet"
