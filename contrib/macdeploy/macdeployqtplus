@@ -603,7 +603,7 @@ else:
 
 # ------------------------------------------------
 
-target = os.path.join("dist", "devault-qt.app")
+target = os.path.join("dist", "DeVault-Core.app")
 
 if verbose >= 2:
     print("+ Copying source bundle +")

@@ -55,7 +55,7 @@ ds['.']['icvp'] = icvp
 ds['.']['vSrn'] = ('long', 1)
 
 ds['Applications']['Iloc'] = (370, 156)
-ds['devault-qt.app']['Iloc'] = (128, 156)
+ds['DeVault-Core.app']['Iloc'] = (128, 156)
 
 ds.flush()
 ds.close()
