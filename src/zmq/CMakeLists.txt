@@ -6,10 +6,10 @@ add_library(zmq
 	zmqabstractnotifier.cpp
 	zmqnotificationinterface.cpp
 	zmqpublishnotifier.cpp
+	zmqrpc.cpp
 )
 
-find_package(ZeroMQ REQUIRED)
-target_include_directories(zmq PRIVATE ${ZMQ_INCLUDE_DIR})
+find_package(ZeroMQ 4.1.5 REQUIRED)
 target_link_libraries(zmq util ${ZMQ_LIBRARY})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
