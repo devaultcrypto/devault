@@ -1,4 +1,4 @@
-Name "@CPACK_NSIS_DISPLAY_NAME@ (64-bit)"
+Name "@CPACK_NSIS_DISPLAY_NAME@"
 
 RequestExecutionLevel highest
 SetCompressor @CPACK_NSIS_COMPRESSOR@
@@ -49,7 +49,7 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile "@CPACK_TOPLEVEL_DIRECTORY@/devault-${VERSION}-win64-setup.exe"
+OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 !if "@CPACK_SYSTEM_NAME@" == "x86_64-w64-mingw32"
 InstallDir $PROGRAMFILES64\DeVault
 !else
