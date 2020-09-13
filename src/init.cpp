@@ -69,7 +69,9 @@
 #include <sodium/core.h>
 
 #if ENABLE_ZMQ
+#include <zmq/zmqabstractnotifier.h>
 #include <zmq/zmqnotificationinterface.h>
+#include <zmq/zmqrpc.h>
 #endif
 
 static const bool DEFAULT_PROXYRANDOMIZE = true;
@@ -719,16 +721,16 @@ void SetupServerArgs() {
 
 #if ENABLE_ZMQ
     gArgs.AddArg("-zmqpubhashblock=<address>",
-                 "Enable publish hash block in <address>"), false,
+                 "Enable publish hash block in <address>", false,
                  OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubhashtx=<address>",
-                 "Enable publish hash transaction in <address>"), false,
+                 "Enable publish hash transaction in <address>", false,
                  OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawblock=<address>",
-                 "Enable publish raw block in <address>"), false,
+                 "Enable publish raw block in <address>", false,
                  OptionsCategory::ZMQ);
     gArgs.AddArg("-zmqpubrawtx=<address>",
-                 "Enable publish raw transaction in <address>"), false,
+                 "Enable publish raw transaction in <address>", false,
                  OptionsCategory::ZMQ);
 #endif
 

@@ -5,7 +5,9 @@
 #include <zmq/zmqpublishnotifier.h>
 
 #include <chain.h>
+#include <chainparams.h>
 #include <config.h>
+#include <primitives/txid.h>
 #include <rpc/server.h>
 #include <streams.h>
 #include <util/system.h>
@@ -26,7 +28,7 @@ static int zmq_send_multipart(void *sock, const void *data, size_t size, ...) {
     va_list args;
     va_start(args, size);
 
-    while (true) {
+    while (1) {
         zmq_msg_t msg;
 
         int rc = zmq_msg_init_size(&msg, size);
@@ -75,7 +77,20 @@ bool CZMQAbstractPublishNotifier::Initialize(void *pcontext) {
             return false;
         }
 
-        int rc = zmq_bind(psocket, address.c_str());
+        LogPrint(BCLog::ZMQ,
+                 "zmq: Outbound message high water mark for %s at %s is %d\n",
+                 type, address, outbound_message_high_water_mark);
+
+        int rc = zmq_setsockopt(psocket, ZMQ_SNDHWM,
+                                &outbound_message_high_water_mark,
+                                sizeof(outbound_message_high_water_mark));
+        if (rc != 0) {
+            zmqError("Failed to set outbound message high water mark");
+            zmq_close(psocket);
+            return false;
+        }
+
+        rc = zmq_bind(psocket, address.c_str());
         if (rc != 0) {
             zmqError("Failed to bind address");
             zmq_close(psocket);
@@ -115,7 +130,7 @@ void CZMQAbstractPublishNotifier::Shutdown() {
     }
 
     if (count == 1) {
-        LogPrint(BCLog::ZMQ, "Close socket at address %s\n", address);
+        LogPrint(BCLog::ZMQ, "zmq: Close socket at address %s\n", address);
         int linger = 0;
         zmq_setsockopt(psocket, ZMQ_LINGER, &linger, sizeof(linger));
         zmq_close(psocket);
