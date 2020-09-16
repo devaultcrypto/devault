@@ -1762,7 +1762,10 @@ int64_t CalculateMaximumSignedTxSize(const CTransaction &tx,
     // For now return the larger of the two, this will mean potentially
     // more fees than needed but sizes should be comparable and this
     // will prevent issues with fees being too low
+    int64_t old_size = GetVirtualTransactionSize(CTransaction(txNew));
     int64_t size = std::max(bls_size,ec_size);
+    LogPrintf("CalculatedMaximumSignedTxSize old %d, ec %d, bls %, final %d\n",
+              old_size, ec_size, bls_size, size);
     return size;
 }
 
