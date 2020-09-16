@@ -249,7 +249,8 @@ private:
     /** Set the proxy-enabled icon as shown in the UI. */
     void updateProxyIcon();
     void updateWindowTitle();
-
+public Q_SLOTS:
+#ifdef ENABLE_WALLET
     /** Open DeVault website */
     void openDVT_global();
     /** Switch to overview (home) page */
@@ -268,6 +269,7 @@ private:
 
     /** Show open dialog */
     void openClicked();
+#endif // ENABLE_WALLET
     /** Show configuration dialog */
     void optionsClicked();
     /** Show about dialog */
