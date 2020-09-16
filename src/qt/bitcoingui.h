@@ -290,7 +290,6 @@ public Q_SLOTS:
 
     /** Show window if hidden, unminimize when minimized, rise when obscured or
      * show if hidden and fToggleHidden is true */
-public:    
     void showNormalIfMinimized(bool fToggleHidden = false);
     /** Simply calls showNormalIfMinimized(true) for use in SLOT() macro */
     void toggleHidden();
@@ -304,12 +303,14 @@ public:
     /** When hideTrayIcon setting is changed in OptionsModel hide or show the
      * icon accordingly. */
     void setTrayIconVisible(bool);
+
+    void showModalOverlay();
+    
 private:    
 
     /** Toggle networking */
     void toggleNetworkActive();
 
-    void showModalOverlay();
 };
 
 class UnitDisplayStatusBarControl : public QLabel {
