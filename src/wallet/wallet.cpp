@@ -1758,7 +1758,7 @@ int64_t CalculateMaximumSignedTxSize(const CTransaction &tx,
     int64_t bls_size = 91 * tx.vin.size() + 83 * tx.vout.size() + 110;
     // This is formula for EC Txes
     // will overestimate size for BLS Tx when more inputs
-    int64_t ec_size = 146 * tx.vin.size() + 33 * tx.vout.size() + 10;
+    int64_t ec_size = 148 * tx.vin.size() + 34 * tx.vout.size() + 10;
     // For now return the larger of the two, this will mean potentially
     // more fees than needed but sizes should be comparable and this
     // will prevent issues with fees being too low
