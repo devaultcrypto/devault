@@ -158,7 +158,7 @@ static UniValue verifymessage(const Config &config,
       use_bls = true;
     }
 
-    if (!use_ec || !use_bls) {
+    if (!use_ec && !use_bls) {
       throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
     }
 
