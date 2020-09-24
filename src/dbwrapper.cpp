@@ -144,7 +144,7 @@ static datadb::Options GetOptions(size_t nCacheSize) {
 CDBWrapper::CDBWrapper(const fs::path &path, size_t nCacheSize, bool fMemory,
                        bool fWipe, bool obfuscate)
 #ifdef NO_BOOST_FILESYSTEM
-    : m_name(path.stem()) {
+    : m_name(path.stem().string()) {
 #else    
     : m_name(fs::basename(path)) {
 #endif

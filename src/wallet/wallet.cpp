@@ -2875,12 +2875,7 @@ bool CWallet::SelectCoinsMinConf(const Amount nTargetValue, const int nConfMine,
     std::vector<CInputCoin> vValue;
     Amount nTotalLower = Amount::zero();
 
-    
-#if __cplusplus < 201703L
-  std::random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
-#else
-  Shuffle(vCoins.begin(), vCoins.end(), FastRandomContext());
-#endif
+    Shuffle(vCoins.begin(), vCoins.end(), FastRandomContext());
 
     for (const COutput &output : vCoins) {
         if (!OutputEligibleForSpending(output, nConfMine, nConfTheirs,

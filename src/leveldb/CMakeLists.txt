@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.5)
 project(Leveldb VERSION 0.1.0 LANGUAGES C CXX)
 
 # This project can take advantage of C++11.
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # Remove some warnings for leveldb as they can get noisy.
 add_compiler_flags(-Wno-sign-compare -Wno-implicit-fallthrough)
