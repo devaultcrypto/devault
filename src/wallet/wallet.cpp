@@ -1788,13 +1788,9 @@ int64_t CalculateMaximumSignedTxSize(const CTransaction &tx,
     // This is formula for EC Txes
     // will overestimate size for BLS Tx when more inputs
     int64_t ec_size = 148 * tx.vin.size() + 34 * tx.vout.size() + 10;
-    // For now return the larger of the two, this will mean potentially
-    // more fees than needed but sizes should be comparable and this
-    // will prevent issues with fees being too low
-    int64_t old_size = GetVirtualTransactionSize(CTransaction(txNew));
-    int64_t size = std::max(bls_size,ec_size);
-    LogPrintf("CalculatedMaximumSignedTxSize old %d, ec %d, bls %, final %d\n",
-              old_size, ec_size, bls_size, size);
+    // Fees are set by wallet by whether it has BLS addresses or Legacy ones
+    int64_t size = (wallet->UseBLSKeys()) ? bls_size : ec_size;
+    LogPrintf("CalculatedMaximumSignedTxSize ec %d, bls %, final %d\n", ec_size, bls_size, size);
     return size;
 }
 
