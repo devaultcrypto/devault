@@ -1,10 +1,5 @@
-This release includes the following features and fixes since 1.2.0 release:
+This release includes the following features and fixes since 1.2.1 release:
 
-This is a bugfix release containing the following fixes:
-
- - Fix an error in fee calculation for ECDSA transactions
- - Fix an issue with release flags
- - Fix clickable icons for network display and modal overlay
- - Fix QT shortcuts
- - Various build optimizations
-
+ - Fix bug in rpc method verifymessage
+ - increase min change (+ min final change)
+ - Change some CMake build defaults
