@@ -31,6 +31,7 @@
 #include <malloc.h>
 #endif
 
+
 #ifndef ENABLE_WALLET
 /**
  * @note Do not add or change anything in the information returned by this

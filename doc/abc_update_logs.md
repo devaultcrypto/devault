@@ -2732,7 +2732,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
       [wallet] Deprecate account RPC methods
       [wallet] [rpc] Remove duplicate entries in rpcwallet.cpp's CRPCCommand table
       [tests] Rename rpc_listtransactions.py to wallet_listtransactions.py
-      Merge #12892: [wallet] [rpc] introduce 'label' API for wallet
+####  Merge #12892: [wallet] [rpc] introduce 'label' API for wallet
       Merge #9894: remove 'label' filter for rpc command help
       test: Remove python3.4 workaround in feature_dbcrash
       build: Require python 3.5

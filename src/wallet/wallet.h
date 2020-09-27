@@ -1185,6 +1185,7 @@ public:
     std::set<std::set<CTxDestination>> GetAddressGroupings() EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     std::map<CTxDestination, Amount>   GetAddressBalances(interfaces::Chain::Lock &locked_chain);
     std::set<CTxDestination> GetLabelAddresses(const std::string &label) const;
+    void DeleteLabel(const std::string &label);
 
     isminetype IsMine(const CTxIn &txin) const;
     /**
@@ -1443,6 +1444,45 @@ public:
     void KeepKey();
     void KeepScript() override { KeepKey(); }
 };
+
+/**
+ * DEPRECATED Account information.
+ * Stored in wallet with key "acc"+string account name.
+ */
+class CAccount {
+public:
+    CPubKey vchPubKey;
+
+    CAccount() { SetNull(); }
+
+    void SetNull() { vchPubKey = CPubKey(); }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action) {
+        int nVersion = s.GetVersion();
+        if (!(s.GetType() & SER_GETHASH)) {
+            READWRITE(nVersion);
+        }
+
+        READWRITE(vchPubKey);
+    }
+};
+
+OutputType ParseOutputType(const std::string &str, OutputType default_type);
+const std::string &FormatOutputType(OutputType type);
+
+/**
+ * Get a destination of the requested type (if possible) to the specified key.
+ * The caller must make sure LearnRelatedScripts has been called beforehand.
+ */
+CTxDestination GetDestinationForKey(const CPubKey &key, OutputType);
+
+/**
+ * Get all destinations (potentially) supported by the wallet for the given key.
+ */
+std::vector<CTxDestination> GetAllDestinationsForKey(const CPubKey &key);
 
 /** RAII object to check and reserve a wallet rescan */
 class WalletRescanReserver {
