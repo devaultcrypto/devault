@@ -28,4 +28,7 @@ CPubKey AddrToPubKey(const CChainParams &chainparams, CKeyStore *const keystore,
 CScript CreateMultisigRedeemscript(const int required,
                                    const std::vector<CPubKey> &pubkeys);
 
+UniValue DescribeAddress(const CTxDestination& dest);
+
 #endif // BITCOIN_RPC_UTIL_H
+

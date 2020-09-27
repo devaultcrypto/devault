@@ -3816,8 +3816,8 @@ XXXXX Merge #10522: [wallet] Remove unused variables
 #___  Improve ZMQ functional test
 #___  Remove redundant pwallet nullptr check
 #___  Add missing locks and locking annotations for CAddrMan
-      [rpc] Move DescribeAddressVisitor to rpc/util
-      [rpc] split wallet and non-wallet parts of DescribeAddressVisitor
+####  [rpc] Move DescribeAddressVisitor to rpc/util
+####  [rpc] split wallet and non-wallet parts of DescribeAddressVisitor
       (finally) remove getinfo in favor of more module-specific infos
 #___  [mining] Add a test for TestCBlockTemplateEntry
       Bump version number to 0.19.8
