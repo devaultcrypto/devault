@@ -313,19 +313,26 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() != 1) {
+    if (request.fHelp || request.params.size() < 1 ||
+        request.params.size() > 2) {
         throw std::runtime_error(
-            "getlabeladdress \"label\"\n"
-            "\nReturns the current Devault address for receiving payments to "
-            "this label.\n"
+            "getlabeladdress \"label\" ( force ) \n"
+            "\nReturns the default receiving address for this label. This will "
+            "reset to a fresh address once there's a transaction that spends "
+            "to it.\n"
             "\nArguments:\n"
-            "1. \"label\"         (string, required) The label name for the "
+            "1. \"label\"         (string, required) The label for the "
             "address. It can also be set to the empty string \"\" to represent "
-            "the default label. The label does not need to exist, it will be "
-            "created and a new address created  if there is no label by the "
-            "given name.\n"
+            "the default label.\n"
+            "2. \"force\"         (bool, optional) Whether the label should be "
+            "created if it does not yet exist. If False, the RPC will return "
+            "an error if called with a label that doesn't exist.\n"
+            "                                    Defaults to false (unless the "
+            "getaccountaddress method alias is being called, in which case "
+            "defaults to true for backwards compatibility).\n"
             "\nResult:\n"
-            "\"address\"          (string) The label devault address\n"
+            "\"address\"          (string) The current receiving address for "
+            "the label.\n"
             "\nExamples:\n" +
             HelpExampleCli("getlabeladdress", "") +
             HelpExampleCli("getlabeladdress", "\"\"") +
@@ -337,6 +344,23 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
 
     // Parse the label first so we don't generate a key if there's an error
     std::string label = LabelFromValue(request.params[0]);
+    bool force = request.strMethod == "getaccountaddress" ? true : false;
+    if (!request.params[1].isNull()) {
+        force = request.params[1].get_bool();
+    }
+
+    bool label_found = false;
+    for (const auto& item : pwallet->mapAddressBook) {
+        if (item.second.name == label) {
+            label_found = true;
+            break;
+        }
+    }
+    if (!force && !label_found) {
+        throw JSONRPCError(RPC_WALLET_INVALID_LABEL_NAME,
+                           std::string("No addresses with label " + label));
+    }
+
     UniValue ret(UniValue::VSTR);
     ret = GetLabelDestination(pwallet, label);
     return ret;
@@ -401,16 +425,15 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() < 1 ||
-        request.params.size() > 2) {
+    if (request.fHelp || request.params.size() != 2) {
         throw std::runtime_error(
             "setlabel \"address\" \"label\"\n"
             "\nSets the label associated with the given address.\n"
             "\nArguments:\n"
             "1. \"address\"         (string, required) The devault address to "
             "be associated with a label.\n"
-            "2. \"label\"           (string, required) The label to assign the "
-            "address to.\n"
+            "2. \"label\"           (string, required) The label to assign to "
+            "the address.\n"
             "\nExamples:\n" +
             HelpExampleCli("setlabel",
                            R"("devault:qpzfppqqg5sk6ck8c624tk7vgxeuafaq9uumff5u2u" "tabby")") +
@@ -420,23 +443,31 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
     }
     LOCK2(cs_main, pwallet->cs_wallet);
 
-    CTxDestination dest =
-        DecodeDestination(request.params[0].get_str(), config.GetChainParams());
+    std::string dest_label = request.params[0].get_str();
+    CTxDestination dest = DecodeDestination(dest_label, config.GetChainParams());
     if (!IsValidDestination(dest)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Invalid Devault address");
     }
 
-    std::string label;
-    if (!request.params[1].isNull()) {
-        label = LabelFromValue(request.params[1]);
-    }
+    std::string label = LabelFromValue(request.params[1]);
 
     if (IsMine(*pwallet, dest)) {
-        // Only add the label to Address Book if the address is yours.
+        // Detect when changing the label of an address that is the receiving
+        // address of another label. If so, delete the account record for it.
+        // Labels, unlike addresses, can be deleted, and if we wouldn't do this,
+        // the record would stick around forever.
+        if (pwallet->mapAddressBook.count(dest)) {
+            std::string old_label = pwallet->mapAddressBook[dest].name;
+            if (old_label != label &&
+                dest_label == GetLabelDestination(pwallet, old_label)) {
+                pwallet->DeleteLabel(old_label);
+            }
+        }
+
         pwallet->SetAddressBook(dest, label, "receive");
     } else {
-        pwallet->SetLabel(dest, label, "external");
+        pwallet->SetAddressBook(dest, label, "send");
     }
 
     return NullUniValue;
@@ -4503,6 +4534,501 @@ UniValue rescanblockchain(const Config &config, const JSONRPCRequest &request) {
     return response;
 }
 
+
+class DescribeAddressVisitor : public std::variant<UniValue> {
+public:
+    explicit DescribeAddressVisitor() {}
+
+    UniValue operator()(const CNoDestination &dest) const {
+        return UniValue(UniValue::VOBJ);
+    }
+
+    UniValue operator()(const CKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isscript", false);
+        return obj;
+    }
+  
+    UniValue operator()(const BKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isscript", false);
+        return obj;
+    }
+
+    UniValue operator()(const CScriptID &scriptID) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isscript", true);
+        return obj;
+    }
+};
+
+#ifdef ENABLE_WALLET
+class DescribeWalletAddressVisitor : public std::variant<UniValue> {
+public:
+    CWallet *const pwallet;
+
+    void ProcessSubScript(const CScript &subscript, UniValue &obj,
+                          bool include_addresses = false) const {
+        // Always present: script type and redeemscript
+        txnouttype which_type;
+        std::vector<std::vector<uint8_t>> solutions_data;
+        Solver(subscript, which_type, solutions_data);
+        obj.pushKV("script", GetTxnOutputType(which_type));
+        obj.pushKV("hex", HexStr(subscript.begin(), subscript.end()));
+
+        CTxDestination embedded;
+        UniValue a(UniValue::VARR);
+        if (ExtractDestination(subscript, embedded)) {
+            // Only when the script corresponds to an address.
+            UniValue subobj(UniValue::VOBJ);
+            UniValue detail = std::visit(DescribeAddressVisitor(), embedded);
+            subobj.pushKVs(detail);
+            UniValue wallet_detail = std::visit(*this, embedded);
+            subobj.pushKVs(wallet_detail);
+            subobj.pushKV("address", EncodeDestination(embedded));
+            subobj.pushKV("scriptPubKey",
+                          HexStr(subscript.begin(), subscript.end()));
+            // Always report the pubkey at the top level, so that
+            // `getnewaddress()['pubkey']` always works.
+            if (subobj.exists("pubkey")) {
+                obj.pushKV("pubkey", subobj["pubkey"]);
+            }
+            obj.pushKV("embedded", std::move(subobj));
+            if (include_addresses) {
+                a.push_back(EncodeDestination(embedded));
+            }
+        } else if (which_type == TX_MULTISIG) {
+            // Also report some information on multisig scripts (which do not
+            // have a corresponding address).
+            // TODO: abstract out the common functionality between this logic
+            // and ExtractDestinations.
+            obj.pushKV("sigsrequired", solutions_data[0][0]);
+            UniValue pubkeys(UniValue::VARR);
+            for (size_t i = 1; i < solutions_data.size() - 1; ++i) {
+                CPubKey key(solutions_data[i].begin(), solutions_data[i].end());
+                if (include_addresses) {
+                    a.push_back(EncodeDestination(key.GetKeyID()));
+                }
+                pubkeys.push_back(HexStr(key.begin(), key.end()));
+            }
+            obj.pushKV("pubkeys", std::move(pubkeys));
+        }
+
+        // The "addresses" field is confusing because it refers to public keys
+        // using their P2PKH address. For that reason, only add the 'addresses'
+        // field when needed for backward compatibility. New applications can
+        // use the 'pubkeys' field for inspecting multisig participants.
+        if (include_addresses) {
+            obj.pushKV("addresses", std::move(a));
+        }
+    }
+
+    explicit DescribeWalletAddressVisitor(CWallet *_pwallet)
+        : pwallet(_pwallet) {}
+
+    UniValue operator()(const CNoDestination &dest) const {
+        return UniValue(UniValue::VOBJ);
+    }
+
+    UniValue operator()(const CKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        CPubKey vchPubKey;
+        if (pwallet && pwallet->GetPubKey(keyID, vchPubKey)) {
+            obj.pushKV("pubkey", HexStr(vchPubKey));
+            obj.pushKV("iscompressed", vchPubKey.IsCompressed());
+        }
+        return obj;
+    }
+   UniValue operator()(const BKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        CPubKey vchPubKey;
+        if (pwallet && pwallet->GetPubKey(keyID, vchPubKey)) {
+            obj.pushKV("pubkey", HexStr(vchPubKey));
+            obj.pushKV("iscompressed", "false");
+        }
+        return obj;
+    }
+
+    UniValue operator()(const CScriptID &scriptID) const {
+        UniValue obj(UniValue::VOBJ);
+        CScript subscript;
+        if (pwallet && pwallet->GetCScript(scriptID, subscript)) {
+            ProcessSubScript(subscript, obj, true);
+        }
+        return obj;
+    }
+};
+
+UniValue DescribeAddress(const CTxDestination& dest)
+{
+  return std::visit(DescribeAddressVisitor(), dest);
+}
+
+UniValue DescribeWalletAddress(CWallet* pwallet, const CTxDestination& dest)
+{
+    UniValue ret(UniValue::VOBJ);
+    UniValue detail = DescribeAddress(dest);
+    ret.pushKVs(detail);
+    ret.pushKVs(std::visit(DescribeWalletAddressVisitor(pwallet), dest));
+    return ret;
+}
+#endif
+
+/** Convert CAddressBookData to JSON record.  */
+static UniValue AddressBookDataToJSON(const CAddressBookData &data,
+                                      const bool verbose) {
+    UniValue ret(UniValue::VOBJ);
+    if (verbose) {
+        ret.pushKV("name", data.name);
+    }
+    ret.pushKV("purpose", data.purpose);
+    return ret;
+}
+
+UniValue getaddressinfo(const Config &config, const JSONRPCRequest &request) {
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            "getaddressinfo \"address\"\n"
+            "\nReturn information about the given bitcoin address. Some "
+            "information requires the address\n"
+            "to be in the wallet.\n"
+            "\nArguments:\n"
+            "1. \"address\"                    (string, required) The bitcoin "
+            "address to get the information of.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"address\" : \"address\",        (string) The bitcoin address "
+            "validated\n"
+            "  \"scriptPubKey\" : \"hex\",       (string) The hex encoded "
+            "scriptPubKey generated by the address\n"
+            "  \"ismine\" : true|false,        (boolean) If the address is "
+            "yours or not\n"
+            "  \"iswatchonly\" : true|false,   (boolean) If the address is "
+            "watchonly\n"
+            "  \"isscript\" : true|false,      (boolean) If the key is a "
+            "script\n"
+            "  \"script\" : \"type\"             (string, optional) The output "
+            "script type. Only if \"isscript\" is true and the redeemscript is "
+            "known. Possible types: nonstandard, pubkey, pubkeyhash, "
+            "scripthash, multisig, nulldata, witness_v0_keyhash, "
+            "witness_v0_scripthash, witness_unknown\n"
+            "  \"hex\" : \"hex\",                (string, optional) The "
+            "redeemscript for the p2sh address\n"
+            "  \"pubkeys\"                     (string, optional) Array of "
+            "pubkeys associated with the known redeemscript (only if "
+            "\"script\" is \"multisig\")\n"
+            "    [\n"
+            "      \"pubkey\"\n"
+            "      ,...\n"
+            "    ]\n"
+            "  \"sigsrequired\" : xxxxx        (numeric, optional) Number of "
+            "signatures required to spend multisig output (only if \"script\" "
+            "is \"multisig\")\n"
+            "  \"pubkey\" : \"publickeyhex\",    (string, optional) The hex "
+            "value of the raw public key, for single-key addresses (possibly "
+            "embedded in P2SH or P2WSH)\n"
+            "  \"embedded\" : {...},           (object, optional) Information "
+            "about the address embedded in P2SH or P2WSH, if relevant and "
+            "known. It includes all getaddressinfo output fields for the "
+            "embedded address, excluding metadata (\"timestamp\", "
+            "\"hdkeypath\", \"hdseedid\") and relation to the wallet "
+            "(\"ismine\", \"iswatchonly\", \"account\").\n"
+            "  \"iscompressed\" : true|false,  (boolean) If the address is "
+            "compressed\n"
+            "  \"account\" : \"account\"         (string) The account "
+            "associated with the address, \"\" is the default account\n"
+            "  \"timestamp\" : timestamp,      (number, optional) The creation "
+            "time of the key if available in seconds since epoch (Jan 1 1970 "
+            "GMT)\n"
+            "  \"hdkeypath\" : \"keypath\"       (string, optional) The HD "
+            "keypath if the key is HD and available\n"
+            "  \"hdseedid\" : \"<hash160>\"      (string, optional) The "
+            "Hash160 of the HD seed\n"
+            "  \"hdmasterkeyid\" : \"<hash160>\" (string, optional) alias for "
+            "hdseedid maintained for backwards compatibility. Will be removed "
+            "in V0.21.\n"
+            "  \"labels\"                      (object) Array of labels "
+            "associated with the address.\n"
+            "    [\n"
+            "      { (json object of label data)\n"
+            "        \"name\": \"labelname\" (string) The label\n"
+            "        \"purpose\": \"string\" (string) Purpose of address "
+            "(\"send\" for sending address, \"receive\" for receiving "
+            "address)\n"
+            "      },...\n"
+            "    ]\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getaddressinfo",
+                           "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\"") +
+            HelpExampleRpc("getaddressinfo",
+                           "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\""));
+    }
+
+    LOCK(pwallet->cs_wallet);
+
+    UniValue ret(UniValue::VOBJ);
+    CTxDestination dest =
+        DecodeDestination(request.params[0].get_str(), config.GetChainParams());
+
+    // Make sure the destination is valid
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
+
+    std::string currentAddress = EncodeDestination(dest, config);
+    ret.pushKV("address", currentAddress);
+
+    CScript scriptPubKey = GetScriptForDestination(dest);
+    ret.pushKV("scriptPubKey",
+               HexStr(scriptPubKey.begin(), scriptPubKey.end()));
+
+    isminetype mine = IsMine(*pwallet, dest);
+    ret.pushKV("ismine", bool(mine & ISMINE_SPENDABLE));
+    ret.pushKV("iswatchonly", bool(mine & ISMINE_WATCH_ONLY));
+    UniValue detail = DescribeWalletAddress(pwallet, dest);
+    ret.pushKVs(detail);
+    if (pwallet->mapAddressBook.count(dest)) {
+        ret.pushKV("account", pwallet->mapAddressBook[dest].name);
+    }
+    const CKeyMetadata *meta = nullptr;
+    if (std::holds_alternative<CKeyID>(dest)) {
+      auto key_id = std::get<CKeyID>(dest);
+      auto it = pwallet->mapKeyMetadata.find(key_id);
+      if (it != pwallet->mapKeyMetadata.end()) {
+        meta = &it->second;
+      }
+    } else if (std::holds_alternative<BKeyID>(dest)) {
+      auto key_id = std::get<BKeyID>(dest);
+      auto it = pwallet->mapBLSKeyMetadata.find(key_id);
+      if (it != pwallet->mapBLSKeyMetadata.end()) {
+        meta = &it->second;
+      }
+    }
+    
+    if (!meta) {
+      auto it = pwallet->m_script_metadata.find(CScriptID(scriptPubKey));
+      if (it != pwallet->m_script_metadata.end()) {
+        meta = &it->second;
+      }
+    }
+    if (meta) {
+      ret.pushKV("timestamp", meta->nCreateTime);
+      if (!meta->hdKeypath.empty()) {
+        ret.pushKV("hdkeypath", meta->hdKeypath);
+        //ret.pushKV("hdseedid", meta->hd_seed_id.GetHex());
+        //ret.pushKV("hdmasterkeyid", meta->hd_seed_id.GetHex());
+      }
+    }
+
+    // Currently only one label can be associated with an address, return an
+    // array so the API remains stable if we allow multiple labels to be
+    // associated with an address.
+    UniValue labels(UniValue::VARR);
+    std::map<CTxDestination, CAddressBookData>::iterator mi =
+        pwallet->mapAddressBook.find(dest);
+    if (mi != pwallet->mapAddressBook.end()) {
+        labels.push_back(AddressBookDataToJSON(mi->second, true));
+    }
+    ret.pushKV("labels", std::move(labels));
+
+    return ret;
+}
+
+UniValue getaddressesbylabel(const Config &config,
+                             const JSONRPCRequest &request) {
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "getaddressesbylabel \"label\"\n"
+            "\nReturns the list of addresses assigned the specified label.\n"
+            "\nArguments:\n"
+            "1. \"label\"  (string, required) The label.\n"
+            "\nResult:\n"
+            "{ (json object with addresses as keys)\n"
+            "  \"address\": { (json object with information about address)\n"
+            "    \"purpose\": \"string\" (string)  Purpose of address "
+            "(\"send\" for sending address, \"receive\" for receiving "
+            "address)\n"
+            "  },...\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getaddressesbylabel", "\"tabby\"") +
+            HelpExampleRpc("getaddressesbylabel", "\"tabby\""));
+
+    LOCK(pwallet->cs_wallet);
+
+    std::string label = LabelFromValue(request.params[0]);
+
+    // Find all addresses that have the given label
+    UniValue ret(UniValue::VOBJ);
+    for (const auto &item : pwallet->mapAddressBook) {
+        if (item.second.name == label) {
+            ret.pushKV(EncodeDestination(item.first, config),
+                       AddressBookDataToJSON(item.second, false));
+        }
+    }
+
+    if (ret.empty()) {
+        throw JSONRPCError(RPC_WALLET_INVALID_LABEL_NAME,
+                           std::string("No addresses with label " + label));
+    }
+
+    return ret;
+}
+
+UniValue listlabels(const Config &config, const JSONRPCRequest &request) {
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() > 1)
+        throw std::runtime_error(
+            "listlabels ( \"purpose\" )\n"
+            "\nReturns the list of all labels, or labels that are assigned to "
+            "addresses with a specific purpose.\n"
+            "\nArguments:\n"
+            "1. \"purpose\"    (string, optional) Address purpose to list "
+            "labels for ('send','receive'). An empty string is the same as not "
+            "providing this argument.\n"
+            "\nResult:\n"
+            "[               (json array of string)\n"
+            "  \"label\",      (string) Label name\n"
+            "  ...\n"
+            "]\n"
+            "\nExamples:\n"
+            "\nList all labels\n" +
+            HelpExampleCli("listlabels", "") +
+            "\nList labels that have receiving addresses\n" +
+            HelpExampleCli("listlabels", "receive") +
+            "\nList labels that have sending addresses\n" +
+            HelpExampleCli("listlabels", "send") + "\nAs json rpc call\n" +
+            HelpExampleRpc("listlabels", "receive"));
+
+    LOCK(pwallet->cs_wallet);
+
+    std::string purpose;
+    if (!request.params[0].isNull()) {
+        purpose = request.params[0].get_str();
+    }
+
+    // Add to a set to sort by label name, then insert into Univalue array
+    std::set<std::string> label_set;
+    for (const auto &entry :  pwallet->mapAddressBook) {
+        if (purpose.empty() || entry.second.purpose == purpose) {
+            label_set.insert(entry.second.name);
+        }
+    }
+
+    UniValue ret(UniValue::VARR);
+    for (const std::string &name : label_set) {
+        ret.push_back(name);
+    }
+
+    return ret;
+}
+
+#ifdef SETHD_OK
+static UniValue sethdseed(const Config &config, const JSONRPCRequest &request) {
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet *const pwallet = wallet.get();
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() > 2) {
+        throw std::runtime_error(
+            "sethdseed ( \"newkeypool\" \"seed\" )\n"
+            "\nSet or generate a new HD wallet seed. Non-HD wallets will not "
+            "be upgraded to being a HD wallet. Wallets that are already\n"
+            "HD will have a new HD seed set so that new keys added to the "
+            "keypool will be derived from this new seed.\n"
+            "\nNote that you will need to MAKE A NEW BACKUP of your wallet "
+            "after setting the HD wallet seed.\n" +
+            HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"newkeypool\"         (boolean, optional, default=true) "
+            "Whether to flush old unused addresses, including change "
+            "addresses, from the keypool and regenerate it.\n"
+            "                             If true, the next address from "
+            "getnewaddress and change address from getrawchangeaddress will be "
+            "from this new seed.\n"
+            "                             If false, addresses (including "
+            "change addresses if the wallet already had HD Chain Split "
+            "enabled) from the existing\n"
+            "                             keypool will be used until it has "
+            "been depleted.\n"
+            "2. \"seed\"               (string, optional) The WIF private key "
+            "to use as the new HD seed; if not provided a random seed will be "
+            "used.\n"
+            "                             The seed value can be retrieved "
+            "using the dumpwallet command. It is the private key marked "
+            "hdseed=1\n"
+            "\nExamples:\n" +
+            HelpExampleCli("sethdseed", "") +
+            HelpExampleCli("sethdseed", "false") +
+            HelpExampleCli("sethdseed", "true \"wifkey\"") +
+            HelpExampleRpc("sethdseed", "true, \"wifkey\""));
+    }
+
+    if (IsInitialBlockDownload()) {
+        throw JSONRPCError(
+            RPC_CLIENT_IN_INITIAL_DOWNLOAD,
+            "Cannot set a new HD seed while still in Initial Block Download");
+    }
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    bool flush_key_pool = true;
+    if (!request.params[0].isNull()) {
+        flush_key_pool = request.params[0].get_bool();
+    }
+
+    CPubKey master_pub_key;
+    if (request.params[1].isNull()) {
+        master_pub_key = pwallet->GenerateNewSeed();
+    } else {
+        CKey key = DecodeSecret(request.params[1].get_str());
+        if (!key.IsValid()) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                               "Invalid private key");
+        }
+
+        if (HaveKey(*pwallet, key)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                               "Already have this key (either as an HD seed or "
+                               "as a loose private key)");
+        }
+
+        master_pub_key = pwallet->DeriveNewSeed(key);
+    }
+
+    pwallet->SetHDSeed(master_pub_key);
+    if (flush_key_pool) {
+        pwallet->NewKeyPool();
+    }
+
+    return NullUniValue;
+}
+#endif
+
 // clang-format off
 static const ContextFreeRPCCommand commands[] = {
     //  category            name                            actor (function)              argNames
@@ -4512,21 +5038,20 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label|account"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
-    { "wallet",             "createwallet",                 createwallet,                 {"wallet_name", "password", "blank"} },
     { "wallet",             "getlabeladdress",              getlabeladdress,              {"label"} },
     { "wallet",             "getaddressesbylabels",         getaddressesbylabels,         {} },
-    { "wallet",             "createwallet",                 createwallet,                 {"wallet_name", "password", "disable_private_keys"} },
-    { "wallet",             "getbalance",                   getbalance,                   {"account","minconf","include_watchonly"} },
-    { "wallet",             "getnewaddress",                getnewaddress,                {"label|account"} },
-    { "wallet",             "getrawchangeaddress",          getrawchangeaddress,          {} },
     { "wallet",             "getreceivedbylabel",           getreceivedbylabel,           {"label","minconf"} },
     { "wallet",             "getreceivedbyaccount",         getreceivedbylabel,           {"account","minconf"} },
+    { "wallet",             "createwallet",                 createwallet,                 {"wallet_name"} },
+    { "wallet",             "getaddressinfo",               getaddressinfo,               {"address"} },
+    { "wallet",             "getbalance",                   getbalance,                   {"account","minconf","include_watchonly"} },
+    { "wallet",             "getnewaddress",                getnewaddress,                {"label|account", "address_type"} },
+    { "wallet",             "getrawchangeaddress",          getrawchangeaddress,          {"address_type"} },
     { "wallet",             "getreceivedbyaddress",         getreceivedbyaddress,         {"address","minconf"} },
     { "wallet",             "gettransaction",               gettransaction,               {"txid","include_watchonly"} },
     { "wallet",             "getunconfirmedbalance",        getunconfirmedbalance,        {} },
     { "wallet",             "getwalletinfo",                getwalletinfo,                {} },
     { "wallet",             "keypoolrefill",                keypoolrefill,                {"newsize"} },
-    { "wallet",             "listaccounts",                 listaccounts,                 {"minconf","include_watchonly"} },
     { "wallet",             "listaddressgroupings",         listaddressgroupings,         {} },
     { "wallet",             "listlockunspent",              listlockunspent,              {} },
     { "wallet",             "listreceivedbylabel",          listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
@@ -4539,7 +5064,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "listwallets",                  listwallets,                  {} },
     { "wallet",             "loadwallet",                   loadwallet,                   {"filename", "password"} },
     { "wallet",             "lockunspent",                  lockunspent,                  {"unlock","transactions"} },
-    { "wallet",             "move",                         movecmd,                      {"fromaccount","toaccount","amount","minconf","comment"} },
     { "wallet",             "rescanblockchain",             rescanblockchain,             {"start_height", "stop_height"} },
     { "wallet",             "sendfrom",                     sendfrom,                     {"fromaccount","toaddress","amount","minconf","comment","comment_to"} },
     { "wallet",             "sendmany",                     sendmany,                     {"fromaccount","amounts","minconf","comment","subtractfeefrom"} },
@@ -4555,6 +5079,25 @@ static const ContextFreeRPCCommand commands[] = {
     { "wallet",             "walletlock",                   walletlock,                   {} },
     { "wallet",             "walletpassphrasechange",       walletpassphrasechange,       {"oldpassphrase","newpassphrase"} },
     { "wallet",             "walletpassphrase",             walletpassphrase,             {"passphrase","timeout"} },
+
+    /** Account functions (deprecated) */
+    { "wallet",             "getaccountaddress",            getlabeladdress,              {"account"} },
+    //    { "wallet",             "getaccount",                   getaccount,                   {"address"} },
+    //    { "wallet",             "getaddressesbyaccount",        getaddressesbyaccount,        {"account"} },
+    { "wallet",             "getreceivedbyaccount",         getreceivedbylabel,           {"account","minconf"} },
+    { "wallet",             "listaccounts",                 listaccounts,                 {"minconf","include_watchonly"} },
+    { "wallet",             "listreceivedbyaccount",        listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
+    { "wallet",             "setaccount",                   setlabel,                     {"address","account"} },
+    { "wallet",             "move",                         movecmd,                      {"fromaccount","toaccount","amount","minconf","comment"} },
+
+    /** Label functions (to replace non-balance account functions) */
+    { "wallet",             "getlabeladdress",              getlabeladdress,              {"label","force"} },
+    { "wallet",             "getaddressesbylabel",          getaddressesbylabel,          {"label"} },
+    { "wallet",             "getreceivedbylabel",           getreceivedbylabel,           {"label","minconf"} },
+    { "wallet",             "listlabels",                   listlabels,                   {"purpose"} },
+    { "wallet",             "listreceivedbylabel",          listreceivedbylabel,          {"minconf","include_empty","include_watchonly"} },
+    { "wallet",             "setlabel",                     setlabel,                     {"address","label"} },
+
     { "generating",         "generate",                     generate,                     {"nblocks","maxtries"} },
     { "generating",         "generateuntilshutdown",        generateuntilshutdown,        {} },
 };

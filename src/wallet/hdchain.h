@@ -144,10 +144,13 @@ class CHDPubKey {
 
 class CKeyMetadata {
   public:
-  static const int CURRENT_VERSION = 1;
+  static const int VERSION_BASIC = 1;
+  static const int VERSION_WITH_KEYPATH = 2;
+  static const int CURRENT_VERSION = VERSION_WITH_KEYPATH;
   int nVersion;
   // 0 means unknown.
   int64_t nCreateTime;
+  std::string hdKeypath; // Setup with HDPubKey
 
   CKeyMetadata() { SetNull(); }
   explicit CKeyMetadata(int64_t nCreateTime_) {
@@ -160,10 +163,14 @@ class CKeyMetadata {
   template <typename Stream, typename Operation> inline void SerializationOp(Stream &s, Operation ser_action) {
     READWRITE(this->nVersion);
     READWRITE(nCreateTime);
+    if (this->nVersion >= VERSION_WITH_KEYPATH) {
+      READWRITE(hdKeypath);
+    }
   }
 
   void SetNull() {
     nVersion = CKeyMetadata::CURRENT_VERSION;
     nCreateTime = 0;
+    hdKeypath.clear();
   }
 };

@@ -351,7 +351,7 @@ std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, boo
   
     // store metadata
     UpdateTimeFirstKey(metadata.nCreateTime);
-  
+
     if (internal) {
       acc.nInternalChainCounter = nChildIndex;
     } else {
@@ -375,6 +375,7 @@ std::tuple<CPubKey, CHDPubKey> CWallet::GenerateNewKey(CHDChain& hdChainDec, boo
     }
     
     HDKey = AddHDPubKeyWithoutDB(neutered, internal);
+    metadata.hdKeypath  = HDKey.GetKeyPath();
 
     if (pubkey.IsBLS()) {
         mapBLSKeyMetadata[pubkey.GetBLSKeyID()] = metadata;
@@ -4754,6 +4755,11 @@ CWallet::GetLabelAddresses(const std::string &label) const {
     }
 
     return result;
+}
+
+void CWallet::DeleteLabel(const std::string &label) {
+    WalletBatch batch(*database);
+    batch.EraseAccount(label);
 }
 
 bool CReserveKey::GetReservedKey(CPubKey &pubkey, bool internal) {
