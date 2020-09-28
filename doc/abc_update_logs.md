@@ -2581,9 +2581,9 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Merge #13138: [tests] Remove accounts from wallet_importprunedfunds.py
      Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
      Add test coverage for messages requesting invalid blocks
-     Drop IsLimited in favor of IsReachable
+#### Drop IsLimited in favor of IsReachable
 #    Remove undue lock assertion in GuessVerificationProgess
-     Revert use of size_t in ParseParameters
+#### Revert use of size_t in ParseParameters
      Fixes broken link to disclosure policy
      [tests] Remove 'account' API from wallet_listsinceblock
      [tests] Remove 'account' API from wallet_basic
@@ -2594,11 +2594,11 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [tests] Remove 'account' API from wallet_listtransactions
      [tests] Remove 'account' API from wallet_keypool_topup
      [tests] Remove 'account' API from wallet_import_rescan
-     Merge #13055: qt: Don't log to console by default
+#### Merge #13055: qt: Don't log to console by default
      [cmake] Add comments to express what tests do.
      [cmake] Remove useless copy of create_cache.py
      [tests] Remove 'account' API from wallet_listreceivedby
-     Split out key-value parsing in ArgsManager into its own function
+#### Split out key-value parsing in ArgsManager into its own function
 #### IsReachable is the inverse of IsLimited (DRY). Includes unit tests
      Bump version to 0.20.8
      [cmake] Use terminal when runnign integration tests
@@ -4163,7 +4163,7 @@ XXXXX Allow wallet files in multiple directories
       Updated manpages for 0.19.4 release
       Updated chainparams for 0.19.4 release
       Remove the boost/algorithm/string/case_conv.hpp dependency
-      scripted-diff: Replace NET_TOR with NET_ONION
+####  scripted-diff: Replace NET_TOR with NET_ONION
       Log warning message when deprecated network name 'tor' is used (e.g. option onlynet=tor)
 ##### Remove Safe mode
       Use angle bracket in include for net and netbase
