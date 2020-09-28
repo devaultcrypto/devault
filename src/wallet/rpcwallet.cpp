@@ -317,14 +317,14 @@ UniValue getlabeladdress(const Config &config, const JSONRPCRequest &request) {
         request.strMethod == "getaccountaddress") {
         if (request.fHelp) {
             throw std::runtime_error(
-                "getaccountaddress (Deprecated, will be removed in v0.21. To "
-                "use this command, start bitcoind with "
+                "getaccountaddress (Deprecated, will be removed. To "
+                "use this command, start devaultd with "
                 "-deprecatedrpc=accounts)");
         }
         throw JSONRPCError(
             RPC_METHOD_DEPRECATED,
-            "getaccountaddress is deprecated and will be removed in v0.21. To "
-            "use this command, start bitcoind with -deprecatedrpc=accounts.");
+            "getaccountaddress is deprecated and will be removed. To "
+            "use this command, start devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() < 1 ||
@@ -443,13 +443,13 @@ UniValue setlabel(const Config &config, const JSONRPCRequest &request) {
         request.strMethod == "setaccount") {
         if (request.fHelp) {
             throw std::runtime_error(
-                "setaccount (Deprecated, will be removed in v0.21. To use this "
-                "command, start bitcoind with -deprecatedrpc=accounts)");
+                "setaccount (Deprecated, will be removed. To use this "
+                "command, start devaultd with -deprecatedrpc=accounts)");
         }
         throw JSONRPCError(
             RPC_METHOD_DEPRECATED,
-            "setaccount is deprecated and will be removed in v0.21. To use "
-            "this command, start bitcoind with -deprecatedrpc=accounts.");
+            "setaccount is deprecated and will be removed. To use "
+            "this command, start devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() != 2) {
@@ -1121,14 +1121,14 @@ UniValue getreceivedbylabel(const Config &config,
         request.strMethod == "getreceivedbyaccount") {
         if (request.fHelp) {
             throw std::runtime_error(
-                "getreceivedbyaccount (Deprecated, will be removed in v0.21. "
-                "To use this command, start bitcoind with "
+                "getreceivedbyaccount (Deprecated, will be removed. "
+                "To use this command, start devaultd with "
                 "-deprecatedrpc=accounts)");
         }
         throw JSONRPCError(RPC_METHOD_DEPRECATED,
                            "getreceivedbyaccount is deprecated and will be "
-                           "removed in v0.21. To use this command, start "
-                           "bitcoind with -deprecatedrpc=accounts.");
+                           "removed. To use this command, start "
+                           "devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() < 1 ||
@@ -1327,13 +1327,13 @@ static UniValue movecmd(const Config &config, const JSONRPCRequest &request) {
     if (!IsDeprecatedRPCEnabled(gArgs, "accounts")) {
         if (request.fHelp) {
             throw std::runtime_error(
-                "move (Deprecated, will be removed in v0.21. To use this "
-                "command, start bitcoind with -deprecatedrpc=accounts)");
+                "move (Deprecated, will be removed. To use this "
+                "command, start devaultd with -deprecatedrpc=accounts)");
         }
         throw JSONRPCError(
             RPC_METHOD_DEPRECATED,
-            "move is deprecated and will be removed in v0.21. To use this "
-            "command, start bitcoind with -deprecatedrpc=accounts.");
+            "move is deprecated and will be removed. To use this "
+            "command, start devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() < 3 ||
@@ -1738,10 +1738,9 @@ UniValue addmultisigaddress(const Config &config,
             "  \"redeemScript\":\"script\"         (string) The string value "
             "of the hex-encoded redemption script.\n"
             "}\n"
-            "\nResult (DEPRECATED. To see this result in v0.19.6 instead, "
-            "please start bitcoind with -deprecatedrpc=addmultisigaddress).\n"
+            "\nResult (DEPRECATED).\n"
             "        clients should transition to the new output api before "
-            "upgrading to v0.20.\n"
+            "upgrading.\n"
             "\"address\"                         (string) A bitcoin address "
             "associated with the keys.\n"
 
@@ -2042,14 +2041,14 @@ UniValue listreceivedbylabel(const Config &config,
         request.strMethod == "listreceivedbyaccount") {
         if (request.fHelp) {
             throw std::runtime_error(
-                "listreceivedbyaccount (Deprecated, will be removed in v0.21. "
-                "To use this command, start bitcoind with "
+                "listreceivedbyaccount (Deprecated, will be removed. "
+                "To use this command, start devaultd with "
                 "-deprecatedrpc=accounts)");
         }
         throw JSONRPCError(RPC_METHOD_DEPRECATED,
                            "listreceivedbyaccount is deprecated and will be "
-                           "removed in v0.21. To use this command, start "
-                           "bitcoind with -deprecatedrpc=accounts.");
+                           "removed. To use this command, start "
+                           "devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() > 3) {
@@ -2419,13 +2418,13 @@ static UniValue listaccounts(const Config &config,
     if (!IsDeprecatedRPCEnabled(gArgs, "accounts")) {
         if (request.fHelp) {
             throw std::runtime_error(
-                "listaccounts (Deprecated, will be removed in v0.21. To use "
-                "this command, start bitcoind with -deprecatedrpc=accounts)");
+                "listaccounts (Deprecated, will be removed. To use "
+                "this command, start devaultd with -deprecatedrpc=accounts)");
         }
         throw JSONRPCError(
             RPC_METHOD_DEPRECATED,
-            "listaccounts is deprecated and will be removed in v0.21. To use "
-            "this command, start bitcoind with -deprecatedrpc=accounts.");
+            "listaccounts is deprecated and will be removed. To use "
+            "this command, start devaultd with -deprecatedrpc=accounts.");
     }
 
     if (request.fHelp || request.params.size() > 2) {
@@ -4831,8 +4830,7 @@ UniValue getaddressinfo(const Config &config, const JSONRPCRequest &request) {
             "  \"hdseedid\" : \"<hash160>\"      (string, optional) The "
             "Hash160 of the HD seed\n"
             "  \"hdmasterkeyid\" : \"<hash160>\" (string, optional) alias for "
-            "hdseedid maintained for backwards compatibility. Will be removed "
-            "in V0.21.\n"
+            "hdseedid maintained for backwards compatibility. Will be removed.\n"
             "  \"labels\"                      (object) Array of labels "
             "associated with the address.\n"
             "    [\n"
