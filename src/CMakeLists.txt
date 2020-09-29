@@ -182,7 +182,8 @@ check_cxx_compiler_flag(-std=c++17 HAVE_FLAG_STD_CXX17)
 if (HAVE_FLAG_STD_CXX17)
   set(CMAKE_CXX_STANDARD 17)
   message(STATUS "Compiler supports C++17")
-else()
+  add_definitions("-D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR") # still needed?
+ else()
   message(ERROR "Compiler must at least support C++17")
 endif()
 
