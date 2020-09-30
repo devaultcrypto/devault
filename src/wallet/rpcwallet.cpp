@@ -1022,7 +1022,7 @@ static UniValue getreceivedbyaddress(const Config &config,
 
         CValidationState state;
         if (wtx.IsCoinBase() || !ContextualCheckTransactionForCurrentBlock(
-                                    config, *wtx.tx, state)) {
+                                                                           config.GetChainParams().GetConsensus(), *wtx.tx, state)) {
             continue;
         }
 
@@ -1115,7 +1115,7 @@ UniValue getreceivedbylabel(const Config &config,
         const CWalletTx &wtx = pairWtx.second;
         CValidationState state;
         if (wtx.IsCoinBase() || !ContextualCheckTransactionForCurrentBlock(
-                                    config, *wtx.tx, state)) {
+                                                                           config.GetChainParams().GetConsensus(), *wtx.tx, state)) {
             continue;
         }
 
@@ -1777,7 +1777,7 @@ UniValue ListReceived(const Config &config,interfaces::Chain::Lock &locked_chain
 
         CValidationState state;
         if (wtx.IsCoinBase() || !ContextualCheckTransactionForCurrentBlock(
-                                    config, *wtx.tx, state)) {
+                                                                           config.GetChainParams().GetConsensus(), *wtx.tx, state)) {
             continue;
         }
 

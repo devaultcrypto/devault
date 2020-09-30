@@ -628,7 +628,7 @@ void CTxMemPool::removeForReorg(const Config &config,
         bool validLP = TestLockPointValidity(&lp);
 
         CValidationState state;
-        if (!ContextualCheckTransactionForCurrentBlock(config, tx, state,
+        if (!ContextualCheckTransactionForCurrentBlock(config.GetChainParams().GetConsensus(), tx, state,
                                                        flags) ||
             !CheckSequenceLocks(*this, tx, flags, &lp, validLP)) {
             // Note if CheckSequenceLocks fails the LockPoints may still be
