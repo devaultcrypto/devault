@@ -2541,7 +2541,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [CMAKE] Fix scope issue in the remove_<lang>_compiler_flags() functions
 #    Rationalize lock anotation in validation code
      tests: Add missing cs_main locks required when accessing pcoinsdbview, pcoinsTip or pblocktree
-     Introduce BlockHash to represent a block hash
+##   Introduce BlockHash to represent a block hash
      Add braces in block.h
      Use size_t where apropriate in skiplist_tests.cpp
 ##   Add Benchmark to test input de-duplication worst case
@@ -2555,15 +2555,15 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [test] Speed up fuzzing by ~200x when using afl-fuzz
      [CMAKE] Build test_bitcoin_fuzzy
      drop 'check3' upgrade-conditional-script-failure for Schnorr multisig
-     Nit in net_processing.cpp
-     Backport PR14897, PR15834 and PR16196
-     Merge #15149: gui: Show current wallet name in window title
+##   Nit in net_processing.cpp
+###  Backport PR14897, PR15834 and PR16196
+###  Merge #15149: gui: Show current wallet name in window title
      Update timings.json
      Various nits in net_processing.cpp
 #    p2p: Clarify control flow in ProcessMessage()
 #    Backport of Core PR14728: fix uninitialized read when stringifying an addrLocal
      previous link was dead
-     Merge #14784: qt: Use WalletModel* instead of the wallet name as map key
+###  Merge #14784: qt: Use WalletModel* instead of the wallet name as map key
      test: Fix test failures
      qa: fix deprecated log.warn in feature_dbcrash test
      [tests] fix block time in feature_pruning.py
@@ -2575,11 +2575,11 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Fix copy in loop
      Trivial: Corrected comment array name from pnSeeds6 to pnSeed6
      Merge #13498: [wallet] Fixups from account API deprecation
-     Merge #12639: Reduce cs_main lock and avoid extra lookups of mapAddressBook in listunspent RPC
-     [wallet] [rpc] Remove getlabeladdress RPC
+###  Merge #12639: Reduce cs_main lock and avoid extra lookups of mapAddressBook in listunspent RPC
+###  [wallet] [rpc] Remove getlabeladdress RPC
      Fix wrong version in clang-format error message and update the doc
      Merge #13138: [tests] Remove accounts from wallet_importprunedfunds.py
-     Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
+###  Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
      Add test coverage for messages requesting invalid blocks
 #### Drop IsLimited in favor of IsReachable
 #    Remove undue lock assertion in GuessVerificationProgess
