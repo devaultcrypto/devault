@@ -3033,7 +3033,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
       Remove ReadBlockFromDisk's dependency on Config
       Remove dependency on Config from the PoW code
-      Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
+###   Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
 ###   Activate consensus rule based on consensus params rather than config
       Add warning about redundant moves
       Remove redundant call to std::move

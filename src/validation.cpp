@@ -538,7 +538,7 @@ static bool AcceptToMemoryPoolWorker(
     // be mined yet.
     CValidationState ctxState;
     if (!ContextualCheckTransactionForCurrentBlock(
-            config, tx, ctxState, STANDARD_LOCKTIME_VERIFY_FLAGS)) {
+            consensusParams, tx, ctxState, STANDARD_LOCKTIME_VERIFY_FLAGS)) {
         // We copy the state from a dummy to ensure we don't increase the
         // ban score of peer for transaction that could be valid in the future.
         return state.DoS(
@@ -3826,7 +3826,7 @@ static bool ContextualCheckBlockHeader(const Config &config,
     return true;
 }
 
-bool ContextualCheckTransactionForCurrentBlock(const Config &config,
+bool ContextualCheckTransactionForCurrentBlock(const Consensus::Params &params,
                                                const CTransaction &tx,
                                                CValidationState &state,
                                                int flags) {
@@ -3859,7 +3859,7 @@ bool ContextualCheckTransactionForCurrentBlock(const Config &config,
                                         ? nMedianTimePast
                                         : GetAdjustedTime();
 
-    return ContextualCheckTransaction(config, tx, state, nBlockHeight,
+    return ContextualCheckTransaction(params, tx, state, nBlockHeight,
                                       nLockTimeCutoff, nMedianTimePast);
 }
 
@@ -3909,7 +3909,7 @@ static bool ContextualCheckBlock(const Config &config, const CBlock &block,
             prevTx = &tx;
         }
 
-        if (!ContextualCheckTransaction(config, tx, state, nHeight,
+        if (!ContextualCheckTransaction(config.GetChainParams().GetConsensus(), tx, state, nHeight,
                                         nLockTimeCutoff, nMedianTimePast)) {
             // state set by ContextualCheckTransaction.
             return false;
