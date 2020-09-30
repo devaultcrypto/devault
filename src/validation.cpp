@@ -349,7 +349,7 @@ static void FindFilesToPruneManual(std::set<int> &setFilesToPrune,
 static void FindFilesToPrune(std::set<int> &setFilesToPrune,
                              uint64_t nPruneAfterHeight);
 static FILE *OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
-static uint32_t GetBlockScriptFlags(const Config &config,
+static uint32_t GetBlockScriptFlags(const Consensus::Params &params,
                                     const CBlockIndex *pChainTip);
 
 bool TestLockPointValidity(const LockPoints *lp) {
@@ -450,9 +450,9 @@ std::string FormatStateMessage(const CValidationState &state) {
         state.GetRejectCode());
 }
 
-static bool IsBLSEnabledForCurrentBlock(const Config &config) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+static bool IsBLSEnabledForCurrentBlock(const Consensus::Params &params) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
-    return IsBLSEnabled(config, chainActive.Tip());
+    return IsBLSEnabled(params, chainActive.Tip());
 }
 
 // Used to avoid mempool polluting consensus critical paths if CCoinsViewMempool
@@ -504,6 +504,8 @@ static bool AcceptToMemoryPoolWorker(
     std::vector<COutPoint> &coins_to_uncache, bool test_accept)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     AssertLockHeld(cs_main);
+
+    const Consensus::Params &consensusParams =  config.GetChainParams().GetConsensus();
 
     const CTransaction &tx = *ptx;
     const TxId txid = tx.GetId();
@@ -750,7 +752,7 @@ static bool AcceptToMemoryPoolWorker(
         // Set extraFlags as a set of flags that needs to be activated.
         uint32_t extraFlags = SCRIPT_VERIFY_NONE;
 
-        if (IsBLSEnabledForCurrentBlock(config)) {
+        if (IsBLSEnabledForCurrentBlock(consensusParams)) {
             extraFlags |= SCRIPT_ENABLE_BLS;
             extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
         }
@@ -784,7 +786,7 @@ static bool AcceptToMemoryPoolWorker(
         // invalid blocks (using TestBlockValidity), however allowing such
         // transactions into the mempool can be exploited as a DoS attack.
         uint32_t currentBlockScriptVerifyFlags =
-            GetBlockScriptFlags(config, chainActive.Tip());
+            GetBlockScriptFlags(consensusParams, chainActive.Tip());
 
         if (!CheckInputsFromMempoolAndCache(tx, state, view, pool,
                                             currentBlockScriptVerifyFlags, true,
@@ -1707,7 +1709,7 @@ int32_t ComputeBlockVersion(const CBlockIndex *pindexPrev,
 }
 
 // Returns the script flags which should be checked for a given block
-static uint32_t GetBlockScriptFlags(const Config &config,
+static uint32_t GetBlockScriptFlags(const Consensus::Params &params,
                                     const CBlockIndex *pChainTip) {
     AssertLockHeld(cs_main);
     // const Consensus::Params &consensusParams =
@@ -1745,7 +1747,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // transactions using the OP_CHECKDATASIG opcode and it's verify
     // alternative. We also start enforcing push only signatures and
     // clean stack.
-    if (IsBLSEnabled(config, pChainTip)) {
+    if (IsBLSEnabled(params, pChainTip)) {
       flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
       flags |= SCRIPT_VERIFY_SIGPUSHONLY;
       flags |= SCRIPT_VERIFY_CLEANSTACK;
@@ -1754,7 +1756,7 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // If the Great Wall fork is enabled, we start accepting transactions
     // recovering coins sent to BLS addresses. We also stop accepting 65 byte signatures in
     // CHECKMULTISIG and its verify variant.
-    if (IsBLSEnabledForCurrentBlock(config)) {
+    if (IsBLSEnabledForCurrentBlock(params)) {
       flags |= SCRIPT_ENABLE_BLS;
     }
 
@@ -1901,7 +1903,7 @@ bool CChainState::ConnectBlock(const Config &config, const CBlock &block,
     // Start enforcing BIP68 (sequence locks).
     int nLockTimeFlags = LOCKTIME_VERIFY_SEQUENCE;
 
-    const uint32_t flags = GetBlockScriptFlags(config, pindex->pprev);
+    const uint32_t flags = GetBlockScriptFlags(consensusParams, pindex->pprev);
 
     int64_t nTime2 = GetTimeMicros();
     nTimeForks += nTime2 - nTime1;
@@ -2358,6 +2360,8 @@ bool CChainState::DisconnectTip(const Config &config, CValidationState &state,
     CBlockIndex *pindexDelete = chainActive.Tip();
     assert(pindexDelete);
 
+    const Consensus::Params &consensusParams = config.GetChainParams().GetConsensus();
+
     // Read block from disk.
     std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
     CBlock &block = *pblock;
@@ -2392,8 +2396,8 @@ bool CChainState::DisconnectTip(const Config &config, CValidationState &state,
     // in front of disconnectpool for reprocessing in a future
     // updateMempoolForReorg call
     if (pindexDelete->pprev != nullptr &&
-        GetBlockScriptFlags(config, pindexDelete) !=
-            GetBlockScriptFlags(config, pindexDelete->pprev)) {
+        GetBlockScriptFlags(consensusParams, pindexDelete) !=
+            GetBlockScriptFlags(consensusParams, pindexDelete->pprev)) {
         LogPrint(BCLog::MEMPOOL,
                  "Disconnecting mempool due to rewind of upgrade block\n");
         if (disconnectpool) {
@@ -2589,6 +2593,9 @@ bool CChainState::ConnectTip(const Config &config, CValidationState &state,
                              DisconnectedBlockTransactions &disconnectpool) {
     AssertLockHeld(cs_main);
 
+    const CChainParams &params = config.GetChainParams();
+    const Consensus::Params &consensusParams = params.GetConsensus();
+
     assert(pindexNew->pprev == chainActive.Tip());
     // Read block from disk.
     int64_t nTime1 = GetTimeMicros();
@@ -2673,8 +2680,8 @@ bool CChainState::ConnectTip(const Config &config, CValidationState &state,
     // in front of disconnectpool for reprocessing in a future
     // updateMempoolForReorg call
     if (pindexNew->pprev != nullptr &&
-        GetBlockScriptFlags(config, pindexNew) !=
-            GetBlockScriptFlags(config, pindexNew->pprev)) {
+        GetBlockScriptFlags(consensusParams, pindexNew) !=
+            GetBlockScriptFlags(consensusParams, pindexNew->pprev)) {
         LogPrint(BCLog::MEMPOOL,
                  "Disconnecting mempool due to acceptance of upgrade block\n");
         disconnectpool.importMempool(g_mempool);
