@@ -1672,7 +1672,6 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
                                      CValidationState &state,
                                      std::vector<std::pair<CAddrIndexKey, Amount>>& addrIndex,
                                      CBlockIndex *pindex) {
-  /*
     CDiskTxPos pos(pindex->GetBlockPos(),
                    GetSizeOfCompactSize(block.vtx.size()));
     std::vector<std::pair<uint256, CDiskTxPos>> vPos;
@@ -1687,7 +1686,6 @@ static bool WriteTxIndexDataForBlock(const CBlock &block,
         return AbortNode(state, "Failed to write address index");
       }
     }
-  */
     return true;
 }
 
