@@ -3288,7 +3288,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       [LINTER] Integrate check-rpc-mappings to arcanist
       Fix nits in blockchain.cpp RPC table
       [tests] rename TestNode to TestP2PConn in tests
-      Merge #12431: Only call NotifyBlockTip when chainActive changes
+##    Merge #12431: Only call NotifyBlockTip when chainActive changes
       Bump version to 0.19.12
       [CI] Enable debug for the ASAN build
       qa: Avoid checking reject code for now
@@ -3334,10 +3334,10 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Migrate build configs from TeamCity to build-configurations.sh
       Merge #11997: [tests] util_tests.cpp: actually check ignored args
       Merge #11879: [tests] remove redundant univalue_tests.cpp
-      scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
+##    scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
 #     Merge #11714: [tests] Test that mempool rejects coinbase transactions
 #     Merge #11133: Document assumptions that are beoing made to avoid division by zero
-      [Part 5 of 5] Add a CChainState class to clarify internal interfaces
+##    [Part 5 of 5] Add a CChainState class to clarify internal interfaces
       QA: Fix race condition in wallet_encryption test
       [tests] [qt] Add tests for address book manipulation via EditAddressDialog
       [wallet] [rpc] Add loadwallet RPC
@@ -4195,7 +4195,7 @@ XXXXX Allow wallet files in multiple directories
 #####  Migrate MakeUnique to c++14 std::make_unique
 #####  Use c++14 generic std::rbegin() and std::rend() instead of class methods
 #####  [secp256k1] refactor nativeECDSABuffer to a more generic name
-      [Part 4 of 5] Add a CChainState class to clarify internal interfaces
+##      [Part 4 of 5] Add a CChainState class to clarify internal interfaces
 #####  Remove unused depends list from `getblocktemplate` transactions
 #####  Remove unused parameter `validFeeEstimates` from `CTxMempool::addUnchecked`
 #####  Fix comment in CheckInputs to match changed code
