@@ -36,7 +36,7 @@ static bool IsFinalTx(const CTransaction &tx, int nBlockHeight,
     return true;
 }
 
-bool ContextualCheckTransaction(const Config &config, const CTransaction &tx,
+bool ContextualCheckTransaction(const Consensus::Params &params, const CTransaction &tx,
                                 CValidationState &state, int nHeight,
                                 int64_t nLockTimeCutoff,
                                 int64_t nMedianTimePast) {
