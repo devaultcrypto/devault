@@ -8,6 +8,10 @@
 class CBlockIndex;
 class Config;
 
+namespace Consensus {
+  struct Params;
+}
+
 /** Check BLS related protocol upgrade has activated. */
-bool IsBLSEnabled(const Config &config, const CBlockIndex *pindexPrev);
+bool IsBLSEnabled(const Consensus::Params &params, const CBlockIndex *pindexPrev);
 
