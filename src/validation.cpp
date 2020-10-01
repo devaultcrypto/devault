@@ -310,8 +310,8 @@ double GuessVerificationPercent(const ChainTxData &data,
 }
 
 BlockValidationOptions::BlockValidationOptions(const Config &config)
-    : checkPoW(true), checkMerkleRoot(true),
-      excessiveBlockSize(config.GetMaxBlockSize()) {}
+    : excessiveBlockSize(config.GetMaxBlockSize()), checkPoW(true),
+      checkMerkleRoot(true) {}
 
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator) {
@@ -4315,7 +4315,7 @@ bool ProcessNewBlock(const Config &config,
     return true;
 }
 
-bool TestBlockValidity(const Config &config, CValidationState &state,
+bool TestBlockValidity(const CChainParams &chainparams, CValidationState &state,
                        const CBlock &block, CBlockIndex *pindexPrev,
                        BlockValidationOptions validationOptions) {
     AssertLockHeld(cs_main);
@@ -4328,25 +4328,25 @@ bool TestBlockValidity(const Config &config, CValidationState &state,
     indexDummy.phashBlock = &block_hash;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(config.GetChainParams(), block, state,
+    if (!ContextualCheckBlockHeader(chainparams, block, state,
                                     pindexPrev, GetAdjustedTime())) {
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__,
                      FormatStateMessage(state));
     }
 
-    if (!CheckBlock(block, state, config.GetChainParams().GetConsensus(),
+    if (!CheckBlock(block, state, chainparams.GetConsensus(),
                     validationOptions)) {
         return error("%s: Consensus::CheckBlock: %s", __func__,
                      FormatStateMessage(state));
     }
 
     if (!ContextualCheckBlock(
-            block, state, config.GetChainParams().GetConsensus(), pindexPrev)) {
+            block, state, chainparams.GetConsensus(), pindexPrev)) {
         return error("%s: Consensus::ContextualCheckBlock: %s", __func__,
                      FormatStateMessage(state));
     }
 
-    if (!g_chainstate.ConnectBlock(config.GetChainParams(),block, state, &indexDummy, viewNew,
+    if (!g_chainstate.ConnectBlock(chainparams,block, state, &indexDummy, viewNew,
                                    validationOptions,
                                    true)) {
         return false;
