@@ -182,7 +182,7 @@ std::string generateOneBlock(const Config &config, CScript& coinbaseScript) {
     
     CBlock *pblock = &pblocktemplate->block;
     
-    IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
+    IncrementExtraNonce(pblock, chainActive.Tip(), config.GetMaxBlockSize(), nExtraNonce);
     
     while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, config.GetChainParams().GetConsensus())) {
         ++pblock->nNonce;

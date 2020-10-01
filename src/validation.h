@@ -292,14 +292,17 @@ static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 550 * 1024 * 1024;
 
 class BlockValidationOptions {
 private:
+    uint64_t excessiveBlockSize;
     bool checkPoW : 1;
     bool checkMerkleRoot : 1;
-
-    uint64_t excessiveBlockSize;
 
 public:
     // Do full validation by default
     BlockValidationOptions(const Config &config);
+    BlockValidationOptions(uint64_t _excessiveBlockSize, bool _checkPow = true,
+                           bool _checkMerkleRoot = true)
+        : excessiveBlockSize(_excessiveBlockSize), checkPoW(_checkPow),
+          checkMerkleRoot(_checkMerkleRoot) {}
 
     BlockValidationOptions withCheckPoW(bool _checkPoW = true) const {
         BlockValidationOptions ret = *this;
@@ -614,7 +617,7 @@ bool ContextualCheckTransactionForCurrentBlock(const Consensus::Params &params,
  * Check a block is completely valid from start to finish (only works on top of
  * our current best block, with cs_main held)
  */
-bool TestBlockValidity(const Config &config, CValidationState &state,
+bool TestBlockValidity(const CChainParams &chainparams, CValidationState &state,
                        const CBlock &block, CBlockIndex *pindexPrev,
                        BlockValidationOptions validationOptions);
 
