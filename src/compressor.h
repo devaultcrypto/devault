@@ -9,6 +9,7 @@
 #include <primitives/transaction.h>
 #include <script/script.h>
 #include <serialize.h>
+#include <span.h>
 
 class CKeyID;
 class BKeyID;
