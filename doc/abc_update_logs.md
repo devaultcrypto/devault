@@ -2824,7 +2824,7 @@ XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in Walle
       Merge #11050: Avoid treating null RPC arguments different from missing arguments
       Merge #11191: RPC: Improve help text and behavior of RPC-logging.
       Merge #11626: rpc: Make `logging` RPC public
-      [rpc] Add logging RPC
+xx    [rpc] Add logging RPC
       Change CDnsSeedOpts to use std::string instead of c-strings
       Introduce constant default variables to initialize seeder options
       Remove strlcpy.h
