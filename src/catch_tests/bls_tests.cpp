@@ -3,7 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <catch_tests/test_bitcoin.h>
-#include <test/lcg.h>
+#include <catch_tests/lcg.h>
 
 #include <script/interpreter.h>
 
