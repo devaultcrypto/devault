@@ -424,7 +424,7 @@ bool IsInitialBlockDownload();
  * Retrieve a transaction (from memory pool, or from disk, if possible).
  */
 bool GetTransaction(const Consensus::Params &params, const TxId &txid,
-                    CTransactionRef &tx, uint256 &hashBlock,
+                    CTransactionRef &tx, BlockHash &hashBlock,
                     bool fAllowSlow = false, CBlockIndex *blockIndex = nullptr);
 
 /**
