@@ -5542,7 +5542,7 @@ bool CWalletTx::AcceptToMemoryPool(interfaces::Chain::Lock &locked_chain,
         GetConfig(), g_mempool, state, tx, true /* fLimitFree */,
         nullptr /* pfMissingInputs */, false /* fOverrideMempoolLimit */,
         nAbsurdFee);
-    fInMempool != ret;
+    fInMempool |= ret;
     return ret;
 }
 

@@ -2411,8 +2411,8 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Merge #13419: [tests] Speed up knapsack_solver_test by not recreating wallet 100 times.
      Merge #13775: doc: Remove newlines from error message
 #    Merge #13773: wallet: Fix accidental use of the comma operator
-     stop rewinding post-segwit blocks on startup
-     [backport] gui: Show messages as text not html
+##   stop rewinding post-segwit blocks on startup
+##   [backport] gui: Show messages as text not html
 #    Fix -Wcast-align in crypto_hash.cpp
      [LINTER] Enable new autopep8 rules
      [LINTER] Remove empty lines at the beginning of a block
@@ -2422,7 +2422,7 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
      Static assert with no message is a C++17 feature and warns on C++14
      [LINTER] Fix the tests linter
      Add a separate executable for seeder tests
-     Fix enum NumConnections shadowing warning
+##   Fix enum NumConnections shadowing warning
      checkmultisig: refactor nullfail check
      remove priority free transactions mechanism (currently off by default)
      fix some tests that rely on free transactions being submittable via RPC
