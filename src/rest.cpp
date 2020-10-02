@@ -397,7 +397,7 @@ static bool rest_tx(Config &config, HTTPRequest *req,
     }
 
     CTransactionRef tx;
-    uint256 hashBlock = uint256();
+    BlockHash hashBlock = BlockHash();
     if (!GetTransaction(config.GetChainParams().GetConsensus(), txid, tx,
                         hashBlock, true)) {
         return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");

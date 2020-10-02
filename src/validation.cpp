@@ -910,7 +910,7 @@ bool GetAddrIndex(const std::string &addr,
  * from the corresponding block.
  */
 bool GetTransaction(const Consensus::Params &params, const TxId &txid,
-                    CTransactionRef &txOut, uint256 &hashBlock, bool fAllowSlow,
+                    CTransactionRef &txOut, BlockHash &hashBlock, bool fAllowSlow,
                     CBlockIndex *blockIndex) {
     CBlockIndex *pindexSlow = blockIndex;
 
@@ -924,7 +924,7 @@ bool GetTransaction(const Consensus::Params &params, const TxId &txid,
         }
 
         if (g_txindex) {
-            return g_txindex->FindTx(txid, hashBlock, txOut);
+          return g_txindex->FindTx(txid, hashBlock, txOut);
         }
 
         // use coin database to locate block that contains transaction, and scan
