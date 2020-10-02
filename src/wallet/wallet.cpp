@@ -5530,10 +5530,6 @@ bool CWalletTx::AcceptToMemoryPool(interfaces::Chain::Lock &locked_chain,
                                    const Amount nAbsurdFee,
                                    CValidationState &state) {
 
-    // Quick check to avoid re-setting fInMempool to false
-    if (g_mempool.exists(tx->GetId())) {
-        return false;
-    }
     // Temporary, for AcceptToMemoryPool below. Removed in upcoming commit.
     LockAnnotation lock(::cs_main);
 
@@ -5546,7 +5542,7 @@ bool CWalletTx::AcceptToMemoryPool(interfaces::Chain::Lock &locked_chain,
         GetConfig(), g_mempool, state, tx, true /* fLimitFree */,
         nullptr /* pfMissingInputs */, false /* fOverrideMempoolLimit */,
         nAbsurdFee);
-    fInMempool = ret;
+    fInMempool != ret;
     return ret;
 }
 
