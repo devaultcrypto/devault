@@ -40,12 +40,6 @@ void InterruptHTTPServer();
 /** Stop HTTP server */
 void StopHTTPServer();
 
-/**
- * Change logging level for libevent. Removes BCLog::LIBEVENT from
- * logCategories if libevent doesn't support debug logging.
- */
-bool UpdateHTTPServerLogging(bool enable);
-
 /** Handler for requests to a certain HTTP path */
 typedef std::function<bool(Config &config, HTTPRequest *req,
                            const std::string &)>
@@ -84,19 +78,19 @@ public:
     enum RequestMethod { UNKNOWN, GET, POST, HEAD, PUT, OPTIONS };
 
     /** Get requested URI */
-    std::string GetURI() const;
+    std::string GetURI();
 
     /** Get CService (address:ip) for the origin of the http request */
-    CService GetPeer() const;
+    CService GetPeer();
 
     /** Get request method */
-    RequestMethod GetRequestMethod() const;
+    RequestMethod GetRequestMethod();
 
     /**
      * Get the request header specified by hdr, or an empty string.
      * Return an pair (isPresent,string).
      */
-    std::pair<bool, std::string> GetHeader(const std::string &hdr) const;
+    std::pair<bool, std::string> GetHeader(const std::string &hdr);
 
     /**
      * Read request body.

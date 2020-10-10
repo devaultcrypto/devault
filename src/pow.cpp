@@ -9,15 +9,18 @@
 
 #include <arith_uint256.h>
 #include <chain.h>
+#include <chainparams.h>
+#include <config.h>
 #include <consensus/activation.h>
 #include <consensus/params.h>
 #include <primitives/block.h>
 #include <uint256.h>
 #include <util/system.h>
 
-unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const CBlockHeader *pblock,
-                                           const Consensus::Params &params) 
+unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const CBlockHeader *pblock, const Config &config) 
 {
+    const Consensus::Params &params = config.GetChainParams().GetConsensus();
+
     // This cannot handle the genesis block and early blocks in general.
     assert(pindexPrev);
     
@@ -80,8 +83,9 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexPrev, const 
 }
 
 uint32_t GetNextWorkRequired(const CBlockIndex *pindexPrev,
-                             const CBlockHeader *pblock,
-                             const Consensus::Params &params) {
+                             const CBlockHeader *pblock, const Config &config) {
+    const Consensus::Params &params = config.GetChainParams().GetConsensus();
+
     // GetNextWorkRequired should never be called on the genesis block
     assert(pindexPrev != nullptr);
 
@@ -90,10 +94,10 @@ uint32_t GetNextWorkRequired(const CBlockIndex *pindexPrev,
         return pindexPrev->nBits;
     }
 
-    return LwmaCalculateNextWorkRequired(pindexPrev, pblock, params);
+    return LwmaCalculateNextWorkRequired(pindexPrev, pblock, config);
 }
 
-bool CheckProofOfWork(uint256 hash, uint32_t nBits, const Consensus::Params &params) {
+bool CheckProofOfWork(uint256 hash, uint32_t nBits, const Config &config) {
   bool fNegative;
   bool fOverflow;
   arith_uint256 bnTarget;
@@ -103,7 +107,7 @@ bool CheckProofOfWork(uint256 hash, uint32_t nBits, const Consensus::Params &par
   // Check range
   if (fNegative || bnTarget == 0 || fOverflow ||
       bnTarget >
-      UintToArith256(params.powLimit)) {
+      UintToArith256(config.GetChainParams().GetConsensus().powLimit)) {
     return false;
   }
   

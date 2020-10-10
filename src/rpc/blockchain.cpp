@@ -85,7 +85,6 @@ UniValue blockheaderToJSON(const CBlockIndex *tip,
     result.pushKV("bits", strprintf("%08x", blockindex->nBits));
     result.pushKV("difficulty", GetDifficulty(blockindex));
     result.pushKV("chainwork", blockindex->nChainWork.GetHex());
-    result.pushKV("nTx", uint64_t(blockindex->nTx));
 
     if (blockindex->pprev) {
         result.pushKV("previousblockhash",
@@ -126,7 +125,6 @@ UniValue blockToJSON(const CBlock &block, const CBlockIndex *tip,
     result.pushKV("bits", strprintf("%08x", block.nBits));
     result.pushKV("difficulty", GetDifficulty(blockindex));
     result.pushKV("chainwork", blockindex->nChainWork.GetHex());
-    result.pushKV("nTx", uint64_t(blockindex->nTx));
 
     if (blockindex->pprev) {
         result.pushKV("previousblockhash",
@@ -581,11 +579,11 @@ static UniValue getmempoolancestors(const Config &config,
         fVerbose = request.params[1].get_bool();
     }
 
-    TxId txid(ParseHashV(request.params[0], "parameter 1"));
+    uint256 hash = ParseHashV(request.params[0], "parameter 1");
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
@@ -608,10 +606,10 @@ static UniValue getmempoolancestors(const Config &config,
         UniValue o(UniValue::VOBJ);
         for (CTxMemPool::txiter ancestorIt : setAncestors) {
             const CTxMemPoolEntry &e = *ancestorIt;
-            const TxId &_txid = e.GetTx().GetId();
+            const uint256 &_hash = e.GetTx().GetId();
             UniValue info(UniValue::VOBJ);
             entryToJSON(info, e);
-            o.pushKV(_txid.ToString(), info);
+            o.pushKV(_hash.ToString(), info);
         }
         return o;
     }
@@ -651,11 +649,11 @@ static UniValue getmempooldescendants(const Config &config,
         fVerbose = request.params[1].get_bool();
     }
 
-    TxId txid(ParseHashV(request.params[0], "parameter 1"));
+    uint256 hash = ParseHashV(request.params[0], "parameter 1");
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
@@ -677,10 +675,10 @@ static UniValue getmempooldescendants(const Config &config,
         UniValue o(UniValue::VOBJ);
         for (CTxMemPool::txiter descendantIt : setDescendants) {
             const CTxMemPoolEntry &e = *descendantIt;
-            const TxId &_txid = e.GetTx().GetId();
+            const uint256 &_hash = e.GetTx().GetId();
             UniValue info(UniValue::VOBJ);
             entryToJSON(info, e);
-            o.pushKV(_txid.ToString(), info);
+            o.pushKV(_hash.ToString(), info);
         }
         return o;
     }
@@ -704,11 +702,11 @@ static UniValue getmempoolentry(const Config &config,
             HelpExampleRpc("getmempoolentry", "\"mytxid\""));
     }
 
-    TxId txid(ParseHashV(request.params[0], "parameter 1"));
+    uint256 hash = ParseHashV(request.params[0], "parameter 1");
 
     LOCK(g_mempool.cs);
 
-    CTxMemPool::txiter it = g_mempool.mapTx.find(txid);
+    CTxMemPool::txiter it = g_mempool.mapTx.find(hash);
     if (it == g_mempool.mapTx.end()) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "Transaction not in mempool");
@@ -780,8 +778,6 @@ static UniValue getblockheader(const Config &config,
             "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
             "  \"chainwork\" : \"0000...1f3\"     (string) Expected number of "
             "hashes required to produce the current chain (in hex)\n"
-            "  \"nTx\" : n,             (numeric) The number of transactions "
-            "in the block.\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the "
             "previous block\n"
             "  \"nextblockhash\" : \"hash\",      (string) The hash of the "
@@ -802,7 +798,7 @@ static UniValue getblockheader(const Config &config,
     LOCK(cs_main);
 
     std::string strHash = request.params[0].get_str();
-    BlockHash hash(uint256S(strHash));
+    uint256 hash(uint256S(strHash));
 
     bool fVerbose = true;
     if (!request.params[1].isNull()) {
@@ -876,7 +872,7 @@ static UniValue getdifficulties(const Config &config, const JSONRPCRequest &requ
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
       }
       CBlock block;
-      if (!ReadBlockFromDisk(block, pblockindex, config.GetChainParams().GetConsensus())) {
+      if (!ReadBlockFromDisk(block, pblockindex, config)) {
         // Block not found on disk. This could be because we have the block
         // header in our index but don't have the block (for example if a
         // non-whitelisted node sends us an unrequested long chain of valid
@@ -923,12 +919,12 @@ static UniValue getdifficulties(const Config &config, const JSONRPCRequest &requ
 static CBlock GetBlockChecked(const Config &config,
                               const CBlockIndex *pblockindex) {
     CBlock block;
-    if (IsBlockPruned(pblockindex)) {
+    if (fHavePruned && !pblockindex->nStatus.hasData() &&
+        pblockindex->nTx > 0) {
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
     }
 
-    if (!ReadBlockFromDisk(block, pblockindex,
-                           config.GetChainParams().GetConsensus())) {
+    if (!ReadBlockFromDisk(block, pblockindex, config)) {
         // Block not found on disk. This could be because we have the block
         // header in our index but don't have the block (for example if a
         // non-whitelisted node sends us an unrequested long chain of valid
@@ -984,8 +980,6 @@ static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
             "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
             "  \"chainwork\" : \"xxxx\",  (string) Expected number of hashes "
             "required to produce the chain up to this block (in hex)\n"
-            "  \"nTx\" : n,             (numeric) The number of transactions "
-            "in the block.\n"
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the "
             "previous block\n"
             "  \"nextblockhash\" : \"hash\"       (string) The hash of the "
@@ -1011,7 +1005,7 @@ static UniValue getblock(const Config &config, const JSONRPCRequest &request) {
     LOCK(cs_main);
 
     std::string strHash = request.params[0].get_str();
-    BlockHash hash(uint256S(strHash));
+    uint256 hash(uint256S(strHash));
 
     int verbosity = 1;
     if (!request.params[1].isNull()) {
@@ -1521,8 +1515,7 @@ static UniValue getchaintips(const Config &config,
     std::set<const CBlockIndex *> setOrphans;
     std::set<const CBlockIndex *> setPrevs;
 
-    for (const std::pair<const BlockHash, CBlockIndex *> &item :
-         mapBlockIndex) {
+    for (const std::pair<const uint256, CBlockIndex *> &item : mapBlockIndex) {
         if (!chainActive.Contains(item.second)) {
             setOrphans.insert(item.second);
             setPrevs.insert(item.second->pprev);
@@ -1559,7 +1552,7 @@ static UniValue getchaintips(const Config &config,
         } else if (block->nStatus.isOnParkedChain()) {
             // This block or one of its ancestors is parked.
             status = "parked";
-        } else if (!block->HaveTxsDownloaded()) {
+        } else if (block->nChainTx == 0) {
             // This block cannot be connected because full block data for it or
             // one of its parents is missing.
             status = "headers-only";
@@ -1651,7 +1644,7 @@ static UniValue preciousblock(const Config &config,
     }
 
     std::string strHash = request.params[0].get_str();
-    BlockHash hash(uint256S(strHash));
+    uint256 hash(uint256S(strHash));
     CBlockIndex *pblockindex;
 
     {
@@ -1689,7 +1682,7 @@ UniValue finalizeblock(const Config &config, const JSONRPCRequest &request) {
     }
 
     std::string strHash = request.params[0].get_str();
-    BlockHash hash(uint256S(strHash));
+    uint256 hash(uint256S(strHash));
     CValidationState state;
 
     {
@@ -1730,7 +1723,7 @@ static UniValue invalidateblock(const Config &config,
     }
 
     const std::string strHash = request.params[0].get_str();
-    const BlockHash hash(uint256S(strHash));
+    const uint256 hash(uint256S(strHash));
     CValidationState state;
 
     {
@@ -1768,7 +1761,7 @@ UniValue parkblock(const Config &config, const JSONRPCRequest &request) {
     }
 
     const std::string strHash = request.params[0].get_str();
-    const BlockHash hash(uint256S(strHash));
+    const uint256 hash(uint256S(strHash));
     CValidationState state;
 
     {
@@ -1810,7 +1803,7 @@ static UniValue reconsiderblock(const Config &config,
     }
 
     const std::string strHash = request.params[0].get_str();
-    const BlockHash hash(uint256S(strHash));
+    const uint256 hash(uint256S(strHash));
 
     {
         LOCK(cs_main);
@@ -1849,7 +1842,7 @@ UniValue unparkblock(const Config &config, const JSONRPCRequest &request) {
     }
 
     const std::string strHash = request.params[0].get_str();
-    const BlockHash hash(uint256S(strHash));
+    const uint256 hash(uint256S(strHash));
 
     {
         LOCK(cs_main);
@@ -1918,7 +1911,7 @@ static UniValue getchaintxstats(const Config &config,
         LOCK(cs_main);
         pindex = chainActive.Tip();
     } else {
-        BlockHash hash(uint256S(request.params[1].get_str()));
+        uint256 hash = uint256S(request.params[1].get_str());
         LOCK(cs_main);
         auto it = mapBlockIndex.find(hash);
         if (it == mapBlockIndex.end()) {
@@ -2235,7 +2228,7 @@ static UniValue getblockstats(const Config &config,
         pindex = chainActive[height];
     } else {
         const std::string strHash = request.params[0].get_str();
-        const BlockHash hash(uint256S(strHash));
+        const uint256 hash(uint256S(strHash));
         pindex = LookupBlockIndex(hash);
         if (!pindex) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
@@ -2291,8 +2284,6 @@ static UniValue getblockstats(const Config &config,
     std::vector<Amount> feerate_array;
     std::vector<int64_t> txsize_array;
 
-    const Consensus::Params &params = config.GetChainParams().GetConsensus();
-
     for (const auto &tx : block.vtx) {
         outputs += tx->vout.size();
         Amount tx_total_out = Amount::zero();
@@ -2326,17 +2317,17 @@ static UniValue getblockstats(const Config &config,
         }
 
         if (loop_inputs) {
+
             if (!g_txindex) {
                 throw JSONRPCError(RPC_INVALID_PARAMETER,
                                    "One or more of the selected stats requires "
                                    "-txindex enabled");
             }
-
             Amount tx_total_in = Amount::zero();
             for (const CTxIn &in : tx->vin) {
                 CTransactionRef tx_in;
-                BlockHash hashBlock;
-                if (!GetTransaction(params, in.prevout.GetTxId(), tx_in,
+                uint256 hashBlock;
+                if (!GetTransaction(config, in.prevout.GetTxId(), tx_in,
                                     hashBlock, false)) {
                     throw JSONRPCError(RPC_INTERNAL_ERROR,
                                        std::string("Unexpected internal error "

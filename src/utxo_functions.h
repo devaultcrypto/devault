@@ -25,7 +25,7 @@ double GetDifficulty(const CBlockIndex *blockindex);
 
 struct CCoinsStats {
     int nHeight;
-    BlockHash hashBlock;
+    uint256 hashBlock;
     uint64_t nTransactions;
     uint64_t nTransactionOutputs;
     uint64_t nBogoSize;

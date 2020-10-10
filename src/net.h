@@ -77,6 +77,10 @@ static const bool DEFAULT_UPNP = USE_UPNP;
 #else
 static const bool DEFAULT_UPNP = false;
 #endif
+/** The maximum number of entries in mapAskFor */
+static const size_t MAPASKFOR_MAX_SZ = MAX_INV_SZ;
+/** The maximum number of entries in setAskFor (larger due to getdata latency)*/
+static const size_t SETASKFOR_MAX_SZ = 2 * MAX_INV_SZ;
 /** The maximum number of peer connections to maintain. */
 static const unsigned int DEFAULT_MAX_PEER_CONNECTIONS = 125;
 /** The default for -maxuploadtarget. 0 = Unlimited */
@@ -299,13 +303,6 @@ public:
 
     void WakeMessageHandler();
 
-    /**
-     * Attempts to obfuscate tx time through exponentially distributed emitting.
-     * Works assuming that a single interval is used.
-     * Variable intervals will result in privacy decrease.
-     */
-    int64_t PoissonNextSendInbound(int64_t now, int average_interval_seconds);
-
 private:
     struct ListenSocket {
         SOCKET socket;
@@ -433,8 +430,6 @@ private:
      */
     std::atomic_bool m_try_another_outbound_peer;
 
-    std::atomic<int64_t> m_next_send_inv_to_incoming;
-
     friend struct CConnmanTest;
 };
 
@@ -510,6 +505,8 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer,
 extern bool fDiscover;
 extern bool fListen;
 extern bool fRelayTxes;
+
+extern limitedmap<uint256, int64_t> mapAlreadyAskedFor;
 
 struct LocalServiceInfo {
     int nScore;
@@ -693,7 +690,7 @@ protected:
     mapMsgCmdSize mapRecvBytesPerMsgCmd GUARDED_BY(cs_vRecv);
 
 public:
-    BlockHash hashContinue;
+    uint256 hashContinue;
     std::atomic<int> nStartingHeight{-1};
 
     // flood relay
@@ -708,15 +705,17 @@ public:
     CRollingBloomFilter filterInventoryKnown GUARDED_BY(cs_inventory);
     // Set of transaction ids we still have to announce. They are sorted by the
     // mempool before relay, so the order is not important.
-    std::set<TxId> setInventoryTxToSend;
+    std::set<uint256> setInventoryTxToSend;
     // List of block ids we still have announce. There is no final sorting
     // before sending, as they are always sent immediately and in the order
     // requested.
     std::vector<uint256> vInventoryBlockToSend GUARDED_BY(cs_inventory);
     CCriticalSection cs_inventory;
+    std::set<uint256> setAskFor;
+    std::multimap<int64_t, CInv> mapAskFor;
     int64_t nNextInvSend{0};
     // Used for headers announcements - unfiltered blocks to relay.
-    std::vector<BlockHash> vBlockHashesToAnnounce GUARDED_BY(cs_inventory);
+    std::vector<uint256> vBlockHashesToAnnounce GUARDED_BY(cs_inventory);
     // Used for BIP35 mempool sending.
     bool fSendMempool GUARDED_BY(cs_inventory){false};
 
@@ -826,19 +825,20 @@ public:
     void PushInventory(const CInv &inv) {
         LOCK(cs_inventory);
         if (inv.type == MSG_TX) {
-            const TxId txid(inv.hash);
-            if (!filterInventoryKnown.contains(txid)) {
-                setInventoryTxToSend.insert(txid);
+            if (!filterInventoryKnown.contains(inv.hash)) {
+                setInventoryTxToSend.insert(inv.hash);
             }
         } else if (inv.type == MSG_BLOCK) {
             vInventoryBlockToSend.push_back(inv.hash);
         }
     }
 
-    void PushBlockHash(const BlockHash &hash) {
+    void PushBlockHash(const uint256 &hash) {
         LOCK(cs_inventory);
         vBlockHashesToAnnounce.push_back(hash);
     }
+
+    void AskFor(const CInv &inv);
 
     void CloseSocketDisconnect();
 
@@ -855,7 +855,7 @@ public:
  * Return a timestamp in the future (in microseconds) for exponentially
  * distributed events.
  */
-int64_t PoissonNextSend(int64_t now, int average_interval_seconds);
+int64_t PoissonNextSend(int64_t nNow, int average_interval_seconds);
 
 std::string getSubVersionEB(uint64_t MaxBlockSize);
 std::string userAgent(const Config &config);

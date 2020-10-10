@@ -19,7 +19,6 @@
 
 TEST_CASE("TestPackageAccounting") {
   CTxMemPool testPool;
-  LOCK2(cs_main, testPool.cs);
   TestMemPoolEntryHelper entry;
   CMutableTransaction parentOfAll;
 
@@ -66,6 +65,7 @@ TEST_CASE("TestPackageAccounting") {
       // parents.
 
       {
+          LOCK(testPool.cs);
           CTxMemPoolEntry parent = *testPool.mapTx.find(mtx.vin.back().prevout.GetTxId());
 
           minAncestors = std::min(minAncestors, parent.GetCountWithAncestors());
@@ -106,6 +106,7 @@ TEST_CASE("TestPackageAccounting") {
     totalFee += randFee;
     totalSize += CTransaction(tx).GetTotalSize();
     {
+        LOCK(testPool.cs);
         CTxMemPoolEntry parentEntry = *testPool.mapTx.find(parentOfAllId);
         CTxMemPoolEntry latestEntry = *testPool.mapTx.find(curId);
     
@@ -160,7 +161,6 @@ TEST_CASE("MempoolRemoveTest") {
   }
 
   CTxMemPool testPool;
-  LOCK2(cs_main, testPool.cs);
 
   // Nothing in pool, remove should do nothing:
   unsigned int poolSize = testPool.size();
@@ -226,7 +226,6 @@ TEST_CASE("MempoolClearTest") {
   }
 
   CTxMemPool testPool;
-  LOCK2(cs_main, testPool.cs);
 
   // Nothing in pool, clear should do nothing:
   testPool.clear();
@@ -236,6 +235,8 @@ TEST_CASE("MempoolClearTest") {
   testPool.addUnchecked(txParent.GetId(), entry.FromTx(txParent));
 
   {
+      LOCK(testPool.cs);
+      
       BOOST_CHECK_EQUAL(testPool.size(), 1UL);
       BOOST_CHECK_EQUAL(testPool.mapTx.size(), 1UL);
       BOOST_CHECK_EQUAL(testPool.mapNextTx.size(), 1UL);
@@ -266,7 +267,6 @@ static void CheckSort(CTxMemPool &pool, std::vector<std::string> &sortedOrder, c
 TEST_CASE("MempoolIndexingTest") {
   
   CTxMemPool pool;
-  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
 
   /* 3rd highest fee */
@@ -314,6 +314,7 @@ TEST_CASE("MempoolIndexingTest") {
   sortedOrder[2] = tx1.GetId().ToString(); // 10
   sortedOrder[3] = tx4.GetId().ToString(); // 15
   sortedOrder[4] = tx2.GetId().ToString(); // 20
+  LOCK(pool.cs);
   CheckSort<descendant_score>(pool, sortedOrder, "MempoolIndexingTest1");
 
   /* low fee but with high fee child */
@@ -446,7 +447,6 @@ TEST_CASE("MempoolIndexingTest") {
 TEST_CASE("MempoolAncestorIndexingTest") {
   CTxMemPool pool;
   TestMemPoolEntryHelper entry;
-  LOCK2(cs_main, pool.cs);
 
   /* 3rd highest fee */
   CMutableTransaction tx1 = CMutableTransaction();
@@ -501,6 +501,7 @@ TEST_CASE("MempoolAncestorIndexingTest") {
   }
   sortedOrder[4] = tx3.GetId().ToString(); // 0
 
+  LOCK(pool.cs);
   CheckSort<ancestor_score>(pool, sortedOrder, "MempoolAncestorIndexingTest1");
 
   /* low fee parent with high fee child */
@@ -559,7 +560,6 @@ TEST_CASE("MempoolAncestorIndexingTest") {
 
 TEST_CASE("MempoolSizeLimitTest") {
   CTxMemPool pool;
-  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   entry.dPriority = 10.0;
   Amount feeIncrement = MEMPOOL_FULL_FEE_INCREMENT.GetFeePerK();
@@ -776,8 +776,6 @@ TEST_CASE("TestImportMempool") {
       // If the mempool is empty, importMempool doesn't change
       // disconnectPool
       CTxMemPool testPool;
-      LOCK2(cs_main, testPool.cs);
-      
       disconnectPool.importMempool(testPool);
       CheckDisconnectPoolOrder(disconnectPool, correctlyOrderedIds, disconnectedTxns.size());
 

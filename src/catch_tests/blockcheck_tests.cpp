@@ -16,7 +16,7 @@ static void RunCheckOnBlockImpl(const GlobalConfig &config, const CBlock &block,
                                 bool expected) {
   block.fChecked = false;
   bool fValid = CheckBlock(
-                           block, state, config.GetChainParams().GetConsensus(),
+                           config, block, state,
                            BlockValidationOptions(config).withCheckPoW(false).withCheckMerkleRoot(
                                                                                                   false));
 

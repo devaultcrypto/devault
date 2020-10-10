@@ -28,7 +28,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <optional>
 
 class CBlockIndex;
 class Config;
@@ -240,7 +239,7 @@ private:
 
 // extracts a transaction hash from CTxMempoolEntry or CTransactionRef
 struct mempoolentry_txid {
-    typedef TxId result_type;
+    typedef uint256 result_type;
     result_type operator()(const CTxMemPoolEntry &entry) const {
         return entry.GetTx().GetId();
     }
@@ -406,7 +405,7 @@ private:
 public:
     SaltedTxidHasher();
 
-    size_t operator()(const TxId &txid) const {
+    size_t operator()(const uint256 &txid) const {
         return SipHashUint256(k0, k1, txid);
     }
 };
@@ -544,7 +543,7 @@ public:
 
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
     //!< All tx hashes/entries in mapTx, in random order
-    std::vector<std::pair<TxHash, txiter>> vTxHashes;
+    std::vector<std::pair<uint256, txiter>> vTxHashes;
 
     struct CompareIteratorByHash {
         bool operator()(const txiter &a, const txiter &b) const {
@@ -583,7 +582,7 @@ private:
 
 public:
     indirectmap<COutPoint, const CTransaction *> mapNextTx GUARDED_BY(cs);
-    std::map<TxId, TXModifier> mapDeltas;
+    std::map<uint256, TXModifier> mapDeltas;
 
     /**
      * Create a new CTxMemPool.
@@ -610,16 +609,15 @@ public:
     // Note that addUnchecked is ONLY called from ATMP outside of tests
     // and any other callers may break wallet's in-mempool tracking (due to
     // lack of CValidationInterface::TransactionAddedToMempool callbacks).
-    void addUnchecked(const TxId &hash, const CTxMemPoolEntry &entry)
-        EXCLUSIVE_LOCKS_REQUIRED(cs, cs_main);
-    void addUnchecked(const TxId &hash, const CTxMemPoolEntry &entry,
-                      setEntries &setAncestors)
-        EXCLUSIVE_LOCKS_REQUIRED(cs, cs_main);
+    void addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry);
+    void addUnchecked(const uint256 &hash, const CTxMemPoolEntry &entry,
+                      setEntries &setAncestors);
 
     void addAddrIndex(const CTxMemPoolEntry &entry, const CCoinsViewCache &view);
     bool getAddrIndex(std::vector<std::string> &addresses,
                       std::vector<std::pair<CMempoolAddrDeltaKey, CMempoolAddrDelta> > &results);
     bool removeAddrIndex(const uint256 txhash);
+    
     
     void removeRecursive(
         const CTransaction &tx,
@@ -634,9 +632,9 @@ public:
     void clear();
     // lock free
     void _clear() EXCLUSIVE_LOCKS_REQUIRED(cs);
-    bool CompareDepthAndScore(const TxId &txida, const TxId &txidb);
-    void queryHashes(std::vector<uint256> &vtxid) const;
-    bool isSpent(const COutPoint &outpoint) const;
+    bool CompareDepthAndScore(const uint256 &hasha, const uint256 &hashb);
+    void queryHashes(std::vector<uint256> &vtxid);
+    bool isSpent(const COutPoint &outpoint);
     unsigned int GetTransactionsUpdated() const;
     void AddTransactionsUpdated(unsigned int n);
     /**
@@ -647,27 +645,13 @@ public:
     bool HasNoInputsOf(const CTransaction &tx) const;
 
     /** Affect CreateNewBlock prioritisation of transactions */
-    void PrioritiseTransaction(const TxId &txid, double dPriorityDelta,
+    void PrioritiseTransaction(const uint256 &hash, double dPriorityDelta,
                                const Amount nFeeDelta);
-    void ApplyDeltas(const TxId &txid, double &dPriorityDelta,
+    void ApplyDeltas(const uint256 hash, double &dPriorityDelta,
                      Amount &nFeeDelta) const;
-    void ClearPrioritisation(const TxId &txid);
+    void ClearPrioritisation(const uint256 hash);
 
-    /** Get the transaction in the pool that spends the same prevout */
-    const CTransaction *GetConflictTx(const COutPoint &prevout) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs);
-
-    /** Returns an iterator to the given txid, if found */
-    std::optional<txiter> GetIter(const TxId &txid) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs);
-
-    /**
-     * Translate a set of txids into a set of pool iterators to avoid repeated
-     * lookups.
-     */
-    setEntries GetIterSet(const std::set<TxId> &txids) const
-        EXCLUSIVE_LOCKS_REQUIRED(cs);
-
+public:
     /**
      * Remove a set of transactions from the mempool. If a transaction is in
      * this set, then all in-mempool descendants must also be in the set, unless
@@ -752,7 +736,7 @@ public:
      * Returns false if the transaction is in the mempool and not within the
      * chain limit specified.
      */
-    bool TransactionWithinChainLimit(const TxId &txid,
+    bool TransactionWithinChainLimit(const uint256 &txid,
                                      size_t chainLimit) const;
 
     /** @returns true if the mempool is fully loaded */
@@ -771,13 +755,13 @@ public:
         return totalTxSize;
     }
 
-    bool exists(const TxId &txid) const {
+    bool exists(uint256 hash) const {
         LOCK(cs);
-        return mapTx.count(txid) != 0;
+        return mapTx.count(hash) != 0;
     }
 
-    CTransactionRef get(const TxId &txid) const;
-    TxMempoolInfo info(const TxId &txid) const;
+    CTransactionRef get(const uint256 &hash) const;
+    TxMempoolInfo info(const uint256 &hash) const;
     std::vector<TxMempoolInfo> infoAll() const;
 
     CFeeRate estimateFee() const;

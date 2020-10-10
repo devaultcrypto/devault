@@ -46,7 +46,7 @@ bool CColdRewards::UpdateWithBlock(const Config &config, CBlockIndex *pindexNew)
   CBlock block;
   int nHeight = pindexNew->nHeight;
   Amount minRewardBalance = consensusParams.getMinRewardBalance(nHeight);
-  ReadBlockFromDisk(block, pindexNew, config.GetChainParams().GetConsensus());
+  ReadBlockFromDisk(block, pindexNew, config);
 
   // Loop through block
   std::vector<std::pair<COutPoint, CRewardValue>> rewardAdditions;

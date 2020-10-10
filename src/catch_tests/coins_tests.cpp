@@ -26,7 +26,7 @@ bool operator==(const Coin &a, const Coin &b) {
 }
 
 class CCoinsViewTest : public CCoinsView {
-  BlockHash hashBestBlock_;
+  uint256 hashBestBlock_;
   std::map<COutPoint, Coin> map_;
 
   public:
@@ -41,9 +41,9 @@ class CCoinsViewTest : public CCoinsView {
     return true;
   }
 
-  BlockHash GetBestBlock() const override { return hashBestBlock_; }
+  uint256 GetBestBlock() const override { return hashBestBlock_; }
 
-  bool BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) override {
+  bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override {
     for (CCoinsMap::iterator it = mapCoins.begin(); it != mapCoins.end();) {
       if (it->second.flags & CCoinsCacheEntry::DIRTY) {
         // Same optimization used in CCoinsViewDB is to only write dirty
@@ -588,7 +588,7 @@ void GetCoinMapEntry(const CCoinsMap &map, Amount &value, char &flags) {
 void WriteCoinViewEntry(CCoinsView &view, const Amount value, char flags) {
   CCoinsMap map;
   InsertCoinMapEntry(map, value, flags);
-  view.BatchWrite(map, BlockHash());
+  view.BatchWrite(map, {});
 }
 
 class SingleEntryCacheTest {

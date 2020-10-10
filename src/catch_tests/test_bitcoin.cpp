@@ -190,13 +190,13 @@ CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransa
             });
 
   // IncrementExtraNonce creates a valid coinbase and merkleRoot
+  unsigned int extraNonce = 0;
   {
     LOCK(cs_main);
-    unsigned int extraNonce = 0;
-    IncrementExtraNonce(&block, chainActive.Tip(), config.GetMaxBlockSize(), extraNonce);
+    IncrementExtraNonce(config, &block, chainActive.Tip(), extraNonce);
   }
 
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
     ++block.nNonce;
   }
 

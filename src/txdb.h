@@ -12,24 +12,15 @@
 #include <flatfile.h>
 #include <addrindex.h>
 #include <timestampindex.h>
-#include <diskblockpos.h>
 
 #include <string>
 #include <utility>
 #include <vector>
 
-struct BlockHash;
 class CBlockIndex;
 class CCoinsViewDBCursor;
 class uint256;
-
-namespace Consensus {
-struct Params;
-}
-
-namespace Consensus {
-struct Params;
-}
+class Config;
 
 //! No need to periodic flush if at least this much space still available.
 static constexpr int MAX_BLOCK_COINSDB_USAGE = 10;
@@ -51,29 +42,6 @@ static const int64_t nMaxTxIndexCache = 1024;
 //! Max memory allocated to coin DB specific cache (MiB)
 static const int64_t nMaxCoinsDBCache = 8;
 
-
-struct CDiskTxPos : public FlatFilePos {
-    unsigned int nTxOffset; // after header
-
-    ADD_SERIALIZE_METHODS;
-
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream &s, Operation ser_action) {
-        READWRITEAS(FlatFilePos, *this);
-        READWRITE(VARINT(nTxOffset));
-    }
-
-    CDiskTxPos(const CDiskBlockPos &blockIn, unsigned int nTxOffsetIn)
-        : FlatFilePos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn) {}
-
-    CDiskTxPos() { SetNull(); }
-
-    void SetNull() {
-        FlatFilePos::SetNull();
-        nTxOffset = 0;
-    }
-};
-
 /** CCoinsView backed by the coin database (chainstate/) */
 class CCoinsViewDB final : public CCoinsView {
 protected:
@@ -85,9 +53,9 @@ public:
 
     bool GetCoin(const COutPoint &outpoint, Coin &coin) const override;
     bool HaveCoin(const COutPoint &outpoint) const override;
-    BlockHash GetBestBlock() const override;
-    std::vector<BlockHash> GetHeadBlocks() const override;
-    bool BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) override;
+    uint256 GetBestBlock() const override;
+    std::vector<uint256> GetHeadBlocks() const override;
+    bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
     CCoinsViewCursor *Cursor() const override;
 
     //! Attempt to update from an older database format.
@@ -109,7 +77,7 @@ public:
     void Next() override;
 
 private:
-    CCoinsViewDBCursor(CDBIterator *pcursorIn, const BlockHash &hashBlockIn)
+    CCoinsViewDBCursor(CDBIterator *pcursorIn, const uint256 &hashBlockIn)
         : CCoinsViewCursor(hashBlockIn), pcursor(pcursorIn) {}
     std::unique_ptr<CDBIterator> pcursor;
     std::pair<char, COutPoint> keyTmp;
@@ -145,8 +113,8 @@ public:
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
     bool LoadBlockIndexGuts(
-                            const Consensus::Params &params,
-                            std::function<CBlockIndex *(const BlockHash &)> insertBlockIndex);
+        const Config &config,
+        std::function<CBlockIndex *(const uint256 &)> insertBlockIndex);
 };
 
 #endif // BITCOIN_TXDB_H

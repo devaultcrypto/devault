@@ -42,7 +42,7 @@
 #include <future>
 #include <univalue.h>
 
-static void TxToJSON(const CTransaction &tx, const BlockHash &hashBlock,
+static void TxToJSON(const CTransaction &tx, const uint256 hashBlock,
                      UniValue &entry) {
     // Call into TxToUniv() in bitcoin-common to decode the transaction hex.
     //
@@ -177,8 +177,7 @@ static UniValue getrawtransaction(const Config &config,
     TxId txid = TxId(ParseHashV(request.params[0], "parameter 1"));
     CBlockIndex *blockindex = nullptr;
 
-    const CChainParams &params = config.GetChainParams();
-    if (txid == params.GenesisBlock().hashMerkleRoot) {
+    if (txid == config.GetChainParams().GenesisBlock().hashMerkleRoot) {
         // Special exception for the genesis block coinbase transaction
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                            "The genesis block coinbase is not considered an "
@@ -196,7 +195,7 @@ static UniValue getrawtransaction(const Config &config,
     if (!request.params[2].isNull()) {
         LOCK(cs_main);
 
-        BlockHash blockhash = BlockHash(ParseHashV(request.params[2], "parameter 3"));
+        uint256 blockhash = ParseHashV(request.params[2], "parameter 3");
         auto it = mapBlockIndex.find(blockhash);
         if (it == mapBlockIndex.end()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
@@ -212,8 +211,8 @@ static UniValue getrawtransaction(const Config &config,
     }
 
     CTransactionRef tx;
-    BlockHash hash_block;
-    if (!GetTransaction(params.GetConsensus(), txid, tx, hash_block, true, blockindex)) {
+    uint256 hash_block;
+    if (!GetTransaction(config, txid, tx, hash_block, true, blockindex)) {
         std::string errmsg;
         if (blockindex) {
             if (!blockindex->nStatus.hasData()) {
@@ -299,10 +298,10 @@ static UniValue gettxoutproof(const Config &config,
 
     CBlockIndex *pblockindex = nullptr;
 
-    BlockHash hashBlock;
+    uint256 hashBlock;
     if (!request.params[1].isNull()) {
         LOCK(cs_main);
-        hashBlock = BlockHash::fromHex(request.params[1].get_str());
+        hashBlock = uint256S(request.params[1].get_str());
         if (!mapBlockIndex.count(hashBlock)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
         }
@@ -326,13 +325,11 @@ static UniValue gettxoutproof(const Config &config,
         g_txindex->BlockUntilSyncedToCurrentChain();
     }
 
-    const Consensus::Params &params = config.GetChainParams().GetConsensus();
-
     LOCK(cs_main);
 
     if (pblockindex == nullptr) {
         CTransactionRef tx;
-        if (!GetTransaction(params, oneTxId, tx, hashBlock, false) ||
+        if (!GetTransaction(config, oneTxId, tx, hashBlock, false) ||
             hashBlock.IsNull()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
                                "Transaction not yet in block");
@@ -346,7 +343,7 @@ static UniValue gettxoutproof(const Config &config,
     }
 
     CBlock block;
-    if (!ReadBlockFromDisk(block, pblockindex, params)) {
+    if (!ReadBlockFromDisk(block, pblockindex, config)) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
     }
 
@@ -1422,7 +1419,7 @@ static UniValue sendrawtransaction(const Config &config,
     const TxId &txid = tx->GetId();
 
     Amount nMaxRawTxFee = maxTxFee;
-    if (!request.params[1].isNull() && request.params[1].get_bool()) {
+    if (request.params.size() > 1 && request.params[1].get_bool()) {
         nMaxRawTxFee = Amount::zero();
     }
 

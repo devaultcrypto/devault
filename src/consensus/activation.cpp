@@ -10,7 +10,7 @@
 #include <consensus/params.h>
 #include <util/system.h>
 
-bool IsBLSEnabled(const Consensus::Params &params, const CBlockIndex *pindexPrev) {
+bool IsBLSEnabled(const Config &config, const CBlockIndex *pindexPrev) {
   if (pindexPrev == nullptr) {
     return false;
   }
@@ -18,5 +18,5 @@ bool IsBLSEnabled(const Consensus::Params &params, const CBlockIndex *pindexPrev
   return pindexPrev->GetMedianTimePast() >=
   gArgs.GetArg(
                "-blsactivationtime",
-               params.blsActivationTime);
+               config.GetChainParams().GetConsensus().blsActivationTime);
 }

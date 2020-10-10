@@ -44,8 +44,6 @@ add_executable(bitcoin-bench
 	checkqueue.cpp
 	crypto_aes.cpp
 	crypto_hash.cpp
-	duplicate_inputs.cpp
-	examples.cpp
 	gcs_filter.cpp
 	Examples.cpp
 	lockedpool.cpp

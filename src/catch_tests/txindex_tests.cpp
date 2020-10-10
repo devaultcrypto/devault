@@ -20,7 +20,7 @@ TEST_CASE("txindex_initial_sync") {
   TxIndex txindex(1 << 20, true);
 
   CTransactionRef tx_disk;
-  BlockHash block_hash;
+  uint256 block_hash;
 
   // Transaction should not be found in the index before it is started.
   for (const auto &txn : setup.coinbaseTxns) {

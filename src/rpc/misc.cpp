@@ -9,11 +9,6 @@
 #include <config.h>
 #include <chain.h>
 #include <dstencode.h>
-
-#include <httpserver.h>
-#include <init.h>
-
-#include <logging.h>
 #include <net.h>
 #include <netbase.h>
 #include <rpc/blockchain.h>
@@ -405,8 +400,9 @@ static UniValue getmemoryinfo(const Config &config,
             HelpExampleRpc("getmemoryinfo", ""));
     }
 
-    std::string mode =
-        request.params[0].isNull() ? "stats" : request.params[0].get_str();
+    std::string mode = (request.params.size() < 1 || request.params[0].isNull())
+                           ? "stats"
+                           : request.params[0].get_str();
     if (mode == "stats") {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("locked", RPCLockedMemoryInfo());
@@ -422,111 +418,6 @@ static UniValue getmemoryinfo(const Config &config,
     } else {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "unknown mode " + mode);
     }
-}
-
-static void EnableOrDisableLogCategories(UniValue cats, bool enable) {
-    cats = cats.get_array();
-    for (size_t i = 0; i < cats.size(); ++i) {
-        std::string cat = cats[i].get_str();
-
-        bool success;
-        if (enable) {
-            success = GetLogger().EnableCategory(cat);
-        } else {
-            success = GetLogger().DisableCategory(cat);
-        }
-
-        if (!success) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER,
-                               "unknown logging category " + cat);
-        }
-    }
-}
-
-static UniValue logging(const Config &config, const JSONRPCRequest &request) {
-    if (request.fHelp || request.params.size() > 2) {
-        throw std::runtime_error(
-            "logging ( <include> <exclude> )\n"
-            "Gets and sets the logging configuration.\n"
-            "When called without an argument, returns the list of categories "
-            "with status that are currently being debug logged or not.\n"
-            "When called with arguments, adds or removes categories from debug "
-            "logging and return the lists above.\n"
-            "The arguments are evaluated in order \"include\", \"exclude\".\n"
-            "If an item is both included and excluded, it will thus end up "
-            "being excluded.\n"
-            "The valid logging categories are: " +
-            ListLogCategories() +
-            "\n"
-            "In addition, the following are available as category names with "
-            "special meanings:\n"
-            "  - \"all\",  \"1\" : represent all logging categories.\n"
-            "  - \"none\", \"0\" : even if other logging categories are "
-            "specified, ignore all of them.\n"
-            "\nArguments:\n"
-            "1. \"include\"        (array of strings, optional) A json array "
-            "of categories to add debug logging\n"
-            "     [\n"
-            "       \"category\"   (string) the valid logging category\n"
-            "       ,...\n"
-            "     ]\n"
-            "2. \"exclude\"        (array of strings, optional) A json array "
-            "of categories to remove debug logging\n"
-            "     [\n"
-            "       \"category\"   (string) the valid logging category\n"
-            "       ,...\n"
-            "     ]\n"
-            "\nResult:\n"
-            "{                   (json object where keys are the logging "
-            "categories, and values indicates its status\n"
-            "  \"category\": 0|1,  (numeric) if being debug logged or not. "
-            "0:inactive, 1:active\n"
-            "  ...\n"
-            "}\n"
-            "\nExamples:\n" +
-            HelpExampleCli("logging", "\"[\\\"all\\\"]\" \"[\\\"http\\\"]\"") +
-            HelpExampleRpc("logging", "[\"all\"], \"[libevent]\""));
-    }
-
-    uint32_t original_log_categories = GetLogger().GetCategoryMask();
-    if (request.params[0].isArray()) {
-        EnableOrDisableLogCategories(request.params[0], true);
-    }
-
-    if (request.params[1].isArray()) {
-        EnableOrDisableLogCategories(request.params[1], false);
-    }
-
-    uint32_t updated_log_categories = GetLogger().GetCategoryMask();
-    uint32_t changed_log_categories =
-        original_log_categories ^ updated_log_categories;
-
-    /**
-     * Update libevent logging if BCLog::LIBEVENT has changed.
-     * If the library version doesn't allow it, UpdateHTTPServerLogging()
-     * returns false, in which case we should clear the BCLog::LIBEVENT flag.
-     * Throw an error if the user has explicitly asked to change only the
-     * libevent flag and it failed.
-     */
-    if (changed_log_categories & BCLog::LIBEVENT) {
-        if (!UpdateHTTPServerLogging(
-                GetLogger().WillLogCategory(BCLog::LIBEVENT))) {
-            GetLogger().DisableCategory(BCLog::LIBEVENT);
-            if (changed_log_categories == BCLog::LIBEVENT) {
-                throw JSONRPCError(RPC_INVALID_PARAMETER,
-                                   "libevent logging cannot be updated when "
-                                   "using libevent before v2.1.1.");
-            }
-        }
-    }
-
-    UniValue result(UniValue::VOBJ);
-    std::vector<CLogCategoryActive> vLogCatActive = ListActiveLogCategories();
-    for (const auto &logCatActive : vLogCatActive) {
-        result.pushKV(logCatActive.category, logCatActive.active);
-    }
-
-    return result;
 }
 
 static UniValue echo(const Config &config, const JSONRPCRequest &request) {
@@ -737,7 +628,6 @@ static const ContextFreeRPCCommand commands[] = {
     { "control",            "getinfo",                getinfo,                {} }, /* uses wallet if enabled */
 #endif
     { "control",            "getmemoryinfo",          getmemoryinfo,          {"mode"} },
-    { "control",             "logging",                logging,                {"include", "exclude"} },
     { "util",               "verifymessage",          verifymessage,          {"address","signature","message"} },
     { "util",               "signmessagewithlegacyprivkey", signmessagewithlegacyprivkey, {"privkey","message"} },
     { "util",               "signmessagewithblsprivkey", signmessagewithblsprivkey, {"privkey","message"} },

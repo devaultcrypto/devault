@@ -32,7 +32,7 @@ public:
 class BlockTransactionsRequest {
 public:
     // A BlockTransactionsRequest message
-    BlockHash blockhash;
+    uint256 blockhash;
     std::vector<uint32_t> indices;
 
     ADD_SERIALIZE_METHODS;
@@ -80,7 +80,7 @@ public:
 class BlockTransactions {
 public:
     // A BlockTransactions message
-    BlockHash blockhash;
+    uint256 blockhash;
     std::vector<CTransactionRef> txn;
 
     BlockTransactions() = default;
@@ -166,7 +166,7 @@ public:
 
     CBlockHeaderAndShortTxIDs(const CBlock &block);
 
-    uint64_t GetShortID(const TxHash &txhash) const;
+    uint64_t GetShortID(const uint256 &txhash) const;
 
     size_t BlockTxCount() const {
         return shorttxids.size() + prefilledtxn.size();
@@ -230,7 +230,7 @@ public:
     // reference> form.
     ReadStatus
     InitData(const CBlockHeaderAndShortTxIDs &cmpctblock,
-             const std::vector<std::pair<TxHash, CTransactionRef>> &extra_txn);
+             const std::vector<std::pair<uint256, CTransactionRef>> &extra_txn);
     bool IsTxAvailable(size_t index) const;
     ReadStatus FillBlock(CBlock &block,
                          const std::vector<CTransactionRef> &vtx_missing);

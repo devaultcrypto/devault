@@ -55,8 +55,6 @@
 #include <devault/rewards.h>
 #include <devault/budget.h>
 
-#include <diskblockpos.h>
-
 #include <cstdint>
 #include <cstdio>
 #include <memory>
@@ -512,10 +510,8 @@ void SetupServerArgs() {
                   MIN_DISK_SPACE_FOR_BLOCK_FILES / 1024 / 1024),
         false, OptionsCategory::OPTIONS);
     gArgs.AddArg("-reindex-chainstate",
-                 "Rebuild chain state from the currently indexed blocks. When "
-                 "in pruning mode or if blocks on disk might be corrupted, use "
-                 "full -reindex instead.",
-                 false, OptionsCategory::OPTIONS);
+                 "Rebuild chain state from the currently indexed blocks", false,
+                 OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-reindex",
         "Rebuild chain state and block index from the blk*.dat files on disk",
@@ -741,19 +737,11 @@ void SetupServerArgs() {
         strprintf("How many blocks to check at startup (default: %u, 0 = all)",
                   DEFAULT_CHECKBLOCKS),
         true, OptionsCategory::DEBUG_TEST);
-    gArgs.AddArg(
-        "-checklevel=<n>",
-        strprintf("How thorough the block verification of "
-                  "-checkblocks is: "
-                  "level 0 reads the blocks from disk, "
-                  "level 1 verifies block validity, "
-                  "level 2 verifies undo data, "
-                  "level 3 checks disconnection of tip blocks, "
-                  "and level 4 tries to reconnect the blocks. "
-                  "Each level includes the checks of the previous levels "
-                  "(0-4, default: %u)",
-                  DEFAULT_CHECKLEVEL),
-        true, OptionsCategory::DEBUG_TEST);
+    gArgs.AddArg("-checklevel=<n>",
+                 strprintf("How thorough the block verification of "
+                           "-checkblocks is (0-4, default: %u)",
+                           DEFAULT_CHECKLEVEL),
+                 true, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-checkblockindex",
                  strprintf("Do a full consistency check for mapBlockIndex, "
                            "setBlockIndexCandidates, chainActive and "
@@ -952,6 +940,11 @@ void SetupServerArgs() {
     gArgs.AddArg("-blockmaxsize=<n>",
                  strprintf("Set maximum block size in bytes (default: %d)",
                            DEFAULT_MAX_GENERATED_BLOCK_SIZE),
+                 false, OptionsCategory::BLOCK_CREATION);
+    gArgs.AddArg("-blockprioritypercentage=<n>",
+                 strprintf("Set maximum percentage of a block reserved to "
+                           "high-priority/low-fee transactions (default: %d)",
+                           DEFAULT_BLOCK_PRIORITY_PERCENTAGE),
                  false, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-blockmintxfee=<amt>",
                  strprintf("Set lowest fee rate (in %s/kB) for transactions to "
@@ -1167,7 +1160,7 @@ void ThreadImport(const Config &config, std::vector<fs::path> vImportFiles) {
         if (fReindex) {
             int nFile = 0;
             while (true) {
-                CDiskBlockPos pos(nFile, 0);
+                FlatFilePos pos(nFile, 0);
                 if (!fs::exists(GetBlockPosFilename(pos, "blk"))) {
                     // No block files left to reindex
                     break;
@@ -1504,6 +1497,15 @@ bool AppInitParameterInteraction(Config &config) {
         }
     }
 
+    // if space reserved for high priority transactions is misconfigured
+    // stop program execution and warn the user with a proper error message
+    const int64_t blkprio = gArgs.GetArg("-blockprioritypercentage",
+                                         DEFAULT_BLOCK_PRIORITY_PERCENTAGE);
+    if (!config.SetBlockPriorityPercentage(blkprio)) {
+        return InitError(_("Block priority percentage has to belong to the "
+                           "[0..100] interval."));
+    }
+
     // -bind and -whitebind can't be set when not listening
     size_t nUserBind =
         gArgs.GetArgs("-bind").size() + gArgs.GetArgs("-whitebind").size();
@@ -1544,9 +1546,8 @@ bool AppInitParameterInteraction(Config &config) {
         // Special-case: if -debug=0/-nodebug is set, turn off debugging
         // messages
         const std::vector<std::string> &categories = gArgs.GetArgs("-debug");
-        if (std::none_of(
-                categories.begin(), categories.end(),
-                [](std::string cat) { return cat == "0" || cat == "none"; })) {
+        if (find(categories.begin(), categories.end(), std::string("0")) ==
+            categories.end()) {
             for (const auto &cat : categories) {
                 BCLog::LogFlags flag;
                 if (!GetLogCategory(flag, cat)) {
@@ -1619,7 +1620,7 @@ bool AppInitParameterInteraction(Config &config) {
         LogPrintf("Skipping checkpoint verification.\n");
     }
 
-    hashAssumeValid = BlockHash::fromHex(
+    hashAssumeValid = uint256S(
         gArgs.GetArg("-assumevalid",
                      chainparams.GetConsensus().defaultAssumeValid.GetHex()));
     if (!hashAssumeValid.IsNull()) {
@@ -2267,8 +2268,7 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
 
                 // ReplayBlocks is a no-op if we cleared the coinsviewdb with
                 // -reindex or -reindex-chainstate
-                if (!ReplayBlocks(chainparams.GetConsensus(),
-                                  pcoinsdbview.get())) {
+                if (!ReplayBlocks(config, pcoinsdbview.get())) {
                     strLoadError =
                         _("Unable to replay blocks. You will need to rebuild "
                           "the database using -reindex-chainstate.");
@@ -2288,6 +2288,20 @@ bool AppInitMain(Config &config, RPCServer& rpcServer,
                         break;
                     }
                     assert(chainActive.Tip() != nullptr);
+                }
+
+                if (!fReset) {
+                    // Note that RewindBlockIndex MUST run even if we're about
+                    // to -reindex-chainstate. It both disconnects blocks based
+                    // on chainActive, and drops block data in mapBlockIndex
+                    // based on lack of available witness data.
+                    uiInterface.InitMessage(_("Rewinding blocks..."));
+                    if (!RewindBlockIndex(config)) {
+                        strLoadError = _("Unable to rewind the database to a "
+                                         "pre-fork state. You will need to "
+                                         "redownload the blockchain");
+                        break;
+                    }
                 }
 
                 if (!is_coinsview_empty) {

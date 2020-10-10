@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-typedef std::map<int, BlockHash> MapCheckpoints;
+typedef std::map<int, uint256> MapCheckpoints;
 
 struct CCheckpointData {
     MapCheckpoints mapCheckpoints;

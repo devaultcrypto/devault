@@ -9,10 +9,8 @@
 #define BITCOIN_WALLET_WALLET_H
 
 #include <amount.h>
-#include <logging.h>
 #include <interfaces/chain.h>
 #include <outputtype.h>
-#include <primitives/blockhash.h>
 #include <script/ismine.h>
 #include <script/sign.h>
 #include <streams.h>
@@ -207,11 +205,11 @@ struct COutputEntry {
 class CMerkleTx {
 private:
     /** Constant used in hashBlock to indicate tx has been abandoned */
-    static const BlockHash ABANDON_HASH;
+    static const uint256 ABANDON_HASH;
 
 public:
     CTransactionRef tx;
-    BlockHash hashBlock;
+    uint256 hashBlock;
 
     /**
      * An nIndex == -1 means that hashBlock (in nonzero) refers to the earliest
@@ -232,7 +230,7 @@ public:
     }
 
     void Init() {
-        hashBlock = BlockHash();
+        hashBlock = uint256();
         nIndex = -1;
     }
 
@@ -344,9 +342,6 @@ public:
     std::string strFromAccount;
     //!< position in ordered transaction list
     int64_t nOrderPos;
-    std::multimap<int64_t,
-                  std::pair<CWalletTx *, CAccountingEntry *>>::const_iterator
-        m_it_wtxOrdered;
 
     // memory only
     mutable bool fDebitCached;
@@ -747,48 +742,21 @@ private:
     void AddToSpends(const TxId &wtxid);
 
     /**
-     * Add a transaction to the wallet, or update it. pIndex and posInBlock
-     * should be set when the transaction was known to be included in a
-     * block. When *pIndex == nullptr, then wallet state is not updated in
-     * AddToWallet, but notifications happen and cached balances are marked
-     * dirty.
-     *
-     * If fUpdate is true, existing transactions will be updated.
-     * TODO: One exception to this is that the abandoned state is cleared under
-     * the assumption that any further notification of a transaction that was
-     * considered abandoned is an indication that it is not safe to be
-     * considered abandoned. Abandoned state should probably be more carefully
-     * tracked via different posInBlock signals or by checking mempool presence
-     * when necessary.
-     */
-    bool AddToWalletIfInvolvingMe(const CTransactionRef &tx,
-                                  const CBlockIndex *pIndex, int posInBlock,
-                                  bool fUpdate)
-        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
-
-    /**
      * Mark a transaction (and its in-wallet descendants) as conflicting with a
      * particular block.
      */
-    void MarkConflicted(const BlockHash &hashBlock, const TxId &txid);
-
-    /**
-     * Mark a transaction's inputs dirty, thus forcing the outputs to be
-     * recomputed
-     */
-    void MarkInputsDirty(const CTransactionRef &tx);
+    void MarkConflicted(const uint256 &hashBlock, const TxId &txid);
 
     void SyncMetaData(std::pair<TxSpends::iterator, TxSpends::iterator>);
 
     /**
-     * Used by
-     * TransactionAddedToMemorypool/BlockConnected/Disconnected/ScanForWalletTransactions.
+     * Used by TransactionAddedToMemorypool/BlockConnected/Disconnected.
      * Should be called with pindexBlock and posInBlock if this is for a
      * transaction that is included in a block.
      */
     void SyncTransaction(const CTransactionRef &tx,
                          const CBlockIndex *pindex = nullptr,
-                         int posInBlock = 0, bool update_tx = true)
+                         int posInBlock = 0)
         EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
     /* HD derive new child key (on internal or external chain) */
@@ -1075,6 +1043,10 @@ public:
                    const std::vector<CTransactionRef> &vtxConflicted) override;
     void
     BlockDisconnected(const std::shared_ptr<const CBlock> &pblock) override;
+    bool AddToWalletIfInvolvingMe(const CTransactionRef &tx,
+                                  const CBlockIndex *pIndex, int posInBlock,
+                                  bool fUpdate)
+        EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
     int64_t RescanFromTime(int64_t startTime,
                            const WalletRescanReserver &reserver, bool update);
     CBlockIndex *ScanForWalletTransactions(CBlockIndex *pindexStart,
@@ -1448,32 +1420,6 @@ public:
     bool OutputEligibleForSpending(const COutput &output, const int nConfMine,
                                    const int nConfTheirs,
                                    const uint64_t nMaxAncestors) const;
-    /**
-     * Returns a bracketed wallet name for displaying in logs, will return
-     * [default wallet] if the wallet has no name.
-     */
-    const std::string GetDisplayName() const {
-        std::string wallet_name =
-            GetName().length() == 0 ? "default wallet" : GetName();
-        return strprintf("[%s]", wallet_name);
-    };
-
-    /**
-     * Prepends the wallet name in logging output to ease debugging in
-     * multi-wallet use cases.
-     */
-    template <typename... Params>
-    void WalletLogPrintf(std::string fmt, Params... parameters) const {
-        LogPrintf(("%s " + fmt).c_str(), GetDisplayName(), parameters...);
-    };
-
-    template <typename... Params>
-    void WalletLogPrintfToBeContinued(std::string fmt,
-                                      Params... parameters) const {
-        LogPrintfToBeContinued(("%s " + fmt).c_str(), GetDisplayName(),
-                               parameters...);
-    };
-
 };
 
 /** A key allocated from the key pool. */

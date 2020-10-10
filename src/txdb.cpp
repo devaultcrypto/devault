@@ -15,7 +15,6 @@
 #include <uint256.h>
 #include <util/fs_util.h>
 #include <validation.h>
-#include <util/system.h>
 
 #include <thread>
 #include <cstdint>
@@ -79,21 +78,21 @@ bool CCoinsViewDB::HaveCoin(const COutPoint &outpoint) const {
     return db.Exists(CoinEntry(&outpoint));
 }
 
-BlockHash CCoinsViewDB::GetBestBlock() const {
-    BlockHash hashBestChain;
-    if (!db.Read(DB_BEST_BLOCK, hashBestChain)) return BlockHash();
+uint256 CCoinsViewDB::GetBestBlock() const {
+    uint256 hashBestChain;
+    if (!db.Read(DB_BEST_BLOCK, hashBestChain)) return uint256();
     return hashBestChain;
 }
 
-std::vector<BlockHash> CCoinsViewDB::GetHeadBlocks() const {
-    std::vector<BlockHash> vhashHeadBlocks;
+std::vector<uint256> CCoinsViewDB::GetHeadBlocks() const {
+    std::vector<uint256> vhashHeadBlocks;
     if (!db.Read(DB_HEAD_BLOCKS, vhashHeadBlocks)) {
-        return std::vector<BlockHash>();
+        return std::vector<uint256>();
     }
     return vhashHeadBlocks;
 }
 
-bool CCoinsViewDB::BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) {
+bool CCoinsViewDB::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) {
     CDBBatch batch(db);
     size_t count = 0;
     size_t changed = 0;
@@ -102,10 +101,10 @@ bool CCoinsViewDB::BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) {
     int crash_simulate = gArgs.GetArg("-dbcrashratio", 0);
     assert(!hashBlock.IsNull());
 
-    BlockHash old_tip = GetBestBlock();
+    uint256 old_tip = GetBestBlock();
     if (old_tip.IsNull()) {
         // We may be in the middle of replaying.
-        std::vector<BlockHash> old_heads = GetHeadBlocks();
+        std::vector<uint256> old_heads = GetHeadBlocks();
         if (old_heads.size() == 2) {
             assert(old_heads[0] == hashBlock);
             old_tip = old_heads[1];
@@ -117,7 +116,7 @@ bool CCoinsViewDB::BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) {
     // A vector is used for future extensibility, as we may want to support
     // interrupting after partial writes from multiple independent reorgs.
     batch.Erase(DB_BEST_BLOCK);
-    batch.Write(DB_HEAD_BLOCKS, std::vector<BlockHash>{hashBlock, old_tip});
+    batch.Write(DB_HEAD_BLOCKS, std::vector<uint256>{hashBlock, old_tip});
 
     for (auto& it : mapCoins) {
         if (it.second.flags & CCoinsCacheEntry::DIRTY) {
@@ -381,8 +380,8 @@ bool CBlockTreeDB::ReadFlag(const std::string &name, bool &fValue) {
 }
 
 bool CBlockTreeDB::LoadBlockIndexGuts(
-    const Consensus::Params &params,
-    std::function<CBlockIndex *(const BlockHash &)> insertBlockIndex) {
+    const Config &config,
+    std::function<CBlockIndex *(const uint256 &)> insertBlockIndex) {
 
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
@@ -417,7 +416,7 @@ bool CBlockTreeDB::LoadBlockIndexGuts(
         pindexNew->nTx = diskindex.nTx;
 
         if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits,
-                              params)) {
+                              config)) {
             return error("%s: CheckProofOfWork failed: %s", __func__,
                          pindexNew->ToString());
         }

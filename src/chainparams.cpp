@@ -95,7 +95,7 @@ public:
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
-        consensus.defaultAssumeValid = BlockHash::fromHex(
+        consensus.defaultAssumeValid = uint256S(
             "000000000000000003aadeae9dee37b8cb4838a866dae19b54854a0f039b03e0");
 
         // Date and time (GMT): Saturday, October 10, 2020 4:00:00 PM
@@ -160,15 +160,15 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {5000, BlockHash::fromHex("000000000000000173c13a23fed27056b5a76912a27d62064cb988"
+                {5000, uint256S("000000000000000173c13a23fed27056b5a76912a27d62064cb988"
                                  "db13888907")},
-                {50000, BlockHash::fromHex("00000000000000600f43cf743ca452b38d4cf175d588089c3c73ca"
+                {50000, uint256S("00000000000000600f43cf743ca452b38d4cf175d588089c3c73ca"
                                  "afbc0364cd")},
-                {110068, BlockHash::fromHex("00000000000000ab518cf852a114ff655ae01580d26727552a584c"
+                {110068, uint256S("00000000000000ab518cf852a114ff655ae01580d26727552a584c"
                                  "62bcf40726")},
-                {110420, BlockHash::fromHex("000000000000007edbec10fadbf144be667309ceb4eec9a377bb95"
+                {110420, uint256S("000000000000007edbec10fadbf144be667309ceb4eec9a377bb95"
                                  "0716c4d4a1")},
-                {131502, BlockHash::fromHex("00000000000000161d9356272df6aa2c551738634ecb6b4a16b7c8"
+                {131502, uint256S("00000000000000161d9356272df6aa2c551738634ecb6b4a16b7c8"
                                  "a6bf62c14c")},
             }};
 
@@ -185,7 +185,7 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         // Reduce this difficult a lot to get started
-        consensus.powLimit = BlockHash::fromHex(
+        consensus.powLimit = uint256S(
             "00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetSpacing = 2 * 15; // 30 seconds
         consensus.nBlocksPerYear = 30 * 24 * 365.25; 
@@ -198,7 +198,7 @@ public:
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
-        consensus.defaultAssumeValid = BlockHash::fromHex(
+        consensus.defaultAssumeValid = uint256S(
             "000000000000030bee568d677b6b99ee7d2d00b25d1fe95df5e73b484f00c322");
 
         // Date July 11, 2020, 4:00:00 pm GMT
@@ -219,10 +219,10 @@ public:
             CreateGenesisBlock(1570974562, 3551570310, 0x1d00ffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock ==
-               BlockHash::fromHex("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
+               uint256S("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
                         "53891eeed9"));
         assert(genesis.hashMerkleRoot ==
-               BlockHash::fromHex("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
+               uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
                         "dda326f35b"));
 
         vSeeds.clear();
@@ -249,7 +249,7 @@ public:
 
         checkpointData = {
             .mapCheckpoints = {
-                {0, BlockHash::fromHex("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
+                {0, uint256S("00000000797947527458fac580afda78e5274b3cd3c8ca9c0b53d6"
                                "53891eeed9")},
             }};
 
@@ -279,7 +279,7 @@ public:
 
         // By default assume that the signatures in ancestors of this block are
         // valid.
-        consensus.defaultAssumeValid = BlockHash();
+        consensus.defaultAssumeValid = uint256S("0x00");
 
         // TBD
         consensus.blsActivationTime = 1999999999;
@@ -298,10 +298,10 @@ public:
         genesis = CreateGenesisBlock(1559660400, 3, 0x207fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock ==
-               BlockHash::fromHex("7f39501a21abfd9930011aaf76bed139f16d896ca9bc66f9f4770d"
+               uint256S("7f39501a21abfd9930011aaf76bed139f16d896ca9bc66f9f4770d"
                         "345459d08a"));
         assert(genesis.hashMerkleRoot ==
-               BlockHash::fromHex("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
+               uint256S("95d9f62f327ebae0d88f38c72224407e5dde5157f952cdb70921c2"
                         "dda326f35b"));
 
         //!< Regtest mode doesn't have any DNS seeds.
@@ -312,7 +312,7 @@ public:
         fMineBlocksOnDemand = true;
 
         checkpointData = {.mapCheckpoints = {
-                              {0, BlockHash::fromHex("00000000d78ce705553c88affb299cdbcf7c8000c7038b422abe77"
+                              {0, uint256S("00000000d78ce705553c88affb299cdbcf7c8000c7038b422abe77"
                                            "850eee28a9")},
                           }};
 

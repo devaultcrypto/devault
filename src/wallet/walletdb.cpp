@@ -237,7 +237,6 @@ public:
     bool fIsEncrypted{false};
     bool fAnyUnordered{false};
     int nFileVersion{0};
-    unsigned int m_unknown_records{0};
     std::vector<TxId> vWalletUpgrade;
 
     CWalletScanState() {}
@@ -412,8 +411,6 @@ bool ReadKeyValue(CWallet *pwallet, CDataStream &ssKey, CDataStream &ssValue,
             WalletFlag flags;
             ssValue >> flags;
             pwallet->SetWalletFlags(flags);
-        } else if (strType != "bestblock" && strType != "bestblock_nomerkle") {
-            wss.m_unknown_records++;
         }
     } catch (...) {
         return false;
@@ -451,7 +448,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
         // Get cursor
         Dbc *pcursor = m_batch.GetCursor();
         if (!pcursor) {
-            pwallet->WalletLogPrintf("Error getting wallet database cursor\n");
+            LogPrintf("Error getting wallet database cursor\n");
             return DBErrors::CORRUPT;
         }
 
@@ -465,8 +462,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
             }
 
             if (ret != 0) {
-                pwallet->WalletLogPrintf(
-                    "Error reading next record from wallet database\n");
+                LogPrintf("Error reading next record from wallet database\n");
                 return DBErrors::CORRUPT;
             }
 
@@ -493,7 +489,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
                 }
             }
             if (!strErr.empty()) {
-                pwallet->WalletLogPrintf("%s\n", strErr);
+                LogPrintf("%s\n", strErr);
             }
         }
         pcursor->close();
@@ -514,7 +510,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
         return result;
     }
 
-    pwallet->WalletLogPrintf("nFileVersion = %d\n", wss.nFileVersion);
+    LogPrintf("nFileVersion = %d\n", wss.nFileVersion);
 
     if (wss.nCKeys) {
         InitWarning(_("You have one or more private keys in your wallet that are potentially not backed"
@@ -523,8 +519,7 @@ DBErrors WalletBatch::LoadWallet(CWallet *pwallet) {
     }
 
 
-    pwallet->WalletLogPrintf("Keys: %u encrypted, %u w/ metadata, unknown wallet records: %u\n", wss.nCKeys, wss.nKeyMeta,
-              wss.m_unknown_records);
+    LogPrintf("Keys: %u encrypted, %u w/ metadata\n", wss.nCKeys, wss.nKeyMeta);
 
     // nTimeFirstKey is only reliable if all keys have metadata
     if ((wss.nCKeys + wss.nWatchKeys) != wss.nKeyMeta) {

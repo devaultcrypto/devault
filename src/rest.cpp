@@ -154,12 +154,10 @@ static bool rest_headers(Config &config, HTTPRequest *req,
     }
 
     std::string hashStr = path[1];
-    uint256 rawHash;
-    if (!ParseHashStr(hashStr, rawHash)) {
+    uint256 hash;
+    if (!ParseHashStr(hashStr, hash)) {
         return RESTERR(req, HTTP_BAD_REQUEST, "Invalid hash: " + hashStr);
     }
-
-    const BlockHash hash(rawHash);
 
     const CBlockIndex *tip = nullptr;
     std::vector<const CBlockIndex *> headers;
@@ -223,12 +221,10 @@ static bool rest_block(const Config &config, HTTPRequest *req,
     std::string hashStr;
     const RetFormat rf = ParseDataFormat(hashStr, strURIPart);
 
-    uint256 rawHash;
-    if (!ParseHashStr(hashStr, rawHash)) {
+    uint256 hash;
+    if (!ParseHashStr(hashStr, hash)) {
         return RESTERR(req, HTTP_BAD_REQUEST, "Invalid hash: " + hashStr);
     }
-
-    const BlockHash hash(rawHash);
 
     CBlock block;
     CBlockIndex *pblockindex = nullptr;
@@ -241,13 +237,14 @@ static bool rest_block(const Config &config, HTTPRequest *req,
             return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
         }
 
-        if (IsBlockPruned(pblockindex)) {
+        pblockindex = mapBlockIndex[hash];
+        if (fHavePruned && !pblockindex->nStatus.hasData() &&
+            pblockindex->nTx > 0) {
             return RESTERR(req, HTTP_NOT_FOUND,
                            hashStr + " not available (pruned data)");
         }
 
-        if (!ReadBlockFromDisk(block, pblockindex,
-                               config.GetChainParams().GetConsensus())) {
+        if (!ReadBlockFromDisk(block, pblockindex, config)) {
             return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
         }
     }
@@ -395,9 +392,8 @@ static bool rest_tx(Config &config, HTTPRequest *req,
     }
 
     CTransactionRef tx;
-    BlockHash hashBlock = BlockHash();
-    if (!GetTransaction(config.GetChainParams().GetConsensus(), txid, tx,
-                        hashBlock, true)) {
+    uint256 hashBlock = uint256();
+    if (!GetTransaction(config, txid, tx, hashBlock, true)) {
         return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
     }
 

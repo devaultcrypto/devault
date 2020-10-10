@@ -3,7 +3,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <chain.h>
-#include <chainparams.h>
 #include <config.h>
 #include <index/base.h>
 #include <shutdown.h>
@@ -85,7 +84,7 @@ static const CBlockIndex *NextSyncBlock(const CBlockIndex *pindex_prev)
 void BaseIndex::ThreadSync() {
     const CBlockIndex *pindex = m_best_block_index.load();
     if (!m_synced) {
-        auto &consensus_params = GetConfig().GetChainParams().GetConsensus();
+        auto &config = GetConfig();
 
         int64_t last_log_time = 0;
         int64_t last_locator_write_time = 0;
@@ -121,7 +120,7 @@ void BaseIndex::ThreadSync() {
             }
 
             CBlock block;
-            if (!ReadBlockFromDisk(block, pindex, consensus_params)) {
+            if (!ReadBlockFromDisk(block, pindex, config)) {
                 FatalError("%s: Failed to read block %s from disk", __func__,
                            pindex->GetBlockHash().ToString());
                 return;
@@ -196,7 +195,7 @@ void BaseIndex::ChainStateFlushed(const CBlockLocator &locator) {
         return;
     }
 
-    const BlockHash &locator_tip_hash = locator.vHave.front();
+    const uint256 &locator_tip_hash = locator.vHave.front();
     const CBlockIndex *locator_tip_index;
     {
         LOCK(cs_main);

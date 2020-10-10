@@ -64,20 +64,20 @@ TEST_CASE("get_disk_positions") {
       }
 
       // Data and undo positions should be unmodified
-      CDiskBlockPos dataPosition = index.GetBlockPos();
+      FlatFilePos dataPosition = index.GetBlockPos();
       if (flags & 0x01) {
         BOOST_CHECK(dataPosition.nFile == expectedFile);
         BOOST_CHECK(dataPosition.nPos == expectedDataPosition);
       } else {
-        BOOST_CHECK(dataPosition == CDiskBlockPos());
+        BOOST_CHECK(dataPosition == FlatFilePos());
       }
 
-      CDiskBlockPos undoPosition = index.GetUndoPos();
+      FlatFilePos undoPosition = index.GetUndoPos();
       if (flags & 0x02) {
         BOOST_CHECK(undoPosition.nFile == expectedFile);
         BOOST_CHECK(undoPosition.nPos == expectedUndoPosition);
       } else {
-        BOOST_CHECK(undoPosition == CDiskBlockPos());
+        BOOST_CHECK(undoPosition == FlatFilePos());
       }
     }
   }
@@ -87,17 +87,17 @@ TEST_CASE("get_block_hash") {
   CBlockIndex index = CBlockIndex();
 
   /* Test with all 0 hash */
-  const BlockHash zeroHash = BlockHash();
+  const uint256 zeroHash = uint256();
   index.phashBlock = &zeroHash;
-  BlockHash hash = index.GetBlockHash();
+  uint256 hash = index.GetBlockHash();
   BOOST_CHECK(hash == zeroHash);
 
   /* Test with a random hash */
-  uint256 hashBytes;
+  std::vector<uint8_t> hashBytes(32);
 
   std::generate(hashBytes.begin(), hashBytes.end(), []() { return uint8_t(rand() % 255); });
 
-  const BlockHash randomHash = BlockHash(hashBytes);
+  const uint256 randomHash = uint256(hashBytes);
   index.phashBlock = &randomHash;
   hash = index.GetBlockHash();
   BOOST_CHECK(hash == randomHash);
@@ -158,10 +158,10 @@ TEST_CASE("median_time_past") {
 
 TEST_CASE("to_string") {
   CBlockHeader header = CBlockHeader();
-  header.hashMerkleRoot = BlockHash();
+  header.hashMerkleRoot = uint256();
 
   CBlockIndex index = CBlockIndex(header);
-  const BlockHash hashBlock = BlockHash();
+  const uint256 hashBlock = uint256();
   index.phashBlock = &hashBlock;
   index.nHeight = 123;
 
@@ -210,7 +210,7 @@ TEST_CASE("to_string") {
                              "hashBlock="
                              "0000000000000000000000000000000000000000000000000000000000000000)",
                              &indexPrev);
-  index.hashMerkleRoot = BlockHash::fromHex("0123456789ABCDEF");
+  index.hashMerkleRoot = uint256S("0123456789ABCDEF");
   indexString = index.ToString();
   BOOST_CHECK_EQUAL(indexString, expectedString);
 
@@ -221,7 +221,7 @@ TEST_CASE("to_string") {
                              "hashBlock="
                              "000000000000000000000000000000000000000000000000fedcba9876543210)",
                              &indexPrev);
-  const BlockHash emptyHashBlock = BlockHash::fromHex("FEDCBA9876543210");
+  const uint256 emptyHashBlock = uint256S("FEDCBA9876543210");
   index.phashBlock = &emptyHashBlock;
   indexString = index.ToString();
   BOOST_CHECK_EQUAL(indexString, expectedString);

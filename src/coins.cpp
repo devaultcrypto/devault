@@ -13,13 +13,13 @@
 bool CCoinsView::GetCoin(const COutPoint &outpoint, Coin &coin) const {
     return false;
 }
-BlockHash CCoinsView::GetBestBlock() const {
-    return BlockHash();
+uint256 CCoinsView::GetBestBlock() const {
+    return uint256();
 }
-std::vector<BlockHash> CCoinsView::GetHeadBlocks() const {
-    return std::vector<BlockHash>();
+std::vector<uint256> CCoinsView::GetHeadBlocks() const {
+    return std::vector<uint256>();
 }
-bool CCoinsView::BatchWrite(CCoinsMap &mapCoins, const BlockHash &hashBlock) {
+bool CCoinsView::BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) {
     return false;
 }
 CCoinsViewCursor *CCoinsView::Cursor() const {
@@ -37,17 +37,17 @@ bool CCoinsViewBacked::GetCoin(const COutPoint &outpoint, Coin &coin) const {
 bool CCoinsViewBacked::HaveCoin(const COutPoint &outpoint) const {
     return base->HaveCoin(outpoint);
 }
-BlockHash CCoinsViewBacked::GetBestBlock() const {
+uint256 CCoinsViewBacked::GetBestBlock() const {
     return base->GetBestBlock();
 }
-std::vector<BlockHash> CCoinsViewBacked::GetHeadBlocks() const {
+std::vector<uint256> CCoinsViewBacked::GetHeadBlocks() const {
     return base->GetHeadBlocks();
 }
 void CCoinsViewBacked::SetBackend(CCoinsView &viewIn) {
     base = &viewIn;
 }
 bool CCoinsViewBacked::BatchWrite(CCoinsMap &mapCoins,
-                                  const BlockHash &hashBlock) {
+                                  const uint256 &hashBlock) {
     return base->BatchWrite(mapCoins, hashBlock);
 }
 CCoinsViewCursor *CCoinsViewBacked::Cursor() const {
@@ -182,19 +182,19 @@ bool CCoinsViewCache::HaveCoinInCache(const COutPoint &outpoint) const {
     return (it != cacheCoins.end() && !it->second.coin.IsSpent());
 }
 
-BlockHash CCoinsViewCache::GetBestBlock() const {
+uint256 CCoinsViewCache::GetBestBlock() const {
     if (hashBlock.IsNull()) {
         hashBlock = base->GetBestBlock();
     }
     return hashBlock;
 }
 
-void CCoinsViewCache::SetBestBlock(const BlockHash &hashBlockIn) {
+void CCoinsViewCache::SetBestBlock(const uint256 &hashBlockIn) {
     hashBlock = hashBlockIn;
 }
 
 bool CCoinsViewCache::BatchWrite(CCoinsMap &mapCoins,
-                                 const BlockHash &hashBlockIn) {
+                                 const uint256 &hashBlockIn) {
     for (auto& it : mapCoins) {
         // Ignore non-dirty entries (optimization).
         if (it.second.flags & CCoinsCacheEntry::DIRTY) {

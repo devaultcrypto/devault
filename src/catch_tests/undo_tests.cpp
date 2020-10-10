@@ -50,7 +50,7 @@ TEST_CASE("connect_utxo_extblock") {
   CCoinsView coinsDummy;
   CCoinsViewCache view(&coinsDummy);
 
-  block.hashPrevBlock = BlockHash(InsecureRand256());
+  block.hashPrevBlock = InsecureRand256();
   view.SetBestBlock(block.hashPrevBlock);
 
   // Create a block with coinbase and resolution transaction.

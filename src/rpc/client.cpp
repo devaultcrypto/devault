@@ -49,6 +49,7 @@ static const CRPCConvertParam vRPCConvertParams[] = {
     {"listreceivedbylabel", 0, "minconf"},
     {"listreceivedbylabel", 1, "include_empty"},
     {"listreceivedbylabel", 2, "include_watchonly"},
+    {"getlabeladdress", 1, "force"},
     {"getbalance", 1, "minconf"},
     {"getbalance", 2, "include_watchonly"},
     {"getblockhash", 0, "height"},
@@ -144,8 +145,6 @@ static const CRPCConvertParam vRPCConvertParams[] = {
     {"getmempooldescendants", 1, "verbose"},
     {"disconnectnode", 1, "nodeid"},
     {"sweepprivkey",1,"address"},
-    {"logging", 0, "include"},
-    {"logging", 1, "exclude"},
     // Echo with conversion (For testing only)
     {"echojson", 0, "arg0"},
     {"echojson", 1, "arg1"},

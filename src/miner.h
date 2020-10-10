@@ -20,10 +20,6 @@ class CChainParams;
 class Config;
 class CScript;
 
-namespace Consensus {
-struct Params;
-}
-
 static const bool DEFAULT_PRINTPRIORITY = false;
 
 struct CBlockTemplateEntry {
@@ -155,25 +151,15 @@ private:
     int nHeight;
     int64_t nLockTimeCutoff;
     int64_t nMedianTimePast;
-    const CChainParams &chainparams;
 
+    const Config *config;
     const CTxMemPool *mempool;
 
     // Variables used for addPriorityTxs
     int lastFewTxs;
 
 public:
-    struct Options {
-        Options();
-        uint64_t nExcessiveBlockSize;
-        uint64_t nMaxGeneratedBlockSize;
-        CFeeRate blockMinFeeRate;
-    };
-
-    BlockAssembler(const Config &config, const CTxMemPool &_mempool);
-    BlockAssembler(const CChainParams &params, const CTxMemPool &_mempool,
-                   const Options &options);
-
+    BlockAssembler(const Config &_config, const CTxMemPool &mempool);
     /** Construct a new block template with coinbase to scriptPubKeyIn */
     std::unique_ptr<CBlockTemplate>
     CreateNewBlock(const CScript &scriptPubKeyIn);
@@ -188,8 +174,9 @@ private:
     void AddToBlock(CTxMemPool::txiter iter);
 
     // Methods for how to add transactions to a block.
-    /**
-     * Add transactions based on feerate including unconfirmed ancestors.
+    /** Add transactions based on tx "priority" */
+    void addPriorityTxs();
+    /** Add transactions based on feerate including unconfirmed ancestors
      * Increments nPackagesSelected / nDescendantsUpdated with corresponding
      * statistics from the package selection (for logging statistics).
      */
@@ -239,10 +226,10 @@ private:
 };
 
 /** Modify the extranonce in a block */
-void IncrementExtraNonce(CBlock *pblock, const CBlockIndex *pindexPrev,
-                         uint64_t nExcessiveBlockSize,
+void IncrementExtraNonce(const Config &config, CBlock *pblock,
+                         const CBlockIndex *pindexPrev,
                          unsigned int &nExtraNonce);
-int64_t UpdateTime(CBlockHeader *pblock, const Consensus::Params &params,
+int64_t UpdateTime(CBlockHeader *pblock, const Config &config,
                    const CBlockIndex *pindexPrev);
 
 #endif // BITCOIN_MINER_H

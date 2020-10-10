@@ -14,7 +14,6 @@
 #include <list>
 #include <mutex>
 #include <string>
-#include <vector>
 
 static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS = false;
@@ -25,11 +24,6 @@ static const std::string DEFAULT_DEBUGLOGFILE = "debug.log";
 static const uint32_t DEFAULT_DEBUGLOGFILE_KEEPDAYS = 7;
 
 extern bool fLogIPs;
-
-struct CLogCategoryActive {
-    std::string category;
-    bool active;
-};
 
 namespace BCLog {
 
@@ -73,7 +67,8 @@ private:
     std::atomic_bool m_started_new_line{true};
 
     /**
-     * Log categories bitfield.
+     * Log categories bitfield. Leveldb/libevent need special handling if their
+     * flags are changed at runtime.
      */
     std::atomic<uint32_t> m_categories{0};
 
@@ -99,8 +94,6 @@ public:
     void RemoveOlderDebugFiles();
 
 
-    uint32_t GetCategoryMask() const { return m_categories.load(); }
-
     void EnableCategory(LogFlags category);
     bool EnableCategory(const std::string &str);
     void DisableCategory(LogFlags category);
@@ -122,11 +115,8 @@ static inline bool LogAcceptCategory(BCLog::LogFlags category) {
     return GetLogger().WillLogCategory(category);
 }
 
-/** Returns a string with the log categories. */
+/** Returns a string with the supported log categories */
 std::string ListLogCategories();
-
-/** Returns a vector of the active log categories. */
-std::vector<CLogCategoryActive> ListActiveLogCategories();
 
 /** Return true if str parses as a log category and set the flag */
 bool GetLogCategory(BCLog::LogFlags &flag, const std::string &str);
@@ -146,9 +136,5 @@ bool GetLogCategory(BCLog::LogFlags &flag, const std::string &str);
     do {                                                                       \
         GetLogger().LogPrintStr(tfm::format(__VA_ARGS__));                     \
     } while (0)
-
-
-#define LogPrintfToBeContinued LogPrintf
-#define LogPrintToBeContinued LogPrint
 
 #endif // BITCOIN_LOGGING_H

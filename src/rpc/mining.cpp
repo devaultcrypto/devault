@@ -139,13 +139,11 @@ UniValue generateBlocks(const Config &config,
 
         {
             LOCK(cs_main);
-            IncrementExtraNonce(pblock, chainActive.Tip(),
-                                config.GetMaxBlockSize(), nExtraNonce);
+            IncrementExtraNonce(config, pblock, chainActive.Tip(), nExtraNonce);
         }
 
         while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount &&
-               !CheckProofOfWork(pblock->GetHash(), pblock->nBits,
-                                 config.GetChainParams().GetConsensus())) {
+               !CheckProofOfWork(pblock->GetHash(), pblock->nBits, config)) {
             ++pblock->nNonce;
             --nMaxTries;
         }
@@ -255,6 +253,9 @@ static UniValue getmininginfo(const Config &config,
     obj.pushKV("currentblocksize", uint64_t(nLastBlockSize));
     obj.pushKV("currentblocktx", uint64_t(nLastBlockTx));
     obj.pushKV("difficulty", double(GetDifficulty(chainActive.Tip())));
+    obj.pushKV("blockprioritypercentage",
+               uint8_t(gArgs.GetArg("-blockprioritypercentage",
+                                    DEFAULT_BLOCK_PRIORITY_PERCENTAGE)));
     obj.pushKV("networkhashps", getnetworkhashps(config, request));
     obj.pushKV("pooledtx", uint64_t(g_mempool.size()));
     obj.pushKV("chain", config.GetChainParams().NetworkIDString());
@@ -298,10 +299,10 @@ static UniValue prioritisetransaction(const Config &config,
 
     LOCK(cs_main);
 
-    TxId txid(ParseHashStr(request.params[0].get_str(), "txid"));
+    uint256 hash = ParseHashStr(request.params[0].get_str(), "txid");
     Amount nAmount(request.params[2].get_int64());
 
-    g_mempool.PrioritiseTransaction(txid, request.params[1].get_real(),
+    g_mempool.PrioritiseTransaction(hash, request.params[1].get_real(),
                                     nAmount);
     return true;
 }
@@ -474,7 +475,7 @@ static UniValue getblocktemplate(const Config &config,
                                    "Block decode failed");
             }
 
-            const BlockHash hash = block.GetHash();
+            uint256 hash = block.GetHash();
             auto mi = mapBlockIndex.find(hash);
             if (mi != mapBlockIndex.end()) {
                 CBlockIndex *pindex = mi->second;
@@ -493,7 +494,7 @@ static UniValue getblocktemplate(const Config &config,
                 return "inconclusive-not-best-prevblk";
             }
             CValidationState state;
-            TestBlockValidity(config.GetChainParams(), state, block, pindexPrev,
+            TestBlockValidity(config, state, block, pindexPrev,
                               BlockValidationOptions(config)
                                   .withCheckPoW(false)
                                   .withCheckMerkleRoot(true));
@@ -603,7 +604,7 @@ static UniValue getblocktemplate(const Config &config,
     CBlock *pblock = &pblocktemplate->block;
 
     // Update nTime
-    UpdateTime(pblock, config.GetChainParams().GetConsensus(), pindexPrev);
+    UpdateTime(pblock, config, pindexPrev);
     pblock->nNonce = 0;
 
     UniValue aCaps(UniValue::VARR);
@@ -735,7 +736,7 @@ static UniValue submitblock(const Config &config,
                            "Block does not start with a coinbase");
     }
 
-    const BlockHash hash = block.GetHash();
+    uint256 hash = block.GetHash();
     {
         LOCK(cs_main);
         auto mi = mapBlockIndex.find(hash);

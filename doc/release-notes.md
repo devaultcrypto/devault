@@ -7,6 +7,9 @@ This release includes the following features and fixes since 1.2.1 release:
    configured with `-walletdir` parameter.
 
 This release includes the following features and fixes:
+ - The `inactivehdmaster` property in the `dumpwallet` output has been
+   deprecated in favor of `inactivehdseed`. `inactivehdmaster` will be removed
+   in V0.21.
 
 'label' and 'account' APIs for wallet
 -------------------------------------
@@ -44,31 +47,3 @@ Here are the changes to RPC methods:
 | `sendmany`             | The `account` named parameter has been renamed to `dummy`. If provided, the `dummy` parameter must be set to the empty string, unless running with the `-deprecatedrpc=accounts` argument (in which case functionality is unchanged). |
 | `listtransactions`     | The `account` named parameter has been renamed to `dummy`. If provided, the `dummy` parameter must be set to the string `*`, unless running with the `-deprecatedrpc=accounts` argument (in which case functionality is unchanged). |
 | `getbalance`           | `account`, `minconf` and `include_watchonly` parameters are deprecated, and can only be used if running with '-deprecatedrpc=accounts' |
-
- - `getlabeladdress` has been removed and replaced with `getaccountaddress`
-   until v0.21 at which time `getaccountaddress` will also be removed.  To
-
-Network
--------
- - When fetching a transaction announced by multiple peers, previous versions of
-   Bitcoin ABC would sequentially attempt to download the transaction from each
-   announcing peer until the transaction is received, in the order that those
-   peers' announcements were received.  In this release, the download logic has
-   changed to randomize the fetch order across peers and to prefer sending
-   download requests to outbound peers over inbound peers. This fixes an issue
-   where inbound peers can prevent a node from getting a transaction.
-
-GUI changes
------------
- - Block storage can be limited under Preferences, in the Main tab. Undoing
-   this setting requires downloading the full blockchain again. This mode is
-   incompatible with -txindex and -rescan.
-
-Other
------------
- - Fixed a bug with Multiwallets that have their own directories (i.e. cases
-   such as `DATADIR/wallets/mywallet/wallet.dat`).  Backups of these wallets
-   will now take each wallet's specific directory into account.
-
- - Added `nTx` return value to `getblock` and `getblockheader` detailing the
-   number of transactions in the returned block.

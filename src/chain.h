@@ -16,7 +16,6 @@
 #include <tinyformat.h>
 #include <sync.h>
 #include <uint256.h>
-#include "diskblockpos.h"
 
 #include <unordered_map>
 #include <vector>
@@ -53,7 +52,7 @@ class CBlockIndex {
 public:
     //! pointer to the hash of the block, if any. Memory is owned by this
     //! CBlockIndex
-    const BlockHash *phashBlock;
+    const uint256 *phashBlock;
 
     //! pointer to the index of the predecessor of this block
     CBlockIndex *pprev;
@@ -145,8 +144,8 @@ public:
         nNonce = block.nNonce;
     }
 
-    CDiskBlockPos GetBlockPos() const {
-        CDiskBlockPos ret;
+    FlatFilePos GetBlockPos() const {
+        FlatFilePos ret;
         if (nStatus.hasData()) {
             ret.nFile = nFile;
             ret.nPos = nDataPos;
@@ -154,8 +153,8 @@ public:
         return ret;
     }
 
-    CDiskBlockPos GetUndoPos() const {
-        CDiskBlockPos ret;
+    FlatFilePos GetUndoPos() const {
+        FlatFilePos ret;
         if (nStatus.hasUndo()) {
             ret.nFile = nFile;
             ret.nPos = nUndoPos;
@@ -176,17 +175,7 @@ public:
         return block;
     }
 
-    BlockHash GetBlockHash() const { return *phashBlock; }
-
-    /**
-     * Check whether this block's and all previous blocks' transactions have
-     * been downloaded (and stored to disk) at some point.
-     *
-     * Does not imply the transactions are consensus-valid (ConnectTip might
-     * fail) Does not imply the transactions are still stored on disk.
-     * (IsBlockPruned might return true)
-     */
-    bool HaveTxsDownloaded() const { return nChainTx != 0; }
+    uint256 GetBlockHash() const { return *phashBlock; }
 
     int64_t GetBlockTime() const { return int64_t(nTime); }
 
@@ -258,16 +247,17 @@ struct BlockHasher {
     // this used to call `GetCheapHash()` in uint256, which was later moved; the
     // cheap hash function simply calls ReadLE64() however, so the end result is
     // identical
-    size_t operator()(const BlockHash &hash) const {
+    size_t operator()(const uint256 &hash) const {
         return ReadLE64(hash.begin());
     }
 };
 
-typedef std::unordered_map<BlockHash, CBlockIndex *, BlockHasher> BlockMap;
-extern BlockMap &mapBlockIndex;
+
+typedef std::unordered_map<uint256, CBlockIndex *, BlockHasher> BlockMap;
+extern BlockMap mapBlockIndex;
 extern CCriticalSection cs_main;
 
-inline CBlockIndex *LookupBlockIndex(const BlockHash &hash) {
+inline CBlockIndex *LookupBlockIndex(const uint256 &hash) {
     AssertLockHeld(cs_main);
     BlockMap::const_iterator it = mapBlockIndex.find(hash);
     return it == mapBlockIndex.end() ? nullptr : it->second;
@@ -298,12 +288,12 @@ bool AreOnTheSameFork(const CBlockIndex *pa, const CBlockIndex *pb);
 /** Used to marshal pointers into hashes for db storage. */
 class CDiskBlockIndex : public CBlockIndex {
 public:
-    BlockHash hashPrev;
+    uint256 hashPrev;
 
-    CDiskBlockIndex() { hashPrev = BlockHash(); }
+    CDiskBlockIndex() { hashPrev = uint256(); }
 
     explicit CDiskBlockIndex(const CBlockIndex *pindex) : CBlockIndex(*pindex) {
-        hashPrev = (pprev ? pprev->GetBlockHash() : BlockHash());
+        hashPrev = (pprev ? pprev->GetBlockHash() : uint256());
     }
 
     ADD_SERIALIZE_METHODS;
@@ -337,7 +327,7 @@ public:
         READWRITE(nNonce);
     }
 
-    BlockHash GetBlockHash() const {
+    uint256 GetBlockHash() const {
         CBlockHeader block;
         block.nVersion = nVersion;
         block.hashPrevBlock = hashPrev;

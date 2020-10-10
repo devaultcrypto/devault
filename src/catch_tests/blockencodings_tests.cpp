@@ -14,7 +14,7 @@
 
 #include "catch_unit.h"
 
-std::vector<std::pair<TxHash, CTransactionRef>> extra_txn;
+std::vector<std::pair<uint256, CTransactionRef>> extra_txn;
 
 struct RegtestingSetup : public TestingSetup {
   RegtestingSetup() : TestingSetup(CBaseChainParams::REGTEST) {}
@@ -37,7 +37,7 @@ static CBlock BuildBlockTestCase() {
   block.vtx.resize(3);
   block.vtx[0] = MakeTransactionRef(tx);
   block.nVersion = 42;
-  block.hashPrevBlock = BlockHash(InsecureRand256());
+  block.hashPrevBlock = InsecureRand256();
   block.nBits = 0x207fffff;
 
   tx.vin[0].prevout = InsecureRandOutPoint();
@@ -54,7 +54,7 @@ static CBlock BuildBlockTestCase() {
   assert(!mutated);
 
   GlobalConfig config;
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
     ++block.nNonce;
   }
 
@@ -68,11 +68,11 @@ static CBlock BuildBlockTestCase() {
 TEST_CASE("SimpleRoundTripTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
-  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[2]->GetId(), entry.FromTx(*block.vtx[2]));
+  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[2]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
   // Do a simple ShortTxIDs RT
@@ -139,7 +139,7 @@ class TestHeaderAndShortIDs {
   }
   explicit TestHeaderAndShortIDs(const CBlock &block) : TestHeaderAndShortIDs(CBlockHeaderAndShortTxIDs(block)) {}
 
-  uint64_t GetShortID(const TxHash &txhash) const {
+  uint64_t GetShortID(const uint256 &txhash) const {
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << *this;
     CBlockHeaderAndShortTxIDs base;
@@ -169,14 +169,14 @@ class TestHeaderAndShortIDs {
 TEST_CASE("NonCoinbasePreforwardRTTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
-  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[2]->GetId(), entry.FromTx(*block.vtx[2]));
+  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[2]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
-  TxId txid;
+  uint256 txhash;
 
   // Test with pre-forwarding tx 1, but not coinbase
   {
@@ -184,8 +184,8 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
     shortIDs.prefilledtxn.resize(1);
     shortIDs.prefilledtxn[0] = {1, block.vtx[1]};
     shortIDs.shorttxids.resize(2);
-    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[0]->GetHash());
-    shortIDs.shorttxids[1] = shortIDs.GetShortID(block.vtx[2]->GetHash());
+    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[0]->GetId());
+    shortIDs.shorttxids[1] = shortIDs.GetShortID(block.vtx[2]->GetId());
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << shortIDs;
@@ -227,28 +227,28 @@ TEST_CASE("NonCoinbasePreforwardRTTest") {
     BOOST_CHECK_EQUAL(block.hashMerkleRoot.ToString(), BlockMerkleRoot(block3, &mutated).ToString());
     BOOST_CHECK(!mutated);
 
-    txid = block.vtx[2]->GetId();
+    txhash = block.vtx[2]->GetId();
     block.vtx.clear();
     block2.vtx.clear();
     block3.vtx.clear();
 
     // + 1 because of partialBlockCopy.
-    BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
+    BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
   }
-  BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
+  BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 }
 
 TEST_CASE("SufficientPreforwardRTTest") {
   RegtestingSetup setup;
   CTxMemPool pool;
-  LOCK2(cs_main, pool.cs);
   TestMemPoolEntryHelper entry;
   CBlock block(BuildBlockTestCase());
 
   pool.addUnchecked(block.vtx[1]->GetId(), entry.FromTx(*block.vtx[1]));
+  LOCK(pool.cs);
   BOOST_CHECK_EQUAL(pool.mapTx.find(block.vtx[1]->GetId())->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 
-  TxId txid;
+  uint256 txhash;
 
   // Test with pre-forwarding coinbase + tx 2 with tx 1 in mempool
   {
@@ -258,7 +258,7 @@ TEST_CASE("SufficientPreforwardRTTest") {
     // id == 1 as it is 1 after index 1
     shortIDs.prefilledtxn[1] = {1, block.vtx[2]};
     shortIDs.shorttxids.resize(1);
-    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[1]->GetHash());
+    shortIDs.shorttxids[0] = shortIDs.GetShortID(block.vtx[1]->GetId());
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << shortIDs;
@@ -282,14 +282,14 @@ TEST_CASE("SufficientPreforwardRTTest") {
     BOOST_CHECK_EQUAL(block.hashMerkleRoot.ToString(), BlockMerkleRoot(block2, &mutated).ToString());
     BOOST_CHECK(!mutated);
 
-    txid = block.vtx[1]->GetId();
+    txhash = block.vtx[1]->GetId();
     block.vtx.clear();
     block2.vtx.clear();
 
     // + 1 because of partialBlockCopy.
-    BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
+    BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 1);
   }
-  BOOST_CHECK_EQUAL(pool.mapTx.find(txid)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
+  BOOST_CHECK_EQUAL(pool.mapTx.find(txhash)->GetSharedTx().use_count(), SHARED_TX_OFFSET + 0);
 }
 
 TEST_CASE("EmptyBlockRoundTripTest") {
@@ -305,7 +305,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
   block.vtx.resize(1);
   block.vtx[0] = MakeTransactionRef(std::move(coinbase));
   block.nVersion = 42;
-  block.hashPrevBlock = BlockHash(InsecureRand256());
+  block.hashPrevBlock = InsecureRand256();
   block.nBits = 0x207fffff;
 
   bool mutated;
@@ -313,7 +313,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
   assert(!mutated);
 
   GlobalConfig config;
-  while (!CheckProofOfWork(block.GetHash(), block.nBits, config.GetChainParams().GetConsensus())) {
+  while (!CheckProofOfWork(block.GetHash(), block.nBits, config)) {
     ++block.nNonce;
   }
 
@@ -343,7 +343,7 @@ TEST_CASE("EmptyBlockRoundTripTest") {
 TEST_CASE("TransactionsRequestSerializationTest") {
   RegtestingSetup setup;
   BlockTransactionsRequest req1;
-  req1.blockhash = BlockHash(InsecureRand256());
+  req1.blockhash = InsecureRand256();
   req1.indices.resize(4);
   req1.indices[0] = 0;
   req1.indices[1] = 1;

@@ -1,4 +1,4 @@
-// Copyright (c) 2009-2019 The Bitcoin Core developers
+// Copyright (c) 2009-2016 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -222,11 +222,9 @@ static Amount ExtractAndValidateValue(const std::string &strValue) {
 
 static void MutateTxVersion(CMutableTransaction &tx,
                             const std::string &cmdVal) {
-    int64_t newVersion;
-    if (!ParseInt64(cmdVal, &newVersion) || newVersion < 1 ||
-        newVersion > CTransaction::MAX_STANDARD_VERSION) {
-        throw std::runtime_error("Invalid TX version requested: '" + cmdVal +
-                                 "'");
+    int64_t newVersion = std::atoll(cmdVal.c_str());
+    if (newVersion < 1 || newVersion > CTransaction::MAX_STANDARD_VERSION) {
+        throw std::runtime_error("Invalid TX version requested");
     }
 
     tx.nVersion = int(newVersion);
@@ -234,11 +232,9 @@ static void MutateTxVersion(CMutableTransaction &tx,
 
 static void MutateTxLocktime(CMutableTransaction &tx,
                              const std::string &cmdVal) {
-    int64_t newLocktime;
-    if (!ParseInt64(cmdVal, &newLocktime) || newLocktime < 0LL ||
-        newLocktime > 0xffffffffLL) {
-        throw std::runtime_error("Invalid TX locktime requested: '" + cmdVal +
-                                 "'");
+    int64_t newLocktime = std::atoll(cmdVal.c_str());
+    if (newLocktime < 0LL || newLocktime > 0xffffffffLL) {
+        throw std::runtime_error("Invalid TX locktime requested");
     }
 
     tx.nLockTime = (unsigned int)newLocktime;
@@ -266,11 +262,10 @@ static void MutateTxAddInput(CMutableTransaction &tx,
     static const unsigned int maxVout = MAX_TX_SIZE / minTxOutSz;
 
     // extract and validate vout
-    const std::string &strVout = vStrInputParts[1];
-    int64_t vout;
-    if (!ParseInt64(strVout, &vout) || vout < 0 ||
-        vout > static_cast<int64_t>(maxVout)) {
-        throw std::runtime_error("invalid TX input vout '" + strVout + "'");
+    std::string strVout = vStrInputParts[1];
+    int vout = std::atoi(strVout.c_str());
+    if ((vout < 0) || (vout > (int)maxVout)) {
+        throw std::runtime_error("invalid TX input vout");
     }
 
     // extract the optional sequence number
@@ -375,8 +370,8 @@ static void MutateTxAddOutMultiSig(CMutableTransaction &tx,
         throw std::runtime_error("incorrect number of multisig pubkeys");
     }
 
-    if (required < 1 || required > MAX_PUBKEYS_PER_MULTISIG || numkeys < 1 ||
-        numkeys > MAX_PUBKEYS_PER_MULTISIG || numkeys < required) {
+    if (required < 1 || required > 20 || numkeys < 1 || numkeys > 20 ||
+        numkeys < required) {
         throw std::runtime_error("multisig parameter mismatch. Required " +
                                  std::to_string(required) + " of " +
                                  std::to_string(numkeys) + "signatures.");
@@ -406,11 +401,6 @@ static void MutateTxAddOutMultiSig(CMutableTransaction &tx,
     CScript scriptPubKey = GetScriptForMultisig(required, pubkeys);
 
     if (bScriptHash) {
-        if (scriptPubKey.size() > MAX_SCRIPT_ELEMENT_SIZE) {
-            throw std::runtime_error(
-                strprintf("redeemScript exceeds size limit: %d > %d",
-                          scriptPubKey.size(), MAX_SCRIPT_ELEMENT_SIZE));
-        }
         // Get the ID for the script, and then construct a P2SH destination for
         // it.
         scriptPubKey = GetScriptForDestination(CScriptID(scriptPubKey));
@@ -472,18 +462,7 @@ static void MutateTxAddOutScript(CMutableTransaction &tx,
         bScriptHash = (flags.find('S') != std::string::npos);
     }
 
-    if (scriptPubKey.size() > MAX_SCRIPT_SIZE) {
-        throw std::runtime_error(strprintf("script exceeds size limit: %d > %d",
-                                           scriptPubKey.size(),
-                                           MAX_SCRIPT_SIZE));
-    }
-
     if (bScriptHash) {
-        if (scriptPubKey.size() > MAX_SCRIPT_ELEMENT_SIZE) {
-            throw std::runtime_error(
-                strprintf("redeemScript exceeds size limit: %d > %d",
-                          scriptPubKey.size(), MAX_SCRIPT_ELEMENT_SIZE));
-        }
         scriptPubKey = GetScriptForDestination(CScriptID(scriptPubKey));
     }
 
@@ -495,10 +474,10 @@ static void MutateTxAddOutScript(CMutableTransaction &tx,
 static void MutateTxDelInput(CMutableTransaction &tx,
                              const std::string &strInIdx) {
     // parse requested deletion index
-    int64_t inIdx;
-    if (!ParseInt64(strInIdx, &inIdx) || inIdx < 0 ||
-        inIdx >= static_cast<int64_t>(tx.vin.size())) {
-        throw std::runtime_error("Invalid TX input index '" + strInIdx + "'");
+    int inIdx = std::atoi(strInIdx.c_str());
+    if (inIdx < 0 || inIdx >= (int)tx.vin.size()) {
+        std::string strErr = "Invalid TX input index '" + strInIdx + "'";
+        throw std::runtime_error(strErr.c_str());
     }
 
     // delete input from transaction
@@ -508,10 +487,10 @@ static void MutateTxDelInput(CMutableTransaction &tx,
 static void MutateTxDelOutput(CMutableTransaction &tx,
                               const std::string &strOutIdx) {
     // parse requested deletion index
-    int64_t outIdx;
-    if (!ParseInt64(strOutIdx, &outIdx) || outIdx < 0 ||
-        outIdx >= static_cast<int64_t>(tx.vout.size())) {
-        throw std::runtime_error("Invalid TX output index '" + strOutIdx + "'");
+    int outIdx = std::atoi(strOutIdx.c_str());
+    if (outIdx < 0 || outIdx >= (int)tx.vout.size()) {
+        std::string strErr = "Invalid TX output index '" + strOutIdx + "'";
+        throw std::runtime_error(strErr.c_str());
     }
 
     // delete output from transaction
@@ -631,7 +610,7 @@ static void MutateTxSign(CMutableTransaction &tx, const std::string &flagStr) {
 
         TxId txid(ParseHashStr(prevOut["txid"].get_str(), "txid"));
 
-        const int nOut = prevOut["vout"].get_int();
+        int nOut = std::atoi(prevOut["vout"].getValStr().c_str());
         if (nOut < 0) {
             throw std::runtime_error("vout must be positive");
         }

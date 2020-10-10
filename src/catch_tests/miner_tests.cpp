@@ -58,6 +58,9 @@ void TestPackageSelection(Config &config, CScript scriptPubKey, std::vector<CTra
   // Test the ancestor feerate transaction selection.
   TestMemPoolEntryHelper entry;
 
+  // these 3 tests assume blockprioritypercentage is 0.
+  config.SetBlockPriorityPercentage(0);
+
   // Test that a medium fee transaction will be selected after a higher fee
   // rate package with a low fee rate parent.
   CMutableTransaction tx;
@@ -69,7 +72,6 @@ void TestPackageSelection(Config &config, CScript scriptPubKey, std::vector<CTra
   // This tx has a low fee: 1000 satoshis.
   // Save this txid for later use.
   TxId parentTxId = tx.GetId();
-  LOCK2(cs_main, ::g_mempool.cs);
   g_mempool.addUnchecked(parentTxId, entry.Fee(Amount(1000)).Time(GetTime()).SpendsCoinbase(true).FromTx(tx));
 
   // This tx has a medium fee: 10000 satoshis.
@@ -176,7 +178,7 @@ void TestCoinbaseMessageEB(uint64_t eb, std::string cbmsg) {
 
   // IncrementExtraNonce creates a valid coinbase and merkleRoot
   unsigned int extraNonce = 0;
-  IncrementExtraNonce(pblock, chainActive.Tip(), config.GetMaxBlockSize(), extraNonce);
+  IncrementExtraNonce(config, pblock, chainActive.Tip(), extraNonce);
   unsigned int nHeight = chainActive.Tip()->nHeight + 1;
   std::vector<uint8_t> vec(cbmsg.begin(), cbmsg.end());
   BOOST_CHECK(pblock->vtx[0]->vin[0].scriptSig ==
@@ -253,7 +255,7 @@ TEST_CASE("CreateNewBlock_validity") {
     pblock->hashPrevBlock = pblock->GetHash();
   }
 
-  LOCK2(cs_main, ::g_mempool.cs);
+  LOCK(cs_main);
 
   // Just to make sure we can still make simple blocks.
   BOOST_CHECK(pblocktemplate = BlockAssembler(config, g_mempool).CreateNewBlock(scriptPubKey));

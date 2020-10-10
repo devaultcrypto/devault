@@ -32,21 +32,8 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet)
     /* Main elements init */
     ui->databaseCache->setMinimum(nMinDbCache);
     ui->databaseCache->setMaximum(nMaxDbCache);
-    static const uint64_t GiB = 1024 * 1024 * 1024;
-    static const uint64_t nMinDiskSpace =
-        MIN_DISK_SPACE_FOR_BLOCK_FILES / GiB +
-                (MIN_DISK_SPACE_FOR_BLOCK_FILES % GiB)
-            ? 1
-            : 0;
-    ui->pruneSize->setMinimum(nMinDiskSpace);
     ui->threadsScriptVerif->setMinimum(-GetNumCores());
     ui->threadsScriptVerif->setMaximum(MAX_SCRIPTCHECK_THREADS);
-    ui->pruneWarning->setVisible(false);
-    ui->pruneWarning->setStyleSheet("QLabel { color: red; }");
-
-    ui->pruneSize->setEnabled(false);
-    connect(ui->prune, SIGNAL(toggled(bool)), ui->pruneSize,
-            SLOT(setEnabled(bool)));
 
 /* Network elements init */
 #ifndef USE_UPNP
@@ -184,13 +171,6 @@ void OptionsDialog::setModel(OptionsModel *_model) {
     connect(ui->threadsScriptVerif,
             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
             &OptionsDialog::showRestartWarning);
-
-    connect(ui->prune, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
-    connect(ui->prune, SIGNAL(clicked(bool)), this,
-            SLOT(togglePruneWarning(bool)));
-    connect(ui->pruneSize, SIGNAL(valueChanged(int)), this,
-            SLOT(showRestartWarning()));
-    
     /* Wallet */
     connect(ui->spendZeroConfChange, &QCheckBox::clicked, this,
             &OptionsDialog::showRestartWarning);
@@ -220,8 +200,6 @@ void OptionsDialog::setMapper() {
     mapper->addMapping(ui->threadsScriptVerif,
                        OptionsModel::ThreadsScriptVerif);
     mapper->addMapping(ui->databaseCache, OptionsModel::DatabaseCache);
-    mapper->addMapping(ui->prune, OptionsModel::Prune);
-    mapper->addMapping(ui->pruneSize, OptionsModel::PruneSize);
 
     /* Wallet */
     mapper->addMapping(ui->spendZeroConfChange,
@@ -295,10 +273,6 @@ void OptionsDialog::on_hideTrayIcon_stateChanged(int fState) {
     } else {
         ui->minimizeToTray->setEnabled(true);
     }
-}
-
-void OptionsDialog::togglePruneWarning(bool enabled) {
-    ui->pruneWarning->setVisible(!ui->pruneWarning->isVisible());
 }
 
 void OptionsDialog::showRestartWarning(bool fPersistent) {

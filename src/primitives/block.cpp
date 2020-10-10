@@ -10,8 +10,8 @@
 #include <tinyformat.h>
 #include <util/strencodings.h>
 
-BlockHash CBlockHeader::GetHash() const {
-    return BlockHash(SerializeHash(*this));
+uint256 CBlockHeader::GetHash() const {
+    return SerializeHash(*this);
 }
 
 std::string CBlock::ToString() const {

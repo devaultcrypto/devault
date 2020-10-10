@@ -2,7 +2,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <txdb.h>
 #include <index/txindex.h>
 
 #include <chain.h>
@@ -17,6 +16,28 @@ constexpr char DB_TXINDEX = 't';
 constexpr char DB_TXINDEX_BLOCK = 'T';
 
 std::unique_ptr<TxIndex> g_txindex;
+
+struct CDiskTxPos : public FlatFilePos {
+    unsigned int nTxOffset; // after header
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action) {
+        READWRITEAS(FlatFilePos, *this);
+        READWRITE(VARINT(nTxOffset));
+    }
+
+    CDiskTxPos(const FlatFilePos &blockIn, unsigned int nTxOffsetIn)
+        : FlatFilePos(blockIn.nFile, blockIn.nPos), nTxOffset(nTxOffsetIn) {}
+
+    CDiskTxPos() { SetNull(); }
+
+    void SetNull() {
+        FlatFilePos::SetNull();
+        nTxOffset = 0;
+    }
+};
 
 /**
  * Access to the txindex database (indexes/txindex/)
@@ -241,16 +262,14 @@ BaseIndex::DB &TxIndex::GetDB() const {
     return *m_db;
 }
 
-bool TxIndex::FindTx(const TxId &txid, BlockHash &block_hash,
+bool TxIndex::FindTx(const TxId &txid, uint256 &block_hash,
                      CTransactionRef &tx) const {
     CDiskTxPos postx;
     if (!m_db->ReadTxPos(txid, postx)) {
         return false;
     }
 
-    CDiskBlockPos blockpos(postx.nFile, postx.nPos);
-
-    CAutoFile file(OpenBlockFile(blockpos, true), SER_DISK, CLIENT_VERSION);
+    CAutoFile file(OpenBlockFile(postx, true), SER_DISK, CLIENT_VERSION);
     if (file.IsNull()) {
         return error("%s: OpenBlockFile failed", __func__);
     }

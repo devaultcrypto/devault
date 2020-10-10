@@ -2399,10 +2399,10 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Filter IPv6 by ASN
      Update manpages for 0.20.9 release
      Update chainparams
-##   Remove blockprioritypercentage config parameter.
+     Remove blockprioritypercentage config parameter.
      Add phonon activation logic
      [CMAKE] Override default flags
-##   Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
+     Merge #13451: rpc: expose CBlockIndex::nTx in getblock(header)
 #    [backport] net: Allow connections from misbehavior banned peers
      [CI] Don't override the default Junit file name
      [CMAKE] Unbreak the activated tests
@@ -2411,8 +2411,8 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Merge #13419: [tests] Speed up knapsack_solver_test by not recreating wallet 100 times.
      Merge #13775: doc: Remove newlines from error message
 #    Merge #13773: wallet: Fix accidental use of the comma operator
-##   stop rewinding post-segwit blocks on startup
-##   [backport] gui: Show messages as text not html
+     stop rewinding post-segwit blocks on startup
+     [backport] gui: Show messages as text not html
 #    Fix -Wcast-align in crypto_hash.cpp
      [LINTER] Enable new autopep8 rules
      [LINTER] Remove empty lines at the beginning of a block
@@ -2422,7 +2422,7 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
      Static assert with no message is a C++17 feature and warns on C++14
      [LINTER] Fix the tests linter
      Add a separate executable for seeder tests
-##   Fix enum NumConnections shadowing warning
+     Fix enum NumConnections shadowing warning
      checkmultisig: refactor nullfail check
      remove priority free transactions mechanism (currently off by default)
      fix some tests that rely on free transactions being submittable via RPC
@@ -2434,15 +2434,15 @@ XXXXX wallet: detecting duplicate wallet by comparing the db filename.
 #    Merge #14350: Add WalletLocation class
      [CI] Always move the Gitian install and build log
      Update Debian 10.x ISO link in the Gitian setup docs
-##   We assume uint8_t is an alias of unsigned char.
+     We assume uint8_t is an alias of unsigned char.
      Merge #14474: bitcoin-tx: Use constant for n pubkeys check
-##   Merge #11866: Do not un-mark fInMempool on wallet txn if ATMP fails.
+     Merge #11866: Do not un-mark fInMempool on wallet txn if ATMP fails.
      test: Move main_tests to validation_tests
-##   Merge #14206: doc: Document -checklevel levels
+     Merge #14206: doc: Document -checklevel levels
 #    Merge #13534: Don't assert(foo()) where foo() has side effects
-##   Merge #13662: Explain when reindex-chainstate can be used instead of reindex
+     Merge #13662: Explain when reindex-chainstate can be used instead of reindex
      Fixes AES benchmarks
-##   qt: Replace objc_msgSend with native syntax
+     qt: Replace objc_msgSend with native syntax
      [CMAKE] Fix wrong Openssl include directory variable name
      add SCHNORR_MULTISIG to mandatory flags
      Make more script validation flags backward compatible
@@ -2461,22 +2461,22 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      [CMAKE] SYS_getrandom is expected to be linux only
      [CMAKE] Fix FindBerkeleyDB for FreeBSD
 #    [CMAKE] Enable SSE4.1, SHA-NI and AVX2 for the crypto library
-##   reduce code duplication in UpdateFlags
-##   Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
-##   [wallet] Add wallet name to log messages
+     reduce code duplication in UpdateFlags
+     Merge #13298: Net: Bucketing INV delays (1 bucket) for incoming connections to hide tx time
+     [wallet] Add wallet name to log messages
      [tests] Fix race in rpc_deprecated.py
      add SCRIPT_VERIFY_MINIMALDATA to mandatory flags
      Add braces to support/lockedpool.cpp
-#    Abstract EraseBlockData out of RewindBlockIndex
+     Abstract EraseBlockData out of RewindBlockIndex
      [CI] Print the sanitizer logs
      [CI] Move the sanitizer log directory to /tmp
      [CMAKE] Add an option to promote some warnings to errors
-#    Remove Unused CTransaction tx in wallet.cpp
-#    Privatize CWallet::AddToWalletIfInvolvingMe
-#    Extract CWallet::MarkInputsDirty
+     Remove Unused CTransaction tx in wallet.cpp
+     Privatize CWallet::AddToWalletIfInvolvingMe
+     Extract CWallet::MarkInputsDirty
      [CMAKE] Silent the Qt translation files generation
      allow cuckoocache to function as a map
-#    Merge #12944: [wallet] ScanforWalletTransactions should mark input txns as dirty
+     Merge #12944: [wallet] ScanforWalletTransactions should mark input txns as dirty
      Log debug build status and warn when running benchmarks
      bench_bitcoin: Avoid read/write to default datadir
      test_bitcoin: Avoid read/write to default datadir
@@ -2486,10 +2486,10 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      fix incomplete txvalidationcache_tests
      Fix cuckoocache_tests -Wcast-align warnings
      [cuckoocache] Use getKey and KeyType for contains
-##   Merge #13627: Free keystore.h from file scope level type aliases
-##   Merge #13603: bitcoin-tx: Stricter check for valid integers
+     Merge #13627: Free keystore.h from file scope level type aliases
+     Merge #13603: bitcoin-tx: Stricter check for valid integers
      [move only] Move BIP70 code together in preparation to backport PR14451 BIP70 changes
-##   Sanity-check script sizes in bitcoin-tx
+     Sanity-check script sizes in bitcoin-tx
      Fix unused variable warning when building with wallet disabled
      Bump version to 0.20.9
 20.8     
@@ -2509,7 +2509,7 @@ XXXX Merge #13667: wallet: Fix backupwallet for multiwallets
      Merge #13566: Fix get balance
      Remove check-source-control-tools from check and check-all targets
      [cuckoocache] Use matchKey instead of the == operator.
-xx   refactoring: add a method for determining if a block is pruned or not
+     refactoring: add a method for determining if a block is pruned or not
      Integrate gArgs and chainparams into the Seeder
      Various nits in cuckoocache_tests.cpp
      doc: Doxygen-friendly CuckooCache comments
@@ -2521,17 +2521,17 @@ xx   refactoring: add a method for determining if a block is pruned or not
      fix undefined behaviour in seeder (select() aliasing)
      Update the github issue template to include disclosure policy
      remove NULLDUMMY
-xx   refactor: Add and use HaveTxsDownloaded() where appropriate
+     refactor: Add and use HaveTxsDownloaded() where appropriate
      Added autopatch script for patching and rebasing phabricator diffs
-xx   Make TxIndex::FindTx use BlockHash
+     Make TxIndex::FindTx use BlockHash
      Update GetTransaction's parameters
-xx   Update mempool and compact block logic to use TxHash
-xx   tx pool: Use class methods to hide raw map iterator impl details
-xx   Update mempool's mapDelta to use TxId
-xx   Update mempool's mapTx to index from TxId.
-xx   Use TxId in setInventoryTxToSend
+     Update mempool and compact block logic to use TxHash
+     tx pool: Use class methods to hide raw map iterator impl details
+     Update mempool's mapDelta to use TxId
+     Update mempool's mapTx to index from TxId.
+     Use TxId in setInventoryTxToSend
      refactor: Drop boost::this_thread::interruption_point and boost::thread_interrupted in main thread
-xx   Use BlockHash in BlockTransactionsRequest
+     Use BlockHash in BlockTransactionsRequest
      [cmake] link test runners by default
      Drop minor GetSerializeSize template
      Avoid creating a temporary vector for size-prefixed elements
@@ -2541,11 +2541,11 @@ xx   Use BlockHash in BlockTransactionsRequest
      [CMAKE] Fix scope issue in the remove_<lang>_compiler_flags() functions
 #    Rationalize lock anotation in validation code
      tests: Add missing cs_main locks required when accessing pcoinsdbview, pcoinsTip or pblocktree
-##   Introduce BlockHash to represent a block hash
+     Introduce BlockHash to represent a block hash
      Add braces in block.h
      Use size_t where apropriate in skiplist_tests.cpp
-##   Add Benchmark to test input de-duplication worst case
-##   Add const modifier to HTTPRequest methods
+     Add Benchmark to test input de-duplication worst case
+     Add const modifier to HTTPRequest methods
      Add braces in txdb.cpp
      Move pindexFinalized in CChainState
 #    Explain GetAncestor check for m_failed_blocks in AcceptBlockHeader
@@ -2555,15 +2555,15 @@ xx   Use BlockHash in BlockTransactionsRequest
      [test] Speed up fuzzing by ~200x when using afl-fuzz
      [CMAKE] Build test_bitcoin_fuzzy
      drop 'check3' upgrade-conditional-script-failure for Schnorr multisig
-##   Nit in net_processing.cpp
-###  Backport PR14897, PR15834 and PR16196
-###  Merge #15149: gui: Show current wallet name in window title
+     Nit in net_processing.cpp
+     Backport PR14897, PR15834 and PR16196
+     Merge #15149: gui: Show current wallet name in window title
      Update timings.json
      Various nits in net_processing.cpp
 #    p2p: Clarify control flow in ProcessMessage()
 #    Backport of Core PR14728: fix uninitialized read when stringifying an addrLocal
      previous link was dead
-###  Merge #14784: qt: Use WalletModel* instead of the wallet name as map key
+     Merge #14784: qt: Use WalletModel* instead of the wallet name as map key
      test: Fix test failures
      qa: fix deprecated log.warn in feature_dbcrash test
      [tests] fix block time in feature_pruning.py
@@ -2575,11 +2575,11 @@ xx   Use BlockHash in BlockTransactionsRequest
      Fix copy in loop
      Trivial: Corrected comment array name from pnSeeds6 to pnSeed6
      Merge #13498: [wallet] Fixups from account API deprecation
-###  Merge #12639: Reduce cs_main lock and avoid extra lookups of mapAddressBook in listunspent RPC
-###  [wallet] [rpc] Remove getlabeladdress RPC
+     Merge #12639: Reduce cs_main lock and avoid extra lookups of mapAddressBook in listunspent RPC
+     [wallet] [rpc] Remove getlabeladdress RPC
      Fix wrong version in clang-format error message and update the doc
      Merge #13138: [tests] Remove accounts from wallet_importprunedfunds.py
-###  Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
+     Merge #13437: wallet: Erase wtxOrderd wtx pointer on removeprunedfunds
      Add test coverage for messages requesting invalid blocks
 #### Drop IsLimited in favor of IsReachable
 #    Remove undue lock assertion in GuessVerificationProgess
@@ -2637,7 +2637,7 @@ xx   Use BlockHash in BlockTransactionsRequest
 #     Don't use systray icon on inappropriate systems
       add a couple more Schnorr checkmultisig tests
       Make SigningProvider expose key origin information
-xx    [MOVEONLY] Move ParseHDKeypath to utilstrencodings
+      [MOVEONLY] Move ParseHDKeypath to utilstrencodings
       Introduce KeyOriginInfo for fingerprint + path
 #     Merge #9662: Add createwallet "disableprivatekeys" option: a sane mode for watchonly-wallets
       Use local instance of ArgsManager in getarg_tests
@@ -2659,7 +2659,7 @@ xx    [MOVEONLY] Move ParseHDKeypath to utilstrencodings
       gui: Favor macOS show / hide action in dock menu
       Add missing braces on key.cpp
       qa: Premine to deterministic address with -disablewallet
-xx    RPC: Add new getzmqnotifications method.
+      RPC: Add new getzmqnotifications method.
 #     Break circular dependency: init -> * -> init by extracting shutdown.h
 #     Drop unused init.h includes
 #     Add Windows shutdown handler
@@ -2795,19 +2795,19 @@ xx    RPC: Add new getzmqnotifications method.
       Separate CSeederNode class declaration from definition
       Move parse_name() to dns.h so it can be tested
       Bump version to 0.20.6
-xx    Merge #13481: doc: Rewrite some validation docs as lock annotations
+      Merge #13481: doc: Rewrite some validation docs as lock annotations
 20.5      
       Updated manpages for 0.20.5 release
       Updated chainparams
       Update seeds
       bench: Benchmark MempoolToJSON
 #     Merge #14444: Add compile time checking for cs_main locks which we assert at run time
-xx    Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
+      Merge #13114: wallet/keystore: Add Clang thread safety annotations for variables guarded by cs_KeyStore
       Add test_runner flag to suppress ASAN errors from wallet_multiwallet.py
       [CMAKE] Move package name and copyright to the top level
       Added build-werror config to error on build warnings
       Merge #13248: [gui] Make proxy icon from statusbar clickable
-xx    Merge #13043: [qt] OptionsDialog: add prune setting
+      Merge #13043: [qt] OptionsDialog: add prune setting
       Fix -Wrange-loop-analysis warnings
       Fix -Wthread-safety-analysis warnings
       [CMAKE] Use CPack to build source packages
@@ -2821,10 +2821,10 @@ XXXXX bugfix: Remove dangling wallet env instance and Delete walletView in Walle
 #     rpc: Extract GetWalletNameFromJSONRPCRequest from GetWalletForJSONRPCRequest
 #     [mempool] Mark mempool import fails that were found in mempool as 'already there'
       [CMAKE] Propagate requirements for cmake >= 3.12
-xx    Merge #11050: Avoid treating null RPC arguments different from missing arguments
-xx    Merge #11191: RPC: Improve help text and behavior of RPC-logging.
-xx    Merge #11626: rpc: Make `logging` RPC public
-xx    [rpc] Add logging RPC
+      Merge #11050: Avoid treating null RPC arguments different from missing arguments
+      Merge #11191: RPC: Improve help text and behavior of RPC-logging.
+      Merge #11626: rpc: Make `logging` RPC public
+      [rpc] Add logging RPC
       Change CDnsSeedOpts to use std::string instead of c-strings
       Introduce constant default variables to initialize seeder options
       Remove strlcpy.h
@@ -2874,7 +2874,7 @@ XXXXX Make objects in range declarations immutable by default. Avoid unnecessary
       Inline Sign1 and SignN
       Separate HaveKey function that checks whether a key is in a keystore
 #     Merge #13176: Improve CRollingBloomFilter performance: replace modulus with FastMod
-XX    Add native support for serializing char arrays without FLATDATA
+      Add native support for serializing char arrays without FLATDATA
       refactor: Avoid locking tx pool cs thrice
 #     Return void instead of bool for functions that cannot fail
       Relayout comment in sign.h
@@ -2889,7 +2889,7 @@ XX    Add native support for serializing char arrays without FLATDATA
       Added more explicit instructions for release tagging
       Bump version to 0.20.4
       Add phpcs exclusion for strict_types declararion
-xx    Add static_assert to prevent VARINT(<signed value>)
+      Add static_assert to prevent VARINT(<signed value>)
       [CMAKE] Enable Large File Support on platforms that don't enable it by default
       Add support for Glibc version 2.28
       util: Replace boost::signals2 with std::function
@@ -2925,7 +2925,7 @@ xx    Add static_assert to prevent VARINT(<signed value>)
       [CMAKE] Migrate the python header generation scripts to python 3
       [CMAKE] Only change obj/build.h if the content has changed
       Run miner_tests with fixed options
-xx    Abstract out BlockAssembler options
+      Abstract out BlockAssembler options
       Fix compiler warnings emitted when compiling under stock OpenBSD 6.3
       Merge #13201: [qa] Handle disconnect_node race
       Merge #13402: Document validationinterace callback blocking deadlock potential.
@@ -2953,7 +2953,7 @@ xx    Abstract out BlockAssembler options
 #     banman: create and split out banman
       Move util files to directory
 #     Use C++11 default member initializers
-##    debug log number of unknown wallet records on load
+      debug log number of unknown wallet records on load
 #     Add compile time verification of assumptions we're currently making implicitly/tacitly
 #     Use std::make_unique more consistently
 #     bench: Use non-throwing ParseDouble(...) instead of throwing boost::lexical_cast<double>(...)
@@ -3004,9 +3004,9 @@ xx    Abstract out BlockAssembler options
 #     [qt] coincontrol: Remove unused qt4 workaround
       [build] .gitignore: add QT Creator artifacts
       Adding test case for SINGLE|ANYONECANPAY hash type in tx_valid.json
-##    Remove TestBlockValidity's dependency on Config
-##    Remove ConnectBlock's dependency on Config
-##    Remove CheckBlock's dependency on Config
+      Remove TestBlockValidity's dependency on Config
+      Remove ConnectBlock's dependency on Config
+      Remove CheckBlock's dependency on Config
       [net] Tighten scope in net_processing
 #     Add documentation to PeerLogicValidation interface and related functions
 20.2      
@@ -3020,8 +3020,8 @@ xx    Abstract out BlockAssembler options
       Updated seeds
 #     Fixes compilation of leveldb tests broken in D4004
       [CI] Make IBD a standard build configuration
-###   Remove ContextualCheckBlock's dependency on Config
-###   Remove CheckBlockHeader's dependency on Config
+      Remove ContextualCheckBlock's dependency on Config
+      Remove CheckBlockHeader's dependency on Config
       [CMAKE] Fix Linux64 toolchain name
 #     Source the Excessive block size from BlockValidationOptions
 #     Do not construct out-of-bound pointers in SHA2 code
@@ -3030,11 +3030,11 @@ xx    Abstract out BlockAssembler options
       [CMAKE] Move version to the top level CMakeLists.txt
       [CMAKE] Rename the top-level and `src/` cmake projects
       Generalized ibd.sh to provide a logging tool for running similar types of tests
-###   Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
-###   Remove ReadBlockFromDisk's dependency on Config
-###   Remove dependency on Config from the PoW code
-###   Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
-###   Activate consensus rule based on consensus params rather than config
+      Modify ContextualCheckBlockHeader to accept a CChainParam rather than a Config
+      Remove ReadBlockFromDisk's dependency on Config
+      Remove dependency on Config from the PoW code
+      Use Consensus::Params in ContextualCheckTransaction and variations instead of Config
+      Activate consensus rule based on consensus params rather than config
       Add warning about redundant moves
       Remove redundant call to std::move
       Fix the build-osx target for the depends subsystem
@@ -3288,7 +3288,7 @@ xx    Abstract out BlockAssembler options
       [LINTER] Integrate check-rpc-mappings to arcanist
       Fix nits in blockchain.cpp RPC table
       [tests] rename TestNode to TestP2PConn in tests
-##    Merge #12431: Only call NotifyBlockTip when chainActive changes
+      Merge #12431: Only call NotifyBlockTip when chainActive changes
       Bump version to 0.19.12
       [CI] Enable debug for the ASAN build
       qa: Avoid checking reject code for now
@@ -3334,10 +3334,10 @@ xx    Abstract out BlockAssembler options
       Migrate build configs from TeamCity to build-configurations.sh
       Merge #11997: [tests] util_tests.cpp: actually check ignored args
       Merge #11879: [tests] remove redundant univalue_tests.cpp
-##    scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
+      scripted-diff: Rename CChainState::g_failed_blocks to m_failed_blocks
 #     Merge #11714: [tests] Test that mempool rejects coinbase transactions
 #     Merge #11133: Document assumptions that are beoing made to avoid division by zero
-##    [Part 5 of 5] Add a CChainState class to clarify internal interfaces
+      [Part 5 of 5] Add a CChainState class to clarify internal interfaces
       QA: Fix race condition in wallet_encryption test
       [tests] [qt] Add tests for address book manipulation via EditAddressDialog
       [wallet] [rpc] Add loadwallet RPC
@@ -4195,7 +4195,7 @@ XXXXX Allow wallet files in multiple directories
 #####  Migrate MakeUnique to c++14 std::make_unique
 #####  Use c++14 generic std::rbegin() and std::rend() instead of class methods
 #####  [secp256k1] refactor nativeECDSABuffer to a more generic name
-##      [Part 4 of 5] Add a CChainState class to clarify internal interfaces
+      [Part 4 of 5] Add a CChainState class to clarify internal interfaces
 #####  Remove unused depends list from `getblocktemplate` transactions
 #####  Remove unused parameter `validFeeEstimates` from `CTxMempool::addUnchecked`
 #####  Fix comment in CheckInputs to match changed code

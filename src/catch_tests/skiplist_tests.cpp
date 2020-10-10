@@ -45,12 +45,12 @@ TEST_CASE("skiplist_test") {
 
 TEST_CASE("getlocator_test") {
   // Build a main chain 100000 blocks long.
-  std::vector<BlockHash> vHashMain(100000);
+  std::vector<uint256> vHashMain(100000);
   std::vector<CBlockIndex> vBlocksMain(100000);
   for (unsigned int i = 0; i < vBlocksMain.size(); i++) {
     // Set the hash equal to the height, so we can quickly check the
     // distances.
-    vHashMain[i] = BlockHash(ArithToUint256(i));
+    vHashMain[i] = ArithToUint256(i);
     vBlocksMain[i].nHeight = i;
     vBlocksMain[i].pprev = i ? &vBlocksMain[i - 1] : nullptr;
     vBlocksMain[i].phashBlock = &vHashMain[i];
@@ -60,11 +60,11 @@ TEST_CASE("getlocator_test") {
   }
 
   // Build a branch that splits off at block 49999, 50000 blocks long.
-  std::vector<BlockHash> vHashSide(50000);
+  std::vector<uint256> vHashSide(50000);
   std::vector<CBlockIndex> vBlocksSide(50000);
   for (unsigned int i = 0; i < vBlocksSide.size(); i++) {
     // Add 1<<128 to the hashes, so GetLow64() still returns the height.
-    vHashSide[i] = BlockHash(ArithToUint256(i + 50000 + (arith_uint256(1) << 128)));
+    vHashSide[i] = ArithToUint256(i + 50000 + (arith_uint256(1) << 128));
     vBlocksSide[i].nHeight = i + 50000;
     vBlocksSide[i].pprev = i ? &vBlocksSide[i - 1] : &vBlocksMain[49999];
     vBlocksSide[i].phashBlock = &vHashSide[i];
@@ -105,11 +105,11 @@ TEST_CASE("getlocator_test") {
 }
 
 TEST_CASE("findearliestatleast_test") {
-  std::vector<BlockHash> vHashMain(100000);
+  std::vector<uint256> vHashMain(100000);
   std::vector<CBlockIndex> vBlocksMain(100000);
   for (unsigned int i = 0; i < vBlocksMain.size(); i++) {
     // Set the hash equal to the height
-    vHashMain[i] = BlockHash(ArithToUint256(i));
+    vHashMain[i] = ArithToUint256(i);
     vBlocksMain[i].nHeight = i;
     vBlocksMain[i].pprev = i ? &vBlocksMain[i - 1] : nullptr;
     vBlocksMain[i].phashBlock = &vHashMain[i];
