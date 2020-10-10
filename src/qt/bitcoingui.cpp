@@ -234,9 +234,10 @@ void BitcoinGUI::createActions() {
     sendCoinsMenuAction->setToolTip(sendCoinsMenuAction->statusTip());
 
     receiveCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+    auto schemes = GUIUtil::bitcoinURIScheme(*config);
     receiveCoinsAction->setStatusTip(
-        tr("Request payments (generates QR codes and %1: URIs)")
-            .arg(GUIUtil::bitcoinURIScheme(*config)));
+        tr("Request payments (generates QR codes and %1: or %2 URIs)")
+            .arg(std::get<0>(schemes)).arg(std::get<1>(schemes)));
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
@@ -361,8 +362,9 @@ void BitcoinGUI::createActions() {
 
     openAction = new QAction(platformStyle->TextColorIcon(":/icons/open"),
                              tr("Open &URI..."), this);
-    openAction->setStatusTip(tr("Open a %1: URI or payment request")
-                                 .arg(GUIUtil::bitcoinURIScheme(*config)));
+    
+    openAction->setStatusTip(tr("Open a %1 or %2: URI or payment request")
+                             .arg(std::get<0>(schemes)).arg(std::get<1>(schemes)));
 
     showHelpMessageAction =
         new QAction(platformStyle->TextColorIcon(":/icons/info"),

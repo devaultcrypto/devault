@@ -216,6 +216,7 @@ public:
     // Check if a certain wallet flag is set.
     virtual bool IsWalletBlank() = 0;
     virtual bool IsWalletPrivate() = 0;
+    virtual bool IsWalletBLS() = 0;
 
     // Get default address type.
     virtual OutputType getDefaultAddressType() = 0;

@@ -57,13 +57,13 @@ QString convertToConfiguredAddressFormat(const Config &config,
 // Set up widgets for address and amounts
 void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
 
-QString bitcoinURIScheme(const CChainParams &, bool useCashAddr);
-QString bitcoinURIScheme(const Config &);
+std::tuple<QString,QString> bitcoinURIScheme(const CChainParams &, bool useCashAddr);
+std::tuple<QString,QString> bitcoinURIScheme(const Config &);
 // Parse "bitcoincash:" URI into recipient object, return true on successful
 // parsing
-bool parseBitcoinURI(const QString &scheme, const QUrl &uri,
+bool parseBitcoinURI(const std::tuple<QString,QString> &schemes, const QUrl &uri,
                      SendCoinsRecipient *out);
-bool parseBitcoinURI(const QString &scheme, QString uri,
+bool parseBitcoinURI(const std::tuple<QString,QString> &schemes, QString uri,
                      SendCoinsRecipient *out);
 QString formatBitcoinURI(const Config &config, const SendCoinsRecipient &info);
 

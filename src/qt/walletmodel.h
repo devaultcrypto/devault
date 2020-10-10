@@ -196,6 +196,7 @@ public:
     QString getDisplayName() const;
 
     bool isMultiwallet();
+    bool isWalletBLS() const { return m_wallet->IsWalletBLS(); }
 
 private:
     std::unique_ptr<interfaces::Wallet> m_wallet;

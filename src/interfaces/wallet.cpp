@@ -431,6 +431,7 @@ namespace {
         bool canGetAddresses() override { return m_wallet.CanGetAddresses(); }
         bool IsWalletBlank() override {  return m_wallet.IsWalletBlank(); }
         bool IsWalletPrivate() override {  return m_wallet.IsWalletPrivate(); }
+        bool IsWalletBLS() override {  return m_wallet.IsWalletBLS(); }
         
         OutputType getDefaultChangeType() override {
             return m_wallet.m_default_change_type;

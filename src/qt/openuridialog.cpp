@@ -13,7 +13,7 @@
 OpenURIDialog::OpenURIDialog(const Config *configIn, QWidget *parent)
     : QDialog(parent), ui(new Ui::OpenURIDialog), config(configIn) {
     ui->setupUi(this);
-    ui->uriEdit->setPlaceholderText(GUIUtil::bitcoinURIScheme(*config) + ":");
+    ui->uriEdit->setPlaceholderText(std::get<0>(GUIUtil::bitcoinURIScheme(*config)) + ":");
 }
 
 OpenURIDialog::~OpenURIDialog() {
@@ -26,8 +26,8 @@ QString OpenURIDialog::getURI() {
 
 void OpenURIDialog::accept() {
     SendCoinsRecipient rcp;
-    QString uriScheme = GUIUtil::bitcoinURIScheme(*config);
-    if (GUIUtil::parseBitcoinURI(uriScheme, getURI(), &rcp)) {
+    auto uriSchemes = GUIUtil::bitcoinURIScheme(*config);
+    if (GUIUtil::parseBitcoinURI(uriSchemes, getURI(), &rcp)) {
         /* Only accept value URIs */
         QDialog::accept();
     } else {
@@ -40,6 +40,7 @@ void OpenURIDialog::on_selectFileButton_clicked() {
         this, tr("Select payment request file to open"), "", "", nullptr);
     if (filename.isEmpty()) return;
     QUrl fileUri = QUrl::fromLocalFile(filename);
-    ui->uriEdit->setText(GUIUtil::bitcoinURIScheme(*config) +
+    auto uriSchemes = GUIUtil::bitcoinURIScheme(*config);
+    ui->uriEdit->setText(std::get<0>(uriSchemes) +
                          ":?r=" + QUrl::toPercentEncoding(fileUri.toString()));
 }
