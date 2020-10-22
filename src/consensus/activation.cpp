@@ -14,9 +14,5 @@ bool IsBLSEnabled(const Config &config, const CBlockIndex *pindexPrev) {
   if (pindexPrev == nullptr) {
     return false;
   }
-  
-  return pindexPrev->GetMedianTimePast() >=
-  gArgs.GetArg(
-               "-blsactivationtime",
-               config.GetChainParams().GetConsensus().blsActivationTime);
+  return true;
 }
