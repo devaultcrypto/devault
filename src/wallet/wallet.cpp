@@ -3845,7 +3845,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
 
     CTxDestination source;
     if (from_bls) {
-        source = key.GetPubKey().GetBLSKeyID();
+        source = key.GetPubKeyForBLS().GetBLSKeyID();
     } else {
         source = key.GetPubKey().GetKeyID();
     }
