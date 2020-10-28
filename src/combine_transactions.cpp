@@ -132,7 +132,6 @@ CMutableTransaction combine_transactions(const std::vector<CMutableTransaction> 
     combined_sigs.push_back(uint8_t(sigHashType.getRawSigHashType()));
 
     cfinal << combined_sigs;
-    cfinal << OP_CHECKSIG; // do we need this?, check later
 
     // Push back vin now with new script
     vin.scriptSig = cfinal;

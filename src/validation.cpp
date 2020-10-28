@@ -342,11 +342,6 @@ std::string FormatStateMessage(const CValidationState &state) {
         state.GetRejectCode());
 }
 
-static bool IsBLSEnabledForCurrentBlock(const Config &config) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
-    AssertLockHeld(cs_main);
-    return IsBLSEnabled(config, chainActive.Tip());
-}
-
 // Used to avoid mempool polluting consensus critical paths if CCoinsViewMempool
 // were somehow broken and returning the wrong scriptPubKeys
 static bool CheckInputsFromMempoolAndCache(
@@ -642,10 +637,8 @@ static bool AcceptToMemoryPoolWorker(
         // Set extraFlags as a set of flags that needs to be activated.
         uint32_t extraFlags = SCRIPT_VERIFY_NONE;
 
-        if (IsBLSEnabledForCurrentBlock(config)) {
-            extraFlags |= SCRIPT_ENABLE_BLS;
-            extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
-        }
+        extraFlags |= SCRIPT_ENABLE_BLS;
+        extraFlags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
 
         // Make sure whatever we need to activate is actually activated.
         const uint32_t scriptVerifyFlags =
@@ -1622,18 +1615,14 @@ static uint32_t GetBlockScriptFlags(const Config &config,
     // transactions using the OP_CHECKDATASIG opcode and it's verify
     // alternative. We also start enforcing push only signatures and
     // clean stack.
-    if (IsBLSEnabled(config, pChainTip)) {
-      flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
-      flags |= SCRIPT_VERIFY_SIGPUSHONLY;
-      flags |= SCRIPT_VERIFY_CLEANSTACK;
-    }
+    flags |= SCRIPT_VERIFY_CHECKDATASIG_SIGOPS;
+    flags |= SCRIPT_VERIFY_SIGPUSHONLY;
+    flags |= SCRIPT_VERIFY_CLEANSTACK;
 
     // If the Great Wall fork is enabled, we start accepting transactions
     // recovering coins sent to BLS addresses. We also stop accepting 65 byte signatures in
     // CHECKMULTISIG and its verify variant.
-    if (IsBLSEnabledForCurrentBlock(config)) {
-      flags |= SCRIPT_ENABLE_BLS;
-    }
+    flags |= SCRIPT_ENABLE_BLS;
 
     return flags;
 }

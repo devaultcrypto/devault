@@ -98,9 +98,6 @@ public:
         consensus.defaultAssumeValid = uint256S(
             "000000000000000003aadeae9dee37b8cb4838a866dae19b54854a0f039b03e0");
 
-        // Date and time (GMT): Saturday, October 10, 2020 4:00:00 PM
-        consensus.blsActivationTime = 1602345600;
-
         /**
          * The message start string is designed to be unlikely to occur in
          * normal data. The characters are rarely used upper ASCII, not valid as
@@ -201,9 +198,7 @@ public:
         consensus.defaultAssumeValid = uint256S(
             "000000000000030bee568d677b6b99ee7d2d00b25d1fe95df5e73b484f00c322");
 
-        // Date July 11, 2020, 4:00:00 pm GMT
-        //consensus.blsActivationTime = 1594483200;
-        consensus.blsActivationTime = 1595895427;
+
         diskMagic[0] = 0x0d;
         diskMagic[1] = 0x08;
         diskMagic[2] = 0x13;
@@ -280,9 +275,6 @@ public:
         // By default assume that the signatures in ancestors of this block are
         // valid.
         consensus.defaultAssumeValid = uint256S("0x00");
-
-        // TBD
-        consensus.blsActivationTime = 1999999999;
 
         diskMagic[0] = 0xfa;
         diskMagic[1] = 0xbf;
