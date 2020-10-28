@@ -59,7 +59,7 @@ public:
     void Set(const T pbegin, const T pend) {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
-        } else if (Check(&pbegin[0])) {
+        } else if (CheckBLS(&pbegin[0])) {
             memcpy(keydata.data(), (uint8_t *)&pbegin[0], keydata.size());
             fValid = true;
         } else {
