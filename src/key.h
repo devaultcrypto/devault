@@ -59,7 +59,9 @@ public:
     void Set(const T pbegin, const T pend) {
         if (size_t(pend - pbegin) != keydata.size()) {
             fValid = false;
-        } else if (CheckBLS(&pbegin[0])) {
+            // Must be either EC or BLS private key. At this point we don't
+            // know usage so check for either
+        } else if (CheckBLS(&pbegin[0]) || Check(&pbegin[0])) {
             memcpy(keydata.data(), (uint8_t *)&pbegin[0], keydata.size());
             fValid = true;
         } else {
