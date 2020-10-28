@@ -61,31 +61,6 @@ std::string DecodeDumpString(const std::string &str) {
     return ret.str();
 }
 
-bool GetWalletAddressesForKey(const Config &config, CWallet *const pwallet,
-                              const CKeyID &keyid, std::string &strAddr,
-                              std::string &strLabel) {
-    bool fLabelFound = false;
-    CKey key;
-    pwallet->GetKey(keyid, key);
-    for (const auto &dest : GetAllDestinationsForKey(key.GetPubKey())) {
-        if (pwallet->mapAddressBook.count(dest)) {
-            if (!strAddr.empty()) {
-                strAddr += ",";
-            }
-            strAddr += EncodeDestination(dest, config);
-            strLabel = EncodeDumpString(pwallet->mapAddressBook[dest].name);
-            fLabelFound = true;
-        }
-    }
-    if (!fLabelFound) {
-        strAddr = EncodeDestination(
-            GetDestinationForKey(key.GetPubKey(),
-                                 g_address_type), 
-            config);
-    }
-    return fLabelFound;
-}
-
 static const int64_t TIMESTAMP_MIN = 0;
 
 #ifdef NOT_USED_YET

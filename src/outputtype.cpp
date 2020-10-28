@@ -42,7 +42,8 @@ CTxDestination GetDestinationForKey(const CPubKey &key, OutputType type) {
 }
 
 std::vector<CTxDestination> GetAllDestinationsForKey(const CPubKey &key) {
-    return std::vector<CTxDestination>{key.GetKeyID()};
+    if (key.IsEC()) return std::vector<CTxDestination>{key.GetKeyID()};
+    else return std::vector<CTxDestination>{key.GetBLSKeyID()};
 }
 
 CTxDestination AddAndGetDestinationForScript(CKeyStore &keystore,

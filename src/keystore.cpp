@@ -25,9 +25,9 @@ bool CBasicKeyStore::RemoveKey(const CKey& key) {
 
 void CBasicKeyStore::ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey) {
     AssertLockHeld(cs_KeyStore);
-    CKeyID key_id = pubkey.GetKeyID();
+    auto key_id = pubkey.GetBLSKeyID();
     // We must actually know about this key already.
-    assert(HaveKey(key_id) || mapWatchKeys.count(key_id));
+    assert(HaveKey(key_id) || mapBLSWatchKeys.count(key_id));
     // This adds the redeemscripts necessary to detect alternative outputs using
     // the same keys. Also note that having superfluous scripts in the keystore
     // never hurts. They're only used to guide recursion in signing and IsMine
@@ -168,7 +168,8 @@ bool CBasicKeyStore::AddWatchOnly(const CScript &dest) {
     setWatchOnly.insert(dest);
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
-        mapWatchKeys[pubKey.GetKeyID()] = pubKey;
+        if (pubKey.IsEC()) mapWatchKeys[pubKey.GetKeyID()] = pubKey;
+        else mapBLSWatchKeys[pubKey.GetBLSKeyID()] = pubKey;
         ImplicitlyLearnRelatedKeyScripts(pubKey);
     }
     return true;
@@ -179,6 +180,9 @@ bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest) {
     setWatchOnly.erase(dest);
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
+        if (pubKey.IsEC()) mapWatchKeys.erase(pubKey.GetKeyID();
+        else mapBLSWatchKeys.erase(pubKey.GetBLSKeyID());
+
         mapWatchKeys.erase(pubKey.GetKeyID());
     }
     // Related CScripts are not removed; having superfluous scripts around is
