@@ -187,7 +187,7 @@ TEST_CASE("multisig_Sign") {
   CKey key[4];
   for (int i = 0; i < 4; i++) {
     key[i].MakeNewKey();
-    keystore.AddKey(key[i]);
+    keystore.AddECKey(key[i]);
   }
 
   CScript a_and_b;

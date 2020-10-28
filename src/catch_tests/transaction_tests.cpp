@@ -247,7 +247,7 @@ static std::vector<CMutableTransaction> SetupDummyInputs(CBasicKeyStore &keystor
   CKey key[4];
   for (int i = 0; i < 4; i++) {
     key[i].MakeNewKey();
-    keystoreRet.AddKey(key[i]);
+    keystoreRet.AddECKey(key[i]);
   }
 
   // Create some dummy input transactions

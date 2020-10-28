@@ -57,7 +57,7 @@ TEST_CASE("sign") {
   CKey key[4];
   for (int i = 0; i < 4; i++) {
     key[i].MakeNewKey();
-    keystore.AddKey(key[i]);
+    keystore.AddECKey(key[i]);
   }
 
   // 8 Scripts: checking all combinations of
@@ -159,7 +159,7 @@ TEST_CASE("set") {
   std::vector<CPubKey> keys;
   for (int i = 0; i < 4; i++) {
     key[i].MakeNewKey();
-    keystore.AddKey(key[i]);
+    keystore.AddECKey(key[i]);
     keys.push_back(key[i].GetPubKey());
   }
 
@@ -270,7 +270,7 @@ TEST_CASE("AreInputsStandard") {
   std::vector<CPubKey> keys;
   for (int i = 0; i < 6; i++) {
     key[i].MakeNewKey();
-    keystore.AddKey(key[i]);
+    keystore.AddECKey(key[i]);
   }
   for (int i = 0; i < 3; i++) {
     keys.push_back(key[i].GetPubKey());

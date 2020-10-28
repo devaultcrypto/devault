@@ -339,7 +339,7 @@ TEST_CASE("DoS_mapOrphans") {
   CKey key;
   key.MakeNewKey();
   CBasicKeyStore keystore;
-  keystore.AddKey(key);
+  keystore.AddECKey(key);
 
   // 50 orphan transactions:
   for (int i = 0; i < 50; i++) {

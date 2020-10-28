@@ -356,7 +356,7 @@ TEST_CASE("script_standard_IsMine") {
     BOOST_CHECK(!isInvalid);
 
     // Keystore has key
-    keystore.AddKey(keys[0]);
+    keystore.AddECKey(keys[0]);
     result = IsMine(keystore, scriptPubKey, isInvalid);
     BOOST_CHECK_EQUAL(result, ISMINE_SPENDABLE);
     BOOST_CHECK(!isInvalid);
@@ -374,7 +374,7 @@ TEST_CASE("script_standard_IsMine") {
     BOOST_CHECK(!isInvalid);
 
     // Keystore has key
-    keystore.AddKey(keys[0]);
+    keystore.AddECKey(keys[0]);
     result = IsMine(keystore, scriptPubKey, isInvalid);
     BOOST_CHECK_EQUAL(result, ISMINE_SPENDABLE);
     BOOST_CHECK(!isInvalid);
@@ -402,7 +402,7 @@ TEST_CASE("script_standard_IsMine") {
     BOOST_CHECK(!isInvalid);
 
     // Keystore has redeemScript and key
-    keystore.AddKey(keys[0]);
+    keystore.AddECKey(keys[0]);
     result = IsMine(keystore, scriptPubKey, isInvalid);
     BOOST_CHECK_EQUAL(result, ISMINE_SPENDABLE);
     BOOST_CHECK(!isInvalid);
@@ -411,7 +411,7 @@ TEST_CASE("script_standard_IsMine") {
   // OP_RETURN
   {
     CBasicKeyStore keystore;
-    keystore.AddKey(keys[0]);
+    keystore.AddECKey(keys[0]);
 
     scriptPubKey.clear();
     scriptPubKey << OP_RETURN << ToByteVector(pubkeys[0]);
@@ -424,7 +424,7 @@ TEST_CASE("script_standard_IsMine") {
   // Nonstandard
   {
     CBasicKeyStore keystore;
-    keystore.AddKey(keys[0]);
+    keystore.AddECKey(keys[0]);
 
     scriptPubKey.clear();
     scriptPubKey << OP_9 << OP_ADD << OP_11 << OP_EQUAL;

@@ -153,7 +153,7 @@ TEST_CASE("checkinputs_test, TestChain100Setup") {
   CScript p2pkh_scriptPubKey = GetScriptForDestination(setup.coinbaseKey.GetPubKey().GetKeyID());
 
   CBasicKeyStore keystore;
-  keystore.AddKey(setup.coinbaseKey);
+  keystore.AddECKey(setup.coinbaseKey);
   keystore.AddCScript(p2pk_scriptPubKey);
 
   CMutableTransaction mutableFunding_tx;
