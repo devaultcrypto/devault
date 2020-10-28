@@ -553,6 +553,7 @@ static Amount AmountFromValue(const UniValue &value) {
     return amount;
 }
 
+
 static void MutateTxSign(CMutableTransaction &tx, const std::string &flagStr) {
     SigHashType sigHashType = SigHashType().withForkId();
 
@@ -584,7 +585,138 @@ static void MutateTxSign(CMutableTransaction &tx, const std::string &flagStr) {
         if (!key.IsValid()) {
           throw std::runtime_error("private key not valid");
         }
-        tempKeystore.AddKey(key);
+        tempKeystore.AddECKey(key);
+    }
+
+    // Add previous txouts given in the RPC call:
+    if (!registers.count("prevtxs")) {
+        throw std::runtime_error("prevtxs register variable must be set.");
+    }
+
+    UniValue prevtxsObj = registers["prevtxs"];
+
+    for (unsigned int previdx = 0; previdx < prevtxsObj.size(); previdx++) {
+        UniValue prevOut = prevtxsObj[previdx];
+        if (!prevOut.isObject()) {
+            throw std::runtime_error("expected prevtxs internal object");
+        }
+
+        std::map<std::string, UniValue::VType> types = {
+            {"txid", UniValue::VSTR},
+            {"vout", UniValue::VNUM},
+            {"scriptPubKey", UniValue::VSTR}};
+        if (!prevOut.checkObject(types)) {
+            throw std::runtime_error("prevtxs internal object typecheck fail");
+        }
+
+        TxId txid(ParseHashStr(prevOut["txid"].get_str(), "txid"));
+
+        int nOut = std::atoi(prevOut["vout"].getValStr().c_str());
+        if (nOut < 0) {
+            throw std::runtime_error("vout must be positive");
+        }
+
+        COutPoint out(txid, nOut);
+        std::vector<uint8_t> pkData(
+            ParseHexUV(prevOut["scriptPubKey"], "scriptPubKey"));
+        CScript scriptPubKey(pkData.begin(), pkData.end());
+
+        {
+            const Coin &coin = view.AccessCoin(out);
+            if (!coin.IsSpent() &&
+                coin.GetTxOut().scriptPubKey != scriptPubKey) {
+                std::string err("Previous output scriptPubKey mismatch:\n");
+                err = err + ScriptToAsmStr(coin.GetTxOut().scriptPubKey) +
+                      "\nvs:\n" + ScriptToAsmStr(scriptPubKey);
+                throw std::runtime_error(err);
+            }
+
+            CTxOut txout;
+            txout.scriptPubKey = scriptPubKey;
+            txout.nValue = Amount::zero();
+            if (prevOut.exists("amount")) {
+                txout.nValue = AmountFromValue(prevOut["amount"]);
+            }
+
+            view.AddCoin(out, Coin(txout, 1, false), true);
+        }
+
+        // If redeemScript given and private keys given, add redeemScript to the
+        // tempKeystore so it can be signed:
+        if (scriptPubKey.IsPayToScriptHash() &&
+            prevOut.exists("redeemScript")) {
+            UniValue v = prevOut["redeemScript"];
+            std::vector<uint8_t> rsData(ParseHexUV(v, "redeemScript"));
+            CScript redeemScript(rsData.begin(), rsData.end());
+            tempKeystore.AddCScript(redeemScript);
+        }
+    }
+
+    const CKeyStore &keystore = tempKeystore;
+
+    // Sign what we can:
+    for (size_t i = 0; i < mergedTx.vin.size(); i++) {
+        const CTxIn &txin = mergedTx.vin[i];
+        const Coin &coin = view.AccessCoin(txin.prevout);
+        if (coin.IsSpent()) {
+            continue;
+        }
+
+        const CScript &prevPubKey = coin.GetTxOut().scriptPubKey;
+        const Amount amount = coin.GetTxOut().nValue;
+
+        SignatureData sigdata;
+        // Only sign SIGHASH_SINGLE if there's a corresponding output:
+        if ((sigHashType.getBaseType() != BaseSigHashType::SINGLE) ||
+            (i < mergedTx.vout.size())) {
+            ProduceSignature(MutableTransactionSignatureCreator(
+                                 &keystore, &mergedTx, i, amount, sigHashType),
+                             prevPubKey, sigdata);
+        }
+
+        // ... and merge in other signatures:
+        sigdata = CombineSignatures(
+            prevPubKey,
+            MutableTransactionSignatureChecker(&mergedTx, i, amount), sigdata,
+            DataFromTransaction(txv, i));
+        UpdateTransaction(mergedTx, i, sigdata);
+    }
+
+    tx = mergedTx;
+}
+
+static void MutateTxBLSSign(CMutableTransaction &tx, const std::string &flagStr) {
+    SigHashType sigHashType = SigHashType().withForkId();
+
+    if ((flagStr.size() > 0) && !findSigHashFlags(sigHashType, flagStr)) {
+        throw std::runtime_error("unknown sighash flag/sign option");
+    }
+
+    // mergedTx will end up with all the signatures; it
+    // starts as a clone of the raw tx:
+    CMutableTransaction mergedTx{tx};
+    const CMutableTransaction txv{tx};
+
+    CCoinsView viewDummy;
+    CCoinsViewCache view(&viewDummy);
+
+    if (!registers.count("privatekeys")) {
+        throw std::runtime_error("privatekeys register variable must be set.");
+    }
+
+    CBasicKeyStore tempKeystore;
+    UniValue keysObj = registers["privatekeys"];
+
+    for (unsigned int kidx = 0; kidx < keysObj.size(); kidx++) {
+        if (!keysObj[kidx].isStr()) {
+            throw std::runtime_error("privatekey not a std::string");
+        }
+
+        CKey key = DecodeSecret(keysObj[kidx].getValStr());
+        if (!key.IsValid()) {
+          throw std::runtime_error("private key not valid");
+        }
+        tempKeystore.AddBLSKey(key);
     }
 
     // Add previous txouts given in the RPC call:
@@ -719,9 +851,12 @@ static void MutateTx(CMutableTransaction &tx, const std::string &command,
         MutateTxAddOutScript(tx, commandVal);
     } else if (command == "outdata") {
         MutateTxAddOutData(tx, commandVal);
-    } else if (command == "sign") {
+    } else if (command == "signlegacy") {
         ecc = std::make_unique<Secp256k1Init>();
         MutateTxSign(tx, commandVal);
+    } else if (command == "sign") {
+        ecc = std::make_unique<Secp256k1Init>();
+        MutateTxBLSSign(tx, commandVal);
     } else if (command == "load") {
         RegisterLoad(commandVal);
     } else if (command == "set") {

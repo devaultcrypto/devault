@@ -22,7 +22,8 @@ public:
 
     //! Add a key to the store.
     virtual bool AddKeyPubKey(const CKey &key, const CPubKey &pubkey) = 0;
-    virtual bool AddKey(const CKey &key);
+    virtual bool AddBLSKey(const CKey &key); // known to be BLS key
+    virtual bool AddECKey(const CKey &key); // could be BLS or EC key
     virtual bool RemoveKey(const CKey &key) = 0; // For temporary addition
 
     //! Check whether a key corresponding to a given address is present in the

@@ -3953,7 +3953,7 @@ bool CWallet::SweepCoinsToWallet(const CKey& key,
     } else {
       // We create a temporary keystore and then add this key to it for signing purposes
       CBasicKeyStore keystore;
-      keystore.AddKey(key);
+      keystore.AddECKey(key);
       
 
       for (const auto &coin : coins_to_use) {

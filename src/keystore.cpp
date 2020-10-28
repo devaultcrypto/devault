@@ -9,8 +9,11 @@
 #include <pubkey.h>
 #include <util/system.h>
 
-bool CKeyStore::AddKey(const CKey &key) {
+bool CKeyStore::AddECKey(const CKey &key) {
     return AddKeyPubKey(key, key.GetPubKey());
+}
+bool CKeyStore::AddBLSKey(const CKey &key) {
+    return AddKeyPubKey(key, key.GetPubKeyForBLS());
 }
 
 // Remove key temporarily added for Sweep function
@@ -25,9 +28,15 @@ bool CBasicKeyStore::RemoveKey(const CKey& key) {
 
 void CBasicKeyStore::ImplicitlyLearnRelatedKeyScripts(const CPubKey &pubkey) {
     AssertLockHeld(cs_KeyStore);
-    auto key_id = pubkey.GetBLSKeyID();
-    // We must actually know about this key already.
-    assert(HaveKey(key_id) || mapBLSWatchKeys.count(key_id));
+    if (pubkey.IsBLS()) {
+      auto key_id = pubkey.GetBLSKeyID();
+      // We must actually know about this key already.
+      assert(HaveKey(key_id) || mapBLSWatchKeys.count(key_id));
+    } else {
+      auto key_id = pubkey.GetKeyID();
+      assert(HaveKey(key_id) || mapWatchKeys.count(key_id));
+    }
+      
     // This adds the redeemscripts necessary to detect alternative outputs using
     // the same keys. Also note that having superfluous scripts in the keystore
     // never hurts. They're only used to guide recursion in signing and IsMine
@@ -70,8 +79,10 @@ bool CBasicKeyStore::GetPubKey(const BKeyID &address, CPubKey &vchPubKeyOut) con
 
 bool CBasicKeyStore::AddKeyPubKey(const CKey &key, const CPubKey &pubkey) {
     LOCK(cs_KeyStore);
-    mapKeys[pubkey.GetKeyID()] = key;
-    mapBLSKeysTemp[pubkey.GetBLSKeyID()] = key;
+    if (pubkey.IsBLS()) 
+      mapBLSKeysTemp[pubkey.GetBLSKeyID()] = key;
+    else 
+      mapKeys[pubkey.GetKeyID()] = key;
     ImplicitlyLearnRelatedKeyScripts(pubkey);
     return true;
 }
@@ -180,10 +191,11 @@ bool CBasicKeyStore::RemoveWatchOnly(const CScript &dest) {
     setWatchOnly.erase(dest);
     CPubKey pubKey;
     if (ExtractPubKey(dest, pubKey)) {
-        if (pubKey.IsEC()) mapWatchKeys.erase(pubKey.GetKeyID();
-        else mapBLSWatchKeys.erase(pubKey.GetBLSKeyID());
-
-        mapWatchKeys.erase(pubKey.GetKeyID());
+        if (pubKey.IsEC()) {
+            mapWatchKeys.erase(pubKey.GetKeyID());
+        } else {
+            mapBLSWatchKeys.erase(pubKey.GetBLSKeyID());
+        }
     }
     // Related CScripts are not removed; having superfluous scripts around is
     // harmless (see comment in ImplicitlyLearnRelatedKeyScripts).
