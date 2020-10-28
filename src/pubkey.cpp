@@ -231,9 +231,14 @@ bool CPubKey::IsFullyValid() const {
     if (!IsValid()) {
         return false;
     }
-    secp256k1_pubkey pubkey;
-    return secp256k1_ec_pubkey_parse(secp256k1_context_verify, &pubkey, vch,
+    
+    if (size() == COMPRESSED_PUBLIC_KEY_SIZE) {
+        secp256k1_pubkey pubkey;
+        return secp256k1_ec_pubkey_parse(secp256k1_context_verify, &pubkey, vch,
                                      size());
+    } else {
+        return true;
+    }
 }
 
 bool CPubKey::Derive(CPubKey &pubkeyChild, ChainCode &ccChild,
