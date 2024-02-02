@@ -8,6 +8,7 @@
 #include <rpc/util.h>
 #include <zmq/zmqabstractnotifier.h>
 #include <zmq/zmqnotificationinterface.h>
+#include <mutex>
 
 #include <univalue.h>
 

@@ -9,6 +9,7 @@
 #include <boost/range/iterator.hpp>
 
 #include <shared_mutex>
+#include <mutex>
 #include <iterator>
 #include <type_traits>
 #include <utility>
