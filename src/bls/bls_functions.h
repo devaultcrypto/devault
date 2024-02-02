@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <key.h>
+#include <optional>
 
 namespace bls {
   

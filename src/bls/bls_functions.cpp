@@ -10,6 +10,7 @@
 #include <bls/bls_functions.h>
 #include "util/strencodings.h"
 #include <cstring>
+#include <optional>
 //#include <dstencode.h>
 //#include <script/script.h>
 
