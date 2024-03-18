@@ -123,7 +123,7 @@ bool IsValidBLSScriptSize(const CScript &script) {
   auto script_size = script.size();
   //std::cout << "Script size = << " << script_size << "\n";
   if (script_size > CPubKey::BLS_PUBLIC_KEY_SIZE+2) {
-    script_size -= (CPubKey::BLS_SIGNATURE_SIZE + 4);
+    script_size -= (CPubKey::BLS_SIGNATURE_SIZE + 3);
     return ((script_size % (CPubKey::BLS_PUBLIC_KEY_SIZE+1) == 0));
   } else {
     return ((script.size() == CPubKey::BLS_PUBLIC_KEY_SIZE+1) ||

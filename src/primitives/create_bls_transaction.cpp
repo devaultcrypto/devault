@@ -102,8 +102,6 @@ auto CreatePrivateTxWithSig(const std::vector<CKey>& keys,
         c << ToByteVector(pub); // Add random pubkeys to the last input
 
     c << aggSig;
-    c << OP_CHECKSIG; // since we have custom extraction not sure we actually
-                      // need this, check later
 
     // Put Agg Sig + Random Public Keys into the vin of the last input of the
     // tx.
