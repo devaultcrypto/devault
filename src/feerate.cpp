@@ -35,12 +35,21 @@ static Amount GetFee(size_t nBytes_, Amount nSatoshisPerK) {
         nFee = nSize * nSatoshisPerK / 1000;
     }
 
+    // DeVault [fee quantization]: fees are denominated in whole "spocks" (0.001 DVT = 100000 sat).
+    // Legacy DeVault rounds every Amount up to a spock in the Amount constructor, so all fees, dust,
+    // and the min-relay / min-block fee end up spock-multiples. V2 keeps a satoshi-granular Amount
+    // (see amount.h), so we round the computed fee up to a whole spock here -- this is the single
+    // point every fee rate flows through (min-relay, block-min, dust, wallet). Matches legacy.
+    nFee = SpockQuantize(nFee);
+
+    // A non-zero rate must still charge for a non-empty tx. SpockQuantize already rounds any positive
+    // sub-spock fee up to one spock; this only covers a rate so small the satoshi fee truncated to 0.
     if (nFee == Amount::zero() && nSize != 0) {
         if (nSatoshisPerK > Amount::zero()) {
-            nFee = SATOSHI;
+            nFee = SPOCK_SATS * SATOSHI;
         }
         if (nSatoshisPerK < Amount::zero()) {
-            nFee = -SATOSHI;
+            nFee = -(SPOCK_SATS * SATOSHI);
         }
     }
 

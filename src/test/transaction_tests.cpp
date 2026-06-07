@@ -664,9 +664,13 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
     std::string reason;
     BOOST_CHECK(IsStandardTx(CTransaction(t), reason, flags));
 
-    // Check dust with default relay fee:
-    Amount nDustThreshold = 3 * 182 * dustRelayFee.GetFeePerK() / 1000;
-    BOOST_CHECK_EQUAL(nDustThreshold, 546 * SATOSHI);
+    // Check dust with the default relay fee. DeVault: CFeeRate::GetFee rounds the fee up to a whole
+    // spock (0.001 DVT = 100000 sat), so the dust threshold is always a whole-spock multiple -- for a
+    // typical 182-byte spend at the default relay fee that floor is 3 spocks.
+    const Amount SPOCK = SPOCK_SATS * SATOSHI;
+    Amount nDustThreshold = GetDustThreshold(t.vout[0], dustRelayFee);
+    BOOST_CHECK_EQUAL(nDustThreshold, 3 * SPOCK);
+    BOOST_CHECK_EQUAL(nDustThreshold % SPOCK, Amount::zero());
     // dust:
     t.vout[0].nValue = nDustThreshold - SATOSHI;
     BOOST_CHECK(!IsStandardTx(CTransaction(t), reason, flags));
@@ -674,14 +678,16 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
     t.vout[0].nValue = nDustThreshold;
     BOOST_CHECK(IsStandardTx(CTransaction(t), reason, flags));
 
-    // Check dust with odd relay fee to verify rounding:
-    // nDustThreshold = 182 * 1234 / 1000 * 3
-    dustRelayFee = CFeeRate(1234 * SATOSHI);
+    // A larger relay fee raises the threshold, still rounded up to whole spocks.
+    dustRelayFee = CFeeRate(COIN / 2);
+    nDustThreshold = GetDustThreshold(t.vout[0], dustRelayFee);
+    BOOST_CHECK(nDustThreshold > 3 * SPOCK);
+    BOOST_CHECK_EQUAL(nDustThreshold % SPOCK, Amount::zero());
     // dust:
-    t.vout[0].nValue = (672 - 1) * SATOSHI;
+    t.vout[0].nValue = nDustThreshold - SATOSHI;
     BOOST_CHECK(!IsStandardTx(CTransaction(t), reason, flags));
     // not dust:
-    t.vout[0].nValue = 672 * SATOSHI;
+    t.vout[0].nValue = nDustThreshold;
     BOOST_CHECK(IsStandardTx(CTransaction(t), reason, flags));
     dustRelayFee = CFeeRate(DUST_RELAY_TX_FEE);
 

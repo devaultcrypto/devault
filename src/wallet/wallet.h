@@ -79,10 +79,10 @@ std::shared_ptr<CWallet> GetWallet(const std::string &name);
 static constexpr unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default
 constexpr Amount DEFAULT_PAY_TX_FEE = Amount::zero();
-//! -fallbackfee default
-static constexpr Amount DEFAULT_FALLBACK_FEE(20000 * SATOSHI);
-//! -mintxfee default
-static constexpr Amount DEFAULT_TRANSACTION_MINFEE_PER_KB = 1000 * SATOSHI;
+//! -fallbackfee default (DeVault spock-scale, legacy devault/src/wallet/wallet.h)
+static constexpr Amount DEFAULT_FALLBACK_FEE(COIN / 5);
+//! -mintxfee default -- match the min-relay so the wallet never targets a sub-relay (sub-spock) fee
+static constexpr Amount DEFAULT_TRANSACTION_MINFEE_PER_KB = COIN / 2;
 //! minimum recommended increment for BIP 125 replacement txs
 static constexpr Amount WALLET_INCREMENTAL_RELAY_FEE(5000 * SATOSHI);
 //! Default for -spendzeroconfchange

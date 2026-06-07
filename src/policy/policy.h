@@ -31,7 +31,7 @@ static constexpr int64_t DEFAULT_MAX_INITIAL_GBT_TIME = 0;
  * Default for -blockmintxfee, which sets the minimum feerate for a transaction
  * in blocks created by mining code.
  */
-static constexpr Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(1000 * SATOSHI);
+static constexpr Amount DEFAULT_BLOCK_MIN_TX_FEE_PER_KB(COIN / 2); // DeVault spock-scale (legacy)
 /**
  * Default for -gbtcheckvalidity, which determines whether we call
  * TestBlockValidity() on the generated block template.
@@ -86,6 +86,11 @@ static constexpr unsigned int DEFAULT_BYTES_PER_SIGCHECK = 50;
  * only increase the dust limit after prior releases were already not creating
  * outputs below the new threshold.
  */
+// DeVault: kept at BCHN's value. With the spock-quantized CFeeRate::GetFee (see feerate.cpp), the
+// effective dust threshold is already a whole-spock floor (3 * 1 spock = 0.003 DVT), i.e. dust is
+// spock-based, not satoshi-based. Legacy DeVault used COIN/5 (a ~0.111 DVT dust threshold); that can
+// be restored if a higher dust floor is wanted, but it would require scaling the satoshi-scale test
+// fixtures (dsproof/p2sh/txvalidationcache/IsStandard) that assume small outputs.
 static constexpr Amount DUST_RELAY_TX_FEE(1000 * SATOSHI);
 
 /**

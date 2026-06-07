@@ -64,14 +64,17 @@ struct Params;
 #define MIN_TRANSACTION_SIZE                                                   \
     (::GetSerializeSize(CTransaction::null, PROTOCOL_VERSION))
 
+// DeVault [fee schedule]: legacy DeVault uses spock-scale fees (its Amount quantizes to a spock =
+// 0.001 DVT = 100000 sat), NOT BCHN's tiny satoshi-per-kB defaults. These match legacy
+// devault/src/validation.h so V2's relay/mempool/wallet fee policy is the drop-in equivalent.
 /** Default for -minrelaytxfee, minimum relay fee for transactions */
-static constexpr Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(1000 * SATOSHI);
+static constexpr Amount DEFAULT_MIN_RELAY_TX_FEE_PER_KB(COIN / 2);
 /** Default for -excessutxocharge for transactions transactions */
-static constexpr Amount DEFAULT_UTXO_FEE = Amount::zero();
+static constexpr Amount DEFAULT_UTXO_FEE = COIN / 5;
 //! -maxtxfee default
-static constexpr Amount DEFAULT_TRANSACTION_MAXFEE(COIN / 10);
+static constexpr Amount DEFAULT_TRANSACTION_MAXFEE(2000 * COIN);
 //! Discourage users to set fees higher than this amount (in satoshis) per kB
-static constexpr Amount HIGH_TX_FEE_PER_KB(COIN / 100);
+static constexpr Amount HIGH_TX_FEE_PER_KB(100 * COIN);
 /**
  * -maxtxfee will warn if called with a higher fee than this amount (in satoshis
  */
