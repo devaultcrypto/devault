@@ -1,62 +1,79 @@
-Bitcoin Cash Node
-=================
+DeVault Core
+============
 
-The goal of Bitcoin Cash Node is to create sound money that is usable by everyone
-in the world. We believe this is a civilization-changing technology which will
-dramatically increase human flourishing, freedom, and prosperity. The project
-aims to achieve this goal by implementing a series of optimizations and
-protocol upgrades that will enable peer-to-peer digital cash to scale many
-orders of magnitude beyond current limits.
+Website: [devault.cc](https://devault.cc)
 
-What is Bitcoin Cash?
----------------------
+What is DeVault?
+----------------
 
-Bitcoin Cash is a digital currency that enables instant payments to anyone,
-anywhere in the world. It uses peer-to-peer technology to operate with no
-central authority: managing transactions and issuing money are carried out
-collectively by the network. Bitcoin Cash is a descendant of Bitcoin. It became
-a separate currency from the version supported by Bitcoin Core when the two
-split on August 1, 2017. Bitcoin Cash and the Bitcoin Core version of Bitcoin
-share the same transaction history up until the split.
+DeVault (ticker **DVT**) is a scaled peer-to-peer, next generation cryptocurrency network:
+instant, low-fee transactions and onchain actions/records with no central authority.
 
-What is Bitcoin Cash Node?
---------------------------
+Specifications
+--------------
 
-[Bitcoin Cash Node](https://www.bitcoincashnode.org) is the name of open-source
-software which enables the use of Bitcoin Cash. It is a descendant of the
-[Bitcoin Core](https://bitcoincore.org) and [Bitcoin ABC](https://www.bitcoinabc.org)
-software projects.
+| Specification    | Value                  |
+|------------------|------------------------|
+| Ticker           | DVT                    |
+| PoW algorithm    | SHA256d                |
+| Difficulty       | LWMA                   |
+| Block spacing    | 120 seconds            |
+| Max block size   | 32 MB                  |
+| RPC port         | 3339                   |
+| P2P port         | 33039                  |
+| Networking       | IPv4, IPv6, Tor        |
+| Amount precision | 3 decimals (0.001 DVT) |
+
+### Cold Reward requirements
+
+| Requirement                       | Detail                 |
+|-----------------------------------|------------------------|
+| Confirmations (UTXO age)          | 21,915 blocks          |
+| Minimum balance (blocks 1–109,575)| 1,000+ DVT per input   |
+| Minimum balance (blocks 109,576+) | 25,000+ DVT per input  |
+
+Building
+--------
+
+DeVault Node builds with CMake + Ninja and a **C++20 compiler (GCC ≥ 11 recommended)**:
+
+```
+mkdir build && cd build
+cmake -GNinja ..
+ninja
+```
+
+Output binaries are `build/src/devaultd`, `build/src/devault-cli`, and
+`build/src/qt/devault-qt`. See [doc/build-unix.md](doc/build-unix.md) and the
+other `doc/build-*.md` guides for platform-specific dependencies and options.
+
+Upgrading from a legacy DeVault node
+------------------------------------
+
+1. **Back up** your `~/.devault` directory (always recommended before an upgrade).
+2. Stop your existing `devaultd` / `devault-qt`.
+3. Run the new `devaultd`. It opens `~/.devault`, performs a one-time reindex of
+   the chainstate from your local block files (no re-download), and detects and
+   migrates a legacy HD wallet automatically.
 
 License
 -------
 
-Bitcoin Cash Node is released under the terms of the MIT license. See
-[COPYING](COPYING) for more information or see
-[https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT).
+DeVault Node is released under the terms of the MIT license. See
+[COPYING](COPYING) or [https://opensource.org/licenses/MIT](https://opensource.org/licenses/MIT).
 
-This product includes software developed by the OpenSSL Project for use in the
-[OpenSSL Toolkit](https://www.openssl.org/), cryptographic software written by
-[Eric Young](mailto:eay@cryptsoft.com), and UPnP software written by Thomas
-Bernard.
+Development
+-----------
 
-Development Process
--------------------
+Development takes place at
+[https://github.com/devaultcrypto/devault](https://github.com/devaultcrypto/devault).
+If you would like to contribute, please read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Bitcoin Cash Node development takes place at [https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node](https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node)
-
-There is also a source-only mirror of Bitcoin Cash Node on Github at [https://github.com/bitcoin-cash-node/bitcoin-cash-node](https://github.com/bitcoin-cash-node/bitcoin-cash-node).
-
-If you would like to contribute, please read our [contribution guide](https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node/-/blob/master/CONTRIBUTING.md) and feel
-free to contact us directly at [bitcoincashnode.slack.com](https://bitcoincashnode.slack.com) or [t.me/bitcoincashnode](https://t.me/bitcoincashnode).
+See [doc/README.md](doc/README.md) for further documentation on installation,
+building, and development.
 
 Disclosure Policy
 -----------------
 
-We have a [Disclosure Policy](DISCLOSURE_POLICY.md) for responsible disclosure
-of security issues.
-
-Further info
-------------
-
-See [doc/README.md](doc/README.md) for further info on installation, building,
-development and more.
+We have a [Disclosure Policy](DISCLOSURE_POLICY.md) for the responsible disclosure
+of security issues. Report vulnerabilities to **security@devault.cc**.
