@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <clientversion.h>
+#include <logging.h>
 #include <streams.h>
 
 RecentRequestsTableModel::RecentRequestsTableModel(WalletModel *parent)
@@ -181,7 +182,15 @@ void RecentRequestsTableModel::addNewRequest(const std::string &recipient) {
     CDataStream ss(data, SER_DISK, CLIENT_VERSION);
 
     RecentRequestEntry entry;
-    ss >> entry;
+    try {
+        ss >> entry;
+    } catch (const std::exception &e) {
+        // A receive-request record that doesn't deserialize -- e.g. one saved by an older/legacy
+        // DeVault wallet whose SendCoinsRecipient layout differs (fewer fields). Skip it rather than
+        // aborting GUI startup; the saved request is only UI convenience -- no funds are affected.
+        LogPrintf("RecentRequests: skipping unreadable receive-request record: %s\n", e.what());
+        return;
+    }
 
     // should not happen
     if (entry.id == 0) {
