@@ -20,6 +20,11 @@ CFeeRate::CFeeRate(const Amount nFeePaid, size_t nBytes_) {
     }
 }
 
+// DeVault: the flat per-transaction minimum fee (legacy feerate.h `MIN_FEE`). The legacy applies it
+// inside every CFeeRate::GetFee, so it is the effective floor for relay, the mempool min-fee, dust,
+// and the wallet. Dropping it (V2 only charged the rate) is why small V2 txs underpaid the legacy.
+static constexpr Amount MIN_FEE = COIN / 5; // 0.2 DVT
+
 template <bool ceil>
 static Amount GetFee(size_t nBytes_, Amount nSatoshisPerK) {
     assert(nBytes_ <= uint64_t(std::numeric_limits<int64_t>::max()));
@@ -42,15 +47,12 @@ static Amount GetFee(size_t nBytes_, Amount nSatoshisPerK) {
     // point every fee rate flows through (min-relay, block-min, dust, wallet). Matches legacy.
     nFee = SpockQuantize(nFee);
 
-    // A non-zero rate must still charge for a non-empty tx. SpockQuantize already rounds any positive
-    // sub-spock fee up to one spock; this only covers a rate so small the satoshi fee truncated to 0.
-    if (nFee == Amount::zero() && nSize != 0) {
-        if (nSatoshisPerK > Amount::zero()) {
-            nFee = SPOCK_SATS * SATOSHI;
-        }
-        if (nSatoshisPerK < Amount::zero()) {
-            nFee = -(SPOCK_SATS * SATOSHI);
-        }
+    // DeVault [flat fee floor]: every non-empty tx pays at least MIN_FEE (legacy feerate.cpp does
+    // `nFee = std::max(nFee, MIN_FEE)`). MIN_FEE = COIN/5 = 0.2 DVT = 200 spocks, so this also subsumes
+    // the "at least one spock" floor. This is the per-tx minimum the legacy network enforces, so a V2
+    // tx below it (e.g. a 225-byte tx at the rate alone = 0.113 DVT) is rejected by legacy nodes.
+    if (nSize != 0 && nFee < MIN_FEE) {
+        nFee = MIN_FEE;
     }
 
     return nFee;

@@ -664,12 +664,13 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
     std::string reason;
     BOOST_CHECK(IsStandardTx(CTransaction(t), reason, flags));
 
-    // Check dust with the default relay fee. DeVault: CFeeRate::GetFee rounds the fee up to a whole
-    // spock (0.001 DVT = 100000 sat), so the dust threshold is always a whole-spock multiple -- for a
-    // typical 182-byte spend at the default relay fee that floor is 3 spocks.
+    // Check dust with the default relay fee. DeVault: CFeeRate::GetFee floors every fee at MIN_FEE
+    // (COIN/5 = 0.2 DVT) and rounds up to a whole spock, so the dust threshold for a typical 182-byte
+    // spend is 3 * MIN_FEE = 0.6 DVT (the per-output rate fee is below MIN_FEE, so the floor dominates).
     const Amount SPOCK = SPOCK_SATS * SATOSHI;
+    const Amount MIN_FEE = COIN / 5;
     Amount nDustThreshold = GetDustThreshold(t.vout[0], dustRelayFee);
-    BOOST_CHECK_EQUAL(nDustThreshold, 3 * SPOCK);
+    BOOST_CHECK_EQUAL(nDustThreshold, 3 * MIN_FEE);
     BOOST_CHECK_EQUAL(nDustThreshold % SPOCK, Amount::zero());
     // dust:
     t.vout[0].nValue = nDustThreshold - SATOSHI;
@@ -678,10 +679,11 @@ BOOST_AUTO_TEST_CASE(test_IsStandard) {
     t.vout[0].nValue = nDustThreshold;
     BOOST_CHECK(IsStandardTx(CTransaction(t), reason, flags));
 
-    // A larger relay fee raises the threshold, still rounded up to whole spocks.
-    dustRelayFee = CFeeRate(COIN / 2);
+    // A relay fee high enough that the per-output fee exceeds MIN_FEE raises the threshold above the
+    // 3 * MIN_FEE floor (still a whole-spock multiple).
+    dustRelayFee = CFeeRate(10 * COIN);
     nDustThreshold = GetDustThreshold(t.vout[0], dustRelayFee);
-    BOOST_CHECK(nDustThreshold > 3 * SPOCK);
+    BOOST_CHECK(nDustThreshold > 3 * MIN_FEE);
     BOOST_CHECK_EQUAL(nDustThreshold % SPOCK, Amount::zero());
     // dust:
     t.vout[0].nValue = nDustThreshold - SATOSHI;

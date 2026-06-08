@@ -732,25 +732,25 @@ BOOST_AUTO_TEST_CASE(GetModifiedFeeRateTest) {
 
     TestMemPoolEntryHelper entry;
 
-    // DeVault: fees are spock-quantized (0.001 DVT = 100000 sat), so GetFee returns whole spocks.
-    // Use spock-scale fees here so the fee/size modifications stay distinguishable after quantization.
-    const Amount SPOCK = SPOCK_SATS * SATOSHI;
+    // DeVault: every non-empty-tx fee is spock-quantized AND floored at MIN_FEE (COIN/5 = 0.2 DVT).
+    // Use multiples of MIN_FEE so the fee/size modifications stay above the floor and distinguishable.
+    const Amount MIN_FEE = COIN / 5;
 
-    auto entryNormal = entry.Fee(2 * SPOCK).FromTx(tx);
-    BOOST_CHECK_EQUAL(2 * SPOCK, entryNormal.GetModifiedFeeRate().GetFee(1000));
+    auto entryNormal = entry.Fee(4 * MIN_FEE).FromTx(tx);
+    BOOST_CHECK_EQUAL(4 * MIN_FEE, entryNormal.GetModifiedFeeRate().GetFee(1000));
 
     // Add modified fee
-    CTxMemPoolEntry entryFeeModified = entry.Fee(2 * SPOCK).FromTx(tx);
-    entryFeeModified.UpdateFeeDelta(2 * SPOCK);
-    BOOST_CHECK_EQUAL(4 * SPOCK,
+    CTxMemPoolEntry entryFeeModified = entry.Fee(4 * MIN_FEE).FromTx(tx);
+    entryFeeModified.UpdateFeeDelta(4 * MIN_FEE);
+    BOOST_CHECK_EQUAL(8 * MIN_FEE,
                       entryFeeModified.GetModifiedFeeRate().GetFee(1000));
 
     // Excessive sigchecks count "modifies" size (doubles effective size -> halves the rate)
     CTxMemPoolEntry entrySizeModified =
-        entry.Fee(2 * SPOCK)
+        entry.Fee(4 * MIN_FEE)
             .SigChecks(2000 / DEFAULT_BYTES_PER_SIGCHECK)
             .FromTx(tx);
-    BOOST_CHECK_EQUAL(1 * SPOCK,
+    BOOST_CHECK_EQUAL(2 * MIN_FEE,
                       entrySizeModified.GetModifiedFeeRate().GetFee(1000));
 }
 

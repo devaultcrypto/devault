@@ -14,54 +14,47 @@
 BOOST_FIXTURE_TEST_SUITE(feerate_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(GetFeeTest) {
-    // DeVault: CFeeRate::GetFee / GetFeeCeiling round the fee UP to a whole spock
-    // (0.001 DVT = 100000 sat), matching legacy DeVault's quantizing Amount. Fees are therefore
-    // always spock-multiples (or zero), regardless of the rate or size.
+    // DeVault: CFeeRate::GetFee / GetFeeCeiling (a) round the fee UP to a whole spock (0.001 DVT =
+    // 100000 sat) matching legacy DeVault's quantizing Amount, and (b) apply the legacy flat floor
+    // MIN_FEE = COIN/5 = 0.2 DVT to every non-empty tx (legacy feerate.cpp: std::max(nFee, MIN_FEE)).
     const Amount SPOCK = SPOCK_SATS * SATOSHI; // 100000 sat = 0.001 DVT
+    const Amount MIN_FEE = COIN / 5;           // 0.2 DVT = 200 spocks -- the flat per-tx floor
 
     CFeeRate feeRate, altFeeRate;
 
-    // Zero rate -> always zero.
+    // Empty tx -> zero. Any non-empty tx pays at least MIN_FEE, even at a zero rate.
     feeRate = CFeeRate(Amount::zero());
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(100000), Amount::zero());
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), MIN_FEE);
 
-    // A sub-spock rate charges nothing for an empty tx but rounds any non-empty tx up to one spock.
+    // A sub-MIN_FEE rate -> the flat MIN_FEE floor for any non-empty tx.
     feeRate = CFeeRate(1000 * SATOSHI);
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1), SPOCK);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(999), SPOCK);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), SPOCK);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), SPOCK);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1), MIN_FEE);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(9000), MIN_FEE);
 
-    // Negative (sub-spock) rate -> -1 spock for any non-empty tx.
-    feeRate = CFeeRate(-1000 * SATOSHI);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1), -SPOCK);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), -SPOCK);
-
-    // The DeVault min-relay rate (COIN/2 = 0.5 DVT/kB = 500 spocks/kB) -> exact spock-multiples,
-    // rounding up where the satoshi result is not a whole spock.
+    // The DeVault min-relay rate (COIN/2 = 0.5 DVT/kB). Small txs hit the MIN_FEE floor; larger txs
+    // pay the (spock-quantized) rate once it exceeds MIN_FEE (crossover ~400 bytes).
     feeRate = CFeeRate(COIN / 2);
     BOOST_CHECK_EQUAL(feeRate.GetFee(0), Amount::zero());
-    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 500 * SPOCK); // 0.5 DVT
-    BOOST_CHECK_EQUAL(feeRate.GetFee(226), 113 * SPOCK);  // 11.30M sat -> exactly 113 spocks
-    BOOST_CHECK_EQUAL(feeRate.GetFee(225), 113 * SPOCK);  // 11.25M sat -> rounds up to 113 spocks
-    BOOST_CHECK_EQUAL(feeRate.GetFee(2000), 1000 * SPOCK); // 1.0 DVT
-    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(226), 113 * SPOCK);
+    BOOST_CHECK_EQUAL(feeRate.GetFee(225), MIN_FEE);        // 113 spocks < 200 -> floored to 0.2 DVT
+    BOOST_CHECK_EQUAL(feeRate.GetFee(226), MIN_FEE);        // 113 spocks < 200 -> floored
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), 500 * SPOCK);   // 0.5 DVT > MIN_FEE -> rate
+    BOOST_CHECK_EQUAL(feeRate.GetFee(2000), 1000 * SPOCK);  // 1.0 DVT
+    BOOST_CHECK_EQUAL(feeRate.GetFeeCeiling(225), MIN_FEE);
 
-    // Every positive result is a whole spock, and at least one spock for a non-empty tx.
+    // Every non-empty result is a whole spock and at least MIN_FEE.
     feeRate = CFeeRate(7 * COIN / 3); // an awkward (non-spock) rate
     for (size_t n : {size_t(1), size_t(50), size_t(226), size_t(1000), size_t(9000)}) {
         const Amount f = feeRate.GetFee(n);
         BOOST_CHECK_EQUAL(f % SPOCK, Amount::zero());
-        BOOST_CHECK(f >= SPOCK);
+        BOOST_CHECK(f >= MIN_FEE);
     }
 
     // Alternate constructor is consistent.
     feeRate = CFeeRate(COIN / 2);
     altFeeRate = CFeeRate(feeRate);
-    BOOST_CHECK_EQUAL(feeRate.GetFee(226), altFeeRate.GetFee(226));
+    BOOST_CHECK_EQUAL(feeRate.GetFee(1000), altFeeRate.GetFee(1000));
 
     // Full constructor (fee, bytes) computes the rate; the rate itself is not spock-quantized.
     BOOST_CHECK(CFeeRate(Amount::zero(), 0) == CFeeRate(Amount::zero()));
