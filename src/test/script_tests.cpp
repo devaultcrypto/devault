@@ -530,7 +530,10 @@ public:
         if (nValue != Amount::zero()) {
             UniValue::Array amount;
             amount.reserve(1);
-            amount.push_back(ValueFromAmount(nValue));
+            // These are consensus test-vector amounts (the FORKID sighash value), serialized to match
+            // the committed script_tests.json exactly. Use full satoshi precision -- NOT the display
+            // ValueFromAmount, which now renders only 3 decimals (spocks) and would truncate the vector.
+            amount.push_back(UniValue(UniValue::VNUM, nValue.ToString(false)));
             array.emplace_back(std::move(amount));
         }
 

@@ -340,37 +340,29 @@ BOOST_AUTO_TEST_CASE(rpc_createraw_op_return) {
 }
 
 BOOST_AUTO_TEST_CASE(rpc_format_monetary_values) {
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(Amount::zero())) == "0.00000000");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(SATOSHI)) == "0.00000001");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(17622195 * SATOSHI)) == "0.17622195");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(50000000 * SATOSHI)) == "0.50000000");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(89898989 * SATOSHI)) == "0.89898989");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(100000000 * SATOSHI)) == "1.00000000");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(int64_t(2099999999999990) * SATOSHI)) == "20999999.99999990");
-    BOOST_CHECK(UniValue::stringify(ValueFromAmount(int64_t(2099999999999999) * SATOSHI)) == "20999999.99999999");
+    // DeVault: ValueFromAmount renders 3 decimals (spocks = 0.001 DVT), never 8 satoshi digits. Valid
+    // on-chain amounts are always spock-multiples (exact here); sub-spock satoshis truncate, matching
+    // legacy DeVault's "%d.%03d" Amount::ToString through which its ValueFromAmount routes.
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(Amount::zero())), "0.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN)), "1.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(-1 * COIN)), "-1.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 10)), "0.100");   // 0.1 DVT
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(-1 * COIN / 10)), "-0.100");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 100)), "0.010");  // 0.01 DVT
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 1000)), "0.001"); // 1 spock
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(-1 * COIN / 1000)), "-0.001");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(123456 * (COIN / 1000))), "123.456"); // 123456 spocks
 
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(Amount::zero())), "0.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(123456789 * (COIN / 10000))), "12345.67890000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(-1 * COIN)), "-1.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(-1 * COIN / 10)), "-0.10000000");
+    // Sub-spock satoshis truncate to 3 decimals (valid on-chain amounts never carry these):
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(SATOSHI)), "0.000");        // 1 satoshi
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 10000)), "0.000");   // 0.0001 DVT
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(89898 * (COIN / 1000) + 99 * SATOSHI)), "89.898");
 
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(100000000 * COIN)), "100000000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(10000000 * COIN)), "10000000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(1000000 * COIN)), "1000000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(100000 * COIN)), "100000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(10000 * COIN)), "10000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(1000 * COIN)), "1000.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(100 * COIN)), "100.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(10 * COIN)), "10.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN)), "1.00000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 10)), "0.10000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 100)), "0.01000000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 1000)), "0.00100000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 10000)), "0.00010000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 100000)), "0.00001000");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 1000000)), "0.00000100");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 10000000)), "0.00000010");
-    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(COIN / 100000000)), "0.00000001");
+    // Large (spock-multiple) values:
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(100 * COIN)), "100.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(1230 * COIN)), "1230.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(100000000 * COIN)), "100000000.000");
+    BOOST_CHECK_EQUAL(UniValue::stringify(ValueFromAmount(2000000000 * COIN)), "2000000000.000"); // ~MAX_MONEY
 }
 
 static UniValue ValueFromString(const char* str) {
