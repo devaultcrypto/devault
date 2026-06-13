@@ -67,6 +67,7 @@ Amount CFeeRate::GetFeeCeiling(size_t nBytes) const {
 }
 
 std::string CFeeRate::ToString() const {
-    return strprintf("%d.%08d %s/kB", nSatoshisPerK / COIN,
-                     (nSatoshisPerK % COIN) / SATOSHI, CURRENCY_UNIT);
+    // DeVault: 3-decimal (spock) precision, not 8 satoshi digits.
+    return strprintf("%d.%03d %s/kB", nSatoshisPerK / COIN,
+                     (nSatoshisPerK % COIN) / (SPOCK_SATS * SATOSHI), CURRENCY_UNIT);
 }

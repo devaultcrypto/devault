@@ -7,6 +7,8 @@
 
 #include <primitives/transaction.h>
 
+#include <limits>
+
 #include <QLocale>
 #include <QStringList>
 
@@ -15,10 +17,10 @@ BitcoinUnits::BitcoinUnits(QObject *parent)
 
 QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits() {
     QList<BitcoinUnits::Unit> unitlist;
+    // DeVault: only DVT (3 decimals) and mDVT (whole spocks) are offered. µDVT and sat are sub-spock
+    // (DeVault's smallest unit is the spock = 0.001 DVT = 1 mDVT), so they are intentionally omitted.
     unitlist.append(BCH);
     unitlist.append(mBCH);
-    unitlist.append(uBCH);
-    unitlist.append(SAT);
     return unitlist;
 }
 
@@ -26,10 +28,10 @@ bool BitcoinUnits::valid(int unit) {
     switch (unit) {
         case BCH:
         case mBCH:
-        case uBCH:
-        case SAT:
             return true;
         default:
+            // DeVault: uBCH (µDVT) and SAT are sub-spock and no longer offered; treat them as invalid
+            // so any stale saved display-unit setting falls back to the default unit.
             return false;
     }
 }
@@ -83,9 +85,9 @@ qint64 BitcoinUnits::factor(int unit) {
 int BitcoinUnits::decimals(int unit) {
     switch (unit) {
         case BCH:
-            return 8;
+            return 3; // DVT: spock granularity (0.001 DVT) -- never satoshi (8-digit) precision
         case mBCH:
-            return 5;
+            return 0; // mDVT == 1 spock exactly, so whole numbers only
         case uBCH:
             return 2;
         case SAT:
@@ -143,8 +145,17 @@ QString BitcoinUnits::format(int unit, const Amount nIn, bool fPlus,
 
     if (num_decimals > 0) {
         qint64 remainder = n_abs % coin;
+        // DeVault: show exactly num_decimals fractional digits (3 for DVT = spock granularity), not the
+        // full satoshi remainder. `coin` is satoshis-per-unit (a power of ten); scale the remainder down
+        // so only the displayed digits remain. Sub-spock satoshis (which valid amounts never carry) are
+        // dropped here, matching the CLI's ValueFromAmount and legacy DeVault.
+        qint64 scale = coin;
+        for (int i = 0; i < num_decimals; ++i) {
+            scale /= 10; // coin / 10^num_decimals
+        }
+        const qint64 frac = scale > 0 ? remainder / scale : 0;
         QString remainder_str =
-            QString::number(remainder).rightJustified(num_decimals, '0');
+            QString::number(frac).rightJustified(num_decimals, '0');
         return quotient_str + (decimalSeparatorIsComma() ? ',' : '.') + remainder_str;
     } else {
         return quotient_str;
@@ -208,12 +219,25 @@ std::optional<Amount> BitcoinUnits::parse(int unit, bool allowComma, const QStri
         return std::nullopt;
     }
     bool ok = false;
-    const int64_t sats = int64_t(str.toLongLong(&ok));
+    // `str` is the amount in units of 10^-num_decimals of the selected unit -- e.g. for DVT
+    // (num_decimals=3) "25.113" -> "25113". Scale up to satoshis: each least-displayed digit is
+    // (factor / 10^num_decimals) satoshis (== one spock, 1e5, for both DVT and mDVT).
+    const int64_t combined = int64_t(str.toLongLong(&ok));
     if (!ok) {
         // String-to-integer conversion failed
         return std::nullopt;
     }
-    return sats * SATOSHI;
+    int64_t scale = factor(unit);
+    for (int i = 0; i < num_decimals; ++i) {
+        scale /= 10;
+    }
+    if (scale != 0 &&
+        (combined > std::numeric_limits<int64_t>::max() / scale ||
+         combined < std::numeric_limits<int64_t>::min() / scale)) {
+        // Would overflow int64 satoshis
+        return std::nullopt;
+    }
+    return (combined * scale) * SATOSHI;
 }
 
 QString BitcoinUnits::getAmountColumnTitle(int unit) {

@@ -45,10 +45,14 @@ UniValue ValueFromAmount(const Amount &amount) {
     const uint64_t u_abs = i_amt == std::numeric_limits<int64_t>::min() // handle fact that -(INT64_MIN) is UB
                                ? static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1u // abs(INT64_MIN)
                                : static_cast<uint64_t>(sign ? -i_amt : i_amt);
-    const uint64_t coin_sats = COIN / SATOSHI;
+    const uint64_t coin_sats = COIN / SATOSHI; // 100,000,000 satoshis per DVT
     const uint64_t quotient = u_abs / coin_sats;
-    const uint64_t remainder = u_abs % coin_sats;
-    return UniValue(UniValue::VNUM, strprintf("%s%u.%08u", sign ? "-" : "", quotient, remainder));
+    // DeVault: amounts are spock-granular (1 spock = 0.001 DVT = SPOCK_SATS satoshis). Display 3
+    // decimals (spocks), never 8 satoshi digits -- this matches legacy DeVault, whose ValueFromAmount
+    // routes through Amount::ToString() formatted as "%d.%03d". Sub-spock satoshis (which valid
+    // on-chain amounts never carry) are truncated, exactly as the legacy does.
+    const uint64_t spock_remainder = (u_abs % coin_sats) / uint64_t(SPOCK_SATS); // 0..999
+    return UniValue(UniValue::VNUM, strprintf("%s%u.%03u", sign ? "-" : "", quotient, spock_remainder));
 }
 
 std::string FormatScript(const CScript &script) {

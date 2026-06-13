@@ -8,7 +8,7 @@
 
 #include <tinyformat.h>
 
-const std::string CURRENCY_UNIT = "BCH";
+const std::string CURRENCY_UNIT = "DVT";
 
 std::string Amount::ToString(bool trimTrailingZeros, bool trimTrailingDecimalPoint) const {
     std::string result{strprintf("%d", amount)};
