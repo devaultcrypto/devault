@@ -1,284 +1,114 @@
 # WINDOWS BUILD NOTES
 
-Below are some notes on how to build Bitcoin Cash Node for Windows.
+Notes on how to build **DeVault Node** (`devaultd`, `devault-cli`, `devault-qt`) for Windows.
 
-Please note that from BCHN v0.21.3 onwards, building for Win32 is no longer
-officially supported (and build system capabilities related to this may
-be removed).
+Windows binaries are produced by **cross-compiling from Linux** with the
+[Mingw-w64](https://www.mingw-w64.org/) tool chain — either on a native Linux host (or VM) or inside
+[Windows Subsystem for Linux 2 (WSL 2)](https://learn.microsoft.com/windows/wsl/about). 32-bit Windows
+is not supported.
 
-The options known to work for building Bitcoin Cash Node on Windows are:
+## Compiler requirement (important)
 
-- On Linux, using the [Mingw-w64](https://www.mingw-w64.org/downloads/) cross compiler
-  tool chain. Ubuntu Jammy is recommended and is the platform used to build the
-  Bitcoin Cash Node Windows release binaries.
-- On Windows, using [Windows Subsystem for Linux (WSL)](https://msdn.microsoft.com/commandline/wsl/about)
-  and the Mingw-w64 cross compiler tool chain. This is covered in these notes.
+DeVault Node is **C++20** and requires a **C++20-capable Mingw-w64 tool chain, i.e. GCC ≥ 11**.
 
-Other options which may work, but which have not been extensively tested are
-(please contribute instructions):
+> The older guidance of Ubuntu 18.04/20.04/22.04 no longer applies: their system Mingw-w64 packages are
+> GCC 7 / 9 / **10**, none of which provide C++20's `<source_location>` (and they report the draft
+> `__cplusplus = 201709L`, which trips the `static_assert(__cplusplus >= 202002L)` in
+> `src/compat/assumptions.h`). Use a distribution whose Mingw-w64 is **GCC ≥ 11** —
+> **Ubuntu 24.04 LTS ("noble") ships GCC 13** and is the recommended host.
 
-- On Windows, using a POSIX compatibility layer application such as
-  [cygwin](http://www.cygwin.com/) or [msys2](http://www.msys2.org/).
-- On Windows, using a native compiler tool chain such as
-  [Visual Studio](https://www.visualstudio.com).
+## Reproducible release builds → Guix
 
-In any case please make sure that the compiler supports C++17.
+This guide produces **developer** builds. Reproducible, multi-signer-verifiable **release** binaries
+will be produced with [GNU Guix](https://guix.gnu.org/) (gitian is deprecated and is being retired —
+see `DEVAULT_GUIX_BUILD_PLAN.md` and, once implemented, `contrib/guix/`).
 
-**Note** These notes cover building binaries from source, for running Bitcoin
-Cash Node natively under Windows. If you just want to run Bitcoin Cash Node,
-you can download binaries from the [Bitcoin Cash Node website](https://bitcoincashnode.org/en/download.html).
-If you wish to both compile and run Bitcoin Cash Node on Windows, *under WSL*,
-you can refer to the [Unix build guide](build-unix.md),
-and follow those instructions from within WSL.
+## Cross-compilation (Ubuntu 24.04)
 
-## Windows Subsystem for Linux
+The steps below work on Ubuntu 24.04 directly, in a VM, or under WSL 2. The `depends` system also works
+on other distributions, but the package-install commands differ.
 
-With Windows 10, Microsoft has released a feature named the [Windows
-Subsystem for Linux (WSL)](https://msdn.microsoft.com/commandline/wsl/about). This
-feature allows you to run a bash shell directly on Windows in an Ubuntu-based
-environment. Within this environment you can cross compile for Windows without
-the need for a separate Linux VM or server. Note that while WSL can be installed
-with other Linux variants, such as OpenSUSE, the following instructions have only
-been tested with Ubuntu 20.04 (and 18.04, see below).
-
-In May 2020 WSL 2 was released with Windows 10, Version 2004, Build 19041.
-
-WSL is not supported in versions of Windows prior to Windows 10 or on
-Windows Server SKUs. In addition, it is available only for 64-bit versions of
-Windows.
-
-## Building with WSL 2 and Ubuntu 20.04
-
-This is the recommended method.
-
-### Installing Ubuntu 20.04 on Windows Subsystem for Linux 2
-
-It is beyond the scope of this guide to cover installation of WSL 2 and Ubuntu
-20.04 on WSL 2. Instructions to install WSL 2 are available at the
-[Windows Subsystem for Linux Installation Guide for Windows 10](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-
-Once WSL 2 is installed Ubuntu 20.04 can be found in the
-[Microsoft Store](https://www.microsoft.com/store/apps/9n6svws3rx71). You will
-be asked to create a new UNIX user account. This is a separate account from your
-Windows account.
-
-Once the bash shell is active, you can log in and follow the instructions below,
-starting with the "Cross-compilation" section. Compiling the 64-bit version is
-recommended, but it is possible to compile the 32-bit version.
-
-### Cross-compilation for Ubuntu and Windows Subsystem for Linux 2
-
-The steps below can be performed on Ubuntu (including in a VM) or WSL 2. The depends
-system will also work on other Linux distributions, however the commands for
-installing the toolchain will be different.
-
-First, install the general dependencies:
+### 1. General dependencies
 
 ```bash
-    sudo apt update
-    sudo apt upgrade
-    sudo apt install autoconf automake build-essential bsdmainutils cmake curl git libboost-all-dev libevent-dev libssl-dev libtool ninja-build nsis pkg-config python3 libgmp-dev zlib1g-dev
+sudo apt update
+sudo apt install autoconf automake bsdmainutils build-essential bison cmake curl git \
+    libtool ninja-build nsis pkg-config python3
 ```
 
-A host toolchain (`build-essential`) is necessary because some dependency
-packages need to build host utilities that are used in the build process.
+A host tool chain (`build-essential`) is required because some dependency packages build host utilities
+used during the cross build. See also [dependencies.md](dependencies.md).
 
-See also: [dependencies.md](dependencies.md).
-
-### Building for 64-bit Windows
-
-The first step is to install the `mingw-w64` cross-compilation tool chain.
+### 2. Mingw-w64 cross compiler (POSIX threads)
 
 ```bash
-    sudo apt install g++-mingw-w64-x86-64
+sudo apt install g++-mingw-w64-x86-64
+# Select the POSIX-threads variant (the win32 variant conflicts with std::mutex):
+sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
 ```
 
-Next, configure the `mingw-w64` to the posix[¹](#footnote1) compiler option.
+Confirm the version is **GCC ≥ 11**:
 
 ```bash
-    sudo update-alternatives --config x86_64-w64-mingw32-g++ # Set the default mingw32 g++ compiler option to posix.
-    sudo update-alternatives --config x86_64-w64-mingw32-gcc # Set the default mingw32 gcc compiler option to posix.
+x86_64-w64-mingw32-g++ --version
 ```
 
-Note that for WSL 2 the Bitcoin Cash Node source path MUST be somewhere in the default
-mount file system, for example `/usr/src/bitcoin-cash-node`, AND not under `/mnt/d/`.
-This means you cannot use a directory that is located directly on the host Windows
-file system to perform the build.
-
-Acquire the source in the usual way:
+### 3. Get the source
 
 ```bash
-    git clone https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node.git
-    cd bitcoin-cash-node
+git clone https://github.com/devaultcrypto/devault.git
+cd devault
 ```
 
-Once the source code is ready the build steps are below:
+> **WSL note:** the source must live on the native Linux filesystem (e.g. `~/devault`), **not** under
+> `/mnt/c/…`. Before building under WSL, strip Windows entries from `PATH`:
+> `export PATH=$(echo "$PATH" | sed -e 's|:/mnt.*||g')`
+
+### 4. Build the dependencies for Win64
 
 ```bash
-    export PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g') # strip out problematic Windows %PATH% imported var
-    cd depends
-    make build-win64
-    cd ..
-    mkdir build
-    cd build
-    cmake -GNinja .. -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win64.cmake -DENABLE_MAN=OFF -DBUILD_BITCOIN_SEEDER=OFF # seeder not supported in Windows yet
-    ninja
-    ninja package #to build the install-package
+make -C depends build-win64
 ```
 
-### Installation
+This populates `depends/x86_64-w64-mingw32/`. The build below resolves its libraries from there via
+`cmake/platforms/Win64.cmake` (which sets `CMAKE_FIND_ROOT_PATH` to that prefix), so the build directory
+**must be at the project root** (not inside `depends/`).
 
-After building using the Windows subsystem it can be useful to copy the compiled
-executables to a directory on the windows drive in the same directory structure
-as they appear in the release `.zip` archive. This can be done in the following
-way. This will install to `c:\workspace\bitcoin-cash-node`, for example:
+### 5. Configure and build
 
 ```bash
-    cmake -GNinja .. -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win64.cmake -DENABLE_MAN=OFF -DBUILD_BITCOIN_SEEDER=OFF -DCMAKE_INSTALL_PREFIX=/mnt/c/workspace/bitcoin-cash-node
-    sudo ninja install
+cmake -GNinja -B build_win64 -S . \
+    -DCMAKE_TOOLCHAIN_FILE=cmake/platforms/Win64.cmake \
+    -DENABLE_MAN=OFF -DBUILD_BITCOIN_SEEDER=OFF        # seeder is not supported on Windows
+ninja -C build_win64 bitcoind bitcoin-cli bitcoin-qt    # or: ninja -C build_win64
 ```
 
-## Building with WSL and Ubuntu 18.04
+The output binaries (rebranded) are:
 
-Building with WSL 2 and Ubuntu 20.04 is strongly recommended, but if for some
-reason you find your self unable to install WSL 2, the below guide will work for
-WSL. Here you will need to use Ubuntu 18.04, and that brings with it some extra
-complications.
+- `build_win64/src/devaultd.exe`
+- `build_win64/src/devault-cli.exe`
+- `build_win64/src/qt/devault-qt.exe`
 
-### Installing Ubuntu 18.04 on WSL
-
-At the time of writing (April 2020) the Windows Subsystem for Linux installs Ubuntu
-Focal 20.04 if you just search for Ubuntu in the Microsoft Shop. However, there is
-a problem with the sleep function on WSL, so Ubuntu Bionic 18.04 is recommended, and
-will be covered in these notes. See [this issue](https://github.com/microsoft/WSL/issues/4898)
-for further info.
-
-To install Ubuntu 18.04 on your WSL, you need to:
-
-1. Install Ubuntu 18.04
-    - Open Microsoft Store and search for Ubuntu 18.04 or use [this link](https://www.microsoft.com/store/productId/9n9tngvndl3q)
-    - Click **Get**
-2. Complete Installation
-    - Open a cmd prompt and type "Ubuntu"
-    - Create a new UNIX user account
-      (this is a separate account from your Windows account)
-
-After the bash shell is active, you can follow the instructions below, starting
-with the "Cross-compilation" section. Compiling the 64-bit version is
-recommended, but it is possible to compile the 32-bit version.
-
-### Cross-compilation for Ubuntu and Windows Subsystem for Linux
-
-The steps below can be performed on Ubuntu (including in a VM) or WSL. The depends
-system will also work on other Linux distributions, however the commands for
-installing the toolchain will be different.
-
-First, install the general dependencies:
+### 6. Build the installer (optional)
 
 ```bash
-    sudo apt update
-    sudo apt upgrade
-    sudo apt install autoconf automake build-essential bsdmainutils curl git libboost-all-dev libevent-dev libssl-dev libtool ninja-build pkg-config python3 libgmp-dev
+ninja -C build_win64 package
 ```
 
-The `cmake` version packaged with Ubuntu Bionic is too old for building Building
-Bitcoin Cash Node. To install the latest version:
+This produces the NSIS `*-win64-setup.exe` installer.
 
-```bash
-    sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
-    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-    sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-    sudo apt update
-    sudo apt install cmake
-```
+## Building under WSL 2
 
-A host toolchain (`build-essential`) is necessary because some dependency
-packages need to build host utilities that are used in the build process.
-
-See also: [dependencies.md](dependencies.md).
-
-### Building for 64-bit Windows
-
-The first step is to install the `mingw-w64` cross-compilation tool chain.
-
-```bash
-    sudo apt install g++-mingw-w64-x86-64
-```
-
-Next, configure the `mingw-w64` to the posix[¹](#footnote1) compiler option.
-
-```bash
-    sudo update-alternatives --config x86_64-w64-mingw32-g++ # Set the default mingw32 g++ compiler option to posix.
-    sudo update-alternatives --config x86_64-w64-mingw32-gcc # Set the default mingw32 gcc compiler option to posix.
-```
-
-Note that for WSL the Bitcoin Cash Node source path MUST be somewhere in the default
-mount file system, for example `/usr/src/bitcoin-cash-node`, AND not under `/mnt/d/`.
-This means you cannot use a directory that is located directly on the host Windows
-file system to perform the build.
-
-Acquire the source in the usual way:
-
-```bash
-    git clone https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node.git
-    cd bitcoin-cash-node
-```
-
-Once the source code is ready the build steps are below:
-
-```bash
-    export PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g') # strip out problematic Windows %PATH% imported var
-    cd depends
-    make build-win64
-    cd ..
-    mkdir build
-    cd build
-    cmake -GNinja .. -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win64.cmake -DENABLE_MAN=OFF -DBUILD_BITCOIN_SEEDER=OFF # seeder not supported in Windows yet
-    ninja
-```
-
-### Building BCHN installer
-
-To build a Windows installer for BCHN you need a newer version of the `nsis` package
-than is available in Ubuntu 18.04. To install a newer `nsis` from Ubuntu 19.10
-Eoan you can do:
-
-```bash
-    sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu eoan universe"
-    sudo apt install nsis
-```
-
-Then, back in the build directory, you can build the package with the command
-
-```bash
-    ninja package
-```
-
-### Installation
-
-After building using the Windows subsystem it can be useful to copy the compiled
-executables to a directory on the windows drive in the same directory structure
-as they appear in the release `.zip` archive. This can be done in the following
-way. This will install to `c:\workspace\bitcoin-cash-node`, for example:
-
-```bash
-    cmake -GNinja .. -DCMAKE_TOOLCHAIN_FILE=../cmake/platforms/Win64.cmake -DENABLE_MAN=OFF -DBUILD_BITCOIN_SEEDER=OFF -DCMAKE_INSTALL_PREFIX=/mnt/c/workspace/bitcoin-cash-node
-    sudo ninja install
-```
+Install **Ubuntu 24.04** from the Microsoft Store into WSL 2, open its shell, then follow the
+cross-compilation steps above (mind the filesystem/`PATH` note in step 3).
 
 ## Depends system
 
-For further documentation on the depends system see [README.md](../depends/README.md)
-in the depends directory.
+For further documentation on the `depends` system see [README.md](../depends/README.md).
 
-## Footnotes
+## Footnote — POSIX vs win32 threads
 
-<a name="footnote1">1</a>: Starting from Ubuntu Xenial 16.04, both the 32 and 64
-bit `Mingw-w64` packages install two different compiler options to allow a choice
-between either posix or win32 threads. The default option is win32 threads which
-is the more efficient since it will result in binary code that links directly with
-the Windows kernel32.lib. Unfortunately, the headers required to support win32
-threads conflict with some of the classes in the C++11 standard library, in particular
-`std::mutex`. It's not possible to build the Bitcoin Cash Node code using the win32
-version of the Mingw-w64 cross compilers (at least not without modifying headers
-in the Bitcoin Cash Node source code).
+The Mingw-w64 packages install two tool-chain variants: POSIX threads and win32 threads. The win32
+variant's headers conflict with parts of the C++ standard library (notably `std::mutex`), so DeVault
+Node must be built with the **POSIX** variant (selected in step 2).
