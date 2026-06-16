@@ -94,7 +94,12 @@ echo
 for HOST in ${HOSTS}; do
     OUTDIR="${OUTDIR_BASE}/${HOST}"
     DISTSRC="${REPO_ROOT}/guix-build/distsrc/${HOST}"
-    mkdir -p "${OUTDIR}"
+    # Persistent depends build-cache, OUTSIDE the (rm -rf'd each run) snapshot so built
+    # packages survive across runs. Safe for release: depends caches are content-addressed
+    # (keyed by package version + build-config hash), and DISTSRC is a stable per-host path so
+    # absolute paths baked into cached artifacts stay valid. Delete it for a from-scratch build.
+    DEPENDS_CACHE="${REPO_ROOT}/guix-build/depends-cache/${HOST}"
+    mkdir -p "${OUTDIR}" "${DEPENDS_CACHE}"
     echo "==> Building ${HOST}  ->  ${OUTDIR}"
 
     echo "    preparing clean source snapshot: ${DISTSRC}"
@@ -105,22 +110,30 @@ for HOST in ${HOSTS}; do
     export HOST
 
     # time-machine pins the exact Guix (toolchain bytes); shell --container isolates;
-    # --network=no enforces the offline contract. DISTSRC + OUTDIR are shared read-WRITE
-    # (depends/cmake/ninja write into the snapshot; artifacts land in OUTDIR).
+    # The container's default no-network enforces the offline contract. DISTSRC + OUTDIR are
+    # shared read-WRITE (depends/cmake/ninja write into the snapshot; artifacts land in OUTDIR).
+    # NB: `guix shell --container` disables network BY DEFAULT (offline as required);
+    # there is no `--network=no` — passing `--network` would ENABLE it. So we omit it.
+    # --emulate-fhs: populate /usr/bin/env, /bin/sh, /lib, ... from the profile. Required:
+    # several depends configure scripts/shebangs assume an FHS layout (e.g. openssl's
+    # ./Configure is `#!/usr/bin/env perl`), and the container root is read-only + non-root.
     guix time-machine --commit="${GUIX_PIN}" "${GUIX_BUILD_OPTS[@]}" -- \
-        shell --container --no-cwd --pure --network=no \
+        shell --container --emulate-fhs --no-cwd --pure \
             "${GUIX_BUILD_OPTS[@]}" \
             --share="${DISTSRC}" \
             --share="${OUTDIR}" \
+            --share="${DEPENDS_CACHE}" \
             --manifest="${GUIX_ROOT}/manifest.scm" \
             -- env \
                 HOST="${HOST}" \
                 OUTDIR="${OUTDIR}" \
                 REPO_ROOT="${DISTSRC}" \
+                DEPENDS_BASE_CACHE="${DEPENDS_CACHE}" \
                 VERSION="${VERSION}" \
                 DISTNAME="${DISTNAME}" \
                 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" \
                 GUIX_NO_QT="${GUIX_NO_QT:-0}" \
+                JOBS="${JOBS:-$(nproc)}" \
                 TZ="UTC" LC_ALL="C" \
                 bash "${DISTSRC}/contrib/guix/libexec/build.sh" "${HOST}"
 

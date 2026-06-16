@@ -26,23 +26,49 @@
 (define base-tools
   (map specification->package
        (list
-        ;; build system
-        "gcc-toolchain@12"          ; native C++20 compiler (>= C++20 floor; matches/exceeds Core)
+        ;; compiler
+        "gcc-toolchain@12"          ; native C++20 compiler + binutils (>= C++20 floor)
+        ;; build drivers
+        "make"                      ; depends/ Makefile + most package builds (NOT in gcc-toolchain)
         "cmake-minimal"
         "ninja"
         "pkg-config"
+        ;; autotools chain (several depends regenerate configure / need these)
+        "m4"                        ; gmp et al.
+        "autoconf" "automake" "libtool"
+        "gettext-minimal"           ; msgfmt for some configure steps
         "bison"                     ; required by some depends
-        "python"                    ; build/codegen scripts
+        "gperf"                     ; fontconfig
+        "file"                      ; many configure scripts probe with `file`
+        ;; scripting
+        "python"                    ; build/codegen scripts (xcb-proto, qt)
         "perl"                      ; openssl/qt build steps in depends
-        ;; archive / determinism utilities
+        ;; archive / text / determinism utilities
         "coreutils"                 ; touch --date, sha256sum, sort, ...
-        "findutils"
+        "findutils" "diffutils"
         "sed" "grep" "gawk"
-        "tar" "gzip" "xz" "zip"
+        "tar" "gzip" "xz" "bzip2" "zip"   ; bzip2 essential: several sources are .tar.bz2
         "patch"
+        "util-linux"                ; getopt etc.
         "which"
         "git-minimal"
         "bash-minimal")))
+
+;;; ---------------------------------------------------------------------------
+;;; Native-build dependencies (every host).
+;;; BCHN's NativeExecutable.cmake configures a SECOND, *native* cmake build (build-time
+;;; codegen tools) WITHOUT the depends toolchain file, so it does find_package(OpenSSL/
+;;; Boost/Event/...) against the system. In the hermetic container nothing is on the system,
+;;; so configure fails ("Could NOT find OpenSSL"). gitian solved this by apt-installing
+;;; libssl-dev/libboost-*/libevent-dev/etc. purely for the native tools (see the FIXME in
+;;; contrib/gitian-descriptors/gitian-win.yml); we provide the Guix equivalents here. These
+;;; only satisfy the native helper-tool build — the HOST binaries still link depends/ (the
+;;; toolchain file's CMAKE_FIND_ROOT_PATH=ONLY keeps the host build away from these). Version
+;;; skew vs depends is harmless (gitian likewise used newer distro libs natively).
+;;; ---------------------------------------------------------------------------
+(define native-build-deps
+  (map specification->package
+       (list "openssl" "boost" "libevent" "gmp" "zlib")))
 
 ;;; ---------------------------------------------------------------------------
 ;;; Per-host toolchain, constructed LAZILY (only for the requested HOST).
@@ -87,4 +113,4 @@
 (define host (or (getenv "HOST") "x86_64-linux-gnu"))
 
 (packages->manifest
- (append base-tools (host->toolchain host)))
+ (append base-tools native-build-deps (host->toolchain host)))

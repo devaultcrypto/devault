@@ -41,6 +41,15 @@ TF="${TOOLCHAIN_FILE[$HOST]:?unknown HOST '$HOST'}"
 # explicit for parity with cross hosts). Cross hosts need the binutils prefix on PATH.
 CMAKE_EXTRA=()
 case "$HOST" in
+    x86_64-linux-gnu|aarch64-linux-gnu)
+        # BCHN's own release options (cf. gitian-linux): static C++ runtime + glibc back-compat.
+        # NOTE: full off-Guix portability is NOT yet solved — binaries are built against Guix
+        # glibc 2.41 and still require GLIBC_2.38 symbols + carry a /gnu/store RUNPATH, so they
+        # run on a Guix host but not on older systems. Completing this needs an OLDER-glibc
+        # toolchain (Bitcoin Core's approach) + -static-libgcc + patchelf --remove-rpath.
+        # Tracked in DEVAULT_GUIX_IMPLEMENTATION_PLAN.md / memory; deferred pending decision.
+        CMAKE_EXTRA+=( "-DENABLE_STATIC_LIBSTDCXX=ON" "-DENABLE_GLIBC_BACK_COMPAT=ON" )
+        ;;
     x86_64-w64-mingw32)
         CMAKE_EXTRA+=( "-DCPACK_PACKAGE_FILE_NAME=${DISTNAME}-win64-setup-unsigned" )
         ;;
@@ -62,7 +71,13 @@ echo "--- depends (HOST=$HOST) ---"
 # depends builds Qt regardless — that is the long pole, so the smoke knob skips it here.
 DEPENDS_OPTS=()
 [ "${GUIX_NO_QT:-0}" = "1" ] && DEPENDS_OPTS+=( "NO_QT=1" )
-make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"$(nproc)"
+# Persistent build cache: set via ENV (BASE_CACHE is `?=` in depends/Makefile, and env vars
+# survive the Makefile's MAKEOVERRIDES command-line filter, unlike `make BASE_CACHE=...`).
+if [ -n "${DEPENDS_BASE_CACHE:-}" ]; then
+    export BASE_CACHE="${DEPENDS_BASE_CACHE}"
+    mkdir -p "${BASE_CACHE}"
+fi
+make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"${JOBS:-$(nproc)}"
 DEPENDS_PREFIX="${REPO_ROOT}/depends/${HOST}"
 
 echo "--- cmake configure (HOST=$HOST) ---"
@@ -86,7 +101,7 @@ cmake -GNinja -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
     "${CMAKE_EXTRA[@]}"
 
 echo "--- ninja build ---"
-ninja -C "${BUILD_DIR}" -j"$(nproc)"
+ninja -C "${BUILD_DIR}" -j"${JOBS:-$(nproc)}"
 
 # security-check exists in the BCHN cmake tree (used by gitian-win). Best-effort:
 # skip gracefully if the target is absent for a given host.
