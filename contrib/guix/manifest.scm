@@ -17,6 +17,7 @@
 
 (use-modules (gnu packages)
              (gnu packages cross-base)        ; cross-gcc / cross-binutils / cross-libc
+             (gnu packages gcc)               ; gcc-12 (base compiler for the cross toolchain)
              (guix profiles))
 
 ;;; ---------------------------------------------------------------------------
@@ -73,9 +74,28 @@
 ;;; ---------------------------------------------------------------------------
 ;;; Per-host toolchain, constructed LAZILY (only for the requested HOST).
 ;;; ---------------------------------------------------------------------------
+;; G1 portability — an x86_64-linux-gnu "cross" toolchain whose gcc is REBUILT against an
+;; older glibc (2.33, the oldest packaged at this pin), so release binaries have a low glibc
+;; symbol floor (run on Ubuntu 22.04 / Debian 12 and newer). Just bundling gcc-12 with an old
+;; glibc is NOT enough — gcc's own libstdc++/libgcc would still be glibc-2.41-built — so we
+;; rebuild gcc against glibc 2.33 via cross-gcc. Build/realize is a one-time, cached compile.
+;; MUST stay byte-identical to contrib/guix/ realization so store paths match (see plan).
+(define (linux-x86_64-old-glibc-toolchain)
+  (let* ((target "x86_64-linux-gnu")
+         (old-glibc (specification->package "glibc@2.33"))
+         (xbinutils (cross-binutils target))
+         (xlibc (cross-libc target #:libc old-glibc #:xbinutils xbinutils))
+         (xgcc (cross-gcc target #:xgcc gcc-12 #:xbinutils xbinutils #:libc xlibc)))
+    (list xbinutils xlibc xgcc)))
+
 (define (host->toolchain host)
   (cond
-    ;; G1 — native Linux x86-64: nothing extra beyond base-tools.
+    ;; G1 — Linux x86-64. NOTE: linux-x86_64-old-glibc-toolchain (above) is DEFERRED — at this
+    ;; Guix pin, cross-libc can't build glibc 2.33/2.35 (the useful-floor versions): an internal
+    ;; gexp/sexp mismatch in their package args makes the derivation builder unparseable; only
+    ;; glibc 2.39+ work via cross-libc, which is too new to widen portability. Pending a decision
+    ;; on the portability approach, the native gcc-toolchain (base-tools) is used → reproducible
+    ;; build that runs on a Guix host (glibc floor 2.38). See plan / memory.
     ((string=? host "x86_64-linux-gnu")
      '())
 

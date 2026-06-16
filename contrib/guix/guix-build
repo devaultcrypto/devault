@@ -85,7 +85,7 @@ make_clean_distsrc() {
 
 echo "DeVault V2 reproducible build"
 echo "  version      : ${VERSION}"
-echo "  guix pin     : ${GUIX_PIN}"
+echo "  guix pin     : ${GUIX_PIN}  (linux: ${GUIX_PIN_LINUX})"
 echo "  source epoch : ${SOURCE_DATE_EPOCH}"
 echo "  hosts        : ${HOSTS}"
 echo "  output base  : ${OUTDIR_BASE}"
@@ -94,13 +94,15 @@ echo
 for HOST in ${HOSTS}; do
     OUTDIR="${OUTDIR_BASE}/${HOST}"
     DISTSRC="${REPO_ROOT}/guix-build/distsrc/${HOST}"
+    HOST_PIN="$(guix_pin_for_host "${HOST}")"
     # Persistent depends build-cache, OUTSIDE the (rm -rf'd each run) snapshot so built
-    # packages survive across runs. Safe for release: depends caches are content-addressed
-    # (keyed by package version + build-config hash), and DISTSRC is a stable per-host path so
-    # absolute paths baked into cached artifacts stay valid. Delete it for a from-scratch build.
-    DEPENDS_CACHE="${REPO_ROOT}/guix-build/depends-cache/${HOST}"
+    # packages survive across runs. KEYED BY (host, pin): depends built under a different Guix
+    # toolchain (e.g. a different glibc) must NOT be reused, or it would silently contaminate
+    # the glibc floor. DISTSRC is a stable per-host path so absolute paths in cached artifacts
+    # stay valid. Delete the dir for a from-scratch build.
+    DEPENDS_CACHE="${REPO_ROOT}/guix-build/depends-cache/${HOST}-${HOST_PIN:0:12}"
     mkdir -p "${OUTDIR}" "${DEPENDS_CACHE}"
-    echo "==> Building ${HOST}  ->  ${OUTDIR}"
+    echo "==> Building ${HOST}  ->  ${OUTDIR}   (guix pin ${HOST_PIN:0:12})"
 
     echo "    preparing clean source snapshot: ${DISTSRC}"
     make_clean_distsrc "${DISTSRC}"
@@ -117,7 +119,7 @@ for HOST in ${HOSTS}; do
     # --emulate-fhs: populate /usr/bin/env, /bin/sh, /lib, ... from the profile. Required:
     # several depends configure scripts/shebangs assume an FHS layout (e.g. openssl's
     # ./Configure is `#!/usr/bin/env perl`), and the container root is read-only + non-root.
-    guix time-machine --commit="${GUIX_PIN}" "${GUIX_BUILD_OPTS[@]}" -- \
+    guix time-machine --commit="${HOST_PIN}" "${GUIX_BUILD_OPTS[@]}" -- \
         shell --container --emulate-fhs --no-cwd --pure \
             "${GUIX_BUILD_OPTS[@]}" \
             --share="${DISTSRC}" \

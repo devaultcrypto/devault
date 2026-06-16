@@ -10,9 +10,18 @@ else()
   set(TOOLCHAIN_PREFIX ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu)
 endif()
 
-# Cross compilers to use for C and C++
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
+# Cross compilers to use for C and C++.
+# Prefer the TOOLCHAIN_PREFIX-prefixed compiler when present (e.g. the Guix old-glibc
+# x86_64-linux-gnu cross toolchain used for portable release builds); otherwise fall back to
+# the plain native gcc/g++ (dev builds that pass this file without a cross toolchain present).
+find_program(_TOOLCHAIN_PREFIXED_CC ${TOOLCHAIN_PREFIX}-gcc)
+if(_TOOLCHAIN_PREFIXED_CC)
+  set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+else()
+  set(CMAKE_C_COMPILER gcc)
+  set(CMAKE_CXX_COMPILER g++)
+endif()
 
 set(CMAKE_C_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
 set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})

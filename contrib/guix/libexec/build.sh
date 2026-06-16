@@ -77,7 +77,22 @@ if [ -n "${DEPENDS_BASE_CACHE:-}" ]; then
     export BASE_CACHE="${DEPENDS_BASE_CACHE}"
     mkdir -p "${BASE_CACHE}"
 fi
-make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"${JOBS:-$(nproc)}"
+# For the old-glibc Linux host, depends/hosts/linux.mk uses a PLAIN `gcc` on x86 build hosts
+# (its `ifeq 86,$(build_arch)` shortcut) — which would be the native glibc-2.41 gcc and
+# reintroduce the high glibc floor. Expose the cross toolchain under unprefixed names on a
+# PATH scoped to JUST the depends build, so depends compiles against the old glibc while the
+# later native sub-build (run_native_cmake.sh) still finds the native gcc on the normal PATH.
+DEPENDS_PATH="${PATH}"
+if [ "${HOST}" = "x86_64-linux-gnu" ] && command -v "${HOST}-gcc" >/dev/null 2>&1; then
+    XBIN="${REPO_ROOT}/guix-build/xbin/${HOST}"
+    rm -rf "${XBIN}"; mkdir -p "${XBIN}"
+    _xdir="$(dirname "$(command -v "${HOST}-gcc")")"
+    for f in "${_xdir}/${HOST}-"*; do
+        [ -e "$f" ] && ln -sf "$f" "${XBIN}/$(basename "$f" | sed "s/^${HOST}-//")"
+    done
+    DEPENDS_PATH="${XBIN}:${PATH}"
+fi
+PATH="${DEPENDS_PATH}" make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"${JOBS:-$(nproc)}"
 DEPENDS_PREFIX="${REPO_ROOT}/depends/${HOST}"
 
 echo "--- cmake configure (HOST=$HOST) ---"

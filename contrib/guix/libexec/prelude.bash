@@ -30,11 +30,27 @@ VERSION="$(grep -m1 -A3 '^project(' "${REPO_ROOT}/CMakeLists.txt" \
 export VERSION
 export DISTNAME="devault-${VERSION}"
 
-# --- Pinned Guix commit ----------------------------------------------------
-# The new "Ubuntu image": every independent builder MUST agree on this commit.
-# Override per release with GUIX_PIN=<commit>.
+# --- Pinned Guix commit(s) -------------------------------------------------
+# The new "Ubuntu image": every independent builder MUST agree on these commits.
+# Override per release with GUIX_PIN / GUIX_PIN_LINUX=<commit>.
 # Set 2026-06-15 from `guix describe` on the build host (branch master, git.guix.gnu.org).
 export GUIX_PIN="${GUIX_PIN:-230aa373f315f247852ee07dff34146e9b480aec}"
+
+# Linux x86-64 release binaries need a LOW glibc symbol floor to run off a Guix host (portable
+# on Ubuntu 22.04 / Debian 12+). GUIX_PIN's default glibc is 2.41 (too new), and cross-libc
+# can't build an older glibc at that pin (a Guix-internal builder bug — see plan/memory). So
+# the x86_64-linux-gnu target pins an OLDER Guix commit whose DEFAULT toolchain is gcc-12 +
+# glibc 2.35 — a standard, well-tested toolchain, NO cross-libc gymnastics. Windows/macOS keep
+# GUIX_PIN (their modern C++20 cross-compilers are unaffected). 842a11f1 = 2023-11-29.
+export GUIX_PIN_LINUX="${GUIX_PIN_LINUX:-842a11f1caa1bb929c427722ad9d7b7c1ff65727}"
+
+# Map a HOST to the Guix commit it builds under.
+guix_pin_for_host() {
+    case "$1" in
+        x86_64-linux-gnu) echo "${GUIX_PIN_LINUX}" ;;
+        *)                echo "${GUIX_PIN}" ;;
+    esac
+}
 
 # --- Reproducibility env (faketime-free; Guix toolchain is deterministic) ---
 # SOURCE_DATE_EPOCH: default to the HEAD commit time; override for a tagged release.
