@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+#
+# DeVault V2 — Guix reproducible build driver.
+# For each HOST, runs the per-host build.sh inside a hermetic, network-isolated
+# Guix container pinned to GUIX_PIN. Adapted from Bitcoin Core's contrib/guix/guix-build.
+#
+# Usage:
+#   ./contrib/guix/guix-build                      # build the full mandatory host set
+#   HOSTS="x86_64-linux-gnu" ./contrib/guix/guix-build   # build a subset (dev)
+#   GUIX_PIN=<commit> ./contrib/guix/guix-build
+#
+# PREREQUISITES (see DEVAULT_GUIX_IMPLEMENTATION_PLAN.md §4 / §5):
+#   - Guix installed + guix-daemon running (G0).
+#   - `make -C depends download` already run (the container has NO network).
+#   - macOS SDK present under depends/SDKs/ for the darwin hosts (G4).
+#
+# DRAFT (2026-06-13): first scaffold. Validate against a live, pinned Guix before relying on it.
+
+set -e -o pipefail
+
+# shellcheck source=libexec/prelude.bash
+source "$(dirname "${BASH_SOURCE[0]}")/libexec/prelude.bash"
+
+HOSTS="${HOSTS:-$HOSTS_DEFAULT}"
+
+if [ "${GUIX_PIN}" = "REPLACE_WITH_PINNED_GUIX_COMMIT" ]; then
+    echo "ERROR: GUIX_PIN is not set. Run G0 4.5 (record \`guix describe\`) and set it in" >&2
+    echo "       contrib/guix/libexec/prelude.bash, or pass GUIX_PIN=<commit>." >&2
+    exit 1
+fi
+
+command -v guix >/dev/null 2>&1 || { echo "ERROR: guix not in PATH. Run G0 4.1-4.3." >&2; exit 1; }
+
+# Guix build options applied to BOTH time-machine (builds the pinned inferior) and shell
+# (builds the toolchain profile). --fallback: if a substitute server can't serve a store
+# item, build it from source instead of hard-failing — resilient to substitute outages and
+# strictly more reproducible. GUIX_SUBSTITUTE_URLS (optional): override the substitute
+# servers, e.g. to skip an unreachable mirror. Leave unset to use the daemon's configured
+# servers. (On hosts where ci.guix.gnu.org is firewalled, set it to bordeaux only.)
+GUIX_BUILD_OPTS=( --fallback )
+if [ -n "${GUIX_SUBSTITUTE_URLS:-}" ]; then
+    GUIX_BUILD_OPTS+=( --substitute-urls="${GUIX_SUBSTITUTE_URLS}" )
+fi
+
+# The container is offline — fail early if depends sources were not pre-fetched.
+if [ ! -d "${REPO_ROOT}/depends/sources" ]; then
+    echo "ERROR: depends/sources/ missing. Run: make -C depends download   (G0 4.6)" >&2
+    exit 1
+fi
+
+# Build inputs that must NOT enter the clean source snapshot (regenerated in-container,
+# or irrelevant dev junk). depends/sources is excluded here and hardlinked in separately
+# (it is large; hardlinks are space-free on the same filesystem).
+DISTSRC_EXCLUDES=(
+    --exclude=./.git
+    --exclude=./guix-build
+    --exclude=./build
+    --exclude='./build_*'
+    --exclude=./depends/work
+    --exclude=./depends/built
+    --exclude=./depends/sources
+    --exclude='./depends/x86_64-linux-gnu'
+    --exclude='./depends/x86_64-w64-mingw32'
+    --exclude='./depends/aarch64-linux-gnu'
+    --exclude='./depends/*-apple-darwin*'
+    --exclude='./*.dat'
+    --exclude='./*.png'
+)
+
+# Make a clean, writable copy of the source tree for one host build. The container needs
+# the tree writable (depends builds into depends/{work,built,<host>}); building from a
+# fresh snapshot keeps the user's working tree clean and lets two runs be truly independent.
+# Snapshot = current WORKING TREE (so uncommitted scaffolding is included during bring-up).
+# TODO(release): switch to `git archive <tag>` for committed-only release reproducibility.
+make_clean_distsrc() {
+    local distsrc="$1"
+    rm -rf "${distsrc}"
+    mkdir -p "${distsrc}"
+    tar -C "${REPO_ROOT}" "${DISTSRC_EXCLUDES[@]}" -cf - . | tar -C "${distsrc}" -xf -
+    # Hardlink the pre-fetched source cache in (offline container reads it from here).
+    mkdir -p "${distsrc}/depends"
+    cp -al "${REPO_ROOT}/depends/sources" "${distsrc}/depends/sources"
+}
+
+echo "DeVault V2 reproducible build"
+echo "  version      : ${VERSION}"
+echo "  guix pin     : ${GUIX_PIN}"
+echo "  source epoch : ${SOURCE_DATE_EPOCH}"
+echo "  hosts        : ${HOSTS}"
+echo "  output base  : ${OUTDIR_BASE}"
+echo
+
+for HOST in ${HOSTS}; do
+    OUTDIR="${OUTDIR_BASE}/${HOST}"
+    DISTSRC="${REPO_ROOT}/guix-build/distsrc/${HOST}"
+    mkdir -p "${OUTDIR}"
+    echo "==> Building ${HOST}  ->  ${OUTDIR}"
+
+    echo "    preparing clean source snapshot: ${DISTSRC}"
+    make_clean_distsrc "${DISTSRC}"
+
+    # Export HOST so manifest.scm's (getenv "HOST") selects this host's toolchain when the
+    # host-side `guix` evaluates the manifest (before the container is created).
+    export HOST
+
+    # time-machine pins the exact Guix (toolchain bytes); shell --container isolates;
+    # --network=no enforces the offline contract. DISTSRC + OUTDIR are shared read-WRITE
+    # (depends/cmake/ninja write into the snapshot; artifacts land in OUTDIR).
+    guix time-machine --commit="${GUIX_PIN}" "${GUIX_BUILD_OPTS[@]}" -- \
+        shell --container --no-cwd --pure --network=no \
+            "${GUIX_BUILD_OPTS[@]}" \
+            --share="${DISTSRC}" \
+            --share="${OUTDIR}" \
+            --manifest="${GUIX_ROOT}/manifest.scm" \
+            -- env \
+                HOST="${HOST}" \
+                OUTDIR="${OUTDIR}" \
+                REPO_ROOT="${DISTSRC}" \
+                VERSION="${VERSION}" \
+                DISTNAME="${DISTNAME}" \
+                SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" \
+                GUIX_NO_QT="${GUIX_NO_QT:-0}" \
+                TZ="UTC" LC_ALL="C" \
+                bash "${DISTSRC}/contrib/guix/libexec/build.sh" "${HOST}"
+
+    echo "==> Done ${HOST}"
+    echo
+done
+
+echo "All hosts built. Next: ./contrib/guix/guix-attest to produce SHA256SUMS(.asc)."
