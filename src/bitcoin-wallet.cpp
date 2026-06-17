@@ -57,7 +57,7 @@ static bool WalletAppInit(int argc, char *argv[]) {
     }
     if (argc < 2 || HelpRequested(gArgs)) {
         std::string usage =
-            strprintf("%s bitcoin-wallet version", PACKAGE_NAME) + " " +
+            strprintf("%s devault-wallet version", PACKAGE_NAME) + " " +
                       FormatFullVersion() + "\n\n" +
                       "wallet-tool is an offline tool for creating and interacting with "
                       "DeVault wallet files.\n" +
@@ -65,7 +65,7 @@ static bool WalletAppInit(int argc, char *argv[]) {
                       "wallet directory in the datadir.\n" +
                       "To change the target wallet, use the -datadir, -wallet and "
                       "-testnet/-regtest arguments.\n\n" +
-                      "Usage:\n" + "  bitcoin-wallet [options] <command>\n\n" +
+                      "Usage:\n" + "  devault-wallet [options] <command>\n\n" +
                       gArgs.GetHelpMessage();
 
         std::fprintf(stdout, "%s", usage.c_str());

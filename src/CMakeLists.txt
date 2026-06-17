@@ -690,6 +690,7 @@ if(BUILD_BITCOIN_WALLET)
   add_to_security_check(bitcoin-wallet)
 
   install_target(bitcoin-wallet)
+  set_target_properties(bitcoin-wallet PROPERTIES OUTPUT_NAME devault-wallet)
 else()
   target_sources(server PRIVATE dummywallet.cpp)
 endif()

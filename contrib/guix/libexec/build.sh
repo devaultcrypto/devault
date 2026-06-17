@@ -204,6 +204,10 @@ case "$HOST" in
         # NSIS installer (driven by cmake/modules/NSIS.template.in).
         ninja -C "${BUILD_DIR}" package
         find "${BUILD_DIR}" -name "*-setup-unsigned.exe" -exec cp {} "${OUTDIR}/" \;
+        # `zip -@` APPENDS to an existing archive — re-running into the same OUTDIR would keep stale
+        # entries (e.g. a pre-rename bitcoin-wallet.exe) and make the zip non-reproducible. Remove it
+        # first so it is always built fresh from the current install tree.
+        rm -f "${OUTDIR}/${DISTNAME}-win64.zip"
         ( cd "${INSTALL_DIR}/.." && \
           find "${DISTNAME}" ! -name "*.dbg" -print0 | \
             xargs -0r touch --no-dereference --date="@${SOURCE_DATE_EPOCH}" && \
