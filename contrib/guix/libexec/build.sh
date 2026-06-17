@@ -90,7 +90,10 @@ fi
 # libstdc++, no glibc). CROSS_LIBRARY_PATH is left as-is: the profile lib has the matching cross
 # libstdc++ (its separate gcc 'lib' output isn't in the union's lib). No-op for cross hosts that
 # don't use a -toolchain meta-package (e.g. aarch64 raw cross — handled in its own phase).
-_xtc=$(ls -d /gnu/store/*-gcc-cross-"${HOST}"-toolchain-* 2>/dev/null | grep -vE '\.drv$|-builder$' | head -1)
+# NB: `|| true` — under `set -e -o pipefail` a glob with no match makes the pipe (hence the
+# command substitution, hence this plain assignment) non-zero and would abort the script. Hosts
+# without a -toolchain meta-package (native x86_64, aarch64 raw cross) legitimately match nothing.
+_xtc=$(ls -d /gnu/store/*-gcc-cross-"${HOST}"-toolchain-* 2>/dev/null | grep -vE '\.drv$|-builder$' | head -1 || true)
 if [ -n "${_xtc}" ]; then
     echo "--- cross include paths -> clean toolchain (de-contaminate fhs glibc): ${_xtc} ---"
     export CROSS_C_INCLUDE_PATH="${_xtc}/include"
@@ -100,6 +103,31 @@ if [ -n "${_xtc}" ]; then
     # mingw headers/libs live here. This is Guix's equivalent of gitian's /usr/<triple>. The
     # platform toolchain file appends $ENV{GUIX_CROSS_TOOLCHAIN_ROOT} to CMAKE_FIND_ROOT_PATH.
     export GUIX_CROSS_TOOLCHAIN_ROOT="${_xtc}"
+fi
+
+# CROSS Linux hosts (e.g. aarch64): the raw cross-gcc/cross-libc do NOT promote search paths, so
+# CROSS_*_INCLUDE_PATH start empty and the cross gcc finds glibc + libstdc++ via its built-in
+# sysroot — there is no FHS contamination to undo (unlike the mingw meta-package above). BUT the
+# Linux KERNEL HEADERS (linux/types.h, pulled in transitively by glibc's <bits/sched.h>) live in
+# the separately-propagated linux-libre-headers-cross package, which is NOT on the cross gcc's
+# default search path. Add it so glibc's C headers resolve. gcc reads CROSS_C_INCLUDE_PATH while
+# g++ reads CROSS_CPLUS_INCLUDE_PATH (a C++ TU does not consult the C var) and depends builds both
+# C and C++ — so set BOTH. No-op on hosts without such a package (native x86_64; mingw).
+_kh=$(ls -d /gnu/store/*-linux-libre-headers-cross-"${HOST}"-* 2>/dev/null | grep -vE '\.drv$|-builder$' | head -1 || true)  # || true: see _xtc note above
+if [ -n "${_kh}" ]; then
+    echo "--- cross kernel headers -> CROSS_*_INCLUDE_PATH: ${_kh} ---"
+    export CROSS_C_INCLUDE_PATH="${_kh}/include${CROSS_C_INCLUDE_PATH:+:${CROSS_C_INCLUDE_PATH}}"
+    export CROSS_CPLUS_INCLUDE_PATH="${_kh}/include${CROSS_CPLUS_INCLUDE_PATH:+:${CROSS_CPLUS_INCLUDE_PATH}}"
+    # Qt's installed .prl files list bare `-lm`/`-lpthread` (glibc), and cmake's _qt5_*_process_prl_file
+    # resolves every -l via find_library — which, under FIND_ROOT_PATH_MODE_LIBRARY=ONLY, only searches
+    # depends/ → "Library not found: m". Expose the cross glibc prefix as a cmake find-root (the platform
+    # file appends $GUIX_CROSS_TOOLCHAIN_ROOT, the same hook Win64.cmake uses). Ask the compiler for
+    # libm.so's path and take its prefix; libm.so + the libpthread.a stub both live in <prefix>/lib.
+    _libm=$("${HOST}-gcc" -print-file-name=libm.so 2>/dev/null || true)
+    if [ -e "${_libm}" ]; then
+        export GUIX_CROSS_TOOLCHAIN_ROOT="$(dirname "$(cd "$(dirname "${_libm}")" && pwd)")"
+        echo "--- cross glibc find-root -> ${GUIX_CROSS_TOOLCHAIN_ROOT} ---"
+    fi
 fi
 
 echo "--- depends (HOST=$HOST) ---"
@@ -192,7 +220,14 @@ strip_and_split() {
 mkdir -p "${OUTDIR}"
 case "$HOST" in
     x86_64-linux-gnu|aarch64-linux-gnu)
-        strip_and_split objcopy strip "${INSTALL_DIR}"
+        # Native binutils for the native host; the cross binutils for a cross host — the native
+        # objcopy/strip cannot read a foreign-arch ELF ("Unable to recognise the format" on the
+        # aarch64 .so/binaries otherwise).
+        if [ "${HOST}" = "x86_64-linux-gnu" ]; then
+            strip_and_split objcopy strip "${INSTALL_DIR}"
+        else
+            strip_and_split "${HOST}-objcopy" "${HOST}-strip" "${INSTALL_DIR}"
+        fi
         # Deterministic tarball: sorted entries, fixed owner/mtime.
         ( cd "${INSTALL_DIR}/.." && \
           find "${DISTNAME}" ! -name "*.dbg" | sort | \

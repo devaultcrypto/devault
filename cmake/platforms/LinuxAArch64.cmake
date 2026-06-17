@@ -24,6 +24,14 @@ set(CMAKE_FIND_ROOT_PATH
 	"/usr/${TOOLCHAIN_PREFIX}"
 )
 
+# Guix reproducible build: Qt's .prl files reference bare -lm/-lpthread (glibc), which cmake's
+# find_library cannot resolve under FIND_ROOT_PATH_MODE_LIBRARY=ONLY (only searches depends/).
+# build.sh exports the cross glibc prefix here so those system libs resolve (depends/ stays first,
+# so it is still preferred for everything it provides). Guarded: a no-op for non-Guix cross builds.
+if(DEFINED ENV{GUIX_CROSS_TOOLCHAIN_ROOT})
+  list(APPEND CMAKE_FIND_ROOT_PATH "$ENV{GUIX_CROSS_TOOLCHAIN_ROOT}")
+endif()
+
 # We also may have built dependencies for the native platform.
 set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depends/${TOOLCHAIN_PREFIX}/native")
 
