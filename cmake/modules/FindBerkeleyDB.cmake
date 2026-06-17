@@ -143,11 +143,17 @@ if(BerkeleyDB_INCLUDE_DIR)
 		"${BerkeleyDB_VERSION_MINOR}"
 	)
 
+	# Berkeley DB's os_pid.c calls pthread_self(), so the static libs need winpthreads at link
+	# time. A posix-threads mingw auto-linked it; with a win32-threads mingw nothing does. Under the
+	# `-static` link the wallet uses, `-lpthread` (a thin wrapper/import stub) fails to supply the
+	# symbol — only `-lwinpthread` (the static implementation) does. Windows-only generator expr;
+	# other platforms already resolve pthread_self.
 	find_component(BerkeleyDB C
 		NAMES ${_db_variants}
 		HINTS ${_BerkeleyDB_BREW_HINT}
 		PATH_SUFFIXES ${_db_variants}
 		INCLUDE_DIRS ${BerkeleyDB_INCLUDE_DIRS}
+		INTERFACE_LINK_LIBRARIES $<$<PLATFORM_ID:Windows>:-lwinpthread>
 	)
 
 	generate_versions_variants(
@@ -162,6 +168,7 @@ if(BerkeleyDB_INCLUDE_DIR)
 		HINTS ${_BerkeleyDB_BREW_HINT}
 		PATH_SUFFIXES ${_db_variants}
 		INCLUDE_DIRS ${BerkeleyDB_INCLUDE_DIRS}
+		INTERFACE_LINK_LIBRARIES $<$<PLATFORM_ID:Windows>:-lwinpthread>
 	)
 endif()
 

@@ -77,10 +77,32 @@ make_clean_distsrc() {
     local distsrc="$1"
     rm -rf "${distsrc}"
     mkdir -p "${distsrc}"
-    tar -C "${REPO_ROOT}" "${DISTSRC_EXCLUDES[@]}" -cf - . | tar -C "${distsrc}" -xf -
+    # --no-wildcards-match-slash: GNU tar lets `*` cross `/` in --exclude by default, so the
+    # top-level-only patterns './*.png' / './*.dat' would otherwise also match src/qt/res/icons/
+    # *.png (72 real GUI icons) and any nested *.dat fixtures. Anchor them to the root.
+    tar -C "${REPO_ROOT}" --no-wildcards-match-slash "${DISTSRC_EXCLUDES[@]}" -cf - . | tar -C "${distsrc}" -xf -
     # Hardlink the pre-fetched source cache in (offline container reads it from here).
     mkdir -p "${distsrc}/depends"
     cp -al "${REPO_ROOT}/depends/sources" "${distsrc}/depends/sources"
+}
+
+# Build (once, cached + GC-rooted) the native-helper profile for a pin: native gcc-toolchain +
+# native-build-deps. CROSS-host builds source this in build.sh ONLY for BCHN's NativeExecutable
+# sub-build, keeping the native glibc/libstdc++ OUT of the cross build's profile (else they win
+# the include/lib collision and break the cross compile/link). Echoes the resolved /gnu/store
+# profile path — accessible inside the container since the store is auto-mounted there.
+ensure_native_helper() {
+    local pin="$1"
+    local link="${REPO_ROOT}/guix-build/gcroots/native-helper-${pin:0:12}"
+    if [ ! -e "${link}" ]; then
+        echo "    building native-helper profile (native gcc + deps) for pin ${pin:0:12} ..." >&2
+        mkdir -p "$(dirname "${link}")"
+        GUIX_MANIFEST_ROLE=native-helper \
+            guix time-machine --commit="${pin}" "${GUIX_BUILD_OPTS[@]}" -- \
+                package -m "${GUIX_ROOT}/manifest.scm" -p "${link}" \
+                "${GUIX_BUILD_OPTS[@]}" >&2 || return 1
+    fi
+    readlink -f "${link}"
 }
 
 echo "DeVault V2 reproducible build"
@@ -107,6 +129,20 @@ for HOST in ${HOSTS}; do
     echo "    preparing clean source snapshot: ${DISTSRC}"
     make_clean_distsrc "${DISTSRC}"
 
+    # CROSS hosts get a SEPARATE native-helper profile (native gcc + deps) for BCHN's native
+    # sub-build; the native host (x86_64-linux-gnu) has no cross toolchain → no contamination →
+    # no helper needed (everything stays in its single build profile).
+    NATIVE_HELPER=""
+    HELPER_EXPOSE=()
+    if [ "${HOST}" != "x86_64-linux-gnu" ]; then
+        NATIVE_HELPER="$(ensure_native_helper "${HOST_PIN}")"
+        # The helper profile is OUTSIDE the container's manifest closure, so `guix --container`
+        # won't mount it. Expose its full store closure (~30 paths) read-only — else its gcc/libs
+        # are unmounted dangling symlinks. (Paths already in the manifest closure are deduped.)
+        while IFS= read -r _p; do HELPER_EXPOSE+=( --expose="${_p}" ); done \
+            < <(guix gc --requisites "${NATIVE_HELPER}" 2>/dev/null)
+    fi
+
     # Export HOST so manifest.scm's (getenv "HOST") selects this host's toolchain when the
     # host-side `guix` evaluates the manifest (before the container is created).
     export HOST
@@ -119,12 +155,17 @@ for HOST in ${HOSTS}; do
     # --emulate-fhs: populate /usr/bin/env, /bin/sh, /lib, ... from the profile. Required:
     # several depends configure scripts/shebangs assume an FHS layout (e.g. openssl's
     # ./Configure is `#!/usr/bin/env perl`), and the container root is read-only + non-root.
+    # --rebuild-cache is REQUIRED: `guix shell -m manifest.scm` caches the computed profile
+    # keyed by the manifest FILE, NOT by the HOST env var the manifest reads — so without it a
+    # second host would silently reuse the first host's profile. Re-eval is cheap (packages stay
+    # store-cached); it only recomputes which packages the profile contains for this HOST.
     guix time-machine --commit="${HOST_PIN}" "${GUIX_BUILD_OPTS[@]}" -- \
-        shell --container --emulate-fhs --no-cwd --pure \
+        shell --container --emulate-fhs --no-cwd --pure --rebuild-cache \
             "${GUIX_BUILD_OPTS[@]}" \
             --share="${DISTSRC}" \
             --share="${OUTDIR}" \
             --share="${DEPENDS_CACHE}" \
+            "${HELPER_EXPOSE[@]}" \
             --manifest="${GUIX_ROOT}/manifest.scm" \
             -- env \
                 HOST="${HOST}" \
@@ -136,6 +177,7 @@ for HOST in ${HOSTS}; do
                 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH}" \
                 GUIX_NO_QT="${GUIX_NO_QT:-0}" \
                 JOBS="${JOBS:-$(nproc)}" \
+                NATIVE_HELPER_PROFILE="${NATIVE_HELPER}" \
                 TZ="UTC" LC_ALL="C" \
                 bash "${DISTSRC}/contrib/guix/libexec/build.sh" "${HOST}"
 

@@ -22,6 +22,14 @@ set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
 #   set 1st to dir with the cross compiler's C/C++ headers/libs
 set(CMAKE_FIND_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depends/${TOOLCHAIN_PREFIX};/usr/${TOOLCHAIN_PREFIX}")
 
+# Guix reproducible build: there is no /usr/<triple> sysroot; the mingw system headers/libs
+# (shlwapi.h/libshlwapi.a, ws2_32, ...) live in the cross toolchain's store path. build.sh
+# exports it so find_package(SHLWAPI/...) — which uses find_path/find_library, not the compiler
+# env — can resolve Windows system libraries. Guarded: a no-op for non-Guix dev cross builds.
+if(DEFINED ENV{GUIX_CROSS_TOOLCHAIN_ROOT})
+  list(APPEND CMAKE_FIND_ROOT_PATH "$ENV{GUIX_CROSS_TOOLCHAIN_ROOT}")
+endif()
+
 # We also may have built dependencies for the native plateform.
 set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depends/${TOOLCHAIN_PREFIX}/native")
 

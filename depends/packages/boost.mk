@@ -23,7 +23,15 @@ $(package)_toolset_$(host_os)=clang
 else
 $(package)_toolset_$(host_os)=gcc
 endif
+# boost.test (unit_test_framework) is used ONLY by the test suite (cmake/modules/TestSuite.cmake),
+# never by release binaries (src/CMakeLists.txt requires only chrono+filesystem). It also fails
+# to compile against Guix's newer mingw-w64 13 headers (boost 1.77 setcolor.hpp -> stralign.h:
+# '_wcsicmp' not declared). So skip building it for the Windows cross target.
+ifeq ($(host_os),mingw32)
+$(package)_config_libraries=date_time,chrono,filesystem,system
+else
 $(package)_config_libraries=date_time,chrono,filesystem,system,test
+endif
 $(package)_cxxflags+=-std=c++17 -fvisibility=hidden
 $(package)_cxxflags_linux=-fPIC
 endef

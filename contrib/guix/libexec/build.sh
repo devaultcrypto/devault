@@ -65,6 +65,43 @@ if [ "${GUIX_NO_QT:-0}" = "1" ]; then
     CMAKE_EXTRA+=( "-DBUILD_BITCOIN_QT=OFF" )
 fi
 
+# CROSS hosts: source the native-helper profile EARLY (before depends) so every NATIVE step —
+# depends' native build tools (native_b2 etc.) AND BCHN's NativeExecutable sub-build — finds a
+# native gcc + native deps. Kept OUT of the cross build's own profile to avoid header/lib
+# contamination: the cross compiler reads CROSS_*_INCLUDE_PATH / CROSS_LIBRARY_PATH (from the
+# clean cross-only profile) while the native gcc reads C_INCLUDE_PATH / CPLUS_INCLUDE_PATH /
+# LIBRARY_PATH (disjoint), so the cross packages stay clean. native gcc lands on PATH as `gcc`
+# (unprefixed); the cross compiler stays `x86_64-w64-mingw32-gcc` — no conflict.
+if [ -n "${NATIVE_HELPER_PROFILE:-}" ] && [ -e "${NATIVE_HELPER_PROFILE}/etc/profile" ]; then
+    echo "--- sourcing native-helper profile (native tools/sub-build): ${NATIVE_HELPER_PROFILE} ---"
+    GUIX_PROFILE="${NATIVE_HELPER_PROFILE}"
+    . "${NATIVE_HELPER_PROFILE}/etc/profile"
+    # guix profiles don't export CMAKE_PREFIX_PATH; the native sub-build's find_package(OpenSSL/
+    # Boost/...) needs it. The main cross build ignores it (toolchain file FIND_ROOT_PATH=ONLY
+    # restricts finds to depends/).
+    export CMAKE_PREFIX_PATH="${NATIVE_HELPER_PROFILE}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
+fi
+
+# CROSS hosts: undo --emulate-fhs's glibc contamination of the cross include path. --emulate-fhs
+# (needed so configure scripts find /usr/bin/env) unions a glibc into the container profile,
+# whose headers land in CROSS_C_INCLUDE_PATH and break the cross compile (glibc <bits/types/
+# time_t.h> vs mingw <corecrt.h>; <cwchar> 'swprintf' etc.). Re-point CROSS_*_INCLUDE_PATH at the
+# cross toolchain's OWN clean headers — the gcc-cross-<host>-toolchain union (mingw sysroot +
+# libstdc++, no glibc). CROSS_LIBRARY_PATH is left as-is: the profile lib has the matching cross
+# libstdc++ (its separate gcc 'lib' output isn't in the union's lib). No-op for cross hosts that
+# don't use a -toolchain meta-package (e.g. aarch64 raw cross — handled in its own phase).
+_xtc=$(ls -d /gnu/store/*-gcc-cross-"${HOST}"-toolchain-* 2>/dev/null | grep -vE '\.drv$|-builder$' | head -1)
+if [ -n "${_xtc}" ]; then
+    echo "--- cross include paths -> clean toolchain (de-contaminate fhs glibc): ${_xtc} ---"
+    export CROSS_C_INCLUDE_PATH="${_xtc}/include"
+    export CROSS_CPLUS_INCLUDE_PATH="${_xtc}/include/c++:${_xtc}/include/c++/${HOST}:${_xtc}/include"
+    # Also expose the toolchain root as a cmake find-root: cmake's find_package() for Windows
+    # system libs (SHLWAPI etc.) uses find_path/find_library (NOT the compiler env), and the
+    # mingw headers/libs live here. This is Guix's equivalent of gitian's /usr/<triple>. The
+    # platform toolchain file appends $ENV{GUIX_CROSS_TOOLCHAIN_ROOT} to CMAKE_FIND_ROOT_PATH.
+    export GUIX_CROSS_TOOLCHAIN_ROOT="${_xtc}"
+fi
+
 echo "--- depends (HOST=$HOST) ---"
 # Sources were pre-fetched on the host (container is offline). This builds the
 # target libs into depends/$HOST. NO_QT must be passed HERE too (not just to cmake) or
@@ -95,6 +132,14 @@ fi
 PATH="${DEPENDS_PATH}" make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"${JOBS:-$(nproc)}"
 DEPENDS_PREFIX="${REPO_ROOT}/depends/${HOST}"
 
+# security-check.py (run via `ninja security-check` below) shells out to $OBJDUMP/$READELF to
+# introspect the built binaries. Its defaults (/usr/bin/objdump, /usr/bin/readelf) are the native
+# binutils, which cannot parse a Windows PE -> "cannot open" and a spurious failure. Point them at
+# the host-prefixed binutils when present (mingw PE needs this; guarded so the native Linux host,
+# whose default check already passes, is left untouched if no prefixed tool exists).
+if command -v "${HOST}-objdump" >/dev/null 2>&1; then export OBJDUMP="${HOST}-objdump"; fi
+if command -v "${HOST}-readelf" >/dev/null 2>&1; then export READELF="${HOST}-readelf"; fi
+
 echo "--- cmake configure (HOST=$HOST) ---"
 BUILD_DIR="${REPO_ROOT}/guix-build/build/${HOST}"
 INSTALL_DIR="${BUILD_DIR}/install/${DISTNAME}"
@@ -110,6 +155,7 @@ cmake -GNinja -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
     -DENABLE_REDUCE_EXPORTS=ON \
     -DENABLE_CLANG_TIDY=OFF \
     -DENABLE_MAN=OFF \
+    -DENABLE_TEST=OFF \
     -DBUILD_BITCOIN_SEEDER=OFF \
     -DCPACK_STRIP_FILES=ON \
     -DCCACHE=OFF \
