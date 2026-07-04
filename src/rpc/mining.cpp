@@ -25,6 +25,7 @@
 #include <rpc/mining.h>
 #include <rpc/server.h>
 #include <rpc/util.h>
+#include <script/standard.h>
 #include <shutdown.h>
 #include <txmempool.h>
 #include <util/strencodings.h>
@@ -734,6 +735,36 @@ static UniValue getblocktemplatecommon(bool fLight, const Config &config, const 
     result.emplace_back("bits", strprintf("%08x", pblock->nBits));
     result.emplace_back("height", pindexPrev->nHeight + 1);
 
+    // DeVault: expose the extra coinbase outputs (the cold reward on a regular block, the budget
+    // payouts on a superblock) that a pool-built coinbase MUST reproduce verbatim, since
+    // "coinbasevalue" above is the miner's share only (vout[0] = fees + subsidy). Same field and
+    // format as legacy DeVault's getblocktemplate, which 2019-era pool software (e.g. yiimp's DVT
+    // branch) already consumes: [{payee, script, amount}, ...] with `script` the scriptPubKey hex,
+    // `amount` in satoshis. A pool must use a SINGLE payout output at vout[0] and append these
+    // outputs after it in the order given (QuickValidate checks the cold reward at vout[1]).
+    {
+        const auto &cbVout = pblock->vtx[0]->vout;
+        if (cbVout.size() > 1) {
+            UniValue::Array extraCoinbase;
+            extraCoinbase.reserve(cbVout.size() - 1);
+            for (size_t o = 1; o < cbVout.size(); ++o) {
+                const CTxOut &txout = cbVout[o];
+                UniValue::Object entry;
+                entry.reserve(3);
+                CTxDestination dest;
+                std::string payee;
+                if (ExtractDestination(txout.scriptPubKey, dest, 0 /* legacy p2sh_20 */)) {
+                    payee = EncodeDestination(dest, config);
+                }
+                entry.emplace_back("payee", std::move(payee));
+                entry.emplace_back("script", HexStr(txout.scriptPubKey));
+                entry.emplace_back("amount", txout.nValue / SATOSHI);
+                extraCoinbase.emplace_back(std::move(entry));
+            }
+            result.emplace_back("coinbase_payload", std::move(extraCoinbase));
+        }
+    }
+
     if (fLight) {
         // Note: this must be called with cs_main held (which is the case here)
         gbtl::CacheAndSaveTxsToFile(jobId, pvtx);
@@ -819,8 +850,8 @@ static UniValue getblocktemplate(const Config &config, const JSONRPCRequest &req
                 "      \"flags\" : \"xx\"                  (string) key name is to be ignored, and value included in scriptSig\n"
                 "  },\n"
                 "  \"coinbasevalue\" : n,              (numeric) "
-                "maximum allowable input to coinbase transaction, including the generation award and transaction fees "
-                "(in satoshis)\n"
+                "the miner's share of the coinbase (block subsidy plus transaction fees, in satoshis); "
+                "any coinbase_payload outputs below are IN ADDITION to this value\n"
                 "  \"coinbasetxn\" : { ... },          (json object) information for coinbase transaction\n"
                 "  \"target\" : \"xxxx\",                (string) The hash target\n"
                 "  \"mintime\" : xxx,                  (numeric) "
@@ -835,7 +866,17 @@ static UniValue getblocktemplate(const Config &config, const JSONRPCRequest &req
                 "  \"sizelimit\" : n,                  (numeric) limit of block size\n"
                 "  \"curtime\" : ttt,                  (numeric) current timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
                 "  \"bits\" : \"xxxxxxxx\",              (string) compressed target of next block\n"
-                "  \"height\" : n                      (numeric) The height of the next block\n"
+                "  \"height\" : n,                     (numeric) The height of the next block\n"
+                "  \"coinbase_payload\" : [            (array, DeVault; present only when required) "
+                "extra coinbase outputs that MUST be appended verbatim after the miner payout output: "
+                "the cold reward on a regular block (validated at vout index 1), or the budget payouts on a superblock\n"
+                "      {\n"
+                "        \"payee\" : \"xxxx\",             (string) the destination address (informational)\n"
+                "        \"script\" : \"xxxx\",            (string) the output scriptPubKey, hex; use this verbatim\n"
+                "        \"amount\" : n                  (numeric) the output value in satoshis, in addition to coinbasevalue\n"
+                "      }\n"
+                "      ,...\n"
+                "  ]\n"
                 "}\n"
             },
             RPCExamples{HelpExampleCli("getblocktemplate", "") +
@@ -869,8 +910,8 @@ static UniValue getblocktemplatelight(const Config &config, const JSONRPCRequest
                 "      \"flags\" : \"xx\"                  (string) key name is to be ignored, and value included in scriptSig\n"
                 "  },\n"
                 "  \"coinbasevalue\" : n,              (numeric) "
-                "maximum allowable input to coinbase transaction, including the generation award and transaction fees "
-                "(in satoshis)\n"
+                "the miner's share of the coinbase (block subsidy plus transaction fees, in satoshis); "
+                "any coinbase_payload outputs below are IN ADDITION to this value\n"
                 "  \"coinbasetxn\" : { ... },          (json object) information for coinbase transaction\n"
                 "  \"target\" : \"xxxx\",                (string) The hash target\n"
                 "  \"mintime\" : xxx,                  (numeric) "
@@ -885,7 +926,17 @@ static UniValue getblocktemplatelight(const Config &config, const JSONRPCRequest
                 "  \"sizelimit\" : n,                  (numeric) limit of block size\n"
                 "  \"curtime\" : ttt,                  (numeric) current timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
                 "  \"bits\" : \"xxxxxxxx\",              (string) compressed target of next block\n"
-                "  \"height\" : n                      (numeric) The height of the next block\n"
+                "  \"height\" : n,                     (numeric) The height of the next block\n"
+                "  \"coinbase_payload\" : [            (array, DeVault; present only when required) "
+                "extra coinbase outputs that MUST be appended verbatim after the miner payout output: "
+                "the cold reward on a regular block (validated at vout index 1), or the budget payouts on a superblock\n"
+                "      {\n"
+                "        \"payee\" : \"xxxx\",             (string) the destination address (informational)\n"
+                "        \"script\" : \"xxxx\",            (string) the output scriptPubKey, hex; use this verbatim\n"
+                "        \"amount\" : n                  (numeric) the output value in satoshis, in addition to coinbasevalue\n"
+                "      }\n"
+                "      ,...\n"
+                "  ]\n"
                 "}\n"
             },
             RPCExamples{HelpExampleCli("getblocktemplatelight", "") +

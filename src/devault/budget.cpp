@@ -23,6 +23,7 @@ namespace {
 struct BudgetStruct {
     std::string MainNetAddress;
     std::string TestNetAddress;
+    std::string RegTestNetAddress;
     std::string Purpose;
     int64_t percent;
 };
@@ -33,29 +34,34 @@ struct BudgetPayouts {
 };
 
 // Reward Address & Percentage (verbatim from legacy DeVault devault/budget.cpp:30-55).
+// The RegTestNetAddress column is V2-only (legacy had none — its regtest superblocks were broken
+// because the dvtest: strings do not decode under the dvreg: prefix, leaving empty payout scripts).
+// Each regtest address is the SAME hash160 payload as the testnet address, re-encoded with the
+// dvreg: prefix, so regtest superblocks are mineable/validatable in tests. Mainnet/testnet payouts
+// are untouched (guarded by budget_tests).
 const BudgetPayouts Payouts[] = {
     {
         5, // change on 5th Superblock
-        {{"devault:pp2ghv9ya7fs98rvz3gzuqmen608dh6g2y5d5dxrtp", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community", 15},
-         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
-         {"devault:pqws2sgc2y22x2gkcnmw72edpa0u0kscdsqp29e530", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs", 5},
-         {"devault:pzgux6zlzpw45hm45fwcj5d7mf5fn7pa2ydjzx5nxw", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDevs", 5},
-         {"devault:prutq74qks5aez2a4mhrcm26t0r3pjzpxyapq0kdjk", "dvtest:qqltstfypfuftlgrvqdfml4js0y3yxdpgya2krkhk5", "Marketing", 5},
-         {"devault:prcljsfamr0hsc2jn4mr5et9xx5u9lm8rvl976n0zm", "dvtest:qpw43t63nxmufurn5qn9jyurc27xntvdz5n7ujhdaq", "Support", 5}},
+        {{"devault:pp2ghv9ya7fs98rvz3gzuqmen608dh6g2y5d5dxrtp", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "dvreg:pr2jg83w445mrwqwkczgdevyeetatckhg5le2mty0u", "Community", 15},
+         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "dvreg:pr49tdjhuktpp440edg9cej7d9hcvnrluvpxqst25f", "CoreDevs", 10},
+         {"devault:pqws2sgc2y22x2gkcnmw72edpa0u0kscdsqp29e530", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "dvreg:qzlg7mlrz56hnnwddc8k0a2w397sqjgegghhpljds4", "WebDevs", 5},
+         {"devault:pzgux6zlzpw45hm45fwcj5d7mf5fn7pa2ydjzx5nxw", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "dvreg:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9lu606sqezg", "BusDevs", 5},
+         {"devault:prutq74qks5aez2a4mhrcm26t0r3pjzpxyapq0kdjk", "dvtest:qqltstfypfuftlgrvqdfml4js0y3yxdpgya2krkhk5", "dvreg:qqltstfypfuftlgrvqdfml4js0y3yxdpgy3s85sf8s", "Marketing", 5},
+         {"devault:prcljsfamr0hsc2jn4mr5et9xx5u9lm8rvl976n0zm", "dvtest:qpw43t63nxmufurn5qn9jyurc27xntvdz5n7ujhdaq", "dvreg:qpw43t63nxmufurn5qn9jyurc27xntvdz5lyd93nvy", "Support", 5}},
     },
     {
         15,
-        {{"devault:pp2ghv9ya7fs98rvz3gzuqmen608dh6g2y5d5dxrtp", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community", 15},
-         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
-         {"devault:pqws2sgc2y22x2gkcnmw72edpa0u0kscdsqp29e530", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs/Support", 10},
-         {"devault:pzgux6zlzpw45hm45fwcj5d7mf5fn7pa2ydjzx5nxw", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDev/Marketing", 10}},
+        {{"devault:pp2ghv9ya7fs98rvz3gzuqmen608dh6g2y5d5dxrtp", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "dvreg:pr2jg83w445mrwqwkczgdevyeetatckhg5le2mty0u", "Community", 15},
+         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "dvreg:pr49tdjhuktpp440edg9cej7d9hcvnrluvpxqst25f", "CoreDevs", 10},
+         {"devault:pqws2sgc2y22x2gkcnmw72edpa0u0kscdsqp29e530", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "dvreg:qzlg7mlrz56hnnwddc8k0a2w397sqjgegghhpljds4", "WebDevs/Support", 10},
+         {"devault:pzgux6zlzpw45hm45fwcj5d7mf5fn7pa2ydjzx5nxw", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "dvreg:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9lu606sqezg", "BusDev/Marketing", 10}},
     },
     {
         std::numeric_limits<int32_t>::max(), // change if we add more to superblock change
-        {{"devault:pqqqaf843zj992fkqr483zptyp0r8kfg7g5enjt05d", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "Community", 15},
-         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "CoreDevs", 10},
-         {"devault:prgtl5yust3v2m76c3t4vsnuwuufaht0euqm2smja2", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "WebDevs/Support", 10},
-         {"devault:pz3htku32554kntjvzpwp8nuhmksvp73f5wwmxts8h", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "BusDev/Marketing", 10}},
+        {{"devault:pqqqaf843zj992fkqr483zptyp0r8kfg7g5enjt05d", "dvtest:pr2jg83w445mrwqwkczgdevyeetatckhg5nrmvd67c", "dvreg:pr2jg83w445mrwqwkczgdevyeetatckhg5le2mty0u", "Community", 15},
+         {"devault:prg2wlmzj7kzy8ps7pfnkf39nze49yh8fsk0yfslw0", "dvtest:pr49tdjhuktpp440edg9cej7d9hcvnrluvdu38d59d", "dvreg:pr49tdjhuktpp440edg9cej7d9hcvnrluvpxqst25f", "CoreDevs", 10},
+         {"devault:prgtl5yust3v2m76c3t4vsnuwuufaht0euqm2smja2", "dvtest:qzlg7mlrz56hnnwddc8k0a2w397sqjgeggmdsg5np3", "dvreg:qzlg7mlrz56hnnwddc8k0a2w397sqjgegghhpljds4", "WebDevs/Support", 10},
+         {"devault:pz3htku32554kntjvzpwp8nuhmksvp73f5wwmxts8h", "dvtest:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9luk4t8x8nv", "dvreg:qpzn5j40a3r0kaznf8y6jpaa4z7stmg9lu606sqezg", "BusDev/Marketing", 10}},
     }};
 
 // Get Array Size at Compile time for Loops
@@ -87,7 +93,9 @@ ComputeSuperBlockPayments(int nHeight, const Amount &nBlockSubsidy, const CChain
         return payments;
     }
     const int64_t nBlocksPerPeriod = consensus.nBlocksPerYear / 12;
-    const bool fTestNet = (chainparams.NetworkIDString() != "main");
+    const std::string &netID = chainparams.NetworkIDString();
+    const bool fRegTest = (netID == "regtest");
+    const bool fTestNet = (netID != "main");
     const int Index = getPayoutIndexFromHeight(int(nHeight / nBlocksPerPeriod));
 
     // Sum of the %s -> scale factor (DeVault budget is a fraction of the miner's portion).
@@ -98,7 +106,8 @@ ComputeSuperBlockPayments(int nHeight, const Amount &nBlockSubsidy, const CChain
     const int ScaleFactor = (100 - PerCentSum);
 
     for (const auto &b : Payouts[Index].budget) {
-        const std::string &addr = fTestNet ? b.TestNetAddress : b.MainNetAddress;
+        const std::string &addr =
+            fRegTest ? b.RegTestNetAddress : (fTestNet ? b.TestNetAddress : b.MainNetAddress);
         CScript script = GetScriptForDestination(DecodeDestination(addr, chainparams));
         Amount payment =
             (((b.percent * nBlocksPerPeriod * (nBlockSubsidy / SATOSHI)) / (ScaleFactor * (COIN / SATOSHI))) *

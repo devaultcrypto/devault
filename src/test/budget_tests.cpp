@@ -16,7 +16,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-// The budget addresses only decode under mainnet/testnet cashaddr prefixes, so test on mainnet params.
+#include <cstdint>
+#include <set>
+#include <vector>
+
+// Mainnet params guard the real (consensus) payout table; a separate regtest suite below guards the
+// V2-only dvreg: budget column that makes regtest superblocks mineable.
 struct MainNetSetup : public BasicTestingSetup {
     MainNetSetup() : BasicTestingSetup(CBaseChainParams::MAIN) {}
 };
@@ -81,6 +86,49 @@ BOOST_AUTO_TEST_CASE(non_superblock_is_noop) {
     Amount nBudgetReward = -SATOSHI;
     BOOST_CHECK(CheckSuperBlockBudget(block, height, subsidy, params, nBudgetReward));
     BOOST_CHECK_EQUAL(nBudgetReward / SATOSHI, int64_t(0));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// Regtest budget addresses (V2-only dvreg: column). Legacy had none — its dvtest: strings do not
+// decode under the dvreg: prefix, so every regtest budget payout script came out EMPTY and the first
+// regtest superblock (21915) could neither be mined nor validated. Guard that the dvreg: column
+// yields real, distinct scripts and that mine==validate holds on regtest like the other nets.
+struct RegTestSetup : public BasicTestingSetup {
+    RegTestSetup() : BasicTestingSetup(CBaseChainParams::REGTEST) {}
+};
+
+BOOST_FIXTURE_TEST_SUITE(budget_regtest_tests, RegTestSetup)
+
+BOOST_AUTO_TEST_CASE(regtest_superblock_fill_matches_check) {
+    const CChainParams &params = Params();
+    const int superHeight = 21915; // first superblock (regtest keeps nBlocksPerYear / 12)
+    const Amount subsidy = GetBlockSubsidy(superHeight, params.GetConsensus());
+
+    CMutableTransaction cb;
+    cb.vin.resize(1);
+    cb.vin[0].prevout = COutPoint();
+    cb.vout.resize(1);
+    cb.vout[0] = CTxOut(subsidy, CScript() << OP_TRUE);
+
+    BOOST_CHECK(FillSuperBlockBudget(cb, superHeight, subsidy, params));
+    BOOST_CHECK_EQUAL(cb.vout.size(), size_t(1 + 6)); // 6 payees in the first epoch
+
+    // The old failure mode: undecodable addresses -> empty scripts (which also collide with each
+    // other, double-counting in the validator). Every payout script must be non-empty and distinct.
+    std::set<std::vector<uint8_t>> scripts;
+    for (size_t o = 1; o < cb.vout.size(); ++o) {
+        const CScript &s = cb.vout[o].scriptPubKey;
+        BOOST_CHECK(!s.empty());
+        scripts.emplace(s.begin(), s.end());
+    }
+    BOOST_CHECK_EQUAL(scripts.size(), size_t(6));
+
+    CBlock block;
+    block.vtx.push_back(MakeTransactionRef(cb));
+    Amount nBudgetReward = -SATOSHI;
+    BOOST_CHECK(CheckSuperBlockBudget(block, superHeight, subsidy, params, nBudgetReward));
+    BOOST_CHECK(nBudgetReward > Amount::zero());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
