@@ -159,6 +159,10 @@ public:
 
         // May 15, 2025 12:00:00 UTC protocol upgrade (this is one less than the first block mined under new rules)
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // May 15, 2026 12:00:00 UTC protocol upgrade
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD
@@ -350,6 +354,10 @@ public:
 
         // May 15, 2025 12:00:00 UTC protocol upgrade (this is one less than the first block mined under new rules)
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // May 15, 2026 12:00:00 UTC protocol upgrade
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD
@@ -520,6 +528,10 @@ public:
 
         // May 15, 2025 12:00:00 UTC protocol upgrade (this is one less than the first block mined under new rules)
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // May 15, 2026 12:00:00 UTC protocol upgrade
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD
@@ -712,6 +724,10 @@ public:
 
         // May 15, 2025 12:00:00 UTC protocol upgrade
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // May 15, 2026 12:00:00 UTC protocol upgrade
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD
@@ -872,6 +888,10 @@ public:
 
         // November 15, 2024 12:00:00 UTC; protocol upgrade activates 6 months early
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // November 15, 2025 12:00:00 UTC; protocol upgrade activates 6 months early
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD
@@ -1069,6 +1089,10 @@ public:
 
         // May 15, 2025 12:00:00 UTC protocol upgrade
         consensus.upgrade11Height = 2000000000; // DeVault: DISABLED (no BigInt); Phase-3 TBD
+        // DeVault Upgrade 1 (DU1) — the V2 hard fork (DNFTs/tokens/introspection/64-bit/p2sh32).
+        // Height decided near launch; overridable for tests via -du1activationheight.
+        consensus.du1Height = 2000000000;    // DISABLED until the fork height is set
+        consensus.ftForkHeight = 2000000000; // FT system deferred (DEVAULT_NFT_SPEC.md §10.8)
 
         // May 15, 2026 12:00:00 UTC protocol upgrade
         consensus.upgrade12ActivationTime = 9999999999; // DeVault: DISABLED; Phase-3 TBD

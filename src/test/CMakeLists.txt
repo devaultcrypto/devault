@@ -209,6 +209,7 @@ add_boost_unit_tests_to_suite(bitcoin test_bitcoin
     base58_tests.cpp
     coldrewards_tests.cpp
     budget_tests.cpp
+    dnft_activation_tests.cpp
     base64_tests.cpp
     bigint_script_property_tests.cpp
     bigint_tests.cpp

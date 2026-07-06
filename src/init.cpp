@@ -1051,6 +1051,22 @@ void SetupServerArgs() {
                   chipnetChainParams->GetConsensus().upgrade2027ActivationTime),
         true, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg(
+        "-du1activationheight=<n>",
+        strprintf("Activation height of DeVault Upgrade 1 (the V2 hard fork: DNFTs/tokens/introspection); "
+                  "first block using new rules will be after this height (default: %d, testnet: %d, regtest: %d)",
+                  defaultChainParams->GetConsensus().du1Height,
+                  testnetChainParams->GetConsensus().du1Height,
+                  regtestChainParams->GetConsensus().du1Height),
+        true, OptionsCategory::DEBUG_TEST);
+    gArgs.AddArg(
+        "-ftforkactivationheight=<n>",
+        strprintf("Activation height of the future DeVault fungible-token system; until then, from DU1 "
+                  "onward, amount-carrying token outputs are invalid (default: %d, testnet: %d, regtest: %d)",
+                  defaultChainParams->GetConsensus().ftForkHeight,
+                  testnetChainParams->GetConsensus().ftForkHeight,
+                  regtestChainParams->GetConsensus().ftForkHeight),
+        true, OptionsCategory::DEBUG_TEST);
+    gArgs.AddArg(
         "-printtoconsole",
         "Send trace/debug info to console instead of debug.log file (default: "
         "1 when no -daemon. To disable logging to file, set debuglogfile=0)",
@@ -2041,6 +2057,26 @@ bool AppInitParameterInteraction(Config &config) {
         }
         ::g_Upgrade11HeightOverride.emplace(static_cast<int32_t>(height));
         LogPrintf("Using upgrade 11 activation height override: %d\n", height);
+    }
+
+    // Process CLI/conf override for the DU1 (DeVault Upgrade 1) activation height
+    if (gArgs.IsArgSet("-du1activationheight")) {
+        const auto height = gArgs.GetArg("-du1activationheight", 0);
+        if (height < 0 || height > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
+            return InitError("Invalid -du1activationheight, must be a positive integer in the 32-bit range");
+        }
+        ::g_DU1HeightOverride.emplace(static_cast<int32_t>(height));
+        LogPrintf("Using DU1 (DeVault Upgrade 1) activation height override: %d\n", height);
+    }
+
+    // Process CLI/conf override for the (future) DeVault fungible-token activation height
+    if (gArgs.IsArgSet("-ftforkactivationheight")) {
+        const auto height = gArgs.GetArg("-ftforkactivationheight", 0);
+        if (height < 0 || height > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
+            return InitError("Invalid -ftforkactivationheight, must be a positive integer in the 32-bit range");
+        }
+        ::g_FTForkHeightOverride.emplace(static_cast<int32_t>(height));
+        LogPrintf("Using FT-fork activation height override: %d\n", height);
     }
 
     return true;

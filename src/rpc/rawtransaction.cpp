@@ -1090,7 +1090,7 @@ UniValue::Object SignTransaction(interfaces::Chain &, CMutableTransaction &mtx, 
     CCoinsViewCache view(&viewDummy);
     uint32_t scriptFlags = 0;
     int chainHeight;
-    std::optional<int> upgrade9Height; // the first actual block height for upgrade9 rules, if unset, not activated
+    std::optional<int> tokenRulesHeight; // the first actual block height for token rules (DeVault: DU1), if unset, not activated
     bool targetedVmLimitsEnabled = false;
     {
         LOCK2(cs_main, g_mempool.cs);
@@ -1112,8 +1112,8 @@ UniValue::Object SignTransaction(interfaces::Chain &, CMutableTransaction &mtx, 
         const auto &params = ::Params().GetConsensus();
         scriptFlags = GetMemPoolScriptFlags(params, tip);
         chainHeight = tip->nHeight;
-        if (IsUpgrade9Enabled(params, tip)) {
-            upgrade9Height = GetUpgrade9ActivationHeight(params) + 1;
+        if (IsDU1Enabled(params, tip)) {
+            tokenRulesHeight = GetDU1ActivationHeight(params) + 1;
         }
         targetedVmLimitsEnabled = bool(scriptFlags & SCRIPT_ENABLE_MAY2025);
     }
@@ -1184,9 +1184,9 @@ UniValue::Object SignTransaction(interfaces::Chain &, CMutableTransaction &mtx, 
 
                 if (tokenDataPtr && !coinHeight) {
                     // Ensure we can sign and that token doesn't end up as categorized as a PATFO
-                    // so set the height to either when upgrade9 activated or the latest chain tip
-                    // height, whichever is earlier.
-                    coinHeight = upgrade9Height.value_or(chainHeight);
+                    // so set the height to either when the token rules (DU1) activated or the
+                    // latest chain tip height, whichever is earlier.
+                    coinHeight = tokenRulesHeight.value_or(chainHeight);
                 }
 
                 view.AddCoin(out, Coin(txout, coinHeight.value_or(1), false), true);

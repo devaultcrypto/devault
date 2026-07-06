@@ -181,3 +181,36 @@ bool IsUpgrade2027Enabled(const Consensus::Params &params, const CBlockIndex *pi
 
     return IsUpgrade2027Enabled(params, pindexPrev->GetMedianTimePast());
 }
+
+// DeVault Upgrade 1 (DU1) — the V2 hard fork (CashTokens-based DNFTs, native introspection,
+// 64-bit script integers, p2sh32; see DEVAULT_NFT_SPEC.md §10). Mirrors the upgrade9 plumbing;
+// DeVault keys its fork on these predicates, never on IsUpgrade9* (upgrade9Height stays sentinel).
+std::optional<int32_t> g_DU1HeightOverride;
+
+int32_t GetDU1ActivationHeight(const Consensus::Params &params) {
+    return g_DU1HeightOverride.value_or(params.du1Height);
+}
+
+bool IsDU1EnabledForHeightPrev(const Consensus::Params &params, const int32_t nHeightPrev) {
+    return nHeightPrev >= GetDU1ActivationHeight(params);
+}
+
+bool IsDU1Enabled(const Consensus::Params &params, const CBlockIndex *pindexPrev) {
+    if (pindexPrev == nullptr) {
+        return false;
+    }
+
+    return IsDU1EnabledForHeightPrev(params, pindexPrev->nHeight);
+}
+
+// DeVault fungible-token activation (future; until it activates the FT-deferral gate in
+// src/devault/dnft.cpp rejects amount-carrying token outputs — DEVAULT_NFT_SPEC.md §10.8).
+std::optional<int32_t> g_FTForkHeightOverride;
+
+int32_t GetFTForkActivationHeight(const Consensus::Params &params) {
+    return g_FTForkHeightOverride.value_or(params.ftForkHeight);
+}
+
+bool IsFTForkEnabledForHeightPrev(const Consensus::Params &params, const int32_t nHeightPrev) {
+    return nHeightPrev >= GetFTForkActivationHeight(params);
+}

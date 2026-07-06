@@ -39,17 +39,22 @@ struct EnsureClearedMempoolMixin {
     ~EnsureClearedMempoolMixin() { LOCK(g_mempool.cs); g_mempool.clear(); }
 };
 
-// Mixin to ensure tokens are enabled for this test
-struct Upgrade9ActivatedMixin {
-    std::optional<int32_t> origUpgrade9ActivationOverride;
+// Mixin to ensure tokens are enabled for this test (DeVault: DU1 activation; the FT-fork
+// override is also set since the inherited test uses fungible amounts and the DeVault
+// FT-deferral gate would otherwise reject them).
+struct TokensActivatedMixin {
+    std::optional<int32_t> origDU1ActivationOverride, origFTForkActivationOverride;
 
-    Upgrade9ActivatedMixin() {
-        origUpgrade9ActivationOverride = g_Upgrade9HeightOverride;
-        g_Upgrade9HeightOverride = 0;
+    TokensActivatedMixin() {
+        origDU1ActivationOverride = g_DU1HeightOverride;
+        origFTForkActivationOverride = g_FTForkHeightOverride;
+        g_DU1HeightOverride = 0;
+        g_FTForkHeightOverride = 0;
     }
 
-    ~Upgrade9ActivatedMixin() {
-        g_Upgrade9HeightOverride = origUpgrade9ActivationOverride;
+    ~TokensActivatedMixin() {
+        g_DU1HeightOverride = origDU1ActivationOverride;
+        g_FTForkHeightOverride = origFTForkActivationOverride;
     }
 };
 
@@ -684,12 +689,11 @@ BOOST_FIXTURE_TEST_CASE(dsproof_recursive_search_mempool, EnsureClearedMempoolTe
 }
 
 // Like EnsureClearedMempoolTestChain100Setup, but ensures tokens are enabled
-struct Upgrade9TestChain100Setup : Upgrade9ActivatedMixin, EnsureClearedMempoolTestChain100Setup {};
+struct TokensTestChain100Setup : TokensActivatedMixin, EnsureClearedMempoolTestChain100Setup {};
 
 /// Test that a txn input with a CashToken in it does correctly produce a proof.
-// Disabled: depends on BCH Upgrade9 (CashTokens) being active; tokens are a Phase-4 feature
-// on DeVault (see token_tests). Plain dsproof tests above still cover double-spend proofs.
-BOOST_FIXTURE_TEST_CASE(dsproof_with_cashtokens, Upgrade9TestChain100Setup, *boost::unit_test::disabled()) {
+// Re-enabled in Phase 4A (DU1 wires up DeVault's token activation).
+BOOST_FIXTURE_TEST_CASE(dsproof_with_cashtokens, TokensTestChain100Setup) {
     FlatSigningProvider provider;
     provider.keys[coinbaseKey.GetPubKey().GetID()] = coinbaseKey;
     provider.pubkeys[coinbaseKey.GetPubKey().GetID()] = coinbaseKey.GetPubKey();
@@ -705,8 +709,8 @@ BOOST_FIXTURE_TEST_CASE(dsproof_with_cashtokens, Upgrade9TestChain100Setup, *boo
     // Some code-paths below need locks held
     LOCK2(cs_main, g_mempool.cs);
     BOOST_CHECK(DoubleSpendProof::IsEnabled()); // default state should be enabled
-    // tokens should also be enabled
-    BOOST_CHECK(IsUpgrade9Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
+    // tokens should also be enabled (DeVault: at DU1, via the TokensActivatedMixin)
+    BOOST_CHECK(IsDU1Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
     g_mempool.clear(); // ensure mempool is clean
     BOOST_CHECK_EQUAL(g_mempool.doubleSpendProofStorage()->size(), 0u);
     const uint32_t scriptFlags = GetMemPoolScriptFlags(::GetConfig().GetChainParams().GetConsensus(),
@@ -725,17 +729,22 @@ BOOST_FIXTURE_TEST_CASE(dsproof_with_cashtokens, Upgrade9TestChain100Setup, *boo
         txTo.vin[0].prevout = COutPoint(txFrom->GetId(), 0);
         txTo.vout.resize(2);
 
-        // output 0- has fungible-only tokens
+        // DeVault: the NFT output (vout[1]) below is later double-spent into two half-value
+        // outputs; each half must clear the ~0.6 DVT dust floor (fRequireStandard is on in this
+        // fixture), so size the NFT output at ~4 DVT. Its (i+1)*CENT term keeps every genesis
+        // txid unique. The tx pays zero fee, which is fine here (ToMemPool uses bypass_limits).
+        const Amount nftValue = 4 * COIN + int64_t(i+1) * CENT;
+
+        // output 0- has fungible-only tokens; takes the remaining (bulk) value.
         auto *output = &txTo.vout[0];
-        //   ensure spends are unique amounts (thus unique txid)
-        output->nValue = txFrom->GetValueOut() - int64_t(i+1) * CENT;
+        output->nValue = txFrom->GetValueOut() - nftValue;
         output->scriptPubKey = scriptPubKey;
         //   create a pure fungible token with 2^(24 + i) amount.
         output->tokenDataPtr.emplace(tokenId, token::SafeAmount::fromInt(0x1000000LL << i).value());
 
         // output 1 - has immutable NFT only
         output = &txTo.vout[1];
-        output->nValue = txFrom->GetValueOut() - txTo.vout[0].nValue;
+        output->nValue = nftValue;
         output->scriptPubKey = scriptPubKey;
         //   create an NFT token with 0 amount.
         token::NFTCommitment commitmentData;

@@ -51,11 +51,11 @@
 #include <utility>
 #include <vector>
 
-// CashTokens are not consensus-active on DeVault yet — token activation is a Phase-4 hard-fork
-// feature (on-chain-data NFTs). The token-parsing code is retained (1E), but these BCH token
-// CONSENSUS tests assume tokens are active, so the suite is disabled until Phase 4 wires up
-// DeVault's token activation height (at which point these get re-enabled / re-vectored).
-BOOST_FIXTURE_TEST_SUITE(token_tests, BasicTestingSetup, *boost::unit_test::disabled())
+// Re-enabled in Phase 4A: DeVault activates the CashTokens machinery at DU1 (the V2 hard fork,
+// DEVAULT_NFT_SPEC.md §10) as the DNFT ownership base. These inherited consensus tests flip
+// activation via SetTokensActive below (DU1 + FT-fork overrides — the latter lifts the DeVault
+// FT-deferral gate, since these tests exercise fungible amounts of the inherited token layer).
+BOOST_FIXTURE_TEST_SUITE(token_tests, BasicTestingSetup)
 
 static std::string GetRandomScriptPubKeyHexForAPubKey(const CPubKey destinationPubKey,
                                                       CScript *script_out = nullptr,
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader vr(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0);
@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader vr(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0);
@@ -756,7 +756,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader vr(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0);
@@ -793,7 +793,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader vr(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0);
@@ -840,7 +840,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
             vw << COMPACTSIZE(spk.size() / 2);
 
         }
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader vr(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0);
@@ -882,7 +882,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txo;
         GenericVectorReader(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0) >> txo;
@@ -912,7 +912,7 @@ BOOST_AUTO_TEST_CASE(check_consensus_misc_activation) {
         std::vector<uint8_t> csize;
         GenericVectorWriter vw(SER_NETWORK, INIT_PROTO_VERSION, csize, 0);
         vw << COMPACTSIZE(spk.size() / 2);
-        auto hextxo = "0102030000000000" + HexStr(csize) + spk;
+        auto hextxo = "00e1f50500000000" /* nValue = 1 DVT LE64; >= DeVault 0.6 DVT dust */ + HexStr(csize) + spk;
         const auto txodata = ParseHex(hextxo);
         CTxOut txoIn;
         GenericVectorReader(SER_NETWORK, INIT_PROTO_VERSION, txodata, 0) >> txoIn;
@@ -1119,19 +1119,24 @@ static CBlock MakeBlock(const CChainParams &params, bool replaceCoinbase = true,
     return std::move(block);
 }
 
-/// Activates or deactivates upgrade 9 by setting the activation height for a past or future block
+/// Activates or deactivates the DeVault token rules (DU1 + the FT fork, so the FT-deferral gate
+/// does not interfere with these inherited fungible-token tests) by setting the activation
+/// heights for a past or future block.
 [[nodiscard]]
-static Defer<std::function<void()>> SetUpgrade9Active(bool active) {
-    const auto prevVal = g_Upgrade9HeightOverride;
+static Defer<std::function<void()>> SetTokensActive(bool active) {
+    const auto prevDU1 = g_DU1HeightOverride;
+    const auto prevFT = g_FTForkHeightOverride;
     const auto currentHeight = []{
         LOCK(cs_main);
         return CHECK_NONFATAL(::ChainActive().Tip())->nHeight;
     }();
     const auto activationHeight = active ? currentHeight - 1 : currentHeight + 1;
-    g_Upgrade9HeightOverride = activationHeight;
+    g_DU1HeightOverride = activationHeight;
+    g_FTForkHeightOverride = activationHeight;
     return Defer(std::function<void()>{
-        [prevVal] {
-            g_Upgrade9HeightOverride = prevVal;
+        [prevDU1, prevFT] {
+            g_DU1HeightOverride = prevDU1;
+            g_FTForkHeightOverride = prevFT;
         }
     });
 }
@@ -1219,7 +1224,7 @@ BOOST_FIXTURE_TEST_CASE(check_consensus_rejection_of_coinbase_tokens, TestChain1
     };
 
     // Pre-activation
-    auto a1 = SetUpgrade9Active(false);
+    auto a1 = SetTokensActive(false);
     BOOST_CHECK_MESSAGE(MakeBlockAndTestValidity(coinbaseTxWithTokenData),
                         "Before activation, the Coinbase transaction may contain valid token outputs");
     state = CValidationState{};
@@ -1229,7 +1234,7 @@ BOOST_FIXTURE_TEST_CASE(check_consensus_rejection_of_coinbase_tokens, TestChain1
     state = CValidationState{};
 
     // Activate Upgrade9 by setting Upgarde9 MTP below the tip's MTP
-    auto a2 = SetUpgrade9Active(true);
+    auto a2 = SetTokensActive(true);
 
     BOOST_CHECK_MESSAGE( ! MakeBlockAndTestValidity(coinbaseTxWithTokenData),
                         "After activation, the Coinbase transaction may not contain valid token outputs");
@@ -1431,7 +1436,10 @@ static CMutableTransaction CreateAndSignTx(const CKey senderKey, const CTransact
     tx.vout = vout;
     for (auto &output : tx.vout) {
         if (output.nValue == -SATOSHI) { // This is how a null CTxOut value is determined
-            output.nValue = inputCoin.nValue / int64_t(tx.vout.size()) - int64_t(500) * SATOSHI;
+            // DeVault fee scale: leave 1 DVT (COIN) per output as fee. Upstream left 500 sats,
+            // which is below DeVault's block-min fee rate, so the block assembler would skip
+            // the txn and the mine-via-mempool tests would fail.
+            output.nValue = inputCoin.nValue / int64_t(tx.vout.size()) - COIN;
         }
         output.scriptPubKey = scriptPubKey;
     }
@@ -1463,7 +1471,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_valid_genesis_token, TestChain100Setu
     vout[0].tokenDataPtr.emplace(token::Id{m_coinbase_txns[0]->GetId()},
                                  token::SafeAmount::fromInt(1).value());
     // Attempt to mine the transaction pre-activation
-    auto a1 = SetUpgrade9Active(false);
+    auto a1 = SetTokensActive(false);
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout);
 
     CValidationState state;
@@ -1474,7 +1482,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_valid_genesis_token, TestChain100Setu
     state = CValidationState{};
 
     // Attempt to mine the transaction post-activation
-    auto a2 = SetUpgrade9Active(true);
+    auto a2 = SetTokensActive(true);
     BOOST_CHECK_MESSAGE(MineTransactions({tx1}, state),
                         "After activation, valid genesis tokens may be mined into a block via the mempool path");
 }
@@ -1485,7 +1493,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_invalid_mint, TestChain100Setup) {
     std::vector<CTxOut> vout(1);
     // Random ID ensures no matching token category
     vout[0].tokenDataPtr.emplace(token::Id{InsecureRand256()}, token::SafeAmount::fromInt(1).value());
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
 
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout);
 
@@ -1505,7 +1513,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_spent_coin_with_token_spend, TestChai
     vout[0].tokenDataPtr.emplace(token::Id{m_coinbase_txns[0]->GetId()},
                                  token::SafeAmount::fromInt(1).value());
 
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
 
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout, nullptr);
 
@@ -1530,7 +1538,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_token_overspend, TestChain100Setup) {
                                  token::SafeAmount::fromInt(1).value());
     CKey firstDestinationKey;
 
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
 
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout, &firstDestinationKey);
     const CTransactionRef tx1ref = MakeTransactionRef(tx1);
@@ -1570,7 +1578,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_invalid_nft_mint, TestChain100Setup) 
                                  true /* hasNFT */, false /* isMutableNFT */,
                                  false /* isMintingNFT */, false /* uncheckedNFT */ );
     CKey firstDestinationKey;
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout, &firstDestinationKey);
     const CTransactionRef tx1ref = MakeTransactionRef(tx1);
 
@@ -1608,7 +1616,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_token_amount_overflow, TestChain100Se
                                  token::SafeAmount::fromInt(std::numeric_limits<int64_t>::max()).value());
     vout[1].tokenDataPtr = vout[0].tokenDataPtr;
     vout[1].tokenDataPtr->SetAmount(token::SafeAmount::fromInt(100).value());
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout);
 
     // Attempt to mine the transaction
@@ -1629,7 +1637,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_zero_ft_amount, TestChain100Setup) {
     vout[0].tokenDataPtr.emplace(token::Id{m_coinbase_txns[0]->GetId()},
                                  token::SafeAmount::fromInt(1).value());
     CKey firstDestinationKey;
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
     CMutableTransaction tx1 = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout, &firstDestinationKey);
     const CTransactionRef tx1ref = MakeTransactionRef(tx1);
 
@@ -1653,7 +1661,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_invalid_ft_with_commitment, TestChain
                                  token::NFTCommitment{3u, uint8_t(0xaa)},
                                  false /* hasNFT */, false /* isMutableNFT */,
                                  false /* isMintingNFT */, false /* uncheckedNFT */ );
-    auto a1 = SetUpgrade9Active(true);
+    auto a1 = SetTokensActive(true);
     BOOST_CHECK_THROW(CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout),
                       token::InvalidBitfieldError);
 }
@@ -1675,7 +1683,7 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_oversized_token_commitment, TestChain
                                                         uint8_t(0xab)},
                                    true /* hasNFT */, false /* isMutableNFT */,
                                    true /* isMintingNFT */, false /* uncheckedNFT */ );
-    auto u9_on = SetUpgrade9Active(true);
+    auto u9_on = SetTokensActive(true);
     auto u12_off = SetUpgrade12Active(false);
     CMutableTransaction tx_oversized_upgrade9_only = CreateAndSignTx(coinbaseKey, m_coinbase_txns[0], vout);
     CreateAndProcessBlock({}, {}); // Ensures we can spend m_coinbase_txs[1]
@@ -1694,14 +1702,17 @@ BOOST_FIXTURE_TEST_CASE(with_mempool_check_oversized_token_commitment, TestChain
     BOOST_CHECK(! state.IsValid());
     BOOST_CHECK_EQUAL(state.GetRejectReason(), "bad-txns-token-commitment-oversized");
 
-    // Now, turn on upgrade 12, and the 128 byte commitment should mine ok
+    // DeVault (spec Q4): the upgrade12 128-byte commitment limit NEVER activates — DU1 keeps the
+    // 40-byte limit permanently and GetNextBlockScriptFlags never sets SCRIPT_ENABLE_MAY2026, so
+    // the upstream tail of this test ("post-upgrade-12 a >40 <=128-byte commitment mines OK") is
+    // impossible by design here. Instead, assert the DeVault-permanent behavior: even with the
+    // upstream upgrade12 knob flipped, a >40-byte commitment still may NOT be mined.
     state = {};
     auto u12_on = SetUpgrade12Active(true);
-    BOOST_REQUIRE_MESSAGE(MineTransactions({tx_oversized_upgrade9_only}, state),
-                          "Post-upgrade 12: Tokens with a commitment >40 but <=128 bytes may be mined into a block");
-    BOOST_CHECK(state.IsValid());
-    // Consume the coin we just spent so as to not confuse other tests in this file.
-    m_coinbase_txns.erase(m_coinbase_txns.begin());
+    BOOST_CHECK_MESSAGE( ! MineTransactions({tx_oversized_upgrade9_only}, state),
+                        "DeVault: commitments >40 bytes may never be mined (upgrade12/MAY2026 is not part of DU1)");
+    BOOST_CHECK(! state.IsValid());
+    BOOST_CHECK_EQUAL(state.GetRejectReason(), "bad-txns-token-commitment-oversized");
 
     // Attempt to mine a commitment that is too large for both upgrade 9 and upgrade 12
     state = {};
@@ -1722,7 +1733,7 @@ BOOST_FIXTURE_TEST_CASE(sighash_utxos_test, TestChain100Setup) {
         CreateAndProcessBlock({}, p2pk_scriptPubKey);
         CreateAndProcessBlock({}, p2pk_scriptPubKey);
 
-        auto d1 = SetUpgrade9Active(isUpgrade9Active);
+        auto d1 = SetTokensActive(isUpgrade9Active);
 
         CMutableTransaction spend_tx;
         spend_tx.nVersion = 1;

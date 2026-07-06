@@ -21,6 +21,7 @@
 #include <consensus/tx_verify.h>
 #include <consensus/validation.h>
 #include <devault/budget.h>
+#include <devault/dnft.h>
 #include <devault/rewards.h>
 #include <dsproof/dsproof.h>
 #include <dsproof/storage.h>
@@ -705,9 +706,9 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
         // Check token spends (if any) are within consensus
         {
             int64_t firstTokenBlockHeight;
-            if (scriptVerifyFlags & SCRIPT_ENABLE_TOKENS) { // Assumption: this can only be true if Upgrade9 activated
+            if (scriptVerifyFlags & SCRIPT_ENABLE_TOKENS) { // Assumption: this can only be true if DU1 activated
                 // First block to actually use token rules is 1 + activation block
-                firstTokenBlockHeight = 1 + GetUpgrade9ActivationHeight(consensusParams);
+                firstTokenBlockHeight = 1 + GetDU1ActivationHeight(consensusParams);
             } else {
                 // not activated yet -- far future
                 firstTokenBlockHeight = std::numeric_limits<int64_t>::max();
@@ -715,6 +716,15 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
 
             if ( ! CheckTxTokens(tx, state, view, scriptVerifyFlags, firstTokenBlockHeight)) {
                 // State filled-in by CheckTxTokens
+                return false;
+            }
+
+            // DeVault DNFT rules (DEVAULT_NFT_SPEC.md): in 4A this is the FT-deferral gate; the
+            // envelope/binding rules land here in 4C. The prospective confirmation height for a
+            // mempool acceptance is one past the current tip.
+            if (!dnft::CheckDnftRules(tx, state, view, scriptVerifyFlags,
+                                      ::ChainActive().Height() + 1, consensusParams)) {
+                // State filled-in by CheckDnftRules
                 return false;
             }
         }
@@ -1560,11 +1570,12 @@ int32_t ComputeBlockVersion(const CBlockIndex *pindexPrev,
 // Returns the script flags which should be checked for the block after
 // the given block.
 static uint32_t GetNextBlockScriptFlags(const Consensus::Params &params, const CBlockIndex *pindex) {
-    // DeVault historical consensus ruleset (see DEVAULT_HISTORICAL_CONSENSUS_RULESET.md).
-    // DeVault's GetBlockScriptFlags enforces the following from genesis (no height/upgrade gating),
-    // and adds a small set at the script-upgrade MTP boundary. All Graviton+ BCH flags
-    // (SCHNORR_MULTISIG, MINIMALDATA, sigchecks, 64-bit ints, native introspection, tokens, p2sh_32,
-    // BigInt, ...) are intentionally NOT set -- DeVault never had them.
+    // DeVault historical consensus ruleset (archived in DEVAULT_V2_COMPLETED.md, originally
+    // DEVAULT_HISTORICAL_CONSENSUS_RULESET.md). DeVault's GetBlockScriptFlags enforces the
+    // following from genesis (no height/upgrade gating), and adds a small set at the
+    // script-upgrade MTP boundary. All Graviton+ BCH flags (SCHNORR_MULTISIG, MINIMALDATA,
+    // sigchecks, BigInt, ...) are intentionally NOT set pre-DU1 -- DeVault never had them.
+    // At DU1 (the V2 hard fork) a specific subset activates; see the DU1 block below.
     uint32_t flags = SCRIPT_VERIFY_NONE;
 
     flags |= SCRIPT_VERIFY_P2SH;
@@ -1591,6 +1602,18 @@ static uint32_t GetNextBlockScriptFlags(const Consensus::Params &params, const C
         // are unspendable going forward (POST-FORK must reject blskeyhash spends; coins replaced
         // from the budget). See DEVAULT_BLS_HANDLING.md.
         flags |= SCRIPT_ENABLE_BLS;
+    }
+
+    // DeVault Upgrade 1 (DU1) -- the V2 hard fork (DEVAULT_NFT_SPEC.md §10, decided Q9):
+    // CashTokens (the DNFT ownership base), native introspection, 64-bit script integers and
+    // p2sh32, as one coherent VM upgrade. SCRIPT_ENABLE_MAY2026 is deliberately NOT set (Q4:
+    // token commitments stay at the 40-byte limit). Note the additional DeVault-only DNFT rules
+    // (envelope binding, FT-deferral) are enforced by CheckDnftRules, not by a script flag.
+    if (IsDU1Enabled(params, pindex)) {
+        flags |= SCRIPT_ENABLE_TOKENS;
+        flags |= SCRIPT_NATIVE_INTROSPECTION;
+        flags |= SCRIPT_64_BIT_INTEGERS;
+        flags |= SCRIPT_ENABLE_P2SH_32;
     }
 
     return flags;
@@ -1866,9 +1889,9 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
     }
 
     int64_t firstTokenBlockHeight;
-    if (flags & SCRIPT_ENABLE_TOKENS) { // Assumption: this can only be true if Upgrade9 is activated for pindex->pprev
+    if (flags & SCRIPT_ENABLE_TOKENS) { // Assumption: this can only be true if DU1 is activated for pindex->pprev
         // First block to actually use token rules is 1 + activation block
-        firstTokenBlockHeight = 1 + GetUpgrade9ActivationHeight(consensusParams);
+        firstTokenBlockHeight = 1 + GetDU1ActivationHeight(consensusParams);
     } else {
         // not activated yet -- far future
         firstTokenBlockHeight = std::numeric_limits<int64_t>::max();
@@ -1919,9 +1942,17 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
 
         // Check token spends are within consensus
         // Note: we pass coinbase txn here too, which is what we want, since coinbase txn should have NO token data
-        // post-activation of Upgrade9, and this function checks that requirement.
+        // post-activation of DU1, and this function checks that requirement.
         if ( ! CheckTxTokens(tx, state, view, flags, firstTokenBlockHeight)) {
             // State was filled-in by CheckTxTokens
+            return false;
+        }
+
+        // DeVault DNFT rules (DEVAULT_NFT_SPEC.md): in 4A this is the FT-deferral gate; the
+        // envelope/binding rules land here in 4C. Stateless (tx + view only) -- nothing to undo
+        // on disconnect, and -reindex/-reindex-chainstate revalidate identically.
+        if (!dnft::CheckDnftRules(tx, state, view, flags, pindex->nHeight, consensusParams)) {
+            // State was filled-in by CheckDnftRules
             return false;
         }
 

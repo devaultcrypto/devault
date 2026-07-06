@@ -650,25 +650,27 @@ BOOST_FIXTURE_TEST_CASE(dummy_input_size_test, TestChain100Setup) {
     BOOST_CHECK_EQUAL(CalculateP2PKHInputSize(true), DUMMY_P2PKH_INPUT_SIZE);
 }
 
-struct Upgrade9NotActivatedTestingSetup : ListCoinsTestingSetup {
-    std::optional<int32_t> origUpgrade9Override;
+struct TokensNotActivatedTestingSetup : ListCoinsTestingSetup {
+    std::optional<int32_t> origDU1Override, origFTForkOverride;
 
-    Upgrade9NotActivatedTestingSetup() : ListCoinsTestingSetup() {
-        origUpgrade9Override = g_Upgrade9HeightOverride;
-        g_Upgrade9HeightOverride = std::numeric_limits<int32_t>::max();
+    TokensNotActivatedTestingSetup() : ListCoinsTestingSetup() {
+        origDU1Override = g_DU1HeightOverride;
+        origFTForkOverride = g_FTForkHeightOverride;
+        g_DU1HeightOverride = std::numeric_limits<int32_t>::max();
+        g_FTForkHeightOverride = std::numeric_limits<int32_t>::max();
         LOCK(cs_main);
-        // Ensure upgrade 9 (tokens) is not active for next block and mempool
-        BOOST_CHECK(!IsUpgrade9Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
+        // Ensure DU1 (tokens) is not active for next block and mempool
+        BOOST_CHECK(!IsDU1Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
     }
-    ~Upgrade9NotActivatedTestingSetup() {
-        g_Upgrade9HeightOverride = origUpgrade9Override;
+    ~TokensNotActivatedTestingSetup() {
+        g_DU1HeightOverride = origDU1Override;
+        g_FTForkHeightOverride = origFTForkOverride;
     }
 };
 
-// Disabled: per its own comment, this test injects CashToken (upgrade9) data into txns to test BIP69
-// sorting with token data present. DeVault keeps upgrade9 permanently inactive (tokens are a Phase-4
-// feature), so the token-bearing blocks don't connect here. Re-enable when Phase 4 wires up tokens.
-BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::unit_test::disabled()) {
+// Re-enabled in Phase 4A (DU1 wires up DeVault's token activation). This test injects CashToken
+// data into txns to test BIP69 sorting with token data present.
+BOOST_FIXTURE_TEST_CASE(wallet_bip69, TokensNotActivatedTestingSetup) {
     // Note: The entire point of this test is to *just* test tx sorting with/without bip69 enabled when token data is
     // present/absent, and as such we didn't bother creating consensus-respecting CashToken txns for this test (which
     // is why this test requires upgrade9 be disabled).
@@ -696,11 +698,13 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
     }
 
     // Ensure we have a bunch of small coins
+    // DeVault scale: upstream used 1000*CASH (0.001 DVT) coins with 10-sat bumps — below DeVault's
+    // ~0.6 DVT dust floor and off the 0.001-DVT spock grid. Use 1-DVT coins bumped by one spock.
     {
         const auto myScriptPubKey = GetScriptForRawPubKey(coinbaseKey.GetPubKey());
-        std::vector<CRecipient> toMe(100, CRecipient{myScriptPubKey, 1000 * CASH, {}, false});
+        std::vector<CRecipient> toMe(100, CRecipient{myScriptPubKey, COIN, {}, false});
         for (int i = 0; i < 3; ++i) {
-            for (auto &r: toMe) r.nAmount += 10 * SATOSHI; // make subsequent iterations have slightly larger coins
+            for (auto &r: toMe) r.nAmount += COIN / 1000; // one spock -- subsequent iterations have slightly larger coins
             AddTx(toMe);
         }
     }
@@ -725,22 +729,26 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
                            token::NFTCommitment{5u, uint8_t{3}}, true, false, false);
 
 
+    // DeVault scale (upstream used N * CASH): N * COIN / 25 keeps every output above the ~0.6 DVT
+    // dust floor, on the 0.001-DVT spock grid, and makes the send total (~838 DVT) exceed the
+    // largest possible single wallet coin (a 500-DVT coinbase) — guaranteeing the multi-input
+    // selections the input-sorting checks below require.
     std::vector<CRecipient> recipients{{
-        {scriptPubKeys[1], 3040 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[2], 3040 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[3], 8001 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[2], 1234 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[1], 1234 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[3], 1234 * CASH, {}, false /* subtract fee */},
-        {scriptPubKeys[3], 1234 * CASH, token::OutputDataPtr{tok1}, false /* subtract fee */},
-        {scriptPubKeys[3], 1234 * CASH, token::OutputDataPtr{tok2}, false /* subtract fee */},
-        {scriptPubKeys[0], 234 * CASH, {}, false /* subtract fee */},
+        {scriptPubKeys[1], 3040 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[2], 3040 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[3], 8001 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[2], 1234 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[1], 1234 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[3], 1234 * COIN / 25, {}, false /* subtract fee */},
+        {scriptPubKeys[3], 1234 * COIN / 25, token::OutputDataPtr{tok1}, false /* subtract fee */},
+        {scriptPubKeys[3], 1234 * COIN / 25, token::OutputDataPtr{tok2}, false /* subtract fee */},
+        {scriptPubKeys[0], 234 * COIN / 25, {}, false /* subtract fee */},
         // These funny scriptPubKeys here are to ensure we catch bad sorts that use the incorrect prevector::operator<
         // instead of the correct lexicographical ordering.
         {CScript() << opcodetype(FIRST_UNDEFINED_OP_VALUE-1),
-                        234 * CASH, {}, false /* subtract fee */},
+                        234 * COIN / 25, {}, false /* subtract fee */},
         {CScript() << opcodetype(FIRST_UNDEFINED_OP_VALUE-2) << opcodetype(FIRST_UNDEFINED_OP_VALUE-2),
-                        234 * CASH, {}, false /* subtract fee */},
+                        234 * COIN / 25, {}, false /* subtract fee */},
     }};
 
     const auto IsTxSorted = [](const CTransactionRef &tx) {
@@ -819,6 +827,32 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
           return true;
     };
 
+    // DeVault determinism: with the ~0.6 DVT dust floor, free-form coin selection can land close
+    // enough to the send total that the would-be change is folded into the fee, making the
+    // "change exists" postconditions below flaky. Preselect the wallet's largest coins (>= 2, and
+    // enough to exceed the ~839 DVT send total by >60 DVT) so every sub-case is structurally
+    // guaranteed BOTH >1 input AND a change output well above dust. The BIP69 sorting behavior
+    // under test is unaffected by how the inputs were chosen.
+    const auto SelectBigCoins = [&]() {
+        CCoinControl ctl;
+        LOCK2(cs_main, wallet->cs_wallet);
+        std::vector<COutput> avail;
+        wallet->AvailableCoins(*m_locked_chain, avail);
+        std::sort(avail.begin(), avail.end(), [](const COutput &a, const COutput &b) {
+            return a.GetInputCoin().txout.nValue > b.GetInputCoin().txout.nValue;
+        });
+        Amount sum = Amount::zero();
+        size_t used = 0;
+        for (const auto &out : avail) {
+            ctl.Select(out.GetInputCoin().outpoint);
+            sum += out.GetInputCoin().txout.nValue;
+            if (++used >= 2 && sum > 900 * COIN) break;
+        }
+        BOOST_REQUIRE(used >= 2 && sum > 900 * COIN);
+        ctl.fAllowOtherInputs = false;
+        return ctl;
+    };
+
     {
         // 1. Create tx with BIP69 enabled.
         //    Postconditions to be met: tx is sorted and change pos is correct.
@@ -826,7 +860,7 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
         CTransactionRef tx;
         int changePos = -1;
 
-        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos).tx;
+        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos, SelectBigCoins()).tx;
 
         BOOST_CHECK(tx->vin.size() > 1); // ensure we had a bunch of inputs in the txn
         BOOST_CHECK(IsTxSorted(tx));
@@ -843,7 +877,7 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
         CTransactionRef tx;
         int changePos = 2; // request change position 2
 
-        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos).tx;
+        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos, SelectBigCoins()).tx;
 
         BOOST_CHECK(tx->vin.size() > 1); // ensure we had a bunch of inputs in the txn
         BOOST_CHECK( ! IsTxSorted(tx));
@@ -859,7 +893,7 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
         CTransactionRef tx;
         int changePos = -1; // no specific change position requested
 
-        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos).tx;
+        tx = AddTx(recipients, CoinSelectionHint::Default, &changePos, SelectBigCoins()).tx;
 
         BOOST_CHECK(tx->vin.size() > 1); // ensure we had a bunch of inputs in the txn
         BOOST_CHECK( ! IsTxSorted(tx));
@@ -877,9 +911,9 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
         Amount fee;
         int changePos = -1;
         std::string error;
-        CCoinControl dummy;
+        const CCoinControl bigCoins = SelectBigCoins();
         const auto res = wallet->CreateTransaction(*m_locked_chain, recipients, tx, reservekey, fee,
-                                                   changePos, error, dummy, false /* don't sign */);
+                                                   changePos, error, bigCoins, false /* don't sign */);
         BOOST_CHECK_EQUAL(res, CreateTransactionResult::CT_OK);
         BOOST_CHECK(tx->vin.size() > 1); // ensure we had a bunch of inputs in the txn
         BOOST_CHECK( ! IsTxSorted(tx));
@@ -889,24 +923,28 @@ BOOST_FIXTURE_TEST_CASE(wallet_bip69, Upgrade9NotActivatedTestingSetup, *boost::
     }
 }
 
-struct Upgrade9ActivatedTestingSetup : ListCoinsTestingSetup {
-    std::optional<int32_t> origUpgrade9Override;
-    Upgrade9ActivatedTestingSetup() : ListCoinsTestingSetup() {
-        origUpgrade9Override = g_Upgrade9HeightOverride;
-        g_Upgrade9HeightOverride = 0;
+struct TokensActivatedTestingSetup : ListCoinsTestingSetup {
+    std::optional<int32_t> origDU1Override, origFTForkOverride;
+    TokensActivatedTestingSetup() : ListCoinsTestingSetup() {
+        origDU1Override = g_DU1HeightOverride;
+        origFTForkOverride = g_FTForkHeightOverride;
+        g_DU1HeightOverride = 0;
+        // These inherited tests exercise fungible amounts too; lift the DeVault FT-deferral gate
+        // (they validate the inherited CashTokens layer — the base for post-FT-activation rules).
+        g_FTForkHeightOverride = 0;
         LOCK(cs_main);
-        // Ensure upgrade 9 (tokens) is active for next block and mempool
-        BOOST_CHECK(IsUpgrade9Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
+        // Ensure DU1 (tokens) is active for next block and mempool
+        BOOST_CHECK(IsDU1Enabled(::GetConfig().GetChainParams().GetConsensus(), ::ChainActive().Tip()));
     }
-    ~Upgrade9ActivatedTestingSetup() {
-        g_Upgrade9HeightOverride = origUpgrade9Override;
+    ~TokensActivatedTestingSetup() {
+        g_DU1HeightOverride = origDU1Override;
+        g_FTForkHeightOverride = origFTForkOverride;
     }
 };
 
-/// Test basic support in wallet for processing tokens (requires upgrade9 to work correctly)
-// Disabled: requires upgrade9 (CashTokens) ACTIVE, which DeVault never activates (Phase-4 feature).
-// The Upgrade9ActivatedTestingSetup fixture cannot reach an activated state on DeVault. Re-enable in Phase 4.
-BOOST_FIXTURE_TEST_CASE(wallet_tokens, Upgrade9ActivatedTestingSetup, *boost::unit_test::disabled()) {
+/// Test basic support in wallet for processing tokens (requires active token rules to work correctly)
+// Re-enabled in Phase 4A (DU1 wires up DeVault's token activation).
+BOOST_FIXTURE_TEST_CASE(wallet_tokens, TokensActivatedTestingSetup) {
     CCoinControl allIncludingTokens;
     allIncludingTokens.m_allow_tokens = true;
 
@@ -969,7 +1007,9 @@ BOOST_FIXTURE_TEST_CASE(wallet_tokens, Upgrade9ActivatedTestingSetup, *boost::un
         token::OutputDataPtr tokenData{tokenId, token::SafeAmount::fromIntUnchecked(12345),
                                        token::NFTCommitment(5u, uint8_t(0x1c)), true /* hasNFT */};
         const auto spk = GetScriptForRawPubKey(coinbaseKey.GetPubKey());
-        const CRecipient toMe{spk, 100 * CASH, tokenData, false};
+        // DeVault scale: 2 DVT (upstream 100*CASH is dust here; also leaves headroom for the
+        // subtract-fee send-to-self below, since every fee is floored at 0.2 DVT).
+        const CRecipient toMe{spk, 2 * COIN, tokenData, false};
 
         AddTx(toMe, CoinSelectionHint::Default, nullptr, ctl);
         return tokenId;
@@ -1036,8 +1076,9 @@ BOOST_FIXTURE_TEST_CASE(wallet_tokens, Upgrade9ActivatedTestingSetup, *boost::un
     AddTx(toExt); // send all non-token coins to external address
 
     const auto balanceAfter = wallet->GetAvailableBalance();
-    BOOST_CHECK_MESSAGE(balanceBefore != balanceAfter && balanceAfter == 50 * COIN,
-                        "Our ending balance should be just 50 BCH (newly matured coinbase from mining).");
+    // DeVault: the newly matured coinbase is 500 DVT on regtest (10x BCH's 50).
+    BOOST_CHECK_MESSAGE(balanceBefore != balanceAfter && balanceAfter == 500 * COIN,
+                        "Our ending balance should be just 500 DVT (newly matured coinbase from mining).");
     BOOST_CHECK_MESSAGE(GetTokenCoins().size() == 1, "Ensure that after sending all, we still have the token coin");
     const auto balancePlusTokens = wallet->GetAvailableBalance(&allIncludingTokens);
     BOOST_CHECK_MESSAGE(balancePlusTokens == balanceAfter + tokenCoins.front().GetInputCoin().txout.nValue,

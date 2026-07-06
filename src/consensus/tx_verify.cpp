@@ -38,7 +38,8 @@ static bool IsFinalTx(const CTransaction &tx, int nBlockHeight,
 }
 
 static uint64_t GetMinimumTxSize(const Consensus::Params &params, int nHeightPrev) {
-    if (IsUpgrade9EnabledForHeightPrev(params, nHeightPrev)) {
+    // DeVault: the upgrade9-era min-tx-size reduction (100 -> 65) activates at DU1 (spec Q14).
+    if (IsDU1EnabledForHeightPrev(params, nHeightPrev)) {
         return MIN_TX_SIZE_UPGRADE9;
     }
     if (IsMagneticAnomalyEnabled(params, nHeightPrev)) {
@@ -71,7 +72,8 @@ bool ContextualCheckTransaction(const Consensus::Params &params,
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-undersize");
     }
 
-    if (IsUpgrade9EnabledForHeightPrev(params, nHeight - 1)) {
+    // DeVault: the tx-version consensus restriction activates at DU1 (spec Q14).
+    if (IsDU1EnabledForHeightPrev(params, nHeight - 1)) {
         // CHIP 2021-01 Restrict Transaction Version
         if (tx.nVersion > CTransaction::MAX_CONSENSUS_VERSION || tx.nVersion < CTransaction::MIN_CONSENSUS_VERSION) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-version");

@@ -87,3 +87,30 @@ bool IsUpgrade12Enabled(const Consensus::Params &params, const CBlockIndex *pind
 
 /** Check if May 15th, 2027 protocol upgrade has activated. */
 bool IsUpgrade2027Enabled(const Consensus::Params &params, const CBlockIndex *pindexPrev);
+
+/**
+ *  Global: If set, the user overrode the -du1activationheight from the command-line or config file. Unit tests
+ *  also may temporarily set this value. If this is not set, the *DU1*() functions use hard-coded chain params for
+ *  the activation height rather than this override.
+ */
+extern std::optional<int32_t> g_DU1HeightOverride;
+
+/** Check if DeVault Upgrade 1 — the V2 hard fork (CashTokens-based DNFTs, native introspection,
+ *  64-bit script integers, p2sh32; see DEVAULT_NFT_SPEC.md §10) — has activated. */
+bool IsDU1EnabledForHeightPrev(const Consensus::Params &params, int32_t nHeightPrev);
+bool IsDU1Enabled(const Consensus::Params &params, const CBlockIndex *pindexPrev);
+/** Returns the height of the activation block. This is one less than the actual block for which the new rules apply. */
+int32_t GetDU1ActivationHeight(const Consensus::Params &params);
+
+/**
+ *  Global: as above, for -ftforkactivationheight (unit tests / regtest only, until the DeVault
+ *  fungible-token system is specified and ships).
+ */
+extern std::optional<int32_t> g_FTForkHeightOverride;
+
+/** Check if the (future, separately specified) DeVault fungible-token system has activated.
+ *  From DU1 until this activates, the FT-deferral gate (src/devault/dnft.cpp) rejects any token
+ *  output carrying a fungible amount (DEVAULT_NFT_SPEC.md §10.8). */
+bool IsFTForkEnabledForHeightPrev(const Consensus::Params &params, int32_t nHeightPrev);
+/** Returns the height of the activation block. This is one less than the actual block for which the new rules apply. */
+int32_t GetFTForkActivationHeight(const Consensus::Params &params);

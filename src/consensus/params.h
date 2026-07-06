@@ -125,6 +125,18 @@ struct Params {
     /** Window for Zawy's LWMA difficulty adjustment algorithm. */
     int64_t nZawyLwmaAveragingWindow;
 
+    // --- DeVault Upgrade 1 (DU1) — the V2 hard fork ---
+    /** Block height at which the DU1 rules became active (one less than the first block validated
+     *  under the new rules — same convention as upgrade9Height). DU1 is the single V2 fork
+     *  activation: CashTokens-based DNFTs, native introspection, 64-bit script integers and
+     *  p2sh32 (DEVAULT_NFT_SPEC.md §10), plus the other fork-bundle items gated on it. */
+    int du1Height;
+    /** Block height at which DeVault's future, separately-specified fungible-token system
+     *  activates. From DU1 until then, any token output carrying a fungible amount is
+     *  consensus-invalid (the FT-deferral gate, DEVAULT_NFT_SPEC.md §10.8), so no stock-CashTokens
+     *  FT state can exist before the DeVault FT redesign lands. */
+    int ftForkHeight;
+
     /** Minimum UTXO balance required to earn a cold reward at a given height. */
     Amount getMinRewardBalance(int Height) const {
         size_t index = 0;
