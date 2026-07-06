@@ -97,3 +97,11 @@ add_fuzz_target(
     # Sources
     rolling_bloom_filter.cpp
 )
+
+add_fuzz_target(
+    fuzz-dnft_envelope
+    dnft_envelope
+
+    # Sources
+    dnft_envelope.cpp
+)
