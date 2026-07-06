@@ -185,6 +185,66 @@ def parse_envelope(script: bytes) -> ParseResult:
     return r
 
 
+# ---- transaction / CashTokens wrapping serialization (for the M9 raw-tx harness) ----
+TOKEN_PREFIX = 0xEF
+STRUCT_HAS_AMOUNT = 0x10
+STRUCT_HAS_NFT = 0x20
+STRUCT_HAS_COMMITMENT_LENGTH = 0x40
+CAP_NONE, CAP_MUTABLE, CAP_MINTING = 0x00, 0x01, 0x02
+
+
+def ser_compactsize(n: int) -> bytes:
+    if n < 0xFD:
+        return bytes([n])
+    if n <= 0xFFFF:
+        return b"\xfd" + n.to_bytes(2, "little")
+    if n <= 0xFFFFFFFF:
+        return b"\xfe" + n.to_bytes(4, "little")
+    return b"\xff" + n.to_bytes(8, "little")
+
+
+def wrap_token_spk(category_internal: bytes, capability: int, commitment, amount, real_spk: bytes) -> bytes:
+    """0xef || tokendata || real_spk, matching token.h OutputData serialization.
+    category_internal is the 32-byte category in internal (serialized) order."""
+    assert len(category_internal) == 32
+    has_nft = commitment is not None or capability != CAP_NONE
+    bitfield = 0
+    if has_nft:
+        bitfield |= STRUCT_HAS_NFT | (capability & 0x0F)
+        if commitment is not None:
+            bitfield |= STRUCT_HAS_COMMITMENT_LENGTH
+    if amount is not None:
+        bitfield |= STRUCT_HAS_AMOUNT
+    td = category_internal + bytes([bitfield])
+    if commitment is not None:
+        td += ser_compactsize(len(commitment)) + commitment
+    if amount is not None:
+        td += ser_compactsize(amount)
+    return bytes([TOKEN_PREFIX]) + td + real_spk
+
+
+def ser_output(value_sats: int, spk: bytes) -> bytes:
+    return value_sats.to_bytes(8, "little") + ser_compactsize(len(spk)) + spk
+
+
+def ser_tx(version: int, vins, vouts, locktime: int = 0) -> bytes:
+    """vins: list of (txid_display_hex, vout, scriptSig_bytes, sequence). vouts: list of raw output bytes."""
+    s = version.to_bytes(4, "little") + ser_compactsize(len(vins))
+    for txid_hex, vout, script_sig, seq in vins:
+        s += bytes.fromhex(txid_hex)[::-1] + vout.to_bytes(4, "little")
+        s += ser_compactsize(len(script_sig)) + script_sig + seq.to_bytes(4, "little")
+    s += ser_compactsize(len(vouts))
+    for o in vouts:
+        s += o
+    s += locktime.to_bytes(4, "little")
+    return s
+
+
+def category_internal_from_txid(txid_display_hex: str) -> bytes:
+    """A CashTokens category equals a txid; on the wire both are the internal (reversed) byte order."""
+    return bytes.fromhex(txid_display_hex)[::-1]
+
+
 def compute_commitment(envelope_spk: bytes, input0_txid_internal: bytes, input0_n: int,
                        token_vout_index: int) -> bytes:
     """0x01 || SHA256( envelope_spk || outpoint0(36) || le32(vout_index) ).
