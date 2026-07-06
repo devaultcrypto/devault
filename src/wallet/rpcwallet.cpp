@@ -30,6 +30,7 @@
 #include <wallet/coincontrol.h>
 #include <wallet/legacywallet.h>
 #include <wallet/psbtwallet.h>
+#include <wallet/rpcdnft.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/mnemonic.h>
 #include <wallet/wallet.h>
@@ -4928,6 +4929,11 @@ static const ContextFreeRPCCommand commands[] = {
     { "rawtransactions",    "fundrawtransaction",           fundrawtransaction,           {"hexstring","options"} },
     { "wallet",             "abandontransaction",           abandontransaction,           {"txid"} },
     { "wallet",             "addmultisigaddress",           addmultisigaddress,           {"nrequired","keys","label"} },
+    { "dnft",               "mintnft",                      mintnft,                      {"content","content_type","options"} },
+    { "dnft",               "sendnft",                      sendnft,                      {"category","commitment","address"} },
+    { "dnft",               "burnnft",                      burnnft,                      {"category","commitment"} },
+    { "dnft",               "listnfts",                     listnfts,                     {} },
+    { "dnft",               "getnftinfo",                   getnftinfo,                   {"category","commitment"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
     { "wallet",             "createwallet",                 createwallet,                 {"wallet_name", "disable_private_keys", "blank", "passphrase", "mnemonic"} },
     { "wallet",             "migratelegacywallet",          migratelegacywallet,          {"passphrase", "new_wallet_name", "legacy_path", "new_passphrase", "rescan"} },

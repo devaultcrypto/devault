@@ -34,6 +34,7 @@
 #include <undo.h>
 #include <util/check.h>
 #include <util/saltedhashers.h>
+#include <devault/dnft_envelope.h>
 #include <util/strencodings.h>
 #include <validation.h>
 #include <validationinterface.h>
@@ -43,6 +44,52 @@
 #include <unordered_map>
 
 #include <univalue.h>
+
+// Append a "dnft" array to a transaction's JSON: one entry per DNFT envelope output
+// (DEVAULT_NFT_SPEC.md §5), with the parsed content descriptor. Purely informational; does not run
+// or depend on consensus. No-op when the transaction carries no DNFT envelopes.
+static void AddDnftDecode(UniValue::Object &entry, const CTransaction &tx) {
+    UniValue::Array dnftArr;
+    for (size_t n = 0; n < tx.vout.size(); ++n) {
+        if (!dnft::IsDnftEnvelope(tx.vout[n].scriptPubKey)) {
+            continue;
+        }
+        const dnft::ParsedEnvelope p = dnft::ParseDnftEnvelope(tx.vout[n].scriptPubKey);
+        UniValue::Object o;
+        o.emplace_back("vout", int64_t(n));
+        o.emplace_back("valid", p.valid);
+        if (!p.valid) {
+            o.emplace_back("error", p.error);
+        } else {
+            if (p.content_type) {
+                o.emplace_back("content_type", std::string(p.content_type->begin(), p.content_type->end()));
+            }
+            o.emplace_back("content_length", int64_t(p.has_body ? p.body.size() : 0));
+            o.emplace_back("has_body", p.has_body);
+            if (p.content_encoding) {
+                o.emplace_back("content_encoding",
+                               std::string(p.content_encoding->begin(), p.content_encoding->end()));
+            }
+            if (p.metadata) {
+                o.emplace_back("metadata", HexStr(*p.metadata));
+            }
+            if (p.delegate) {
+                o.emplace_back("delegate", HexStr(*p.delegate));
+            }
+            if (!p.parents.empty()) {
+                UniValue::Array parents;
+                for (const auto &parent : p.parents) {
+                    parents.emplace_back(HexStr(parent));
+                }
+                o.emplace_back("parents", std::move(parents));
+            }
+        }
+        dnftArr.emplace_back(std::move(o));
+    }
+    if (!dnftArr.empty()) {
+        entry.emplace_back("dnft", std::move(dnftArr));
+    }
+}
 
 static UniValue::Object TxToJSON(const Config &config, const CTransaction &tx, const BlockHash &hashBlock,
                                  const CTxUndo *txundo, const TransactionFormatOptions &options) {
@@ -64,6 +111,7 @@ static UniValue::Object TxToJSON(const Config &config, const CTransaction &tx, c
     // available to code in bitcoin-common, so we query them here and push the
     // data into the returned UniValue.
     UniValue::Object entry = TransactionToUniv(config, tx, txundo, options, extraReserve);
+    AddDnftDecode(entry, tx);
 
     if (hasHash) {
         entry.emplace_back("blockhash", hashBlock.GetHex());
@@ -913,7 +961,10 @@ static UniValue decoderawtransaction(const Config &config,
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
     }
 
-    return TransactionToUniv(config, CTransaction(std::move(mtx)));
+    const CTransaction ctx(std::move(mtx));
+    UniValue::Object entry = TransactionToUniv(config, ctx);
+    AddDnftDecode(entry, ctx);
+    return UniValue(std::move(entry));
 }
 
 static UniValue decodescript(const Config &config,
