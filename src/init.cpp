@@ -31,6 +31,7 @@
 #include <httprpc.h>
 #include <httpserver.h>
 #include <index/coinstatsindex.h>
+#include <index/dnftindex.h>
 #include <index/txindex.h>
 #include <interfaces/chain.h>
 #include <key.h>
@@ -215,6 +216,9 @@ void Interrupt() {
     if (g_coin_stats_index) {
         g_coin_stats_index->Interrupt();
     }
+    if (g_dnft_index) {
+        g_dnft_index->Interrupt();
+    }
 }
 
 void Shutdown(NodeContext &node) {
@@ -255,6 +259,9 @@ void Shutdown(NodeContext &node) {
     if (g_coin_stats_index) {
         g_coin_stats_index->Stop();
     }
+    if (g_dnft_index) {
+        g_dnft_index->Stop();
+    }
 
     StopTorControl();
 
@@ -276,6 +283,8 @@ void Shutdown(NodeContext &node) {
     g_connman.reset();
     g_banman.reset();
     g_txindex.reset();
+    g_coin_stats_index.reset();
+    g_dnft_index.reset();
 
     if (::g_mempool.IsLoaded() &&
         gArgs.GetArg("-persistmempool", DEFAULT_PERSIST_MEMPOOL)) {
@@ -638,6 +647,10 @@ void SetupServerArgs() {
                  ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     gArgs.AddArg("-coinstatsindex",
                  strprintf("Maintain coinstats index used by the gettxoutsetinfo RPC (default: %u)", DEFAULT_COINSTATSINDEX),
+                 ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
+    gArgs.AddArg("-nftindex",
+                 strprintf("Maintain the onchain NFT (DNFT) index used by the getnftcollection and "
+                           "getnftitem RPCs (default: %u)", DEFAULT_DNFTINDEX),
                  ArgsManager::ALLOW_ANY, OptionsCategory::OPTIONS);
     gArgs.AddArg(
         "-usecashaddr",
@@ -1687,6 +1700,10 @@ bool AppInitParameterInteraction(Config &config) {
     if (gArgs.GetArg("-prune", 0)) {
         if (gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
             return InitError(_("Prune mode is incompatible with -txindex."));
+        }
+        if (gArgs.GetBoolArg("-nftindex", DEFAULT_DNFTINDEX)) {
+            // The DNFT index reads block undo data (mint-vs-move) and rewinds by reading old blocks.
+            return InitError(_("Prune mode is incompatible with -nftindex."));
         }
     }
 
@@ -2825,6 +2842,11 @@ bool AppInitMain(Config &config, RPCServer &rpcServer,
     if (gArgs.GetBoolArg("-coinstatsindex", DEFAULT_COINSTATSINDEX)) {
         g_coin_stats_index = std::make_unique<CoinStatsIndex>(/* cache size = */ 0, false, fReindex);
         g_coin_stats_index->Start();
+    }
+    if (gArgs.GetBoolArg("-nftindex", DEFAULT_DNFTINDEX)) {
+        // The DNFT index (getnftcollection/getnftitem) is wiped + rebuilt on -reindex.
+        g_dnft_index = std::make_unique<DnftIndex>(/* cache size = */ 0, false, fReindex);
+        g_dnft_index->Start();
     }
 
     // Step 9: load wallet

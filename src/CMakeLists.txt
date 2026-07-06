@@ -573,6 +573,7 @@ add_library(server
   httpserver.cpp
   index/base.cpp
   index/coinstatsindex.cpp
+  index/dnftindex.cpp
   index/txindex.cpp
   init.cpp
   interfaces/chain.cpp

@@ -20,6 +20,7 @@
 #include <core_io.h>
 #include <hash.h>
 #include <index/coinstatsindex.h>
+#include <index/dnftindex.h>
 #include <index/txindex.h>
 #include <key_io.h>
 #include <node/blockstorage.h>
@@ -249,6 +250,114 @@ static UniValue getcoldrewardstats(const Config &config,
     obj.emplace_back("records", s.records);
     obj.emplace_back("active_candidates", s.active);
     obj.emplace_back("bestblock", s.bestBlock.IsNull() ? std::string() : s.bestBlock.GetHex());
+    return obj;
+}
+
+static uint256 ParseCategory(const std::string &hex) {
+    if (hex.size() != 64 || !IsHex(hex)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "category must be a 32-byte hex string");
+    }
+    return uint256S(hex);
+}
+
+static UniValue getnftcollection(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 1) {
+        throw std::runtime_error(
+            RPCHelpMan{"getnftcollection",
+                "\nReturns onchain-truth facts about a DNFT collection (category): the counted "
+                "number of items minted, whether the collection is still open (a minting token is "
+                "unspent), and its genesis. Requires -nftindex.\n",
+                {
+                    {"category", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The collection category (token id)"},
+                }}
+                .ToString() +
+            "\nExamples:\n" +
+            HelpExampleCli("getnftcollection", "\"<category>\"") +
+            HelpExampleRpc("getnftcollection", "\"<category>\""));
+    }
+    if (!g_dnft_index) {
+        throw JSONRPCError(RPC_MISC_ERROR, "getnftcollection requires -nftindex to be enabled");
+    }
+    const uint256 category = ParseCategory(request.params[0].get_str());
+    const auto rec = g_dnft_index->GetCategory(category);
+    if (!rec) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No DNFT collection with that category");
+    }
+
+    // Determine open/closed and the live minting outpoint from the current UTXO set (not stored
+    // state), so the answer is always consistent with the chain tip.
+    LOCK(cs_main);
+    UniValue::Array liveMinting;
+    for (const COutPoint &op : rec->mintingOutpoints) {
+        if (pcoinsTip->HaveCoin(op)) {
+            UniValue::Object o;
+            o.emplace_back("txid", op.GetTxId().GetHex());
+            o.emplace_back("vout", int64_t(op.GetN()));
+            liveMinting.emplace_back(std::move(o));
+        }
+    }
+    const bool open = !liveMinting.empty();
+
+    UniValue::Object obj;
+    obj.emplace_back("category", category.GetHex());
+    obj.emplace_back("genesis_txid", rec->genesisTxid.GetHex());
+    obj.emplace_back("genesis_height", rec->genesisHeight);
+    obj.emplace_back("minted", int64_t(rec->mintedCount));
+    obj.emplace_back("open", open);
+    obj.emplace_back("minting_outpoints", std::move(liveMinting));
+    return obj;
+}
+
+static UniValue getnftitem(const Config &config, const JSONRPCRequest &request) {
+    if (request.fHelp || request.params.size() != 2) {
+        throw std::runtime_error(
+            RPCHelpMan{"getnftitem",
+                "\nReturns onchain facts about one DNFT item, identified by its (category, "
+                "commitment). Requires -nftindex.\n",
+                {
+                    {"category", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The item's collection category"},
+                    {"commitment", RPCArg::Type::STR_HEX, /* opt */ false, /* default_val */ "", "The item's commitment (its stable identity)"},
+                }}
+                .ToString() +
+            "\nExamples:\n" +
+            HelpExampleCli("getnftitem", "\"<category>\" \"<commitment>\"") +
+            HelpExampleRpc("getnftitem", "\"<category>\", \"<commitment>\""));
+    }
+    if (!g_dnft_index) {
+        throw JSONRPCError(RPC_MISC_ERROR, "getnftitem requires -nftindex to be enabled");
+    }
+    const uint256 category = ParseCategory(request.params[0].get_str());
+    if (!IsHex(request.params[1].get_str())) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "commitment must be hex");
+    }
+    const std::vector<uint8_t> commitment = ParseHex(request.params[1].get_str());
+    const auto rec = g_dnft_index->GetItem(category, commitment);
+    if (!rec) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No DNFT item with that category and commitment");
+    }
+
+    // Is the item still live (unspent) at the current tip?
+    bool exists;
+    {
+        LOCK(cs_main);
+        exists = pcoinsTip->HaveCoin(COutPoint(rec->mintTxid, rec->mintVout));
+    }
+
+    UniValue::Object obj;
+    obj.emplace_back("category", category.GetHex());
+    obj.emplace_back("commitment", HexStr(commitment));
+    obj.emplace_back("item_id", rec->mintTxid.GetHex() + "i" + std::to_string(rec->mintVout));
+    obj.emplace_back("mint_txid", rec->mintTxid.GetHex());
+    obj.emplace_back("mint_vout", int64_t(rec->mintVout));
+    obj.emplace_back("height", rec->height);
+    obj.emplace_back("content_type", std::string(rec->contentType.begin(), rec->contentType.end()));
+    obj.emplace_back("content_length", int64_t(rec->contentLength));
+    obj.emplace_back("still_at_mint_outpoint", exists);
+    UniValue::Array parents;
+    for (const auto &p : rec->parents) {
+        parents.emplace_back(HexStr(p));
+    }
+    obj.emplace_back("parents", std::move(parents));
     return obj;
 }
 
@@ -3097,6 +3206,8 @@ static const ContextFreeRPCCommand commands[] = {
     { "blockchain",         "getblockchaininfo",      getblockchaininfo,      {} },
     { "blockchain",         "getblockcount",          getblockcount,          {} },
     { "blockchain",         "getcoldrewardstats",     getcoldrewardstats,     {} },
+    { "blockchain",         "getnftcollection",       getnftcollection,       {"category"} },
+    { "blockchain",         "getnftitem",             getnftitem,             {"category","commitment"} },
     { "blockchain",         "getblockhash",           getblockhash,           {"height"} },
     { "blockchain",         "getblockheader",         getblockheader,         {"blockhash|hash_or_height","verbose"} },
     { "blockchain",         "getblockstats",          getblockstats,          {"hash_or_height","stats"} },
