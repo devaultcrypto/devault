@@ -493,6 +493,10 @@ target_link_libraries(common util secp256k1)
 
 # script library
 add_library(script
+  # DeVault: the DNFT envelope codec lives here (not in server) because the Solver
+  # (script/standard.cpp) classifies envelope outputs via dnft::IsDnftEnvelope. It is a pure
+  # script-layer codec (deps: CScript + CSHA256 only).
+  devault/dnft_envelope.cpp
   script/bigint.cpp
   script/bitfield.cpp
   script/descriptor.cpp
@@ -557,7 +561,6 @@ add_library(server
   consensus/tx_check.cpp
   devault/budget.cpp
   devault/dnft.cpp
-  devault/dnft_envelope.cpp
   devault/rewards.cpp
   devault/rewards_calculation.cpp
   devault/rewardsview.cpp

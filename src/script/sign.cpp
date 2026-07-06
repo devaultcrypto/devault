@@ -96,6 +96,7 @@ static bool SignStep(const SigningProvider &provider,
         case TX_NONSTANDARD:
         case TX_NULL_DATA:
         case TX_SCRIPT:
+        case TX_DNFT_ENVELOPE: // unspendable data carrier, nothing to sign
             return false;
         case TX_PUBKEY:
             if (!CreateSig(creator, sigdata, provider, sig, CPubKey(vSolutions[0]), scriptPubKey, scriptFlags)) {

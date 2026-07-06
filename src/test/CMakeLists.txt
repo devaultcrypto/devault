@@ -212,6 +212,7 @@ add_boost_unit_tests_to_suite(bitcoin test_bitcoin
     dnft_activation_tests.cpp
     dnft_binding_tests.cpp
     dnft_envelope_tests.cpp
+    dnft_policy_tests.cpp
     base64_tests.cpp
     bigint_script_property_tests.cpp
     bigint_tests.cpp

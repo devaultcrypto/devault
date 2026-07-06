@@ -44,9 +44,15 @@ static constexpr bool DEFAULT_GBT_CHECK_VALIDITY = true;
  */
 static constexpr bool DEFAULT_ALLOW_UNCONNECTED_MINING = false;
 /**
- * The maximum size for transactions we're willing to relay/mine.
+ * The maximum size for transactions we're willing to relay/mine (pre-DU1).
  */
 static constexpr unsigned int MAX_STANDARD_TX_SIZE = 100000;
+/**
+ * DeVault (DU1, spec A4): once tokens activate, the standard tx size cap rises to the consensus
+ * cap (MAX_TX_SIZE) so a full-size DNFT mint (~990 KB envelope) can relay. Policy-only — the
+ * consensus limit is unchanged. Selected by SCRIPT_ENABLE_TOKENS in the standardness flags.
+ */
+static constexpr unsigned int MAX_STANDARD_TX_SIZE_DU1 = MAX_TX_SIZE;
 
 /**
  * Before upgrade 12 only:

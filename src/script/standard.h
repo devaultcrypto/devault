@@ -81,6 +81,10 @@ enum txnouttype {
     TX_NULL_DATA,
     // after upgrade12: p2s (pay-to-script); non-null-data bare scripts that don't match above and are <= 201 bytes
     TX_SCRIPT,     ///< p2s
+    // DeVault (DU1, spec Q15): a DNFT content envelope (OP_RETURN + "DNFT" magic). Its own standard
+    // type once tokens are active so it is exempt from the plain-OP_RETURN datacarrier cap; sized by
+    // the post-DU1 standard tx size cap instead, and consensus-validated at mint (CheckDnftRules).
+    TX_DNFT_ENVELOPE,
 };
 
 class CNoDestination {

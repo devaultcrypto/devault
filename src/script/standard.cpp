@@ -7,6 +7,7 @@
 #include <script/standard.h>
 
 #include <crypto/sha256.h>
+#include <devault/dnft_envelope.h>
 #include <pubkey.h>
 #include <script/container_types.h>
 #include <script/script.h>
@@ -35,6 +36,8 @@ const char *GetTxnOutputType(txnouttype t) {
             return "nulldata";
         case TX_SCRIPT:
             return "script";
+        case TX_DNFT_ENVELOPE:
+            return "dnftenvelope";
     }
     return nullptr;
 }
@@ -112,6 +115,16 @@ txnouttype Solver(const CScript &scriptPubKey, std::vector<std::vector<uint8_t>>
     if (valtype hashBytes; scriptPubKey.IsPayToScriptHash(flags, &hashBytes)) {
         vSolutionsRet.push_back(std::move(hashBytes));
         return TX_SCRIPTHASH;
+    }
+
+    // DeVault (DU1, spec Q15): once tokens are active, a DNFT content envelope (OP_RETURN whose
+    // first push is the "DNFT" magic) is its own standard type, exempt from the plain-OP_RETURN
+    // datacarrier cap below. Consensus (CheckDnftRules) classifies envelopes with the exact same
+    // predicate and fully validates them at mint, so anything typed here either pairs with a valid
+    // mint or invalidates its transaction. Must precede the generic OP_RETURN arm. Pre-activation
+    // (no SCRIPT_ENABLE_TOKENS) such scripts remain TX_NULL_DATA.
+    if ((flags & SCRIPT_ENABLE_TOKENS) && dnft::IsDnftEnvelope(scriptPubKey)) {
+        return TX_DNFT_ENVELOPE;
     }
 
     // Provably prunable, data-carrying output
@@ -200,7 +213,7 @@ bool ExtractDestinations(const CScript &scriptPubKey, txnouttype &typeRet,
     typeRet = Solver(scriptPubKey, vSolutions, flags);
     if (typeRet == TX_NONSTANDARD) {
         return false;
-    } else if (typeRet == TX_NULL_DATA) {
+    } else if (typeRet == TX_NULL_DATA || typeRet == TX_DNFT_ENVELOPE) {
         // This is data, not addresses
         return false;
     }

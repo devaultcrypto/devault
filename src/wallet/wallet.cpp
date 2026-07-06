@@ -3607,8 +3607,14 @@ CreateTransactionResult CWallet::CreateTransaction(
         // Return the constructed transaction data.
         tx = MakeTransactionRef(std::move(txNew));
 
-        // Limit size.
-        if (tx->GetTotalSize() > MAX_STANDARD_TX_SIZE) {
+        // Limit size to what the mempool will relay. DeVault (DU1, spec A4): once tokens
+        // activate, the standard cap rises to the consensus cap so full-size DNFT mints
+        // (~990 KB envelopes) can be built. (cs_main is held by locked_chain above.)
+        const unsigned int nMaxStdTxSize =
+            (GetMemPoolScriptFlags(::Params().GetConsensus(), ::ChainActive().Tip()) & SCRIPT_ENABLE_TOKENS)
+                ? MAX_STANDARD_TX_SIZE_DU1
+                : MAX_STANDARD_TX_SIZE;
+        if (tx->GetTotalSize() > nMaxStdTxSize) {
             strFailReason = _("Transaction too large");
             return CreateTransactionResult::CT_ERROR;
         }

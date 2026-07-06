@@ -946,6 +946,9 @@ bool internal::AddOrphanTx(const CTransactionRef &tx, NodeId peer)
     // transaction(s) have been mined or received.
     // 100 orphans, each of which is at most 100,000 bytes big is at most 10
     // megabytes of orphans and somewhat more byprev index (in the worst case):
+    // DeVault: deliberately kept at the PRE-DU1 standard cap even though post-DU1 relay allows
+    // ~1 MB DNFT mints (spec A4) — raising it would grow the orphan-map worst case 10x. An
+    // oversize orphan is just not cached; it is re-fetched once its parents arrive.
     unsigned int sz = tx->GetTotalSize();
     if (sz > MAX_STANDARD_TX_SIZE) {
         LogPrint(BCLog::MEMPOOL,

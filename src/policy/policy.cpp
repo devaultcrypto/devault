@@ -73,8 +73,12 @@ bool IsStandardTx(const CTransaction &tx, std::string &reason, uint32_t flags) {
     // almost as much to process as they cost the sender in fees, because
     // computing signature hashes is O(ninputs*txsize). Limiting transactions
     // to MAX_STANDARD_TX_SIZE mitigates CPU exhaustion attacks.
+    // DeVault (DU1, spec A4): once tokens activate the cap rises to the consensus cap so
+    // full-size DNFT mints (~990 KB envelopes) can relay.
+    const uint32_t nMaxStdTxSize =
+        (flags & SCRIPT_ENABLE_TOKENS) ? MAX_STANDARD_TX_SIZE_DU1 : MAX_STANDARD_TX_SIZE;
     uint32_t sz = tx.GetTotalSize();
-    if (sz > MAX_STANDARD_TX_SIZE) {
+    if (sz > nMaxStdTxSize) {
         reason = "tx-size";
         return false;
     }
@@ -116,6 +120,11 @@ bool IsStandardTx(const CTransaction &tx, std::string &reason, uint32_t flags) {
 
         if (whichType == TX_NULL_DATA) {
             nDataSize += txout.scriptPubKey.size();
+        } else if (whichType == TX_DNFT_ENVELOPE) {
+            // DeVault (DU1, spec Q15): DNFT envelopes are exempt from the plain-OP_RETURN
+            // datacarrier cap — their size is bounded by the (post-DU1) standard tx size cap
+            // above, and their content is consensus-validated at mint (CheckDnftRules).
+            // Unspendable (OP_RETURN), so no dust check either.
         } else if ((whichType == TX_MULTISIG) && (!fIsBareMultisigStd)) {
             reason = "bare-multisig";
             return false;

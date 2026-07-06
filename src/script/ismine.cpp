@@ -59,6 +59,7 @@ IsMineResult IsMineInner(const CKeyStore &keystore, const CScript &scriptPubKey,
         case TX_NONSTANDARD:
         case TX_NULL_DATA:
         case TX_SCRIPT:
+        case TX_DNFT_ENVELOPE: // unspendable data carrier, never "mine"
             break;
         case TX_PUBKEY:
             keyID = CPubKey(vSolutions[0]).GetID();
