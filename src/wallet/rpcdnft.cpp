@@ -172,7 +172,12 @@ UniValue mintnft(const Config &config, const JSONRPCRequest &request) {
                     {"options", RPCArg::Type::OBJ, true, "", "",
                      {
                          {"recipient", RPCArg::Type::STR, true, "", "Address to receive the NFT (default: a new wallet address)"},
-                         {"parents", RPCArg::Type::ARR, true, "", "Parent item claims, each a 65-byte category||commitment hex (must be spent as inputs)"},
+                         {"parents", RPCArg::Type::ARR, true, "",
+                          "Parent item claims (each must be spent as an input)",
+                          {
+                              {"parent", RPCArg::Type::STR_HEX, true, "",
+                               "65-byte category||commitment, hex"},
+                          }},
                          {"delegate", RPCArg::Type::STR_HEX, true, "", "Delegate item id bytes (explorer-resolved)"},
                          {"metadata", RPCArg::Type::STR_HEX, true, "", "CBOR metadata bytes, hex"},
                          {"content_encoding", RPCArg::Type::STR, true, "", "Body content-encoding, e.g. \"br\""},
@@ -433,7 +438,9 @@ UniValue listnfts(const Config &config, const JSONRPCRequest &request) {
         UniValue::Object item;
         item.emplace_back("category", ptd->GetId().GetHex());
         item.emplace_back("commitment", HexStr(commit));
-        item.emplace_back("outpoint", coin.outpoint.ToString());
+        // Full current outpoint (machine-consumable; COutPoint::ToString truncates the txid)
+        item.emplace_back("txid", coin.outpoint.GetTxId().GetHex());
+        item.emplace_back("vout", int64_t(coin.outpoint.GetN()));
         item.emplace_back("amount", ValueFromAmount(coin.txout.nValue));
         item.emplace_back("confirmations", o.nDepth);
         arr.emplace_back(std::move(item));
@@ -468,7 +475,9 @@ UniValue getnftinfo(const Config &config, const JSONRPCRequest &request) {
     UniValue::Object result;
     result.emplace_back("category", category.GetHex());
     result.emplace_back("commitment", HexStr(commitment));
-    result.emplace_back("outpoint", coin.outpoint.ToString());
+    // Full current outpoint (machine-consumable; COutPoint::ToString truncates the txid)
+    result.emplace_back("txid", coin.outpoint.GetTxId().GetHex());
+    result.emplace_back("vout", int64_t(coin.outpoint.GetN()));
     result.emplace_back("amount", ValueFromAmount(coin.txout.nValue));
     result.emplace_back("confirmations", o.nDepth);
     CTxDestination dest;

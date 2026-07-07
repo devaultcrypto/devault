@@ -128,6 +128,7 @@ private:
     QToolBar *appToolBar = nullptr;
     QAction *overviewAction = nullptr;
     QAction *historyAction = nullptr;
+    QAction *nftsAction = nullptr; // DeVault 4G: the digital-artifacts (DNFT) tab
     QAction *quitAction = nullptr;
     QAction *sendCoinsAction = nullptr;
     QAction *sendCoinsMenuAction = nullptr;
@@ -269,6 +270,8 @@ public Q_SLOTS:
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
+    /** DeVault 4G: switch to the digital-artifacts (DNFT) page */
+    void gotoNftPage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */

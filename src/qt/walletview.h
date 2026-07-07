@@ -14,6 +14,7 @@
 
 class BitcoinGUI;
 class ClientModel;
+class DnftPage;
 class OverviewPage;
 class PlatformStyle;
 class ReceiveCoinsDialog;
@@ -72,6 +73,7 @@ private:
     QWidget *transactionsPage;
     ReceiveCoinsDialog *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
+    DnftPage *dnftPage; // DeVault 4G: the digital-artifacts (DNFT) tab
     AddressBookPage *usedSendingAddressesPage;
     AddressBookPage *usedReceivingAddressesPage;
 
@@ -89,6 +91,8 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
+    /** DeVault 4G: switch to the digital-artifacts (DNFT) page */
+    void gotoNftPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

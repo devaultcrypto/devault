@@ -291,6 +291,15 @@ void BitcoinGUI::createActions() {
     historyAction->setShortcut(QKeySequence(Qt::ALT + static_cast<int>(Qt::Key_4)));
     tabGroup->addAction(historyAction);
 
+    // DeVault 4G: the digital-artifacts (DNFT) tab
+    nftsAction = new QAction(platformStyle->SingleColorIcon(":/icons/nft"),
+                             tr("&NFTs"), this);
+    nftsAction->setStatusTip(tr("Browse, mint, and send digital artifacts (DNFTs)"));
+    nftsAction->setToolTip(nftsAction->statusTip());
+    nftsAction->setCheckable(true);
+    nftsAction->setShortcut(QKeySequence(Qt::ALT + static_cast<int>(Qt::Key_5)));
+    tabGroup->addAction(nftsAction);
+
 #ifdef ENABLE_WALLET
     // These showNormalIfMinimized are needed because Send Coins and Receive
     // Coins can be triggered from the tray menu, and need to show the GUI to be
@@ -319,6 +328,9 @@ void BitcoinGUI::createActions() {
             [this] { showNormalIfMinimized(); });
     connect(historyAction, &QAction::triggered, this,
             &BitcoinGUI::gotoHistoryPage);
+    connect(nftsAction, &QAction::triggered,
+            [this] { showNormalIfMinimized(); });
+    connect(nftsAction, &QAction::triggered, this, &BitcoinGUI::gotoNftPage);
 #endif // ENABLE_WALLET
 
     quitAction = new QAction(platformStyle->TextColorIcon(":/icons/quit"),
@@ -580,6 +592,7 @@ void BitcoinGUI::createToolBars() {
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        toolbar->addAction(nftsAction);
         overviewAction->setChecked(true);
 
 #ifdef ENABLE_WALLET
@@ -768,6 +781,7 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled) {
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
+    nftsAction->setEnabled(enabled);
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -897,6 +911,13 @@ void BitcoinGUI::gotoHistoryPage() {
     historyAction->setChecked(true);
     if (walletFrame) {
         walletFrame->gotoHistoryPage();
+    }
+}
+
+void BitcoinGUI::gotoNftPage() {
+    nftsAction->setChecked(true);
+    if (walletFrame) {
+        walletFrame->gotoNftPage();
     }
 }
 

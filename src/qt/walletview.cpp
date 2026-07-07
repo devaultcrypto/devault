@@ -13,6 +13,7 @@
 #include <qt/askpassphrasedialog.h>
 #include <qt/bitcoingui.h>
 #include <qt/clientmodel.h>
+#include <qt/dnftpage.h>
 #include <qt/guiutil.h>
 #include <qt/optionsmodel.h>
 #include <qt/overviewpage.h>
@@ -64,6 +65,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle,
 
     receiveCoinsPage = new ReceiveCoinsDialog(platformStyle);
     sendCoinsPage = new SendCoinsDialog(platformStyle, walletModel);
+    dnftPage = new DnftPage(platformStyle);
 
     usedSendingAddressesPage =
         new AddressBookPage(platformStyle, AddressBookPage::ForEditing,
@@ -76,6 +78,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle,
     addWidget(transactionsPage);
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
+    addWidget(dnftPage);
 
     // Clicking on a transaction on the overview pre-selects the transaction on
     // the transaction history page
@@ -182,6 +185,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel) {
     overviewPage->setWalletModel(_walletModel);
     receiveCoinsPage->setModel(_walletModel);
     sendCoinsPage->setModel(_walletModel);
+    dnftPage->setWalletModel(_walletModel);
     usedReceivingAddressesPage->setModel(
         _walletModel ? _walletModel->getAddressTableModel() : nullptr);
     usedSendingAddressesPage->setModel(
@@ -267,6 +271,10 @@ void WalletView::gotoSendCoinsPage(QString addr) {
     if (!addr.isEmpty()) {
         sendCoinsPage->setAddress(addr);
     }
+}
+
+void WalletView::gotoNftPage() {
+    setCurrentWidget(dnftPage);
 }
 
 void WalletView::gotoSignMessageTab(QString addr) {

@@ -262,6 +262,9 @@ if(BUILD_BITCOIN_WALLET)
 			askpassphrasedialog.cpp
 			coincontroldialog.cpp
 			coincontroltreewidget.cpp
+			dnftdialogs.cpp
+			dnftpage.cpp
+			dnftrpc.cpp
 			editaddressdialog.cpp
 			legacyaddressdialog.cpp
 			legacyaddressconvertdialog.cpp
