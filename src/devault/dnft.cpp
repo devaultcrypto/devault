@@ -14,7 +14,7 @@
 #include <util/strencodings.h>
 
 #include <array>
-#include <set>
+#include <map>
 #include <vector>
 
 namespace dnft {
@@ -48,8 +48,21 @@ bool CheckDnftRules(const CTransaction &tx, CValidationState &state, const CCoin
         // binding hash with, so the DNFT rules are simply not applicable to it.
         return true;
     }
+    if (tx.vin.empty()) {
+        // Defense-in-depth: the binding salt is tx.vin[0].prevout and the input scan iterates
+        // tx.vin. CheckRegularTransaction ("bad-txns-vin-empty") already rejects a non-coinbase
+        // tx with no inputs before this function runs in both ATMP and ConnectBlock, so this is
+        // unreachable — but never dereference vin[0] on faith in consensus code.
+        return true;
+    }
 
     const bool ftForkActive = IsFTForkEnabledForHeightPrev(params, nHeight - 1);
+    // FT-FORK TODO (4I review #2): ftForkActive flips this gate at ftForkHeight WITHOUT changing
+    // any script flag. The fork-boundary mempool purge in validation.cpp (Dis/ConnectTip) fires
+    // only on a GetNextBlockScriptFlags() difference, so a reorg across ftForkHeight would NOT
+    // purge now-invalid FT txs -> BlockAssembler could brick getblocktemplate. Before any real
+    // ftForkHeight is set, generalize that boundary predicate to also compare
+    // IsFTForkEnabledForHeightPrev. Unreachable today (ftForkHeight is the sentinel).
 
     // --- Single output pass (DEVAULT_NFT_SPEC.md §5, §6, §10.8) ---
     // Collect envelope outputs (the content carriers) and inscribed-item candidates (capability
@@ -113,7 +126,15 @@ bool CheckDnftRules(const CTransaction &tx, CValidationState &state, const CCoin
     // Used to (a) distinguish a MINT (new commitment) from a MOVE (an existing item transferred, no
     // envelope owed), and (b) validate parent claims (spend-to-prove). Input coins are still present
     // in `view` at this point (CheckTxInputs/CheckTxTokens read them; they are spent later).
-    std::set<std::vector<uint8_t>> inputImmutableItems;
+    //
+    // Multiplicities matter (not just membership): a minting-capability input authorizes creating,
+    // under CashTokens conservation, arbitrarily many immutable NFTs — including ones whose
+    // commitment equals an inscribed item already on an input. A key→count map lets each move
+    // consume exactly one input copy; any EXCESS inscribed-format output (a would-be duplicate of a
+    // "1/1") then falls into the mint path below, where the §6.4 binding hash rejects it (its
+    // copied commitment cannot equal a freshly salted hash). Without the count, both copies would
+    // classify as moves and the duplicate would be minted for free.
+    std::map<std::vector<uint8_t>, size_t> inputImmutableItems;
     for (const CTxIn &in : tx.vin) {
         const Coin &coin = view.AccessCoin(in.prevout);
         if (coin.IsSpent()) {
@@ -121,20 +142,23 @@ bool CheckDnftRules(const CTransaction &tx, CValidationState &state, const CCoin
         }
         const token::OutputDataPtr &ptd = coin.GetTxOut().tokenDataPtr;
         if (ptd && ptd->IsImmutableNFT()) { // HasNFT && capability none
-            inputImmutableItems.insert(ItemKey(ptd->GetId(), ptd->GetCommitment()));
+            ++inputImmutableItems[ItemKey(ptd->GetId(), ptd->GetCommitment())];
         }
     }
 
-    // Classify candidates: an inscribed output whose (category, commitment) is NOT already present
-    // on an immutable input is a MINT (needs an envelope); otherwise it is a MOVE (a transfer of an
-    // existing item, no envelope obligation — CashTokens conservation already preserved the
-    // commitment verbatim). Commitments are globally unique per item (Q1 salting), so this
-    // classification is exact.
+    // Classify candidates: an inscribed output is a MOVE (a transfer of an existing item, no
+    // envelope obligation — CashTokens conservation preserved the commitment verbatim) as long as
+    // an unconsumed matching immutable input remains; each move consumes one. Any further copy is a
+    // MINT (needs an envelope) and is rejected by the binding rule. Commitments are globally unique
+    // per item (Q1 salting), so a legitimate move always has exactly one matching input.
     std::vector<size_t> inscribingVouts; // MINTs, in output order
     for (size_t idx : candidateInscribed) {
         const token::OutputData &td = *tx.vout[idx].tokenDataPtr;
-        if (inputImmutableItems.count(ItemKey(td.GetId(), td.GetCommitment())) == 0) {
-            inscribingVouts.push_back(idx);
+        auto it = inputImmutableItems.find(ItemKey(td.GetId(), td.GetCommitment()));
+        if (it != inputImmutableItems.end() && it->second > 0) {
+            --it->second; // consume one input copy: this output is a MOVE
+        } else {
+            inscribingVouts.push_back(idx); // no input copy left -> MINT (binding rule applies)
         }
     }
 

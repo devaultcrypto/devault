@@ -1164,7 +1164,7 @@ UniValue::Object SignTransaction(interfaces::Chain &, CMutableTransaction &mtx, 
         scriptFlags = GetMemPoolScriptFlags(params, tip);
         chainHeight = tip->nHeight;
         if (IsDU1Enabled(params, tip)) {
-            tokenRulesHeight = GetDU1ActivationHeight(params) + 1;
+            tokenRulesHeight = int64_t{GetDU1ActivationHeight(params)} + 1; // avoid int32 overflow at INT32_MAX
         }
         targetedVmLimitsEnabled = bool(scriptFlags & SCRIPT_ENABLE_MAY2025);
     }

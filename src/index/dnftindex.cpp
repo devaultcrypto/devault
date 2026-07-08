@@ -64,7 +64,7 @@ bool DnftIndex::Init() {
 }
 
 bool DnftIndex::ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDBBatch &batch,
-                             const bool apply) {
+                             std::map<uint256, DnftCategoryRecord> &cats, const bool apply) {
     // Genesis (and any pre-DU1 block) carries no DNFT/token data; undo may be absent for genesis.
     CBlockUndo undo;
     const bool haveUndo = pindex->nHeight > 0 && UndoReadFromDisk(undo, pindex);
@@ -72,9 +72,10 @@ bool DnftIndex::ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDB
         return false; // cannot classify mint-vs-move without undo (pruned?)
     }
 
-    // Category records are read-modify-write and may be touched many times per block, so cache them
-    // in memory and flush once at the end. Item records are add/erase only -> written directly.
-    std::map<uint256, DnftCategoryRecord> cats;
+    // Category records are read-modify-write; `cats` is the accumulator shared across every
+    // ProcessBlock call in this WriteBlock (see the header note) — WriteBlock flushes it once. The
+    // first touch of a category reads it from the DB into the map; all later touches (this block,
+    // and other blocks in the same rewind/apply batch) hit the map, so counts stay consistent.
     const auto loadCat = [&](const uint256 &c) -> DnftCategoryRecord & {
         auto it = cats.find(c);
         if (it != cats.end()) {
@@ -165,7 +166,15 @@ bool DnftIndex::ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDB
                             item.contentType = *pe.content_type;
                         }
                         item.contentLength = pe.has_body ? pe.body.size() : 0;
-                        item.parents = pe.parents;
+                        // Deduplicate parent claims (spec §7 — duplicates are consensus-harmless
+                        // but the recorded provenance should list each parent once, matching the
+                        // explorer). Order-preserving.
+                        for (const auto &pc : pe.parents) {
+                            if (std::find(item.parents.begin(), item.parents.end(), pc) ==
+                                item.parents.end()) {
+                                item.parents.push_back(pc);
+                            }
+                        }
                     }
                 }
                 batch.Write(MakeItemKey(cat, commit), item);
@@ -178,18 +187,11 @@ bool DnftIndex::ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDB
         }
     }
 
-    // Flush category records (erase when the collection has nothing left after a reversal).
-    for (const auto &[cat, rec] : cats) {
-        if (rec.mintedCount == 0 && rec.mintingOutpoints.empty()) {
-            batch.Erase(MakeCatKey(cat));
-        } else {
-            batch.Write(MakeCatKey(cat), rec);
-        }
-    }
     return true;
 }
 
-bool DnftIndex::Rewind(const CBlockIndex *target, CDBBatch &batch) {
+bool DnftIndex::Rewind(const CBlockIndex *target, CDBBatch &batch,
+                       std::map<uint256, DnftCategoryRecord> &cats) {
     const CBlockIndex *cur;
     {
         LOCK(cs_main);
@@ -205,7 +207,7 @@ bool DnftIndex::Rewind(const CBlockIndex *target, CDBBatch &batch) {
         if (!ReadBlockFromDisk(block, cur, params)) {
             return false;
         }
-        if (!ProcessBlock(block, cur, batch, /*apply=*/false)) {
+        if (!ProcessBlock(block, cur, batch, cats, /*apply=*/false)) {
             return false;
         }
         cur = cur->pprev;
@@ -215,17 +217,30 @@ bool DnftIndex::Rewind(const CBlockIndex *target, CDBBatch &batch) {
 
 bool DnftIndex::WriteBlock(const CBlock &block, const CBlockIndex *pindex) {
     CDBBatch batch(*m_db);
+    // One category accumulator for the whole batch (rewind + apply): m_db->Read does not see
+    // writes buffered in `batch`, so a per-block map would re-read stale counts for any category
+    // touched by more than one of these blocks (4I review F2).
+    std::map<uint256, DnftCategoryRecord> cats;
 
     // Reorg detection: if this block does not extend our current best, rewind to its parent first.
     if (pindex->pprev != nullptr && !m_best_block_hash.IsNull() &&
         m_best_block_hash != pindex->pprev->GetBlockHash()) {
-        if (!Rewind(pindex->pprev, batch)) {
+        if (!Rewind(pindex->pprev, batch, cats)) {
             return false;
         }
     }
 
-    if (!ProcessBlock(block, pindex, batch, /*apply=*/true)) {
+    if (!ProcessBlock(block, pindex, batch, cats, /*apply=*/true)) {
         return false;
+    }
+
+    // Flush the accumulated category records once (erase a collection with nothing left).
+    for (const auto &[cat, rec] : cats) {
+        if (rec.mintedCount == 0 && rec.mintingOutpoints.empty()) {
+            batch.Erase(MakeCatKey(cat));
+        } else {
+            batch.Write(MakeCatKey(cat), rec);
+        }
     }
 
     const BlockHash hash = pindex->GetBlockHash();

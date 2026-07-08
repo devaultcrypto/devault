@@ -708,7 +708,7 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
             int64_t firstTokenBlockHeight;
             if (scriptVerifyFlags & SCRIPT_ENABLE_TOKENS) { // Assumption: this can only be true if DU1 activated
                 // First block to actually use token rules is 1 + activation block
-                firstTokenBlockHeight = 1 + GetDU1ActivationHeight(consensusParams);
+                firstTokenBlockHeight = int64_t{1} + GetDU1ActivationHeight(consensusParams);
             } else {
                 // not activated yet -- far future
                 firstTokenBlockHeight = std::numeric_limits<int64_t>::max();

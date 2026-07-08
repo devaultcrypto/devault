@@ -948,7 +948,9 @@ bool internal::AddOrphanTx(const CTransactionRef &tx, NodeId peer)
     // megabytes of orphans and somewhat more byprev index (in the worst case):
     // DeVault: deliberately kept at the PRE-DU1 standard cap even though post-DU1 relay allows
     // ~1 MB DNFT mints (spec A4) — raising it would grow the orphan-map worst case 10x. An
-    // oversize orphan is just not cached; it is re-fetched once its parents arrive.
+    // oversize orphan is simply not cached (and, per the caller, not added to recentRejects, and
+    // its txid is forgotten from txrequest); recovery relies on a later re-announcement causing a
+    // re-request — there is no parent-arrival trigger for it.
     unsigned int sz = tx->GetTotalSize();
     if (sz > MAX_STANDARD_TX_SIZE) {
         LogPrint(BCLog::MEMPOOL,

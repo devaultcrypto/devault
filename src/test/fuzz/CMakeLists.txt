@@ -105,3 +105,11 @@ add_fuzz_target(
     # Sources
     dnft_envelope.cpp
 )
+
+add_fuzz_target(
+    fuzz-dnft_rules
+    dnft_rules
+
+    # Sources
+    dnft_rules.cpp
+)

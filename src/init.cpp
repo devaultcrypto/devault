@@ -2054,6 +2054,11 @@ bool AppInitParameterInteraction(Config &config) {
         }
         ::g_Upgrade9HeightOverride.emplace(static_cast<int32_t>(height));
         LogPrintf("Using upgrade 9 activation height override: %d\n", height);
+        // DeVault: BCH's upgrade9 has no non-test consumers here — CashTokens/introspection/etc.
+        // activate at DU1 instead (see -du1activationheight). This override sets a value nothing
+        // reads, so warn rather than let an operator believe it enabled tokens (4I review #4).
+        InitWarning(_("-upgrade9activationheight has no effect on DeVault; CashTokens and the "
+                      "related rules activate at DU1. Use -du1activationheight instead."));
     }
 
     // Process CLI/conf override for the upgrade10 activation height

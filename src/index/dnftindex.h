@@ -9,6 +9,7 @@
 #include <uint256.h>
 
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -60,10 +61,16 @@ class DnftIndex final : public BaseIndex {
     const std::unique_ptr<DB> m_db;
     BlockHash m_best_block_hash; // last block applied to the index (mirrors DB key 'B')
 
-    //! Apply (apply=true) or reverse (apply=false) one block's DNFT effects into `batch`.
-    bool ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDBBatch &batch, bool apply);
+    //! Apply (apply=true) or reverse (apply=false) one block's DNFT effects into `batch`. Category
+    //! records are read-modify-write; a single `cats` accumulator is threaded through the whole
+    //! WriteBlock (rewind + apply) and flushed once, because writes buffered in `batch` are NOT
+    //! visible to m_db->Read — so per-call re-reads would corrupt any category touched by more than
+    //! one block in a single reorg/replay batch (4I review F2).
+    bool ProcessBlock(const CBlock &block, const CBlockIndex *pindex, CDBBatch &batch,
+                      std::map<uint256, DnftCategoryRecord> &cats, bool apply);
     //! Reverse blocks from the current best back to (but excluding) `target`.
-    bool Rewind(const CBlockIndex *target, CDBBatch &batch);
+    bool Rewind(const CBlockIndex *target, CDBBatch &batch,
+                std::map<uint256, DnftCategoryRecord> &cats);
 
 protected:
     bool WriteBlock(const CBlock &block, const CBlockIndex *pindex) override;

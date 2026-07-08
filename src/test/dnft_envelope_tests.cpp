@@ -189,6 +189,80 @@ BOOST_AUTO_TEST_CASE(invalid_duplicate_field) {
     BOOST_CHECK_EQUAL(p.error, "bad-txns-dnft-envelope-duplicate-field");
 }
 
+// 4I review F3: the other single-shot fields take the identical duplicate-reject path as
+// content_type but were previously untested. metaprotocol/content_encoding/delegate all reject;
+// metadata is deliberately chunkable and must NOT (it concatenates — covered separately).
+BOOST_AUTO_TEST_CASE(invalid_duplicate_field_all_singleshot) {
+    for (uint8_t tag : {TAG_METAPROTOCOL, TAG_CONTENT_ENCODING, TAG_DELEGATE}) {
+        CScript spk;
+        spk << OP_RETURN << V({'D', 'N', 'F', 'T'});
+        spk << V({tag}) << S("x");
+        spk << V({tag}) << S("y");
+        spk << V({});
+        const ParsedEnvelope p = ParseDnftEnvelope(spk);
+        BOOST_CHECK_MESSAGE(!p.valid, "duplicate tag " << int(tag) << " must be invalid");
+        BOOST_CHECK_EQUAL(p.error, "bad-txns-dnft-envelope-duplicate-field");
+    }
+    // Metadata repeated is VALID (chunkable): the two chunks concatenate.
+    CScript md;
+    md << OP_RETURN << V({'D', 'N', 'F', 'T'});
+    md << V({TAG_METADATA}) << S("ab");
+    md << V({TAG_METADATA}) << S("cd");
+    md << V({});
+    const ParsedEnvelope p = ParseDnftEnvelope(md);
+    BOOST_CHECK(p.valid);
+    BOOST_REQUIRE(p.metadata.has_value());
+    BOOST_CHECK_EQUAL(HexStr(*p.metadata), HexStr(S("abcd")));
+}
+
+// 4I review F2: the PUSHDATA2/PUSHDATA4 length-header bounds checks + oversize guard were
+// exercised only via a 1-byte direct push. Feed truncated PUSHDATA1/2/4 headers and an oversize
+// PUSHDATA4 claim; all must reject as -malformed and never over-read.
+BOOST_AUTO_TEST_CASE(invalid_truncated_pushdata_headers) {
+    // PUSHDATA1 with no length byte.
+    {
+        CScript spk;
+        spk << OP_RETURN << V({'D', 'N', 'F', 'T'});
+        spk.push_back(OP_PUSHDATA1); // then EOF
+        const ParsedEnvelope p = ParseDnftEnvelope(spk);
+        BOOST_CHECK(!p.valid);
+        BOOST_CHECK_EQUAL(p.error, "bad-txns-dnft-envelope-malformed");
+    }
+    // PUSHDATA2 with a 1-byte (truncated) length header.
+    {
+        CScript spk;
+        spk << OP_RETURN << V({'D', 'N', 'F', 'T'});
+        spk.push_back(OP_PUSHDATA2);
+        spk.push_back(0x10); // only 1 of 2 length bytes
+        const ParsedEnvelope p = ParseDnftEnvelope(spk);
+        BOOST_CHECK(!p.valid);
+        BOOST_CHECK_EQUAL(p.error, "bad-txns-dnft-envelope-malformed");
+    }
+    // PUSHDATA4 claiming ~2 GB with nothing following — the oversize guard must fire, no over-read.
+    {
+        CScript spk;
+        spk << OP_RETURN << V({'D', 'N', 'F', 'T'});
+        spk.push_back(OP_PUSHDATA4);
+        spk.push_back(0xff);
+        spk.push_back(0xff);
+        spk.push_back(0xff);
+        spk.push_back(0x7f); // len = 0x7fffffff
+        const ParsedEnvelope p = ParseDnftEnvelope(spk);
+        BOOST_CHECK(!p.valid);
+        BOOST_CHECK_EQUAL(p.error, "bad-txns-dnft-envelope-malformed");
+    }
+    // Well-formed PUSHDATA1 (a real 200-byte body via the builder) still parses — proves the
+    // header path isn't over-eager.
+    {
+        EnvelopeFields f;
+        f.content_type = S("text/plain");
+        const std::vector<uint8_t> body(200, 0x5a);
+        const ParsedEnvelope p = ParseDnftEnvelope(BuildDnftEnvelope(f, Sp(body)));
+        BOOST_CHECK(p.valid);
+        BOOST_CHECK_EQUAL(p.body.size(), 200u);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(invalid_unknown_even_tag) {
     CScript spk;
     spk << OP_RETURN << V({'D', 'N', 'F', 'T'});

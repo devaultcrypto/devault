@@ -193,6 +193,43 @@ BOOST_AUTO_TEST_CASE(valid_burn) {
     BOOST_CHECK(Run(s).first);
 }
 
+// 4I review finding #1 (HIGH, reproduced on regtest): a holder of BOTH an inscribed item and its
+// collection's minting baton could duplicate a "1/1". CashTokens conservation lets the baton mint
+// a second output with the SAME (category, commitment); the classification must NOT treat both
+// identical outputs as moves. The fix counts input multiplicities: the first identical output
+// consumes the one input copy (move); the second has no input copy left, so it is a MINT candidate
+// and the §6.4 binding rule rejects it (a copied commitment can't equal a freshly salted hash).
+BOOST_AUTO_TEST_CASE(reject_duplicate_inscribed_via_minting_baton) {
+    Scene s;
+    const token::Id cat = Cat("52");
+    const auto commit = BindingCommit(SimpleEnvelope(), COutPoint(TxId(uint256S("zz")), 0), 0);
+    // inputs: the item itself + the category's minting baton
+    s.addInput(COutPoint(TxId(uint256S("a6a")), 0), Inscribed(cat, commit));
+    s.addInput(COutPoint(TxId(uint256S("a6b")), 0), MintingNft(cat, CommitBytes({0xba, 0xba})));
+    // outputs: TWO identical copies of the item + the re-created baton (collection stays open)
+    s.addTokenOutput(Inscribed(cat, commit));  // vout 0: the legitimate move
+    s.addTokenOutput(Inscribed(cat, commit));  // vout 1: the forged duplicate
+    s.addTokenOutput(MintingNft(cat, CommitBytes({0xba, 0xba})));
+    const auto [ok, why] = Run(s);
+    BOOST_CHECK(!ok);
+    // The excess copy falls into the mint path; with no envelope it fails pairing.
+    BOOST_CHECK_EQUAL(why, "bad-txns-dnft-binding-missing");
+}
+
+// The single legitimate move of an item held ALONGSIDE its category's minting baton must still
+// pass (proves the fix doesn't over-reject the common open-collection case).
+BOOST_AUTO_TEST_CASE(valid_move_with_minting_baton_present) {
+    Scene s;
+    const token::Id cat = Cat("53");
+    const auto commit = BindingCommit(SimpleEnvelope(), COutPoint(TxId(uint256S("zz")), 0), 0);
+    s.addInput(COutPoint(TxId(uint256S("a7a")), 0), Inscribed(cat, commit));
+    s.addInput(COutPoint(TxId(uint256S("a7b")), 0), MintingNft(cat, CommitBytes({0xcd})));
+    s.addTokenOutput(Inscribed(cat, commit)); // one move, no duplicate
+    s.addTokenOutput(MintingNft(cat, CommitBytes({0xcd})));
+    const auto [ok, why] = Run(s);
+    BOOST_CHECK_MESSAGE(ok, "legitimate move with baton present rejected: " + why);
+}
+
 BOOST_AUTO_TEST_CASE(valid_mixed_move_and_mint) {
     Scene s;
     const token::Id catA = Cat("60");
@@ -373,6 +410,29 @@ BOOST_AUTO_TEST_CASE(reject_parent_not_inscribed) {
     const CScript env = BuildDnftEnvelope(f, Span<const uint8_t>{});
     s.addEnvelope(env);
     s.addTokenOutput(Inscribed(Cat("bc"), BindingCommit(env, s.input0(), 1)));
+    const auto [ok, why] = Run(s);
+    BOOST_CHECK(!ok);
+    BOOST_CHECK_EQUAL(why, "bad-txns-dnft-parent-missing");
+}
+
+// 4I review F4: an input carries an inscribed item (C1, 0x01‖H); the child claims (C2, 0x01‖H) —
+// SAME commitment, WRONG category. The parent-claim set is keyed on category‖commitment, so this
+// must reject: proving the category component is load-bearing, not just the commitment.
+BOOST_AUTO_TEST_CASE(reject_parent_wrong_category) {
+    Scene s;
+    const token::Id inputCat = Cat("d0");
+    const auto commit = BindingCommit(SimpleEnvelope(), COutPoint(TxId(uint256S("zz")), 0), 0);
+    s.addInput(COutPoint(TxId(uint256S("d01")), 0), Inscribed(inputCat, commit));
+    // Claim the SAME commitment under a DIFFERENT category.
+    const token::Id claimedCat = Cat("d1");
+    std::vector<uint8_t> claim(claimedCat.begin(), claimedCat.end());
+    claim.insert(claim.end(), commit.begin(), commit.end());
+    EnvelopeFields f;
+    f.content_type = std::vector<uint8_t>{'a'};
+    f.parents.push_back(claim);
+    const CScript env = BuildDnftEnvelope(f, Span<const uint8_t>{});
+    s.addEnvelope(env);
+    s.addTokenOutput(Inscribed(Cat("d2"), BindingCommit(env, s.input0(), 1)));
     const auto [ok, why] = Run(s);
     BOOST_CHECK(!ok);
     BOOST_CHECK_EQUAL(why, "bad-txns-dnft-parent-missing");
