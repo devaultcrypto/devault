@@ -561,6 +561,7 @@ add_library(server
   consensus/tx_check.cpp
   devault/budget.cpp
   devault/dnft.cpp
+  devault/ft.cpp
   devault/rewards.cpp
   devault/rewards_calculation.cpp
   devault/rewardsview.cpp

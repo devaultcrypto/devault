@@ -831,6 +831,14 @@ extern ActivationBlockTracker g_upgrade2027_block_tracker;
 uint32_t GetMemPoolScriptFlags(const Consensus::Params &params, const CBlockIndex *pindex,
                                uint32_t *nextBlockFlags = nullptr /* out param: block flags without standard */);
 
+/// True iff `pindex` sits on a consensus-rule upgrade boundary — i.e. the rules for the block after
+/// `pindex` differ from the rules for the block after `pindex->pprev`, so a (dis)connect here must
+/// re-evaluate the mempool. Covers both script-VM upgrades (a GetNextBlockScriptFlags difference)
+/// and DeVault rule-only forks that carry no script flag (the ftForkHeight FT-deferral lift;
+/// DEVAULT_FT_SPEC.md §10, resolving the 4I review #2 gap). Requires `pindex->pprev != nullptr`.
+/// Exposed for consensus unit tests (the reorg boundary sites in validation.cpp use it).
+bool NextBlockUpgradeBoundary(const Consensus::Params &params, const CBlockIndex *pindex);
+
 /// Returns the adaptive blocksize limit for the next block, given `pindexPrev`, if upgrade10 is activated.
 /// If upgrade 10 is not activated, returns the legacy blocksize limit for the chain (e.g. 32MB for mainnet,
 /// 2MB for testnet4, -excessiveblocksize=XX, etc).

@@ -57,12 +57,12 @@ bool CheckDnftRules(const CTransaction &tx, CValidationState &state, const CCoin
     }
 
     const bool ftForkActive = IsFTForkEnabledForHeightPrev(params, nHeight - 1);
-    // FT-FORK TODO (4I review #2): ftForkActive flips this gate at ftForkHeight WITHOUT changing
-    // any script flag. The fork-boundary mempool purge in validation.cpp (Dis/ConnectTip) fires
-    // only on a GetNextBlockScriptFlags() difference, so a reorg across ftForkHeight would NOT
-    // purge now-invalid FT txs -> BlockAssembler could brick getblocktemplate. Before any real
-    // ftForkHeight is set, generalize that boundary predicate to also compare
-    // IsFTForkEnabledForHeightPrev. Unreachable today (ftForkHeight is the sentinel).
+    // ftForkActive flips this FT-deferral gate at ftForkHeight without changing any script flag.
+    // The fork-boundary mempool purge in validation.cpp (Dis/ConnectTip) is reorg-safe across this
+    // boundary as of Phase 5A: NextBlockUpgradeBoundary() there compares IsFTForkEnabledForHeightPrev
+    // in addition to GetNextBlockScriptFlags, so a reorg across ftForkHeight re-evaluates the mempool
+    // (resolves the 4I review #2 gap). Post-fork, amount-bearing token outputs are governed by
+    // CheckTxTokens (conservation) plus dnft::CheckFtRules (DEVAULT_FT_SPEC.md; 5C).
 
     // --- Single output pass (DEVAULT_NFT_SPEC.md §5, §6, §10.8) ---
     // Collect envelope outputs (the content carriers) and inscribed-item candidates (capability

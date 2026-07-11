@@ -22,6 +22,7 @@
 #include <consensus/validation.h>
 #include <devault/budget.h>
 #include <devault/dnft.h>
+#include <devault/ft.h>
 #include <devault/rewards.h>
 #include <dsproof/dsproof.h>
 #include <dsproof/storage.h>
@@ -725,6 +726,14 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
             if (!dnft::CheckDnftRules(tx, state, view, scriptVerifyFlags,
                                       ::ChainActive().Height() + 1, consensusParams)) {
                 // State filled-in by CheckDnftRules
+                return false;
+            }
+
+            // DeVault fungible-token rules (DEVAULT_FT_SPEC.md): 5A no-op; 5C fills in the deploy +
+            // stateless mint-emission checks. Same prospective height as CheckDnftRules above.
+            if (!dnft::CheckFtRules(tx, state, view, scriptVerifyFlags,
+                                    ::ChainActive().Height() + 1, consensusParams)) {
+                // State filled-in by CheckFtRules
                 return false;
             }
         }
@@ -1619,6 +1628,31 @@ static uint32_t GetNextBlockScriptFlags(const Consensus::Params &params, const C
     return flags;
 }
 
+// True iff the consensus rule set that applies to the block *after* `pindex` differs from the set
+// that applies to the block *after* `pindex->pprev` — i.e. `pindex` sits on an upgrade boundary,
+// so the mempool must be re-evaluated when this block is (dis)connected. Two kinds of boundary:
+//   1. script-VM upgrades, detected by a GetNextBlockScriptFlags() difference (DU1, the BLS/script
+//      boundary, etc.);
+//   2. DeVault rule-only forks that carry NO script flag — the ftForkHeight FT-deferral lift
+//      (DEVAULT_FT_SPEC.md §10; resolves the 4I review #2 gap). Without this comparison, a reorg
+//      across ftForkHeight would leave now-invalid FT txs in the mempool and could brick
+//      getblocktemplate.
+// Requires `pindex->pprev != nullptr` (callers guard this). Declared in validation.h for tests.
+bool NextBlockUpgradeBoundary(const Consensus::Params &params, const CBlockIndex *pindex) {
+    assert(pindex != nullptr && pindex->pprev != nullptr);
+    if (GetNextBlockScriptFlags(params, pindex) != GetNextBlockScriptFlags(params, pindex->pprev)) {
+        return true;
+    }
+    // GetNextBlockScriptFlags(params, X) is evaluated for the block *after* X, i.e. with the
+    // IsDU1Enabled(params, X) == IsDU1EnabledForHeightPrev(params, X->nHeight) convention; mirror
+    // that convention here for the FT fork so both operands describe "the next block after X".
+    if (IsFTForkEnabledForHeightPrev(params, pindex->nHeight) !=
+        IsFTForkEnabledForHeightPrev(params, pindex->pprev->nHeight)) {
+        return true;
+    }
+    return false;
+}
+
 uint32_t GetMemPoolScriptFlags(const Consensus::Params &params, const CBlockIndex *pindex, uint32_t *nextBlockFlags) {
     const uint32_t flags = GetNextBlockScriptFlags(params, pindex);
     if (nextBlockFlags) *nextBlockFlags = flags;
@@ -1953,6 +1987,13 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
         // on disconnect, and -reindex/-reindex-chainstate revalidate identically.
         if (!dnft::CheckDnftRules(tx, state, view, flags, pindex->nHeight, consensusParams)) {
             // State was filled-in by CheckDnftRules
+            return false;
+        }
+
+        // DeVault fungible-token rules (DEVAULT_FT_SPEC.md): 5A no-op; 5C fills in the deploy +
+        // stateless mint-emission checks (the ConnectBlock path gains the per-block mint counter).
+        if (!dnft::CheckFtRules(tx, state, view, flags, pindex->nHeight, consensusParams)) {
+            // State was filled-in by CheckFtRules
             return false;
         }
 
@@ -2439,8 +2480,7 @@ bool CChainState::DisconnectTip(const Config &config,
     // in front of disconnectpool for reprocessing in a future
     // updateMempoolForReorg call
     if (pindexDelete->pprev != nullptr &&
-        GetNextBlockScriptFlags(consensusParams, pindexDelete) !=
-            GetNextBlockScriptFlags(consensusParams, pindexDelete->pprev)) {
+        NextBlockUpgradeBoundary(consensusParams, pindexDelete)) {
         LogPrint(BCLog::MEMPOOL,
                  "Disconnecting mempool due to rewind of upgrade block\n");
         if (disconnectpool) {
@@ -2740,8 +2780,7 @@ bool CChainState::ConnectTip(const Config &config, CValidationState &state,
     // in front of disconnectpool for reprocessing in a future
     // updateMempoolForReorg call
     if (pindexNew->pprev != nullptr &&
-        GetNextBlockScriptFlags(consensusParams, pindexNew) !=
-            GetNextBlockScriptFlags(consensusParams, pindexNew->pprev)) {
+        NextBlockUpgradeBoundary(consensusParams, pindexNew)) {
         LogPrint(BCLog::MEMPOOL,
                  "Disconnecting mempool due to acceptance of upgrade block\n");
         disconnectpool.importMempool(g_mempool);

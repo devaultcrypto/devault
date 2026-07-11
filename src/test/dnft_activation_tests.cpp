@@ -186,4 +186,40 @@ BOOST_AUTO_TEST_CASE(ft_deferral_gate) {
     }
 }
 
+// Phase 5A (the 4I review #2 fix): NextBlockUpgradeBoundary must treat ftForkHeight as a real
+// upgrade boundary even though the FT-deferral lift carries NO script flag, so a reorg across it
+// re-evaluates the mempool. It must also keep detecting the DU1 script-VM boundary.
+BOOST_FIXTURE_TEST_CASE(ft_fork_upgrade_boundary, TestChain100Setup) {
+    const auto &params = ::Params().GetConsensus();
+    LOCK(cs_main);
+
+    const auto idx = [](int h) { return ::ChainActive()[h]; };
+    BOOST_REQUIRE(idx(51) != nullptr && idx(30) != nullptr && idx(30)->pprev != nullptr);
+
+    // DU1 boundary at height 30 (a script-flag change), FT-fork boundary at height 50 (rule-only,
+    // no script flag). At height 50 DU1 is already long active, so the ONLY rule difference across
+    // that boundary is the FT fork — exactly the case the 4I review flagged.
+    {
+        ActivationOverrides ov(30, 50);
+
+        // FT-fork boundary detected despite no script-flag change (the boundary block is the last
+        // pre-FT block; its "next block" is the first FT block).
+        BOOST_CHECK(NextBlockUpgradeBoundary(params, idx(50)));
+        BOOST_CHECK(!NextBlockUpgradeBoundary(params, idx(49)));
+        BOOST_CHECK(!NextBlockUpgradeBoundary(params, idx(51)));
+
+        // Regression: the DU1 script-VM boundary is still detected, and its neighbours are not.
+        BOOST_CHECK(NextBlockUpgradeBoundary(params, idx(30)));
+        BOOST_CHECK(!NextBlockUpgradeBoundary(params, idx(29)));
+        BOOST_CHECK(!NextBlockUpgradeBoundary(params, idx(31)));
+    }
+
+    // With the FT fork disabled (sentinel), height 50 is no longer a boundary; DU1 still is.
+    {
+        ActivationOverrides ov(30, std::nullopt);
+        BOOST_CHECK(!NextBlockUpgradeBoundary(params, idx(50)));
+        BOOST_CHECK(NextBlockUpgradeBoundary(params, idx(30)));
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
