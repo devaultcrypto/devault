@@ -113,3 +113,11 @@ add_fuzz_target(
     # Sources
     dnft_rules.cpp
 )
+
+add_fuzz_target(
+    fuzz-ft_envelope
+    ft_envelope
+
+    # Sources
+    ft_envelope.cpp
+)

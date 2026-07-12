@@ -5,48 +5,13 @@
 
 #include <crypto/common.h>
 #include <crypto/sha256.h>
+#include <devault/envelope_util.h> // NextElement (shared with the DVFT codec since Phase 5B)
 
 #include <cstring>
 
 namespace dnft {
 
 namespace {
-
-// Read the next script element starting at `pc` (< `end`).
-//   returns false  -> end reached, or a truncated/oversized push (malformed script)
-//   returns true, isPush=true,  data=<span of pushed bytes>  -> a canonical data push (OP_0..OP_PUSHDATA4)
-//   returns true, isPush=false                               -> some other opcode (not a data push)
-// Bounds logic mirrors GetScriptOp() exactly but yields a zero-copy Span instead of copying.
-bool NextElement(const uint8_t *&pc, const uint8_t *end, bool &isPush, Span<const uint8_t> &data) {
-    if (pc >= end) {
-        return false;
-    }
-    const uint32_t opcode = *pc++;
-    if (opcode <= OP_PUSHDATA4) {
-        uint32_t nSize = 0;
-        if (opcode < OP_PUSHDATA1) {
-            nSize = opcode;
-        } else if (opcode == OP_PUSHDATA1) {
-            if (end - pc < 1) return false;
-            nSize = *pc++;
-        } else if (opcode == OP_PUSHDATA2) {
-            if (end - pc < 2) return false;
-            nSize = ReadLE16(pc);
-            pc += 2;
-        } else { // OP_PUSHDATA4
-            if (end - pc < 4) return false;
-            nSize = ReadLE32(pc);
-            pc += 4;
-        }
-        if (uint32_t(end - pc) < nSize) return false;
-        data = Span<const uint8_t>(pc, size_t(nSize));
-        pc += nSize;
-        isPush = true;
-        return true;
-    }
-    isPush = false;
-    return true;
-}
 
 // Internal span-based parse result (zero-copy views into the input script).
 struct SpanEnvelope {
