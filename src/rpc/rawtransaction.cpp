@@ -35,6 +35,7 @@
 #include <util/check.h>
 #include <util/saltedhashers.h>
 #include <devault/dnft_envelope.h>
+#include <devault/ft_envelope.h>
 #include <util/strencodings.h>
 #include <validation.h>
 #include <validationinterface.h>
@@ -91,6 +92,56 @@ static void AddDnftDecode(UniValue::Object &entry, const CTransaction &tx) {
     }
 }
 
+// DeVault fungible tokens (DEVAULT_FT_SPEC.md §8, phase 5D): surface any DVFT deploy/mint marker
+// alongside the DNFT decode, so `decoderawtransaction` / `getrawtransaction` explain a token
+// transaction without an external tool.
+static void AddFtDecode(UniValue::Object &entry, const CTransaction &tx) {
+    UniValue::Array arr;
+    for (size_t n = 0; n < tx.vout.size(); ++n) {
+        if (!dnft::IsFtEnvelope(tx.vout[n].scriptPubKey)) {
+            continue;
+        }
+        const dnft::ParsedFtEnvelope p = dnft::ParseFtEnvelope(tx.vout[n].scriptPubKey);
+        UniValue::Object o;
+        o.emplace_back("vout", int64_t(n));
+        o.emplace_back("valid", p.valid);
+        if (!p.valid) {
+            o.emplace_back("error", p.error);
+        } else if (p.is_mint) {
+            o.emplace_back("type", "mint");
+            // The marker names the DEPLOY txid (internal byte order on the wire).
+            o.emplace_back("deploy_txid",
+                           TxId(uint256(std::vector<uint8_t>(p.mint_deploy_txid.begin(),
+                                                             p.mint_deploy_txid.end()))).GetHex());
+        } else {
+            o.emplace_back("type", "deploy");
+            o.emplace_back("symbol", std::string(p.symbol.begin(), p.symbol.end()));
+            o.emplace_back("name", std::string(p.name.begin(), p.name.end()));
+            o.emplace_back("decimals", int64_t(p.decimals));
+            o.emplace_back("mode", p.mode == dnft::FT_MODE_OPEN ? "open" : "fixed");
+            if (p.mode == dnft::FT_MODE_OPEN) {
+                o.emplace_back("quantity", int64_t(p.quantity_per_mint));
+                o.emplace_back("per_block_limit", int64_t(p.per_block_limit));
+                o.emplace_back("start_height", int64_t(p.start_height));
+                if (p.max_mints) {
+                    o.emplace_back("max_mints", int64_t(*p.max_mints));
+                }
+                if (p.end_height) {
+                    o.emplace_back("end_height", int64_t(*p.end_height));
+                }
+                o.emplace_back("premine", int64_t(p.premine));
+            }
+            if (p.metadata) {
+                o.emplace_back("metadata", HexStr(*p.metadata));
+            }
+        }
+        arr.emplace_back(std::move(o));
+    }
+    if (!arr.empty()) {
+        entry.emplace_back("dft", std::move(arr));
+    }
+}
+
 static UniValue::Object TxToJSON(const Config &config, const CTransaction &tx, const BlockHash &hashBlock,
                                  const CTxUndo *txundo, const TransactionFormatOptions &options) {
     const bool hasHash = !hashBlock.IsNull();
@@ -112,6 +163,7 @@ static UniValue::Object TxToJSON(const Config &config, const CTransaction &tx, c
     // data into the returned UniValue.
     UniValue::Object entry = TransactionToUniv(config, tx, txundo, options, extraReserve);
     AddDnftDecode(entry, tx);
+    AddFtDecode(entry, tx);
 
     if (hasHash) {
         entry.emplace_back("blockhash", hashBlock.GetHex());
@@ -964,6 +1016,7 @@ static UniValue decoderawtransaction(const Config &config,
     const CTransaction ctx(std::move(mtx));
     UniValue::Object entry = TransactionToUniv(config, ctx);
     AddDnftDecode(entry, ctx);
+    AddFtDecode(entry, ctx);
     return UniValue(std::move(entry));
 }
 

@@ -22,6 +22,7 @@ add_library(wallet
 	mnemonic.cpp
 	psbtwallet.cpp
 	rpcdnft.cpp
+	rpcft.cpp
 	rpcdump.cpp
 	rpcwallet.cpp
 	wallet.cpp

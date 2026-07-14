@@ -31,6 +31,7 @@
 #include <wallet/legacywallet.h>
 #include <wallet/psbtwallet.h>
 #include <wallet/rpcdnft.h>
+#include <wallet/rpcft.h>
 #include <wallet/rpcwallet.h>
 #include <wallet/mnemonic.h>
 #include <wallet/wallet.h>
@@ -4934,6 +4935,14 @@ static const ContextFreeRPCCommand commands[] = {
     { "dnft",               "burnnft",                      burnnft,                      {"category","commitment"} },
     { "dnft",               "listnfts",                     listnfts,                     {} },
     { "dnft",               "getnftinfo",                   getnftinfo,                   {"category","commitment"} },
+
+    // DeVault fungible tokens (DFT) -- DEVAULT_FT_SPEC.md §11, phase 5D
+    { "dft",                "deployft",                     deployft,                     {"symbol","name","decimals","mode","options"} },
+    { "dft",                "mintft",                       mintft,                       {"deploy_txid","count","address"} },
+    { "dft",                "sendft",                       sendft,                       {"category","amount","address"} },
+    { "dft",                "getftinfo",                    getftinfo,                    {"deploy_txid"} },
+    { "dft",                "listfttokens",                 listfttokens,                 {} },
+    { "dft",                "getftbalance",                 getftbalance,                 {"category"} },
     { "wallet",             "backupwallet",                 backupwallet,                 {"destination"} },
     { "wallet",             "createwallet",                 createwallet,                 {"wallet_name", "disable_private_keys", "blank", "passphrase", "mnemonic"} },
     { "wallet",             "migratelegacywallet",          migratelegacywallet,          {"passphrase", "new_wallet_name", "legacy_path", "new_passphrase", "rescan"} },

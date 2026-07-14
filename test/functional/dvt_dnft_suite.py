@@ -25,6 +25,7 @@ TESTS = [
     ("dvt_m13_ft_rules.py", True),        # FT consensus core: registry, schedule, carve-out (5C)
     ("dvt_m9_dnft_binding.py", True),     # the consensus binding rule (raw-tx matrix)
     ("dvt_4d_wallet_dnft.py", True),      # wallet RPC lifecycle
+    ("dvt_5d_wallet_ft.py", True),        # FT wallet RPCs: deploy/mint/send, funding safety (5D)
     ("dvt_4e_nftindex.py", True),         # -nftindex + collection RPCs, reorg, rebuild
     ("dvt_4i_index_reorg.py", True),      # multi-block-same-category reorg (4I review F2)
     ("dvt_4f_bigmint.py", False),         # 990KB mints, relay, ~8MB blocks, persistence
