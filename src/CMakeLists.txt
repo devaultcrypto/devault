@@ -564,6 +564,7 @@ add_library(server
   devault/budget.cpp
   devault/dnft.cpp
   devault/ft.cpp
+  devault/ft_registry.cpp
   devault/rewards.cpp
   devault/rewards_calculation.cpp
   devault/rewardsview.cpp

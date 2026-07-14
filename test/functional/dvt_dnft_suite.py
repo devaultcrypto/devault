@@ -22,6 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TESTS = [
     ("dvt_m8_du1_activation.py", True),   # DU1 activation boundary + script-flag bundle
     ("dvt_m12_ft_activation.py", True),   # FT-fork activation + reorg-safe boundary (5A)
+    ("dvt_m13_ft_rules.py", True),        # FT consensus core: registry, schedule, carve-out (5C)
     ("dvt_m9_dnft_binding.py", True),     # the consensus binding rule (raw-tx matrix)
     ("dvt_4d_wallet_dnft.py", True),      # wallet RPC lifecycle
     ("dvt_4e_nftindex.py", True),         # -nftindex + collection RPCs, reorg, rebuild

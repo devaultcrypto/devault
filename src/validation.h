@@ -662,6 +662,15 @@ bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view);
 bool ReplayColdRewardsToTip(const Consensus::Params &consensusParams)
     EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
+/**
+ * Reconcile the FT deploy registry (g_ftRegistry) to the active-chain tip at startup [5C]: no-op if
+ * already in sync, forward-replay a gap if the registry lags the chainstate (crash recovery), or
+ * rebuild from the FT activation height if it is empty/unrelated. Same structure, and the same
+ * chainstate-first flush ordering, as the cold-reward reconciliation.
+ */
+bool ReplayFtRegistryToTip(const Consensus::Params &consensusParams)
+    EXCLUSIVE_LOCKS_REQUIRED(cs_main);
+
 /** Find the last common block between the parameter chain and a locator. */
 CBlockIndex *FindForkInGlobalIndex(const CChain &chain,
                                    const CBlockLocator &locator)

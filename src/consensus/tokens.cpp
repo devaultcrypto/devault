@@ -107,7 +107,8 @@ bool CheckPreActivationSanity(const CTransaction &tx, CValidationState &state, c
 } // namespace
 
 bool CheckTxTokens(const CTransaction &tx, CValidationState &state, const CCoinsViewCache &view,
-                   const uint32_t scriptFlags, const int64_t firstTokenEnabledBlockHeight) {
+                   const uint32_t scriptFlags, const int64_t firstTokenEnabledBlockHeight,
+                   const token::FtMintAllowance *ftMintAllowance) {
     if ((scriptFlags & SCRIPT_ENABLE_TOKENS) == 0) {
         // Pre-activation we must also do some checks because of the way we changed how serialization works.
         return CheckPreActivationSanity(tx, state, view);
@@ -207,6 +208,23 @@ bool CheckTxTokens(const CTransaction &tx, CValidationState &state, const CCoins
                     }
                 }
             }
+        }
+
+        // DeVault DFT open-mint carve-out (DEVAULT_FT_SPEC.md §6.4). This is the ONE place where
+        // DeVault departs from stock CashTokens conservation: a validated open-mint may create
+        // exactly `amount` fungible tokens of `category` out of thin air. dnft::CheckFtRules has
+        // already run (it MUST precede this function) and has verified the mint marker, resolved the
+        // deploy registry entry, enforced the emission schedule, and pinned this transaction's NET
+        // creation of that category to exactly `amount`.
+        //
+        // We implement the carve-out by crediting the allowance as a VIRTUAL INPUT. Everything below
+        // is then reused verbatim -- the output scan finds the category in inputAmountsByCategory,
+        // takes the ordinary non-genesis safeSub path, and still enforces overflow and
+        // "bad-txns-token-in-belowout". So the mint is permitted for exactly `amount` and not one
+        // token more, and no other category's validation changes in any way.
+        if (ftMintAllowance != nullptr && ftMintAllowance->IsSet()) {
+            auto &catAmount = inputAmountsByCategory[ftMintAllowance->category];
+            catAmount = catAmount.safeAdd(ftMintAllowance->amount).value(); // throws on overflow
         }
 
         // Scan outputs, handle spends and genesis tallies, and NFT ownership transfer

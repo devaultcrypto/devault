@@ -19,6 +19,7 @@
 #include <compat/sanity.h>
 #include <config.h>
 #include <consensus/activation.h>
+#include <devault/ft_registry.h>
 #include <devault/rewards.h>
 #include <devault/rewardsview.h>
 #include <dsproof/dsproof.h>
@@ -325,6 +326,7 @@ void Shutdown(NodeContext &node) {
         pcoinscatcher.reset();
         pcoinsdbview.reset();
         g_coldRewards.reset(); // cold-reward engine + its DB [3D]
+        g_ftRegistry.reset();  // FT deploy registry + its DB [5C]
         pblocktree.reset();
     }
     for (const auto &client : node.chain_clients) {
@@ -2737,6 +2739,21 @@ bool AppInitMain(Config &config, RPCServer &rpcServer,
                     g_coldRewards->Load(rewardsBestBlock);
                 }
 
+                // DeVault DFT [5C]: open the fungible-token deploy registry (a chainstate projection
+                // at <datadir>/ftregistry) and load it into memory. Consensus-critical and therefore
+                // ALWAYS constructed -- never behind a flag, so no node's validity verdict can depend
+                // on an optional index. Wiped alongside the chainstate on -reindex/-reindex-chainstate
+                // so the block replay rebuilds it; ReplayFtRegistryToTip reconciles it to the tip.
+                {
+                    g_ftRegistry.reset(); // release any handle from a prior load attempt (LevelDB dir lock)
+                    const bool fWipeFtRegistry = fReset || fReindexChainState;
+                    auto ftDB = std::make_unique<CFtRegistryDB>(GetDataDir() / "ftregistry", 4 << 20,
+                                                                false, fWipeFtRegistry);
+                    g_ftRegistry = std::make_unique<CFtRegistry>(std::move(ftDB));
+                    BlockHash ftBestBlock;
+                    g_ftRegistry->Load(ftBestBlock);
+                }
+
                 bool is_coinsview_empty = fReset || fReindexChainState ||
                                           pcoinsTip->GetBestBlock().IsNull();
                 if (!is_coinsview_empty) {
@@ -2786,6 +2803,16 @@ bool AppInitMain(Config &config, RPCServer &rpcServer,
                     if (!ReplayColdRewardsToTip(chainparams.GetConsensus())) {
                         strLoadError =
                             _("Unable to reconcile the cold-reward database. Run "
+                              "-reindex-chainstate.");
+                        break;
+                    }
+
+                    // DeVault DFT [5C]: same reconciliation for the deploy registry -- no-op if in
+                    // sync, forward-replay a crash gap, or rebuild from the FT activation height.
+                    // It is rebuildable from block data alone (deploy validity is view-free).
+                    if (!ReplayFtRegistryToTip(chainparams.GetConsensus())) {
+                        strLoadError =
+                            _("Unable to reconcile the fungible-token deploy registry. Run "
                               "-reindex-chainstate.");
                         break;
                     }

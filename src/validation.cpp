@@ -23,6 +23,7 @@
 #include <devault/budget.h>
 #include <devault/dnft.h>
 #include <devault/ft.h>
+#include <devault/ft_registry.h>
 #include <devault/rewards.h>
 #include <dsproof/dsproof.h>
 #include <dsproof/storage.h>
@@ -715,7 +716,22 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
                 firstTokenBlockHeight = std::numeric_limits<int64_t>::max();
             }
 
-            if ( ! CheckTxTokens(tx, state, view, scriptVerifyFlags, firstTokenBlockHeight)) {
+            // DeVault fungible-token rules (DEVAULT_FT_SPEC.md §6). MUST run BEFORE CheckTxTokens
+            // to supply the open-mint conservation carve-out (§6.4). The prospective confirmation
+            // height for a mempool acceptance is one past the current tip. A null FtBlockContext
+            // selects the LOOSE mempool check: the in-block mint index is unknowable here, so only
+            // the emission window is enforced; the strict per-block cap is applied by
+            // BlockAssembler when packing and backstopped by ConnectBlock (spec §6.6).
+            token::FtMintAllowance ftAllowance;
+            if (!dnft::CheckFtRules(tx, state, view, scriptVerifyFlags,
+                                    ::ChainActive().Height() + 1, consensusParams,
+                                    /*ctx=*/nullptr, &ftAllowance)) {
+                // State filled-in by CheckFtRules
+                return false;
+            }
+
+            if ( ! CheckTxTokens(tx, state, view, scriptVerifyFlags, firstTokenBlockHeight,
+                                 &ftAllowance)) {
                 // State filled-in by CheckTxTokens
                 return false;
             }
@@ -726,14 +742,6 @@ AcceptToMemoryPoolWorker(const Config &config, CTxMemPool &pool,
             if (!dnft::CheckDnftRules(tx, state, view, scriptVerifyFlags,
                                       ::ChainActive().Height() + 1, consensusParams)) {
                 // State filled-in by CheckDnftRules
-                return false;
-            }
-
-            // DeVault fungible-token rules (DEVAULT_FT_SPEC.md): 5A no-op; 5C fills in the deploy +
-            // stateless mint-emission checks. Same prospective height as CheckDnftRules above.
-            if (!dnft::CheckFtRules(tx, state, view, scriptVerifyFlags,
-                                    ::ChainActive().Height() + 1, consensusParams)) {
-                // State filled-in by CheckFtRules
                 return false;
             }
         }
@@ -1555,6 +1563,15 @@ DisconnectResult ApplyBlockUndo(CBlockUndo &&blockUndo, const CBlock &block, con
         g_coldRewards->SetBestBlock(block.hashPrevBlock);
     }
 
+    // DeVault DFT [5C]: reverse this block's effect on the deploy registry -- erase every entry
+    // keyed by one of its txids. Exact, because a txid is in the registry IFF that transaction was a
+    // registered deploy (all other erases are no-ops); no undo data and no re-validation needed.
+    // There is NOTHING else to roll back: emission carries no state (the cap is enforced by the
+    // stateless height schedule), so a mint simply re-derives its validity wherever it lands.
+    if (g_ftRegistry && !g_ftRegistrySuppress.load()) {
+        g_ftRegistry->UndoBlock(block, block.hashPrevBlock);
+    }
+
     // Move best block pointer to previous block.
     view.SetBestBlock(block.hashPrevBlock);
 
@@ -1931,6 +1948,13 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
         firstTokenBlockHeight = std::numeric_limits<int64_t>::max();
     }
 
+    // DeVault DFT [5C]: per-block FT state -- the in-block mint counts (the index `k` that the
+    // stateless emission schedule is checked against) and this block's staged deploy registrations.
+    // Purely transient: no cross-block emission counter exists anywhere. Built even under
+    // fJustCheck, because a mining template must be validated against the per-block cap too; only
+    // the COMMIT of the staged deploys is skipped there.
+    FtBlockContext ftCtx;
+
     size_t txIndex = 0;
     for (const auto &ptx : block.vtx) {
         const CTransaction &tx = *ptx;
@@ -1974,10 +1998,22 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
             }
         }
 
+        // DeVault fungible-token rules (DEVAULT_FT_SPEC.md §6). MUST run BEFORE CheckTxTokens: a
+        // validated open-mint requires the conservation carve-out (§6.4), which CheckTxTokens
+        // applies by crediting `ftAllowance` as a virtual input. This also enforces the stateless
+        // emission schedule against the in-block mint index held in ftCtx, and stages the block's
+        // deploys for the registry.
+        token::FtMintAllowance ftAllowance;
+        if (!dnft::CheckFtRules(tx, state, view, flags, pindex->nHeight, consensusParams, &ftCtx,
+                                &ftAllowance)) {
+            // State was filled-in by CheckFtRules
+            return false;
+        }
+
         // Check token spends are within consensus
         // Note: we pass coinbase txn here too, which is what we want, since coinbase txn should have NO token data
         // post-activation of DU1, and this function checks that requirement.
-        if ( ! CheckTxTokens(tx, state, view, flags, firstTokenBlockHeight)) {
+        if ( ! CheckTxTokens(tx, state, view, flags, firstTokenBlockHeight, &ftAllowance)) {
             // State was filled-in by CheckTxTokens
             return false;
         }
@@ -1987,13 +2023,6 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
         // on disconnect, and -reindex/-reindex-chainstate revalidate identically.
         if (!dnft::CheckDnftRules(tx, state, view, flags, pindex->nHeight, consensusParams)) {
             // State was filled-in by CheckDnftRules
-            return false;
-        }
-
-        // DeVault fungible-token rules (DEVAULT_FT_SPEC.md): 5A no-op; 5C fills in the deploy +
-        // stateless mint-emission checks (the ConnectBlock path gains the per-block mint counter).
-        if (!dnft::CheckFtRules(tx, state, view, flags, pindex->nHeight, consensusParams)) {
-            // State was filled-in by CheckFtRules
             return false;
         }
 
@@ -2171,6 +2200,14 @@ bool CChainState::ConnectBlock(const CBlock &block, CValidationState &state,
         g_coldRewards->SetBestBlock(pindex->GetBlockHash());
     }
 
+    // DeVault DFT [5C]: the block is committed, so commit its staged deploy registrations. Staging
+    // (rather than writing during the tx loop) means a block that fails validation late can never
+    // pollute the registry. Only reached when !fJustCheck (the function returned earlier otherwise),
+    // so a mining template never mutates the registry; skipped during VerifyDB (throw-away view).
+    if (g_ftRegistry && !g_ftRegistrySuppress.load()) {
+        g_ftRegistry->ApplyBlock(ftCtx, pindex->GetBlockHash());
+    }
+
     return true;
 }
 
@@ -2325,6 +2362,13 @@ static bool FlushStateToDisk(const CChainParams &chainparams,
                 if (g_coldRewards &&
                     !g_coldRewards->Flush(pcoinsTip->GetBestBlock())) {
                     return AbortNode(state, "Failed to write cold-reward database");
+                }
+
+                // DeVault DFT [5C]: same chainstate-first ordering for the deploy registry, so it is
+                // never AHEAD of the chainstate and an unclean stop leaves at most a forward-
+                // replayable gap (reconciled at startup by ReplayFtRegistryToTip).
+                if (g_ftRegistry && !g_ftRegistry->Flush(pcoinsTip->GetBestBlock())) {
+                    return AbortNode(state, "Failed to write the fungible-token deploy registry");
                 }
             }
         }
@@ -4950,6 +4994,13 @@ bool CVerifyDB::VerifyDB(const Config &config, CCoinsView *coinsview,
         ~ColdRewardsSuppressGuard() { g_coldRewardsSuppress = false; }
     } coldRewardsSuppressGuard;
 
+    // DeVault DFT [5C]: likewise suppress deploy-registry mutations during VerifyDB. Lookups still
+    // work (the map is untouched), so mint validation during the reconnect pass is unaffected.
+    struct FtRegistrySuppressGuard {
+        FtRegistrySuppressGuard() { g_ftRegistrySuppress = true; }
+        ~FtRegistrySuppressGuard() { g_ftRegistrySuppress = false; }
+    } ftRegistrySuppressGuard;
+
     const CChainParams &params = config.GetChainParams();
     const Consensus::Params &consensusParams = params.GetConsensus();
 
@@ -5241,6 +5292,138 @@ bool ReplayBlocks(const Consensus::Params &params, CCoinsView *view) {
 //! Replay the cold-reward block hooks for active-chain heights [startHeight, tip] to (re)build the
 //! engine's in-memory state (the caller flushes afterwards). Returns false on a block-read or
 //! reward-validation failure. Part of startup reconciliation [3D.3].
+/**
+ * Re-derive the FT deploy registry for one height range of the ACTIVE chain [5C].
+ *
+ * This calls the very same dnft::ValidateFtDeploy that ConnectBlock uses. Because deploy validity is
+ * a pure function of (transaction, height) -- view-free by design -- the replay cannot possibly
+ * disagree with the connect path, and it needs no chainstate and no undo data: block bytes suffice.
+ * The activation gate is applied identically (a DVFT envelope in a pre-fork block is inert and
+ * registers nothing), so the rebuilt registry is bit-for-bit what the connect path would have built.
+ */
+static bool ReplayFtRegistryRange(const Consensus::Params &consensusParams, int startHeight,
+                                  const CBlockIndex *tip) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
+    for (int h = startHeight; h <= tip->nHeight; ++h) {
+        if (ShutdownRequested()) {
+            return error("ReplayFtRegistry: shutdown requested at height %d", h);
+        }
+        const CBlockIndex *pindex = ::ChainActive()[h];
+        if (pindex == nullptr) {
+            return error("ReplayFtRegistry: missing active-chain block at height %d", h);
+        }
+        // Mirror CheckFtRules' gating exactly: tokens (DU1) AND the FT fork must be active for the
+        // block at this height, else no deploy in it was ever registered.
+        const bool tokensActive = IsDU1EnabledForHeightPrev(consensusParams, h - 1);
+        const bool ftActive = IsFTForkEnabledForHeightPrev(consensusParams, h - 1);
+        if (!tokensActive || !ftActive) {
+            continue;
+        }
+        CBlock block;
+        if (!ReadBlockFromDisk(block, pindex, consensusParams)) {
+            return error("ReplayFtRegistry: cannot read block %d to rebuild the FT deploy registry "
+                         "(pruned node?). Run -reindex-chainstate or resync.",
+                         h);
+        }
+        FtBlockContext ctx;
+        for (const auto &ptx : block.vtx) {
+            if (ptx->IsCoinBase()) {
+                continue;
+            }
+            FtDeployRecord rec;
+            bool isOpen = false;
+            CValidationState st;
+            if (!dnft::ValidateFtDeploy(*ptx, h, rec, isOpen, st)) {
+                // A block on the ACTIVE chain passed ConnectBlock, so its deploys were valid. If we
+                // disagree now, our rules are not deterministic -- fail loudly rather than build a
+                // registry that differs from the one consensus actually used.
+                return error("ReplayFtRegistry: tx %s in active-chain block %d fails deploy "
+                             "validation during replay (%s) -- non-deterministic FT rules",
+                             ptx->GetId().ToString(), h, st.GetRejectReason());
+            }
+            if (isOpen) {
+                ctx.pendingDeploys.emplace_back(ptx->GetId(), rec);
+            }
+        }
+        g_ftRegistry->ApplyBlock(ctx, pindex->GetBlockHash());
+        if ((h % 50000) == 0) {
+            uiInterface.InitMessage(
+                strprintf("Rebuilding fungible-token deploy registry (%d / %d)...", h, tip->nHeight));
+        }
+    }
+    return true;
+}
+
+/**
+ * Reconcile the FT deploy registry to the active-chain tip at startup [5C] -- the same structure as
+ * ReplayColdRewardsToTip. Three cases:
+ *   - registry best block == tip         -> nothing to do (clean shutdown / lockstep flush)
+ *   - registry best block is an ancestor -> forward-replay the gap (crash-between-flushes window)
+ *   - registry empty / unrelated         -> rebuild from scratch (first run after the FT fork, repair)
+ * Because the registry is flushed AFTER the chainstate it is never ahead of it, so a forward replay
+ * (never a roll-back) always suffices for a crash.
+ */
+bool ReplayFtRegistryToTip(const Consensus::Params &consensusParams) {
+    if (!g_ftRegistry) {
+        return true;
+    }
+    const CBlockIndex *tip = ::ChainActive().Tip();
+    if (tip == nullptr) {
+        return true; // empty chain -- nothing to reconcile
+    }
+
+    const BlockHash registryBest = g_ftRegistry->GetBestBlock();
+    if (registryBest == tip->GetBlockHash()) {
+        return true; // in sync
+    }
+
+    int startHeight = 0;
+    if (!registryBest.IsNull()) {
+        const CBlockIndex *pindexBest = LookupBlockIndex(registryBest);
+        if (pindexBest != nullptr && ::ChainActive().Contains(pindexBest)) {
+            // Ancestor of the tip: forward-replay only the gap.
+            startHeight = pindexBest->nHeight + 1;
+            LogPrintf("FT registry: lags the chainstate by %d block(s); forward-replaying to the "
+                      "tip.\n",
+                      tip->nHeight - pindexBest->nHeight);
+        } else {
+            LogPrintf("FT registry: best block %s is not on the active chain; rebuilding.\n",
+                      registryBest.ToString());
+            g_ftRegistry->Clear();
+        }
+    } else if (g_ftRegistry->Size() > 0) {
+        // Records but no best block: cannot trust the state.
+        LogPrintf("FT registry: records present but no best block; rebuilding.\n");
+        g_ftRegistry->Clear();
+    }
+
+    if (startHeight == 0) {
+        // Full rebuild: start at the first block that could possibly contain a registrable deploy.
+        g_ftRegistry->Clear();
+        const int32_t ftActivation = GetFTForkActivationHeight(consensusParams);
+        // Rules apply from ftActivation + 1 onward; guard against the sentinel/overflow.
+        startHeight = (ftActivation >= tip->nHeight) ? tip->nHeight + 1 : ftActivation + 1;
+        if (startHeight < 1) {
+            startHeight = 1;
+        }
+        if (startHeight <= tip->nHeight) {
+            LogPrintf("FT registry: rebuilding from height %d to %d...\n", startHeight, tip->nHeight);
+        }
+    }
+
+    if (startHeight > tip->nHeight) {
+        // Nothing to replay (e.g. the FT fork has not activated yet): just tag the tip.
+        g_ftRegistry->SetBestBlock(tip->GetBlockHash());
+        return true;
+    }
+
+    if (!ReplayFtRegistryRange(consensusParams, startHeight, tip)) {
+        return false;
+    }
+    LogPrintf("FT registry: reconciled to height %d (%d open-mint deploy(s)).\n", tip->nHeight,
+              g_ftRegistry->Size());
+    return true;
+}
+
 static bool ReplayColdRewardRange(const Consensus::Params &consensusParams, int startHeight,
                                   const CBlockIndex *tip) EXCLUSIVE_LOCKS_REQUIRED(cs_main) {
     for (int h = startHeight; h <= tip->nHeight; ++h) {
