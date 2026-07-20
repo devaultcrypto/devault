@@ -1,13 +1,20 @@
 # Copyright (c) 2017 The Bitcoin developers
 
 set(CMAKE_SYSTEM_NAME Darwin)
-set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
 # Use given TOOLCHAIN_PREFIX if specified
 if(CMAKE_TOOLCHAIN_PREFIX)
   set(TOOLCHAIN_PREFIX ${CMAKE_TOOLCHAIN_PREFIX})
 else()
-  set(TOOLCHAIN_PREFIX ${CMAKE_SYSTEM_PROCESSOR}-apple-darwin23)
+  set(TOOLCHAIN_PREFIX x86_64-apple-darwin23)
+endif()
+
+string(REGEX MATCH "^[^-]+" CMAKE_SYSTEM_PROCESSOR ${TOOLCHAIN_PREFIX})
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+  # CMake and the Apple SDK use arm64, while GNU target triples use aarch64.
+  set(CMAKE_OSX_ARCHITECTURES arm64)
+else()
+  set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
 endif()
 
 # On OSX, we use clang by default.
@@ -20,8 +27,7 @@ set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
 # On OSX we use various stuff from Apple's SDK.
 set(OSX_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/depends/SDKs/MacOSX14.5.sdk")
 set(CMAKE_OSX_SYSROOT ${OSX_SDK_PATH})
-set(CMAKE_OSX_DEPLOYMENT_TARGET 14.5)
-set(CMAKE_OSX_ARCHITECTURES x86_64)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 12.0)
 
 # target environment on the build host system
 #   set 1st to dir with the cross compiler's C/C++ headers/libs

@@ -68,14 +68,13 @@ umask 0022
 export OUTDIR_BASE="${OUTDIR_BASE:-${REPO_ROOT}/guix-build/output/${VERSION}}"
 
 # --- Host -> CMake toolchain file map --------------------------------------
-# (Apple-Silicon entry depends on the OSX.cmake fix tracked in the impl plan, G4.)
 declare -gA CMAKE_TOOLCHAIN_FILE=(
     [x86_64-linux-gnu]="cmake/platforms/Linux64.cmake"
     [x86_64-w64-mingw32]="cmake/platforms/Win64.cmake"
     [aarch64-linux-gnu]="cmake/platforms/LinuxAArch64.cmake"
     [x86_64-apple-darwin23]="cmake/platforms/OSX.cmake"
-    [arm64-apple-darwin23]="cmake/platforms/OSXArm64.cmake"   # TODO(G4): create/parameterize
+    [aarch64-apple-darwin23]="cmake/platforms/OSX.cmake"
 )
 
 # Full mandatory release set (none optional — cb 2026-06-13).
-export HOSTS_DEFAULT="x86_64-linux-gnu x86_64-w64-mingw32 aarch64-linux-gnu x86_64-apple-darwin23 arm64-apple-darwin23"
+export HOSTS_DEFAULT="x86_64-linux-gnu x86_64-w64-mingw32 aarch64-linux-gnu x86_64-apple-darwin23 aarch64-apple-darwin23"

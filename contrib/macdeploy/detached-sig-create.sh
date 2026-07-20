@@ -7,8 +7,9 @@ export LC_ALL=C
 set -e
 
 ROOTDIR=dist
-BUNDLE="${ROOTDIR}/BitcoinCashNode-Qt.app"
+BUNDLE="${BUNDLE:-${ROOTDIR}/DeVault-Qt.app}"
 CODESIGN=codesign
+PAGESTUFF="${PAGESTUFF:-./pagestuff}"
 TEMPDIR=sign.temp
 TEMPLIST="${TEMPDIR}/signatures.txt"
 OUT=signature.tar.gz
@@ -27,8 +28,8 @@ ${CODESIGN} -f --file-list ${TEMPLIST} "$@" "${BUNDLE}"
 
 grep -Fv CodeResources < "${TEMPLIST}" | while read -r i; do
   TARGETFILE="${BUNDLE}/$(echo "${i}" | sed "s|.*${BUNDLE}/||")"
-  SIZE=$(pagestuff "$i" -p | tail -2 | grep size | sed 's/[^0-9]*//g')
-  OFFSET=$(pagestuff "$i" -p | tail -2 | grep offset | sed 's/[^0-9]*//g')
+  SIZE=$("${PAGESTUFF}" "$i" -p | tail -2 | grep size | sed 's/[^0-9]*//g')
+  OFFSET=$("${PAGESTUFF}" "$i" -p | tail -2 | grep offset | sed 's/[^0-9]*//g')
   SIGNFILE="${TEMPDIR}/${OUTROOT}/${TARGETFILE}.sign"
   DIRNAME="$(dirname "${SIGNFILE}")"
   mkdir -p "${DIRNAME}"

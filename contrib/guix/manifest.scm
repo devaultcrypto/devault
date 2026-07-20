@@ -16,8 +16,13 @@
 ;;; branches (G2/G3/G4) still need validation against the pin as each phase is brought up.
 
 (use-modules (gnu packages)
+             (gnu packages cdrom)
              (gnu packages cross-base)        ; cross-gcc / cross-binutils / cross-libc
              (gnu packages gcc)               ; gcc-12 (base compiler for the linux cross toolchain)
+             (gnu packages gnome)
+             (gnu packages image)
+             (gnu packages imagemagick)
+             (gnu packages llvm)
              (guix profiles))
 
 ;;; ---------------------------------------------------------------------------
@@ -42,7 +47,7 @@
         "gperf"                     ; fontconfig
         "file"                      ; many configure scripts probe with `file`
         ;; scripting
-        "python"                    ; build/codegen scripts (xcb-proto, qt)
+        "python" "python-setuptools" ; build/codegen scripts and depends' native Python modules
         "perl"                      ; openssl/qt build steps in depends
         ;; archive / text / determinism utilities
         "coreutils"                 ; touch --date, sha256sum, sort, ...
@@ -129,12 +134,17 @@
      (list (specification->package "gcc-cross-x86_64-w64-mingw32-toolchain@14")
            (specification->package "nsis-x86_64")))
 
-    ;; G4 — macOS (x86_64 + arm64 apple-darwin23): clang + cctools/ld64/libtapi, plus the
-    ;; builder-supplied MacOSX14.5.sdk under depends/SDKs/ (NOT in this manifest).
-    ;; TODO(G4): port Core's clang/cctools/ld64 set; also fix OSX.cmake's hardcoded x86_64.
+    ;; G4 — macOS targets use clang/lld from Guix and the builder-supplied Apple SDK.
+    ;; cctools, ld64, libtapi, and the target-prefixed binary tools are built by depends.
     ((or (string=? host "x86_64-apple-darwin23")
-         (string=? host "arm64-apple-darwin23"))
-     '())
+         (string=? host "aarch64-apple-darwin23"))
+     (list clang-toolchain-18
+           lld-18
+           (make-lld-wrapper lld-18 #:lld-as-ld? #t)
+           xorriso
+           librsvg
+           imagemagick
+           libtiff))
 
     (else (error "manifest.scm: unknown HOST" host))))
 

@@ -33,7 +33,7 @@ declare -A TOOLCHAIN_FILE=(
     [x86_64-w64-mingw32]="cmake/platforms/Win64.cmake"
     [aarch64-linux-gnu]="cmake/platforms/LinuxAArch64.cmake"
     [x86_64-apple-darwin23]="cmake/platforms/OSX.cmake"
-    [arm64-apple-darwin23]="cmake/platforms/OSXArm64.cmake"   # TODO(G4)
+    [aarch64-apple-darwin23]="cmake/platforms/OSX.cmake"
 )
 TF="${TOOLCHAIN_FILE[$HOST]:?unknown HOST '$HOST'}"
 
@@ -53,9 +53,8 @@ case "$HOST" in
     x86_64-w64-mingw32)
         CMAKE_EXTRA+=( "-DCPACK_PACKAGE_FILE_NAME=${DISTNAME}-win64-setup-unsigned" )
         ;;
-    arm64-apple-darwin23)
-        # Until OSX.cmake is parameterized, this passes the prefix/arch through.
-        CMAKE_EXTRA+=( "-DCMAKE_TOOLCHAIN_PREFIX=arm64-apple-darwin23" )
+    *-apple-darwin23)
+        CMAKE_EXTRA+=( "-DCMAKE_TOOLCHAIN_PREFIX=${HOST}" )
         ;;
 esac
 
@@ -160,6 +159,11 @@ fi
 PATH="${DEPENDS_PATH}" make -C "${REPO_ROOT}/depends" HOST="${HOST}" "${DEPENDS_OPTS[@]}" -j"${JOBS:-$(nproc)}"
 DEPENDS_PREFIX="${REPO_ROOT}/depends/${HOST}"
 
+# The cross-Darwin DMG target generates its .DS_Store with Python modules built by depends.
+if [[ "${HOST}" == *-apple-darwin23 ]]; then
+    export PYTHONPATH="${DEPENDS_PREFIX}/native/lib/python3/dist-packages${PYTHONPATH:+:${PYTHONPATH}}"
+fi
+
 # security-check.py (run via `ninja security-check` below) shells out to $OBJDUMP/$READELF to
 # introspect the built binaries. Its defaults (/usr/bin/objdump, /usr/bin/readelf) are the native
 # binutils, which cannot parse a Windows PE -> "cannot open" and a spurious failure. Point them at
@@ -203,7 +207,11 @@ echo "--- install ---"
 # Install into INSTALL_DIR (= CMAKE_INSTALL_PREFIX). Host-specific packaging (NSIS/dmg/tar)
 # happens per-host below; we do NOT run a generic `ninja package` for Linux (we build our
 # own deterministic tarball from the install tree instead).
-DESTDIR="" cmake --install "${BUILD_DIR}" || ninja -C "${BUILD_DIR}" install
+if [[ "${HOST}" == *-apple-darwin23 ]]; then
+    DESTDIR="" cmake --install "${BUILD_DIR}" --strip || ninja -C "${BUILD_DIR}" install
+else
+    DESTDIR="" cmake --install "${BUILD_DIR}" || ninja -C "${BUILD_DIR}" install
+fi
 
 # --- Per-host packaging + debug split + normalization ----------------------
 # Common: split debug symbols into *.dbg, strip, deterministic archive.
@@ -250,8 +258,39 @@ case "$HOST" in
             zip -X@ "${OUTDIR}/${DISTNAME}-win64.zip" )
         ;;
     *-apple-darwin23)
-        # macOS: .app via macdeployqtplus, then .dmg. TODO(G4): wire macdeploy + codesign-ready.
-        echo "TODO(G4): darwin packaging (.app/.dmg) not yet implemented for ${HOST}" >&2
+        # Keep command-line artifacts independent of the GUI bundle.
+        ( cd "${INSTALL_DIR}/.." && \
+          find "${DISTNAME}" -not -path "*.app" -not -path "*.app/*" | sort | \
+          tar --no-recursion --owner=0 --group=0 --mtime="@${SOURCE_DATE_EPOCH}" \
+              -c -T - | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}.tar.gz" )
+
+        if [ "${GUIX_NO_QT:-0}" = "1" ]; then
+            echo "--- GUIX_NO_QT=1: skipping macOS app and DMG packaging ---"
+        else
+            echo "--- macOS deploy directory ---"
+            ninja -C "${BUILD_DIR}" osx-deploydir
+            OSX_VOLNAME="$(cat "${BUILD_DIR}/osx_volname")"
+            DARWIN_ARCH="${HOST%%-*}"
+            [ "${DARWIN_ARCH}" = "aarch64" ] && DARWIN_ARCH="arm64"
+            HANDOFF_DIR="${BUILD_DIR}/unsigned-app-${HOST}"
+            rm -rf "${HANDOFF_DIR}"
+            mkdir -p "${HANDOFF_DIR}"
+            cp "${BUILD_DIR}/osx_volname" "${HANDOFF_DIR}/"
+            cp "${REPO_ROOT}/contrib/macdeploy/detached-sig-create.sh" "${HANDOFF_DIR}/"
+            cp "${REPO_ROOT}/contrib/macdeploy/detached-sig-apply.sh" "${HANDOFF_DIR}/"
+            cp "${DEPENDS_PREFIX}/native/bin/${HOST}-codesign_allocate" "${HANDOFF_DIR}/codesign_allocate"
+            cp "${DEPENDS_PREFIX}/native/bin/${HOST}-pagestuff" "${HANDOFF_DIR}/pagestuff"
+            printf 'BUNDLE=dist/DeVault-Qt.app\nARCH=%s\nexport BUNDLE ARCH\n' "${DARWIN_ARCH}" > "${HANDOFF_DIR}/signing.env"
+            mv "${BUILD_DIR}/dist" "${HANDOFF_DIR}/"
+            ( cd "${BUILD_DIR}" && \
+              find "$(basename "${HANDOFF_DIR}")" -print0 | sort -z | \
+              tar --null --no-recursion --owner=0 --group=0 --mtime="@${SOURCE_DATE_EPOCH}" \
+                  -c -T - | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.tar.gz" )
+
+            echo "--- macOS DMG ---"
+            ninja -C "${BUILD_DIR}" osx-dmg
+            mv "${BUILD_DIR}/${OSX_VOLNAME}.dmg" "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.dmg"
+        fi
         ;;
 esac
 
