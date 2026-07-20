@@ -12,7 +12,7 @@ hermetic, pinnable toolchain. It replaces the deprecated `contrib/gitian-*` setu
 ## Mandatory targets (none optional)
 
 `x86_64-linux-gnu`, `x86_64-w64-mingw32`, `aarch64-linux-gnu`, `x86_64-apple-darwin23`,
-`arm64-apple-darwin23`.
+`aarch64-apple-darwin23` (Apple Silicon).
 
 ## Install Guix (once, on the build host)
 
@@ -48,9 +48,24 @@ make -C depends download
 ./contrib/guix/guix-build
 #    ...or a subset while developing:
 HOSTS="x86_64-linux-gnu" ./contrib/guix/guix-build
+#    macOS release artifacts (repeat for Apple Silicon):
+HOSTS="x86_64-apple-darwin23" ./contrib/guix/guix-build
 ```
 
 Artifacts land in `guix-build/output/<version>/<host>/`.
+
+For each Darwin host, a normal GUI build emits:
+
+- `devault-<version>-<host>.tar.gz`: the command-line node and tools;
+- `devault-<version>-<host>-unsigned.dmg`: the reproducible unsigned disk image; and
+- `devault-<version>-<host>-unsigned.tar.gz`: the unsigned `DeVault-Qt.app`, detached-signature
+  scripts, and the host-specific `codesign_allocate`/`pagestuff` utilities.
+
+The signing handoff intentionally contains no certificate or credentials. On a credentialed
+macOS release machine, extract it, change into its `unsigned-app-<host>/` directory, source
+`signing.env`, then use `detached-sig-create.sh` and `detached-sig-apply.sh`. Apple signing and
+notarization happen outside this hermetic Guix build. `GUIX_NO_QT=1` is a Darwin smoke-build
+mode: it produces only the command-line archive and skips the app/DMG artifacts.
 
 ## Verify reproducibility
 

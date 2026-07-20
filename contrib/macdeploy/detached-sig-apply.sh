@@ -8,7 +8,7 @@ set -e
 
 UNSIGNED="$1"
 SIGNATURE="$2"
-ARCH=x86_64
+ARCH="${ARCH:-x86_64}"
 ROOTDIR=dist
 TEMPDIR=signed.temp
 OUTDIR=signed-app

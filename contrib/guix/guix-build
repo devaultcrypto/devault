@@ -49,6 +49,20 @@ if [ ! -d "${REPO_ROOT}/depends/sources" ]; then
     exit 1
 fi
 
+# The macOS SDK is proprietary and supplied by the builder. The source snapshot includes it
+# from depends/SDKs, so reject a Darwin build before creating a container if it is missing.
+for host in ${HOSTS}; do
+    case "${host}" in
+        *-apple-darwin23)
+            SDK_PATH="${REPO_ROOT}/depends/SDKs/MacOSX14.5.sdk"
+            if [ ! -d "${SDK_PATH}" ]; then
+                echo "ERROR: macOS SDK missing at ${SDK_PATH}. Extract MacOSX14.5.sdk there before building Darwin targets." >&2
+                exit 1
+            fi
+            ;;
+    esac
+done
+
 # Build inputs that must NOT enter the clean source snapshot (regenerated in-container,
 # or irrelevant dev junk). depends/sources is excluded here and hardlinked in separately
 # (it is large; hardlinks are space-free on the same filesystem).

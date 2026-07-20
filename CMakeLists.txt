@@ -36,7 +36,8 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(__NO_USER_CMAKE_BUILD_TYPE ON CACHE BOOL "True if the user didn't set a build type on the command line")
 endif()
 
-set(BITCOIN_QT_OSX_BUNDLE_NAME "BitcoinCashNode-Qt")
+set(BITCOIN_QT_OSX_BUNDLE_NAME "DeVault-Qt")
+set(DEVAULT_QT_OSX_BUNDLE_IDENTIFIER "cc.devault.DeVault-Qt")
 
 # Find the python interpreter. This is required for several targets.
 find_package(Python 3.6 COMPONENTS Interpreter REQUIRED)
